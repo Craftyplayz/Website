@@ -1,0 +1,49 @@
+.reading {
+    width: 75%;
+    min-height: 100vh;
+    margin: 0 auto;
+    text-align: justify;
+    background-color: peachpuff;
+    color: black;
+    padding: 10px 20px;
+/*     display: none; */
+    line-height: 2.5;
+}
+.controls {
+    position: absolute;
+    left: 0;
+    top: 50%;
+}
+
+/* if on phone reading width to 90% */
+@media only screen and (max-width: 600px) {
+    .reading {
+        width: 90%;
+    }
+}
+
+.choices {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.choice {
+    margin: 20px;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.choice:hover {
+    cursor: pointer;
+}
+
+.reading h1 {
+    display: block;
+}
+
+

@@ -1,0 +1,50 @@
+,
+    "titles": [],
+    "relationshipStatus": "",
+    "partner": "",
+    "parents": {
+        "father": "",
+        "mother": ""
+    },
+    "children": [
+      {
+          "son": ""
+      },
+      {
+          "daughter": ""
+      }
+  ],
+    "siblings": [
+        {
+            "name": "",
+            "relation": "brother",
+            "age": "younger"
+        },
+        {
+            "name": "",
+            "relation": "sister",
+            "age": "older"
+        }
+    ],
+    "address": "",
+    "occupation": "",
+    "clubs": [
+        {
+            "club": "",
+            "role": ""
+        }
+    ],
+    "notes": [
+        {
+            "title": "",
+            "text": "",
+            "quote": "",
+            "source": ""
+        }
+    ],
+    "rareskills": [],
+    "wiki": ""
+
+
+
+    “   ”

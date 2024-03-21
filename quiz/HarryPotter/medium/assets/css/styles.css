@@ -1,0 +1,145 @@
+body {
+  background-color: #202020;
+}
+
+.control {
+  margin-bottom: 1em;
+}
+
+.radio {
+  margin-right: 15px;
+  padding: 8px;
+}
+
+.results {
+  display: none;
+  background-color: #202020;
+  border-radius: 15px;
+  box-shadow: 10px 10px 20px 0px rgba(0, 0, 0, 0.75);
+  color: white;
+}
+
+@media only screen and (min-width : 768px) {
+  .long {
+    height: calc(100vh - 130px);
+    overflow-y: scroll;
+  }
+
+  .long::-webkit-scrollbar {
+    width: 0px;
+  }
+}
+
+.notification {
+  position: fixed;
+  top: 65px;
+  right: 15px;
+  width: auto;
+  z-index: 9999;
+  padding: 1rem 1.25rem 1rem 1.25rem;
+  min-width: 100px;
+  text-align: center;
+}
+
+@-webkit-keyframes slideInRight {
+  from {
+    -webkit-transform: translate3d(100%, 0, 0);
+    transform: translate3d(100%, 0, 0);
+    visibility: visible;
+  }
+
+  to {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    -webkit-transform: translate3d(100%, 0, 0);
+    transform: translate3d(100%, 0, 0);
+    visibility: visible;
+  }
+
+  to {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.slideInRight {
+  -webkit-animation-name: slideInRight;
+  animation-name: slideInRight;
+  -webkit-animation-duration: .3s;
+  animation-duration: .3s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+
+@-webkit-keyframes slideOutRight {
+  from {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    visibility: hidden;
+    -webkit-transform: translate3d(100%, 0, 0);
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    visibility: hidden;
+    -webkit-transform: translate3d(100%, 0, 0);
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+.slideOutRight {
+  -webkit-animation-name: slideOutRight;
+  animation-name: slideOutRight;
+  -webkit-animation-duration: .3s;
+  animation-duration: .3s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+
+.card.question {
+  background-color: #202020;
+  color: rgb(255, 255, 255);
+  padding: 0 20px;
+  margin-bottom: 20px;
+  border-radius: 15px;
+  box-shadow: 10px 10px 20px 0px rgba(0, 0, 0, 0.75);
+}
+
+.button {
+  color : rgb(255, 255, 255);
+  background-color: #202020;
+  border-radius: 15px;
+  box-shadow: 10px 10px 20px 0px rgba(0, 0, 0, 0.75);
+}
+
+.radio {
+  color: white;
+}
+
+.radio:hover {
+  color: white;
+}
+
+
+.content h3 {
+  color: white;
+}
+
+.content h5 {
+  color: white;
+}

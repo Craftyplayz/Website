@@ -1,0 +1,90 @@
+.screenshots {
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    padding: 30px;
+/*     margin-top: 50px;
+    margin-bottom: 30px; */
+}
+
+
+.screenshot-image {
+    width: 600px;
+    height: 338px;
+    border: rgb(255, 0, 0) 3px solid;
+    border-radius: 5px;
+    object-fit: cover;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.screenshotfull {
+  margin: auto;
+  display: block;
+  max-width: 90vw;
+  max-height: 90vh;
+  border: rgb(255, 0, 0) 3px solid;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+
+body {
+  margin: 0;
+}
+
+.slideshow {
+  position: relative; /* Add this to make the container a reference for absolute positioning */
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
+}
+
+.slideshow img {
+  position: absolute;
+  width: 100%;
+  height: 100vh;
+  object-fit: cover;
+  opacity: 0; /* Start with zero opacity */
+  transition: opacity 1s ease-in-out;
+  top: 0;
+}
+
+.about {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  background-color: rgba(0, 0, 0, 0.753);
+  font-size: 50px;
+  font-weight: 700;
+  text-align: center;
+/*     width: 80%; */
+  max-width: 800px;
+  padding: 0 20px;
+  border-radius: 15px;
+  box-shadow: 10px 10px 20px 0px rgba(0, 0, 0, 0.75);
+}
+
+.about h1 {
+  font-size: 80px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.about h2 {
+  font-size: 20px;
+}
+
+/* mobile version */
+@media only screen and (max-width: 600px) {
+  .screenshot-image {
+      width: 300px;
+      height: 169px;
+  }
+}

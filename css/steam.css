@@ -1,0 +1,69 @@
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 75%;
+    margin: 0 auto;
+    border: 1px solid #ddd;
+    margin-top: 10px;
+}
+
+tr {
+    border: 1px solid white;
+    height: 50px;
+    width: 100px;
+}
+
+td {
+    padding-right: 16px;
+}
+
+tr:nth-child(even) {
+    background-color: #000000;
+}
+
+.info {
+    float: right;
+    margin-top: 10px;
+    border: 1px solid white;
+    padding: 10px;
+    width: 25%;
+    color: white;
+    text-align: center;
+}
+
+.info img {
+    width: 200px;
+    height: 200px;
+    border-radius: 15%;
+    transition: all 0.5s ease; 
+}
+
+.info img:hover {
+    border-radius: 0px;
+}
+
+.link {
+    color: white;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+#lastPlayed:hover {
+    text-decoration: none;
+    color: red;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
