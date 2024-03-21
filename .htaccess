@@ -1,0 +1,5 @@
+RewriteCond %{HTTP_HOST} ^craftyplayz.com [NC]
+RewriteRule ^(.*)$ http://www.craftyplayz.com/$1 [L,R=301]
+ErrorDocument 404 /php/404
+RewriteEngine On
+RewriteRule ^steam/gamer/([A-Za-z0-9_-]+)$ /php/steam.php?gameid=$1 [L]
