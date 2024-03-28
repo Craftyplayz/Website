@@ -35,6 +35,7 @@ $.getJSON("assets/json/quiz.json", function (data) {
                 <input type='radio' name='${item.title}' class='message'>
                 ${item.six}
               </label>
+
               <br>
             </div>
           </div>

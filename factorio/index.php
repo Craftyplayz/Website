@@ -15,32 +15,59 @@
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
     ?>
-
     <div class="title">
         <h1>My Factorio Saves</h1>
-        <h3>Still need to render/upload a few maps</h3>
+        <h2>Currently playing a Krastorio2/Space Exploration Playthrough</h2>
     </div>
     <div class="gallery">
-    <?php
-// Define an array of map names
-$mapNames = ['beef', 'Krastorio2', 'rampant', 'Save1', 'Space', 'Space2']; // Add your map names here
+        <?php
 
-// Loop through each map name and echo the corresponding div
-foreach ($mapNames as $folderName) {
-    $link = '/factorio/map?map=' . $folderName . '/';
-    $thumbnailPath = 'https://craftyplayz.co.uk/' . $folderName . '/Images/thumbnail.png';
-    echo '<div class="gallery-item" title="' . $folderName . '">';
-    echo "\n";
-    echo '<a href="' . $link . '"><img src="' . $thumbnailPath . '" class="gallery-image" /></a>';
-    echo "\n";
-    echo '</div>';
-}
-?>
-
+        $mapNames = [
+        'beef',
+        'Krastorio2',
+        'rampant',
+        'Save1', 
+        'Space',
+        'Space2',
+        'BisTall',
+        'BisTallT'
+    ];
+        foreach ($mapNames as $folderName) {
+            $link = '/factorio/map?map=' . $folderName;
+            $thumbnailPath = 'https://craftyplayz.co.uk/factorio/' . $folderName . '/Images/thumbnail.png';
+            echo '<div class="gallery-item" title="' . $folderName . '">';
+            echo "\n";
+            echo '<a href="https://craftyplayz.com/factorio/map?map=' . $folderName . '"><img src="' . $thumbnailPath . '" class="gallery-image" /></a>';
+            echo "\n";
+            echo '</div>';
+        }
+        ?>
     </div>
     <?php
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
     ?>
+    <script>
+        const navSlide = () => {
+            const burger = document.querySelector('.hamburger');
+            const nav = document.querySelector('.nav-links');
+            burger.addEventListener('click', () => {
+                nav.classList.toggle('nav-active');
+            });
+        }
+        navSlide();
+    </script>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#toggleHeader').click(function () {
+                $('#header').toggle();
+            });
+        });
+    </script>
 </body>
 
 </html>
