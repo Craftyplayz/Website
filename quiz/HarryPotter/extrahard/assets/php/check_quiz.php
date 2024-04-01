@@ -17,11 +17,11 @@ foreach ($answers as $item) {
 }
 
 $messages = array(
-    "none" => "Perfect Score! (if you were trying to get everything wrong)",
-    "low" => "You should try the easier questions",
-    "medium" => "Not bad",
-    "high" => "Nearly there!",
-    "perfect" => "Perfect Score!"
+    "none" => "This is some text",
+    "low" => "This is some text",
+    "medium" => "This is some text",
+    "high" => "This is some text",
+    "perfect" => "This is some text"
 );
 $percentage = round(($correct * 100) / $total);
 

@@ -1,28 +1,56 @@
-$.getJSON("assets/json/quiz.json", function(data) {
-  var questionCount = 6; 
-  $.each(data, function(i, item) {
-    var radioInputs = '';
-    for (var j = 1; j <= questionCount; j++) {
-      radioInputs += `
-        <label class='radio'>
-          <input type='radio' name='${item.title}' class='message'>
-          ${item['option' + j]}
-        </label>
-        <br>
-      `;
-    }
+$.getJSON("assets/json/quiz.json", function (data) {
+  $.each(data, function (i, item) {
     $("#content").append(`
       <div class="card question q${i}">
         <div class="card-content">
           <div class='content'>
             <h3 style='color:white;'>${item.title}</h3>
             <div class='control'>
-              ${radioInputs}
+              <label class='radio'>
+                <input type='radio' name='${item.title}' class='message'>
+                ${item.one}
+              </label>
+              <br>
+                            <label class='radio'>
+                <input type='radio' name='${item.title}' class='message'>
+                ${item.two}
+              </label>
+              <br>
+              <label class='radio'>
+                <input type='radio' name='${item.title}' class='message'>
+                ${item.three}
+              </label>
+              <br>
+                            <label class='radio'>
+                <input type='radio' name='${item.title}' class='message'>
+                ${item.four}
+              </label>
+              <br>
+              <label class='radio'>
+                <input type='radio' name='${item.title}' class='message'>
+                ${item.five}
+              </label>
+              <br>
+                            <label class='radio'>
+                <input type='radio' name='${item.title}' class='message'>
+                ${item.six}
+              </label>
+              <br>
+              <label class='radio'>
+                <input type='radio' name='${item.title}' class='message'>
+                ${item.seven}
+              </label>
+              <br>
+                            <label class='radio'>
+                <input type='radio' name='${item.title}' class='message'>
+                ${item.eight}
+              </label>
+              <br>
             </div>
           </div>
         </div>
       </div>
-    `);
+      `);
   });
 });
 
@@ -69,7 +97,7 @@ $(document).ready(function () {
     if (checked_questions == all_questions && checked_questions != 0) {
       $.ajax({
         type: "POST",
-        url: "assets/php/check_quiz.php",
+        url: "./assets/php/check_quiz.php",
         data: {
           all_answers: all_answers,
         },
