@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/css/books.css">
     <script src="/books/sort.js"></script>
 </head>
-
+<!-- add search feature -->
 <body>
     <?php
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
