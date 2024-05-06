@@ -34,7 +34,7 @@
     ];
         foreach ($mapNames as $folderName) {
             $link = '/factorio/map?map=' . $folderName;
-            $thumbnailPath = 'https://craftyplayz.co.uk/factorio/' . $folderName . '/Images/thumbnail.png';
+            $thumbnailPath = 'https://assets.craftyplayz.com/factorio/' . $folderName . '/Images/thumbnail.png';
             echo '<div class="gallery-item" title="' . $folderName . '">';
             echo "\n";
             echo '<a href="https://craftyplayz.com/factorio/map?map=' . $folderName . '"><img src="' . $thumbnailPath . '" class="gallery-image" /></a>';
