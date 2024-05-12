@@ -10,6 +10,7 @@
     <script src="/books/sort.js"></script>
 </head>
 <!-- add search feature -->
+
 <body>
     <?php
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
@@ -99,7 +100,7 @@
             <div class="gallery-item hg" title="The Hunger Games Mockingjay">
                 <img src="/images/books/HungerGames/hg3.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item rp" title="Ready Player One">
+            <div class="gallery-item rp bookshelf" title="Ready Player One">
                 <img src="/images/books/ReadyPlayer/rp1.webp" class="gallery-image" />
             </div>
             <div class="gallery-item rp" title="Ready Player Two">
@@ -120,13 +121,18 @@
         </div>
 
         <div class="title">
-            <h1>Current Series</h1>
-            <h2>Trials of Apollo<br>By Rick Riordan</h2>
+            <h1>Current Book</h1>
+            <h2>Currently not reading anything<br></h2>
         </div>
         <div class="gallery" id="reading">
-            <div class="gallery-item tp bookshelf">
-                <img src="/images/books/TrialsOfApollo/tp1.jpeg" class="gallery-image" />
-            </div>
+        </div>
+
+        <div class="title">
+            <h1>Planned Reading List</h1>
+            <h2>In no order</h2>
+        </div>
+
+        <div class="gallery" id="reading">
             <div class="gallery-item tp bookshelf">
                 <img src="/images/books/TrialsOfApollo/tp2.jpeg" class="gallery-image current" />
             </div>
@@ -139,16 +145,10 @@
             <div class="gallery-item tp bookshelf">
                 <img src="/images/books/TrialsOfApollo/tp5.jpeg" class="gallery-image" />
             </div>
-        </div>
-
-        <div class="title">
-            <h1>Planned Reading List</h1>
-            <h2>In no order</h2>
-        </div>
-
-        <div class="gallery" id="reading">
-
-            <div class="gallery-item pj" title="Percy Jackson And Chalice of the Gods">
+            <div class="gallery-item" title="Ender's Game">
+                <img src="/images/books/standalone/eg.jpf" class="gallery-image" />
+            </div>
+            <div class="gallery-item" title="Percy Jackson And Chalice of the Gods">
                 <img src="/images/books/PercyJackson/pj6.webp" class="gallery-image" />
             </div>
             <div class="gallery-item" title="Miss Peregrine's Home for Peculiar Children">
