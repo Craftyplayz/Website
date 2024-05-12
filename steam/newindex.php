@@ -73,10 +73,10 @@
         }
 
         // Determine the string representation of the last played time
-        if ($daysSinceLastPlayed === 0) {
-            $lastPlayed = 'today';
+        if ($daysSinceLastPlayed <= 0) {
+            $lastPlayed = 'Today';
         } elseif ($daysSinceLastPlayed == 1) {
-            $lastPlayed = 'yesterday';
+            $lastPlayed = 'Yesterday';
         } else {
             $lastPlayed = $daysSinceLastPlayed . ' days ago';
         }
