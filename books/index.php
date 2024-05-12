@@ -27,13 +27,14 @@
             <ul>
                 <li id="all"><a onclick="everything()">All</a></li>
                 <!--             <li><a onclick="sort('na')">Standalone books</a></li> -->
-                <li><a onclick="sort('pj')">Percy Jackson Series</a></li>
-                <li><a onclick="sort('hp')">Harry Potter Series</a></li>
-                <li><a onclick="sort('hg')">Hunger Games Series</a></li>
+                <li><a onclick="sort('pj')">Percy Jacksons</a></li>
+                <li><a onclick="sort('ho')">Heros of Olympus</a></li>
+                <li><a onclick="sort('tp')">Trials of Apollo</a></li>
+                <li><a onclick="sort('hp')">Harry Potter</a></li>
+                <li><a onclick="sort('hg')">Hunger Games</a></li>
                 <li><a onclick="sort('mc')">Minecraft books</a></li>
                 <li><a onclick="sort('rp')">Ready Player One/Two</a></li>
-                <li><a onclick="sort('ho')">Heros of Olympus Series</a></li>
-                <li><a onclick="sort('tp')">Trials of Apollo Series</a></li>
+                <li><a onclick="sort('ar')">Alex Rider</a></li>
             </ul>
         </div>
         <div class="gallery" id="read">
