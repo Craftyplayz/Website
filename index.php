@@ -69,7 +69,7 @@
 
         changeImage();
     </script>
-    <script src="js/konami.js"></script>
+    <script src="/konami.js"></script>
 
     <?php
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
