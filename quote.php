@@ -4,4 +4,4 @@
     $image = $images[array_rand($images)];
     header ('Content-Type: image/png');
     readfile($folder . '/' . $image);
-?>8a
+?>
