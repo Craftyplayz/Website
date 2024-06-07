@@ -8005,12 +8005,12 @@
     "species": "human",
     "gender": "female",
     "house": "",
-    "dateOfBirth": "",
+    "dateOfBirth": "Between 31 July 1985 and 30 July 1986",
     "dateOfDeath": "",
     "wizard": true,
     "ancestry": "quarter-veela",
     "eyeColour": "",
-    "hairColour": "blonde",
+    "hairColour": "silvery-blonde",
     "wand": [{ "wood": "", "core": "", "length": "" }],
     "patronus": "",
     "hogwartsStudent": false,
@@ -8018,7 +8018,35 @@
     "actor": "Angelica Mandy",
     "alternate_actors": [],
     "alive": true,
-    "image": false
+    "image": false,
+    "titles": [],
+    "relationshipStatus": "",
+    "partner": "",
+    "parents": {
+        "father": "Monsieur Delacour",
+        "mother": "Apolline Delacour"
+    },
+    "children": [],
+    "siblings": [
+        {
+            "name": "Fleur Delacour",
+            "relation": "sister",
+            "age": "older"
+        }
+    ],
+    "address": "",
+    "occupation": "",
+    "clubs": [],
+    "notes": [
+        {
+            "title": "Triwizard Hostage",
+            "text": "Gabriell was one of the 4 hostages in the second task of the Triwizard Tournement. She was rescued by harry after Fleur was unable to reach her due to a grindylow attack.",
+            "quote": "“You saved ’er,” she said breathlessly. “Even though she was not your ’ostage.”",
+            "source": "The Goblet of Fire"
+        }
+    ],
+    "rareskills": [],
+    "wiki": "https://antifandom.com/harrypotter/wiki/Gabrielle_Delacour"
   },
   {
     "id": "bd9f49ef-452e-4c22-84c8-ab76da9f0003",
@@ -8040,7 +8068,26 @@
     "actor": "",
     "alternate_actors": [],
     "alive": true,
-    "image": false
+    "image": false,
+    "titles": [],
+    "relationshipStatus": "",
+    "partner": "Apolline Delacour",
+    "parents": {},
+    "children": [
+      {
+          "daughter": "Fleur Delacour"
+      },
+      {
+          "daughter": "Gabrielle Delacour"
+      }
+  ],
+    "siblings": [],
+    "address": "",
+    "occupation": "",
+    "clubs": [],
+    "notes": [],
+    "rareskills": [],
+    "wiki": "https://antifandom.com/harrypotter/wiki/Delacour_sisters%27_father"
   },
   {
     "id": "4848cf4f-27ac-42d3-8e49-f63515c92c37",
@@ -8062,7 +8109,31 @@
     "actor": "",
     "alternate_actors": [],
     "alive": true,
-    "image": false
+    "image": false,
+    "titles": ["Chaser"],
+    "relationshipStatus": "",
+    "partner": "",
+    "parents": {},
+    "children": [],
+    "siblings": [],
+    "address": "",
+    "occupation": "",
+    "clubs": [
+        {
+            "club": "Chudley Cannons",
+            "role": "Chaser"
+        }
+    ],
+    "notes": [
+        {
+            "title": "Most Quaffle drops",
+            "text": "Dragomir Gorgovitch held the record for the most quaffle drops in a season.",
+            "quote": "“Dragomir Gorgovitch, Chaser, transferred to the Chudley Cannons for a record fee two years ago. Record holder for most Quaffle drops in a season.”",
+            "source": "The Deathly Hallows"
+        }
+    ],
+    "rareskills": [],
+    "wiki": "https://antifandom.com/harrypotter/wiki/Dragomir_Gorgovitch"
   },
   {
     "id": "d1e8ddf1-cfc7-404a-bffe-f4ac6c656ead",
@@ -8074,7 +8145,7 @@
     "dateOfBirth": "",
     "dateOfDeath": "",
     "wizard": true,
-    "ancestry": "",
+    "ancestry": "Half Blood or Pure Blood",
     "eyeColour": "",
     "hairColour": "white",
     "wand": [{ "wood": "", "core": "", "length": "" }],
@@ -8089,16 +8160,20 @@
     "relationshipStatus": "Widowed",
     "partner": "Pandora Lovegood",
     "parents": {},
-    "children": [
-      {
-          "daughter": "Luna Lovegood"
-      }
+    "children": [{"daughter": "Luna Lovegood"}
   ],
     "siblings": [],
     "address": "",
     "occupation": "Editor of the Quibbler",
     "clubs": [],
-    "notes": [],
+    "notes": [
+        {
+            "title": "Editor of the Quibbler",
+            "text": "Xenophilius Lovegood was the editor of the quibbller and often posted his own eccentric beliefs",
+            "quote": "“Of course not,” said Hermione scathingly, before Harry could answer, “ The Quibbler’s rubbish, everyone knows that.”",
+            "source": "The Order of the Phoenix"
+        }
+    ],
     "rareskills": [],
     "wiki": "https://antifandom.com/harrypotter/wiki/Xenophilius_Lovegood"
 
@@ -8217,7 +8292,7 @@
     "notes": [
         {
             "title": "Azkaban",
-            "text": "Since Thorfinn is seen in watned posters it is likely that he was imprisoned in Azkaban after Voldemort's first defeat. This is slightly ironic as his possible ancestor Damocles Rowle was the one to establish Azkaban in the first place",
+            "text": "Since Thorfinn is seen in wanted posters it is likely that he was imprisoned in Azkaban after Voldemort's first defeat. This is slightly ironic as his possible ancestor Damocles Rowle was the one to establish Azkaban in the first place",
             "quote": "A purpose-built prison, located on some remote Hebridean island, was preferred, and plans had been drawn up when Damocles Rowle became Minister for Magic.",
             "source": "https://www.wizardingworld.com/writing-by-jk-rowling/azkaban#:~:text=A%20purpose%2Dbuilt%20prison%2C%20located%20on%20some%20remote%20Hebridean%20island%2C%20was%20preferred%2C%20and%20plans%20had%20been%20drawn%20up%20when%20Damocles%20Rowle%20became%20Minister%20for%20Magic."
         }
@@ -8227,8 +8302,8 @@
   },
   {
     "id": "d4eee96d-c53f-4e6f-8a95-c97d42343833",
-    "name": "Reg Cattermole",
-    "alternate_names": ["Reginald Cattermole"],
+    "name": "Reginald Cattermole",
+    "alternate_names": ["Reg Cattermole"],
     "species": "human",
     "gender": "male",
     "house": "",
