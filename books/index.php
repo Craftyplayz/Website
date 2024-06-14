@@ -123,7 +123,7 @@
 
         <div class="title">
             <h1>Current Book</h1>
-            <h2>Currently not reading anything<br>By Rick Riordan</h2>
+            <h2>Currently not reading anything<br></h2>
         </div>
         <div class="gallery" id="reading">
         </div>
