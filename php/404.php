@@ -38,11 +38,11 @@
 
     <body>
 <div class="title">
-  <h1>Page not found!</h1>
+  <h1>Page not found</h1>
   <h2>The page you are looking for does not exist</h2>
 
   <!-- back button -->
-  <button onclick="history.back()">Go Back?</button>
+  <button onclick="history.back()">Go Back</button>
 </div>
 
 <script>
