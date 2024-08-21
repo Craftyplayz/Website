@@ -38,6 +38,9 @@
             </ul>
         </div>
         <div class="gallery" id="read">
+                        <div class="gallery-item lr bookshelf">
+                <img src="/images/books/LordOfTheRings/ho1.webp" class="gallery-image" />
+            </div>
             <div class="gallery-item tp bookshelf">
                 <img src="/images/books/TrialsOfApollo/tp1.jpeg" class="gallery-image" />
             </div>
@@ -221,9 +224,7 @@
             <div class="gallery-item">
                 <img src="/images/books/SkulduggeryPleasant/sd4.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item">
-                <img src="/images/books/LordOfTheRings/ho1.webp" class="gallery-image" />
-            </div>
+
             <div class="gallery-item">
                 <img src="/images/books/HerosOfOlympus/hoo6.webp" class="gallery-image" />
             </div>
