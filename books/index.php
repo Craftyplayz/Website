@@ -150,7 +150,7 @@
 
         <div class="gallery" id="reading">
             <div class="gallery-item tp bookshelf">
-                <img src="/images/books/TrialsOfApollo/tp2.jpeg" class="gallery-image current" />
+                <img src="/images/books/TrialsOfApollo/tp2.jpeg" class="gallery-image" />
             </div>
             <div class="gallery-item tp bookshelf">
                 <img src="/images/books/TrialsOfApollo/tp3.jpeg" class="gallery-image" />
@@ -167,7 +167,7 @@
             <div class="gallery-item" title="Percy Jackson And Chalice of the Gods">
                 <img src="/images/books/PercyJackson/pj6.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item" title="Miss Peregrine's Home for Peculiar Children">
+            <div class="gallery-item bookshelf" title="Miss Peregrine's Home for Peculiar Children">
                 <img src="/images/books/Standalone/pc.webp" class="gallery-image" />
             </div>
             <!--         <div class="gallery-item">
@@ -218,7 +218,7 @@
         <div class="gallery-item">
             <img src="/images/books/BoyVsBeast/bb16.webp" class="gallery-image" />
         </div> -->
-            <div class="gallery-item">
+            <div class="gallery-item bookshelf">
                 <img src="/images/books/HungerGames/hg0.webp" class="gallery-image" />
             </div>
             <div class="gallery-item bookshelf">
@@ -236,20 +236,19 @@
             <div class="gallery-item">
                 <img src="/images/books/SkulduggeryPleasant/sd4.webp" class="gallery-image" />
             </div>
-
             <div class="gallery-item">
                 <img src="/images/books/HerosOfOlympus/hoo6.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item">
+            <div class="gallery-item bookshelf">
                 <img src="/images/books/LordOfTheRings/lr1.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item">
+            <div class="gallery-item bookshelf">
                 <img src="/images/books/LordOfTheRings/lr2.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item">
+            <div class="gallery-item bookshelf">
                 <img src="/images/books/LordOfTheRings/lr3.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item">
+            <div class="gallery-item bookshelf">
                 <img src="/images/books/ASongOfIceAndFire/if1.webp" class="gallery-image" />
             </div>
             <div class="gallery-item">
@@ -258,13 +257,13 @@
             <div class="gallery-item bookshelf">
                 <img src="/images/books/ASongOfIceAndFire/if3.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item">
+            <div class="gallery-item bookshelf">
                 <img src="/images/books/ASongOfIceAndFire/if4.webp" class="gallery-image" />
             </div>
             <div class="gallery-item bookshelf">
                 <img src="/images/books/ASongOfIceAndFire/if5.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item">
+            <div class="gallery-item bookshelf">
                 <img src="/images/books/MazeRunner/mr1.webp" class="gallery-image" />
             </div>
             <div class="gallery-item">
@@ -279,7 +278,7 @@
             <div class="gallery-item bookshelf">
                 <img src="/images/books/Twlight/tw2.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item">
+            <div class="gallery-item bookshelf">
                 <img src="/images/books/Twlight/tw3.webp" class="gallery-image" />
             </div>
             <div class="gallery-item bookshelf">
@@ -288,10 +287,10 @@
             <div class="gallery-item">
                 <img src="/images/books/Twlight/tw5.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item">
+            <div class="gallery-item bookshelf">
                 <img src="/images/books/HisDarkMaterials/hd1.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item">
+            <div class="gallery-item bookshelf">
                 <img src="/images/books/HisDarkMaterials/hd2.webp" class="gallery-image" />
             </div>
             <div class="gallery-item">
@@ -334,7 +333,7 @@
             <div class="gallery-item">
                 <img src="/images/books/AlexRider/ar12.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item">
+            <div class="gallery-item bookshelf">
                 <img src="/images/books/ChronicalsOfNarnia/cn1.webp" class="gallery-image" />
             </div>
             <div class="gallery-item">
@@ -397,7 +396,7 @@
             <div class="gallery-item" title="Secret Seven Series (17 books)">
                 <img src="/images/books/SecretSeven/ss1.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item bookshelf" title="Encyclopaedia of Cats">
+            <div class="gallery-item bookshelf" title="Encyclopedia of Cats">
                 <img src="/images/books/standalone/ec.webp" class="gallery-image" />
             </div>
             <div class="gallery-item bookshelf" title="Artemis Fowl">
