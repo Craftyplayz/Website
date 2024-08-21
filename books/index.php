@@ -38,7 +38,7 @@
             </ul>
         </div>
         <div class="gallery" id="read">
-                        <div class="gallery-item lr bookshelf">
+            <div class="gallery-item lr bookshelf">
                 <img src="/images/books/LordOfTheRings/ho1.webp" class="gallery-image" />
             </div>
             <div class="gallery-item tp bookshelf">
@@ -126,9 +126,21 @@
 
         <div class="title">
             <h1>Current Book</h1>
-            <h2>Currently not reading anything<br></h2>
+            <h2>Currently Reading the Hobbit & The Lord of the Ringsr<br></h2>
         </div>
         <div class="gallery" id="reading">
+            <div class="gallery-item lr bookshelf">
+                <img src="/images/books/LordOfTheRings/ho1.webp" class="gallery-image" />
+            </div>
+            <div class="gallery-item bookshelf">
+                <img src="/images/books/LordOfTheRings/lr1.webp" class="gallery-image current" />
+            </div>
+            <div class="gallery-item bookshelf">
+                <img src="/images/books/LordOfTheRings/lr2.webp" class="gallery-image" />
+            </div>
+            <div class="gallery-item bookshelf">
+                <img src="/images/books/LordOfTheRings/lr3.webp" class="gallery-image" />
+            </div>
         </div>
 
         <div class="title">
