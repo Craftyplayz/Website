@@ -35,6 +35,7 @@
                 <li><a onclick="sort('mc')">Minecraft books</a></li>
                 <li><a onclick="sort('rp')">Ready Player One/Two</a></li>
                 <li><a onclick="sort('ar')">Alex Rider</a></li>
+                <li><a onclick="sort('lr')">Lord of the Rings/Hobbit</a></li>
             </ul>
         </div>
         <div class="gallery" id="read">
