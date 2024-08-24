@@ -45,6 +45,7 @@ html {
     font-size: 30px;
     left: 352px;
     top: 30px;
+    color: white;
 }
 
 /* Mobile version */
@@ -78,7 +79,7 @@ html {
     }
     .gamename {
         font-size: 20px;
-        color: blue;
+        color: white;
         display: none;
     }
 
@@ -97,4 +98,9 @@ html {
 
 progress {
     width: 100%;
+}
+
+a {
+    text-decoration: none;
+    color: white;
 }
