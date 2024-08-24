@@ -34,7 +34,7 @@
                 <li><a onclick="sort('hg')">Hunger Games</a></li>
                 <li><a onclick="sort('mc')">Minecraft books</a></li>
                 <li><a onclick="sort('rp')">Ready Player One/Two</a></li>
-<!--                 <li><a onclick="sort('ar')">Alex Rider</a></li> -->
+                <!--                 <li><a onclick="sort('ar')">Alex Rider</a></li> -->
                 <li><a onclick="sort('lr')">Lord of the Rings/Hobbit</a></li>
             </ul>
         </div>
@@ -367,6 +367,9 @@
             </div>
             <div class="gallery-item" title="How To Train Your Dragon: How to Fight a Dragon's Fury">
                 <img src="/images/books/HowtoTrainYourDragon/hd12.webp" class="gallery-image" />
+            </div>
+            <div class="gallery-item bookshelf" title="Diary of a Wimpy Kid">
+                <img src="/images/books/DiaryofaWimpyKid/dw1.webp" class="gallery-image" />
             </div>
 
             <!--         div class="gallery-item">

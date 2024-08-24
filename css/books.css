@@ -268,6 +268,32 @@ h2::before {
     z-index: 9;
 }
 
+.partial {
+    position: relative;
+}
+
+.partial::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    /* set background image to "https://www.craftyplayz.com/images/checkmark.png" */
+    background-image: url(https://www.craftyplayz.com/images/checkmark.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 9;
+}
 .hidden {
     display: none;
+}
+
+.expand .gallery-item {
+    display: block;
+}
+
+.expand .gallery-item.hidden {
+    display: inline-block;
 }
