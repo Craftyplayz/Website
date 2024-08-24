@@ -119,7 +119,7 @@
 
         echo '<div class="games">' . PHP_EOL;
         echo '    <a href="/steam/newgame/' . $game['appid'] . '"><img class="banner" src="' . $imageSrc . '"></a>' . PHP_EOL;
-        echo '        <a href="/steam/newgame/' . $game['appid'] . '" style="width: 50%;"><p class="gamename">' . $gamename . '</p></a>' . PHP_EOL;
+        echo '        <a href="/steam/newgame/' . $game['appid'] . '" style="width: 50%; color: white"><p class="gamename">' . $gamename . '</p></a>' . PHP_EOL;
         echo '    <div class="info">' . PHP_EOL;
         echo '        <div class="item">' . PHP_EOL;
         echo '            <p>Playtime</p>' . PHP_EOL;
