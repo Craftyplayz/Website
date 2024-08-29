@@ -72,13 +72,13 @@
             <div class="gallery-item pj bookshelf" title="Percy Jackson: The Lasy Olympian">
                 <img src="/images/books/PercyJackson/set2/pj5.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item rp bookshelf" title="Ready Player One">
+            <div class="gallery-item rp bookshelf" title="Ready Player One" data-book="3">
                 <img src="/images/books/ReadyPlayer/rp1.webp" class="gallery-image" />
             </div>
             <div class="gallery-item rp" title="Ready Player Two">
                 <img src="/images/books/ReadyPlayer/rp2.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item hg bookshelf" title="The Hunger Games">
+            <div class="gallery-item hg bookshelf" title="The Hunger Games" data-book="2">
                 <img src="/images/books/HungerGames/hg1.webp" class="gallery-image" />
             </div>
             <div class="gallery-item hg bookshelf" title="The Hunger Games Catching Fire">
@@ -87,28 +87,28 @@
             <div class="gallery-item hg bookshelf" title="The Hunger Games Mockingjay">
                 <img src="/images/books/HungerGames/hg3.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item hp bookshelf" title="Harry potter and the Philosophers Stone">
+            <div class="gallery-item hp bookshelf" title="Harry potter and the Philosophers Stone" data-book="37" data-audio="71">
                 <img src="/images/books/HarryPotter/set1/hp1.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item hp bookshelf" title="Harry potter and the Chamber of Secrets">
+            <div class="gallery-item hp bookshelf" title="Harry potter and the Chamber of Secrets" data-book="37" data-audio="71">
                 <img src="/images/books/HarryPotter/set1/hp2.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item hp bookshelf" title="Harry potter and the Prisoner of Azkaban">
+            <div class="gallery-item hp bookshelf" title="Harry potter and the Prisoner of Azkaban" data-book="37" data-audio="71">
                 <img src="/images/books/HarryPotter/set1/hp3.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item hp bookshelf" title="Harry potter and the Goblet of Fire">
+            <div class="gallery-item hp bookshelf" title="Harry potter and the Goblet of Fire" data-book="37" data-audio="71">
                 <img src="/images/books/HarryPotter/set1/hp4.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item hp bookshelf" title="Harry potter and the Order of the pheonix">
+            <div class="gallery-item hp bookshelf" title="Harry potter and the Order of the pheonix" data-book="37" data-audio="71">
                 <img src="/images/books/HarryPotter/set1/hp5.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item hp bookshelf" title="Harry potter and the Half-Blood prince">
+            <div class="gallery-item hp bookshelf" title="Harry potter and the Half-Blood prince" data-book="37" data-audio="71">
                 <img src="/images/books/HarryPotter/set1/hp6.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item hp bookshelf" title="Harry potter and the Deathly Hallows">
+            <div class="gallery-item hp bookshelf" title="Harry potter and the Deathly Hallows" data-book="37" data-audio="71">
                 <img src="/images/books/HarryPotter/set1/hp7.webp" class="gallery-image" />
-            </div>rrr
-            <div class="gallery-item mc" title="Minecraft Combat Handbook">
+            </div>
+            <div class="gallery-item mc" title="Minecraft Combat Handbook" data-book="37">
                 <img src="/images/books/Minecraft/mc1.webp" class="gallery-image" />
             </div>
             <div class="gallery-item mc bookshelf" title="Minecraft Construction Handbook">
@@ -506,7 +506,54 @@ document.addEventListener("DOMContentLoaded", function() {
 
     hideAllButFirst();
 });
+
     </script>
+    <script>
+document.querySelectorAll('.gallery-item').forEach(item => {
+    // Check if the data-book attribute exists
+    if (item.hasAttribute('data-book')) {
+        const bookValue = item.getAttribute('data-book');
+        const bookBadge = document.createElement('div');
+        bookBadge.style.position = 'absolute';
+        bookBadge.style.top = '3px';
+        bookBadge.style.left = '3px';
+        bookBadge.style.width = '20px';
+        bookBadge.style.height = '20px';
+        bookBadge.style.backgroundColor = '#21db4d';
+        bookBadge.style.color = 'white';
+        bookBadge.style.borderRadius = '50%';
+        bookBadge.style.display = 'flex';
+        bookBadge.style.alignItems = 'center';
+        bookBadge.style.justifyContent = 'center';
+        bookBadge.style.fontSize = '12px';
+        bookBadge.textContent = bookValue;
+        bookBadge.title = 'Times read';
+        item.style.position = 'relative';
+        item.appendChild(bookBadge);
+    }
 
+    // Check if the data-audio attribute exists
+    if (item.hasAttribute('data-audio')) {
+        const audioValue = item.getAttribute('data-audio');
+        const audioBadge = document.createElement('div');
+        audioBadge.style.position = 'absolute';
+        audioBadge.style.top = '3px';
+        audioBadge.style.left = '26px'; // Offset the audio badge from the book badge
+        audioBadge.style.width = '20px';
+        audioBadge.style.height = '20px';
+        audioBadge.style.backgroundColor = 'red';
+        audioBadge.style.color = 'white';
+        audioBadge.style.borderRadius = '50%';
+        audioBadge.style.display = 'flex';
+        audioBadge.style.alignItems = 'center';
+        audioBadge.style.justifyContent = 'center';
+        audioBadge.style.fontSize = '12px';
+        audioBadge.textContent = audioValue;
+        audioBadge.title = 'Times listened to';
+        item.style.position = 'relative';
+        item.appendChild(audioBadge);
+    }
+});
 
+    </script>
 </html>
