@@ -108,7 +108,7 @@
             <div class="gallery-item hp bookshelf" title="Harry potter and the Deathly Hallows" data-book="37" data-audio="71">
                 <img src="/images/books/HarryPotter/set1/hp7.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item mc" title="Minecraft Combat Handbook" data-book="37">
+            <div class="gallery-item mc" title="Minecraft Combat Handbook">
                 <img src="/images/books/Minecraft/mc1.webp" class="gallery-image" />
             </div>
             <div class="gallery-item mc bookshelf" title="Minecraft Construction Handbook">
