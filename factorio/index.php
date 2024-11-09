@@ -17,14 +17,15 @@
     ?>
     <div class="title">
         <h1>My Factorio Saves</h1>
-        <h2>Currently playing a Krastorio2/Space Exploration Playthrough</h2>
+        <h2>Currently playing a Megabase Factory (aim of 10k spm)</h2>
     </div>
     <div class="gallery">
         <?php
 
         $mapNames = [
         'beef',
-        'Krastorio2',
+/*         'Krastorio2', */
+        'Krastorio2-Temp',
         'rampant',
         'Save1', 
         'Space',
