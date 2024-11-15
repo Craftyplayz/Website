@@ -433,6 +433,24 @@
             <div class="gallery-item" series="boyvsbeast">
                 <img src="/images/books/BoyVsBeast/bb16.webp" class="gallery-image" />
             </div>
+            <div class="gallery-item bookshelf" series="beastquest">
+                <img src="/images/books/BeastQuest/bq1.jpg" class="gallery-image" />
+            </div>
+            <div class="gallery-item" series="beastquest">
+                <img src="/images/books/BeastQuest/bq2.jpg" class="gallery-image" />
+            </div>
+            <div class="gallery-item" series="beastquest">
+                <img src="/images/books/BeastQuest/bq3.jpg" class="gallery-image" />
+            </div>
+            <div class="gallery-item" series="beastquest">
+                <img src="/images/books/BeastQuest/bq4.jpg" class="gallery-image" />
+            </div>
+            <div class="gallery-item" series="beastquest">
+                <img src="/images/books/BeastQuest/bq5.jpg" class="gallery-image" />
+            </div>
+            <div class="gallery-item" series="beastquest">
+                <img src="/images/books/BeastQuest/bq6.jpg" class="gallery-image" />
+            </div>
             <div class="gallery-item bookshelf" title="Images you should not masturbate to">
                 <img src="/images/books/Standalone/im.jpg" class="gallery-image" />
             </div>
