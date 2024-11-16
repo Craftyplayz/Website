@@ -17,66 +17,66 @@
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
     ?>
 
-<?php
-// Construct the API URL
-$url = 'http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=' . $steamkey . '&steamid=' . $steamid . '&format=json&include_appinfo=1';
+    <?php
+    // Construct the API URL
+    $url = 'http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=' . $steamkey . '&steamid=' . $steamid . '&format=json&include_appinfo=1';
 
-/*
-Retrieve the JSON data from the API
-and decode it into an associative array
-*/
-$json = file_get_contents($url);
-$data = json_decode($json, true);
+    /*
+    Retrieve the JSON data from the API
+    and decode it into an associative array
+    */
+    $json = file_get_contents($url);
+    $data = json_decode($json, true);
 
-// Get the 'games' array from the response data
-$games = $data['response']['games'];
-$totalgames = $data['response']['game_count'];
+    // Get the 'games' array from the response data
+    $games = $data['response']['games'];
+    $totalgames = $data['response']['game_count'];
 
-// **Fetch and merge recently played data:**
-$recentlyPlayedUrl = 'http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=' . $steamkey . '&steamid=' . $steamid . '&format=json';
-$recentlyPlayedJson = file_get_contents($recentlyPlayedUrl);
-$recentlyPlayedData = json_decode($recentlyPlayedJson, true);
+    // **Fetch and merge recently played data:**
+    $recentlyPlayedUrl = 'http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=' . $steamkey . '&steamid=' . $steamid . '&format=json';
+    $recentlyPlayedJson = file_get_contents($recentlyPlayedUrl);
+    $recentlyPlayedData = json_decode($recentlyPlayedJson, true);
 
-// Check if recently played data exists
-if (isset($recentlyPlayedData['response'])) {
-  $recentlyPlayedGames = $recentlyPlayedData['response']['games'];
-} else {
-  // Handle error: Recently played data might not be available publicly
-  echo 'Error: Unable to retrieve recently played games data.';
-  exit; // Stop script execution
-}
+    // Check if recently played data exists
+    if (isset($recentlyPlayedData['response'])) {
+        $recentlyPlayedGames = $recentlyPlayedData['response']['games'];
+    } else {
+        // Handle error: Recently played data might not be available publicly
+        echo 'Error: Unable to retrieve recently played games data.';
+        exit; // Stop script execution
+    }
 
-// Identify missing games and update data
-foreach ($recentlyPlayedGames as $recentGame) {
-    $appId = $recentGame['appid'];
+    // Identify missing games and update data
+    foreach ($recentlyPlayedGames as $recentGame) {
+        $appId = $recentGame['appid'];
 
-    // Check if the game is already in the owned games array
-    $gameExists = false;
-    foreach ($games as $existingGame) {
-        if ($existingGame['appid'] == $appId) {
-            $gameExists = true;
-            // Update playtime_2weeks for the existing game
-            $existingGame['playtime_2weeks'] = $recentGame['playtime_2weeks'];
-            break;
+        // Check if the game is already in the owned games array
+        $gameExists = false;
+        foreach ($games as $existingGame) {
+            if ($existingGame['appid'] == $appId) {
+                $gameExists = true;
+                // Update playtime_2weeks for the existing game
+                $existingGame['playtime_2weeks'] = $recentGame['playtime_2weeks'];
+                break;
+            }
+        }
+
+        // Add the game if it doesn't already exist
+        if (!$gameExists) {
+            $games[] = $recentGame;
         }
     }
 
-    // Add the game if it doesn't already exist
-    if (!$gameExists) {
-        $games[] = $recentGame;
-    }
-}
+    // Update total games count
+    $totalgames = count($games);
 
-// Update total games count
-$totalgames = count($games);
-
-unset($game); // Unset reference for better memory management
-
-// Sort the games based on playtime in descending order
-usort($games, function ($a, $b) {
-  return $b['playtime_forever'] <=> $a['playtime_forever'];
-});
-?>
+    unset($game); // Unset reference for better memory management
+    
+    // Sort the games based on playtime in descending order
+    usort($games, function ($a, $b) {
+        return $b['playtime_forever'] <=> $a['playtime_forever'];
+    });
+    ?>
 
     <div class="title">
         <h2>
@@ -102,12 +102,12 @@ usort($games, function ($a, $b) {
 
         // Check if playtime_2weeks is available
         if (isset($game['playtime_2weeks'])) {
-          $totalPlaytime = round($game['playtime_forever'] / 60);
-          $twoWeekPlaytime = round($game['playtime_2weeks'] / 60);
-          $playtimeText = "$totalPlaytime Hours <br> $twoWeekPlaytime Hours Past 2 Weeks";
+            $totalPlaytime = round($game['playtime_forever'] / 60);
+            $twoWeekPlaytime = round($game['playtime_2weeks'] / 60);
+            $playtimeText = "$totalPlaytime Hours <br> $twoWeekPlaytime Hours Past 2 Weeks";
         } else {
-          $totalPlaytime = round($game['playtime_forever'] / 60);
-          $playtimeText = "$totalPlaytime Hours";
+            $totalPlaytime = round($game['playtime_forever'] / 60);
+            $playtimeText = "$totalPlaytime Hours";
         }
         $lastPlayedTimestamp = $game['rtime_last_played'];
 
