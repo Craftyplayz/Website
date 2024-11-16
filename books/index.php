@@ -87,16 +87,16 @@
             <div class="gallery-item hg bookshelf" title="The Hunger Games Mockingjay">
                 <img src="/images/books/HungerGames/hg3.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item hp bookshelf" title="Harry potter and the Philosophers Stone" data-book="37" data-audio="71">
+            <div class="gallery-item hp bookshelf" title="Harry potter and the Philosophers Stone" data-book="37" data-audio="74">
                 <img src="/images/books/HarryPotter/set1/hp1.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item hp bookshelf" title="Harry potter and the Chamber of Secrets" data-book="37" data-audio="71">
+            <div class="gallery-item hp bookshelf" title="Harry potter and the Chamber of Secrets" data-book="37" data-audio="74">
                 <img src="/images/books/HarryPotter/set1/hp2.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item hp bookshelf" title="Harry potter and the Prisoner of Azkaban" data-book="37" data-audio="71">
+            <div class="gallery-item hp bookshelf" title="Harry potter and the Prisoner of Azkaban" data-book="37" data-audio="74">
                 <img src="/images/books/HarryPotter/set1/hp3.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item hp bookshelf" title="Harry potter and the Goblet of Fire" data-book="37" data-audio="71">
+            <div class="gallery-item hp bookshelf" title="Harry potter and the Goblet of Fire" data-book="37" data-audio="74">
                 <img src="/images/books/HarryPotter/set1/hp4.webp" class="gallery-image" />
             </div>
             <div class="gallery-item hp bookshelf" title="Harry potter and the Order of the pheonix" data-book="37" data-audio="71">
