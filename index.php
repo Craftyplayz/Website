@@ -24,7 +24,7 @@
     ?>
 
     <div class="about">
-        <h1>Hi, Im Crafty!</h1>
+        <h1>Hi, I'm Crafty!</h1>
         <h2>Web Developer, Avid Gamer And Technical Minecraft Player</h2>
     </div>
 
