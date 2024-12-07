@@ -1,27 +1,4 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Game</title>
-    <meta http-equiv="refresh" content="-1">
-</head>
-<body>
-    <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php'; ?>
-    <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php'; ?>
-
-    <div class="title">
-        <h1>The Game</h1><br>
-        <h1>Time Since Last Loss: <?= formatTime($currentTime); ?></h1>
-        <h1>Best Time: <?= formatTime($data[0]['best_time']); ?></h1>
-        <form method="POST">
-            <button type="submit" id="myButton">I Lost!</button>
-        </form>
-    </div>
-
-    <?php
+<?php
 // File path to the JSON file
 $jsonFilePath = __DIR__ . '/thegame.json';
 
@@ -83,6 +60,37 @@ function formatTime($seconds)
     return implode(' ', $timeParts);
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Game</title>
+    <meta http-equiv="refresh" content="-1">
+</head>
+<body>
+    <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php'; ?>
+    <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php'; ?>
+
+    <div class="title">
+        <h1>The Game</h1><br>
+        <h1>Time Since Last Loss: <?= formatTime($currentTime); ?></h1>
+        <h1>Best Time: <?= formatTime($data[0]['best_time']); ?></h1>
+        <form method="POST">
+            <button type="submit" id="myButton">I Lost!</button>
+        </form>
+    </div>
+
+
+    <div class="title">
+        <h1>Previous Times</h1>
+        <?php foreach ($data[1] as $key => $time) : ?>
+            <p><?= formatTime($time); ?></p>
+        <?php endforeach; ?>
+    </div>
+
+
 
     <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php'; ?>
 </body>
