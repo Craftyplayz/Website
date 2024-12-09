@@ -26,7 +26,7 @@
                 output += "Cyberpunk " + year + ", ";
                 year--;
             }
-            output += "Cyberpunk 2";
+            output += "";
             document.write(output);
         </script>
         and Cyberpunk 1 or can I just play Cyberpunk 2077 and figure it out as I go?
