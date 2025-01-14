@@ -8,7 +8,7 @@ var allowedKeys = {
   66: "b",
 };
 
-// the 'official' Konami Code sequence
+// the 'official' Konami Code sequence1
 var konamiCode = [
   "up",
   "up",
