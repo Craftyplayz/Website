@@ -28,6 +28,12 @@
         <h3>Bones/Arrows/Rotten Flesh/String/Gunpowder 1 Diamond per stack</h3><br>
         <h3>Sugar Cane 1 Diamond per stack</h3><br>
         <h1>Delivery on request!</h1>
+        <h1>Upcoming items</h1>
+        <h3>Beacons</h3>
+        <h3>Gold Blocks</h3>
+        <h3>All Wood types</h3>
+        <h3>Shulker Boxes</h3>
+        <h3>Honey/Wax</h3>
     </div>
 
     <?php
