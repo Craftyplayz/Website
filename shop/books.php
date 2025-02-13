@@ -11,13 +11,13 @@
 
 <body>
     <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
+    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/shopheader.php';
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
     ?>
 
     <div class="title">
         <h1>Captainalism Enchanted Books</h1>
-        <h2>Price Lists</h2>
+        <h2>Price List</h2>
         <h3>Mending (2 Diamonds)</h3><br>
         <h3>Unbreaking 3 (2 Diamonds)</h3><br>
         <h3>Protection 4 (2 Diamonds)</h3><br>
@@ -36,8 +36,5 @@
         <h3>Blast Protection 4 (1 Diamond)</h3><br>
     </div>
 
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
 </body>
 </html>

@@ -11,10 +11,9 @@
 
 <body>
     <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
+    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/shopheader.php';
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
     ?>
-
     <div class="title">
         <h1>Captainalism</h1>
         <h2>Price Lists</h2>
@@ -27,17 +26,11 @@
         <h3>Fireworks 1 Diamond for 2 stacks (Flight duration 1 and 3 avaliable)</h3><br>
         <h3>Bones/Arrows/Rotten Flesh/String/Gunpowder 1 Diamond per stack</h3><br>
         <h3>Sugar Cane 1 Diamond per stack</h3><br>
+
         <h1>Delivery on request!</h1>
-        <h1>Upcoming items</h1>
-        <h3>Beacons</h3>
-        <h3>Gold Blocks</h3>
-        <h3>All Wood types</h3>
-        <h3>Shulker Boxes</h3>
-        <h3>Honey/Wax</h3>
+        <h5>Contact Chewy or Crafty on discord for delivery</h5>
     </div>
 
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+
 </body>
 </html>
