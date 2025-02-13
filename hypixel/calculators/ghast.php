@@ -25,11 +25,11 @@ if (!$playerdata || !$bazaardata) {
 $coinpurse = 0;
 if (isset($playerdata['profile']['members']) && is_array($playerdata['profile']['members'])) {
     $memberKeys = array_keys($playerdata['profile']['members']);
-    $firstMember = $memberKeys[0]; // Get first member dynamically
-    if (isset($playerdata['profile']['members'][$firstMember]['currencies']['coin_purse'])) {
-        $coinpurse = $playerdata['profile']['members'][$firstMember]['currencies']['coin_purse'];
+    if (isset($playerdata['profile']['members']['22159541fde841e6a104593e1cb3a456']['currencies']['coin_purse'])) {
+        $coinpurse = $playerdata['profile']['members']['22159541fde841e6a104593e1cb3a456']['currencies']['coin_purse'];
     }
 }
+
 
 echo '<h1>Ghast Tear Bazaar Calculation</h1>';
 echo '<h2>Balance</h2>';
