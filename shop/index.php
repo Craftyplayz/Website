@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Captainalism</title>
-    <meta http-equiv="refresh" content="-1">
+
 </head>
 
 <body>
@@ -14,23 +14,332 @@
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/shopheader.php';
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
     ?>
+
     <div class="title">
         <h1>Captainalism</h1>
         <h2>Price Lists</h2>
-        <h3>Iron Blocks 32 for 1 Diamond</h3><br>
-        <h3>Enchanted Books (Individually priced) <a href="/shop/books">Avaliable Books</a></h3><br>
-        <h3>Golden Carrots 1 Diamond per Stack</h3><br>
-        <h3>Prismarine 1 Diamond per stack</h3><br>
-        <h3>Prismarine Bricks 2 Diamonds per stack</h3><br>
-        <h3>Sea Lantern 2 Diamonds per stack</h3><br>
-        <h3>Fireworks 1 Diamond for 2 stacks (Flight duration 1 and 3 avaliable)</h3><br>
-        <h3>Bones/Arrows/Rotten Flesh/String/Gunpowder 1 Diamond per stack</h3><br>
-        <h3>Sugar Cane 1 Diamond per stack</h3><br>
+    </div>
 
-        <h1>Delivery on request!</h1>
-        <h5>Contact Chewy or Crafty on discord for delivery</h5>
+    <div class="grid">
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Block_of_Iron_JE4_BE3.png/150px-Block_of_Iron_JE4_BE3.png?18948">
+            </div>
+            <div class="price-overlay">2 Diamonds for 32 Blocks</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Block_of_Gold_JE6_BE3.png/150px-Block_of_Gold_JE6_BE3.png?09478">
+            </div>
+            <div class="price-overlay">2 Diamonds per 32</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img src="https://minecraft.wiki/images/Enchanted_Book.gif?b21c4"></div>
+            <div class="price-overlay">All books 1 diamond<br>Except swift sneak</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img src="https://minecraft.wiki/images/Golden_Carrot_JE4_BE2.png?43b25"></div>
+            <div class="price-overlay">1 Diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Prismarine_JE2_BE2.gif/150px-Prismarine_JE2_BE2.gif?655fd">
+            </div>
+            <div class="price-overlay">1 Diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Prismarine_Bricks_JE2_BE2.png/150px-Prismarine_Bricks_JE2_BE2.png?e9b46">
+            </div>
+            <div class="price-overlay">2 Diamonds per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Sea_Lantern_JE1.gif/120px-Sea_Lantern_JE1.gif?62a76"></div>
+            <div class="price-overlay">2 Diamonds per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img src="https://minecraft.wiki/images/Bone_JE3_BE2.png?b405e"></div>
+            <div class="price-overlay">1 Diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/String_JE2_BE2.png/150px-String_JE2_BE2.png?25d69"></div>
+            <div class="price-overlay">1 Diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img src="https://minecraft.wiki/images/Gunpowder_JE2_BE2.png?c4145"></div>
+            <div class="price-overlay">1 Diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img src="https://minecraft.wiki/images/Arrow_%28item%29_JE1_BE1.png?93ac1">
+            </div>
+            <div class="price-overlay">1 Diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img src="https://minecraft.wiki/images/Leather_JE2_BE2.png?10fae"></div>
+            <div class="price-overlay">2 Diamonds per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Slime_Block_JE2_BE3.png/150px-Slime_Block_JE2_BE3.png?57b93">
+            </div>
+            <div class="price-overlay">1 Diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Light_Gray_Wool_JE3_BE3.png/150px-Light_Gray_Wool_JE3_BE3.png?b75ee">
+            </div>
+            <div class="price-overlay">1 Diamond per stack<br>All colours avaliable</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Redstone_Dust_JE2_BE2.png/150px-Redstone_Dust_JE2_BE2.png?8cf17">
+            </div>
+            <div class="price-overlay">1 Diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img src="https://minecraft.wiki/images/Lapis_Lazuli_JE2_BE2.png?03506"></div>
+            <div class="price-overlay">2 Diamonds per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/Item_Frame_%28item%29_JE1_BE1.png?10f5c"></div>
+            <div class="price-overlay">2 Diamonds per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Glowstone_JE4_BE2.png/150px-Glowstone_JE4_BE2.png?0d5b0">
+            </div>
+            <div class="price-overlay">1 Diamonds per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Bricks_JE5_BE3.png/150px-Bricks_JE5_BE3.png?54bd8"></div>
+            <div class="price-overlay">2 Stacks per diamond</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Glass_JE4_BE2.png/150px-Glass_JE4_BE2.png?fb219"></div>
+            <div class="price-overlay">1 Diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img src="https://minecraft.wiki/images/Name_Tag_JE2_BE2.png?cbdc1"></div>
+            <div class="price-overlay">2 Diamonds per 16</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Bookshelf_JE4_BE2.png/150px-Bookshelf_JE4_BE2.png?9b143">
+                <div class="price-overlay">2 Diamonds per stack</div>
+            </div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Beacon_JE6_BE2.png/150px-Beacon_JE6_BE2.png?684bf"></div>
+            <div class="price-overlay">4 Diamonds each<br>Or 12 diamonds for a full kit</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Shulker_Box_JE1_BE1.png/150px-Shulker_Box_JE1_BE1.png?3cfa4">
+            </div>
+            <div class="price-overlay">1 Diamond each</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Enchanted_Elytra_%28item%29.gif/120px-Enchanted_Elytra_%28item%29.gif?fb130">
+            </div>
+            <div class="price-overlay">6 Diamonds each</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Enchanted_Diamond_Pickaxe.gif/120px-Enchanted_Diamond_Pickaxe.gif?c7aaa">
+            </div>
+            <div class="price-overlay">8 Diamonds per tool<br>Fully enchanted</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Enchanted_Diamond_Helmet_%28item%29.gif/120px-Enchanted_Diamond_Helmet_%28item%29.gif?eeb3a">
+            </div>
+            <div class="price-overlay">8 Diamonds per piece<br>Fully enchanted</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/Bottle_o%27_Enchanting.gif?ad9ab"></div>
+            <div class="price-overlay">4 Diamonds per stack</div>
+        </div>
+        <!-- <div class="product">
+            <div class="product-content"><img
+                    src=""></div>
+            <div class="price-overlay">4 Diamonds each</div>
+        </div> -->
+    </div>
+
+    <div class="title">
+        <h1>Upcoming items</h1>
+    </div>
+    <div class="grid">
+        <div class="product">
+            <div class="product-content"><img src="https://minecraft.wiki/images/Nether_Quartz_JE2_BE2.png?d0049"></div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Obsidian_JE3_BE2.png/150px-Obsidian_JE3_BE2.png?0a8ae">
+            </div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Crying_Obsidian_JE1_BE1.png/150px-Crying_Obsidian_JE1_BE1.png?f1f04">
+            </div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Soul_Sand_JE2_BE2.png/150px-Soul_Sand_JE2_BE2.png?2334d">
+            </div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Gravel_JE5_BE4.png/150px-Gravel_JE5_BE4.png?bb814"></div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Blackstone_JE3_BE2.png/150px-Blackstone_JE3_BE2.png?abdc1"></div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src=""></div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src=""></div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src=""></div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src=""></div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src=""></div>
+        </div>
     </div>
 
 
+
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        img {
+            width: 150px;
+            height: 150px;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 150px);
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .product {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            background-color: rgba(49, 49, 49, 0);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .product:hover {
+            transform: scale(1.05);
+        }
+
+        .product-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .price-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            font-size: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: height 0.3s ease, opacity 0.3s ease;
+            text-align: center;
+        }
+
+        .product:hover .price-overlay {
+            height: 40%;
+            opacity: 1;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .slideshow {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .slide.active {
+            display: block;
+        }
+    </style>
+
 </body>
+
 </html>

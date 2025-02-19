@@ -15,13 +15,8 @@
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
     ?>
     <div class="title">
-        <h1>Captainalism</h1>
-        <h1>Upcoming items!</h1>
-        <h3>Beacons</h3>
-        <h3>Gold Blocks</h3>
-        <h3>All Wood types</h3>
-        <h3>Shulker Boxes</h3>
-        <h3>Honey/Wax</h3>
+        <h1>Captainalism Casino</h1>
+        <h1>Coming soon!</h1>
     </div>
 
 </body>

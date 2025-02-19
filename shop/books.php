@@ -34,6 +34,7 @@
         <h3>Punch 2 (1 Diamond)</h3><br>
         <h3>Thorns 3 (1 Diamond)</h3><br>
         <h3>Blast Protection 4 (1 Diamond)</h3><br>
+        <h3>Veinminer (1 Diamond)</h3><br>
     </div>
 
 </body>
