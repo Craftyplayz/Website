@@ -16,7 +16,7 @@
     ?>
 
     <div class="title">
-        <h1>Random Insult</h1>
+        <h1>Random Insult Generator</h1>
 <h2>
 <?php
 // Make a request to the API

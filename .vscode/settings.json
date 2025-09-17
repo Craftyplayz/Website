@@ -1,3 +1,7 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "bitburner.authToken": "Ds/b7QwPnUhJqmuj++GSIU2dXqV+PVx2csJwckvDOkpk698drlBqVQSPpv/qNaug",
+    "bitburner.fileWatcher.enable": true,
+    "bitburner.showPushSuccessNotification": true,
+    "bitburner.showFileWatcherEnabledNotification": false
 }

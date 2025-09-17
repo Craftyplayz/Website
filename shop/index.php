@@ -163,9 +163,39 @@
             <div class="price-overlay">8 Diamonds per piece<br>Fully enchanted</div>
         </div>
         <div class="product">
-            <div class="product-content"><img
-                    src="https://minecraft.wiki/images/Bottle_o%27_Enchanting.gif?ad9ab"></div>
+            <div class="product-content"><img src="https://minecraft.wiki/images/Bottle_o%27_Enchanting.gif?ad9ab">
+            </div>
             <div class="price-overlay">4 Diamonds per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/Nether_Quartz_JE2_BE2.png?d0049"></div>
+            <div class="price-overlay">1 diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Obsidian_JE3_BE2.png/150px-Obsidian_JE3_BE2.png?0a8ae"></div>
+            <div class="price-overlay">1 diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Crying_Obsidian_JE1_BE1.png/150px-Crying_Obsidian_JE1_BE1.png?f1f04"></div>
+            <div class="price-overlay">1 diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Soul_Sand_JE2_BE2.png/150px-Soul_Sand_JE2_BE2.png?2334d"></div>
+            <div class="price-overlay">1 diamond per stack</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Gravel_JE5_BE4.png/150px-Gravel_JE5_BE4.png?bb814"></div>
+            <div class="price-overlay">2 stacks per diamond</div>
+        </div>
+        <div class="product">
+            <div class="product-content"><img
+                    src="https://minecraft.wiki/images/thumb/Blackstone_JE3_BE2.png/150px-Blackstone_JE3_BE2.png?abdc1"></div>
+            <div class="price-overlay">2 stacks per diamond</div>
         </div>
         <!-- <div class="product">
             <div class="product-content"><img
@@ -178,52 +208,7 @@
         <h1>Upcoming items</h1>
     </div>
     <div class="grid">
-        <div class="product">
-            <div class="product-content"><img src="https://minecraft.wiki/images/Nether_Quartz_JE2_BE2.png?d0049"></div>
-        </div>
-        <div class="product">
-            <div class="product-content"><img
-                    src="https://minecraft.wiki/images/thumb/Obsidian_JE3_BE2.png/150px-Obsidian_JE3_BE2.png?0a8ae">
-            </div>
-        </div>
-        <div class="product">
-            <div class="product-content"><img
-                    src="https://minecraft.wiki/images/thumb/Crying_Obsidian_JE1_BE1.png/150px-Crying_Obsidian_JE1_BE1.png?f1f04">
-            </div>
-        </div>
-        <div class="product">
-            <div class="product-content"><img
-                    src="https://minecraft.wiki/images/thumb/Soul_Sand_JE2_BE2.png/150px-Soul_Sand_JE2_BE2.png?2334d">
-            </div>
-        </div>
-        <div class="product">
-            <div class="product-content"><img
-                    src="https://minecraft.wiki/images/thumb/Gravel_JE5_BE4.png/150px-Gravel_JE5_BE4.png?bb814"></div>
-        </div>
-        <div class="product">
-            <div class="product-content"><img
-                    src="https://minecraft.wiki/images/thumb/Blackstone_JE3_BE2.png/150px-Blackstone_JE3_BE2.png?abdc1"></div>
-        </div>
-        <div class="product">
-            <div class="product-content"><img
-                    src=""></div>
-        </div>
-        <div class="product">
-            <div class="product-content"><img
-                    src=""></div>
-        </div>
-        <div class="product">
-            <div class="product-content"><img
-                    src=""></div>
-        </div>
-        <div class="product">
-            <div class="product-content"><img
-                    src=""></div>
-        </div>
-        <div class="product">
-            <div class="product-content"><img
-                    src=""></div>
-        </div>
+
     </div>
 
 
