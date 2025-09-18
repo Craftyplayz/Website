@@ -19,15 +19,23 @@
         <h1>Random Insult Generator</h1>
 <h2>
 <?php
-// Make a request to the API
-$response = file_get_contents('https://evilinsult.com/generate_insult.php?lang=en&type=json');
+// API URL
+$url = "https://evilinsult.com/generate_insult.php?lang=en&type=json";
 
-// Decode the JSON response
+// Get the API response
+$response = file_get_contents($url);
+
+// Decode JSON into array
 $data = json_decode($response, true);
 
-// Echo the insult
-echo $data['insult'];
+// Check and echo the insult
+if (isset($data['insult'])) {
+    echo $data['insult'];
+} else {
+    echo "No insult found.";
+}
 ?>
+
 </h2>
     </div>
 

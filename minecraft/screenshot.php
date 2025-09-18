@@ -15,12 +15,17 @@
 </head>
 
 <body>
-    <?php
-    $imagePath = "/images/minecraft/screenshots/";
-    $imageId = $_GET['id'];
-    $imageAlt = "Screenshot " . $imageId;
-    $imageClass = "screenshot-image";
-    ?>
+<?php
+$imagePath = "/images/minecraft/rawscreenshots/";
+$imageId = $_GET['id'];
+
+// force .png extension
+$imageId = pathinfo($imageId, PATHINFO_FILENAME) . ".png";
+
+$imageAlt = "Screenshot " . $imageId;
+$imageClass = "screenshot-image";
+?>
+
 
     <img src="<?php echo $imagePath . $imageId; ?>" alt="<?php echo $imageAlt; ?>" class="screenshotfull">
     <button onclick="window.history.back()" style="display: block; margin: 0 auto;">Back</button>

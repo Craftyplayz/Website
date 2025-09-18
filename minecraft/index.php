@@ -66,7 +66,7 @@
     <div class="title" id="screenshots">
         <h1>Minecraft Screenshots</h1>
         <h2>Some screenshots from my years of playing minecraft</h2>
-        <h2>Click any image to view fullscreen</h2>
+        <h2>Click any image to view full quality</h2>
     </div>
 
     <div class="screenshots">
