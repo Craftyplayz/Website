@@ -27,8 +27,9 @@ $dir = $_SERVER['DOCUMENT_ROOT'] . '/images/minecraft/skins/';
 $images = glob($dir . '*.png');
 foreach ($images as $image) {
     $name = basename($image);
-    echo '<div class="gallery-item">';
-    echo '<a href="/images/minecraft/skins/download/' . $name . '" target="_blank"><img src="/images/minecraft/skins/' . $name . '" target="_blank"></a>';
+    $borderStyle = ($name === "purple.png") ? ' style="border: 3px solid purple;"' : '';
+    echo '<div class="gallery-item"' . $borderStyle . '>';
+    echo '<a href="/images/minecraft/skins/download/' . $name . '" target="_blank"><img src="/images/minecraft/skins/' . $name . '"></a>';
     echo '</div>';
 }
 ?>

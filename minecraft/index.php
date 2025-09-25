@@ -70,14 +70,18 @@
     </div>
 
     <div class="screenshots">
-        <?php
-        $images = scandir($_SERVER['DOCUMENT_ROOT'] . '/images/minecraft/screenshots');
-        foreach ($images as $image) {
-            if ($image !== '.' && $image !== '..') {
-                echo '<a href="/minecraft/screenshot?id=' . $image . '">' . PHP_EOL . '<div class="screenshot"><img src="/images/minecraft/screenshots/' . $image . '" alt="Screenshot" class="screenshot-image"></div></a>' . PHP_EOL;
-            }
-        }
-        ?>
+<?php
+$images = scandir($_SERVER['DOCUMENT_ROOT'] . '/images/minecraft/screenshots');
+$images = array_reverse($images);
+
+foreach ($images as $image) {
+    if ($image !== '.' && $image !== '..') {
+        echo '<a href="/minecraft/screenshot?id=' . $image . '">' . PHP_EOL .
+             '<div class="screenshot"><img src="/images/minecraft/screenshots/' . $image . '" alt="Screenshot" class="screenshot-image"></div></a>' . PHP_EOL;
+    }
+}
+?>
+
     </div>
 
 
