@@ -57,19 +57,19 @@
             <div class="gallery-item ho bookshelf" title="The Heros of Olympus: The Blood of Olympus">
                 <img src="/images/books/HerosOfOlympus/hoo5.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item pj bookshelf" title="Percy Jackson: The Lightning Thief">
+            <div class="gallery-item pj bookshelf" title="Percy Jackson: The Lightning Thief" data-book="2" >
                 <img src="/images/books/PercyJackson/set2/pj1.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item pj bookshelf" title="Percy Jackson: The Sea of Monsters">
+            <div class="gallery-item pj bookshelf" title="Percy Jackson: The Sea of Monsters" data-book="2" >
                 <img src="/images/books/PercyJackson/set2/pj2.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item pj bookshelf" title="Percy Jackson: The Titans Curse">
+            <div class="gallery-item pj bookshelf" title="Percy Jackson: The Titans Curse" data-book="2" >
                 <img src="/images/books/PercyJackson/set2/pj3.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item pj bookshelf" title="Percy Jackson: The Battle of the Labrynth">
+            <div class="gallery-item pj bookshelf" title="Percy Jackson: The Battle of the Labrynth" data-book="2" >
                 <img src="/images/books/PercyJackson/set2/pj4.webp" class="gallery-image" />
             </div>
-            <div class="gallery-item pj bookshelf" title="Percy Jackson: The Lasy Olympian">
+            <div class="gallery-item pj bookshelf" title="Percy Jackson: The Lasy Olympian" data-book="2" >
                 <img src="/images/books/PercyJackson/set2/pj5.webp" class="gallery-image" />
             </div>
             <div class="gallery-item rp bookshelf" title="Ready Player One" data-book="3">

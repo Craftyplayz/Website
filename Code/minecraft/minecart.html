@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Book Generator</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        max-width: 600px;
+        margin: 20px auto;
+      }
+      input {
+        width: 100%;
+        margin: 4px 0;
+        padding: 6px;
+      }
+      button {
+        padding: 10px;
+        margin-top: 10px;
+        width: 100%;
+      }
+      textarea {
+        width: 100%;
+        height: 200px;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Book Page Generator</h2>
+
+    <!-- Unlimited length -->
+    <input id="bookTitle" placeholder="Book Title" />
+    <input id="bookAuthor" placeholder="Book Author" />
+
+    <div id="inputs"></div>
+    <button onclick="generate()">Generate Command</button>
+    <textarea id="output"></textarea>
+
+    <script>
+      // Create 14 inputs with 15-char limit
+      const container = document.getElementById("inputs");
+      for (let i = 1; i <= 14; i++) {
+        const inp = document.createElement("input");
+        inp.id = "inp" + i;
+        inp.placeholder = "Input " + i;
+        inp.maxLength = 15;
+        container.appendChild(inp);
+      }
+
+      function generate() {
+        const values = [];
+        for (let i = 1; i <= 14; i++) {
+          values.push(document.getElementById("inp" + i).value || "");
+        }
+
+        const bookTitle = document.getElementById("bookTitle").value || "Untitled";
+        const bookAuthor = document.getElementById("bookAuthor").value || "Unknown";
+
+        const pages = [];
+
+        for (let a = 0; a < 14; a++) {
+          const components = [];
+
+          for (let i = 0; i < 14; i++) {
+            if (i === a) {
+              components.push({
+                text: "> " + values[i],
+                bold: true,
+                color: "dark_green",
+              });
+            } else {
+              components.push({
+                text: values[i],
+                color: "black",
+                bold: false,
+                italic: false,
+                underlined: false,
+                strikethrough: false,
+                obfuscated: false,
+              });
+            }
+
+            if (i < 13) components.push("\n");
+          }
+
+          pages.push(JSON.stringify(components));
+        }
+
+        pages.push(
+          JSON.stringify([
+            { text: "Below Nether roof", bold: true, color: "dark_green" },
+            "\n",
+            "\n",
+            "\n",
+            "\n",
+            { text: "Do NOT sign this book", bold: true, color: "red" },
+          ])
+        );
+
+        const command = `give craftyplayz_ writable_book[written_book_content={
+    pages:[${pages.join(",")}],
+    title:"${bookTitle}",
+    author:"${bookAuthor}"
+}]`;
+
+        document.getElementById("output").value = command;
+      }
+    </script>
+  </body>
+</html>
