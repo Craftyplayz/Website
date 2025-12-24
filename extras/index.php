@@ -22,7 +22,7 @@
         <h1>Currently working</h1>
         <div>
             <p><a href="/update/">Fake pc updates and crashes</a></p><br>
-            <p><a href="/tests/speedtest">Reading Speed test</a></p><br>
+            <p><a href="/tests/speedtest.php">Reading Speed test</a></p><br>
             <p><a href="/extas/rgb.php">RGB Strobe light</a></p><br>
             <p><a href="/extas/chaos.html">Fullscreen Twitch chat</a></p><br>
             <p><a href="/extras/trump">Random Trump Quote</a></p><br>
@@ -39,8 +39,7 @@
         <h1>Coming soon</h1>
         <div>
             <p>Harry Potter quiz</p><br>
-            <a href="https://toneindicators.carrd.co/"><p>Tone indicator guide</p></a><br>
-            <a href="https://www.nohello.com"><p>No Hello Guide</p></a><br>
+            <p>Tone indicator guide</p></a><br>
             <p>Pet showcase pages</p><br>
         </div>
     </div>

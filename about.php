@@ -28,16 +28,14 @@
         </div>
         <div class="item">
             <h1>Background</h1>
-            <p>20 Years old</p><br>
-            <p>He/Him</p><br>
+            <p>22 Years old</p><br>
             <p>Born in NSW Australia and lived there for 16 years</p><br>
             <p>Now living in the UK since 2019</p><br>
         </div>
         <div class="item">
             <h1>Intrests</h1>
-            <p>Programming - Mostly creating websites such as this one</p><br>
             <p><a href="/steam">Gaming</a> - My main games are Minecraft, Rocket League & Factorio<br>You can see my steam stats here -<a href="/steam/"> Steam Stats</a></p><br>
-            <p>Books - Im currently reading the Heroes of Olympus series<br>I have read Harry Potter over 125 times now - <a href="/books">Books Ive read</a></p><br>
+            <p>Books - Im currently reading the Heroes of Olympus series<br>I have read Harry Potter over 135 times now - <a href="/books">Books Ive read</a></p><br>
         </div>
         <div class="item">
             <h1>Contact me</h1>

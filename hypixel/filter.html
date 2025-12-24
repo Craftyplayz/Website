@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Regex Builder</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; }
+  li { list-style: none; margin: 4px 0; }
+  button { margin-left: 8px; }
+  input { width: 100%; margin-bottom: 8px; }
+  code { display: block; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<input id="regexInput" placeholder="(?i)(lowball|john|crafty)">
+<input id="newItemInput" placeholder="New filter (e.g. [NPC])">
+<button id="addBtn">Add</button>
+
+<ul id="list"></ul>
+
+<strong>Resulting Regex:</strong>
+<code id="output"></code>
+
+<script>
+const regexInput = document.getElementById('regexInput');
+const newItemInput = document.getElementById('newItemInput');
+const listEl = document.getElementById('list');
+const outputEl = document.getElementById('output');
+
+let items = [];
+
+function parseRegex() {
+  const m = regexInput.value.match(/^\(\?i\)\((.*)\)$/);
+  if (!m) return;
+  items = m[1].split('|').filter(Boolean);
+  render();
+}
+
+function render() {
+  listEl.innerHTML = '';
+
+  [...items].reverse().forEach((item, i) => {
+    const li = document.createElement('li');
+    li.textContent = item;
+
+    const btn = document.createElement('button');
+    btn.textContent = 'Remove';
+    btn.onclick = () => {
+      items.splice(items.length - 1 - i, 1);
+      render();
+    };
+
+    li.appendChild(btn);
+    listEl.appendChild(li);
+  });
+
+  outputEl.textContent = `(?i)(${items.join('|')})`;
+}
+
+document.getElementById('addBtn').onclick = () => {
+  const val = newItemInput.value.trim();
+  if (!val || items.includes(val)) return;
+  items.push(val);
+  newItemInput.value = '';
+  render();
+};
+
+regexInput.addEventListener('input', parseRegex);
+</script>
+<button id="copyBtn">Copy</button>
+<script>
+document.getElementById('copyBtn').onclick = () => {
+  navigator.clipboard.writeText(outputEl.textContent);
+};
+</script>
+
+</body>
+</html>

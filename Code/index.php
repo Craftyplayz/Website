@@ -18,6 +18,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
 </div>
 <div class="title">
 <a href="/Code/downloads/index.php">Downloads</a><br>
+<a href="/Code/minecraft/index.php">Minecraft</a><br>
 <?php
     $directory = $_SERVER['DOCUMENT_ROOT'] . '/Code/';
     $excludedFiles = ['.', '..', 'index.php', 'jelly.php'];
