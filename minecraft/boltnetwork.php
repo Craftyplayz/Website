@@ -170,7 +170,7 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 350px;
+            width: 450px;
             background: #252525;
             border: 2px solid #333;
             border-radius: 8px;
@@ -200,20 +200,54 @@
 
         .direction-label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-size: 14px;
             font-weight: 600;
             color: #aaa;
         }
 
-        .direction-value {
-            font-size: 13px;
-            color: #4a9eff;
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 32px);
+            gap: 4px;
+            margin-top: 8px;
         }
 
-        .direction-value.empty {
-            color: #666;
-            font-style: italic;
+        .item-slot {
+            width: 32px;
+            height: 32px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .item-slot img {
+            width: 24px;
+            height: 24px;
+            image-rendering: pixelated;
+            pointer-events: none;
+        }
+
+        .item-slot:empty {
+            background: #0a0a0a;
+        }
+
+        .item-tooltip {
+            position: absolute;
+            background: rgba(16, 0, 16, 0.94);
+            color: white;
+            padding: 6px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 10000;
+            white-space: nowrap;
+            border: 2px solid rgba(80, 0, 80, 0.8);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
         .validation-panel {
@@ -339,7 +373,9 @@
                 </div>
                 <div class="control-group">
                     <label>Station Item</label>
-                    <input type="text" id="stationItem" placeholder="e.g., diamond">
+                    <select id="stationItem" style="width: 100%; padding: 10px; background: #1a1a1a; border: 1px solid #444; color: #e0e0e0; border-radius: 4px; font-size: 14px;">
+                        <option value="">Select an item...</option>
+                    </select>
                 </div>
                 <button class="btn btn-primary" onclick="addStation()">Add Station</button>
                 <button class="btn btn-secondary" onclick="addIntersection()">Add Junction</button>
@@ -383,6 +419,51 @@
         let connections = [];
         let selectedNode = null;
         let nextId = 1;
+        let itemList = [];
+
+        // Load items from JSON
+        async function loadItems() {
+            try {
+                // Add cache buster to force fresh load
+                const response = await fetch('/minecraft/itemlist/items.json?v=' + Date.now());
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                let text = await response.text();
+                
+                // Remove BOM if present
+                if (text.charCodeAt(0) === 0xFEFF) {
+                    text = text.slice(1);
+                }
+                // Also try to remove any leading non-JSON characters
+                text = text.replace(/^\uFEFF/, '').trim();
+                
+                console.log('Raw response:', text.substring(0, 200)); // Log first 200 chars
+                const data = JSON.parse(text);
+                itemList = data.items || data; // Support both {items: [...]} and [...] formats
+                console.log('Loaded items:', itemList.length);
+                populateItemDropdown();
+            } catch (error) {
+                console.error('Error loading items:', error);
+                console.error('Error details:', error.stack);
+                alert('Could not load items.json. Check console for details.');
+            }
+        }
+
+        function populateItemDropdown() {
+            const select = document.getElementById('stationItem');
+            select.innerHTML = '<option value="">Select an item...</option>';
+            
+            itemList.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item.replace(/_/g, ' ');
+                select.appendChild(option);
+            });
+        }
+
+        // Load items on page load
+        loadItems();
 
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -410,14 +491,14 @@
 
         function addStation() {
             const name = document.getElementById('stationName').value.trim();
-            const item = document.getElementById('stationItem').value.trim();
+            const item = document.getElementById('stationItem').value;
             
             if (!name) {
                 alert('Please enter a station name');
                 return;
             }
             if (!item) {
-                alert('Please enter a station item');
+                alert('Please select a station item');
                 return;
             }
             
@@ -804,36 +885,82 @@
                     <h3>Station: ${selectedNode.name}</h3>
                     <div class="direction-display has-item">
                         <span class="direction-label">Item in Minecart</span>
-                        <div class="direction-value">${selectedNode.item}</div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="/minecraft/itemlist/${selectedNode.item}.png" style="width: 32px; height: 32px; image-rendering: pixelated;">
+                            <span style="color: #4a9eff;">${selectedNode.item.replace(/_/g, ' ')}</span>
+                        </div>
                     </div>
                 `;
             } else {
-                const northItems = selectedNode.directions.north.join(', ') || 'Empty';
-                const eastItems = selectedNode.directions.east.join(', ') || 'Empty';
-                const southItems = selectedNode.directions.south.join(', ') || 'Empty';
-                const westItems = selectedNode.directions.west.join(', ') || 'Empty';
+                const directions = ['north', 'east', 'south', 'west'];
+                const directionLabels = {
+                    north: '⬆ North',
+                    east: '➡ East',
+                    south: '⬇ South',
+                    west: '⬅ West'
+                };
                 
-                panel.innerHTML = `
+                let html = `
                     <button class="close-btn" onclick="closeConfigPanel()">×</button>
                     <h3>Junction #${selectedNode.id}</h3>
                     <p style="color: #888; font-size: 13px; margin-bottom: 15px;">Items are automatically assigned based on shortest paths to all stations</p>
-                    <div class="direction-display ${selectedNode.directions.north.length > 0 ? 'has-item' : ''}">
-                        <span class="direction-label">⬆ North</span>
-                        <div class="direction-value ${selectedNode.directions.north.length === 0 ? 'empty' : ''}">${northItems}</div>
-                    </div>
-                    <div class="direction-display ${selectedNode.directions.east.length > 0 ? 'has-item' : ''}">
-                        <span class="direction-label">➡ East</span>
-                        <div class="direction-value ${selectedNode.directions.east.length === 0 ? 'empty' : ''}">${eastItems}</div>
-                    </div>
-                    <div class="direction-display ${selectedNode.directions.south.length > 0 ? 'has-item' : ''}">
-                        <span class="direction-label">⬇ South</span>
-                        <div class="direction-value ${selectedNode.directions.south.length === 0 ? 'empty' : ''}">${southItems}</div>
-                    </div>
-                    <div class="direction-display ${selectedNode.directions.west.length > 0 ? 'has-item' : ''}">
-                        <span class="direction-label">⬅ West</span>
-                        <div class="direction-value ${selectedNode.directions.west.length === 0 ? 'empty' : ''}">${westItems}</div>
-                    </div>
                 `;
+                
+                directions.forEach(direction => {
+                    const items = selectedNode.directions[direction];
+                    const hasItems = items.length > 0;
+                    
+                    // Calculate iron nuggets: 55 minus the number of filter items
+                    const ironNuggetCount = 55 - items.length;
+                    
+                    html += `
+                        <div class="direction-display ${hasItems ? 'has-item' : ''}">
+                            <span class="direction-label">${directionLabels[direction]}</span>
+                            <div class="item-grid">
+                    `;
+                    
+                    // Create 54 slots (9x6 grid)
+                    for (let i = 0; i < 54; i++) {
+                        // Last 3 slots (51, 52, 53) are minecarts
+                        if (i >= 51) {
+                            html += `
+                                <div class="item-slot" data-item-name="Minecart" onmouseenter="showTooltip(event, 'Minecart')" onmouseleave="hideTooltip()">
+                                    <img src="/minecraft/itemlist/minecart.png" alt="minecart">
+                                    <span style="position: absolute; bottom: 2px; right: 2px; font-size: 10px; color: white; text-shadow: 1px 1px 1px black;">1</span>
+                                </div>
+                            `;
+                        }
+                        // Slot 50 is iron nuggets
+                        else if (i === 50) {
+                            html += `
+                                <div class="item-slot" data-item-name="Iron Nugget" onmouseenter="showTooltip(event, 'Iron Nugget')" onmouseleave="hideTooltip()">
+                                    <img src="/minecraft/itemlist/iron_nugget.png" alt="iron_nugget">
+                                    <span style="position: absolute; bottom: 2px; right: 2px; font-size: 10px; color: white; text-shadow: 1px 1px 1px black;">${ironNuggetCount}</span>
+                                </div>
+                            `;
+                        }
+                        // Filter items
+                        else if (i < items.length) {
+                            const itemName = items[i].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                            html += `
+                                <div class="item-slot" data-item-name="${itemName}" onmouseenter="showTooltip(event, '${itemName}')" onmouseleave="hideTooltip()">
+                                    <img src="/minecraft/itemlist/${items[i]}.png" alt="${items[i]}">
+                                </div>
+                            `;
+                        }
+                        // Empty slots
+                        else {
+                            html += `<div class="item-slot"></div>`;
+                        }
+                    }
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                panel.innerHTML = html;
             }
             
             document.body.appendChild(panel);
@@ -957,6 +1084,39 @@
             
             // Reset the file input so the same file can be imported again
             event.target.value = '';
+        }
+
+        let tooltipElement = null;
+
+        function showTooltip(event, itemName) {
+            hideTooltip();
+            
+            tooltipElement = document.createElement('div');
+            tooltipElement.className = 'item-tooltip';
+            tooltipElement.textContent = itemName;
+            document.body.appendChild(tooltipElement);
+            
+            updateTooltipPosition(event);
+            
+            // Update position on mouse move
+            event.target.addEventListener('mousemove', updateTooltipPosition);
+        }
+
+        function updateTooltipPosition(event) {
+            if (!tooltipElement) return;
+            
+            const x = event.clientX + 10;
+            const y = event.clientY + 10;
+            
+            tooltipElement.style.left = x + 'px';
+            tooltipElement.style.top = y + 'px';
+        }
+
+        function hideTooltip() {
+            if (tooltipElement) {
+                tooltipElement.remove();
+                tooltipElement = null;
+            }
         }
 
         draw();
