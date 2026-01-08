@@ -250,6 +250,16 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
+        .tooltip-title {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .tooltip-subtitle {
+            font-size: 11px;
+            color: #aaaaaa;
+        }
+
         .validation-panel {
             position: absolute;
             bottom: 20px;
@@ -900,6 +910,8 @@
                     west: '⬅ West'
                 };
                 
+                const stations = nodes.filter(n => n.type === 'station');
+                
                 let html = `
                     <button class="close-btn" onclick="closeConfigPanel()">×</button>
                     <h3>Junction #${selectedNode.id}</h3>
@@ -924,7 +936,7 @@
                         // Last 3 slots (51, 52, 53) are minecarts
                         if (i >= 51) {
                             html += `
-                                <div class="item-slot" data-item-name="Minecart" onmouseenter="showTooltip(event, 'Minecart')" onmouseleave="hideTooltip()">
+                                <div class="item-slot" data-item-name="Minecart" onmouseenter="showTooltip(event, 'Minecart', null)" onmouseleave="hideTooltip()">
                                     <img src="/minecraft/itemlist/minecart.png" alt="minecart">
                                     <span style="position: absolute; bottom: 2px; right: 2px; font-size: 10px; color: white; text-shadow: 1px 1px 1px black;">1</span>
                                 </div>
@@ -933,7 +945,7 @@
                         // Slot 50 is iron nuggets
                         else if (i === 50) {
                             html += `
-                                <div class="item-slot" data-item-name="Iron Nugget" onmouseenter="showTooltip(event, 'Iron Nugget')" onmouseleave="hideTooltip()">
+                                <div class="item-slot" data-item-name="Iron Nugget" onmouseenter="showTooltip(event, 'Iron Nugget', null)" onmouseleave="hideTooltip()">
                                     <img src="/minecraft/itemlist/iron_nugget.png" alt="iron_nugget">
                                     <span style="position: absolute; bottom: 2px; right: 2px; font-size: 10px; color: white; text-shadow: 1px 1px 1px black;">${ironNuggetCount}</span>
                                 </div>
@@ -942,8 +954,10 @@
                         // Filter items
                         else if (i < items.length) {
                             const itemName = items[i].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                            const station = stations.find(s => s.item === items[i]);
+                            const stationName = station ? station.name : 'Unknown Station';
                             html += `
-                                <div class="item-slot" data-item-name="${itemName}" onmouseenter="showTooltip(event, '${itemName}')" onmouseleave="hideTooltip()">
+                                <div class="item-slot" data-item-name="${itemName}" data-station-name="${stationName}" onmouseenter="showTooltip(event, '${itemName}', '${stationName}')" onmouseleave="hideTooltip()">
                                     <img src="/minecraft/itemlist/${items[i]}.png" alt="${items[i]}">
                                 </div>
                             `;
@@ -1088,12 +1102,21 @@
 
         let tooltipElement = null;
 
-        function showTooltip(event, itemName) {
+        function showTooltip(event, itemName, stationName) {
             hideTooltip();
             
             tooltipElement = document.createElement('div');
             tooltipElement.className = 'item-tooltip';
-            tooltipElement.textContent = itemName;
+            
+            if (stationName) {
+                tooltipElement.innerHTML = `
+                    <div class="tooltip-title">${itemName}</div>
+                    <div class="tooltip-subtitle">${stationName}</div>
+                `;
+            } else {
+                tooltipElement.innerHTML = `<div class="tooltip-title">${itemName}</div>`;
+            }
+            
             document.body.appendChild(tooltipElement);
             
             updateTooltipPosition(event);
