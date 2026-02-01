@@ -170,7 +170,7 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 450px;
+            width: 4```````````````````````````````````````````50px;
             background: #252525;
             border: 2px solid #333;
             border-radius: 8px;

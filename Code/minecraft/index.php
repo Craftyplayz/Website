@@ -23,8 +23,8 @@ $items = scandir($dir);
 foreach ($items as $item) {
     if ($item === '.' || $item === '..') continue;   // skip system entries
 
-    // optional: skip this file itself
-    if ($item === basename(__FILE__)) continue;
+    // skip index.php file
+    if ($item === 'index.php') continue;
 
     echo '<a href="' . htmlspecialchars($item) . '">' . htmlspecialchars($item) . '</a><br>';
 }
