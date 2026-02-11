@@ -30,8 +30,13 @@
         <p>Ancient sanctuary</p>
         <p>Soul of the duelist</p>
         <p>Rise of destiny</p>
+        <p>Tournement award packs 1-8</p>
+        <p>Dark beginning 1 & 2</p>
+        <p>Retro Pack 1 & 2</p>
+        <p>Dark legends</p>
         <br>
         <h2>All the collectible tins up till 2005</h2>
+
 
         <h2>All starter decks up until 2006 + yugi-Kaiba reloaded</h2>
     </div>
