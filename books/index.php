@@ -20,6 +20,7 @@
     <body>
         <div class="title">
             <h1>Books I've read</h1>
+            <h2><a href="https://reading.craftyplayz.com/books">Live stats from Kindle</a></h2>
         </div>
         <div class="jump">
             <input id="toggle" type="checkbox" checked>
