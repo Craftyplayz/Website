@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KOReader Control Panel</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel Standalone for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+        const { Search, ChevronDown, ChevronRight, ExternalLink, Wifi, Moon, Sun, Book, Settings, Home, Zap } = lucide;
+
+        const KINDLE_IP = '192.168.16.4:5673';
+
+        const commands = [
+          {
+            category: "General",
+            icon: "Settings",
+            items: [
+              { name: "Close top most widget", path: "/koreader/event/Close" },
+              { name: "Gesture overview", path: "/koreader/event/ShowGestureOverview" },
+              { name: "File browser", path: "/koreader/event/Home" },
+              { name: "Open previous document", path: "/koreader/event/OpenLastDoc" },
+              { name: "History", path: "/koreader/event/ShowHist" },
+              { name: "History search", path: "/koreader/event/SearchHistory" },
+              { name: "Favourites", path: "/koreader/event/ShowColl" },
+              { name: "Collections", path: "/koreader/event/ShowCollList" },
+              { name: "Collections search", path: "/koreader/event/ShowCollectionsSearchDialog" },
+              { name: "Bookmark browser", path: "/koreader/event/ShowBookmarkBrowser" },
+              { name: "Show menu", path: "/koreader/event/ShowMenu" },
+              { name: "Menu search", path: "/koreader/event/MenuSearch" },
+              { name: "Screenshot", path: "/koreader/event/Screenshot" }
+            ]
+          },
+          {
+            category: "Dictionary & Lookup",
+            icon: "Book",
+            items: [
+              { name: "Dictionary lookup", path: "/koreader/event/ShowDictionaryLookup" },
+              { name: "Cycle dictionary presets", path: "/koreader/event/CycleDictionaryPresets" },
+              { name: "Wikipedia lookup", path: "/koreader/event/ShowWikipediaLookup" }
+            ]
+          },
+          {
+            category: "Device Control",
+            icon: "Zap",
+            items: [
+              { name: "Exit sleep screen", path: "/koreader/event/ExitScreensaver" },
+              { name: "Sleep", path: "/koreader/event/RequestSuspend" },
+              { name: "Restart KOReader", path: "/koreader/event/Restart" },
+              { name: "Exit KOReader", path: "/koreader/event/Exit" },
+              { name: "Enable touch input", path: "/koreader/event/IgnoreTouchInput/false" },
+              { name: "Disable touch input", path: "/koreader/event/IgnoreTouchInput/true" },
+              { name: "Toggle touch input", path: "/koreader/event/IgnoreTouchInput" }
+            ]
+          },
+          {
+            category: "Rotation",
+            icon: "Settings",
+            items: [
+              { name: "↑ 0°", path: "/koreader/event/ConfigChange/rotation_mode/0/&/SetRotationMode/0" },
+              { name: "⤸ 90° CW", path: "/koreader/event/ConfigChange/rotation_mode/1/&/SetRotationMode/1" },
+              { name: "↓ 180°", path: "/koreader/event/ConfigChange/rotation_mode/2/&/SetRotationMode/2" },
+              { name: "⤹ 90° CCW", path: "/koreader/event/ConfigChange/rotation_mode/3/&/SetRotationMode/3" },
+              { name: "Toggle orientation", path: "/koreader/event/SwapRotation" },
+              { name: "Invert rotation", path: "/koreader/event/InvertRotation" },
+              { name: "Rotate 90° CW", path: "/koreader/event/IterateRotation" },
+              { name: "Rotate 90° CCW", path: "/koreader/event/IterateRotation/true" }
+            ]
+          },
+          {
+            category: "Wi-Fi",
+            icon: "Wifi",
+            items: [
+              { name: "Turn on Wi-Fi", path: "/koreader/event/InfoWifiOn" },
+              { name: "Turn off Wi-Fi", path: "/koreader/event/InfoWifiOff" },
+              { name: "Toggle Wi-Fi", path: "/koreader/event/ToggleWifi" },
+              { name: "Show network info", path: "/koreader/event/ShowNetworkInfo" }
+            ]
+          },
+          {
+            category: "Screen & Lights",
+            icon: "Sun",
+            items: [
+              { name: "Show frontlight dialog", path: "/koreader/event/ShowFlDialog" },
+              { name: "Toggle frontlight", path: "/koreader/event/ToggleFrontlight" },
+              { name: "Set brightness - Min", path: "/koreader/event/SetFlIntensity/0" },
+              { name: "Set brightness - Medium", path: "/koreader/event/SetFlIntensity/12" },
+              { name: "Set brightness - Max", path: "/koreader/event/SetFlIntensity/24" },
+              { name: "Increase brightness +1", path: "/koreader/event/IncreaseFlIntensity/1" },
+              { name: "Increase brightness +12.5", path: "/koreader/event/IncreaseFlIntensity/12.5" },
+              { name: "Decrease brightness -1", path: "/koreader/event/DecreaseFlIntensity/1" },
+              { name: "Decrease brightness -12.5", path: "/koreader/event/DecreaseFlIntensity/12.5" },
+              { name: "Set warmth - Min", path: "/koreader/event/SetFlWarmth/0" },
+              { name: "Set warmth - Medium", path: "/koreader/event/SetFlWarmth/50" },
+              { name: "Set warmth - Max", path: "/koreader/event/SetFlWarmth/100" },
+              { name: "Toggle night mode", path: "/koreader/event/ToggleNightMode" },
+              { name: "Night mode ON", path: "/koreader/event/SetNightMode/true" },
+              { name: "Night mode OFF", path: "/koreader/event/SetNightMode/false" },
+              { name: "Full screen refresh", path: "/koreader/event/FullRefresh" }
+            ]
+          },
+          {
+            category: "Reader - Navigation",
+            icon: "Book",
+            items: [
+              { name: "Previous chapter", path: "/koreader/event/GotoPrevChapter" },
+              { name: "Next chapter", path: "/koreader/event/GotoNextChapter" },
+              { name: "First page", path: "/koreader/event/GoToBeginning" },
+              { name: "Last page", path: "/koreader/event/GoToEnd" },
+              { name: "Random page", path: "/koreader/event/GoToRandomPage" },
+              { name: "Previous page", path: "/koreader/event/GotoViewRel/-1" },
+              { name: "Next page", path: "/koreader/event/GotoViewRel/1" },
+              { name: "Go to page", path: "/koreader/event/ShowGotoDialog" },
+              { name: "Skim document", path: "/koreader/event/ShowSkimtoDialog" },
+              { name: "Back", path: "/koreader/event/Back" }
+            ]
+          },
+          {
+            category: "Reader - Bookmarks",
+            icon: "Book",
+            items: [
+              { name: "Previous bookmark", path: "/koreader/event/GotoPreviousBookmarkFromPage" },
+              { name: "Next bookmark", path: "/koreader/event/GotoNextBookmarkFromPage" },
+              { name: "First bookmark", path: "/koreader/event/GotoFirstBookmark" },
+              { name: "Last bookmark", path: "/koreader/event/GotoLastBookmark" },
+              { name: "Latest bookmark", path: "/koreader/event/GoToLatestBookmark" },
+              { name: "Bookmarks", path: "/koreader/event/ShowBookmark" },
+              { name: "Bookmark search", path: "/koreader/event/SearchBookmark" },
+              { name: "Toggle bookmark", path: "/koreader/event/ToggleBookmark" }
+            ]
+          },
+          {
+            category: "Reader - Menu & Info",
+            icon: "Settings",
+            items: [
+              { name: "Show bottom menu", path: "/koreader/event/ShowConfigMenu" },
+              { name: "Toggle status bar", path: "/koreader/event/ToggleFooterMode" },
+              { name: "Table of contents", path: "/koreader/event/ShowToc" },
+              { name: "Book map", path: "/koreader/event/ShowBookMap" },
+              { name: "Page browser", path: "/koreader/event/ShowPageBrowser" },
+              { name: "Book status", path: "/koreader/event/ShowBookStatus" },
+              { name: "Book information", path: "/koreader/event/ShowBookInfo" },
+              { name: "Book description", path: "/koreader/event/ShowBookDescription" },
+              { name: "Book cover", path: "/koreader/event/ShowBookCover" },
+              { name: "Fulltext search", path: "/koreader/event/ShowFulltextSearchInput" }
+            ]
+          },
+          {
+            category: "EPUB - Font Settings",
+            icon: "Settings",
+            items: [
+              { name: "Increase font size +1", path: "/koreader/event/IncreaseFontSize/1" },
+              { name: "Decrease font size -1", path: "/koreader/event/DecreaseFontSize/1" },
+              { name: "Font size 12", path: "/koreader/event/ConfigChange/font_size/12/&/SetFontSize/12" },
+              { name: "Font size 16", path: "/koreader/event/ConfigChange/font_size/16/&/SetFontSize/16" },
+              { name: "Font size 20", path: "/koreader/event/ConfigChange/font_size/20/&/SetFontSize/20" },
+              { name: "Font size 22 (default)", path: "/koreader/event/ConfigChange/font_size/22/&/SetFontSize/22" },
+              { name: "Font size 24", path: "/koreader/event/ConfigChange/font_size/24/&/SetFontSize/24" },
+              { name: "Font size 28", path: "/koreader/event/ConfigChange/font_size/28/&/SetFontSize/28" }
+            ]
+          },
+          {
+            category: "EPUB - Layout",
+            icon: "Settings",
+            items: [
+              { name: "Two columns OFF", path: "/koreader/event/ConfigChange/visible_pages/1/&/SetVisiblePages/1" },
+              { name: "Two columns ON", path: "/koreader/event/ConfigChange/visible_pages/2/&/SetVisiblePages/2" },
+              { name: "View mode - Page", path: "/koreader/event/ConfigChange/view_mode/0/&/SetViewMode/page" },
+              { name: "View mode - Continuous", path: "/koreader/event/ConfigChange/view_mode/1/&/SetViewMode/scroll" },
+              { name: "Line spacing 100%", path: "/koreader/event/ConfigChange/line_spacing/100/&/SetLineSpace/100" },
+              { name: "Line spacing 110%", path: "/koreader/event/ConfigChange/line_spacing/110/&/SetLineSpace/110" },
+              { name: "Line spacing 120%", path: "/koreader/event/ConfigChange/line_spacing/120/&/SetLineSpace/120" }
+            ]
+          },
+          {
+            category: "PDF - Zoom & Crop",
+            icon: "Settings",
+            items: [
+              { name: "Toggle reflow", path: "/koreader/event/ToggleReflow" },
+              { name: "Zoom - Page full", path: "/koreader/event/SetZoomMode/page" },
+              { name: "Zoom - Page width", path: "/koreader/event/SetZoomMode/pagewidth" },
+              { name: "Zoom - Page height", path: "/koreader/event/SetZoomMode/pageheight" },
+              { name: "Zoom - Content full", path: "/koreader/event/SetZoomMode/content" },
+              { name: "Zoom - Content width", path: "/koreader/event/SetZoomMode/contentwidth" },
+              { name: "Page crop - None", path: "/koreader/event/ConfigChange/trim_page/3/&/PageCrop/none" },
+              { name: "Page crop - Auto", path: "/koreader/event/ConfigChange/trim_page/1/&/PageCrop/auto" },
+              { name: "View mode - Page", path: "/koreader/event/ConfigChange/page_scroll/0/&/SetScrollMode/false" },
+              { name: "View mode - Continuous", path: "/koreader/event/ConfigChange/page_scroll/1/&/SetScrollMode/true" }
+            ]
+          },
+          {
+            category: "Statistics & Sync",
+            icon: "Settings",
+            items: [
+              { name: "Reading statistics - Enable", path: "/koreader/event/ToggleStatistics/true" },
+              { name: "Reading statistics - Disable", path: "/koreader/event/ToggleStatistics/false" },
+              { name: "Show progress", path: "/koreader/event/ShowReaderProgress" },
+              { name: "Show calendar view", path: "/koreader/event/ShowCalendarView" },
+              { name: "Battery statistics", path: "/koreader/event/ShowBatteryStatistics" },
+              { name: "System statistics", path: "/koreader/event/ShowSysStatistics" }
+            ]
+          }
+        ];
+
+        const LucideIcon = ({ name, ...props }) => {
+          React.useEffect(() => {
+            lucide.createIcons();
+          });
+          return React.createElement('i', { 'data-lucide': name.toLowerCase(), ...props });
+        };
+
+        function KOReaderControl() {
+          const [searchTerm, setSearchTerm] = useState('');
+          const [expandedCategories, setExpandedCategories] = useState(new Set(['General']));
+          const [lastCommand, setLastCommand] = useState(null);
+          const [status, setStatus] = useState('');
+
+          const filteredCommands = useMemo(() => {
+            if (!searchTerm) return commands;
+            
+            const search = searchTerm.toLowerCase();
+            return commands.map(category => ({
+              ...category,
+              items: category.items.filter(item => 
+                item.name.toLowerCase().includes(search) ||
+                item.path.toLowerCase().includes(search)
+              )
+            })).filter(category => category.items.length > 0);
+          }, [searchTerm]);
+
+          const toggleCategory = (categoryName) => {
+            const newExpanded = new Set(expandedCategories);
+            if (newExpanded.has(categoryName)) {
+              newExpanded.delete(categoryName);
+            } else {
+              newExpanded.add(categoryName);
+            }
+            setExpandedCategories(newExpanded);
+          };
+
+          const sendCommand = async (command) => {
+            const url = `http://${KINDLE_IP}${command.path}`;
+            setLastCommand(command.name);
+            setStatus('Sending...');
+            
+            try {
+              const response = await fetch(url, { 
+                method: 'GET',
+                mode: 'no-cors'
+              });
+              setStatus('✓ Sent');
+              setTimeout(() => setStatus(''), 2000);
+            } catch (error) {
+              setStatus('✗ Error');
+              setTimeout(() => setStatus(''), 3000);
+            }
+          };
+
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+              <div className="max-w-6xl mx-auto">
+                <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                  <h1 className="text-3xl font-bold text-slate-800 mb-2">KOReader Control Panel</h1>
+                  <p className="text-slate-600 mb-4">
+                    Connected to: <span className="font-mono bg-slate-100 px-2 py-1 rounded">{KINDLE_IP}</span>
+                  </p>
+                  
+                  {lastCommand && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-blue-800">
+                          Last command: <strong>{lastCommand}</strong>
+                        </span>
+                        <span className={`text-sm font-semibold ${status.includes('✓') ? 'text-green-600' : status.includes('✗') ? 'text-red-600' : 'text-blue-600'}`}>
+                          {status}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="relative">
+                    <LucideIcon name="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+                    <input
+                      type="text"
+                      placeholder="Search commands..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {filteredCommands.map((category) => {
+                    const isExpanded = expandedCategories.has(category.category);
+                    
+                    return (
+                      <div key={category.category} className="bg-white rounded-lg shadow-md overflow-hidden">
+                        <button
+                          onClick={() => toggleCategory(category.category)}
+                          className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white hover:from-slate-100 hover:to-slate-50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <LucideIcon name={category.icon} size={20} className="text-slate-600" />
+                            <h2 className="text-lg font-semibold text-slate-800">{category.category}</h2>
+                            <span className="text-sm text-slate-500">({category.items.length})</span>
+                          </div>
+                          <LucideIcon name={isExpanded ? "chevron-down" : "chevron-right"} size={20} />
+                        </button>
+
+                        {isExpanded && (
+                          <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                            {category.items.map((item, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => sendCommand(item)}
+                                className="group flex items-center gap-2 px-4 py-3 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-lg transition-all text-left"
+                              >
+                                <LucideIcon name="external-link" size={14} className="text-slate-400 group-hover:text-blue-500 flex-shrink-0" />
+                                <span className="text-sm text-slate-700 group-hover:text-blue-700 font-medium truncate">
+                                  {item.name}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {filteredCommands.length === 0 && (
+                  <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                    <p className="text-slate-500">No commands found matching "{searchTerm}"</p>
+                  </div>
+                )}
+
+                <div className="mt-8 text-center text-sm text-slate-500">
+                  <p>Total commands: {commands.reduce((acc, cat) => acc + cat.items.length, 0)}</p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<KOReaderControl />);
+    </script>
+</body>
+</html>
