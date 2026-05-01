@@ -1,17 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <link rel="stylesheet" href="/css/global.css">
-  <link rel="stylesheet" href="/games/newhpchapter/style.css">
-</head>
-<body>
-  <div class="game">
-    <div class="paragraph">
-      <p>Paragraph Text Here</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/global.css" />
+    <link rel="stylesheet" href="/games/newhpchapter/style.css" />
+  </head>
+  <body>
+    <div class="title">
+      <h1>Harry Potter Chapter Guesser</h1>
+      <div class="score-section">
+        <span class="score-label">Score: <span id="score-current">0</span></span>
+        <span class="score-divider">|</span>
+        <span class="score-label">Best: <span id="score-high">0</span></span>
+      </div>
     </div>
-  </div>
-</body>
+    <div class="game">
+      <div class="paragraph">
+        <p id="paragraph"></p>
+      </div>
+      <div class="buttons"></div>
+    </div>
+    <p id="chapter-id">Chapter ID: </p>
+  </body>
+      <script src="/games/newhpchapter/game.js"></script>
 </html>

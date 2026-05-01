@@ -1,108 +1,207 @@
-let books = [];
+// ── Score state ───────────────────────────────────────────────────────────────
 let score = 0;
-let correctBook = null;
-let correctChapter = null;
-let currentParagraph = "";
-let correctBookTitle = "";
-let correctChapterTitle = "";
+let highScore = parseInt(localStorage.getItem("hpHighScore") || "0", 10);
 
-const gameDiv = document.getElementById("game");
+// ── Persistent element refs ───────────────────────────────────────────────────
+const paragraphEl   = document.getElementById("paragraph");
+const buttonsEl     = document.querySelector(".buttons");
+const chapterIdEl   = document.getElementById("chapter-id");
+const scoreEl       = document.getElementById("score-current");
+const highScoreEl   = document.getElementById("score-high");
 
-// Load index.json first
-async function loadIndex() {
-  const res = await fetch("index.json");
-  books = await res.json();
-  startRound();
-}
+// ── Round state ───────────────────────────────────────────────────────────────
+let indexData         = null;
+let correctBookTitle  = null;
+let chapterId         = null;
 
-// Start a round
-async function startRound() {
-  gameDiv.innerHTML = "";
+// ── Inject animations ─────────────────────────────────────────────────────────
+(function injectStyles() {
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeSlideOut {
+      from { opacity: 1; transform: translateY(0); }
+      to   { opacity: 0; transform: translateY(-8px); }
+    }
+    @keyframes scorePop {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.4); }
+      100% { transform: scale(1); }
+    }
+    @keyframes highlightCorrect {
+      0%   { box-shadow: 0 0 0 0px rgba(80,200,100,0.6); }
+      50%  { box-shadow: 0 0 0 5px rgba(80,200,100,0.6); }
+      100% { box-shadow: 0 0 0 3px rgba(80,200,100,0.4); }
+    }
+    @keyframes shakeWrong {
+      0%,100% { transform: translateX(0); }
+      20%     { transform: translateX(-5px); }
+      40%     { transform: translateX(5px); }
+      60%     { transform: translateX(-3px); }
+      80%     { transform: translateX(3px); }
+    }
 
-  // 1. random book
-  const book = books[Math.floor(Math.random() * books.length)];
+    .paragraph-animate {
+      animation: fadeSlideIn 0.5s ease forwards;
+    }
 
-  // 2. random chapter
-  const chapter =
-    book.chapters[Math.floor(Math.random() * book.chapters.length)];
+    .btn-animate {
+      opacity: 0;
+      animation: fadeSlideIn 0.35s ease forwards;
+    }
 
-  correctBook = book.bookIndex;
-  correctChapter = chapter.chapterIndex;
-  correctBookTitle = book.bookTitle;
-  correctChapterTitle = chapter.title;
+    button.correct {
+      background-color: #4caf50 !important;
+      color: #fff !important;
+      border-color: #4caf50 !important;
+      animation: highlightCorrect 0.5s ease forwards;
+    }
 
-  // 3. load chapter file
-  const folder = String(book.bookIndex).padStart(2, "0");
-  const res = await fetch(`${folder}/${chapter.id}.json`);
-  const data = await res.json();
+    button.wrong {
+      opacity: 0.4;
+      animation: shakeWrong 0.35s ease;
+    }
 
-  // 4. random paragraph
-  const paragraph =
-    data.paragraphs[Math.floor(Math.random() * data.paragraphs.length)];
-  currentParagraph = paragraph;
+    button:disabled {
+      cursor: not-allowed;
+    }
 
-  showParagraph();
-}
-
-// Show paragraph + book buttons
-function showParagraph() {
-  gameDiv.innerHTML = `<p>${currentParagraph}</p>`;
-
-  books.forEach((book) => {
-    const btn = document.createElement("button");
-    btn.textContent = `Book ${book.bookIndex}`;
-    btn.onclick = () => selectBook(book);
-    gameDiv.appendChild(btn);
-  });
-}
-
-function selectBook(book) {
-  if (book.bookIndex !== correctBook) {
-    showCorrectAnswer();
-    return;
-  }
-
-  showChapters(book);
-}
-
-// Show chapters
-function showChapters(book) {
-  gameDiv.innerHTML = `<p>${currentParagraph}</p>`;
-
-  book.chapters.forEach((ch) => {
-    const btn = document.createElement("button");
-    btn.textContent = `${ch.title} - ${String(ch.chapterIndex).padStart(2, "0")}`;
-    btn.onclick = () => selectChapter(ch);
-    gameDiv.appendChild(btn);
-  });
-}
-
-function selectChapter(chapter) {
-  if (chapter.chapterIndex === correctChapter) {
-    score++;
-    startRound();
-  } else {
-    showCorrectAnswer();
-  }
-}
-
-
-function showCorrectAnswer() {
-  gameDiv.innerHTML = `
-    <h2>Wrong!</h2>
-    <p>Correct book: ${correctBookTitle}</p>
-    <p>Correct chapter: ${correctChapterTitle} - ${String(correctChapter).padStart(2, "0")}</p>
-    <p>Final score: ${score}</p>
+    #score-current {
+      display: inline-block;
+    }
+    #score-current.pop {
+      animation: scorePop 0.35s ease;
+    }
   `;
+  document.head.appendChild(style);
+})();
 
-  setTimeout(() => {
-    endGame();
-  }, 5000);
+// ── Score helpers ─────────────────────────────────────────────────────────────
+function updateScoreDisplay() {
+  scoreEl.textContent    = score;
+  highScoreEl.textContent = highScore;
 }
 
-function endGame() {
-  gameDiv.innerHTML = `<h2>Game Over</h2><p>Score: ${score}</p>`;
+function incrementScore() {
+  score++;
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem("hpHighScore", highScore);
+  }
+  updateScoreDisplay();
+
+  // Pop animation
+  scoreEl.classList.remove("pop");
+  void scoreEl.offsetWidth; // reflow
+  scoreEl.classList.add("pop");
 }
 
-// Start
-loadIndex();
+// ── Paragraph load ────────────────────────────────────────────────────────────
+function loadParagraph(bookIndex, chapId) {
+  return fetch(`/games/newhpchapter/0${bookIndex}/${chapId}.json`)
+    .then((res) => res.json())
+    .then((data) => {
+      const idx = Math.floor(Math.random() * data.paragraphs.length);
+      paragraphEl.classList.remove("paragraph-animate");
+      void paragraphEl.offsetWidth;
+      paragraphEl.textContent = data.paragraphs[idx];
+      paragraphEl.classList.add("paragraph-animate");
+    })
+    .catch(console.error);
+}
+
+// ── Button renderers ──────────────────────────────────────────────────────────
+function showBookButtons() {
+  buttonsEl.innerHTML = "";
+
+  indexData.forEach((book, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = book.bookTitle;
+    btn.style.animationDelay = `${i * 50}ms`;
+    btn.classList.add("btn-animate");
+
+    btn.addEventListener("click", () => {
+      if (book.bookTitle === correctBookTitle) {
+        btn.classList.add("correct");
+        setTimeout(() => showChapterButtons(book), 400);
+      } else {
+        btn.classList.add("wrong");
+        btn.disabled = true;
+
+        // Highlight the correct book
+        const allBtns = buttonsEl.querySelectorAll("button");
+        allBtns.forEach((b) => {
+          if (b.textContent === correctBookTitle) {
+            b.classList.add("correct");
+          }
+        });
+      }
+    });
+
+    buttonsEl.appendChild(btn);
+  });
+}
+
+function showChapterButtons(book) {
+  buttonsEl.innerHTML = "";
+
+  book.chapters.forEach((chapter, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = chapter.title;
+    btn.style.animationDelay = `${i * 30}ms`;
+    btn.classList.add("btn-animate");
+
+    btn.addEventListener("click", () => {
+      if (chapter.id === chapterId) {
+        btn.classList.add("correct");
+        incrementScore();
+
+        // After 1 second, start a new round
+        setTimeout(() => startRound(), 1000);
+      } else {
+        btn.classList.add("wrong");
+        btn.disabled = true;
+
+        // Highlight the correct chapter
+        const allBtns = buttonsEl.querySelectorAll("button");
+        allBtns.forEach((b) => {
+          if (b.textContent === book.chapters.find((c) => c.id === chapterId)?.title) {
+            b.classList.add("correct");
+          }
+        });
+      }
+    });
+
+    buttonsEl.appendChild(btn);
+  });
+}
+
+// ── Round logic ───────────────────────────────────────────────────────────────
+function startRound() {
+  const randomBook    = indexData[Math.floor(Math.random() * indexData.length)];
+  const randomChapter = randomBook.chapters[Math.floor(Math.random() * randomBook.chapters.length)];
+
+  chapterId        = randomChapter.id;
+  correctBookTitle = randomBook.bookTitle;
+
+  // Debug label
+  chapterIdEl.textContent = `Chapter ID: ${chapterId}`;
+
+  loadParagraph(randomBook.bookIndex, chapterId).then(() => {
+    showBookButtons();
+  });
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+updateScoreDisplay();
+
+fetch("index.json")
+  .then((res) => res.json())
+  .then((data) => {
+    indexData = data;
+    startRound();
+  })
+  .catch(console.error);
