@@ -3,16 +3,16 @@ let score = 0;
 let highScore = parseInt(localStorage.getItem("hpHighScore") || "0", 10);
 
 // ── Persistent element refs ───────────────────────────────────────────────────
-const paragraphEl   = document.getElementById("paragraph");
-const buttonsEl     = document.querySelector(".buttons");
-const chapterIdEl   = document.getElementById("chapter-id");
-const scoreEl       = document.getElementById("score-current");
-const highScoreEl   = document.getElementById("score-high");
+const paragraphEl = document.getElementById("paragraph");
+const buttonsEl = document.querySelector(".buttons");
+const chapterIdEl = document.getElementById("chapter-id");
+const scoreEl = document.getElementById("score-current");
+const highScoreEl = document.getElementById("score-high");
 
 // ── Round state ───────────────────────────────────────────────────────────────
-let indexData         = null;
-let correctBookTitle  = null;
-let chapterId         = null;
+let indexData = null;
+let correctBookTitle = null;
+let chapterId = null;
 
 // ── Inject animations ─────────────────────────────────────────────────────────
 (function injectStyles() {
@@ -81,7 +81,7 @@ let chapterId         = null;
 
 // ── Score helpers ─────────────────────────────────────────────────────────────
 function updateScoreDisplay() {
-  scoreEl.textContent    = score;
+  scoreEl.textContent = score;
   highScoreEl.textContent = highScore;
 }
 
@@ -129,15 +129,15 @@ function showBookButtons() {
         setTimeout(() => showChapterButtons(book), 400);
       } else {
         btn.classList.add("wrong");
-        btn.disabled = true;
 
-        // Highlight the correct book
+        // Highlight the correct book, disable all, end game
         const allBtns = buttonsEl.querySelectorAll("button");
         allBtns.forEach((b) => {
-          if (b.textContent === correctBookTitle) {
-            b.classList.add("correct");
-          }
+          b.disabled = true;
+          if (b.textContent === correctBookTitle) b.classList.add("correct");
         });
+
+        endGame();
       }
     });
 
@@ -163,15 +163,18 @@ function showChapterButtons(book) {
         setTimeout(() => startRound(), 1000);
       } else {
         btn.classList.add("wrong");
-        btn.disabled = true;
 
-        // Highlight the correct chapter
+        // Highlight the correct chapter, disable all, end game
+        const correctTitle = book.chapters.find(
+          (c) => c.id === chapterId,
+        )?.title;
         const allBtns = buttonsEl.querySelectorAll("button");
         allBtns.forEach((b) => {
-          if (b.textContent === book.chapters.find((c) => c.id === chapterId)?.title) {
-            b.classList.add("correct");
-          }
+          b.disabled = true;
+          if (b.textContent === correctTitle) b.classList.add("correct");
         });
+
+        endGame();
       }
     });
 
@@ -179,12 +182,36 @@ function showChapterButtons(book) {
   });
 }
 
+// ── Game over ─────────────────────────────────────────────────────────────────
+function endGame() {
+  setTimeout(() => {
+    buttonsEl.innerHTML = "";
+
+    const msg = document.createElement("p");
+    msg.textContent = `Game over! You scored ${score}.`;
+    msg.style.cssText =
+      "font-weight:bold; font-size:1.2em; margin-bottom:1em; animation: fadeSlideIn 0.4s ease forwards;";
+    buttonsEl.appendChild(msg);
+
+    const restartBtn = document.createElement("button");
+    restartBtn.textContent = "Play Again";
+    restartBtn.classList.add("btn-animate");
+    restartBtn.addEventListener("click", () => {
+      score = 0;
+      updateScoreDisplay();
+      startRound();
+    });
+    buttonsEl.appendChild(restartBtn);
+  }, 800);
+}
+
 // ── Round logic ───────────────────────────────────────────────────────────────
 function startRound() {
-  const randomBook    = indexData[Math.floor(Math.random() * indexData.length)];
-  const randomChapter = randomBook.chapters[Math.floor(Math.random() * randomBook.chapters.length)];
+  const randomBook = indexData[Math.floor(Math.random() * indexData.length)];
+  const randomChapter =
+    randomBook.chapters[Math.floor(Math.random() * randomBook.chapters.length)];
 
-  chapterId        = randomChapter.id;
+  chapterId = randomChapter.id;
   correctBookTitle = randomBook.bookTitle;
 
   // Debug label
@@ -198,7 +225,7 @@ function startRound() {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 updateScoreDisplay();
 
-fetch("index.json")
+fetch("newhpchapter/index.json")
   .then((res) => res.json())
   .then((data) => {
     indexData = data;
