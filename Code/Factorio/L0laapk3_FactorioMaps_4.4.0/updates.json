@@ -1,0 +1,91 @@
+{
+    "1.0.0": "Initial Release",
+    "1.1.0": "Fixed Lightorio Incompability, added update checker",
+    "1.1.1": "Fixed minor problems",
+    "1.1.2": "Fixed problem with save files with spaces in the names",
+    "1.2.1": "Bugfix. Splat!",
+    "1.2.0": "Fixed problem with mod names with symbols, added changelog",
+    "2.0.0": "Added HD mode, allow more zoom levels in general",
+    "2.1.0": "Block all 404 requests, The client now knows exactly which images exist (Breaks old maps)",
+    "2.2.0": "Significantly increased image quality and file size at the cost of some processing time",
+    "2.2.1": "Fixed problem with missing graphics",
+    "2.3.0": "Fixed problems with the deduplicator",
+    "2.4.0": "Fixed a bug in the image deduplicator",
+    "2.4.1": "Added a simple gui with instructions",
+    "2.4.2": "Fix for dual python installation",
+    "3.0.0": [
+        "Tags can now be seen on the map!",
+        "Linux support",
+        "Switched to python 3"
+    ],
+    "3.0.1": "Added flags to set maximum threads used",
+    "3.0.2": "Added flag to disable alt-mode",
+    "3.1.0": "!Better implementation of tag image extraction",
+    "3.1.1": "!Fixed bugs when no mod path is specified",
+    "3.1.2": "!Fixed bug where the entire script-output folder is sometimes removed due to inconsistent symlink behavior",
+    "3.2.0": [
+        "!Considerable speedup for most users that haven't bothered changing the factorio config.ini",
+        "Loads of bugfixes"
+    ],
+    "3.2.1": "Fixed various bugs",
+    "3.3.0": [
+        "Updated for 0.17",
+        "Some minor bugfixes"
+    ],
+    "3.3.1": "Fixed a bug where some parts of the map could be missing if multiple factions were used",
+    "3.3.2": "Many bugfixes.",
+    "3.4.0": [
+        "Separated map tags to surface and snapshot level",
+        "Thumbnail generation of the map"
+    ],
+    "3.5.0": [
+        "!Added API for integration with i.a. Factorissimo",
+        "Better dependency management",
+        "Several bugfixes"
+    ],
+    "3.5.1": "Removed dependency on package that isnt being updated anymore",
+    "3.5.2": "Added support for unicode characters",
+    "3.5.3": "Bugfixes",
+    "3.5.4": "Extended API",
+    "3.5.5": "Updated for 0.18",
+    "4.0.0": [
+        "!Fixed bug when dealing with near empty factorio config files",
+        "Better defaults for pvp scenario",
+        "Allow running for any working directory",
+        "Added wildcards for savefile names",
+        "Added option to output to any directory",
+        "Improved launching factorio trough steam",
+        "Better handling for modded ground tiles",
+        "Fixed nasty bug with image cross-referencing",
+        "Fixed scale of map label image sizes",
+        "Day and night snapshots are now completely identical instead of 1 tick apart",
+        "Added option to set the default snapshot when the page loads"
+    ],
+    "4.0.1": "!Bugfix with default snapshot index",
+    "4.1.0": [
+        "Replace symlinks with the new script-output config option, restore linux compatibility",
+        "Fix for editor/god mode maps",
+        "Fix for when the CWD is different than the script directory",
+        "Bugfixes :)"
+    ],
+    "4.1.1": "Updated for 1.1",
+    "4.2.0": [
+        "Fix steam compatibility",
+        "Remove orderedset dependency",
+        "Add partial support for rich text in item labels",
+        "Security fix that prevents html injection"
+    ],
+    "4.3.0": [
+        "Allow for custom temporary directory for usage with RAM-disks by Huntfx",
+		"Support savegames located in subdirectories by sonowz",
+		"Fix OSError/PermissionError in availableDrives by sonowz",
+		"Ignore steam_autocloud file",
+		"Implemented malformed item checking"
+    ],
+    "4.4.0": [
+      "Added support for the latest python versions (3.12)",
+      "Improve image downscaling",
+      "Fix issue involving renderboxes and unrendered surfaces",
+      "Fix several issues with special characters in tags"
+    ]
+}

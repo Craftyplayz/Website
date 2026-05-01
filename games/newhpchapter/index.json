@@ -1,0 +1,1039 @@
+[
+  {
+    "bookIndex": 1,
+    "bookTitle": "Harry Potter and the Philosopher's Stone",
+    "chapters": [
+      {
+        "id": "b01c01",
+        "chapterIndex": 1,
+        "title": "The Boy Who Lived"
+      },
+      {
+        "id": "b01c02",
+        "chapterIndex": 2,
+        "title": "The Vanishing Glass"
+      },
+      {
+        "id": "b01c03",
+        "chapterIndex": 3,
+        "title": "The Letters from No One"
+      },
+      {
+        "id": "b01c04",
+        "chapterIndex": 4,
+        "title": "The Keeper of the Keys"
+      },
+      {
+        "id": "b01c05",
+        "chapterIndex": 5,
+        "title": "Diagon Alley"
+      },
+      {
+        "id": "b01c06",
+        "chapterIndex": 6,
+        "title": "The Journey from Platform Nine and Three-Quarters"
+      },
+      {
+        "id": "b01c07",
+        "chapterIndex": 7,
+        "title": "The Sorting Hat"
+      },
+      {
+        "id": "b01c08",
+        "chapterIndex": 8,
+        "title": "The Potions Master"
+      },
+      {
+        "id": "b01c09",
+        "chapterIndex": 9,
+        "title": "The Midnight Duel"
+      },
+      {
+        "id": "b01c10",
+        "chapterIndex": 10,
+        "title": "Halloween"
+      },
+      {
+        "id": "b01c11",
+        "chapterIndex": 11,
+        "title": "Quidditch"
+      },
+      {
+        "id": "b01c12",
+        "chapterIndex": 12,
+        "title": "The Mirror of Erised"
+      },
+      {
+        "id": "b01c13",
+        "chapterIndex": 13,
+        "title": "Nicholas Flamel"
+      },
+      {
+        "id": "b01c14",
+        "chapterIndex": 14,
+        "title": "Norbert the Norwegian Ridgeback"
+      },
+      {
+        "id": "b01c15",
+        "chapterIndex": 15,
+        "title": "The Forbidden Forest"
+      },
+      {
+        "id": "b01c16",
+        "chapterIndex": 16,
+        "title": "Through the Trapdoor"
+      },
+      {
+        "id": "b01c17",
+        "chapterIndex": 17,
+        "title": "The Man with Two Faces"
+      }
+    ]
+  },
+  {
+    "bookIndex": 2,
+    "bookTitle": "Harry Potter and the Chamber of Secrets",
+    "chapters": [
+      {
+        "id": "b02c01",
+        "chapterIndex": 1,
+        "title": "The Worst Birthday"
+      },
+      {
+        "id": "b02c02",
+        "chapterIndex": 2,
+        "title": "Dobby's Warning"
+      },
+      {
+        "id": "b02c03",
+        "chapterIndex": 3,
+        "title": "The Burrow"
+      },
+      {
+        "id": "b02c04",
+        "chapterIndex": 4,
+        "title": "At Flourish and Blotts"
+      },
+      {
+        "id": "b02c05",
+        "chapterIndex": 5,
+        "title": "The Whomping Willow"
+      },
+      {
+        "id": "b02c06",
+        "chapterIndex": 6,
+        "title": "Gilderoy Lockhart"
+      },
+      {
+        "id": "b02c07",
+        "chapterIndex": 7,
+        "title": "Mudbloods and Murmurs"
+      },
+      {
+        "id": "b02c08",
+        "chapterIndex": 8,
+        "title": "The Deathday Party"
+      },
+      {
+        "id": "b02c09",
+        "chapterIndex": 9,
+        "title": "The Writing on the Wall"
+      },
+      {
+        "id": "b02c10",
+        "chapterIndex": 10,
+        "title": "The Rogue Bludger"
+      },
+      {
+        "id": "b02c11",
+        "chapterIndex": 11,
+        "title": "The Dueling Club"
+      },
+      {
+        "id": "b02c12",
+        "chapterIndex": 12,
+        "title": "The Polyjuice Potion"
+      },
+      {
+        "id": "b02c13",
+        "chapterIndex": 13,
+        "title": "The Very Secret Diary"
+      },
+      {
+        "id": "b02c14",
+        "chapterIndex": 14,
+        "title": "Cornelius Fudge"
+      },
+      {
+        "id": "b02c15",
+        "chapterIndex": 15,
+        "title": "Aragog"
+      },
+      {
+        "id": "b02c16",
+        "chapterIndex": 16,
+        "title": "The Chamber of Secrets"
+      },
+      {
+        "id": "b02c17",
+        "chapterIndex": 17,
+        "title": "The Heir of Slytherin"
+      },
+      {
+        "id": "b02c18",
+        "chapterIndex": 18,
+        "title": "Dobby's Reward"
+      }
+    ]
+  },
+  {
+    "bookIndex": 3,
+    "bookTitle": "Harry Potter and the Prisoner of Azkaban",
+    "chapters": [
+      {
+        "id": "b03c01",
+        "chapterIndex": 1,
+        "title": "Owl Post"
+      },
+      {
+        "id": "b03c02",
+        "chapterIndex": 2,
+        "title": "Aunt Marge's Big Mistake"
+      },
+      {
+        "id": "b03c03",
+        "chapterIndex": 3,
+        "title": "The Knight Bus"
+      },
+      {
+        "id": "b03c04",
+        "chapterIndex": 4,
+        "title": "The Leaky Cauldron"
+      },
+      {
+        "id": "b03c05",
+        "chapterIndex": 5,
+        "title": "The Dementor"
+      },
+      {
+        "id": "b03c06",
+        "chapterIndex": 6,
+        "title": "Talons and Tea Leaves"
+      },
+      {
+        "id": "b03c07",
+        "chapterIndex": 7,
+        "title": "The Boggart in the Wardrobe"
+      },
+      {
+        "id": "b03c08",
+        "chapterIndex": 8,
+        "title": "Flight of the Fat Lady"
+      },
+      {
+        "id": "b03c09",
+        "chapterIndex": 9,
+        "title": "Grim Defeat"
+      },
+      {
+        "id": "b03c10",
+        "chapterIndex": 10,
+        "title": "The Marauder's Map"
+      },
+      {
+        "id": "b03c11",
+        "chapterIndex": 11,
+        "title": "The Firebolt"
+      },
+      {
+        "id": "b03c12",
+        "chapterIndex": 12,
+        "title": "The Patronus"
+      },
+      {
+        "id": "b03c13",
+        "chapterIndex": 13,
+        "title": "Gryffindor versus Ravenclaw"
+      },
+      {
+        "id": "b03c14",
+        "chapterIndex": 14,
+        "title": "Snape's Grudge"
+      },
+      {
+        "id": "b03c15",
+        "chapterIndex": 15,
+        "title": "The Quidditch Final"
+      },
+      {
+        "id": "b03c16",
+        "chapterIndex": 16,
+        "title": "Professor Trelawney's Prediction"
+      },
+      {
+        "id": "b03c17",
+        "chapterIndex": 17,
+        "title": "Cat, Rat, and Dog"
+      },
+      {
+        "id": "b03c18",
+        "chapterIndex": 18,
+        "title": "Moony, Wormtail, Padfoot, and Prongs"
+      },
+      {
+        "id": "b03c19",
+        "chapterIndex": 19,
+        "title": "The Servant of Lord Voldemort"
+      },
+      {
+        "id": "b03c20",
+        "chapterIndex": 20,
+        "title": "The Dementor's Kiss"
+      },
+      {
+        "id": "b03c21",
+        "chapterIndex": 21,
+        "title": "Hermione's Secret"
+      },
+      {
+        "id": "b03c22",
+        "chapterIndex": 22,
+        "title": "Owl Post Again"
+      }
+    ]
+  },
+  {
+    "bookIndex": 4,
+    "bookTitle": "Harry Potter and the Goblet of Fire",
+    "chapters": [
+      {
+        "id": "b04c01",
+        "chapterIndex": 1,
+        "title": "The Riddle House"
+      },
+      {
+        "id": "b04c02",
+        "chapterIndex": 2,
+        "title": "The Scar"
+      },
+      {
+        "id": "b04c03",
+        "chapterIndex": 3,
+        "title": "The Invitation"
+      },
+      {
+        "id": "b04c04",
+        "chapterIndex": 4,
+        "title": "Back to the Burrow"
+      },
+      {
+        "id": "b04c05",
+        "chapterIndex": 5,
+        "title": "Weasleys' Wizard Wheezes"
+      },
+      {
+        "id": "b04c06",
+        "chapterIndex": 6,
+        "title": "The Portkey"
+      },
+      {
+        "id": "b04c07",
+        "chapterIndex": 7,
+        "title": "Bagman and Crouch"
+      },
+      {
+        "id": "b04c08",
+        "chapterIndex": 8,
+        "title": "The Quidditch World Cup"
+      },
+      {
+        "id": "b04c09",
+        "chapterIndex": 9,
+        "title": "The Dark Mark"
+      },
+      {
+        "id": "b04c10",
+        "chapterIndex": 10,
+        "title": "Mayhem at the Ministry"
+      },
+      {
+        "id": "b04c11",
+        "chapterIndex": 11,
+        "title": "Aboard the Hogwarts Express"
+      },
+      {
+        "id": "b04c12",
+        "chapterIndex": 12,
+        "title": "The Triwizard Tournament"
+      },
+      {
+        "id": "b04c13",
+        "chapterIndex": 13,
+        "title": "Mad-Eye Moody"
+      },
+      {
+        "id": "b04c14",
+        "chapterIndex": 14,
+        "title": "The Unforgivable Curses"
+      },
+      {
+        "id": "b04c15",
+        "chapterIndex": 15,
+        "title": "Beauxbatons and Durmstrang"
+      },
+      {
+        "id": "b04c16",
+        "chapterIndex": 16,
+        "title": "The Goblet of Fire"
+      },
+      {
+        "id": "b04c17",
+        "chapterIndex": 17,
+        "title": "The Four Champions"
+      },
+      {
+        "id": "b04c18",
+        "chapterIndex": 18,
+        "title": "The Weighing of the Wands"
+      },
+      {
+        "id": "b04c19",
+        "chapterIndex": 19,
+        "title": "The Hungarian Horntail"
+      },
+      {
+        "id": "b04c20",
+        "chapterIndex": 20,
+        "title": "The First Task"
+      },
+      {
+        "id": "b04c21",
+        "chapterIndex": 21,
+        "title": "The House-Elf Liberation Front"
+      },
+      {
+        "id": "b04c22",
+        "chapterIndex": 22,
+        "title": "The Unexpected Task"
+      },
+      {
+        "id": "b04c23",
+        "chapterIndex": 23,
+        "title": "The Yule Ball"
+      },
+      {
+        "id": "b04c24",
+        "chapterIndex": 24,
+        "title": "Rita Skeeter's Scoop"
+      },
+      {
+        "id": "b04c25",
+        "chapterIndex": 25,
+        "title": "The Egg and the Eye"
+      },
+      {
+        "id": "b04c26",
+        "chapterIndex": 26,
+        "title": "The Second Task"
+      },
+      {
+        "id": "b04c27",
+        "chapterIndex": 27,
+        "title": "Padfoot Returns"
+      },
+      {
+        "id": "b04c28",
+        "chapterIndex": 28,
+        "title": "The Madness of Mr. Crouch"
+      },
+      {
+        "id": "b04c29",
+        "chapterIndex": 29,
+        "title": "The Dream"
+      },
+      {
+        "id": "b04c30",
+        "chapterIndex": 30,
+        "title": "The Pensieve"
+      },
+      {
+        "id": "b04c31",
+        "chapterIndex": 31,
+        "title": "The Third Task"
+      },
+      {
+        "id": "b04c32",
+        "chapterIndex": 32,
+        "title": "Flesh, Blood, and Bone"
+      },
+      {
+        "id": "b04c33",
+        "chapterIndex": 33,
+        "title": "The Death Eaters"
+      },
+      {
+        "id": "b04c34",
+        "chapterIndex": 34,
+        "title": "Priori Incantatem"
+      },
+      {
+        "id": "b04c35",
+        "chapterIndex": 35,
+        "title": "Veritaserum"
+      },
+      {
+        "id": "b04c36",
+        "chapterIndex": 36,
+        "title": "The Parting of the Ways"
+      },
+      {
+        "id": "b04c37",
+        "chapterIndex": 37,
+        "title": "The Beginning"
+      }
+    ]
+  },
+  {
+    "bookIndex": 5,
+    "bookTitle": "Harry Potter and the Order of the Phoenix",
+    "chapters": [
+      {
+        "id": "b05c01",
+        "chapterIndex": 1,
+        "title": "Dudley Demented"
+      },
+      {
+        "id": "b05c02",
+        "chapterIndex": 2,
+        "title": "A Peck of Owls"
+      },
+      {
+        "id": "b05c03",
+        "chapterIndex": 3,
+        "title": "The Advanced Guard"
+      },
+      {
+        "id": "b05c04",
+        "chapterIndex": 4,
+        "title": "Number Twelve, Grimmauld Place"
+      },
+      {
+        "id": "b05c05",
+        "chapterIndex": 5,
+        "title": "The Order of the Phoenix"
+      },
+      {
+        "id": "b05c06",
+        "chapterIndex": 6,
+        "title": "The Noble and Most Ancient House of Black"
+      },
+      {
+        "id": "b05c07",
+        "chapterIndex": 7,
+        "title": "The Ministry of Magic"
+      },
+      {
+        "id": "b05c08",
+        "chapterIndex": 8,
+        "title": "The Hearing"
+      },
+      {
+        "id": "b05c09",
+        "chapterIndex": 9,
+        "title": "The Woes of Mrs. Weasley"
+      },
+      {
+        "id": "b05c10",
+        "chapterIndex": 10,
+        "title": "Luna Lovegood"
+      },
+      {
+        "id": "b05c11",
+        "chapterIndex": 11,
+        "title": "The Sorting Hat's New Song"
+      },
+      {
+        "id": "b05c12",
+        "chapterIndex": 12,
+        "title": "Professor Umbridge"
+      },
+      {
+        "id": "b05c13",
+        "chapterIndex": 13,
+        "title": "Detention with Dolores"
+      },
+      {
+        "id": "b05c14",
+        "chapterIndex": 14,
+        "title": "Percy and Padfoot"
+      },
+      {
+        "id": "b05c15",
+        "chapterIndex": 15,
+        "title": "The Hogwarts High Inquisitor"
+      },
+      {
+        "id": "b05c16",
+        "chapterIndex": 16,
+        "title": "In the Hog's Head"
+      },
+      {
+        "id": "b05c17",
+        "chapterIndex": 17,
+        "title": "Educational Decree Number Twenty-four"
+      },
+      {
+        "id": "b05c18",
+        "chapterIndex": 18,
+        "title": "Dumbledore's Army"
+      },
+      {
+        "id": "b05c19",
+        "chapterIndex": 19,
+        "title": "The Lion and the Serpent"
+      },
+      {
+        "id": "b05c20",
+        "chapterIndex": 20,
+        "title": "Hagrid's Tale"
+      },
+      {
+        "id": "b05c21",
+        "chapterIndex": 21,
+        "title": "The Eye of the Snake"
+      },
+      {
+        "id": "b05c22",
+        "chapterIndex": 22,
+        "title": "St. Mungo's Hospital for Magical Maladies and Injuries"
+      },
+      {
+        "id": "b05c23",
+        "chapterIndex": 23,
+        "title": "Christmas on the Closed Ward"
+      },
+      {
+        "id": "b05c24",
+        "chapterIndex": 24,
+        "title": "Occlumency"
+      },
+      {
+        "id": "b05c25",
+        "chapterIndex": 25,
+        "title": "The Beetle at Bay"
+      },
+      {
+        "id": "b05c26",
+        "chapterIndex": 26,
+        "title": "Seen and Unforeseen"
+      },
+      {
+        "id": "b05c27",
+        "chapterIndex": 27,
+        "title": "The Centaur and the Sneak"
+      },
+      {
+        "id": "b05c28",
+        "chapterIndex": 28,
+        "title": "Snape's Worst Memory"
+      },
+      {
+        "id": "b05c29",
+        "chapterIndex": 29,
+        "title": "Career Advice"
+      },
+      {
+        "id": "b05c30",
+        "chapterIndex": 30,
+        "title": "Grawp"
+      },
+      {
+        "id": "b05c31",
+        "chapterIndex": 31,
+        "title": "O.W.L.S"
+      },
+      {
+        "id": "b05c32",
+        "chapterIndex": 32,
+        "title": "Out of the Fire"
+      },
+      {
+        "id": "b05c33",
+        "chapterIndex": 33,
+        "title": "Fight and Flight"
+      },
+      {
+        "id": "b05c34",
+        "chapterIndex": 34,
+        "title": "The Department of Mysteries"
+      },
+      {
+        "id": "b05c35",
+        "chapterIndex": 35,
+        "title": "Beyond the Veil"
+      },
+      {
+        "id": "b05c36",
+        "chapterIndex": 36,
+        "title": "The Only One He Ever Feared"
+      },
+      {
+        "id": "b05c37",
+        "chapterIndex": 37,
+        "title": "The Lost Prophecy"
+      },
+      {
+        "id": "b05c38",
+        "chapterIndex": 38,
+        "title": "The Second War Begins"
+      }
+    ]
+  },
+  {
+    "bookIndex": 6,
+    "bookTitle": "Harry Potter and the Half-Blood Prince",
+    "chapters": [
+      {
+        "id": "b06c01",
+        "chapterIndex": 1,
+        "title": "The Other Minister"
+      },
+      {
+        "id": "b06c02",
+        "chapterIndex": 2,
+        "title": "Spinner's End"
+      },
+      {
+        "id": "b06c03",
+        "chapterIndex": 3,
+        "title": "Will and Won't"
+      },
+      {
+        "id": "b06c04",
+        "chapterIndex": 4,
+        "title": "Horace Slughorn"
+      },
+      {
+        "id": "b06c05",
+        "chapterIndex": 5,
+        "title": "An Excess of Phlegm"
+      },
+      {
+        "id": "b06c06",
+        "chapterIndex": 6,
+        "title": "Draco's Detour"
+      },
+      {
+        "id": "b06c07",
+        "chapterIndex": 7,
+        "title": "The Slug Club"
+      },
+      {
+        "id": "b06c08",
+        "chapterIndex": 8,
+        "title": "Snape Victorious"
+      },
+      {
+        "id": "b06c09",
+        "chapterIndex": 9,
+        "title": "The Half-Blood Prince"
+      },
+      {
+        "id": "b06c10",
+        "chapterIndex": 10,
+        "title": "The House of Gaunt"
+      },
+      {
+        "id": "b06c11",
+        "chapterIndex": 11,
+        "title": "Hermione's Helping Hand"
+      },
+      {
+        "id": "b06c12",
+        "chapterIndex": 12,
+        "title": "Silver and Opals"
+      },
+      {
+        "id": "b06c13",
+        "chapterIndex": 13,
+        "title": "The Secret Riddle"
+      },
+      {
+        "id": "b06c14",
+        "chapterIndex": 14,
+        "title": "Felix Felicis"
+      },
+      {
+        "id": "b06c15",
+        "chapterIndex": 15,
+        "title": "The Unbreakable Vow"
+      },
+      {
+        "id": "b06c16",
+        "chapterIndex": 16,
+        "title": "A Very Frosty Christmas"
+      },
+      {
+        "id": "b06c17",
+        "chapterIndex": 17,
+        "title": "A Sluggish Memory"
+      },
+      {
+        "id": "b06c18",
+        "chapterIndex": 18,
+        "title": "Birthday Surprises"
+      },
+      {
+        "id": "b06c19",
+        "chapterIndex": 19,
+        "title": "Elf Tails"
+      },
+      {
+        "id": "b06c20",
+        "chapterIndex": 20,
+        "title": "Lord Voldemort's Request"
+      },
+      {
+        "id": "b06c21",
+        "chapterIndex": 21,
+        "title": "The Unknowable Room"
+      },
+      {
+        "id": "b06c22",
+        "chapterIndex": 22,
+        "title": "After the Burial"
+      },
+      {
+        "id": "b06c23",
+        "chapterIndex": 23,
+        "title": "Horcruxes"
+      },
+      {
+        "id": "b06c24",
+        "chapterIndex": 24,
+        "title": "Sectumsempra"
+      },
+      {
+        "id": "b06c25",
+        "chapterIndex": 25,
+        "title": "The Seer Overheard"
+      },
+      {
+        "id": "b06c26",
+        "chapterIndex": 26,
+        "title": "The Cave"
+      },
+      {
+        "id": "b06c27",
+        "chapterIndex": 27,
+        "title": "The Lightning-Struck Tower"
+      },
+      {
+        "id": "b06c28",
+        "chapterIndex": 28,
+        "title": "Flight of the Prince"
+      },
+      {
+        "id": "b06c29",
+        "chapterIndex": 29,
+        "title": "The Phoenix Lament"
+      },
+      {
+        "id": "b06c30",
+        "chapterIndex": 30,
+        "title": "The White Tomb"
+      }
+    ]
+  },
+  {
+    "bookIndex": 7,
+    "bookTitle": "Harry Potter and the Deathly Hallows",
+    "chapters": [
+      {
+        "id": "b07c01",
+        "chapterIndex": 1,
+        "title": "The Dark Lord Ascending"
+      },
+      {
+        "id": "b07c02",
+        "chapterIndex": 2,
+        "title": "In Memoriam"
+      },
+      {
+        "id": "b07c03",
+        "chapterIndex": 3,
+        "title": "The Dursleys Departing"
+      },
+      {
+        "id": "b07c04",
+        "chapterIndex": 4,
+        "title": "The Seven Potters"
+      },
+      {
+        "id": "b07c05",
+        "chapterIndex": 5,
+        "title": "Fallen Warrior"
+      },
+      {
+        "id": "b07c06",
+        "chapterIndex": 6,
+        "title": "The Ghoul in Pajamas"
+      },
+      {
+        "id": "b07c07",
+        "chapterIndex": 7,
+        "title": "The Will of Albus Dumbledore"
+      },
+      {
+        "id": "b07c08",
+        "chapterIndex": 8,
+        "title": "The Wedding"
+      },
+      {
+        "id": "b07c09",
+        "chapterIndex": 9,
+        "title": "A Place to Hide"
+      },
+      {
+        "id": "b07c10",
+        "chapterIndex": 10,
+        "title": "Kreacher's Tale"
+      },
+      {
+        "id": "b07c11",
+        "chapterIndex": 11,
+        "title": "The Bribe"
+      },
+      {
+        "id": "b07c12",
+        "chapterIndex": 12,
+        "title": "Magic is Might"
+      },
+      {
+        "id": "b07c13",
+        "chapterIndex": 13,
+        "title": "The Muggle-Born Registration Commission"
+      },
+      {
+        "id": "b07c14",
+        "chapterIndex": 14,
+        "title": "The Thief"
+      },
+      {
+        "id": "b07c15",
+        "chapterIndex": 15,
+        "title": "The Goblin's Revenge"
+      },
+      {
+        "id": "b07c16",
+        "chapterIndex": 16,
+        "title": "Godric's Hollow"
+      },
+      {
+        "id": "b07c17",
+        "chapterIndex": 17,
+        "title": "Bathilda's Secret"
+      },
+      {
+        "id": "b07c18",
+        "chapterIndex": 18,
+        "title": "The Life and Lies of Albus Dumbledore"
+      },
+      {
+        "id": "b07c19",
+        "chapterIndex": 19,
+        "title": "The Silver Doe"
+      },
+      {
+        "id": "b07c20",
+        "chapterIndex": 20,
+        "title": "Xenophilius Lovegood"
+      },
+      {
+        "id": "b07c21",
+        "chapterIndex": 21,
+        "title": "The Tale of the Three Brothers"
+      },
+      {
+        "id": "b07c22",
+        "chapterIndex": 22,
+        "title": "The Deathly Hallows"
+      },
+      {
+        "id": "b07c23",
+        "chapterIndex": 23,
+        "title": "Malfoy Manor"
+      },
+      {
+        "id": "b07c24",
+        "chapterIndex": 24,
+        "title": "The Wandmaker"
+      },
+      {
+        "id": "b07c25",
+        "chapterIndex": 25,
+        "title": "Shell Cottage"
+      },
+      {
+        "id": "b07c26",
+        "chapterIndex": 26,
+        "title": "Gringotts"
+      },
+      {
+        "id": "b07c27",
+        "chapterIndex": 27,
+        "title": "The Final Hiding Place"
+      },
+      {
+        "id": "b07c28",
+        "chapterIndex": 28,
+        "title": "The Missing Mirror"
+      },
+      {
+        "id": "b07c29",
+        "chapterIndex": 29,
+        "title": "The Lost Diadem"
+      },
+      {
+        "id": "b07c30",
+        "chapterIndex": 30,
+        "title": "The Sacking of Severus Snape"
+      },
+      {
+        "id": "b07c31",
+        "chapterIndex": 31,
+        "title": "The Battle of Hogwarts"
+      },
+      {
+        "id": "b07c32",
+        "chapterIndex": 32,
+        "title": "The Elder Wand"
+      },
+      {
+        "id": "b07c33",
+        "chapterIndex": 33,
+        "title": "The Prince's Tale"
+      },
+      {
+        "id": "b07c34",
+        "chapterIndex": 34,
+        "title": "The Forest Again"
+      },
+      {
+        "id": "b07c35",
+        "chapterIndex": 35,
+        "title": "King's Cross"
+      },
+      {
+        "id": "b07c36",
+        "chapterIndex": 36,
+        "title": "The Flaw in the Plan"
+      },
+      {
+        "id": "b07c37",
+        "chapterIndex": 37,
+        "title": "Nineteen Years Later"
+      }
+    ]
+  }
+]
