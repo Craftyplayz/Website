@@ -1,0 +1,64 @@
+{
+    "stations": [
+        {
+            "id": "s6a1c3f0d6fcfc9.99239436",
+            "name": "Central Hub",
+            "region": {
+                "id": "lime",
+                "hex": "#80C71F",
+                "label": "Lime"
+            },
+            "district": {
+                "id": "gray",
+                "hex": "#474F52",
+                "label": "Gray"
+            },
+            "local": {
+                "id": "brown",
+                "hex": "#835432",
+                "label": "Brown"
+            },
+            "added": "2026-05-31T16:00:45+02:00"
+        },
+        {
+            "id": "s6a1c45e11c2eb7.00507439",
+            "name": "asd",
+            "region": {
+                "id": "light_gray",
+                "hex": "#9D9D97",
+                "label": "Light Gray"
+            },
+            "district": {
+                "id": "brown",
+                "hex": "#835432",
+                "label": "Brown"
+            },
+            "local": {
+                "id": "blue",
+                "hex": "#3C44AA",
+                "label": "Blue"
+            },
+            "added": "2026-05-31T16:29:53+02:00"
+        },
+        {
+            "id": "s6a1c45e504e773.54559513",
+            "name": "sdzxczxc",
+            "region": {
+                "id": "green",
+                "hex": "#5E7C16",
+                "label": "Green"
+            },
+            "district": {
+                "id": "brown",
+                "hex": "#835432",
+                "label": "Brown"
+            },
+            "local": {
+                "id": "magenta",
+                "hex": "#C74EBD",
+                "label": "Magenta"
+            },
+            "added": "2026-05-31T16:29:57+02:00"
+        }
+    ]
+}

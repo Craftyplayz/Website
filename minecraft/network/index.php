@@ -1,0 +1,737 @@
+<?php
+header('Content-Type: application/json');
+
+$file = __DIR__ . '/stations.json';
+
+function loadStations($file)
+{
+    if (!file_exists($file)) {
+        file_put_contents($file, json_encode(['stations' => []]));
+    }
+    $data = json_decode(file_get_contents($file), true);
+    return $data['stations'] ?? [];
+}
+
+function saveStations($file, $stations)
+{
+    file_put_contents($file, json_encode(['stations' => $stations], JSON_PRETTY_PRINT));
+}
+
+$method = $_SERVER['REQUEST_METHOD'];
+$action = $_GET['action'] ?? '';
+
+if ($method === 'GET' && $action === 'list') {
+    echo json_encode(['stations' => loadStations($file)]);
+    exit;
+}
+
+if ($method === 'POST' && $action === 'add') {
+    $body = json_decode(file_get_contents('php://input'), true);
+    $name     = trim($body['name'] ?? '');
+    $region   = $body['region'] ?? null;
+    $district = $body['district'] ?? null;
+    $local    = $body['local'] ?? null;
+
+    if (!$name || !$region || !$district || !$local) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Missing fields']);
+        exit;
+    }
+
+    $stations = loadStations($file);
+    $station = [
+        'id'       => uniqid('s', true),
+        'name'     => $name,
+        'region'   => $region,
+        'district' => $district,
+        'local'    => $local,
+        'added'    => date('c'),
+    ];
+    $stations[] = $station;
+    saveStations($file, $stations);
+    echo json_encode(['ok' => true, 'station' => $station]);
+    exit;
+}
+
+if ($method === 'DELETE' && $action === 'delete') {
+    $id = $_GET['id'] ?? '';
+    $stations = loadStations($file);
+    $stations = array_values(array_filter($stations, fn($s) => $s['id'] !== $id));
+    saveStations($file, $stations);
+    echo json_encode(['ok' => true]);
+    exit;
+}
+
+header('Content-Type: text/html; charset=UTF-8');
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metro Stations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #ffffff;
+            background-color: #202020;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* TOP BAR */
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 40px;
+            background-color: #2726269a;
+            border-bottom: 1px solid #ffffff;
+            height: 100px;
+            flex-shrink: 0;
+        }
+
+        .topbar h1 {
+            font-size: 30px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .search-wrap {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-wrap svg {
+            position: absolute;
+            left: 16px;
+            color: #aaa;
+            pointer-events: none;
+        }
+
+        #search {
+            width: 100%;
+            padding: 10px 20px 10px 44px;
+            background-color: #636262;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: 500;
+            color: #ffffff;
+            font-family: 'Roboto', sans-serif;
+            transition: all 0.2s ease-in-out;
+            outline: none;
+        }
+
+        #search::placeholder {
+            color: #ccc;
+        }
+
+        #search:focus {
+            background-color: #757474;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #636262;
+            color: #ffffff;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: 500;
+            font-family: 'Roboto', sans-serif;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #757474;
+        }
+
+        /* COUNT BAR */
+        .count-bar {
+            padding: 8px 40px;
+            font-size: 14px;
+            color: #aaa;
+            background-color: #272626;
+            border-bottom: 1px solid #3a3a3a;
+            flex-shrink: 0;
+        }
+
+        /* STATION LIST */
+        #list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 40px;
+        }
+
+        #list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #list::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+
+        .station-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid #3a3a3a;
+            transition: background 0.15s;
+        }
+
+        .station-row:last-child {
+            border-bottom: none;
+        }
+
+        .station-row:hover {
+            background-color: #2a2a2a;
+            margin: 0 -10px;
+            padding-left: 10px;
+            padding-right: 10px;
+            border-radius: 8px;
+        }
+
+        .swatches {
+            display: flex;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .swatch {
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .station-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .station-name {
+            font-size: 18px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .station-addr {
+            font-size: 13px;
+            color: #aaa;
+            margin-top: 2px;
+        }
+
+        .del-btn {
+            padding: 6px 12px;
+            font-size: 16px;
+            background-color: transparent;
+            border-radius: 8px;
+            color: #aaa;
+            flex-shrink: 0;
+        }
+
+        .del-btn:hover {
+            background-color: rgba(220, 50, 50, 0.2);
+            color: #ff6b6b;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            font-size: 18px;
+        }
+
+        /* MODAL OVERLAY */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background-color: #272626;
+            border: 1px solid #ffffff;
+            border-radius: 15px;
+            padding: 32px;
+            width: min(500px, 95vw);
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: popIn 0.2s ease;
+        }
+
+        .modal::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .modal::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        .field label {
+            display: block;
+            background-color: transparent;
+            padding: 0;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ccc;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .field input[type="text"] {
+            width: 100%;
+            padding: 10px 20px;
+            background-color: #636262;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #ffffff;
+            font-family: 'Roboto', sans-serif;
+            outline: none;
+            transition: background 0.2s;
+        }
+
+        .field input[type="text"]:focus {
+            background-color: #757474;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+            padding: 12px;
+            background-color: #202020;
+            border-radius: 10px;
+        }
+
+        .cpick {
+            aspect-ratio: 1;
+            border-radius: 5px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            padding: 0;
+            font-size: 0;
+            transition: transform 0.1s, border-color 0.1s;
+            background-color: #636262;
+        }
+
+        .cpick:hover {
+            transform: scale(1.15);
+            background-color: unset;
+        }
+
+        .cpick.on {
+            border-color: #fff;
+            transform: scale(1.15);
+            background-color: unset;
+        }
+
+        .selected-label {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #aaa;
+            min-height: 16px;
+            padding-left: 4px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn-cancel {
+            background-color: #3a3a3a;
+            font-size: 18px;
+        }
+
+        .btn-save {
+            background-color: #636262;
+            font-size: 18px;
+        }
+
+        .btn-save:hover {
+            background-color: #757474;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: #636262;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 15px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .toast.err {
+            background-color: #7a3030;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topbar">
+        <h1>Metro Stations</h1>
+        <div class="search-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input id="search" type="text" placeholder="Search stations…" autocomplete="off" autofocus>
+        </div>
+        <button onclick="openModal()">+ Add Station</button>
+    </div>
+
+    <div class="count-bar" id="countBar">Loading…</div>
+
+    <div id="list"></div>
+
+    <!-- MODAL -->
+    <div class="overlay" id="overlay" onclick="overlayClick(event)">
+        <div class="modal">
+            <h2>New Station</h2>
+
+            <div class="field">
+                <label>Station Name</label>
+                <input type="text" id="mName" placeholder="e.g. Central Hub">
+            </div>
+
+            <div class="field">
+                <label>Region Color (concrete)</label>
+                <div class="color-grid" id="regionGrid"></div>
+                <div class="selected-label" id="regionLbl">—</div>
+            </div>
+
+            <div class="field">
+                <label>District Color (wool)</label>
+                <div class="color-grid" id="districtGrid"></div>
+                <div class="selected-label" id="districtLbl">—</div>
+            </div>
+
+            <div class="field">
+                <label>Local Color (glass)</label>
+                <div class="color-grid" id="localGrid"></div>
+                <div class="selected-label" id="localLbl">—</div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-save" onclick="saveStation()">Add Station</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const COLORS = [{
+                id: 'white',
+                hex: '#F9FFFE',
+                label: 'White'
+            },
+            {
+                id: 'light_gray',
+                hex: '#9D9D97',
+                label: 'Light Gray'
+            },
+            {
+                id: 'gray',
+                hex: '#474F52',
+                label: 'Gray'
+            },
+            {
+                id: 'black',
+                hex: '#1D1D21',
+                label: 'Black'
+            },
+            {
+                id: 'brown',
+                hex: '#835432',
+                label: 'Brown'
+            },
+            {
+                id: 'red',
+                hex: '#B02E26',
+                label: 'Red'
+            },
+            {
+                id: 'orange',
+                hex: '#F9801D',
+                label: 'Orange'
+            },
+            {
+                id: 'yellow',
+                hex: '#FED83D',
+                label: 'Yellow'
+            },
+            {
+                id: 'lime',
+                hex: '#80C71F',
+                label: 'Lime'
+            },
+            {
+                id: 'green',
+                hex: '#5E7C16',
+                label: 'Green'
+            },
+            {
+                id: 'cyan',
+                hex: '#169C9C',
+                label: 'Cyan'
+            },
+            {
+                id: 'light_blue',
+                hex: '#3AB3DA',
+                label: 'Light Blue'
+            },
+            {
+                id: 'blue',
+                hex: '#3C44AA',
+                label: 'Blue'
+            },
+            {
+                id: 'purple',
+                hex: '#8932B8',
+                label: 'Purple'
+            },
+            {
+                id: 'magenta',
+                hex: '#C74EBD',
+                label: 'Magenta'
+            },
+            {
+                id: 'pink',
+                hex: '#F38BAA',
+                label: 'Pink'
+            },
+        ];
+
+        let allStations = [];
+        let sel = {
+            region: null,
+            district: null,
+            local: null
+        };
+
+        function buildPicker(gridId, key, lblId) {
+            const grid = document.getElementById(gridId);
+            COLORS.forEach(c => {
+                const btn = document.createElement('button');
+                btn.className = 'cpick';
+                btn.style.background = c.hex;
+                btn.title = c.label;
+                btn.onclick = () => {
+                    sel[key] = c;
+                    grid.querySelectorAll('.cpick').forEach(b => b.classList.remove('on'));
+                    btn.classList.add('on');
+                    document.getElementById(lblId).textContent = c.label;
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        buildPicker('regionGrid', 'region', 'regionLbl');
+        buildPicker('districtGrid', 'district', 'districtLbl');
+        buildPicker('localGrid', 'local', 'localLbl');
+
+        async function fetchStations() {
+            const r = await fetch('?action=list');
+            const d = await r.json();
+            allStations = d.stations || [];
+            renderList(document.getElementById('search').value);
+        }
+
+        async function saveStation() {
+            const name = document.getElementById('mName').value.trim();
+            if (!name) return toast('Enter a station name', true);
+            if (!sel.region) return toast('Pick a region color', true);
+            if (!sel.district) return toast('Pick a district color', true);
+            if (!sel.local) return toast('Pick a local color', true);
+
+            const res = await fetch('?action=add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name,
+                    region: sel.region,
+                    district: sel.district,
+                    local: sel.local
+                })
+            });
+
+            if (res.ok) {
+                closeModal();
+                fetchStations();
+                toast('Station added');
+            } else toast('Error saving', true);
+        }
+
+        async function deleteStation(id) {
+            await fetch(`?action=delete&id=${id}`, {
+                method: 'DELETE'
+            });
+            fetchStations();
+        }
+
+        function renderList(query = '') {
+            const list = document.getElementById('list');
+            const q = query.toLowerCase();
+            const filtered = allStations.filter(s => s.name.toLowerCase().includes(q));
+
+            const countBar = document.getElementById('countBar');
+            countBar.textContent = query ?
+                `${filtered.length} of ${allStations.length} station${allStations.length !== 1 ? 's' : ''}` :
+                `${allStations.length} station${allStations.length !== 1 ? 's' : ''}`;
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="empty">${query ? 'No matches found.' : 'No stations yet — add one!'}</div>`;
+                return;
+            }
+
+            list.innerHTML = '';
+            filtered.forEach(s => {
+                const row = document.createElement('div');
+                row.className = 'station-row';
+
+                const nameHighlighted = q ?
+                    s.name.replace(new RegExp(`(${q})`, 'gi'), '<mark style="background:rgba(255,255,255,0.25);color:inherit;border-radius:2px;padding:0 1px">$1</mark>') :
+                    s.name;
+
+                row.innerHTML = `
+      <div class="swatches">
+        <div class="swatch" style="background:${s.region.hex}"   title="Region: ${s.region.label}"></div>
+        <div class="swatch" style="background:${s.district.hex}" title="District: ${s.district.label}"></div>
+        <div class="swatch" style="background:${s.local.hex}"    title="Local: ${s.local.label}"></div>
+      </div>
+      <div class="station-info">
+        <div class="station-name">${nameHighlighted}</div>
+        <div class="station-addr">${s.region.label} · ${s.district.label} · ${s.local.label}</div>
+      </div>
+      <button class="del-btn" title="Remove"></button>
+    `;
+                row.querySelector('.del-btn').onclick = () => deleteStation(s.id);
+                list.appendChild(row);
+            });
+        }
+
+        document.getElementById('search').addEventListener('input', e => renderList(e.target.value));
+
+        function openModal() {
+            document.getElementById('overlay').classList.add('open');
+            document.getElementById('mName').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('overlay').classList.remove('open');
+            document.getElementById('mName').value = '';
+            sel = {
+                region: null,
+                district: null,
+                local: null
+            };
+            document.querySelectorAll('.cpick').forEach(b => b.classList.remove('on'));
+            ['regionLbl', 'districtLbl', 'localLbl'].forEach(id => document.getElementById(id).textContent = '—');
+        }
+
+        function overlayClick(e) {
+            if (e.target === document.getElementById('overlay')) closeModal();
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        let toastTimer;
+
+        function toast(msg, err = false) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast show' + (err ? ' err' : '');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+        }
+
+        fetchStations();
+    </script>
+</body>
+
+</html>

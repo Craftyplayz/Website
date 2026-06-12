@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minecraft Transaction Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .receipt, .custom-items {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      background-color: #f9f9f9;
+    }
+    .receipt h3 {
+      margin-bottom: 5px;
+    }
+    .input-group {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Minecraft Fake Transaction Generator</h1>
+  <p>Add your own items and specify their prices, then click the button to generate fake receipts for Minecraft item sales.</p>
+
+  <div class="custom-items">
+    <h3>Add Custom Items</h3>
+    <div id="custom-items-container"></div>
+    <div class="input-group">
+      <input type="text" id="item-name" placeholder="Item Name">
+      <input type="number" id="item-price" placeholder="Item Price">
+      <button onclick="addCustomItem()">Add Item</button>
+      <input type="text" id="book-title" placeholder="Book Title">
+      <input type="text" id="book-author" placeholder="Book Author">
+    </div>
+  </div>
+
+
+  <button onclick="generateAndDisplayReceipts()">Generate Receipts</button>
+
+  <div id="receipts-container"></div>
+  <textarea id="minecraft-command" style="width: 100%; height: 100px; margin-top: 20px;" readonly></textarea>
+
+  <script>
+    let items = [
+/*       { name: "Acacia Log", price: 6 },
+      { name: "Spruce Log", price: 3 },
+      { name: "Jungle Log", price: 4 },
+      { name: "Dark Oak Log", price: 5 },
+      { name: "Oak Log", price: 3 },
+      { name: "Mangrove Log", price: 8 },
+      { name: "Birch Log", price: 5 },
+      { name: "Cherry Log", price: 7 },
+      { name: "Warped Stem", price: 7 },
+      { name: "Crimson Stem", price: 7 } */
+    ];
+
+    const purchasers = [];
+    const namesCSV = fetch('/Code/names.csv')
+      .then(response => response.text())
+      .then(text => text.split('\n').map(line => {
+        const name = line.split(',')[0];
+        if (name === name.toUpperCase()) {
+          return null;
+        }
+        return name;
+      }))
+      .then(names => {
+        purchasers.push(...names.filter(name => name !== null));
+      });
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getRandomDate() {
+      const year = 1958;
+      const month = getRandomInt(1, 12);
+      const day = getRandomInt(1, 28);
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    function addCustomItem() {
+      const itemName = document.getElementById("item-name").value;
+      const itemPrice = parseFloat(document.getElementById("item-price").value);
+
+      if (itemName && !isNaN(itemPrice)) {
+        items.push({ name: itemName, price: itemPrice });
+        displayCustomItems();
+        document.getElementById("item-name").value = '';
+        document.getElementById("item-price").value = '';
+      } else {
+        alert("Please enter both a valid item name and price.");
+      }
+    }
+
+    function displayCustomItems() {
+      const customItemsContainer = document.getElementById("custom-items-container");
+      customItemsContainer.innerHTML = '';
+      items.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.textContent = `${item.name} - $${item.price}`;
+        customItemsContainer.appendChild(itemDiv);
+      });
+    }
+
+    function generateReceipt() {
+      const numItems = getRandomInt(1, 2);
+      const boughtItems = [];
+      let totalPrice = 0;
+
+      for (let i = 0; i < numItems; i++) {
+        const randomItem = items[getRandomInt(0, items.length - 1)];
+        boughtItems.push(randomItem);
+        totalPrice += randomItem.price;
+      }
+
+      const receipt = {
+        purchaser: purchasers[getRandomInt(0, purchasers.length - 1)],
+        date: getRandomDate(),
+        items: boughtItems,
+        totalPrice: totalPrice
+      };
+
+      return receipt;
+    }
+
+    function generateReceipts() {
+      const numReceipts = getRandomInt(50, 100);
+      const receipts = [];
+
+      for (let i = 0; i < numReceipts; i++) {
+        receipts.push(generateReceipt());
+      }
+
+      return receipts;
+    }
+
+    function generateAndDisplayReceipts() {
+  // Get the book title and author from the textboxes
+  const bookTitle = document.getElementById('book-title').value || 'Receipts';
+  const bookAuthor = document.getElementById('book-author').value || 'Transaction Generator';
+
+  const receipts = generateReceipts();
+  const receiptsContainer = document.getElementById('receipts-container');
+  const bookPages = [];
+  receiptsContainer.innerHTML = ''; // Clear previous receipts
+
+  receipts.forEach((receipt, index) => {
+    // Display the receipt
+    const receiptDiv = document.createElement('div');
+    receiptDiv.classList.add('receipt');
+    receiptDiv.innerHTML = `
+      <h3>Receipt #${index + 1}</h3>
+      <p><strong>Purchaser:</strong> ${receipt.purchaser}</p>
+      <p><strong>Date:</strong> ${receipt.date}</p>
+      ${receipt.items.map(item => `<p>Item: ${item.name} - Price: $${item.price}</p>`).join('')}
+      <p><strong>Total Price:</strong> $${receipt.totalPrice}</p>
+    `;
+    receiptsContainer.appendChild(receiptDiv);
+
+    // Format the items for the Minecraft command
+    const itemsFormatted = receipt.items.map((item, i) => {
+      // Add ", after the \\\\n for the last item
+      const endComma = (i === receipt.items.length - 1) ? '",' : '';
+      return `Item: ${item.name} - Price: $${item.price}\\\\n${endComma}`;
+    }).join('');
+
+    // Format the receipt content for the Minecraft command
+    const pageContent = [
+      `Receipt #${index + 1}\\\\n",`,
+      `{"text":"Purchaser:","bold":true}," ${receipt.purchaser}\\\\n",`,
+      `{"text":"Date:","bold":true}," ${receipt.date}\\\\n`,
+      itemsFormatted,  // Use the updated item formatting
+      `{"text":"Total Price:","bold":true}," $${receipt.totalPrice}`
+    ].join('');
+
+    // Add the page content to bookPages array
+    bookPages.push(`'[["${pageContent}"]]'`);
+  });
+
+  // Start of the Minecraft command
+  let minecraftCommand = `give @a written_book[written_book_content={pages:[`;
+
+  // Add all pages to the command
+  minecraftCommand += bookPages.join(',');
+
+  // End of the command with title and author
+  minecraftCommand += `],title:"${bookTitle}",author:"${bookAuthor}"}]`;
+
+  // Display the Minecraft command
+  document.getElementById('minecraft-command').value = minecraftCommand;
+}
+
+
+
+
+    displayCustomItems();
+  </script>
+
+</body>
+</html>
