@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geriant Bingo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: #f5f0e8;
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    gap: clamp(0.4rem, 1.5svh, 1.25rem);
+    overflow: hidden;
+  }
+
+  h1 {
+    /* letter-spacing adds trailing space, padding-left re-centers it */
+    font-size: clamp(1.6rem, 5svh, 3rem);
+    letter-spacing: 0.25em;
+    padding-left: 0.25em;
+    color: #1a1a1a;
+    font-weight: normal;
+    text-transform: uppercase;
+    text-align: center;
+    width: 100%;
+  }
+
+  /*
+    Board width is the smaller of:
+      - 480px (desktop max)
+      - 96vw (don't overflow sideways)
+      - available vertical space after subtracting everything else
+    The --other value is tuned to the non-board heights:
+      h1 + win-msg + controls + gaps ≈ 160px baseline, scaled with svh.
+  */
+  #board {
+    --other: clamp(140px, 22svh, 200px);
+    --size: min(480px, 96vw, calc(100svh - var(--other)));
+    width: var(--size);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: clamp(3px, 0.6vw, 6px);
+  }
+
+  .cell {
+    aspect-ratio: 1;
+    background: #fff;
+    border: 1.5px solid #c8bfb0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4px;
+    /* font scales with the cell size, which scales with the board */
+    font-size: clamp(7px, calc(var(--size) / 42), 12px);
+    line-height: 1.3;
+    color: #2a2a2a;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+
+  .cell:hover { border-color: #888; }
+
+  .cell.marked {
+    background: #3a8c5c;
+    border-color: #2e7049;
+    color: #fff;
+  }
+
+  .cell.free {
+    background: #f0e8d8;
+    font-weight: bold;
+    font-style: italic;
+    color: #6b5c42;
+    cursor: default;
+  }
+
+  .cell.free:hover { border-color: #c8bfb0; }
+
+  #controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    width: min(480px, 96vw);
+  }
+
+  #seed-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+  }
+
+  #seed-input {
+    flex: 1;
+    padding: 0.35rem 0.6rem;
+    font-family: 'Courier New', monospace;
+    font-size: clamp(0.7rem, 2vw, 0.85rem);
+    background: #fff;
+    border: 1.5px solid #c8bfb0;
+    border-radius: 4px;
+    color: #1a1a1a;
+    letter-spacing: 0.05em;
+    min-width: 0;
+  }
+
+  #seed-input:focus { outline: none; border-color: #888; }
+  #seed-input::placeholder { color: #aaa; font-style: italic; }
+
+  .btn {
+    padding: 0.35rem 0.75rem;
+    font-family: 'Georgia', serif;
+    font-size: clamp(0.65rem, 2vw, 0.8rem);
+    letter-spacing: 0.08em;
+    background: transparent;
+    border: 1.5px solid #888;
+    border-radius: 4px;
+    color: #333;
+    cursor: pointer;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .btn:hover { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
+  #copy-btn { border-color: #c8bfb0; color: #777; }
+  #copy-btn:hover, #copy-btn.copied {
+    background: #3a8c5c; color: #fff; border-color: #3a8c5c;
+  }
+
+  #seed-label {
+    font-size: clamp(0.65rem, 1.8vw, 0.75rem);
+    color: #888;
+    letter-spacing: 0.04em;
+    font-style: italic;
+    align-self: flex-start;
+    min-height: 1em;
+  }
+
+  #win-msg {
+    font-size: clamp(0.85rem, 2.5svh, 1.1rem);
+    color: #3a8c5c;
+    letter-spacing: 0.05em;
+    min-height: 1.4em;
+    font-style: italic;
+  }
+
+  #error-msg {
+    font-size: 0.8rem;
+    color: #c0392b;
+    max-width: 480px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<h1>Geriant Bingo</h1>
+<div id="board"></div>
+<div id="win-msg"></div>
+
+<div id="controls">
+  <div id="seed-row">
+    <input id="seed-input" type="text" placeholder="Enter a seed…" spellcheck="false" autocomplete="off" />
+    <button class="btn" id="load-btn">Load</button>
+    <button class="btn" id="new-btn">New Game</button>
+    <button class="btn" id="copy-btn">Share</button>
+  </div>
+  <div id="seed-label"></div>
+</div>
+
+<div id="error-msg"></div>
+
+<script>
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function seededShuffle(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function makeSeed() {
+  return Math.floor(Math.random() * 0xFFFFFFFF).toString(16).padStart(8, '0').toUpperCase();
+}
+
+function parseSeed(str) {
+  const n = parseInt(str.trim(), 16);
+  return isNaN(n) ? null : n;
+}
+
+function getSeedFromURL() {
+  return new URLSearchParams(location.search).get('seed');
+}
+
+function setSeedInURL(seedStr) {
+  const url = new URL(location.href);
+  url.searchParams.set('seed', seedStr);
+  history.replaceState(null, '', url.toString());
+}
+
+const FREE_IDX = 12;
+let pool = [];
+
+async function loadSquares() {
+  const r = await fetch('squares.json');
+  if (!r.ok) throw new Error('Could not load squares.json — make sure it is in the same directory.');
+  const data = await r.json();
+  if (!Array.isArray(data) || data.length === 0)
+    throw new Error('squares.json must be a non-empty JSON array of strings.');
+  return data;
+}
+
+function fillBoard(pool, rng) {
+  const needed = 24;
+  let chosen = [];
+  if (pool.length >= needed) {
+    chosen = seededShuffle(pool, rng).slice(0, needed);
+  } else {
+    while (chosen.length < needed) chosen.push(...seededShuffle(pool, rng));
+    chosen = chosen.slice(0, needed);
+  }
+  return chosen;
+}
+
+function renderBoard(squares) {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  let si = 0;
+  for (let i = 0; i < 25; i++) {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    if (i === FREE_IDX) {
+      cell.classList.add('free', 'marked');
+      cell.textContent = 'FREE';
+    } else {
+      cell.textContent = squares[si++];
+      cell.addEventListener('click', () => { cell.classList.toggle('marked'); checkWin(); });
+    }
+    board.appendChild(cell);
+  }
+}
+
+function checkWin() {
+  const marked = [...document.querySelectorAll('.cell')].map(c => c.classList.contains('marked'));
+  const lines = [
+    [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
+    [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
+    [0,6,12,18,24],[4,8,12,16,20]
+  ];
+  document.getElementById('win-msg').textContent =
+    lines.some(line => line.every(i => marked[i])) ? 'Bingo!' : '';
+}
+
+async function startGame(seedStr) {
+  document.getElementById('win-msg').textContent = '';
+  document.getElementById('error-msg').textContent = '';
+  seedStr = seedStr.trim().toUpperCase();
+  const seedNum = parseSeed(seedStr);
+  if (seedNum === null) {
+    document.getElementById('error-msg').textContent = 'Invalid seed — must be a hex value like 3F9A1C00.';
+    return;
+  }
+  try {
+    if (pool.length === 0) pool = await loadSquares();
+    const rng = mulberry32(seedNum);
+    renderBoard(fillBoard(pool, rng));
+    setSeedInURL(seedStr);
+    document.getElementById('seed-input').value = seedStr;
+    document.getElementById('seed-label').textContent = 'Seed: ' + seedStr;
+  } catch(e) {
+    document.getElementById('error-msg').textContent = e.message;
+  }
+}
+
+document.getElementById('new-btn').addEventListener('click', () => startGame(makeSeed()));
+
+document.getElementById('load-btn').addEventListener('click', () => {
+  const val = document.getElementById('seed-input').value.trim();
+  val ? startGame(val) : startGame(makeSeed());
+});
+
+document.getElementById('seed-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('load-btn').click();
+});
+
+document.getElementById('copy-btn').addEventListener('click', () => {
+  navigator.clipboard.writeText(location.href).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Share'; btn.classList.remove('copied'); }, 1800);
+  });
+});
+
+(async () => {
+  try { pool = await loadSquares(); } catch(e) {
+    document.getElementById('error-msg').textContent = e.message; return;
+  }
+  const urlSeed = getSeedFromURL();
+  urlSeed ? startGame(urlSeed) : startGame(makeSeed());
+})();
+</script>
+</body>
+</html>

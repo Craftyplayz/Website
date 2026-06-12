@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nether Portal Converter</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; color: inherit; }
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        color: #ffffff;
+        background-color: #202020;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .topbar {
+        display: flex;
+        align-items: center;
+        padding: 20px 40px;
+        background-color: #2726269a;
+        border-bottom: 1px solid #ffffff;
+        height: 100px;
+        flex-shrink: 0;
+    }
+
+    .topbar h1 { font-size: 30px; font-weight: 700; }
+
+    .content {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+    }
+
+    .card {
+        background-color: #272626;
+        border: 1px solid #ffffff;
+        border-radius: 15px;
+        padding: 36px;
+        width: min(480px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        padding: 10px 20px;
+        background-color: #636262;
+        border: none;
+        border-radius: 15px;
+        font-size: 20px;
+        font-weight: 500;
+        color: #ffffff;
+        font-family: monospace;
+        outline: none;
+        transition: background 0.2s;
+    }
+
+    input[type="text"]::placeholder { color: #ccc; }
+    input[type="text"]:focus { background-color: #757474; }
+
+    .dim-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .dim-option input { display: none; }
+
+    .dim-option label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 16px;
+        background-color: #3a3a3a;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 500;
+        color: #aaa;
+        transition: background 0.15s, color 0.15s;
+        border: 2px solid transparent;
+    }
+
+    .dim-option input:checked + label {
+        border-color: #ffffff88;
+        background-color: #636262;
+        color: #fff;
+    }
+
+    .dim-option label:hover { background-color: #484848; color: #fff; }
+
+    .result-box {
+        background-color: #3a3a3a;
+        border-radius: 15px;
+        padding: 14px 20px;
+        font-family: monospace;
+        font-size: 20px;
+        font-weight: 500;
+        color: #fff;
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+    }
+
+    .result-box.empty { color: #555; font-size: 15px; font-style: italic; font-family: 'Roboto', sans-serif; font-weight: 400; }
+
+    .error { color: #ff6b6b; font-size: 13px; min-height: 18px; }
+
+    button {
+        padding: 10px 20px;
+        background-color: #636262;
+        color: #ffffff;
+        border: none;
+        border-radius: 15px;
+        font-size: 18px;
+        font-weight: 500;
+        font-family: 'Roboto', sans-serif;
+        transition: background 0.2s;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    button:hover { background-color: #757474; }
+    button:disabled { opacity: 0.35; cursor: default; }
+    button:disabled:hover { background-color: #636262; }
+
+    .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background-color: #636262;
+        color: #fff;
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 15px;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: opacity 0.2s, transform 0.2s;
+        pointer-events: none;
+        z-index: 200;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <h1>Nether Portal Converter</h1>
+</div>
+
+<div class="content">
+    <div class="card">
+        <input type="text" id="input" placeholder="/tp -8676 ~ 4405" oninput="convert()" autofocus>
+
+        <div class="dim-options">
+            <div class="dim-option">
+                <input type="radio" name="dim" id="ow" value="overworld" checked onchange="convert()">
+                <label for="ow">Overworld → Nether</label>
+            </div>
+            <div class="dim-option">
+                <input type="radio" name="dim" id="ne" value="nether" onchange="convert()">
+                <label for="ne">Nether → Overworld</label>
+            </div>
+        </div>
+
+        <div class="result-box empty" id="result-box">Paste a /tp command above</div>
+        <div class="error" id="error"></div>
+
+        <button id="copy-btn" onclick="copyResult()" disabled>Copy to clipboard</button>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    let lastResult = '';
+
+    function parseCoords(raw) {
+        const s = raw.trim();
+        const patterns = [
+            /\/tp\s+(-?\d+(?:\.\d+)?)\s+(~|-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/i,
+            /(-?\d+(?:\.\d+)?)\s+(~|-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/,
+        ];
+        for (const p of patterns) {
+            const m = s.match(p);
+            if (m) return { x: parseFloat(m[1]), y: m[2], z: parseFloat(m[3]) };
+        }
+        return null;
+    }
+
+    function convert() {
+        const raw = document.getElementById('input').value;
+        const dim = document.querySelector('input[name="dim"]:checked').value;
+        const box = document.getElementById('result-box');
+        const errorEl = document.getElementById('error');
+        const copyBtn = document.getElementById('copy-btn');
+
+        errorEl.textContent = '';
+        lastResult = '';
+        copyBtn.disabled = true;
+
+        if (!raw.trim()) {
+            box.textContent = 'Paste a /tp command above';
+            box.className = 'result-box empty';
+            return;
+        }
+
+        const coords = parseCoords(raw);
+        if (!coords) {
+            box.textContent = 'Paste a /tp command above';
+            box.className = 'result-box empty';
+            errorEl.textContent = 'Could not read coordinates. Expected: /tp -8676 ~ 4405';
+            return;
+        }
+
+        const factor = dim === 'overworld' ? (1 / 8) : 8;
+        const newX = Math.round(coords.x * factor);
+        const newZ = Math.round(coords.z * factor);
+        const yStr = coords.y === '~' ? '~' : Math.round(parseFloat(coords.y));
+
+        lastResult = `/tp ${newX} ${yStr} ${newZ}`;
+        box.textContent = lastResult;
+        box.className = 'result-box';
+        copyBtn.disabled = false;
+    }
+
+    function copyResult() {
+        if (!lastResult) return;
+        navigator.clipboard.writeText(lastResult).then(() => {
+            const t = document.getElementById('toast');
+            t.textContent = 'Copied!';
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        });
+    }
+</script>
+</body>
+</html>
