@@ -1,0 +1,169 @@
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:1rem 0;font-family:var(--font-sans);color:var(--color-text-primary)}
+h2{font-size:18px;font-weight:500;margin:0 0 .75rem}
+textarea{width:100%;height:200px;font-family:var(--font-mono);font-size:12px;background:var(--color-background-secondary);color:var(--color-text-primary);border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.6rem;resize:vertical}
+.btns{display:flex;gap:.5rem;margin:.5rem 0}
+button{padding:.45rem 1rem;border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-primary);cursor:pointer;font-size:13px}
+button:hover{background:var(--color-background-primary)}
+button.primary{background:var(--color-text-primary);color:var(--color-background-primary);border-color:transparent}
+button.primary:hover{opacity:.85}
+table{border-collapse:collapse;width:100%;margin-top:.75rem;font-size:13px}
+th,td{border:1px solid var(--color-border-tertiary);padding:5px 8px;text-align:left}
+th{background:var(--color-background-secondary);font-weight:500;font-size:12px}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:1px 7px;border-radius:20px;font-size:11px;font-weight:500}
+.pill-s{background:var(--color-background-info);color:var(--color-text-info)}
+.pill-sh{background:var(--color-background-success);color:var(--color-text-success)}
+.pill-ns{background:var(--color-background-warning);color:var(--color-text-warning)}
+.cb-cell{text-align:center}
+input[type=checkbox]{accent-color:var(--color-text-info);width:14px;height:14px;cursor:pointer}
+.note{font-size:11px;color:var(--color-text-tertiary);margin:.4rem 0 0}
+</style>
+<h2>Litematica material list → Sheets</h2>
+<textarea id="input" placeholder="Paste Litematica material list here…"></textarea>
+<div class="btns">
+  <button class="primary" onclick="convert()">Convert</button>
+  <button onclick="copyTSV()">Copy for Sheets</button>
+</div>
+<div id="preview"></div>
+<textarea id="output" style="height:0;opacity:0;position:absolute;pointer-events:none"></textarea>
+
+<script>
+const STACK1 = new Set([
+  "written_book","enchanted_book","potion","splash_potion","lingering_potion",
+  "tipped_arrow","knowledge_book","bundle","goat_horn","crossbow","bow",
+  "fishing_rod","flint_and_steel","shears","shield","trident","elytra",
+  "compass","clock","recovery_compass","spyglass","map","filled_map",
+  "bucket","water_bucket","lava_bucket","milk_bucket","powder_snow_bucket",
+  "axolotl_bucket","cod_bucket","salmon_bucket","tropical_fish_bucket","pufferfish_bucket",
+  "tadpole_bucket","snow_ball","egg","honey_bottle","suspicious_stew",
+  "cake","bed","white_bed","orange_bed","magenta_bed","light_blue_bed","yellow_bed",
+  "lime_bed","pink_bed","gray_bed","light_gray_bed","cyan_bed","purple_bed",
+  "blue_bed","brown_bed","green_bed","red_bed","black_bed",
+  "armor_stand","item_frame","glow_item_frame","painting","flower_pot",
+  "dragon_egg","beacon","conduit","bell","lodestone","respawn_anchor",
+  "turtle_egg","turtle_scute","bamboo_raft","bamboo_chest_raft",
+  "oak_boat","oak_chest_boat","spruce_boat","spruce_chest_boat",
+  "birch_boat","birch_chest_boat","jungle_boat","jungle_chest_boat",
+  "acacia_boat","acacia_chest_boat","dark_oak_boat","dark_oak_chest_boat",
+  "mangrove_boat","mangrove_chest_boat","cherry_boat","cherry_chest_boat",
+  "pale_oak_boat","pale_oak_chest_boat",
+  "minecart","chest_minecart","furnace_minecart","tnt_minecart","hopper_minecart",
+  "saddle","carrot_on_a_stick","warped_fungus_on_a_stick",
+  "totem_of_undying","nether_star","heart_of_the_sea",
+  "netherite_sword","netherite_axe","netherite_pickaxe","netherite_shovel","netherite_hoe",
+  "netherite_helmet","netherite_chestplate","netherite_leggings","netherite_boots",
+  "diamond_sword","diamond_axe","diamond_pickaxe","diamond_shovel","diamond_hoe",
+  "diamond_helmet","diamond_chestplate","diamond_leggings","diamond_boots",
+  "iron_sword","iron_axe","iron_pickaxe","iron_shovel","iron_hoe",
+  "iron_helmet","iron_chestplate","iron_leggings","iron_boots",
+  "golden_sword","golden_axe","golden_pickaxe","golden_shovel","golden_hoe",
+  "golden_helmet","golden_chestplate","golden_leggings","golden_boots",
+  "stone_sword","stone_axe","stone_pickaxe","stone_shovel","stone_hoe",
+  "wooden_sword","wooden_axe","wooden_pickaxe","wooden_shovel","wooden_hoe",
+  "chainmail_helmet","chainmail_chestplate","chainmail_leggings","chainmail_boots",
+  "leather_helmet","leather_chestplate","leather_leggings","leather_boots",
+  "turtle_helmet","wolf_armor",
+]);
+const STACK16 = new Set([
+  "sign","oak_sign","spruce_sign","birch_sign","jungle_sign","acacia_sign",
+  "dark_oak_sign","mangrove_sign","cherry_sign","bamboo_sign","pale_oak_sign",
+  "crimson_sign","warped_sign",
+  "hanging_sign","oak_hanging_sign","spruce_hanging_sign","birch_hanging_sign",
+  "jungle_hanging_sign","acacia_hanging_sign","dark_oak_hanging_sign",
+  "mangrove_hanging_sign","cherry_hanging_sign","bamboo_hanging_sign",
+  "pale_oak_hanging_sign","crimson_hanging_sign","warped_hanging_sign",
+  "ender_pearl","snowball",
+  "banner","white_banner","orange_banner","magenta_banner","light_blue_banner",
+  "yellow_banner","lime_banner","pink_banner","gray_banner","light_gray_banner",
+  "cyan_banner","purple_banner","blue_banner","brown_banner","green_banner",
+  "red_banner","black_banner",
+]);
+
+function stackSize(raw) {
+  const key = raw.toLowerCase().replace(/[\s\-]+/g,'_').replace(/^minecraft:/,'');
+  if (STACK1.has(key)) return 1;
+  if (STACK16.has(key)) return 16;
+  return 64;
+}
+
+function stackInfo(name, total) {
+  const sz = stackSize(name);
+  if (sz === 1) return {stacks:null, shulkers:null, nonStackable:true};
+  const stacks = Math.ceil(total / sz);
+  const shulkers = Math.ceil(stacks / 27);
+  return {stacks, shulkers, nonStackable:false, sz};
+}
+
+let sheetData = [];
+let parsedRows = [];
+
+function convert() {
+  const text = document.getElementById("input").value;
+  const lines = text.split("\n");
+  parsedRows = [];
+  for (const line of lines) {
+    if (!line.includes("|") || line.includes("Material List for schematic") || line.includes("+---")) continue;
+    const parts = line.split("|").map(x=>x.trim()).filter(x=>x.length);
+    if (parts.length !== 4) continue;
+    if (parts[0]==="Item") continue;
+    const name = parts[0];
+    const total = parseInt(parts[1].replace(/,/g,''), 10) || 0;
+    const info = stackInfo(name, total);
+    parsedRows.push({name, total, ...info});
+  }
+  renderTable();
+  buildTSV();
+}
+
+function renderTable() {
+  const el = document.getElementById("preview");
+  if (!parsedRows.length) { el.innerHTML=''; return; }
+  let html = `<table><thead><tr>
+    <th>Item</th><th>Total</th><th>Stacks</th><th>Shulker boxes</th><th>Have it?</th>
+  </tr></thead><tbody>`;
+  parsedRows.forEach((r,i) => {
+    const stackCell = r.nonStackable
+      ? `<span class="pill pill-ns">not stackable</span>`
+      : `${r.stacks} <span class="pill pill-s">×${r.sz}</span>`;
+    const shulkerCell = r.nonStackable
+      ? `—`
+      : r.shulkers > 1
+        ? `${r.shulkers} <span class="pill pill-sh">shulkers</span>`
+        : `<1`;
+    html += `<tr>
+      <td>${r.name}</td>
+      <td class="num">${r.total.toLocaleString()}</td>
+      <td class="num">${stackCell}</td>
+      <td class="num">${shulkerCell}</td>
+      <td class="cb-cell"><input type="checkbox" data-i="${i}" onchange="updateTSV()"></td>
+    </tr>`;
+  });
+  html += `</tbody></table>
+  <p class="note">Stacks = ×64 (×16 for signs/banners/ender pearls). Shulker boxes = 27 stacks each. "Have it?" column copies as TRUE/FALSE.</p>`;
+  el.innerHTML = html;
+}
+
+function buildTSV() {
+  sheetData = parsedRows.map((r,i) => {
+    const checked = document.querySelector(`input[data-i="${i}"]`)?.checked ?? false;
+    const stacks = r.nonStackable ? "not stackable" : r.stacks;
+    const shulkers = r.nonStackable ? "" : r.shulkers > 1 ? r.shulkers : "<1";
+    return [r.name, r.total, stacks, shulkers, checked ? "TRUE" : "FALSE"];
+  });
+  const header = ["Item","Total","Stacks","Shulker boxes","Have it?"];
+  const tsv = [header, ...sheetData].map(r=>r.join("\t")).join("\n");
+  document.getElementById("output").value = tsv;
+}
+
+function updateTSV() { buildTSV(); }
+
+function copyTSV() {
+  buildTSV();
+  const tsv = document.getElementById("output").value;
+  if (!tsv.trim()) { alert("Convert something first."); return; }
+  navigator.clipboard.writeText(tsv).then(()=>alert("Copied! Paste directly into Google Sheets."));
+}
+</script>

@@ -1,0 +1,830 @@
+<?php
+// ── API handler ──────────────────────────────────────────────────────────────
+$JSON_FILE = __DIR__ . '/milestones.json';
+
+function load(): array
+{
+    global $JSON_FILE;
+    if (!file_exists($JSON_FILE)) return [];
+    $data = json_decode(file_get_contents($JSON_FILE), true);
+    return is_array($data) ? $data : [];
+}
+
+function save(array $data): void
+{
+    global $JSON_FILE;
+    file_put_contents($JSON_FILE, json_encode($data, JSON_PRETTY_PRINT));
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    $body = json_decode(file_get_contents('php://input'), true) ?? [];
+    $action = $body['action'] ?? '';
+    $milestones = load();
+
+    if ($action === 'add') {
+        $entry = [
+            'id'       => uniqid('ms_', true),
+            'name'     => trim($body['name'] ?? ''),
+            'datetime' => $body['datetime'] ?? date('c'),
+            'category' => $body['category'] ?? 'Other',
+        ];
+        if ($entry['name'] === '') {
+            echo json_encode(['ok' => false, 'error' => 'Name required']);
+            exit;
+        }
+        array_unshift($milestones, $entry);
+        save($milestones);
+        echo json_encode(['ok' => true, 'milestone' => $entry]);
+    } elseif ($action === 'delete') {
+        $id = $body['id'] ?? '';
+        $milestones = array_values(array_filter($milestones, fn($m) => $m['id'] !== $id));
+        save($milestones);
+        echo json_encode(['ok' => true]);
+    } elseif ($action === 'list') {
+        echo json_encode(['ok' => true, 'milestones' => $milestones]);
+    } else {
+        echo json_encode(['ok' => false, 'error' => 'Unknown action']);
+    }
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milestone Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #ffffff;
+            background-color: #202020;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* TOP BAR */
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 40px;
+            background-color: #2726269a;
+            border-bottom: 1px solid #ffffff;
+            height: 100px;
+            flex-shrink: 0;
+        }
+
+        .topbar h1 {
+            font-size: 30px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .topbar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-wrap {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-wrap svg {
+            position: absolute;
+            left: 16px;
+            color: #aaa;
+            pointer-events: none;
+        }
+
+        #search {
+            width: 100%;
+            padding: 10px 20px 10px 44px;
+            background-color: #636262;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: 500;
+            color: #ffffff;
+            font-family: 'Roboto', sans-serif;
+            transition: all 0.2s ease-in-out;
+            outline: none;
+        }
+
+        #search::placeholder {
+            color: #ccc;
+        }
+
+        #search:focus {
+            background-color: #757474;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #636262;
+            color: #ffffff;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: 500;
+            font-family: 'Roboto', sans-serif;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #757474;
+        }
+
+        /* FILTER BAR */
+        .filter-bar {
+            padding: 10px 40px;
+            background-color: #272626;
+            border-bottom: 1px solid #3a3a3a;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar span {
+            font-size: 13px;
+            color: #aaa;
+            margin-right: 4px;
+        }
+
+        .filter-btn {
+            padding: 5px 14px;
+            font-size: 14px;
+            border-radius: 20px;
+            background-color: #3a3a3a;
+            color: #aaa;
+        }
+
+        .filter-btn:hover {
+            background-color: #484848;
+            color: #fff;
+        }
+
+        .filter-btn.active {
+            background-color: #636262;
+            color: #fff;
+        }
+
+        /* COUNT BAR */
+        .count-bar {
+            padding: 6px 40px;
+            font-size: 13px;
+            color: #aaa;
+            background-color: #272626;
+            border-bottom: 1px solid #3a3a3a;
+            flex-shrink: 0;
+        }
+
+        /* LIST */
+        #list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 40px;
+        }
+
+        #list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #list::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+
+        .milestone-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid #3a3a3a;
+            transition: background 0.15s;
+        }
+
+        .milestone-row:last-child {
+            border-bottom: none;
+        }
+
+        .milestone-row:hover {
+            background-color: #2a2a2a;
+            margin: 0 -10px;
+            padding-left: 10px;
+            padding-right: 10px;
+            border-radius: 8px;
+        }
+
+        /* Category badge */
+        .cat-badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .cat-first {
+            background-color: #3d5a1e;
+            color: #a8d85e;
+        }
+
+        .cat-build {
+            background-color: #1e3a5a;
+            color: #5eaad8;
+        }
+
+        .cat-farm {
+            background-color: #5a3a1e;
+            color: #d8a45e;
+        }
+
+        .cat-other {
+            background-color: #3a3a3a;
+            color: #aaaaaa;
+        }
+
+        .milestone-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+            width: 32px;
+            text-align: center;
+        }
+
+        .milestone-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .milestone-name {
+            font-size: 18px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .milestone-meta {
+            font-size: 13px;
+            color: #aaa;
+            margin-top: 2px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .milestone-meta .achieved {
+            color: #888;
+        }
+
+        .milestone-meta .elapsed {
+            color: #5eaad8;
+            font-weight: 500;
+        }
+
+        .del-btn {
+            padding: 6px 12px;
+            font-size: 16px;
+            background-color: transparent;
+            border-radius: 8px;
+            color: #aaa;
+            flex-shrink: 0;
+        }
+
+        .del-btn:hover {
+            background-color: rgba(220, 50, 50, 0.2);
+            color: #ff6b6b;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            font-size: 18px;
+        }
+
+        /* MODAL */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background-color: #272626;
+            border: 1px solid #ffffff;
+            border-radius: 15px;
+            padding: 32px;
+            width: min(500px, 95vw);
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: popIn 0.2s ease;
+        }
+
+        .modal::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .modal::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ccc;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .field input[type="text"],
+        .field input[type="datetime-local"],
+        .field select {
+            width: 100%;
+            padding: 10px 20px;
+            background-color: #636262;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #ffffff;
+            font-family: 'Roboto', sans-serif;
+            outline: none;
+            transition: background 0.2s;
+            appearance: none;
+        }
+
+        .field input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            background-color: #757474;
+        }
+
+        /* Category radio buttons */
+        .cat-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .cat-option input {
+            display: none;
+        }
+
+        .cat-option label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background-color: #3a3a3a;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: normal;
+            text-transform: none;
+            color: #ccc;
+            transition: background 0.15s, color 0.15s;
+            border: 2px solid transparent;
+        }
+
+        .cat-option input:checked+label {
+            border-color: #ffffff88;
+            background-color: #636262;
+            color: #fff;
+        }
+
+        .cat-option label:hover {
+            background-color: #484848;
+            color: #fff;
+        }
+
+        .cat-icon {
+            font-size: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn-cancel {
+            background-color: #3a3a3a;
+            font-size: 18px;
+        }
+
+        .btn-save {
+            background-color: #636262;
+            font-size: 18px;
+        }
+
+        .btn-save:hover {
+            background-color: #757474;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: #636262;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 15px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .toast.err {
+            background-color: #7a3030;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <h1>Milestones</h1>
+        <div class="search-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" id="search" placeholder="Search milestones…">
+        </div>
+        <div class="topbar-right">
+            <button id="addBtn">+ Add Milestone</button>
+        </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+        <span>Filter:</span>
+        <button class="filter-btn active" data-cat="All">All</button>
+        <button class="filter-btn" data-cat="First time">First Time</button>
+        <button class="filter-btn" data-cat="Build complete">Build</button>
+        <button class="filter-btn" data-cat="Farm complete">Farm</button>
+        <button class="filter-btn" data-cat="Other">Other</button>
+    </div>
+
+    <!-- COUNT BAR -->
+    <div class="count-bar" id="countBar">Loading…</div>
+
+    <!-- LIST -->
+    <div id="list"></div>
+
+    <!-- MODAL -->
+    <div class="overlay" id="overlay">
+        <div class="modal">
+            <h2>New Milestone</h2>
+            <div class="field">
+                <label>Name</label>
+                <input type="text" id="mName" placeholder="e.g. Killed the Ender Dragon">
+            </div>
+            <div class="field">
+                <label>Date &amp; Time</label>
+                <input type="datetime-local" id="mDatetime">
+            </div>
+            <div class="field">
+                <label>Category</label>
+                <div class="cat-options">
+                    <div class="cat-option">
+                        <input type="radio" name="cat" id="catFirst" value="First time" checked>
+                        <label for="catFirst"><span class="cat-icon"></span> First Time</label>
+                    </div>
+                    <div class="cat-option">
+                        <input type="radio" name="cat" id="catBuild" value="Build complete">
+                        <label for="catBuild"><span class="cat-icon"></span> Build Complete</label>
+                    </div>
+                    <div class="cat-option">
+                        <input type="radio" name="cat" id="catFarm" value="Farm complete">
+                        <label for="catFarm"><span class="cat-icon"></span> Farm Complete</label>
+                    </div>
+                    <div class="cat-option">
+                        <input type="radio" name="cat" id="catOther" value="Other">
+                        <label for="catOther"><span class="cat-icon"></span> Other</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="cancelBtn">Cancel</button>
+                <button class="btn-save" id="saveBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const CAT_META = {
+            'First time': {
+                cls: 'cat-first',
+                icon: '⭐'
+            },
+            'Build complete': {
+                cls: 'cat-build',
+                icon: '🏗️'
+            },
+            'Farm complete': {
+                cls: 'cat-farm',
+                icon: '🌾'
+            },
+            'Other': {
+                cls: 'cat-other',
+                icon: '📌'
+            },
+        };
+
+        let milestones = [];
+        let activeFilter = 'All';
+        let searchTerm = '';
+
+        // ── API ───────────────────────────────────────────────────────────────────────
+        async function api(payload) {
+            const r = await fetch(location.href, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload),
+            });
+            return r.json();
+        }
+
+        async function loadMilestones() {
+            const data = await api({
+                action: 'list'
+            });
+            if (data.ok) {
+                milestones = data.milestones;
+                render();
+            }
+        }
+
+        async function addMilestone(name, datetime, category) {
+            const data = await api({
+                action: 'add',
+                name,
+                datetime,
+                category
+            });
+            if (data.ok) {
+                milestones.unshift(data.milestone);
+                render();
+                toast('Milestone added!');
+            } else toast(data.error || 'Error', true);
+        }
+
+        async function deleteMilestone(id) {
+            const data = await api({
+                action: 'delete',
+                id
+            });
+            if (data.ok) {
+                milestones = milestones.filter(m => m.id !== id);
+                render();
+                toast('Deleted.');
+            }
+        }
+
+        // ── Render ────────────────────────────────────────────────────────────────────
+        function elapsed(isoStr) {
+            const diff = Date.now() - new Date(isoStr).getTime();
+            if (diff < 0) return 'in the future';
+            const s = Math.floor(diff / 1000);
+            if (s < 60) return `${s}s ago`;
+            const m = Math.floor(s / 60);
+            if (m < 60) return `${m}m ago`;
+            const h = Math.floor(m / 60);
+            if (h < 24) return `${h}h ago`;
+            const d = Math.floor(h / 24);
+            if (d < 30) return `${d} day${d===1?'':'s'} ago`;
+            const mo = Math.floor(d / 30.44);
+            if (mo < 12) return `${mo} month${mo===1?'':'s'} ago`;
+            const yr = Math.floor(mo / 12);
+            return `${yr} year${yr===1?'':'s'} ago`;
+        }
+
+        function fmtDatetime(isoStr) {
+            return new Date(isoStr).toLocaleString(undefined, {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            });
+        }
+
+        function render() {
+            const list = document.getElementById('list');
+            const count = document.getElementById('countBar');
+
+            let visible = milestones.filter(m => {
+                const matchCat = activeFilter === 'All' || m.category === activeFilter;
+                const matchSearch = !searchTerm || m.name.toLowerCase().includes(searchTerm);
+                return matchCat && matchSearch;
+            });
+
+            count.textContent = `${visible.length} milestone${visible.length !== 1 ? 's' : ''}`;
+
+            if (!visible.length) {
+                list.innerHTML = `<div class="empty">${milestones.length ? 'No results.' : 'No milestones yet — add one!'}</div>`;
+                return;
+            }
+
+            list.innerHTML = visible.map(m => {
+                const meta = CAT_META[m.category] || CAT_META['Other'];
+                return `
+        <div class="milestone-row" data-id="${m.id}">
+            <span class="milestone-icon">${meta.icon}</span>
+            <div class="milestone-info">
+                <div class="milestone-name">${esc(m.name)}</div>
+                <div class="milestone-meta">
+                    <span class="achieved">📅 ${fmtDatetime(m.datetime)}</span>
+                    <span class="elapsed">⏱ ${elapsed(m.datetime)}</span>
+                </div>
+            </div>
+            <span class="cat-badge ${meta.cls}">${esc(m.category)}</span>
+            <button class="del-btn" data-id="${m.id}" title="Delete">✕</button>
+        </div>`;
+            }).join('');
+
+            list.querySelectorAll('.del-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    if (confirm('Delete this milestone?')) deleteMilestone(btn.dataset.id);
+                });
+            });
+        }
+
+        function esc(str) {
+            return String(str).replace(/[&<>"']/g, c => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            } [c]));
+        }
+
+        // ── Modal ─────────────────────────────────────────────────────────────────────
+        function localDatetimeStr() {
+            const now = new Date();
+            now.setSeconds(0, 0);
+            return now.toISOString().slice(0, 16);
+        }
+
+        document.getElementById('addBtn').addEventListener('click', () => {
+            document.getElementById('mName').value = '';
+            document.getElementById('mDatetime').value = localDatetimeStr();
+            document.querySelector('input[name="cat"][value="First time"]').checked = true;
+            document.getElementById('overlay').classList.add('open');
+            setTimeout(() => document.getElementById('mName').focus(), 50);
+        });
+
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            document.getElementById('overlay').classList.remove('open');
+        });
+
+        document.getElementById('overlay').addEventListener('click', e => {
+            if (e.target === document.getElementById('overlay'))
+                document.getElementById('overlay').classList.remove('open');
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            const name = document.getElementById('mName').value.trim();
+            const datetime = document.getElementById('mDatetime').value;
+            const category = document.querySelector('input[name="cat"]:checked')?.value || 'Other';
+
+            if (!name) {
+                toast('Please enter a name.', true);
+                return;
+            }
+            if (!datetime) {
+                toast('Please set a date.', true);
+                return;
+            }
+
+            document.getElementById('overlay').classList.remove('open');
+            await addMilestone(name, new Date(datetime).toISOString(), category);
+        });
+
+        document.getElementById('mName').addEventListener('keydown', e => {
+            if (e.key === 'Enter') document.getElementById('saveBtn').click();
+        });
+
+        // ── Filter / Search ───────────────────────────────────────────────────────────
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeFilter = btn.dataset.cat;
+                render();
+            });
+        });
+
+        document.getElementById('search').addEventListener('input', e => {
+            searchTerm = e.target.value.trim().toLowerCase();
+            render();
+        });
+
+        // ── Toast ─────────────────────────────────────────────────────────────────────
+        let toastTimer;
+
+        function toast(msg, isErr = false) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast' + (isErr ? ' err' : '') + ' show';
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        // ── Live elapsed refresh ──────────────────────────────────────────────────────
+        setInterval(render, 60000);
+
+        // ── Init ──────────────────────────────────────────────────────────────────────
+        loadMilestones();
+    </script>
+</body>
+
+</html>
