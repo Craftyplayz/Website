@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hypixel Collection Tracker</title>
+    <script src="/js/site.js"></script>
+</head>
+
+<body>
+    <!--#header-->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QPBCTT7P8J');
+</script>
+<link rel="stylesheet" href="/css/global.css">
+<header id="header">
+    <nav>
+        <a href="/"><img src="/images/catsmall.webp" alt="Crafty Playz Logo"></a>
+        <div class="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about.html">About Me</a></li>
+            <li class="dropdown">
+                <a href="#">Games</a>
+                <ul class="submenu">
+                    <li><a href="/steam/">Steam Stats</a></li>
+                    <li><a href="/factorio/">Factorio</a></li>
+                    <li><a href="/minecraft/">Minecraft</a></li>
+                    <li><a href="/quiz">Quizes</a></li>
+                </ul>
+            </li>
+            <li><a href="/books/">Books</a></li>
+            <li class="dropdown"><a href="/extras">Extras</a>
+                <ul class="submenu">
+                    <li><a href="/update/">Fake Update Screens</a></li>
+                    <li><a href="/tests/speedtest">Reading Speed test</a></li>
+                    <li><a href="/extras/trump">Random Trump Tweet</a></li>
+                    <li><a href="/extras/insult">Random Insult</a></li>
+                    <li><a href="/extras/harrypotter/characters">Harry Potter Character Info</a></li>
+                    <li><a href="/extras/qr">QR Code generator</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+<button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
+<!--#/header-->
+
+    <div class="title" id="tracker"></div>
+
+    <script>
+        var esc = site.esc;
+        var profileIds = [
+            '22159541fde841e6a104593e1cb3a456',
+            '39ac5666450b4635873573217a72f143',
+            'dd5b7e595e7846a983d11f9cafa0cd42',
+            'faccdbb77a1f4ed6a5d442dca531089b'
+        ];
+        var profileType = new URLSearchParams(location.search).get('profile') === 'ironman' ? 'ironman' : 'main';
+
+        // Data comes from /data/hypixel/*.json (written by scripts/fetch-data.js)
+        Promise.all([site.json('/data/hypixel/members.json'), site.json('/data/hypixel/collections.json')]).then(function (res) {
+            var members = res[0].members, data = res[1];
+            var total = 0, all = {};
+            profileIds.forEach(function (id, key) {
+                (members[id] || []).forEach(function (p) {
+                    var selected = profileType === 'main' ? 'Mango' : (key === 3 ? 'Banana' : 'Blueberry');
+                    if (p.cute_name !== selected) return;
+                    Object.keys(p.collection).forEach(function (item) {
+                        all[item] = (all[item] || 0) + p.collection[item];
+                        total += p.collection[item];
+                    });
+                });
+            });
+
+            var categories = ['FARMING', 'MINING', 'COMBAT', 'FORAGING', 'FISHING', 'RIFT'];
+            var sorted = {};
+            Object.keys(all).forEach(function (itemId) {
+                for (var i = 0; i < categories.length; i++) {
+                    var cat = data.collections[categories[i]];
+                    if (cat && cat.items[itemId]) {
+                        (sorted[categories[i]] = sorted[categories[i]] || {})[itemId] = all[itemId];
+                        break;
+                    }
+                }
+            });
+
+            var h = 'Hypixel Collection Tracker<h2>Total: ' + site.shortenNumber(total) + '</h2>' +
+                '<a href="/hypixel/collections/?profile=main"><button>Main</button></a> ' +
+                '<a href="/hypixel/collections/?profile=ironman"><button>Ironman</button></a><table>';
+            Object.keys(sorted).forEach(function (category) {
+                var items = Object.keys(sorted[category]).map(function (itemId) {
+                    var item = data.collections[category].items[itemId];
+                    var max = item.tiers[item.tiers.length - 1].amountRequired;
+                    var color = Math.max(0, max - sorted[category][itemId]) === 0 ? 'green' : '#636262';
+                    return '<a href="/hypixel/collections/track.html?item=' + encodeURIComponent(itemId) + '&name=' + encodeURIComponent(item.name) + '&profile=' + profileType + '">' +
+                        '<button style="background-color: ' + color + ';">' + esc(item.name) + '</button></a>';
+                });
+                h += '<tr><td>' + category + ':</td><td>' + items.join(', ') + '</td></tr>';
+            });
+            document.getElementById('tracker').innerHTML = h + '</table>';
+        });
+    </script>
+
+    <!--#footer-->
+<footer>
+    © <span id="site-year"></span> CraftyPlayz
+    <p id="site-breadcrumbs"></p>
+    <p id="site-catfact"></p>
+</footer>
+
+<script>
+    const navSlide = () => {
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+    navSlide();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#toggleHeader').click(function () {
+            $('#header').toggle();
+        });
+    });
+</script>
+<script src="/js/site.js"></script>
+<!--#/footer-->
+
+</body>
+
+</html>

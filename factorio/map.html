@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factorio Map</title>
+    <style>
+        html, body { margin: 0; height: 100%; }
+        iframe { border: 0; }
+    </style>
+</head>
+
+<body>
+    <script>
+        // ?map=<name> (letters, digits, - and _ only)
+        var map = new URLSearchParams(location.search).get('map') || '';
+        if (/^[A-Za-z0-9_-]+$/.test(map)) {
+            var frame = document.createElement('iframe');
+            frame.src = 'https://assets.craftyplayz.com/factorio/' + map + '/';
+            frame.width = '100%';
+            frame.height = '100%';
+            frame.frameBorder = '0';
+            frame.textContent = 'Server Currently Offline, Please check back later';
+            document.body.appendChild(frame);
+        }
+    </script>
+</body>
+
+</html>

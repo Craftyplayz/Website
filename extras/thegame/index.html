@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Game</title>
+</head>
+<body>
+    <!--#header-->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QPBCTT7P8J');
+</script>
+<link rel="stylesheet" href="/css/global.css">
+<header id="header">
+    <nav>
+        <a href="/"><img src="/images/catsmall.webp" alt="Crafty Playz Logo"></a>
+        <div class="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about.html">About Me</a></li>
+            <li class="dropdown">
+                <a href="#">Games</a>
+                <ul class="submenu">
+                    <li><a href="/steam/">Steam Stats</a></li>
+                    <li><a href="/factorio/">Factorio</a></li>
+                    <li><a href="/minecraft/">Minecraft</a></li>
+                    <li><a href="/quiz">Quizes</a></li>
+                </ul>
+            </li>
+            <li><a href="/books/">Books</a></li>
+            <li class="dropdown"><a href="/extras">Extras</a>
+                <ul class="submenu">
+                    <li><a href="/update/">Fake Update Screens</a></li>
+                    <li><a href="/tests/speedtest">Reading Speed test</a></li>
+                    <li><a href="/extras/trump">Random Trump Tweet</a></li>
+                    <li><a href="/extras/insult">Random Insult</a></li>
+                    <li><a href="/extras/harrypotter/characters">Harry Potter Character Info</a></li>
+                    <li><a href="/extras/qr">QR Code generator</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+<button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
+<!--#/header-->
+    
+
+    <div class="title">
+        <h1>The Game</h1><br>
+        <h1>Time Since Last Loss: <span id="current"></span></h1>
+        <h1>Best Time: <span id="best"></span></h1>
+        <button type="button" id="myButton">I Lost!</button>
+    </div>
+
+
+    <div class="title">
+        <h1>Previous Times</h1>
+        <div id="previous"></div>
+    </div>
+
+
+
+    <script>
+        // State lives in this browser's localStorage (no server storage on a static site)
+        var KEY = 'thegame';
+        var state;
+        try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { }
+        if (!state || typeof state.last !== 'number') state = { last: Date.now(), best: 0, previous: [] };
+
+        function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { } }
+
+        function formatTime(seconds) {
+            var days = Math.floor(seconds / 86400);
+            var hours = Math.floor((seconds % 86400) / 3600);
+            var minutes = Math.floor((seconds % 3600) / 60);
+            var parts = [];
+            if (days > 0) parts.push(days + 'd');
+            if (hours > 0 || parts.length) parts.push(hours + 'h');
+            if (minutes > 0 || parts.length) parts.push(minutes + 'm');
+            parts.push((seconds % 60) + 's');
+            return parts.join(' ');
+        }
+
+        function render() {
+            document.getElementById('current').textContent = formatTime(Math.floor((Date.now() - state.last) / 1000));
+            document.getElementById('best').textContent = formatTime(state.best);
+            var prev = document.getElementById('previous');
+            prev.innerHTML = '';
+            state.previous.forEach(function (t) {
+                var p = document.createElement('p');
+                p.textContent = formatTime(t);
+                prev.appendChild(p);
+            });
+        }
+
+        document.getElementById('myButton').addEventListener('click', function () {
+            var since = Math.floor((Date.now() - state.last) / 1000);
+            state.last = Date.now();
+            if (since > state.best) state.best = since;
+            state.previous.push(since);
+            save();
+            render();
+        });
+
+        save();
+        render();
+        setInterval(render, 1000);
+    </script>
+    <!--#footer-->
+<footer>
+    © <span id="site-year"></span> CraftyPlayz
+    <p id="site-breadcrumbs"></p>
+    <p id="site-catfact"></p>
+</footer>
+
+<script>
+    const navSlide = () => {
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+    navSlide();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#toggleHeader').click(function () {
+            $('#header').toggle();
+        });
+    });
+</script>
+<script src="/js/site.js"></script>
+<!--#/footer-->
+</body>
+</html>
