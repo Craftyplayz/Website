@@ -70,8 +70,8 @@ function formatTime($seconds)
     <meta http-equiv="refresh" content="-1">
 </head>
 <body>
-    <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php'; ?>
-    <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php'; ?>
+    <!--#header--><!--#/header-->
+    
 
     <div class="title">
         <h1>The Game</h1><br>
@@ -92,6 +92,6 @@ function formatTime($seconds)
 
 
 
-    <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php'; ?>
+    <!--#footer--><!--#/footer-->
 </body>
 </html>

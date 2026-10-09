@@ -11,10 +11,8 @@
 
 <body>
 
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <!--#header--><!--#/header-->
+
 
     <div class="about">
         <h1>I play alot of Minecraft</h1>
@@ -86,9 +84,7 @@ foreach ($images as $image) {
 
 
     <script src="js/konami.js"></script>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+    <!--#footer--><!--#/footer-->
 </body>
 
 </html>

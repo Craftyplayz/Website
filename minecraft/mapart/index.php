@@ -12,10 +12,8 @@
 
 
 <body>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <!--#header--><!--#/header-->
+
 
     <div class="title" id="screenshots">
         <h1>Maparts</h1>
@@ -35,9 +33,7 @@
 
 
 
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+    <!--#footer--><!--#/footer-->
 </body>
 
 </html>

@@ -7,10 +7,8 @@
     <title>Crafty Playz</title>
 </head>
 <body>
-<?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-?>
+<!--#header--><!--#/header-->
+
 
 <div class="title">
     <h1>Personal scripts that I use</h1>
@@ -21,7 +19,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
 <a href="/Code/minecraft/index.php">Minecraft</a><br>
 <?php
     $directory = $_SERVER['DOCUMENT_ROOT'] . '/Code/';
-    $excludedFiles = ['.', '..', 'index.php', 'jelly.php'];
+    $excludedFiles = ['.', '..', 'index.php'];
 
     $files = scandir($directory);
     foreach ($files as $file) {
@@ -34,9 +32,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
 
 
 
-<?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-?>
+<!--#footer--><!--#/footer-->
 
 </body>
 </html>

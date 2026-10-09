@@ -7,10 +7,8 @@
     <title>Crafty Playz</title>
 </head>
 <body>
-<?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-?>
+<!--#header--><!--#/header-->
+
 
 <div class="title">
     <h1>Minecraft Helpers</h1>
@@ -34,9 +32,7 @@ foreach ($items as $item) {
 
 
 
-<?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-?>
+<!--#footer--><!--#/footer-->
 
 </body>
 </html>

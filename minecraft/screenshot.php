@@ -29,9 +29,7 @@ $imageClass = "screenshot-image";
 
     <img src="<?php echo $imagePath . $imageId; ?>" alt="<?php echo $imageAlt; ?>" class="screenshotfull">
     <button onclick="window.history.back()" style="display: block; margin: 0 auto;">Back</button>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+    <!--#footer--><!--#/footer-->
 </body>
 
 </html>

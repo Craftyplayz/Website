@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Game Stats</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/steam.css">
+    <script src="/js/site.js"></script>
+</head>
+
+<body>
+    <!--#header-->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QPBCTT7P8J');
+</script>
+<link rel="stylesheet" href="/css/global.css">
+<header id="header">
+    <nav>
+        <a href="/"><img src="/images/catsmall.webp" alt="Crafty Playz Logo"></a>
+        <div class="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about.html">About Me</a></li>
+            <li class="dropdown">
+                <a href="#">Games</a>
+                <ul class="submenu">
+                    <li><a href="/steam/">Steam Stats</a></li>
+                    <li><a href="/factorio/">Factorio</a></li>
+                    <li><a href="/minecraft/">Minecraft</a></li>
+                    <li><a href="/quiz">Quizes</a></li>
+                </ul>
+            </li>
+            <li><a href="/books/">Books</a></li>
+            <li class="dropdown"><a href="/extras">Extras</a>
+                <ul class="submenu">
+                    <li><a href="/update/">Fake Update Screens</a></li>
+                    <li><a href="/tests/speedtest">Reading Speed test</a></li>
+                    <li><a href="/extras/trump">Random Trump Tweet</a></li>
+                    <li><a href="/extras/insult">Random Insult</a></li>
+                    <li><a href="/extras/harrypotter/characters">Harry Potter Character Info</a></li>
+                    <li><a href="/extras/qr">QR Code generator</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+<button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
+<!--#/header-->
+
+    <div class="info" id="gameinfo"></div>
+    <table id="achievements"></table>
+
+    <script>
+        var esc = site.esc;
+        var game = new URLSearchParams(location.search).get('game') || '';
+        // Only digits are valid app ids; anything else is rejected
+        if (/^\d+$/.test(game)) {
+            site.json('/data/steam/games/' + game + '.json').then(function (d) {
+                var i = d.info;
+                if (i) {
+                    document.title = i.name + ' Stats';
+                    var h = '';
+                    var site_ = /^https?:\/\//i.test(i.website || '') ? i.website : '';
+                    h += '<a href="' + esc(site_) + '"><h1>' + esc(i.name) + '</h1></a>';
+                    h += '<h2>' + esc(site.decode(i.short_description)) + '</h2>';
+                    h += '<h3>Release Date: ' + esc(i.release_date && i.release_date.date) + '</h3>';
+                    h += '<h3>Price: £' + (i.price != null ? i.price / 100 : '') + '</h3>';
+                    if (i.metacritic) {
+                        var mu = /^https?:\/\//i.test(i.metacritic.url || '') ? i.metacritic.url : '';
+                        h += '<h3>Metacritic Score: ' + esc(i.metacritic.score) + '%</h3>';
+                        h += '<h3>Metacritic Link: <a href="' + esc(mu) + '">' + esc(mu) + '</a></h3>';
+                    }
+                    h += '<h3>Steam Link: <a href="https://store.steampowered.com/app/' + game + '">' + esc(i.name) + '</a></h3>';
+                    document.getElementById('gameinfo').innerHTML = h;
+                }
+                var rows = '';
+                (d.achievements || []).forEach(function (a) {
+                    rows += '<tr><td>' + esc(a.name) + '</td>';
+                    if (a.achieved === 1) {
+                        var t = Math.floor(Date.now() / 1000) - a.unlocktime;
+                        var days = Math.floor(t / 86400), hours = Math.floor((t % 86400) / 3600);
+                        rows += '<td style="color: green;">Achieved</td><td>' + esc(a.description) + '</td><td>' +
+                            (days > 0 ? days + ' days ' : '') + (hours > 0 ? hours + ' hours ' : '') + 'ago</td>';
+                    } else {
+                        rows += '<td style="color: red;">Not Achieved</td><td>' + esc(a.description) + '</td><td></td>';
+                    }
+                    rows += '</tr>';
+                });
+                document.getElementById('achievements').innerHTML = rows;
+            }).catch(function () { });
+        }
+    </script>
+    <!--#footer-->
+<footer>
+    © <span id="site-year"></span> CraftyPlayz
+    <p id="site-breadcrumbs"></p>
+    <p id="site-catfact"></p>
+</footer>
+
+<script>
+    const navSlide = () => {
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+    navSlide();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#toggleHeader').click(function () {
+            $('#header').toggle();
+        });
+    });
+</script>
+<script src="/js/site.js"></script>
+<!--#/footer-->
+</body>
+
+</html>
