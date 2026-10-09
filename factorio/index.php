@@ -11,10 +11,8 @@
 </head>
 
 <body>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <!--#header--><!--#/header-->
+
     <div class="title">
         <h1>My Factorio Saves</h1>
         <h2>Currently playing a Megabase Factory (aim of 10k spm)</h2>
@@ -44,9 +42,7 @@
         }
         ?>
     </div>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+    <!--#footer--><!--#/footer-->
     <script>
         const navSlide = () => {
             const burger = document.querySelector('.hamburger');

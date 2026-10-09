@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Stats</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/steamnew.css">
+    <script src="/js/site.js"></script>
+</head>
+
+<body>
+    <!--#header-->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QPBCTT7P8J');
+</script>
+<link rel="stylesheet" href="/css/global.css">
+<header id="header">
+    <nav>
+        <a href="/"><img src="/images/catsmall.webp" alt="Crafty Playz Logo"></a>
+        <div class="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about.html">About Me</a></li>
+            <li class="dropdown">
+                <a href="#">Games</a>
+                <ul class="submenu">
+                    <li><a href="/steam/">Steam Stats</a></li>
+                    <li><a href="/factorio/">Factorio</a></li>
+                    <li><a href="/minecraft/">Minecraft</a></li>
+                    <li><a href="/quiz">Quizes</a></li>
+                </ul>
+            </li>
+            <li><a href="/books/">Books</a></li>
+            <li class="dropdown"><a href="/extras">Extras</a>
+                <ul class="submenu">
+                    <li><a href="/update/">Fake Update Screens</a></li>
+                    <li><a href="/tests/speedtest">Reading Speed test</a></li>
+                    <li><a href="/extras/trump">Random Trump Tweet</a></li>
+                    <li><a href="/extras/insult">Random Insult</a></li>
+                    <li><a href="/extras/harrypotter/characters">Harry Potter Character Info</a></li>
+                    <li><a href="/extras/qr">QR Code generator</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+<button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
+<!--#/header-->
+
+    <div class="title">
+        <h2 id="total"></h2>
+    </div>
+    <div id="games"></div>
+
+    <script>
+        // Data comes from /data/steam/owned.json (written by scripts/fetch-data.js)
+        var mobile = /(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i.test(navigator.userAgent);
+        var skip = [730, 682130, 469820, 1085750, 459820, 1463120];
+        var esc = site.esc;
+
+        function fmtTime(ts) {
+            var d = new Date(ts * 1000);
+            var t = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
+            var m = d.toLocaleDateString('en-GB', { month: 'short' });
+            var day = d.getDate();
+            var sfx = (day % 10 === 1 && day !== 11) ? 'st' : (day % 10 === 2 && day !== 12) ? 'nd' : (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
+            var s = t + ' ' + m + ' ' + day + sfx;
+            if (d.getFullYear() !== new Date().getFullYear()) s += ' ' + d.getFullYear();
+            return s;
+        }
+
+        site.json('/data/steam/owned.json').then(function (data) {
+            var games = data.games;
+            document.getElementById('total').textContent = games.length + ' Owned Games';
+            var html = '';
+            games.forEach(function (g) {
+                if (g.playtime_forever < 60 || skip.indexOf(g.appid) !== -1) return;
+                var hours = Math.round(g.playtime_forever / 60);
+                var playtime = g.playtime_2weeks !== undefined
+                    ? hours + ' Hours <br> ' + Math.round(g.playtime_2weeks / 60) + ' Hours Past 2 Weeks'
+                    : hours + ' Hours';
+                var days = Math.round((Date.now() / 1000 - g.rtime_last_played) / 86400);
+                var last = days <= 0 ? 'Today' : days === 1 ? 'Yesterday' : days + ' days ago';
+                var img = 'https://cdn.cloudflare.steamstatic.com/steam/apps/' + g.appid + '/' + (mobile ? 'library_600x900.jpg' : 'header.jpg');
+                var done = g.achieved || 0, total = g.total_achievements || 0;
+                var pct = total > 0 ? Math.round(done / total * 100) : 0;
+                var link = '/steam/game.html?game=' + g.appid;
+                html += '<div class="games">\n' +
+                    '  <a href="' + link + '"><img class="banner" src="' + img + '"></a>\n' +
+                    '  <a href="' + link + '" style="width: 50%; color: white"><p class="gamename">' + esc(g.name) + '</p></a>\n' +
+                    '  <div class="info">\n' +
+                    '    <div class="item"><p>Playtime</p><p>' + playtime + '</p></div>\n' +
+                    '    <div class="item"><p>Last Played</p><p title="' + esc(fmtTime(g.rtime_last_played)) + '">' + last + '</p></div>\n' +
+                    '    <div class="item"><p>Achievements ' + done + '/' + total + ' (' + pct + '%)</p><progress value="' + pct + '" max="100"></progress></div>\n' +
+                    '    <div class="item stats"><a href="' + link + '"><button>Stats</button></a></div>\n' +
+                    '  </div>\n</div>\n';
+            });
+            document.getElementById('games').innerHTML = html;
+        });
+    </script>
+    <!--#footer-->
+<footer>
+    © <span id="site-year"></span> CraftyPlayz
+    <p id="site-breadcrumbs"></p>
+    <p id="site-catfact"></p>
+</footer>
+
+<script>
+    const navSlide = () => {
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+    navSlide();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#toggleHeader').click(function () {
+            $('#header').toggle();
+        });
+    });
+</script>
+<script src="/js/site.js"></script>
+<!--#/footer-->
+</body>
+
+</html>

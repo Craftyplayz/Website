@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Cover Search</title>
+        <!--#header-->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QPBCTT7P8J');
+</script>
+<link rel="stylesheet" href="/css/global.css">
+<header id="header">
+    <nav>
+        <a href="/"><img src="/images/catsmall.webp" alt="Crafty Playz Logo"></a>
+        <div class="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about.html">About Me</a></li>
+            <li class="dropdown">
+                <a href="#">Games</a>
+                <ul class="submenu">
+                    <li><a href="/steam/">Steam Stats</a></li>
+                    <li><a href="/factorio/">Factorio</a></li>
+                    <li><a href="/minecraft/">Minecraft</a></li>
+                    <li><a href="/quiz">Quizes</a></li>
+                </ul>
+            </li>
+            <li><a href="/books/">Books</a></li>
+            <li class="dropdown"><a href="/extras">Extras</a>
+                <ul class="submenu">
+                    <li><a href="/update/">Fake Update Screens</a></li>
+                    <li><a href="/tests/speedtest">Reading Speed test</a></li>
+                    <li><a href="/extras/trump">Random Trump Tweet</a></li>
+                    <li><a href="/extras/insult">Random Insult</a></li>
+                    <li><a href="/extras/harrypotter/characters">Harry Potter Character Info</a></li>
+                    <li><a href="/extras/qr">QR Code generator</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+<button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
+<!--#/header-->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            text-decoration: none;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #ffffff;
+            background-color: #202020;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .search-section {
+            background-color: #272626;
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #636262;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px 20px;
+            background-color: #636262;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: 500;
+            transition: all 0.5s ease-in-out;
+            color: #ffffff;
+        }
+
+        input[type="text"]:hover {
+            background-color: lime;
+            color: #000000;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            background-color: lime;
+            color: #000000;
+        }
+
+        input[type="text"]::placeholder {
+            color: #cccccc;
+        }
+
+        input[type="text"]:hover::placeholder,
+        input[type="text"]:focus::placeholder {
+            color: #000000;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #636262;
+            color: #ffffff;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: lime;
+            color: #000000;
+        }
+
+        button:disabled {
+            background-color: #3a3a3a;
+            cursor: not-allowed;
+            color: #666666;
+        }
+
+        .language-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffffff;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .language-toggle input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 15px;
+            font-size: 16px;
+        }
+
+        .status.loading {
+            background-color: #3a3a3a;
+            color: #ffffff;
+            border: 1px solid #636262;
+        }
+
+        .status.error {
+            background-color: #4a2020;
+            color: #ff6b6b;
+            border: 1px solid #8b0000;
+        }
+
+        .status.success {
+            background-color: #2a4a2a;
+            color: lime;
+            border: 1px solid #006400;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .book-card {
+            background-color: #272626;
+            border-radius: 15px;
+            padding: 15px;
+            border: 1px solid #636262;
+            transition: transform 0.3s, border-color 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            border-color: lime;
+        }
+
+        .book-card.selected {
+            border: 3px solid lime;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .book-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: lime;
+            color: #000000;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: #3a3a3a;
+        }
+
+        .book-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .book-author {
+            font-size: 12px;
+            color: #cccccc;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .book-year {
+            font-size: 11px;
+            color: #999999;
+            text-align: center;
+        }
+
+        .no-cover {
+            width: 100%;
+            height: 280px;
+            background: #3a3a3a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999999;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .selection-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #272626;
+            padding: 20px 30px;
+            border-radius: 15px;
+            border: 1px solid lime;
+            box-shadow: 0 10px 40px rgba(0, 255, 0, 0.3);
+            display: none;
+            gap: 15px;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .selection-controls.visible {
+            display: flex;
+        }
+
+        .selection-count {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .select-btn {
+            background-color: lime;
+            color: #000000;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .select-btn:hover {
+            background-color: #00ff00;
+            transform: scale(1.05);
+        }
+
+        .clear-btn {
+            background-color: #636262;
+            color: #ffffff;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .clear-btn:hover {
+            background-color: #8b0000;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.visible {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #272626;
+            border-radius: 15px;
+            border: 1px solid #636262;
+            padding: 30px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #636262;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .modal-close {
+            background-color: #636262;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .modal-close:hover {
+            background-color: #8b0000;
+        }
+
+        .modal-progress {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #cccccc;
+            font-size: 14px;
+        }
+
+        .modal-filters {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 12px;
+            background-color: #3a3a3a;
+            border-radius: 15px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .modal-filters input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .covers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .cover-item {
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            padding: 10px;
+            background-color: #3a3a3a;
+            border-radius: 15px;
+            border: 1px solid #636262;
+        }
+
+        .cover-item:hover {
+            transform: scale(1.05);
+            border-color: lime;
+        }
+
+        .cover-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .modal-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            background-color: #636262;
+            color: #ffffff;
+            border: none;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .nav-btn:hover {
+            background-color: lime;
+            color: #000000;
+        }
+
+        .nav-btn:disabled {
+            background-color: #3a3a3a;
+            cursor: not-allowed;
+            color: #666666;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: lime;
+        }
+
+        .attribution {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #272626;
+            border-radius: 15px;
+            border: 1px solid #636262;
+            color: #cccccc;
+            font-size: 14px;
+        }
+
+        .attribution a {
+            color: lime;
+            text-decoration: none;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .attribution a:hover {
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-section">
+            <h1>Book Cover Search</h1>
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search"
+                    autocomplete="off"
+                >
+                <button id="searchBtn">Search</button>
+            </div>
+            <div class="language-toggle">
+                <input type="checkbox" id="englishOnly" checked>
+                <label for="englishOnly">Show only English editions</label>
+            </div>
+            <div id="status"></div>
+        </div>
+
+        <div id="results" class="results"></div>
+
+        <div id="selectionControls" class="selection-controls">
+            <span class="selection-count"><span id="selectedCount">0</span> books selected</span>
+            <button id="clearSelectionBtn" class="clear-btn">Clear</button>
+            <button id="browseCoversBtn" class="select-btn">Browse Covers</button>
+        </div>
+
+        <div id="coverModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title" id="modalTitle">Loading...</div>
+                    <button class="modal-close" id="closeModal">×</button>
+                </div>
+                <div class="modal-progress" id="modalProgress"></div>
+                <div class="modal-filters">
+                    <input type="checkbox" id="englishCoversOnly" checked>
+                    <label for="englishCoversOnly">Show only English edition covers</label>
+                </div>
+                <div id="coversContainer"></div>
+                <div class="modal-nav">
+                    <button class="nav-btn" id="prevBookBtn">← Previous Book</button>
+                    <button class="nav-btn" id="nextBookBtn">Next Book →</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="attribution">
+            Book data and covers provided by <a href="https://openlibrary.org" target="_blank">Open Library</a>
+        </div>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const englishOnly = document.getElementById('englishOnly');
+        const statusDiv = document.getElementById('status');
+        const resultsDiv = document.getElementById('results');
+        const selectionControls = document.getElementById('selectionControls');
+        const selectedCountSpan = document.getElementById('selectedCount');
+        const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+        const browseCoversBtn = document.getElementById('browseCoversBtn');
+        const coverModal = document.getElementById('coverModal');
+        const closeModal = document.getElementById('closeModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalProgress = document.getElementById('modalProgress');
+        const coversContainer = document.getElementById('coversContainer');
+        const prevBookBtn = document.getElementById('prevBookBtn');
+        const nextBookBtn = document.getElementById('nextBookBtn');
+        const englishCoversOnly = document.getElementById('englishCoversOnly');
+
+        let selectedBooks = [];
+        let currentBookIndex = 0;
+        let allBooksData = [];
+
+        // Search on button click
+        searchBtn.addEventListener('click', performSearch);
+
+        // Search on Enter key
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // English covers filter change
+        englishCoversOnly.addEventListener('change', () => {
+            if (coverModal.classList.contains('visible')) {
+                loadBookCovers();
+            }
+        });
+
+        // Clear selection
+        clearSelectionBtn.addEventListener('click', () => {
+            selectedBooks = [];
+            updateSelectionUI();
+            document.querySelectorAll('.book-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+        });
+
+        // Browse covers
+        browseCoversBtn.addEventListener('click', () => {
+            if (selectedBooks.length > 0) {
+                currentBookIndex = 0;
+                openCoverBrowser();
+            }
+        });
+
+        // Close modal
+        closeModal.addEventListener('click', () => {
+            coverModal.classList.remove('visible');
+        });
+
+        // Navigation buttons
+        prevBookBtn.addEventListener('click', () => {
+            if (currentBookIndex > 0) {
+                currentBookIndex--;
+                loadBookCovers();
+            }
+        });
+
+        nextBookBtn.addEventListener('click', () => {
+            if (currentBookIndex < selectedBooks.length - 1) {
+                currentBookIndex++;
+                loadBookCovers();
+            }
+        });
+
+        async function performSearch() {
+            const query = searchInput.value.trim();
+            
+            if (!query) {
+                showStatus('Please enter a book title', 'error');
+                return;
+            }
+
+            showStatus('Searching for books...', 'loading');
+            searchBtn.disabled = true;
+            resultsDiv.innerHTML = '';
+            selectedBooks = [];
+            updateSelectionUI();
+
+            try {
+                let searchUrl = `https://openlibrary.org/search.json?title=${encodeURIComponent(query)}&limit=50`;
+                
+                if (englishOnly.checked) {
+                    searchUrl += '&language=eng';
+                }
+
+                const response = await fetch(searchUrl);
+                
+                if (!response.ok) {
+                    throw new Error('Search failed');
+                }
+
+                const data = await response.json();
+
+                if (data.numFound === 0) {
+                    showStatus('No books found. Try a different search term.', 'error');
+                    return;
+                }
+
+                const booksWithCovers = data.docs.filter(book => book.cover_i);
+
+                if (booksWithCovers.length === 0) {
+                    showStatus(`Found ${data.numFound} books, but none have cover images available.`, 'error');
+                    return;
+                }
+
+                allBooksData = booksWithCovers;
+                showStatus(`Found ${booksWithCovers.length} books with covers. Click to select books, then browse their covers.`, 'success');
+                displayBooks(booksWithCovers);
+
+            } catch (error) {
+                showStatus('An error occurred while searching. Please try again.', 'error');
+                console.error('Search error:', error);
+            } finally {
+                searchBtn.disabled = false;
+            }
+        }
+
+        function displayBooks(books) {
+            resultsDiv.innerHTML = '';
+
+            books.forEach((book, index) => {
+                const card = document.createElement('div');
+                card.className = 'book-card';
+                card.dataset.index = index;
+
+                const coverUrl = book.cover_i 
+                    ? `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg`
+                    : null;
+
+                let coverElement;
+                if (coverUrl) {
+                    coverElement = `<img src="${coverUrl}" alt="${book.title}" class="book-cover" loading="lazy">`;
+                } else {
+                    coverElement = `<div class="no-cover">No Cover Available</div>`;
+                }
+
+                const authors = book.author_name 
+                    ? book.author_name.join(', ')
+                    : 'Unknown Author';
+
+                const year = book.first_publish_year || '';
+
+                card.innerHTML = `
+                    ${coverElement}
+                    <div class="book-title">${book.title}</div>
+                    <div class="book-author">${authors}</div>
+                    ${year ? `<div class="book-year">First published: ${year}</div>` : ''}
+                `;
+
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleBookSelection(index, card);
+                });
+
+                resultsDiv.appendChild(card);
+            });
+        }
+
+        function toggleBookSelection(index, cardElement) {
+            const bookIndex = selectedBooks.indexOf(index);
+            
+            if (bookIndex > -1) {
+                selectedBooks.splice(bookIndex, 1);
+                cardElement.classList.remove('selected');
+            } else {
+                selectedBooks.push(index);
+                cardElement.classList.add('selected');
+            }
+            
+            updateSelectionUI();
+        }
+
+        function updateSelectionUI() {
+            selectedCountSpan.textContent = selectedBooks.length;
+            
+            if (selectedBooks.length > 0) {
+                selectionControls.classList.add('visible');
+            } else {
+                selectionControls.classList.remove('visible');
+            }
+        }
+
+        async function openCoverBrowser() {
+            coverModal.classList.add('visible');
+            await loadBookCovers();
+        }
+
+        async function loadBookCovers() {
+            const bookIndex = selectedBooks[currentBookIndex];
+            const book = allBooksData[bookIndex];
+            
+            modalTitle.textContent = book.title;
+            modalProgress.textContent = `Book ${currentBookIndex + 1} of ${selectedBooks.length}`;
+            coversContainer.innerHTML = '<div class="loading-spinner">Loading covers...</div>';
+            
+            // Update navigation buttons
+            prevBookBtn.disabled = currentBookIndex === 0;
+            nextBookBtn.disabled = currentBookIndex === selectedBooks.length - 1;
+
+            try {
+                // Fetch all editions for this work
+                const workKey = book.key;
+                const editionsUrl = `https://openlibrary.org${workKey}/editions.json?limit=100`;
+                
+                const response = await fetch(editionsUrl);
+                const data = await response.json();
+                
+                // Collect all series numbers we find for this work to determine the most common one
+                const seriesNumberCounts = {};
+                
+                // First pass: collect all series numbers to find the most common
+                if (data.entries) {
+                    data.entries.forEach(edition => {
+                        if (edition.series && edition.series.length > 0) {
+                            const seriesText = edition.series.join(' ');
+                            const numberMatch = seriesText.match(/#(\d+)|Book\s+(\d+)|Vol\.?\s*(\d+)|Volume\s+(\d+)/i);
+                            if (numberMatch) {
+                                const num = parseInt(numberMatch[1] || numberMatch[2] || numberMatch[3] || numberMatch[4]);
+                                seriesNumberCounts[num] = (seriesNumberCounts[num] || 0) + 1;
+                            }
+                        }
+                    });
+                }
+                
+                // Determine the most common series number (if any)
+                let mostLikelySeriesNumber = null;
+                let maxCount = 0;
+                for (const [num, count] of Object.entries(seriesNumberCounts)) {
+                    if (count > maxCount) {
+                        maxCount = count;
+                        mostLikelySeriesNumber = parseInt(num);
+                    }
+                }
+                
+                // If no series number found in editions, try to extract from the main book title
+                if (mostLikelySeriesNumber === null) {
+                    mostLikelySeriesNumber = extractSeriesNumberFromTitle(book.title);
+                }
+                
+                // Second pass: collect editions with cover IDs
+                const editionsWithCovers = [];
+                
+                if (data.entries) {
+                    data.entries.forEach(edition => {
+                        const shouldInclude = !englishCoversOnly.checked || 
+                            (edition.languages && edition.languages.some(lang => 
+                                lang.key === '/languages/eng' || lang.key === 'eng'
+                            ));
+                        
+                        if (shouldInclude && edition.covers && edition.covers.length > 0) {
+                            edition.covers.forEach(coverId => {
+                                if (coverId) {
+                                    let year = null;
+                                    if (edition.publish_date) {
+                                        const yearMatch = edition.publish_date.match(/\d{4}/);
+                                        if (yearMatch) {
+                                            year = parseInt(yearMatch[0]);
+                                        }
+                                    }
+                                    
+                                    editionsWithCovers.push({
+                                        coverId: coverId,
+                                        year: year,
+                                        seriesNumber: mostLikelySeriesNumber,
+                                        title: edition.title || book.title
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Also add the main cover from the work
+                if (book.cover_i) {
+                    const shouldIncludeMainCover = !englishCoversOnly.checked || 
+                        (book.language && book.language.includes('eng'));
+                    
+                    if (shouldIncludeMainCover || !englishCoversOnly.checked) {
+                        editionsWithCovers.push({
+                            coverId: book.cover_i,
+                            year: book.first_publish_year || null,
+                            seriesNumber: mostLikelySeriesNumber,
+                            title: book.title
+                        });
+                    }
+                }
+
+                if (editionsWithCovers.length === 0) {
+                    coversContainer.innerHTML = '<p style="text-align: center; padding: 40px;">No covers found for this book with the current filters.</p>';
+                    return;
+                }
+
+                // Remove duplicates based on coverId
+                const uniqueEditions = [];
+                const seenCoverIds = new Set();
+                editionsWithCovers.forEach(edition => {
+                    if (!seenCoverIds.has(edition.coverId)) {
+                        seenCoverIds.add(edition.coverId);
+                        uniqueEditions.push(edition);
+                    }
+                });
+
+                // Sort by series number first (if available), then by year
+                uniqueEditions.sort((a, b) => {
+                    // If both have series numbers, sort by series number
+                    if (a.seriesNumber !== null && b.seriesNumber !== null) {
+                        return a.seriesNumber - b.seriesNumber;
+                    }
+                    // Items with series numbers come first
+                    if (a.seriesNumber !== null) return -1;
+                    if (b.seriesNumber !== null) return 1;
+                    
+                    // Fall back to year sorting
+                    if (a.year === null && b.year === null) return 0;
+                    if (a.year === null) return 1;
+                    if (b.year === null) return -1;
+                    return a.year - b.year;
+                });
+
+                // Display all covers with sequential numbering
+                displayCovers(uniqueEditions, book.title);
+
+            } catch (error) {
+                console.error('Error loading covers:', error);
+                coversContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #c62828;">Error loading covers. Please try again.</p>';
+            }
+        }
+        
+        function extractSeriesNumberFromTitle(title) {
+            if (!title) return null;
+            
+            // Common patterns for Harry Potter books
+            const patterns = [
+                /Philosopher'?s Stone/i,           // Book 1
+                /Sorcerer'?s Stone/i,              // Book 1 (US)
+                /Chamber of Secrets/i,             // Book 2
+                /Prisoner of Azkaban/i,            // Book 3
+                /Goblet of Fire/i,                 // Book 4
+                /Order of the Phoenix/i,           // Book 5
+                /Half-Blood Prince/i,              // Book 6
+                /Deathly Hallows/i                 // Book 7
+            ];
+            
+            for (let i = 0; i < patterns.length; i++) {
+                if (patterns[i].test(title)) {
+                    return i + 1;
+                }
+            }
+            
+            // Generic patterns like "Book 3", "#5", "Volume 2"
+            const numberMatch = title.match(/#(\d+)|Book\s+(\d+)|Vol\.?\s*(\d+)|Volume\s+(\d+)/i);
+            if (numberMatch) {
+                return parseInt(numberMatch[1] || numberMatch[2] || numberMatch[3] || numberMatch[4]);
+            }
+            
+            return null;
+        }
+
+        function displayCovers(editions, bookTitle) {
+            coversContainer.innerHTML = '';
+            
+            const grid = document.createElement('div');
+            grid.className = 'covers-grid';
+
+            editions.forEach((edition, index) => {
+                const coverItem = document.createElement('div');
+                coverItem.className = 'cover-item';
+                
+                const coverUrl = `https://covers.openlibrary.org/b/id/${edition.coverId}-L.jpg`;
+                
+                coverItem.innerHTML = `
+                    <img src="${coverUrl}" alt="Cover ${index + 1}" loading="lazy">
+                `;
+
+                coverItem.addEventListener('click', () => {
+                    // Use series number if available, otherwise fall back to year or index
+                    const numberToUse = edition.seriesNumber || edition.year || (index + 1);
+                    downloadCover(coverUrl, edition.coverId, numberToUse, bookTitle);
+                });
+
+                grid.appendChild(coverItem);
+            });
+
+            coversContainer.appendChild(grid);
+        }
+
+        async function downloadCover(url, coverId, seriesNumber, bookTitle) {
+            try {
+                // Clean the book title to make it filename-safe
+                const cleanTitle = bookTitle
+                    .replace(/[<>:"/\\|?*]/g, '') // Remove invalid filename characters
+                    .replace(/\s+/g, ' ') // Normalize spaces
+                    .trim();
+                
+                // Use the actual series number if available, format with leading zero
+                const paddedNumber = String(seriesNumber).padStart(2, '0');
+                
+                // Create filename: "01 Book Title.jpg"
+                const filename = `${paddedNumber} ${cleanTitle}.jpg`;
+                
+                // Fetch the image as a blob
+                const response = await fetch(url);
+                const blob = await response.blob();
+                
+                // Create a temporary URL for the blob
+                const blobUrl = window.URL.createObjectURL(blob);
+                
+                // Create a temporary link and trigger download
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up the blob URL
+                window.URL.revokeObjectURL(blobUrl);
+                
+                // Automatically go to next book after a short delay
+                setTimeout(() => {
+                    if (currentBookIndex < selectedBooks.length - 1) {
+                        currentBookIndex++;
+                        loadBookCovers();
+                    } else {
+                        // If this was the last book, close the modal
+                        coverModal.classList.remove('visible');
+                        // Clear selection
+                        selectedBooks = [];
+                        updateSelectionUI();
+                        document.querySelectorAll('.book-card').forEach(card => {
+                            card.classList.remove('selected');
+                        });
+                    }
+                }, 500);
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                // If fetch fails, fall back to simple download
+                const cleanTitle = bookTitle
+                    .replace(/[<>:"/\\|?*]/g, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                const paddedNumber = String(seriesNumber).padStart(2, '0');
+                const filename = `${paddedNumber} ${cleanTitle}.jpg`;
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Still auto-advance
+                setTimeout(() => {
+                    if (currentBookIndex < selectedBooks.length - 1) {
+                        currentBookIndex++;
+                        loadBookCovers();
+                    } else {
+                        coverModal.classList.remove('visible');
+                        selectedBooks = [];
+                        updateSelectionUI();
+                        document.querySelectorAll('.book-card').forEach(card => {
+                            card.classList.remove('selected');
+                        });
+                    }
+                }, 500);
+            }
+        }
+
+        function showStatus(message, type) {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+        <!--#footer-->
+<footer>
+    © <span id="site-year"></span> CraftyPlayz
+    <p id="site-breadcrumbs"></p>
+    <p id="site-catfact"></p>
+</footer>
+
+<script>
+    const navSlide = () => {
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+    navSlide();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#toggleHeader').click(function () {
+            $('#header').toggle();
+        });
+    });
+</script>
+<script src="/js/site.js"></script>
+<!--#/footer-->
+</body>
+</html>

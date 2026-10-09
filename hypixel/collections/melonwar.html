@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hypixel Collection</title>
+    <meta http-equiv="refresh" content="60">
+    <meta http-equiv="cache-control" content="no-cache" />
+    <link rel="stylesheet" href="/css/hypixel/collection.css">
+    <script src="/js/site.js"></script>
+</head>
+
+<body>
+    <!--#header-->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QPBCTT7P8J');
+</script>
+<link rel="stylesheet" href="/css/global.css">
+<header id="header">
+    <nav>
+        <a href="/"><img src="/images/catsmall.webp" alt="Crafty Playz Logo"></a>
+        <div class="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about.html">About Me</a></li>
+            <li class="dropdown">
+                <a href="#">Games</a>
+                <ul class="submenu">
+                    <li><a href="/steam/">Steam Stats</a></li>
+                    <li><a href="/factorio/">Factorio</a></li>
+                    <li><a href="/minecraft/">Minecraft</a></li>
+                    <li><a href="/quiz">Quizes</a></li>
+                </ul>
+            </li>
+            <li><a href="/books/">Books</a></li>
+            <li class="dropdown"><a href="/extras">Extras</a>
+                <ul class="submenu">
+                    <li><a href="/update/">Fake Update Screens</a></li>
+                    <li><a href="/tests/speedtest">Reading Speed test</a></li>
+                    <li><a href="/extras/trump">Random Trump Tweet</a></li>
+                    <li><a href="/extras/insult">Random Insult</a></li>
+                    <li><a href="/extras/harrypotter/characters">Harry Potter Character Info</a></li>
+                    <li><a href="/extras/qr">QR Code generator</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+<button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
+<!--#/header-->
+
+    <div class="title">
+        <div id="war"></div>
+        <button id="timer" onmouseover="showBackText()" onmouseout="hideBackText()">1:00</button>
+        <br>
+    </div>
+
+    <script>
+        var isHovered = false;
+
+        function startTimer(duration, display) {
+            var timer = duration, minutes, seconds;
+            setInterval(function () {
+                if (!isHovered) { // Only update the display when not hovered
+                    minutes = parseInt(timer / 60, 10);
+                    seconds = parseInt(timer % 60, 10);
+                    minutes = minutes < 10 ? "0" + minutes : minutes;
+                    seconds = seconds < 10 ? "0" + seconds : seconds;
+                    display.textContent = minutes.substr(-1) + ":" + seconds;
+                    if (--timer < 0) {
+                        timer = duration;
+                    }
+                }
+            }, 1000);
+        }
+
+        function showBackText() {
+            isHovered = true;
+            document.querySelector('#timer').textContent = 'THIS IS WAR';
+        }
+
+        function hideBackText() {
+            isHovered = false;
+        }
+
+        window.onload = function () {
+            startTimer(60, document.querySelector('#timer'));
+        };
+
+        // profile 2215... = Mango (Crafty), profile facc... = Papaya (Waffle)
+        var CRAFTY = '22159541fde841e6a104593e1cb3a456', WAFFLE = 'faccdbb77a1f4ed6a5d442dca531089b';
+
+        site.json('/data/hypixel/members.json').then(function (d) {
+            function melons(id, name) {
+                var p = (d.members[id] || []).filter(function (x) { return x.cute_name === name; })[0];
+                return p ? (p.collection.MELON || 0) : 0;
+            }
+            function line(id, headId, name) {
+                return '<img style="height: 30px;" src="https://www.mc-heads.net/head/' + headId + '/left"> ' +
+                    site.shortenNumber(melons(id, name)) + (d.status[id] === 'garden' ? ' Currently In Garden<br>' : '<br>');
+            }
+            var crafty = parseFloat(String(site.shortenNumber(melons(CRAFTY, 'Mango'))));
+            var waffle = parseFloat(String(site.shortenNumber(melons(WAFFLE, 'Papaya'))));
+            document.getElementById('war').innerHTML =
+                line(CRAFTY, '22159541-fde8-41e6-a104-593e1cb3a456', 'Mango') +
+                line(WAFFLE, WAFFLE, 'Papaya') +
+                'Crafty has ' + (crafty - waffle) + ' Million more melons than Waffle<br>';
+        });
+    </script>
+
+    <!--#footer-->
+<footer>
+    © <span id="site-year"></span> CraftyPlayz
+    <p id="site-breadcrumbs"></p>
+    <p id="site-catfact"></p>
+</footer>
+
+<script>
+    const navSlide = () => {
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+    navSlide();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#toggleHeader').click(function () {
+            $('#header').toggle();
+        });
+    });
+</script>
+<script src="/js/site.js"></script>
+<!--#/footer-->
+
+</body>
+
+</html>

@@ -10,10 +10,8 @@
 </head>
 
 <body>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <!--#header--><!--#/header-->
+
 
     <div class="title">
         <h1>Dynmap Marker creator</h1>
@@ -109,9 +107,7 @@
 
 
 
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+    <!--#footer--><!--#/footer-->
 
 </body>
 

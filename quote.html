@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Random quote</title>
+    <script src="/js/site.js"></script>
+    <script>
+        // Opens a random image from /images/quotes (replaces quote.php)
+        site.json('/data/manifests/quotes.json').then(function (files) {
+            location.replace('/images/quotes/' + encodeURIComponent(files[Math.floor(Math.random() * files.length)]));
+        });
+    </script>
+</head>
+
+<body></body>
+
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghast Tear Bazaar Calculation</title>
+    <script src="/js/site.js"></script>
+</head>
+
+<body>
+    <!--#header-->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QPBCTT7P8J');
+</script>
+<link rel="stylesheet" href="/css/global.css">
+<header id="header">
+    <nav>
+        <a href="/"><img src="/images/catsmall.webp" alt="Crafty Playz Logo"></a>
+        <div class="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about.html">About Me</a></li>
+            <li class="dropdown">
+                <a href="#">Games</a>
+                <ul class="submenu">
+                    <li><a href="/steam/">Steam Stats</a></li>
+                    <li><a href="/factorio/">Factorio</a></li>
+                    <li><a href="/minecraft/">Minecraft</a></li>
+                    <li><a href="/quiz">Quizes</a></li>
+                </ul>
+            </li>
+            <li><a href="/books/">Books</a></li>
+            <li class="dropdown"><a href="/extras">Extras</a>
+                <ul class="submenu">
+                    <li><a href="/update/">Fake Update Screens</a></li>
+                    <li><a href="/tests/speedtest">Reading Speed test</a></li>
+                    <li><a href="/extras/trump">Random Trump Tweet</a></li>
+                    <li><a href="/extras/insult">Random Insult</a></li>
+                    <li><a href="/extras/harrypotter/characters">Harry Potter Character Info</a></li>
+                    <li><a href="/extras/qr">QR Code generator</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+<button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
+<!--#/header-->
+
+    <style>
+        h1 { font-size: 2em; color: #333; }
+        h2 { font-size: 1.5em; color: #555; margin-top: 20px; }
+        .info, .orders { margin-left: 20px; }
+        .info p, .orders p { font-size: 1.1em; line-height: 1.5; }
+        .info { margin-top: 10px; }
+        .orders { margin-top: 20px; }
+        .info, .orders { background-color: #f8f8f8; padding: 10px; border-radius: 8px; }
+    </style>
+    <div id="ghast"></div>
+
+    <script>
+        var fmt = function (n, d) { return n.toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); };
+
+        Promise.all([site.json('/data/hypixel/coin-purse.json'), site.json('/data/hypixel/bazaar.json')]).then(function (res) {
+            var coinpurse = res[0].coin_purse || 0;
+            var price = res[1].ENCHANTED_GHAST_TEAR.pricePerUnit || 0;
+            var usable = Math.max(0, coinpurse - 1000000);
+            var maxItems = price > 0 ? Math.floor(usable / price) : 0;
+            var maxPerOrder = 71680, revenuePerItem = 1163.125;
+            var ordered = 0, profit = 0, orders = '';
+            while (maxItems > 0) {
+                var n = Math.min(maxItems, maxPerOrder);
+                orders += '<p>Items to order: ' + n + '</p>';
+                ordered += n;
+                maxItems -= n;
+                profit += (revenuePerItem - price) * n;
+            }
+            document.getElementById('ghast').innerHTML =
+                '<h1>Ghast Tear Bazaar Calculation</h1>' +
+                '<h2>Balance</h2><div class="info"><p>Current Coin Purse: ' + fmt(coinpurse) + '</p></div>' +
+                '<h2>Price Per Unit</h2><div class="info"><p>Price per unit: ' + fmt(price, 2) + '</p></div>' +
+                '<h2>Order Summary</h2><div class="orders">' + orders + '</div>' +
+                '<h2>Total Items Ordered</h2><div class="info"><p>Total Items Ordered: ' + ordered + '</p></div>' +
+                '<h2>Estimated Total Profit</h2><div class="info"><p>Estimated Total Profit: ' + fmt(profit, 2) + '</p></div>';
+        }).catch(function () {
+            document.getElementById('ghast').innerHTML = '<p>Failed to retrieve data.</p>';
+        });
+    </script>
+
+    <!--#footer-->
+<footer>
+    © <span id="site-year"></span> CraftyPlayz
+    <p id="site-breadcrumbs"></p>
+    <p id="site-catfact"></p>
+</footer>
+
+<script>
+    const navSlide = () => {
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+    navSlide();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#toggleHeader').click(function () {
+            $('#header').toggle();
+        });
+    });
+</script>
+<script src="/js/site.js"></script>
+<!--#/footer-->
+
+</body>
+
+</html>

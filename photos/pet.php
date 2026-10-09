@@ -12,10 +12,8 @@
 </head>
 
 <body background="/images/background.jpg">
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <!--#header--><!--#/header-->
+
         <?php
     $folder = $_GET['pet'];
     ?>
@@ -39,9 +37,7 @@
         ?>
     </div>
 
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+    <!--#footer--><!--#/footer-->
 
 </body>
 

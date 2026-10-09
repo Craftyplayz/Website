@@ -12,10 +12,8 @@
 <!-- add search feature -->
 
 <body>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <!--#header--><!--#/header-->
+
 
     <body>
         <div class="title">
@@ -436,9 +434,7 @@
                 <?php echo date('jS F Y', filemtime(__FILE__)); ?>
             </p>
         </footer>
-        <?php
-        include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-        ?>
+        <!--#footer--><!--#/footer-->
     </body>
 
 </html>

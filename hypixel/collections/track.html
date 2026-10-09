@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hypixel Collection</title>
+    <meta http-equiv="refresh" content="60">
+    <meta http-equiv="cache-control" content="no-cache" />
+    <link rel="stylesheet" href="/css/hypixel/collection.css">
+    <script src="/js/site.js"></script>
+</head>
+
+<body>
+    <!--#header-->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QPBCTT7P8J');
+</script>
+<link rel="stylesheet" href="/css/global.css">
+<header id="header">
+    <nav>
+        <a href="/"><img src="/images/catsmall.webp" alt="Crafty Playz Logo"></a>
+        <div class="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about.html">About Me</a></li>
+            <li class="dropdown">
+                <a href="#">Games</a>
+                <ul class="submenu">
+                    <li><a href="/steam/">Steam Stats</a></li>
+                    <li><a href="/factorio/">Factorio</a></li>
+                    <li><a href="/minecraft/">Minecraft</a></li>
+                    <li><a href="/quiz">Quizes</a></li>
+                </ul>
+            </li>
+            <li><a href="/books/">Books</a></li>
+            <li class="dropdown"><a href="/extras">Extras</a>
+                <ul class="submenu">
+                    <li><a href="/update/">Fake Update Screens</a></li>
+                    <li><a href="/tests/speedtest">Reading Speed test</a></li>
+                    <li><a href="/extras/trump">Random Trump Tweet</a></li>
+                    <li><a href="/extras/insult">Random Insult</a></li>
+                    <li><a href="/extras/harrypotter/characters">Harry Potter Character Info</a></li>
+                    <li><a href="/extras/qr">QR Code generator</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+<button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
+<!--#/header-->
+
+    <div class="title">
+        <div id="tracked"></div>
+        <a id="back" href="/hypixel/collections/">
+            <button id="timer" onmouseover="showBackText()" onmouseout="hideBackText()">1:00</button></a>
+        <br>
+    </div>
+
+    <script>
+        var isHovered = false;
+
+        function startTimer(duration, display) {
+            var timer = duration, minutes, seconds;
+            setInterval(function () {
+                if (!isHovered) { // Only update the display when not hovered
+                    minutes = parseInt(timer / 60, 10);
+                    seconds = parseInt(timer % 60, 10);
+                    minutes = minutes < 10 ? "0" + minutes : minutes;
+                    seconds = seconds < 10 ? "0" + seconds : seconds;
+                    display.textContent = minutes.substr(-1) + ":" + seconds;
+                    if (--timer < 0) {
+                        timer = duration;
+                    }
+                }
+            }, 1000);
+        }
+
+        function showBackText() {
+            isHovered = true;
+            document.querySelector('#timer').textContent = 'Back';
+        }
+
+        function hideBackText() {
+            isHovered = false;
+        }
+
+        window.onload = function () {
+            startTimer(60, document.querySelector('#timer'));
+        };
+
+        var esc = site.esc;
+        var q = new URLSearchParams(location.search);
+        var trackedItem = q.get('item') || '';
+        var itemName = q.get('name') || '';
+        var ironman = q.get('profile') === 'ironman';
+        document.getElementById('back').href = '/hypixel/collections/?profile=' + (ironman ? 'ironman' : 'main');
+        var profileIds = [
+            '22159541fde841e6a104593e1cb3a456',
+            '39ac5666450b4635873573217a72f143',
+            'dd5b7e595e7846a983d11f9cafa0cd42',
+            'faccdbb77a1f4ed6a5d442dca531089b',
+            '8fc496c53ce64a939b377d8d1af1f1cb'
+        ];
+
+        Promise.all([site.json('/data/hypixel/members.json'), site.json('/data/hypixel/collections.json')]).then(function (res) {
+            var members = res[0].members, collections = res[1].collections;
+            var rows = [];
+            profileIds.forEach(function (id, key) {
+                (members[id] || []).forEach(function (p) {
+                    var selected = ironman ? (key === 2 ? 'Banana' : 'Blueberry') : 'Mango';
+                    if (p.cute_name !== selected) return;
+                    var total = p.collection[trackedItem] || 0;
+                    rows.push({ player_id: p.player_id, collected: site.shortenNumber(total), total: total });
+                });
+            });
+            rows.sort(function (a, b) { return b.total - a.total; });
+
+            var sum = 0, h = '<table style="width: 10%;">';
+            rows.forEach(function (r) {
+                h += '<tr><td><img style="height: 30px;" src="https://www.mc-heads.net/head/' + encodeURIComponent(r.player_id) + '/left"></td>' +
+                    '<td><span title="' + r.total + '">' + r.collected + '</span></td></tr>';
+                sum += r.total;
+            });
+            h += '</table>' + esc(itemName) + ' Collection: <span title="' + sum + '">' + site.shortenNumber(sum) + '</span>';
+
+            Object.keys(collections).forEach(function (cat) {
+                var item = collections[cat].items[trackedItem];
+                if (!item) return;
+                var tiers = item.tiers, last = tiers[tiers.length - 1];
+                var next = tiers.filter(function (t) { return sum < t.amountRequired; })[0];
+                var pctLast = (sum / last.amountRequired * 100).toFixed(1);
+                if (next && next !== last) {
+                    var pctNext = (sum / next.amountRequired * 100).toFixed(1);
+                    h += '<p>Tier ' + next.tier + ': ' + site.shortenNumber(next.amountRequired) + ' (' + pctNext + '%)</p>' +
+                        '<progress value="' + pctNext + '" max="100"></progress>';
+                }
+                h += '<p><span title="' + last.tier + '">Final Tier</span>: ' + site.shortenNumber(last.amountRequired) + ' (' + pctLast + '%)</p>' +
+                    '<progress value="' + pctLast + '" max="100"></progress><br>';
+                if (trackedItem === 'MELON') {
+                    h += '<a href="/hypixel/collections/melonwar.html">The Great Melon War</a><br>';
+                }
+            });
+            document.getElementById('tracked').innerHTML = h;
+        });
+    </script>
+
+    <!--#footer-->
+<footer>
+    © <span id="site-year"></span> CraftyPlayz
+    <p id="site-breadcrumbs"></p>
+    <p id="site-catfact"></p>
+</footer>
+
+<script>
+    const navSlide = () => {
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+    navSlide();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#toggleHeader').click(function () {
+            $('#header').toggle();
+        });
+    });
+</script>
+<script src="/js/site.js"></script>
+<!--#/footer-->
+
+</body>
+
+</html>

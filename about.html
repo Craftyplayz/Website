@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Me</title>
+    <link rel="stylesheet" href="css/homepage.css">
+    <!-- <meta http-equiv="refresh" content="3"> -->
+</head>
+
+<body>
+    <!--#header-->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QPBCTT7P8J');
+</script>
+<link rel="stylesheet" href="/css/global.css">
+<header id="header">
+    <nav>
+        <a href="/"><img src="/images/catsmall.webp" alt="Crafty Playz Logo"></a>
+        <div class="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about.html">About Me</a></li>
+            <li class="dropdown">
+                <a href="#">Games</a>
+                <ul class="submenu">
+                    <li><a href="/steam/">Steam Stats</a></li>
+                    <li><a href="/factorio/">Factorio</a></li>
+                    <li><a href="/minecraft/">Minecraft</a></li>
+                    <li><a href="/quiz">Quizes</a></li>
+                </ul>
+            </li>
+            <li><a href="/books/">Books</a></li>
+            <li class="dropdown"><a href="/extras">Extras</a>
+                <ul class="submenu">
+                    <li><a href="/update/">Fake Update Screens</a></li>
+                    <li><a href="/tests/speedtest">Reading Speed test</a></li>
+                    <li><a href="/extras/trump">Random Trump Tweet</a></li>
+                    <li><a href="/extras/insult">Random Insult</a></li>
+                    <li><a href="/extras/harrypotter/characters">Harry Potter Character Info</a></li>
+                    <li><a href="/extras/qr">QR Code generator</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+<button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
+<!--#/header-->
+
+
+    <div class="title">
+        <h1>About Me</h1>
+    </div>
+
+    <div class="about-me">
+        <div class="item">
+            <h1>Hobbies</h1>
+            <p>Programming - Mostly creating websites such as this one</p><br>
+        </div>
+        <div class="item">
+            <h1>Background</h1>
+            <p>22 Years old</p><br>
+            <p>Born in NSW Australia and lived there for 16 years</p><br>
+            <p>Now living in the UK since 2019</p><br>
+        </div>
+        <div class="item">
+            <h1>Intrests</h1>
+            <p><a href="/steam">Gaming</a> - My main games are Minecraft, Rocket League & Factorio<br>You can see my steam stats here -<a href="/steam/"> Steam Stats</a></p><br>
+            <p>Books - Im currently reading the Heroes of Olympus series<br>I have read Harry Potter over 135 times now - <a href="/books">Books Ive read</a></p><br>
+        </div>
+        <div class="item">
+            <h1>Contact me</h1>
+            <p>Please dont. I dont like people</p><br>
+        </div>
+    </div>
+
+    <script>
+        const items = document.querySelectorAll('.about-me .item');
+        const isDesktop = window.innerWidth > 768;
+
+        if (isDesktop) {
+            let maxHeight = 0;
+            items.forEach(item => {
+                const height = item.offsetHeight;
+                if (height > maxHeight) {
+                    maxHeight = height;
+                }
+            });
+
+            items.forEach(item => {
+                item.style.height = `${maxHeight}px`;
+            });
+        }
+    </script>
+
+    <!--#footer-->
+<footer>
+    © <span id="site-year"></span> CraftyPlayz
+    <p id="site-breadcrumbs"></p>
+    <p id="site-catfact"></p>
+</footer>
+
+<script>
+    const navSlide = () => {
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+    navSlide();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#toggleHeader').click(function () {
+            $('#header').toggle();
+        });
+    });
+</script>
+<script src="/js/site.js"></script>
+<!--#/footer-->
+
+</body>
+
+</html>
