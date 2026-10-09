@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Untitled</title>
-    <meta http-equiv="refresh" content="-1">
+    <title>The Game</title>
 </head>
-
 <body>
     <!--#header-->
 <!-- Google tag (gtag.js) -->
@@ -57,25 +54,69 @@
 </header>
 <button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
 <!--#/header-->
+    
 
     <div class="title">
-        <h1>Extra Rules</h1>
-        <h2>Match Rules (Decide at start and are always in effect)</h2>
-        <p>You can only pick your winning card from cards that the loser played during that match</p>
-        <p>You can pick 1 Monster card and 1 Spell or Trap card</p>
-        <p>You pick one starter deck (yugi, joey, kaiba or pegasus</p>
-        <h1>Player Rules</h1>
-        <h2>These can be used at any time and are optional (You can only use one of these)</h2>
-        <p>Instead of taking a card you can open an additional 2 packs next round instead</p>
-        <p>You can take 2 cards from the losers deck BUT the loser can take one from yours (They cant take the same card you took)</p>
-        <p>You can pick 10 cards then roll a d10 3 times and take the cards that the numbers land on</p>
-
-</div>
-
-<p><br><a href="/games/yugioh/yugioh2.html">Next</a></p>
-
+        <h1>The Game</h1><br>
+        <h1>Time Since Last Loss: <span id="current"></span></h1>
+        <h1>Best Time: <span id="best"></span></h1>
+        <button type="button" id="myButton">I Lost!</button>
     </div>
 
+
+    <div class="title">
+        <h1>Previous Times</h1>
+        <div id="previous"></div>
+    </div>
+
+
+
+    <script>
+        // State lives in this browser's localStorage (no server storage on a static site)
+        var KEY = 'thegame';
+        var state;
+        try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { }
+        if (!state || typeof state.last !== 'number') state = { last: Date.now(), best: 0, previous: [] };
+
+        function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { } }
+
+        function formatTime(seconds) {
+            var days = Math.floor(seconds / 86400);
+            var hours = Math.floor((seconds % 86400) / 3600);
+            var minutes = Math.floor((seconds % 3600) / 60);
+            var parts = [];
+            if (days > 0) parts.push(days + 'd');
+            if (hours > 0 || parts.length) parts.push(hours + 'h');
+            if (minutes > 0 || parts.length) parts.push(minutes + 'm');
+            parts.push((seconds % 60) + 's');
+            return parts.join(' ');
+        }
+
+        function render() {
+            document.getElementById('current').textContent = formatTime(Math.floor((Date.now() - state.last) / 1000));
+            document.getElementById('best').textContent = formatTime(state.best);
+            var prev = document.getElementById('previous');
+            prev.innerHTML = '';
+            state.previous.forEach(function (t) {
+                var p = document.createElement('p');
+                p.textContent = formatTime(t);
+                prev.appendChild(p);
+            });
+        }
+
+        document.getElementById('myButton').addEventListener('click', function () {
+            var since = Math.floor((Date.now() - state.last) / 1000);
+            state.last = Date.now();
+            if (since > state.best) state.best = since;
+            state.previous.push(since);
+            save();
+            render();
+        });
+
+        save();
+        render();
+        setInterval(render, 1000);
+    </script>
     <!--#footer-->
 <footer>
     © <span id="site-year"></span> CraftyPlayz
@@ -106,7 +147,5 @@
 </script>
 <script src="/js/site.js"></script>
 <!--#/footer-->
-
 </body>
-
 </html>

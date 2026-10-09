@@ -5,8 +5,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Untitled</title>
-    <meta http-equiv="refresh" content="-1">
+    <title>Photos</title>
+    <link rel="stylesheet" href="/css/gallery.css">
+    <style>.gallery-image{height: 300px; width: 300px;} </style>
+    <script src="/js/site.js"></script>
 </head>
 
 <body>
@@ -58,24 +60,27 @@
 <button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
 <!--#/header-->
 
+
     <div class="title">
-        <h1>Extra Rules</h1>
-        <h2>Match Rules (Decide at start and are always in effect)</h2>
-        <p>You can only pick your winning card from cards that the loser played during that match</p>
-        <p>You can pick 1 Monster card and 1 Spell or Trap card</p>
-        <p>You pick one starter deck (yugi, joey, kaiba or pegasus</p>
-        <h1>Player Rules</h1>
-        <h2>These can be used at any time and are optional (You can only use one of these)</h2>
-        <p>Instead of taking a card you can open an additional 2 packs next round instead</p>
-        <p>You can take 2 cards from the losers deck BUT the loser can take one from yours (They cant take the same card you took)</p>
-        <p>You can pick 10 cards then roll a d10 3 times and take the cards that the numbers land on</p>
-
-</div>
-
-<p><br><a href="/games/yugioh/yugioh2.html">Next</a></p>
-
+        <h1>People's Pets</h1>
+        <h2>Click on an image to view more</h2>
     </div>
+    <div class="gallery">
 
+
+        <script>
+            // one tile per pet folder (thumbnail = first image in the folder)
+            site.json('/data/manifests/pets.json').then(function (pets) {
+                document.querySelector('.gallery').innerHTML = Object.keys(pets).map(function (pet) {
+                    var thumb = pets[pet][0] ? '/images/galleries/pets/' + encodeURIComponent(pet) + '/' + encodeURIComponent(pets[pet][0]) : '';
+                    return '<div class="gallery-item" title="' + site.esc(pet) + '"><a href="/photos/pet.html?pet=' + encodeURIComponent(pet) + '"><img src="' + thumb + '" class="gallery-image" /></a></div>';
+                }).join('');
+            });
+        </script>
+<!-- <div class="title">
+    <h1>If you want your pet added send me the photos</h1>
+</div> -->
+    </div>
     <!--#footer-->
 <footer>
     © <span id="site-year"></span> CraftyPlayz

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Images</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #fff;
+            padding: 16px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 64px);
+            gap: 8px;
+        }
+        img {
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+        }
+    </style>
+    <script src="/js/site.js"></script>
+</head>
+<body>
+    <div class="grid">
+        <div data-dirlist="code-items" data-mode="images" data-base="./"></div>
+    </div>
+<script src="/js/dirlist.js"></script>
+</body>
+</html>

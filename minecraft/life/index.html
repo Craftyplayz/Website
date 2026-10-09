@@ -6,7 +6,42 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Untitled</title>
-    <meta http-equiv="refresh" content="-1">
+    <style>
+        .folder-list {
+            max-width: 700px;
+            margin: 20px auto;
+        }
+
+        details {
+            margin: 10px 0;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 8px 12px;
+            background: #222;
+            color: #fff;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.05rem;
+            outline: none;
+        }
+
+        a {
+            display: block;
+            margin: 4px 0 4px 12px;
+            text-decoration: none;
+            color: #9cf;
+            font-size: 0.95rem;
+        }
+
+        a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+    </style>
+    <script src="/js/site.js"></script>
 </head>
 
 <body>
@@ -58,22 +93,26 @@
 <button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
 <!--#/header-->
 
+
     <div class="title">
-        <h1>Extra Rules</h1>
-        <h2>Match Rules (Decide at start and are always in effect)</h2>
-        <p>You can only pick your winning card from cards that the loser played during that match</p>
-        <p>You can pick 1 Monster card and 1 Spell or Trap card</p>
-        <p>You pick one starter deck (yugi, joey, kaiba or pegasus</p>
-        <h1>Player Rules</h1>
-        <h2>These can be used at any time and are optional (You can only use one of these)</h2>
-        <p>Instead of taking a card you can open an additional 2 packs next round instead</p>
-        <p>You can take 2 cards from the losers deck BUT the loser can take one from yours (They cant take the same card you took)</p>
-        <p>You can pick 10 cards then roll a d10 3 times and take the cards that the numbers land on</p>
+        <h1>Template</h1>
+    </div>
 
-</div>
-
-<p><br><a href="/games/yugioh/yugioh2.html">Next</a></p>
-
+    <div class="folder-list">
+        <div id="life-folders"></div>
+        <script>
+            site.json('/data/manifests/life.json').then(function (dirs) {
+                var h = '';
+                Object.keys(dirs).forEach(function (dir) {
+                    h += '<details><summary>' + site.esc(dir) + '</summary>';
+                    dirs[dir].forEach(function (file) {
+                        h += '<a href="' + site.esc(dir + '/' + file) + '" target="_blank">' + site.esc(file) + '</a>';
+                    });
+                    h += '</details>';
+                });
+                document.getElementById('life-folders').innerHTML = h;
+            });
+        </script>
     </div>
 
     <!--#footer-->

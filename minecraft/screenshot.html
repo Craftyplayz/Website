@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>screenshot</title>
+    <link rel="stylesheet" href="/css/minecraft.css">
+    <link rel="stylesheet" href="/css/global.css">
+    <script src="/js/site.js"></script>
+</head>
+
+<body>
+
+
+
+    <img id="shot" src="" alt="" class="screenshotfull">
+    <button onclick="window.history.back()" style="display: block; margin: 0 auto;">Back</button>
+    <script>
+        var id = new URLSearchParams(location.search).get('id') || '';
+        id = id.replace(/\.[^.]*$/, '') + '.png';
+        document.title = 'screenshot' + id;
+        var img = document.getElementById('shot');
+        img.src = '/images/minecraft/rawscreenshots/' + encodeURIComponent(id);
+        img.alt = 'Screenshot ' + id;
+    </script>
+    <!--#footer-->
+<footer>
+    © <span id="site-year"></span> CraftyPlayz
+    <p id="site-breadcrumbs"></p>
+    <p id="site-catfact"></p>
+</footer>
+
+<script>
+    const navSlide = () => {
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+    navSlide();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#toggleHeader').click(function () {
+            $('#header').toggle();
+        });
+    });
+</script>
+<script src="/js/site.js"></script>
+<!--#/footer-->
+</body>
+
+</html>

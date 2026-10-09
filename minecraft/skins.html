@@ -5,8 +5,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Untitled</title>
-    <meta http-equiv="refresh" content="-1">
+    <title>Minecraft Skins</title>
+    <link rel="stylesheet" href="/css/gallery.css">
+    <script src="/js/site.js"></script>
 </head>
 
 <body>
@@ -58,22 +59,21 @@
 <button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
 <!--#/header-->
 
+
     <div class="title">
-        <h1>Extra Rules</h1>
-        <h2>Match Rules (Decide at start and are always in effect)</h2>
-        <p>You can only pick your winning card from cards that the loser played during that match</p>
-        <p>You can pick 1 Monster card and 1 Spell or Trap card</p>
-        <p>You pick one starter deck (yugi, joey, kaiba or pegasus</p>
-        <h1>Player Rules</h1>
-        <h2>These can be used at any time and are optional (You can only use one of these)</h2>
-        <p>Instead of taking a card you can open an additional 2 packs next round instead</p>
-        <p>You can take 2 cards from the losers deck BUT the loser can take one from yours (They cant take the same card you took)</p>
-        <p>You can pick 10 cards then roll a d10 3 times and take the cards that the numbers land on</p>
+        <h1>My Minecraft Skins</h1>
+        <h2>Made by <a title="Except the original rainbow skin" href="https://www.twitch.tv/spooky_clang">Spooky Clang</a></h2>
+    </div>
 
-</div>
-
-<p><br><a href="/games/yugioh/yugioh2.html">Next</a></p>
-
+    <div class="gallery">
+<script>
+    site.json('/data/manifests/skins.json').then(function (images) {
+        document.querySelector('.gallery').innerHTML = images.map(function (name) {
+            var border = name === 'purple.png' ? ' style="border: 3px solid purple;"' : '';
+            return '<div class="gallery-item"' + border + '><a href="/images/minecraft/skins/download/' + encodeURIComponent(name) + '" target="_blank"><img src="/images/minecraft/skins/' + encodeURIComponent(name) + '"></a></div>';
+        }).join('');
+    });
+</script>
     </div>
 
     <!--#footer-->

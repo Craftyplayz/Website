@@ -5,11 +5,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Untitled</title>
-    <meta http-equiv="refresh" content="-1">
+    <title>Crafty Playz</title>
+    <link rel="stylesheet" href="/css/minecraft.css">
+    <script src="/js/site.js"></script>
 </head>
 
 <body>
+
     <!--#header-->
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
@@ -58,24 +60,38 @@
 <button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
 <!--#/header-->
 
-    <div class="title">
-        <h1>Extra Rules</h1>
-        <h2>Match Rules (Decide at start and are always in effect)</h2>
-        <p>You can only pick your winning card from cards that the loser played during that match</p>
-        <p>You can pick 1 Monster card and 1 Spell or Trap card</p>
-        <p>You pick one starter deck (yugi, joey, kaiba or pegasus</p>
-        <h1>Player Rules</h1>
-        <h2>These can be used at any time and are optional (You can only use one of these)</h2>
-        <p>Instead of taking a card you can open an additional 2 packs next round instead</p>
-        <p>You can take 2 cards from the losers deck BUT the loser can take one from yours (They cant take the same card you took)</p>
-        <p>You can pick 10 cards then roll a d10 3 times and take the cards that the numbers land on</p>
 
-</div>
+    <div class="about">
+        <h1>I play alot of Minecraft</h1>
+        <a style="color: white;" href="#screenshots"><h2>View some screenshots</h2></a>
+        <a style="color: white;" href="skins"><h2>View my Skins</h2></a>
+    </div>
 
-<p><br><a href="/games/yugioh/yugioh2.html">Next</a></p>
+    <div class="slideshow"></div>
+
+    <script src="/js/slideshow.js"></script>
+    <div class="title" id="screenshots">
+        <h1>Minecraft Screenshots</h1>
+        <h2>Some screenshots from my years of playing minecraft</h2>
+        <h2>Click any image to view full quality</h2>
+    </div>
+
+    <div class="screenshots">
+<script>
+        site.json('/data/manifests/screenshots.json').then(function (images) {
+            document.querySelector('.screenshots').innerHTML = images.map(function (image) {
+                return '<a href="/minecraft/screenshot.html?id=' + encodeURIComponent(image) + '">
+' +
+                    '<div class="screenshot"><img src="/images/minecraft/screenshots/' + encodeURIComponent(image) + '" alt="Screenshot" class="screenshot-image"></div></a>';
+            }).join('
+');
+        });
+    </script>
 
     </div>
 
+
+    <script src="js/konami.js"></script>
     <!--#footer-->
 <footer>
     © <span id="site-year"></span> CraftyPlayz
@@ -106,7 +122,6 @@
 </script>
 <script src="/js/site.js"></script>
 <!--#/footer-->
-
 </body>
 
 </html>
