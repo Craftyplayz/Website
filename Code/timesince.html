@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Time since 21/12/2024</title>
+</head>
+
+<body>
+    <span id="since"></span>
+    <script>
+        // Time since 9:47PM 21/12/2024 (UK time was GMT on that date)
+        var start = new Date('2024-12-21T21:47:00Z');
+
+        function render() {
+            var now = new Date();
+            var y = now.getFullYear() - start.getFullYear();
+            var anchor = new Date(start);
+            anchor.setFullYear(start.getFullYear() + y);
+            if (anchor > now) { y--; anchor = new Date(start); anchor.setFullYear(start.getFullYear() + y); }
+            var m = 0;
+            while (true) {
+                var next = new Date(anchor);
+                next.setMonth(anchor.getMonth() + 1);
+                if (next > now) break;
+                anchor = next; m++;
+            }
+            var secs = Math.floor((now - anchor) / 1000);
+            var d = Math.floor(secs / 86400), h = Math.floor(secs % 86400 / 3600), i = Math.floor(secs % 3600 / 60), s = secs % 60;
+            var pad = function (n) { return String(n).padStart(2, '0'); };
+            document.getElementById('since').textContent = 'Time since 9:47PM 21/12/2024: ' +
+                pad(y) + ' years, ' + m + ' months, ' + d + ' days, ' + h + ' hours, ' + i + ' minutes, ' + s + ' seconds';
+        }
+        render();
+        setInterval(render, 1000);
+    </script>
+</body>
+
+</html>
