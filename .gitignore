@@ -1,5 +1,2 @@
-/php/
-php/config.php
-php/config.php
-php/404.php
-php/config.php
+# PHP is no longer used; nothing server-side to ignore
+node_modules/

@@ -95,30 +95,49 @@ $(document).ready(function () {
     console.log(checked_questions + "/" + all_questions);
     $("#result").text(checked_questions + "/" + all_questions);
     if (checked_questions == all_questions && checked_questions != 0) {
-      $.ajax({
-        type: "POST",
-        url: "./assets/php/check_quiz.php",
-        data: {
-          all_answers: all_answers,
-        },
-        success: function (data) {
+      $.getJSON("assets/json/quiz_answers.json")
+        .done(function (answers) {
+          // marking happens in the browser (this is a static site)
+          var correct = 0;
+          var total = answers.length;
+          $.each(answers, function (i, item) {
+            if (all_answers[item.title] == item.answer) {
+              correct++;
+            }
+          });
+          var percentage = Math.round((correct * 100) / total);
+          var messages = {
+            none: "This is some text",
+            low: "This is some text",
+            medium: "This is some text",
+            high: "This is some text",
+            perfect: "This is some text",
+          };
+          var message;
+          if (percentage == 100) {
+            message = messages.perfect;
+          } else if (percentage >= 90) {
+            message = messages.high;
+          } else if (percentage >= 60) {
+            message = messages.medium;
+          } else if (percentage >= 30) {
+            message = messages.low;
+          } else if (percentage == 0) {
+            message = messages.none;
+          } else {
+            message = messages.low;
+          }
           notify("Here's your results", "white");
-          var item = JSON.parse(data);
-          var percentage = item.percentage;
-          var correct = item.correct;
-          var total = item.total;
-          var message = item.message;
 
           $(".question, #quiz").hide();
           $("#percent").text(`${percentage}%`);
           $("#score").text(`${correct}/${total}`);
           $("#message").text(`${message}`);
           $(".results").show();
-        },
-        error: function (error) {
+        })
+        .fail(function () {
           notify("Something went wrong", "white");
-        },
-      });
+        });
     } else {
       notify("Looks like you missed something", "white");
     }

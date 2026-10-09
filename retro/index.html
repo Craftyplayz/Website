@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Games</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/steamnew.css">
+    <script src="/js/site.js"></script>
+</head>
+
+<body>
+    <!--#header-->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QPBCTT7P8J');
+</script>
+<link rel="stylesheet" href="/css/global.css">
+<header id="header">
+    <nav>
+        <a href="/"><img src="/images/catsmall.webp" alt="Crafty Playz Logo"></a>
+        <div class="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about.html">About Me</a></li>
+            <li class="dropdown">
+                <a href="#">Games</a>
+                <ul class="submenu">
+                    <li><a href="/steam/">Steam Stats</a></li>
+                    <li><a href="/factorio/">Factorio</a></li>
+                    <li><a href="/minecraft/">Minecraft</a></li>
+                    <li><a href="/quiz">Quizes</a></li>
+                </ul>
+            </li>
+            <li><a href="/books/">Books</a></li>
+            <li class="dropdown"><a href="/extras">Extras</a>
+                <ul class="submenu">
+                    <li><a href="/update/">Fake Update Screens</a></li>
+                    <li><a href="/tests/speedtest">Reading Speed test</a></li>
+                    <li><a href="/extras/trump">Random Trump Tweet</a></li>
+                    <li><a href="/extras/insult">Random Insult</a></li>
+                    <li><a href="/extras/harrypotter/characters">Harry Potter Character Info</a></li>
+                    <li><a href="/extras/qr">QR Code generator</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+<button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
+<!--#/header-->
+
+    <style>
+        .gamename {
+            left: 180px;
+        }
+
+        .info {
+            left: 180px;
+        }
+
+        .games {
+            width: 70vw;
+        }
+    </style>
+    <div id="retro"></div>
+
+    <script>
+        var esc = site.esc;
+        var BEATEN = ['beaten-softcore', 'beaten-hardcore'];
+
+        function daysAgo(ts) {
+            var diff = Math.round((Date.now() - ts) / 86400000);
+            return diff + (diff === 1 ? ' day ago' : ' days ago');
+        }
+
+        function renderGame(game) {
+            var done = game.NumAwarded, total = game.MaxPossible;
+            var pct = total > 0 ? Math.round(done / total * 100) : 0;
+            var beaten = BEATEN.indexOf(game.HighestAwardKind) !== -1;
+            var date = beaten ? game.HighestAwardDate : game.MostRecentAwardedDate;
+            var label = beaten ? 'Beaten Date' : 'Last Achievement Awarded';
+            var ts = Date.parse(date);
+            var exact = date ? new Date(ts).toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }) : 'N/A';
+            var link = '/retro/game?game=' + game.GameID;
+            return '<div class="games">\n' +
+                '  <a href="' + link + '"><img class="banner" src="https://retroachievements.org' + esc(game.ImageIcon) + '" style="width: 160px; height: 160px; object-fit: cover;"></a>\n' +
+                '  <a href="' + link + '" style="width: 50%; color: white"><p class="gamename">' + esc(game.Title) + '</p></a>\n' +
+                '  <div class="info">\n' +
+                '    <div class="item"><p>Console</p><p>' + esc(game.ConsoleName) + '</p></div>\n' +
+                '    <div class="item"><p>' + label + '</p><p title="' + esc(exact) + '">' + daysAgo(ts) + '</p></div>\n' +
+                '    <div class="item"><p>Achievements ' + done + '/' + total + ' (' + pct + '%)</p><progress value="' + pct + '" max="100"></progress></div>\n' +
+                '  </div>\n</div>\n';
+        }
+
+        // Data comes from /data/retro.json (written by scripts/fetch-data.js)
+        site.json('/data/retro.json').then(function (d) {
+            var highlighted = [], regular = [];
+            d.results.forEach(function (g) { (BEATEN.indexOf(g.HighestAwardKind) !== -1 ? highlighted : regular).push(g); });
+            var h = '';
+            if (d.lastGame) {
+                h += '<div class="title"><h2>Last Played</h2></div>\n<div class="last-played">\n' + renderGame(d.lastGame) +
+                    '  <p>Rich Presence: ' + esc(d.richPresence) + '</p>\n</div>\n';
+            }
+            if (highlighted.length) h += '<div class="title"><h2>Completed Games</h2></div>\n' + highlighted.map(renderGame).join('');
+            if (regular.length) h += '<div class="title"><h2>In Progress Games</h2></div>\n' + regular.map(renderGame).join('');
+            document.getElementById('retro').innerHTML = h;
+        });
+    </script>
+
+    <!--#footer-->
+<footer>
+    © <span id="site-year"></span> CraftyPlayz
+    <p id="site-breadcrumbs"></p>
+    <p id="site-catfact"></p>
+</footer>
+
+<script>
+    const navSlide = () => {
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+    navSlide();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#toggleHeader').click(function () {
+            $('#header').toggle();
+        });
+    });
+</script>
+<script src="/js/site.js"></script>
+<!--#/footer-->
+
+</body>
+
+</html>

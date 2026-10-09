@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untitled</title>
+    <script src="/js/site.js"></script>
+</head>
+
+<body>
+    <!--#header-->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-QPBCTT7P8J');
+</script>
+<link rel="stylesheet" href="/css/global.css">
+<header id="header">
+    <nav>
+        <a href="/"><img src="/images/catsmall.webp" alt="Crafty Playz Logo"></a>
+        <div class="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about.html">About Me</a></li>
+            <li class="dropdown">
+                <a href="#">Games</a>
+                <ul class="submenu">
+                    <li><a href="/steam/">Steam Stats</a></li>
+                    <li><a href="/factorio/">Factorio</a></li>
+                    <li><a href="/minecraft/">Minecraft</a></li>
+                    <li><a href="/quiz">Quizes</a></li>
+                </ul>
+            </li>
+            <li><a href="/books/">Books</a></li>
+            <li class="dropdown"><a href="/extras">Extras</a>
+                <ul class="submenu">
+                    <li><a href="/update/">Fake Update Screens</a></li>
+                    <li><a href="/tests/speedtest">Reading Speed test</a></li>
+                    <li><a href="/extras/trump">Random Trump Tweet</a></li>
+                    <li><a href="/extras/insult">Random Insult</a></li>
+                    <li><a href="/extras/harrypotter/characters">Harry Potter Character Info</a></li>
+                    <li><a href="/extras/qr">QR Code generator</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+<button id="toggleHeader"><i class="fa-solid fa-bars"></i></button>
+<!--#/header-->
+
+
+    <div class="title">
+        <h1>Dynmap Marker creator</h1>
+    </div>
+
+
+    <style>
+        /* Style for dropdown menus */
+        select {
+            color: white; /* Text color */
+            background-color: black; /* Background color */
+            padding: 5px; /* Padding for better appearance */
+        }
+    </style>
+
+
+
+
+    <label for="label">Label:</label>
+    <input type="text" id="label"><br><br>
+
+    <label for="id">ID:</label>
+    <input type="text" id="id"><br><br>
+
+    <label for="set">Set:</label>
+    <select id="set">
+        <option value="Builds">Builds</option>
+        <option value="Farms">Farms</option>
+        <option value="Other">Other</option>
+    </select><br><br>
+
+    <label for="icon">Icon:</label>
+
+
+
+    <select id="icon" data-dirlist="markers" data-mode="options">
+    </select><br><br>
+<!-- 
+<select id="icon">
+    <option value="pirateflag">Pirate Flag</option>
+    <option value="construction">Construction</option>
+    <option value="hammer">Hammer</option>
+    <option value="house">House</option>
+    <option value="factory">Factory</option>
+    <option value="diamond">Diamond</option>
+    <option value="world">World</option>
+    <option value="anchor">Anchor</option>
+    <option value="gear">Gear</option>
+    <option value="portal">Portal</option>
+    <option value="cross">Cross</option>
+    <option value="warning">Warning</option>
+    <option value="zombie">Zombie Head</option>
+    <option value="gold">Gold Ingot</option>
+    <option value="oak">Oak Log</option>
+</select><br><br> -->
+
+    <label for="description">Description:</label>
+    <input type="text" id="description"><br><br>
+
+    <button onclick="generateCommands()">Generate Commands</button><br><br>
+
+    <div id="output"></div>
+
+    <script>
+        function generateCommands() {
+            var label = document.getElementById("label").value;
+            var id = document.getElementById("id").value;
+            var set = document.getElementById("set").value;
+            var icon = document.getElementById("icon").value;
+            var description = document.getElementById("description").value;
+
+            var command1 = "/dmarker add \"" + label + "\" id:" + id + " set:" + set + " icon:" + icon;
+
+            var command2 = "/dmarker appenddesc id:" + id + " set:" + set + " desc:\"" + description + "\"";
+
+            var output = command1 + "<br>" + command2;
+
+            document.getElementById("output").innerHTML = output;
+        }
+    </script>
+
+
+
+    <!--#footer-->
+<footer>
+    © <span id="site-year"></span> CraftyPlayz
+    <p id="site-breadcrumbs"></p>
+    <p id="site-catfact"></p>
+</footer>
+
+<script>
+    const navSlide = () => {
+        const burger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.nav-links');
+        burger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+    navSlide();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#toggleHeader').click(function () {
+            $('#header').toggle();
+        });
+    });
+</script>
+<script src="/js/site.js"></script>
+<!--#/footer-->
+
+<script src="/js/dirlist.js"></script>
+</body>
+
+</html>
