@@ -1,148 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chapter Quiz</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="style.css">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07070d">
+  <title>Chapter Oracle — Harry Potter Quiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous"></script>
 </head>
-
 <body>
-<div class="app-wrap">
-
-  <!-- ══════════ LOADING SCREEN ══════════ -->
-  <div class="screen active" id="loadingScreen">
-    <div class="wordmark">
-      <div class="wordmark-eyebrow">Harry Potter</div>
-      <div class="wordmark-title">Chapter <em>Quiz</em></div>
-      <div class="wordmark-divider"></div>
-    </div>
-
-    <div class="card">
-      <div class="loading-inner">
-        <div class="spinner-wrap"><div class="spinner-ring"></div></div>
-
-        <div class="loading-title">Opening the books…</div>
-
-        <div class="loading-book" id="loadingBook">
-          Summoning the library
+  <main class="app-wrap">
+    <section class="screen active" id="loadingScreen" aria-labelledby="loadingTitle" aria-hidden="false">
+      <header class="wordmark"><div class="wordmark-eyebrow">Harry Potter</div><h1 class="wordmark-title" id="loadingTitle">Chapter <em>Oracle</em></h1><div class="wordmark-divider"></div></header>
+      <div class="card"><div class="loading-inner">
+        <div class="spinner-wrap" aria-hidden="true"><div class="spinner-ring"></div></div>
+        <h2 class="loading-title">Opening the books…</h2>
+        <p class="loading-book" id="loadingMessage" role="status" aria-live="polite">Summoning the library</p>
+        <div class="progress-track" role="progressbar" aria-label="Books processed" aria-valuemin="0" aria-valuemax="7"><div class="progress-fill" id="progressFill"></div></div>
+        <p class="loading-count" id="loadingCount">0 of 7 books loaded</p>
+        <ul class="loading-failures" id="loadingFailures" aria-live="polite"></ul>
+        <div class="book-dots" aria-label="Book loading status">
+          <span class="book-dot" data-book-dot="hp-1"></span><span class="book-dot" data-book-dot="hp-2"></span><span class="book-dot" data-book-dot="hp-3"></span><span class="book-dot" data-book-dot="hp-4"></span><span class="book-dot" data-book-dot="hp-5"></span><span class="book-dot" data-book-dot="hp-6"></span><span class="book-dot" data-book-dot="hp-7"></span>
         </div>
-
-        <div class="progress-track">
-          <div class="progress-fill" id="progressFill" style="width:0%"></div>
-        </div>
-
-        <div class="book-dots" id="bookDots">
-          <div class="book-dot" id="dot0"></div>
-          <div class="book-dot" id="dot1"></div>
-          <div class="book-dot" id="dot2"></div>
-          <div class="book-dot" id="dot3"></div>
-          <div class="book-dot" id="dot4"></div>
-          <div class="book-dot" id="dot5"></div>
-          <div class="book-dot" id="dot6"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════ ERROR SCREEN ══════════ -->
-  <div class="screen" id="errorScreen">
-    <div class="wordmark">
-      <div class="wordmark-eyebrow">Harry Potter</div>
-      <div class="wordmark-title">Chapter <em>Oracle</em></div>
-      <div class="wordmark-divider"></div>
-    </div>
-
-    <div class="card">
-      <div class="error-card">
-        <div class="error-icon">📚</div>
-
-        <div class="error-title">Books not found</div>
-
-        <div class="error-msg" id="errorMsg">
-          Could not load the EPUB files.
-        </div>
-
-        <button class="btn btn-primary" onclick="initLoad()">
-          Try Again
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════ QUIZ SCREEN ══════════ -->
-  <div class="screen" id="quizScreen">
-    <div class="quiz-header">
-      <div class="score-wrap">
-        <span class="score-num" id="scoreDisplay">0</span>
-        <span class="score-lbl">Score</span>
-      </div>
-
-      <div class="hs-wrap">
-        <span class="hs-num" id="hsDisplay">0</span>
-        <span class="hs-lbl">Best</span>
-      </div>
-    </div>
-
-    <div class="passage-label">Passage</div>
-
-    <div class="passage-card" id="passageCard"></div>
-
-    <div class="stage-label" id="stageLabel">
-      <span class="stage-badge" id="stageBadge">Step 1</span>
-      <span id="stageText">
-        Which book is this passage from?
-      </span>
-    </div>
-
-    <div id="choicesArea"></div>
-
-    <div class="feedback-bar" id="feedbackBar"></div>
-  </div>
-
-  <!-- ══════════ GAME OVER SCREEN ══════════ -->
-  <div class="screen" id="gameoverScreen">
-    <div class="wordmark">
-      <div class="wordmark-eyebrow">Harry Potter</div>
-      <div class="wordmark-title">Chapter <em>Oracle</em></div>
-      <div class="wordmark-divider"></div>
-    </div>
-
-    <div class="card">
-      <div class="go-inner">
-        <div class="go-eyebrow">Game Over</div>
-
-        <span class="go-score" id="goScore">0</span>
-
-        <div class="go-score-lbl">
-          chapters correctly identified
-        </div>
-
-        <div class="go-record" id="goRecord" style="display:none">
-          ✦ New High Score
-        </div>
-
-        <div class="go-context" id="goContext"></div>
-
-        <div class="go-sep"></div>
-
-        <div class="go-btns">
-          <button class="btn btn-primary" onclick="restartGame()">
-            Play Again
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<script src="script.js"></script>
+      </div></div>
+    </section>
+    <section class="screen" id="errorScreen" aria-labelledby="errorTitle" aria-hidden="true">
+      <header class="wordmark"><div class="wordmark-eyebrow">Harry Potter</div><h1 class="wordmark-title">Chapter <em>Oracle</em></h1><div class="wordmark-divider"></div></header>
+      <div class="card"><div class="error-card">
+        <div class="error-icon" aria-hidden="true">📚</div><h2 class="error-title" id="errorTitle" tabindex="-1">Books not found</h2>
+        <p class="error-msg" id="errorMessage">Could not load the EPUB files.</p><ul class="error-failures" id="errorFailures"></ul>
+        <button class="btn btn-primary" id="retryButton" type="button">Try Again</button>
+      </div></div>
+    </section>
+    <section class="screen" id="quizScreen" aria-label="Chapter quiz" aria-hidden="true">
+      <header class="quiz-header"><div class="score-wrap"><span class="score-num" id="scoreDisplay">0</span><span class="score-lbl">Score</span></div><div class="hs-wrap"><span class="hs-num" id="hsDisplay">0</span><span class="hs-lbl">Best</span></div></header>
+      <div class="passage-label">Passage</div><blockquote class="passage-card" id="passageCard"></blockquote>
+      <h1 class="stage-label" id="stageLabel" tabindex="-1"><span class="stage-badge" id="stageBadge">Step 1 of 2</span><span id="stageText">Which Harry Potter book is this from?</span></h1>
+      <div id="choicesArea"></div><div class="feedback-bar" id="feedbackBar" role="status" aria-live="polite" aria-atomic="true"></div>
+      <button class="btn btn-ghost partial-retry" id="retryLibraryButton" type="button" hidden>Retry book loading</button>
+    </section>
+    <section class="screen" id="gameoverScreen" aria-labelledby="resultTitle" aria-hidden="true">
+      <header class="wordmark"><div class="wordmark-eyebrow">Harry Potter</div><h1 class="wordmark-title">Chapter <em>Oracle</em></h1><div class="wordmark-divider"></div></header>
+      <div class="card"><div class="go-inner">
+        <h2 class="go-eyebrow" id="resultTitle" tabindex="-1">Game Over</h2><span class="go-score" id="goScore">0</span>
+        <p class="go-score-lbl">chapters correctly identified</p><div class="go-record" id="goRecord" hidden>✦ New High Score</div>
+        <p class="go-context" id="resultContext"></p><div class="go-sep"></div>
+        <div class="go-btns"><button class="btn btn-primary" id="restartButton" type="button">Play Again</button></div>
+      </div></div>
+    </section>
+  </main>
+  <script type="module" src="./script.js"></script>
 </body>
 </html>
