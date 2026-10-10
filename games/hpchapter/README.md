@@ -18,7 +18,7 @@ This is a static, browser-only passage quiz. It loads the seven EPUB files in `b
 
 ### Gameplay rules
 
-Each question begins with seven book options in series order. A correct book answer advances to that book's retained chapter choices without scoring; a wrong book answer ends the run. A correct chapter answer awards one point. A wrong chapter answer reveals the chapter, awards no point, and continues. A run normally completes when its question pool is exhausted. Restart creates and reshuffles a new pool from the already parsed library without fetching the EPUBs again.
+Each question begins with seven book options in series order. A correct book answer advances to that book's retained chapter choices without scoring; a wrong book answer ends the run. A correct chapter answer awards one point. A wrong chapter answer reveals the chapter, awards no point, and continues. A run normally completes when its question pool is exhausted. Restart creates and reshuffles a new pool from the already parsed library without fetching the EPUBs again. If some books fail but a usable library remains, the page reports each failure and offers a retry action.
 
 ## Local use and tests
 

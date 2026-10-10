@@ -27,6 +27,7 @@ export class GameView {
       if (button.dataset.answerType === 'chapter') this.onChapterAnswer(button.dataset.answerId);
     });
     requiredElement(this.document, 'retryButton').addEventListener('click', this.onRetry);
+    requiredElement(this.document, 'retryLibraryButton').addEventListener('click', this.onRetry);
     requiredElement(this.document, 'restartButton').addEventListener('click', this.onRestart);
   }
 
@@ -82,9 +83,10 @@ export class GameView {
     requiredElement(this.document, 'errorTitle').focus();
   }
 
-  showQuestion(snapshot, bestScore, { notice = '' } = {}) {
+  showQuestion(snapshot, bestScore, { notice = '', canRetry = false } = {}) {
     this.showScreen('quizScreen');
     this.updateScore(snapshot.score, bestScore);
+    requiredElement(this.document, 'retryLibraryButton').hidden = !canRetry;
     const question = snapshot.currentQuestion;
     requiredElement(this.document, 'passageCard').textContent = question.passage;
     this.setFeedback(notice, notice ? 'fb-info' : '');

@@ -71,7 +71,8 @@ export class GameController {
 
     this.bestScore = this.highScoreStore.read();
     this.partialLoadNotice = loaded.failures.length
-      ? `Some books could not be loaded: ${loaded.failures.map(({ book }) => book.assetPath).join(', ')}.`
+      ? `Some books could not be loaded: ${loaded.failures
+        .map(({ book, error }) => `${book.assetPath} (${error.message})`).join('; ')}.`
       : '';
     this.startRun(questions);
   }
@@ -90,7 +91,10 @@ export class GameController {
       this.view.showLoadError('No readable passages are available to start a game.', []);
       return;
     }
-    this.view.showQuestion(this.session.snapshot(), this.bestScore, { notice: this.partialLoadNotice });
+    this.view.showQuestion(this.session.snapshot(), this.bestScore, {
+      notice: this.partialLoadNotice,
+      canRetry: Boolean(this.partialLoadNotice)
+    });
   }
 
   answerBook(bookId) {
@@ -103,7 +107,7 @@ export class GameController {
       if (token !== this.runToken) return;
       if (outcome.correct) {
         const transition = this.session.beginChapterSelection();
-        if (transition.accepted) this.view.showQuestion(this.session.snapshot(), this.bestScore);
+        if (transition.accepted) this.showCurrentQuestion();
       } else {
         const transition = this.session.advance();
         if (transition.accepted && transition.completed) this.finish(transition.result);
@@ -124,7 +128,7 @@ export class GameController {
       const transition = this.session.advance();
       if (!transition.accepted) return;
       if (transition.completed) this.finish(transition.result);
-      else this.view.showQuestion(this.session.snapshot(), this.bestScore);
+      else this.showCurrentQuestion();
     }, delay);
   }
 
@@ -132,6 +136,13 @@ export class GameController {
     const record = this.highScoreStore.record(result.score);
     this.bestScore = record.highScore;
     this.view.showResults(result, this.bestScore, record.isRecord);
+  }
+
+  showCurrentQuestion() {
+    this.view.showQuestion(this.session.snapshot(), this.bestScore, {
+      notice: this.partialLoadNotice,
+      canRetry: Boolean(this.partialLoadNotice)
+    });
   }
 
   schedule(callback, delay) {
