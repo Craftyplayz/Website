@@ -57,7 +57,9 @@ export class GameView {
       dot.classList.toggle('failed', Boolean(error));
       dot.setAttribute('aria-label', `${book.title}: ${error ? 'failed to load' : 'loaded'}`);
     }
-    requiredElement(this.document, 'progressFill').style.width = `${Math.round(completed / total * 100)}%`;
+    const progress = requiredElement(this.document, 'progressFill');
+    progress.style.width = `${Math.round(completed / total * 100)}%`;
+    progress.parentElement.setAttribute('aria-valuenow', String(completed));
     requiredElement(this.document, 'loadingCount').textContent = `${completed} of ${total} books processed`;
     requiredElement(this.document, 'loadingMessage').textContent = error
       ? `${book.title} could not be loaded.`
@@ -85,7 +87,6 @@ export class GameView {
     this.updateScore(snapshot.score, bestScore);
     const question = snapshot.currentQuestion;
     requiredElement(this.document, 'passageCard').textContent = question.passage;
-    requiredElement(this.document, 'feedbackBar').scrollIntoView?.({ block: 'nearest' });
     this.setFeedback(notice, notice ? 'fb-info' : '');
     if (snapshot.state === 'chapter-selection') this.renderChapterChoices(question);
     else this.renderBookChoices();
