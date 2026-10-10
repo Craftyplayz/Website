@@ -1,6 +1,7 @@
 export class GameSession {
-  constructor(questions) {
+  constructor(questions, { bookIds = null } = {}) {
     this.questions = [...questions];
+    this.bookIds = bookIds ? new Set(bookIds) : null;
     this.score = 0;
     this.currentQuestion = null;
     this.state = 'ready';
@@ -15,6 +16,7 @@ export class GameSession {
 
   answerBook(bookId) {
     if (this.state !== 'book-selection') return this.rejected('invalid-state');
+    if (this.bookIds && !this.bookIds.has(bookId)) return this.rejected('invalid-answer');
     const correct = bookId === this.currentQuestion.bookId;
     this.state = 'answer-feedback';
     this.pendingOutcome = correct ? 'book-correct' : 'book-incorrect';
@@ -22,6 +24,7 @@ export class GameSession {
       accepted: true,
       correct,
       outcome: this.pendingOutcome,
+      chosenBookId: bookId,
       correctBookId: this.currentQuestion.bookId,
       question: this.currentQuestion,
       score: this.score
@@ -39,6 +42,9 @@ export class GameSession {
 
   answerChapter(chapterId) {
     if (this.state !== 'chapter-selection') return this.rejected('invalid-state');
+    if (!this.currentQuestion.chapterChoices.some(chapter => chapter.id === chapterId)) {
+      return this.rejected('invalid-answer');
+    }
     const correct = chapterId === this.currentQuestion.chapterId;
     if (correct) this.score += 1;
     this.state = 'answer-feedback';
@@ -47,6 +53,7 @@ export class GameSession {
       accepted: true,
       correct,
       outcome: this.pendingOutcome,
+      chosenChapterId: chapterId,
       correctChapterId: this.currentQuestion.chapterId,
       question: this.currentQuestion,
       score: this.score

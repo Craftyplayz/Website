@@ -9,23 +9,24 @@ export async function loadLibrary(books, {
 } = {}) {
   let completed = 0;
   const results = await Promise.all(books.map(async book => {
-    let result;
+    let parsedBook = null;
+    let error = null;
     try {
       const response = await fetchImpl(resolveAsset(book.assetPath));
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.arrayBuffer();
-      const parsedBook = await parseEpub(data, book, { JSZipLibrary, DOMParserClass });
-      result = { book: parsedBook, error: null };
-    } catch (error) {
-      result = { book: null, error: error instanceof Error ? error : new Error(String(error)) };
+      parsedBook = await parseEpub(data, book, { JSZipLibrary, DOMParserClass });
+    } catch (loadError) {
+      error = loadError instanceof Error ? loadError : new Error(String(loadError));
     }
     completed += 1;
-    onProgress({ completed, total: books.length, book, ...result });
-    return { book, ...result };
+    const result = { book, parsedBook, error };
+    onProgress({ completed, total: books.length, ...result });
+    return result;
   }));
 
   return {
-    books: results.flatMap(result => result.book ? [result.book] : []),
+    books: results.flatMap(result => result.parsedBook ? [result.parsedBook] : []),
     failures: results.filter(result => result.error).map(({ book, error }) => ({ book, error }))
   };
 }

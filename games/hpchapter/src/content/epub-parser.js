@@ -73,7 +73,7 @@ function addTitle(titleMap, path, title) {
   titleMap[path.split('/').pop()] = title;
 }
 
-function chapterTitlesFromNavigation(zip, manifest, opfPath, Parser) {
+async function chapterTitlesFromNavigation(zip, manifest, opfPath, Parser) {
   const opfDirectory = opfPath.includes('/') ? opfPath.slice(0, opfPath.lastIndexOf('/') + 1) : '';
   const titleMap = {};
   const navItem = Object.values(manifest).find(item => item.properties.split(/\s+/).includes('nav'));
@@ -82,15 +82,19 @@ function chapterTitlesFromNavigation(zip, manifest, opfPath, Parser) {
     const navPath = resolveArchivePath(opfPath, navItem.href);
     const navSource = zip.file(navPath);
     if (navSource) {
-      const navDocument = parseXml(navSource, Parser, { htmlFallback: true });
-      for (const link of elementsByName(navDocument, 'a')) {
-        const href = attribute(link, 'href');
-        const title = normalizeParagraph(link.textContent);
-        if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(href)) continue;
-        const resolved = resolveArchivePath(navPath, href);
-        const relative = resolved.startsWith(opfDirectory) ? resolved.slice(opfDirectory.length) : resolved;
-        addTitle(titleMap, relative, title);
-        addTitle(titleMap, resolved, title);
+      try {
+        const navDocument = parseXml(await navSource.async('text'), Parser, { htmlFallback: true });
+        for (const link of elementsByName(navDocument, 'a')) {
+          const href = attribute(link, 'href');
+          const title = normalizeParagraph(link.textContent);
+          if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(href)) continue;
+          const resolved = resolveArchivePath(navPath, href);
+          const relative = resolved.startsWith(opfDirectory) ? resolved.slice(opfDirectory.length) : resolved;
+          addTitle(titleMap, relative, title);
+          addTitle(titleMap, resolved, title);
+        }
+      } catch {
+        // A broken EPUB 3 nav document may still have a usable EPUB 2 NCX.
       }
     }
   }
@@ -101,18 +105,22 @@ function chapterTitlesFromNavigation(zip, manifest, opfPath, Parser) {
       const ncxPath = resolveArchivePath(opfPath, ncxItem.href);
       const ncxSource = zip.file(ncxPath);
       if (ncxSource) {
-        const ncxDocument = parseXml(ncxSource, Parser, { htmlFallback: true });
-        for (const point of elementsByName(ncxDocument, 'navpoint')) {
-          const content = firstDescendant(point, 'content');
-          const label = firstDescendant(point, 'navlabel');
-          const labelText = label && firstDescendant(label, 'text');
-          const href = attribute(content, 'src');
-          const title = normalizeParagraph(labelText?.textContent);
-          if (!href || !title) continue;
-          const resolved = resolveArchivePath(ncxPath, href);
-          const relative = resolved.startsWith(opfDirectory) ? resolved.slice(opfDirectory.length) : resolved;
-          addTitle(titleMap, relative, title);
-          addTitle(titleMap, resolved, title);
+        try {
+          const ncxDocument = parseXml(await ncxSource.async('text'), Parser, { htmlFallback: true });
+          for (const point of elementsByName(ncxDocument, 'navpoint')) {
+            const content = firstDescendant(point, 'content');
+            const label = firstDescendant(point, 'navlabel');
+            const labelText = label && firstDescendant(label, 'text');
+            const href = attribute(content, 'src');
+            const title = normalizeParagraph(labelText?.textContent);
+            if (!href || !title) continue;
+            const resolved = resolveArchivePath(ncxPath, href);
+            const relative = resolved.startsWith(opfDirectory) ? resolved.slice(opfDirectory.length) : resolved;
+            addTitle(titleMap, relative, title);
+            addTitle(titleMap, resolved, title);
+          }
+        } catch {
+          // Keep the rest of the book available even when its fallback navigation is damaged.
         }
       }
     }
@@ -149,8 +157,7 @@ export async function parseEpub(data, book, {
     };
   }
 
-  const titleMap = chapterTitlesFromNavigation(zip, manifest, opfPath, DOMParserClass);
-  const opfDirectory = opfPath.includes('/') ? opfPath.slice(0, opfPath.lastIndexOf('/') + 1) : '';
+  const titleMap = await chapterTitlesFromNavigation(zip, manifest, opfPath, DOMParserClass);
   const spine = elementsByName(opfDocument, 'itemref');
   const chapters = [];
 
@@ -161,14 +168,19 @@ export async function parseEpub(data, book, {
 
     const fullPath = resolveArchivePath(opfPath, item.href);
     const basename = item.href.split('/').pop();
-    const chapterTitle = titleMap[item.href] || titleMap[fullPath]
-      || titleMap[basename] || titleMap[fullPath.split('/').pop()];
+    const chapterTitle = titleMap[item.href] || titleMap[basename]
+      || titleMap[fullPath] || titleMap[fullPath.split('/').pop()];
     if (!chapterTitle) continue;
 
     const chapterFile = zip.file(fullPath);
     if (!chapterFile) continue;
     const source = await chapterFile.async('text');
-    const chapterDocument = parseXml(source, DOMParserClass, { htmlFallback: true });
+    let chapterDocument;
+    try {
+      chapterDocument = parseXml(source, DOMParserClass, { htmlFallback: true });
+    } catch {
+      continue;
+    }
     const seen = new Set();
     const paragraphs = [];
     for (const [paragraphIndex, paragraph] of elementsByName(chapterDocument, 'p').entries()) {
