@@ -1,40 +1,18 @@
 <?php
 
-$user_answers = $_POST['all_answers'];
+require_once __DIR__ . '/answer_matcher.php';
 
-$json = file_get_contents('../json/quiz_answers.json');
-$answers = json_decode($json);
-$correct = 0;
-$wrong_answers = [];
+$submittedAnswers = $_POST['all_answers'] ?? null;
+$answers = json_decode(file_get_contents(__DIR__ . '/../json/quiz_answers.json'), true);
+$questions = json_decode(file_get_contents(__DIR__ . '/../json/quiz.json'), true);
 
-foreach ($answers as $item) {
-    if ($user_answers[$item->title] == $item->answer) {
-        $correct++;
-    } else {
-        $wrong_answers[] = $item->title;
-    }
-    $total++;
+if (!is_array($submittedAnswers) || !is_array($answers) || !is_array($questions) ||
+    count($submittedAnswers) !== count($answers) || count($answers) !== 14) {
+    http_response_code(400);
+    exit;
 }
 
-$messages = array(
-    "none" => "This is some text",
-    "low" => "This is some text",
-    "medium" => "This is some text",
-    "high" => "This is some text",
-    "perfect" => "This is some text"
-);
-$percentage = round(($correct * 100) / $total);
+$result = quizScoreAnswers($submittedAnswers, $answers, $questions);
 
-if ($percentage == 0) {
-    $message = $messages['none'];
-} elseif ($percentage >= 30) {
-    $message = $messages['low'];
-} elseif ($percentage >= 60) {
-    $message = $messages['medium'];
-} elseif ($percentage >= 90) {
-    $message = $messages['high'];
-} elseif ($percentage == 100) {
-    $message = $messages['perfect'];
-}
-
-echo json_encode(array('percentage' => $percentage, 'correct' => $correct, 'total' => $total, 'message' => $message));
+header('Content-Type: application/json; charset=utf-8');
+echo json_encode($result);
