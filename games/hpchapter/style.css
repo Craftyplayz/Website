@@ -346,6 +346,8 @@ body::after {
 .feedback-bar.fb-wrong   { border: 1px solid var(--red);    color: var(--red);    background: var(--red-dim);   }
 .feedback-bar.fb-partial { border: 1px solid var(--amber);  color: var(--amber);  background: var(--amber-dim); }
 .feedback-bar.fb-info    { border: 1px solid var(--border2); color: var(--text-sub); background: var(--surface2); }
+.partial-retry { margin: 8px auto 0; }
+.partial-retry[hidden] { display: none; }
  
 /* ── Game Over ──────────────────────────────────────── */
 .go-inner { text-align: center; padding: 8px 0; }
