@@ -1,5 +1,4 @@
 const textQuestionIndexes = new Set([1, 2, 3, 5, 10]);
-const choiceQuestionIndexes = new Set([7, 8, 12, 13]);
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (character) => ({

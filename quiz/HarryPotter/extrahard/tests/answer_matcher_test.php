@@ -13,6 +13,42 @@ function expect(bool $condition, string $message): void
 $questions = json_decode(file_get_contents(__DIR__ . '/../assets/json/quiz.json'), true);
 $answers = json_decode(file_get_contents(__DIR__ . '/../assets/json/quiz_answers.json'), true);
 expect(count($questions) === 14 && count($answers) === 14, 'all 14 original question and answer records remain');
+$expectedTitles = [
+    'What year was Ollivanders wand shop founded?',
+    'What was the name of the author of Unfogging the future?',
+    'What was the breed of Dragon guarding the lowest vaults in Gringotts?',
+    'Who was the last character introduced to the reader in the books?',
+    'How many times was Nearly Headless Nick hit on the neck before he died?',
+    'What was the name of the Slytherin seeker in Harrys first year?',
+    'What Number Quidditch world cup did Harry attend in Book 4?',
+    'What floor of St. Mungos was Gilderoy Lockhart living in?',
+    'Who was NOT a member of the advance guard taking Harry to Grimmauld place?',
+    'What was the exact score of the Final of the Quidditch World Cup?',
+    'Who was the friend that went with Dudley and Harry to the zoo on Dudleys birthday?',
+    'What was the exact amount of money Fred and George bet on Ireland to win the World Cup?',
+    'The Leaky Cauldron is located between which two shops in Diagon Alley?',
+    'Which of these is NOT a mentioned flavour of Bertie Botts every flavour Beans?',
+];
+$expectedAnswers = [
+    '382 BC',
+    'Cassandra Vablatsky',
+    'Ukraniun Ironbelly',
+    'Victoire Weasley',
+    '45',
+    'Terrance Higgs',
+    '422nd',
+    '4th',
+    'Elphias Doge',
+    'Bulgaria 160 Ireland 170',
+    'Piers Polkiss',
+    '37 Galleons, 15 Sickles and 3 Knuts',
+    'A Book store and a Record shop',
+    'Hazelnut',
+];
+foreach ($answers as $index => $item) {
+    expect($item['title'] === $expectedTitles[$index] && $item['answer'] === $expectedAnswers[$index], "original question and verified answer " . ($index + 1) . " are unchanged");
+    expect(count($questions[$index]) === 9, "question " . ($index + 1) . " retains its title and eight original options");
+}
 
 $allCorrect = [
     ['year' => '382', 'era' => 'BC'],
@@ -36,6 +72,7 @@ foreach ($answers as $index => $item) {
 
 foreach ([
     [1, '  CASSANDRA   VABLÁTSKY! ', true],
+    [1, "Cassandra\u{2019} Vablatsky", true],
     [1, 'Casandra Vablatsky', true],
     [1, 'Cassanddra Vablatsky', true],
     [1, 'Cassand ra Vablatsky', true],
@@ -44,6 +81,7 @@ foreach ([
     [1, 'Cassandra Vablatsk', true],
     [2, 'Ukrainian Ironbelly', true],
     [3, 'Victoire-Weasley', true],
+    [3, 'Victoire—Weasley', true],
     [3, 'Victor Weasley', false],
     [5, 'Terence Higgs', true],
     [5, 'Draco Malfoy', false],
