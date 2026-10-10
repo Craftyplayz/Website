@@ -15,6 +15,7 @@ export class GameController {
     fetchImpl = globalThis.fetch,
     JSZipLibrary = globalThis.JSZip,
     DOMParserClass = globalThis.DOMParser,
+    loadLibraryImpl = loadLibrary,
     highScoreStore,
     random = Math.random,
     document = globalThis.document,
@@ -26,6 +27,7 @@ export class GameController {
     this.fetchImpl = fetchImpl;
     this.JSZipLibrary = JSZipLibrary;
     this.DOMParserClass = DOMParserClass;
+    this.loadLibraryImpl = loadLibraryImpl;
     this.highScoreStore = highScoreStore;
     this.random = random;
     this.document = document;
@@ -45,7 +47,7 @@ export class GameController {
     const token = ++this.loadToken;
     this.cancelTransitions();
     this.view.showLoading();
-    const libraryPromise = loadLibrary(BOOKS, {
+    const libraryPromise = this.loadLibraryImpl(BOOKS, {
       fetchImpl: this.fetchImpl,
       resolveAsset: path => new URL(path, this.document.baseURI).href,
       JSZipLibrary: this.JSZipLibrary,
@@ -82,7 +84,7 @@ export class GameController {
   startRun(questions) {
     this.cancelTransitions();
     this.runToken += 1;
-    this.session = new GameSession(questions);
+    this.session = new GameSession(questions, { bookIds: BOOKS.map(book => book.id) });
     const started = this.session.start();
     if (!started.accepted || started.completed) {
       this.view.showLoadError('No readable passages are available to start a game.', []);

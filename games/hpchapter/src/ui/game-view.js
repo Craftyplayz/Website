@@ -136,7 +136,7 @@ export class GameView {
 
   showBookAnswer(outcome) {
     this.disableChoices();
-    this.markAnswer('book', outcome.correct ? outcome.correctBookId : null, outcome.question.bookId);
+    this.markAnswer('book', outcome.chosenBookId, outcome.question.bookId);
     this.setFeedback(outcome.correct
       ? '✓ Correct — now identify the chapter'
       : `✗ Wrong — it was ${BOOKS.find(book => book.id === outcome.correctBookId)?.title ?? 'another book'}`,
@@ -145,9 +145,10 @@ export class GameView {
 
   showChapterAnswer(outcome) {
     this.disableChoices();
-    this.markAnswer('chapter', outcome.correct ? outcome.correctChapterId : null, outcome.correctChapterId);
+    this.markAnswer('chapter', outcome.chosenChapterId, outcome.correctChapterId);
     if (!outcome.correct) {
-      const correctButton = this.document.querySelector(`[data-answer-type="chapter"][data-answer-id="${CSS.escape(outcome.correctChapterId)}"]`);
+      const correctButton = Array.from(this.document.querySelectorAll('[data-answer-type="chapter"]'))
+        .find(button => button.dataset.answerId === outcome.correctChapterId);
       correctButton?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     this.setFeedback(outcome.correct
@@ -165,8 +166,9 @@ export class GameView {
 
   markAnswer(type, selectedId, correctId) {
     for (const button of this.document.querySelectorAll(`[data-answer-type="${type}"]`)) {
-      if (selectedId && button.dataset.answerId === selectedId) button.classList.add('state-correct');
-      else if (selectedId && button.dataset.answerId !== correctId) button.classList.add('state-wrong');
+      if (selectedId && button.dataset.answerId === selectedId) {
+        button.classList.add(selectedId === correctId ? 'state-correct' : 'state-wrong');
+      }
       if (button.dataset.answerId === correctId && button.dataset.answerId !== selectedId) {
         button.classList.add('state-reveal');
       }
