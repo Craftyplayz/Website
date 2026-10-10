@@ -7,13 +7,17 @@
   <title>Chapter Oracle — Harry Potter Quiz</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="./style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous"></script>
+  <script async defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous"></script>
 </head>
 <body>
   <main class="app-wrap">
-    <section class="screen active" id="loadingScreen" aria-labelledby="loadingTitle" aria-hidden="false">
+    <section class="screen active" id="menuScreen" aria-label="Choose your challenge">
+      <header class="wordmark"><div class="wordmark-eyebrow">Harry Potter</div><h1 class="wordmark-title">Chapter <em>Oracle</em></h1></header>
+      <div class="card"><h2>Choose your challenge</h2><p>Normal · Timed · Minimum context · Specific books</p><noscript>Enable JavaScript to play this server-confirmed quiz.</noscript></div>
+    </section>
+    <section class="screen" id="loadingScreen" aria-labelledby="loadingTitle" aria-hidden="true">
       <header class="wordmark">
         <div class="wordmark-eyebrow">Harry Potter</div>
         <h1 class="wordmark-title" id="loadingTitle">Chapter <em>Oracle</em></h1>

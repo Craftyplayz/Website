@@ -1,0 +1,3 @@
+<FilesMatch "^(Parser|Storage|Service)\.php$">
+    Require all denied
+</FilesMatch>
