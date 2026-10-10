@@ -138,6 +138,11 @@ test('valid EPUBs with no eligible paragraph yield an empty question pool', asyn
 });
 
 test('book and chapter rules reject invalid/repeated actions and score only correct chapters', () => {
+  const validatedSession = new GameSession([testQuestion('validated')], { bookIds: ['hp-1', 'hp-2'] });
+  validatedSession.start();
+  assert.equal(validatedSession.answerBook('not-a-book').accepted, false);
+  assert.equal(validatedSession.answerBook('hp-2').correct, false);
+
   const session = new GameSession([testQuestion('one'), testQuestion('two')]);
   assert.equal(session.answerBook('hp-1').accepted, false);
   assert.equal(session.start().question.id, 'one');
