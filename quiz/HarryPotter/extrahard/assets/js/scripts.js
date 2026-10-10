@@ -17,7 +17,7 @@ function renderInput(item, index) {
     return `<label for="${id}">Your answer</label><input class="input answer-input" id="${id}" name="answer" type="text" autocomplete="off" placeholder="Type your answer">`;
   }
   if (index === 0) {
-    return `<label for="${id}">Year</label><input class="input answer-input" id="${id}" name="year" type="number" min="1" step="1" required><label for="era-${index}">Era</label><select class="select answer-input" id="era-${index}" name="era" required><option value="">Choose BC or AD</option><option value="BC">BC</option><option value="AD">AD</option></select>`;
+    return `<label for="${id}">Year</label><input class="input answer-input" id="${id}" name="year" type="number" min="1" step="1" required><label for="era-${index}">Era</label><select class="input answer-input" id="era-${index}" name="era" required><option value="">Choose BC or AD</option><option value="BC">BC</option><option value="AD">AD</option></select>`;
   }
   if (index === 4) {
     return `<label for="${id}">Number of times</label><input class="input answer-input" id="${id}" name="number" type="number" min="0" step="1" required>`;
@@ -31,15 +31,15 @@ function renderInput(item, index) {
   if (index === 11) {
     return ["Galleons", "Sickles", "Knuts"].map((unit) => {
       const name = unit.toLowerCase();
-      return `<label for="${name}-${index}">${unit}</label><input class="input answer-input" id="${name}-${index}" name="${name}" type="number" min="0" step="1" required>`;
+      return `<label for="${name}-${index}">${unit}</label><input class="input answer-input" id="${name}-${index}" name="${name}" type="number" min="0" step="1">`;
     }).join("");
   }
-  const options = Array.from({ length: 8 }, (_, optionIndex) => item[` ${["one", "two", "three", "four", "five", "six", "seven", "eight"][optionIndex]}`] || item[["one", "two", "three", "four", "five", "six", "seven", "eight"][optionIndex]])
-    .filter(Boolean);
+  const options = ["one", "two", "three", "four", "five", "six", "seven", "eight"]
+    .map((optionName) => item[optionName]).filter(Boolean);
   if (index === 7) {
-    return `<label for="${id}">Choose a floor</label><select class="select answer-input" id="${id}" name="answer" required><option value="">Select an option</option>${options.map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`).join("")}</select>`;
+    return `<label for="${id}">Choose a floor</label><select class="input answer-input" id="${id}" name="answer" required><option value="">Select an option</option>${options.map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`).join("")}</select>`;
   }
-  return `<fieldset><legend>Choose one answer</legend>${options.map((option, optionIndex) => `<label class="radio choice"><input class="answer-input" type="radio" name="answer" value="${escapeHtml(option)}" required> ${escapeHtml(option)}</label>${optionIndex < options.length - 1 ? "<br>" : ""}`).join("")}</fieldset>`;
+  return `<fieldset><legend>Choose one answer</legend>${options.map((option, optionIndex) => `<label class="radio choice"><input class="answer-input" type="radio" name="answer-${index}" value="${escapeHtml(option)}" required> ${escapeHtml(option)}</label>${optionIndex < options.length - 1 ? "<br>" : ""}`).join("")}</fieldset>`;
 }
 
 $.getJSON("assets/json/quiz.json", function (data) {
@@ -77,7 +77,7 @@ function collectAnswers() {
         answer[this.name] = $(this).val();
       }
     });
-    if (Object.keys(answer).length === 0 || fields.filter(function () { return this.type !== "radio"; }).toArray().some((field) => !field.value.trim())) {
+    if (Object.keys(answer).length === 0 || (index !== 11 && fields.filter(function () { return this.type !== "radio"; }).toArray().some((field) => !field.value.trim()))) {
       complete = false;
     }
     answers[index] = answer;
@@ -91,7 +91,7 @@ $(document).ready(function () {
     event.preventDefault();
     if (submitted) return;
     const result = collectAnswers();
-    if (!result.complete || Object.keys(result.answers).length !== $(".question").length) {
+    if (!result.complete || Object.keys(result.answers).length !== 14 || $(".question").length !== 14) {
       notify("Looks like you missed something", "white");
       return;
     }
