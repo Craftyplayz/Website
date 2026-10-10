@@ -45,6 +45,7 @@ export class GameController {
 
   async load() {
     const token = ++this.loadToken;
+    this.runToken += 1;
     this.cancelTransitions();
     this.view.showLoading();
     const libraryPromise = this.loadLibraryImpl(BOOKS, {
