@@ -172,6 +172,7 @@ final class Service
             'runId' => bin2hex(random_bytes(32)), 'mode' => $mode, 'name' => $name, 'selectedBooks' => $selected,
             'duration' => $this->rules['duration'], 'contextLimit' => $this->rules['contextLimit'],
             'state' => 'ready', 'score' => 0, 'sequence' => $sequence, 'position' => 0,
+            'questionIdKey' => bin2hex(random_bytes(32)),
             'startedMs' => null, 'createdMs' => $now, 'finishedMs' => null, 'result' => null, 'feedback' => null,
             'failures' => $failures,
             'notice' => $failures ? 'Some books could not be loaded. This run uses the available books only. Return to the menu to retry.' : null,
@@ -217,9 +218,9 @@ final class Service
         ];
         if (in_array($run['state'], ['book-selection', 'chapter-selection', 'answer-feedback'], true)) {
             $question = $this->question($run);
-            // Canonical stable IDs contain book identities; never send them before an answer.
+            // Stable IDs expose answers; use a private key, not the client-known bearer token.
             $snapshot['question'] = [
-                'id' => hash_hmac('sha256', $question['stable_id'], $run['runId']),
+                'id' => hash_hmac('sha256', $question['stable_id'], hex2bin($run['questionIdKey'])),
                 'passage' => $run['mode'] === 'minimum' ? $question['excerpt'] : $question['passage'],
             ];
             if ($run['state'] !== 'book-selection') {
@@ -295,13 +296,16 @@ SQL, [
                 throw new ApiError(404, 'This run is unavailable or has expired.');
             }
             $run = json_decode($row['data'], true, 512, JSON_THROW_ON_ERROR);
+            if (!isset($run['questionIdKey'])) {
+                $run['questionIdKey'] = bin2hex(random_bytes(32));
+            }
             $initialState = $run['state'];
             $payload = $action === 'answer' ? json_encode([$body['type'], $body['answerId']], JSON_THROW_ON_ERROR) : null;
             $cached = $action === 'answer' ? $this->storage->query('SELECT payload,response FROM requests WHERE run_id=? AND request_id=?', [$run['runId'], $body['requestId']])->fetch() : false;
             $conflict = $cached && $cached['payload'] !== $payload;
             $active = !in_array($run['state'], ['completed', 'abandoned'], true);
             $now = $this->now();
-            $expired = $action !== 'abandon' && $this->expire($run, $now);
+            $expired = $this->expire($run, $now);
             if (!$expired && $active && !$cached) {
                 $this->transition($run, $action, $body, $now);
             }
@@ -328,6 +332,10 @@ SQL, [
             return;
         }
         if ($action === 'abandon') {
+            $now = $this->now();
+            if ($this->expire($run, $now)) {
+                return;
+            }
             $run['state'] = 'abandoned';
             $run['finishedMs'] = $now;
             $run['feedback'] = null;

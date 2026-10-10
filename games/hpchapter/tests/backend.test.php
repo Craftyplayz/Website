@@ -143,6 +143,9 @@ $run = $service->create(['name' => str_repeat('😀', 20), 'mode' => 'normal']);
 $id = $run['runId'];
 check(preg_match('/^[a-f0-9]{64}$/D', $id) === 1 && $run['state'] === 'ready' && $run['question'] === null && $run['elapsedMs'] === 0, 'opaque ready snapshot');
 $internal = json_decode($storage->query('SELECT data FROM runs WHERE id=?', [$id])->fetchColumn(), true);
+check(strlen(hex2bin($internal['questionIdKey'])) === 32 && $internal['questionIdKey'] !== $id, 'question ID key is independent256bit private randomness');
+check(!array_key_exists('questionIdKey', $run) && !array_key_exists('sequence', $run)
+    && !str_contains(json_encode($run), $internal['questionIdKey']), 'ready snapshot does not expose private key or sequence');
 check(count($internal['sequence']) === count($normalPool) && count(array_unique($internal['sequence'])) === count($normalPool), 'shuffled no-repeat complete sequence');
 check($internal['sequence'] !== $normalPool, 'server shuffles the sequence');
 rejects(fn () => $service->act('next', ['runId' => $id]), 409, 'no skip before start');
@@ -153,6 +156,11 @@ check($started['elapsedMs'] === 0 && $started['state'] === 'book-selection', 'cl
 check(array_keys($started['question']) === ['id', 'passage'] && preg_match('/^[a-f0-9]{64}$/D', $started['question']['id']), 'no answer keys or identity before answering');
 $question = internalQuestion($storage, $id);
 check($started['question']['id'] !== $question['stable_id'] && $started['question']['passage'] === $question['passage'], 'opaque external canonical question');
+check($started['question']['id'] !== hash_hmac('sha256', $question['stable_id'], $id)
+    && $started['question']['id'] !== hash_hmac('sha256', $question['stable_id'], hex2bin($id)), 'client-known bearer cannot enumerate question identity');
+check(!str_contains(json_encode($started), $internal['questionIdKey']) && !array_key_exists('questionIdKey', $started)
+    && !array_key_exists('sequence', $started), 'active snapshot keeps question ID secret key private');
+check($service->act('state', ['runId' => $id])['question']['id'] === $started['question']['id'], 'question ID stable across state resync');
 $now += 1000;
 check($service->act('start', ['runId' => $id])['elapsedMs'] === 1000, 'second start never resets timer');
 rejects(fn () => answer($service, $id, 'chapter', $question['chapter_id']), 409, 'cannot bypass book');
@@ -161,10 +169,12 @@ rejects(fn () => answer($service, $id, 'book', 'hp-8'), 400, 'invalid book canno
 $bookAnswer = answer($service, $id, 'book', $question['book_id']);
 check($bookAnswer['state'] === 'chapter-selection' && $bookAnswer['feedback']['correct'] && $bookAnswer['score'] === 0, 'correct book does not score');
 check(count($bookAnswer['question']['chapterChoices']) > 1, 'actual chapter choices');
+check($bookAnswer['question']['id'] === $started['question']['id'], 'question ID stable across book answer');
 rejects(fn () => answer($service, $id, 'chapter', 'not-a-choice'), 400, 'chapter must be offered');
 $requestId = uuid();
 $chapterAnswer = answer($service, $id, 'chapter', $question['chapter_id'], $requestId);
 check($chapterAnswer['state'] === 'answer-feedback' && $chapterAnswer['score'] === 1 && $chapterAnswer['feedback']['correct'], 'only correct chapter scores');
+check($chapterAnswer['question']['id'] === $started['question']['id'], 'question ID stable across chapter answer');
 check(answer($service, $id, 'chapter', $question['chapter_id'], $requestId) === $chapterAnswer, 'answer request UUID is idempotent');
 $now += 100;
 $freshReplay = answer($service, $id, 'chapter', $question['chapter_id'], $requestId);
@@ -271,8 +281,25 @@ $abandoned = $service->act('abandon', ['runId' => $id]);
 check($abandoned['state'] === 'abandoned' && $abandoned['result'] === null && !$storage->query('SELECT id FROM scores WHERE run_id=?', [$id])->fetch(), 'abandon never ranks');
 $ready = $service->create(['name' => 'expired abandon', 'mode' => 'timed']);
 $service->act('start', ['runId' => $ready['runId']]);
-$now += 61000;
-check($service->act('abandon', ['runId' => $ready['runId']])['state'] === 'abandoned' && !$storage->query('SELECT id FROM scores WHERE run_id=?', [$ready['runId']])->fetch(), 'menu abandon does not score even after clock expiry');
+$expiryQuestion = internalQuestion($storage, $ready['runId']);
+answer($service, $ready['runId'], 'book', $expiryQuestion['book_id']);
+answer($service, $ready['runId'], 'chapter', $expiryQuestion['chapter_id']);
+$now += 60000;
+$expiredAbandon = $service->act('abandon', ['runId' => $ready['runId']]);
+check($expiredAbandon['state'] === 'completed' && $expiredAbandon['score'] === 1
+    && $expiredAbandon['result']['reason'] === 'time-expired' && $expiredAbandon['result']['accepted']
+    && $expiredAbandon['result']['elapsedMs'] === 60000, 'abandon at exact deadline finalizes already-ended timed run');
+check($service->act('abandon', ['runId' => $ready['runId']]) === $expiredAbandon
+    && $service->act('finish', ['runId' => $ready['runId']]) === $expiredAbandon
+    && (int) $storage->query('SELECT COUNT(*) FROM scores WHERE run_id=?', [$ready['runId']])->fetchColumn() === 1, 'expired abandon finalizes only once');
+$earlyAbandon = $service->create(['name' => 'preexpiry abandon', 'mode' => 'timed']);
+$service->act('start', ['runId' => $earlyAbandon['runId']]);
+$earlyQuestion = internalQuestion($storage, $earlyAbandon['runId']);
+answer($service, $earlyAbandon['runId'], 'book', $earlyQuestion['book_id']);
+answer($service, $earlyAbandon['runId'], 'chapter', $earlyQuestion['chapter_id']);
+$now += 59999;
+check($service->act('abandon', ['runId' => $earlyAbandon['runId']])['state'] === 'abandoned'
+    && !$storage->query('SELECT id FROM scores WHERE run_id=?', [$earlyAbandon['runId']])->fetch(), 'abandon before deadline never ranks even with earned point');
 
 $secondStorage = new Storage($directory . '/native.sqlite');
 $secondService = new Service($secondStorage, static function () use (&$now): int { return $now; });
@@ -454,4 +481,24 @@ rejects(fn () => $capacityService->create(['name' => 'all running', 'mode' => 's
 $capacity->query("UPDATE runs SET state='abandoned' WHERE id=?", [$activeIds[0]]);
 $capacityService->create(['name' => 'capacity abandonment', 'mode' => 'specific', 'selectedBooks' => ['hp-1']]);
 check(!$capacity->query('SELECT id FROM runs WHERE id=?', [$activeIds[0]])->fetch() && (int) $capacity->query('SELECT COUNT(*) FROM runs')->fetchColumn() === 2000, 'abandoned state evicted before capacity rejection');
+$legacyKeyRun = $service->create(['name' => 'legacy question key', 'mode' => 'normal']);
+$legacyId = $legacyKeyRun['runId'];
+$oldPublicId = $service->act('start', ['runId' => $legacyId])['question']['id'];
+rewrite($storage, $legacyId, static function (array &$run): void { unset($run['questionIdKey']); });
+$upgraded = $service->act('state', ['runId' => $legacyId]);
+$upgradedPrivate = json_decode($storage->query('SELECT data FROM runs WHERE id=?', [$legacyId])->fetchColumn(), true);
+check(strlen(hex2bin($upgradedPrivate['questionIdKey'])) === 32 && $upgraded['question']['id'] !== $oldPublicId, 'legacy run without private key upgrades transactionally');
+check($service->act('state', ['runId' => $legacyId])['question']['id'] === $upgraded['question']['id'], 'legacy generated question ID remains stable on subsequent state');
+$legacyQuestion = internalQuestion($storage, $legacyId);
+$legacyRequest = uuid();
+$legacyAnswer = answer($service, $legacyId, 'book', $legacyQuestion['book_id'], $legacyRequest);
+check($legacyAnswer['question']['id'] === $upgraded['question']['id']
+    && answer($service, $legacyId, 'book', $legacyQuestion['book_id'], $legacyRequest)['question']['id'] === $upgraded['question']['id'], 'legacy private-key ID stays stable across answer/replay');
+check(!str_contains(json_encode($legacyAnswer), $upgradedPrivate['questionIdKey']) && !isset($legacyAnswer['sequence']), 'legacy upgrade never exposes key or sequence');
+$customAbandon = $changedService->create(['name' => 'configured abandon', 'mode' => 'timed']);
+$changedService->act('start', ['runId' => $customAbandon['runId']]);
+$now += 10000;
+$customEnded = $service->act('abandon', ['runId' => $customAbandon['runId']]);
+check($customEnded['duration'] === 10 && $customEnded['result']['elapsedMs'] === 10000
+    && $customEnded['result']['reason'] === 'time-expired' && $customEnded['result']['accepted'], 'expired abandon respects immutable configured duration');
 echo json_encode(['assertions' => $count, 'normal' => count($normalPool), 'timed' => count($timedPool), 'minimum' => count($minimumPool), 'specific' => $bookCounts], JSON_THROW_ON_ERROR) . "\n";
