@@ -1,126 +1,124 @@
+const textQuestionIndexes = new Set([1, 2, 3, 5, 10]);
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[character]);
+}
+
+function renderInput(item, index) {
+  const id = `answer-${index}`;
+  if (textQuestionIndexes.has(index)) {
+    return `<label for="${id}">Your answer</label><input class="input answer-input" id="${id}" name="answer" type="text" autocomplete="off" placeholder="Type your answer">`;
+  }
+  if (index === 0) {
+    return `<label for="${id}">Year</label><input class="input answer-input" id="${id}" name="year" type="number" min="1" step="1" required><label for="era-${index}">Era</label><select class="input answer-input" id="era-${index}" name="era" required><option value="">Choose BC or AD</option><option value="BC">BC</option><option value="AD">AD</option></select>`;
+  }
+  if (index === 4) {
+    return `<label for="${id}">Number of times</label><input class="input answer-input" id="${id}" name="number" type="number" min="0" step="1" required>`;
+  }
+  if (index === 6) {
+    return `<label for="${id}">World Cup number</label><input class="input answer-input" id="${id}" name="number" type="text" inputmode="numeric" required>`;
+  }
+  if (index === 9) {
+    return `<label for="bulgaria-${index}">Bulgaria</label><input class="input answer-input" id="bulgaria-${index}" name="bulgaria" type="number" min="0" step="1" required><label for="ireland-${index}">Ireland</label><input class="input answer-input" id="ireland-${index}" name="ireland" type="number" min="0" step="1" required>`;
+  }
+  if (index === 11) {
+    return ["Galleons", "Sickles", "Knuts"].map((unit) => {
+      const name = unit.toLowerCase();
+      return `<label for="${name}-${index}">${unit}</label><input class="input answer-input" id="${name}-${index}" name="${name}" type="number" min="0" step="1">`;
+    }).join("");
+  }
+  const options = ["one", "two", "three", "four", "five", "six", "seven", "eight"]
+    .map((optionName) => item[optionName]).filter(Boolean);
+  if (index === 7) {
+    return `<label for="${id}">Choose a floor</label><select class="input answer-input" id="${id}" name="answer" required><option value="">Select an option</option>${options.map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`).join("")}</select>`;
+  }
+  return `<fieldset><legend>Choose one answer</legend>${options.map((option, optionIndex) => `<label class="radio choice"><input class="answer-input" type="radio" name="answer-${index}" value="${escapeHtml(option)}" required> ${escapeHtml(option)}</label>${optionIndex < options.length - 1 ? "<br>" : ""}`).join("")}</fieldset>`;
+}
+
 $.getJSON("assets/json/quiz.json", function (data) {
-  $.each(data, function (i, item) {
-    $("#content").append(`
-      <div class="card question q${i}">
-        <div class="card-content">
-          <div class='content'>
-            <h3 style='color:white;'>${item.title}</h3>
-            <div class='control'>
-              <label class='radio'>
-                <input type='radio' name='${item.title}' class='message'>
-                ${item.one}
-              </label>
-              <br>
-                            <label class='radio'>
-                <input type='radio' name='${item.title}' class='message'>
-                ${item.two}
-              </label>
-              <br>
-              <label class='radio'>
-                <input type='radio' name='${item.title}' class='message'>
-                ${item.three}
-              </label>
-              <br>
-                            <label class='radio'>
-                <input type='radio' name='${item.title}' class='message'>
-                ${item.four}
-              </label>
-              <br>
-              <label class='radio'>
-                <input type='radio' name='${item.title}' class='message'>
-                ${item.five}
-              </label>
-              <br>
-                            <label class='radio'>
-                <input type='radio' name='${item.title}' class='message'>
-                ${item.six}
-              </label>
-              <br>
-              <label class='radio'>
-                <input type='radio' name='${item.title}' class='message'>
-                ${item.seven}
-              </label>
-              <br>
-                            <label class='radio'>
-                <input type='radio' name='${item.title}' class='message'>
-                ${item.eight}
-              </label>
-              <br>
-            </div>
-          </div>
-        </div>
-      </div>
-      `);
+  $.each(data, function (index, item) {
+    $("#content").append(`<div class="card question q${index}"><div class="card-content"><div class="content"><h3>${escapeHtml(item.title)}</h3><div class="control">${renderInput(item, index)}</div></div></div></div>`);
   });
 });
 
 function stringGen(len) {
   var text = "";
   var charset = "abcdefghijklmnopqrstuvwxyz0123456789";
-  for (var i = 0; i < len; i++)
-    text += charset.charAt(Math.floor(Math.random() * charset.length));
+  for (var i = 0; i < len; i++) text += charset.charAt(Math.floor(Math.random() * charset.length));
   return text;
 }
 
 function notify(msg, mode) {
   var classy = stringGen(9);
-  $("body").append(
-    `<div id='${classy}' class='notification is-${mode} slideInRight'>${msg}</div>`
-  );
+  $("body").append(`<div id='${classy}' class='notification is-${mode} slideInRight' role="status">${msg}</div>`);
   setTimeout(function () {
-    $(`#${classy}`).removeClass("slideInRight");
-    $(`#${classy}`).addClass("slideOutRight");
-    setTimeout(function () {
-      $(`#${classy}`).remove();
-    }, 3000);
+    $(`#${classy}`).removeClass("slideInRight").addClass("slideOutRight");
+    setTimeout(function () { $(`#${classy}`).remove(); }, 3000);
   }, 3000);
 }
 
-$(document).ready(function () {
-  $("#quiz").bind("submit", function (e) {
-    e.preventDefault();
-
-    $('input[type="radio"]').click(function () {
-      $(`.button`).prop("disabled", false);
+function collectAnswers() {
+  const answers = {};
+  let complete = true;
+  $(".question").each(function (index) {
+    const fields = $(this).find(".answer-input");
+    const answer = {};
+    fields.each(function () {
+      if (this.type === "radio") {
+        if (this.checked) answer.answer = this.value;
+      } else {
+        answer[this.name] = $(this).val();
+      }
     });
-
-    var all_answers = {};
-    $('input[type="radio"]:checked').each(function () {
-      var answer = $.trim($(this).parent().text());
-      var title = $(this).attr("name");
-      all_answers[title] = answer;
-    });
-    var all_questions = $(".question").length;
-    var checked_questions = $('input[type="radio"]:checked').length;
-    console.log(checked_questions + "/" + all_questions);
-    $("#result").text(checked_questions + "/" + all_questions);
-    if (checked_questions == all_questions && checked_questions != 0) {
-      $.ajax({
-        type: "POST",
-        url: "./assets/php/check_quiz.php",
-        data: {
-          all_answers: all_answers,
-        },
-        success: function (data) {
-          notify("Here's your results", "white");
-          var item = JSON.parse(data);
-          var percentage = item.percentage;
-          var correct = item.correct;
-          var total = item.total;
-          var message = item.message;
-
-          $(".question, #quiz").hide();
-          $("#percent").text(`${percentage}%`);
-          $("#score").text(`${correct}/${total}`);
-          $("#message").text(`${message}`);
-          $(".results").show();
-        },
-        error: function (error) {
-          notify("Something went wrong", "white");
-        },
-      });
-    } else {
-      notify("Looks like you missed something", "white");
+    if (Object.keys(answer).length === 0 || (index !== 11 && fields.filter(function () { return this.type !== "radio"; }).toArray().some((field) => !field.value.trim()))) {
+      complete = false;
     }
+    answers[index] = answer;
+  });
+  return { answers, complete };
+}
+
+$(document).ready(function () {
+  let submitted = false;
+  $("#quiz").on("submit", function (event) {
+    event.preventDefault();
+    if (submitted) return;
+    const result = collectAnswers();
+    if (!result.complete || Object.keys(result.answers).length !== 14 || $(".question").length !== 14) {
+      notify("Looks like you missed something", "white");
+      return;
+    }
+    submitted = true;
+    $(".submit").prop("disabled", true);
+    $.ajax({
+      type: "POST",
+      url: "./assets/php/check_quiz.php",
+      data: { all_answers: result.answers },
+      success: function (data) {
+        try {
+          const item = JSON.parse(data);
+          $("#quiz, .question").hide();
+          $("#percent").text(`${item.percentage}%`);
+          $("#score").text(`${item.correct}/${item.total}`);
+          $("#message").text(item.message);
+          $(".results").show();
+        } catch (error) {
+          submitted = false;
+          $(".submit").prop("disabled", false);
+          notify("Something went wrong", "white");
+        }
+      },
+      error: function () {
+        submitted = false;
+        $(".submit").prop("disabled", false);
+        notify("Something went wrong", "white");
+      },
+    });
   });
 });

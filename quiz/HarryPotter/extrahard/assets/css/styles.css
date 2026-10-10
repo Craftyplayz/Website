@@ -143,3 +143,32 @@ body {
 .content h5 {
   color: white;
 }
+
+.question .answer-input {
+  margin: 0 10px 12px 0;
+  max-width: 100%;
+}
+
+.question input[type="text"],
+.question input[type="number"],
+.question select {
+  width: 100%;
+  max-width: 420px;
+}
+
+.question .answer-input:focus {
+  outline: 3px solid #76c7ff;
+  outline-offset: 2px;
+}
+
+.question label,
+.question legend {
+  display: block;
+  margin: 0 0 6px;
+  color: white;
+}
+
+.question .choice {
+  display: inline-block;
+  padding: 7px 0;
+}
