@@ -2,11 +2,18 @@
 
 function quizNormalizeText(string $answer): string
 {
-    $answer = Normalizer::normalize($answer, Normalizer::FORM_KD) ?: $answer;
-    $answer = transliterator_transliterate('Any-Latin; Latin-ASCII', $answer);
-    $answer = mb_strtolower($answer, 'UTF-8');
-    $answer = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $answer);
-    return trim(preg_replace('/\s+/u', ' ', $answer));
+    if (class_exists('Normalizer')) {
+        $answer = Normalizer::normalize($answer, Normalizer::FORM_KD) ?: $answer;
+    }
+    if (function_exists('transliterator_transliterate')) {
+        $transliterated = transliterator_transliterate('Any-Latin; Latin-ASCII', $answer);
+        $answer = is_string($transliterated) ? $transliterated : $answer;
+    } elseif (function_exists('iconv')) {
+        $answer = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $answer) ?: $answer;
+    }
+    $answer = function_exists('mb_strtolower') ? mb_strtolower($answer, 'UTF-8') : strtolower($answer);
+    $answer = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $answer) ?? '';
+    return trim(preg_replace('/\s+/u', ' ', $answer) ?? '');
 }
 
 function quizDamerauLevenshtein(string $left, string $right): int
@@ -34,6 +41,33 @@ function quizDamerauLevenshtein(string $left, string $right): int
         }
     }
     return $distance[$leftLength][$rightLength];
+}
+
+function quizFuzzyTextMatch(string $answer, string $variant): bool
+{
+    $answerWords = explode(' ', $answer);
+    $variantWords = explode(' ', $variant);
+    $totalLength = strlen(str_replace(' ', '', $variant));
+    $totalThreshold = $totalLength >= 15 ? 2 : ($totalLength >= 8 ? 1 : 0);
+    if ($totalThreshold === 0) {
+        return false;
+    }
+
+    if (count($answerWords) !== count($variantWords)) {
+        return quizDamerauLevenshtein($answer, $variant) <= 1;
+    }
+
+    $totalDistance = 0;
+    foreach ($variantWords as $wordIndex => $variantWord) {
+        $wordLength = strlen($variantWord);
+        $wordThreshold = $wordLength >= 14 ? 2 : ($wordLength >= 7 ? 1 : 0);
+        $wordDistance = quizDamerauLevenshtein($answerWords[$wordIndex], $variantWord);
+        if ($wordDistance > $wordThreshold) {
+            return false;
+        }
+        $totalDistance += $wordDistance;
+    }
+    return $totalDistance > 0 && $totalDistance <= $totalThreshold;
 }
 
 function quizTextAnswerIsCorrect(string $submitted, int $index, string $correct, array $question): bool
@@ -64,9 +98,7 @@ function quizTextAnswerIsCorrect(string $submitted, int $index, string $correct,
         if ($answer === $variant) {
             return true;
         }
-        $length = strlen(str_replace(' ', '', $variant));
-        $threshold = $length >= 15 ? 2 : ($length >= 8 ? 1 : 0);
-        if ($threshold > 0 && quizDamerauLevenshtein($answer, $variant) <= $threshold) {
+        if (quizFuzzyTextMatch($answer, $variant)) {
             return true;
         }
     }
@@ -103,32 +135,44 @@ function quizAnswerIsCorrect(int $index, array $submitted, string $correct, arra
     }
 
     if ($index === 0) {
-        return quizIntegerValue($submitted['year'] ?? null) === 382 &&
-            ($submitted['era'] ?? null) === 'BC' && $correct === '382 BC';
+        if (!preg_match('/^(\d+)\s+(BC|AD)$/i', $correct, $expected)) {
+            return false;
+        }
+        return quizIntegerValue($submitted['year'] ?? null) === quizIntegerValue($expected[1]) &&
+            strtoupper((string) ($submitted['era'] ?? '')) === strtoupper($expected[2]);
     }
     if ($index === 4) {
-        return quizIntegerValue($submitted['number'] ?? null) === 45;
+        return quizIntegerValue($submitted['number'] ?? null) === quizIntegerValue($correct);
     }
     if ($index === 6) {
-        if (!isset($submitted['number']) || !is_string($submitted['number']) ||
+        if (!preg_match('/^(\d+)(?:st|nd|rd|th)?$/i', $correct, $expected) ||
+            !isset($submitted['number']) || !is_string($submitted['number']) ||
             !preg_match('/^(\d+)(?:st|nd|rd|th)?$/i', trim($submitted['number']), $matches)) {
             return false;
         }
-        return quizIntegerValue($matches[1]) === 422;
+        return quizIntegerValue($matches[1]) === quizIntegerValue($expected[1]);
     }
     if ($index === 7 || in_array($index, [8, 12, 13], true)) {
         return isset($submitted['answer']) && is_string($submitted['answer']) &&
             hash_equals($correct, $submitted['answer']);
     }
     if ($index === 9) {
-        return quizIntegerValue($submitted['bulgaria'] ?? null) === 160 &&
-            quizIntegerValue($submitted['ireland'] ?? null) === 170;
+        if (!preg_match('/^Bulgaria\s+(\d+)\s+Ireland\s+(\d+)$/i', $correct, $expected)) {
+            return false;
+        }
+        return quizIntegerValue($submitted['bulgaria'] ?? null) === quizIntegerValue($expected[1]) &&
+            quizIntegerValue($submitted['ireland'] ?? null) === quizIntegerValue($expected[2]);
     }
     if ($index === 11) {
+        if (!preg_match('/^(\d+)\s+Galleons,\s*(\d+)\s+Sickles\s+and\s+(\d+)\s+Knuts$/i', $correct, $expected)) {
+            return false;
+        }
         $galleons = quizOptionalIntegerValue($submitted['galleons'] ?? null);
         $sickles = quizOptionalIntegerValue($submitted['sickles'] ?? null);
         $knuts = quizOptionalIntegerValue($submitted['knuts'] ?? null);
-        return $galleons === 37 && $sickles === 15 && $knuts === 3 &&
+        return $galleons === quizIntegerValue($expected[1]) &&
+            $sickles === quizIntegerValue($expected[2]) &&
+            $knuts === quizIntegerValue($expected[3]) &&
             $sickles <= 16 && $knuts <= 29;
     }
     return false;
