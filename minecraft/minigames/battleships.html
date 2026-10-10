@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TNT Cannon Targeting</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #202020;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+
+  h1 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 28px;
+  }
+
+  .grid-wrapper {
+    background: #272626;
+    border: 1px solid #fff;
+    border-radius: 15px;
+    padding: 20px;
+    display: inline-block;
+  }
+
+  .col-labels {
+    display: grid;
+    grid-template-columns: 28px repeat(10, 42px) 28px;
+    margin-bottom: 4px;
+  }
+
+  .col-labels span {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: 500;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 28px repeat(10, 42px) 28px;
+    gap: 0;
+    margin-bottom: 4px;
+  }
+
+  .row-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: 500;
+  }
+
+  .cell {
+    width: 38px;
+    height: 38px;
+    margin: 2px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.6rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s, border-color 0.1s, color 0.1s;
+    user-select: none;
+  }
+
+  .cell:hover {
+    background: #2a2a2a;
+    border-color: #888;
+    color: #ccc;
+  }
+
+  .cell.selected {
+    background: #2d4a1e;
+    border-color: #5a9e2f;
+    color: #8fd44f;
+  }
+
+  .readout {
+    margin-top: 24px;
+    background: #272626;
+    border: 1px solid #fff;
+    border-radius: 15px;
+    padding: 20px 28px;
+    width: 100%;
+    max-width: 620px;
+    min-height: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .readout .placeholder {
+    color: #555;
+    font-size: 0.85rem;
+  }
+
+  .readout .target-label {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #8fd44f;
+  }
+
+  .settings {
+    display: flex;
+    align-items: flex-end;
+    gap: 32px;
+  }
+
+  .setting {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .setting .label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #888;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .setting .value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+
+<h1>TNT Cannon Targeting</h1>
+
+<div class="grid-wrapper">
+  <div class="col-labels">
+    <span></span>
+    <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+    <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+    <span></span>
+  </div>
+  <div id="grid"></div>
+  <div class="col-labels" style="margin-top:4px;margin-bottom:0;">
+    <span></span>
+    <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+    <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+    <span></span>
+  </div>
+</div>
+
+<div class="readout" id="readout">
+  <span class="placeholder">Select a square to view cannon settings</span>
+</div>
+
+<script>
+  const rows = ['A','B','C','D','E','F','G','H','I','J'];
+
+  const ctRaw = `37,4,8,40
+31,2,8,4
+15,4,6,25
+5,5,5,26
+39,6,6,39
+26,5,5,5
+25,6,4,15
+4,8,2,31
+40,8,4,37
+36,8,3,24
+11,3,7,30
+45,2,8,7
+40,5,7,41
+35,5,6,36
+4,6,4,35
+36,6,5,35
+41,7,5,40
+7,8,2,45
+30,7,3,11
+27,8,2,26
+20,3,7,33
+6,5,6,47
+47,4,7,30
+37,5,6,38
+48,7,7,48
+38,6,5,37
+30,7,4,47
+47,6,5,6
+33,7,3,20
+29,8,2,34
+24,3,7,36
+23,2,7,11
+19,3,6,16
+5,4,5,14
+33,5,5,33
+14,5,4,5
+16,6,3,19
+11,7,2,23
+36,7,3,24
+17,8,1,13
+24,2,7,25
+10,3,6,28
+30,3,6,21
+33,3,6,5
+31,4,5,14
+5,6,3,33
+21,6,3,30
+28,6,3,10
+25,7,2,24
+20,8,1,43
+33,2,7,28
+47,2,7,17
+36,4,6,39
+25,5,5,46
+18,5,4,37
+46,5,5,25
+39,6,4,36
+17,7,2,47
+28,7,2,33
+43,8,3,42
+37,3,7,41
+22,4,6,47
+13,4,5,40
+48,3,6,12
+41,4,5,22
+12,6,3,48
+40,5,4,13
+47,6,4,22
+41,7,3,37
+44,8,3,45
+41,3,7,42
+47,4,7,45
+1,3,5,21
+8,3,5,4
+21,4,4,21
+4,5,3,8
+21,5,3,1
+45,7,4,47
+42,7,3,41
+38,7,2,23
+7,3,6,44
+34,2,6,25
+20,3,5,31
+8,4,4,34
+28,4,4,28
+34,4,4,8
+31,5,3,20
+25,6,2,34
+44,6,3,7
+40,7,2,29
+12,2,6,35
+42,2,6,27
+26,3,5,35
+14,4,4,40
+32,4,4,32
+40,4,4,14
+35,5,3,26
+27,6,2,42
+35,6,2,12
+42,7,2,33`;
+
+  const settings = ctRaw.trim().split('\n').map(line => {
+    const [a, b, c, d] = line.split(',').map(Number);
+    return { a, b, c, d };
+  });
+
+  // Build label->index map: A0=0, A1=1, ... J9=99
+  const labelToIndex = {};
+  rows.forEach((r, ri) => {
+    for (let c = 0; c < 10; c++) {
+      labelToIndex[r + c] = ri * 10 + c;
+    }
+  });
+
+  const grid = document.getElementById('grid');
+  const readout = document.getElementById('readout');
+  let selectedCell = null;
+
+  rows.forEach(r => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'row';
+
+    const rowLabel = document.createElement('div');
+    rowLabel.className = 'row-label';
+    rowLabel.textContent = r;
+    rowEl.appendChild(rowLabel);
+
+    for (let c = 0; c < 10; c++) {
+      const label = r + c;
+      const idx = labelToIndex[label];
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.textContent = label;
+      cell.dataset.label = label;
+      cell.dataset.idx = idx;
+
+      cell.addEventListener('click', () => {
+        if (selectedCell) selectedCell.classList.remove('selected');
+        cell.classList.add('selected');
+        selectedCell = cell;
+        showSettings(label, idx);
+      });
+
+      rowEl.appendChild(cell);
+    }
+
+    // right label
+    const rowLabelR = document.createElement('div');
+    rowLabelR.className = 'row-label';
+    rowLabelR.textContent = r;
+    rowEl.appendChild(rowLabelR);
+
+    grid.appendChild(rowEl);
+  });
+
+  function showSettings(label, idx) {
+    const s = settings[idx];
+    readout.innerHTML = `
+      <div class="target-label">${label}</div>
+      <div class="settings">
+        <div class="setting">
+          <span class="label">Left<br>Minecart</span>
+          <span class="value">${s.a}</span>
+        </div>
+        <div class="setting">
+          <span class="label">Left<br>Lectern</span>
+          <span class="value">${s.b}</span>
+        </div>
+        <div class="setting">
+          <span class="label">Right<br>Lectern</span>
+          <span class="value">${s.c}</span>
+        </div>
+        <div class="setting">
+          <span class="label">Right<br>Minecart</span>
+          <span class="value">${s.d}</span>
+        </div>
+      </div>
+    `;
+  }
+</script>
+</body>
+</html>
