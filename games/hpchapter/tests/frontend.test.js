@@ -526,3 +526,57 @@ test('request UUID fallback works without secure-context randomUUID and sets v4/
   assert.equal(createRequestId(native), 'native-uuid');
   assert.throws(() => createRequestId({}), /secure request identifier/);
 });
+test('menu refreshes global preview after authoritative expired abandon acceptance', async () => {
+  const h = harness(), abandon = deferred(), original = h.api.call;
+  let accepted = false, previews = 0;
+  h.api.call = (action, ...args) => {
+    if (action === 'abandon') return abandon.promise;
+    if (action === 'preview') {
+      previews++;
+      return Promise.resolve({ boards: { timed: accepted ? [{ id: 1, name: 'Harry', score: 3 }] : [] } });
+    }
+    return original(action, ...args);
+  };
+  await h.controller.init();
+  h.controller.setName('Harry');
+  h.controller.selectMode('timed');
+  await h.controller.start();
+  h.controller.menu();
+  await flush();
+  assert.equal(h.controller.model.screen, 'menu');
+  assert.equal(previews, 2);
+  assert.deepEqual(h.controller.model.preview.timed, []);
+  accepted = true;
+  abandon.resolve(snapshot({ state: 'completed', result: { accepted: true, score: 3, reason: 'time-expired' } }));
+  await flush();
+  assert.equal(previews, 3);
+  assert.equal(h.controller.model.preview.timed[0].score, 3);
+  assert.equal(h.controller.model.snapshot, null);
+});
+test('late abandon response cannot refresh a newer run or a different menu generation', async () => {
+  for (const destination of ['quiz', 'menu']) {
+    const h = harness(), abandon = deferred(), original = h.api.call;
+    let previews = 0;
+    h.api.call = (action, ...args) => {
+      if (action === 'abandon') return abandon.promise;
+      if (action === 'preview') previews++;
+      return original(action, ...args);
+    };
+    await h.controller.init();
+    h.controller.setName('Harry');
+    await h.controller.start();
+    h.controller.menu();
+    await flush();
+    if (destination === 'quiz') await h.controller.start();
+    else h.controller.menu();
+    await flush();
+    const previewCount = previews;
+    const token = h.controller.token;
+    abandon.resolve(snapshot({ state: 'completed', result: { accepted: true, score: 99, reason: 'time-expired' } }));
+    await flush();
+    assert.equal(previews, previewCount);
+    assert.equal(h.controller.model.screen, destination);
+    assert.equal(h.controller.token, token);
+    if (destination === 'quiz') assert.equal(h.controller.model.snapshot.score, 0);
+  }
+});

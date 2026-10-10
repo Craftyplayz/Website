@@ -96,8 +96,9 @@ The countdown uses an elapsed-time monotonic browser clock rather than a
 decrementing counter. The server separately enforces its persisted start time and
 duration before accepting answers. Closing the page, backgrounding a tab,
 refreshing, or delaying an API request cannot reset that deadline. Returning to
-the menu abandons an unfinished run without ranking it. Timers and delayed
-callbacks are cleared when leaving a run.
+the menu abandons an unfinished run without ranking it. If the server deadline
+has already passed, the timed result is finalized instead of discarded. Timers
+and delayed callbacks are cleared when leaving a run.
 
 ## Backend and hosting prerequisites
 

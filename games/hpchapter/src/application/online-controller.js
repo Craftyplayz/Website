@@ -76,7 +76,7 @@ export class OnlineController {
   menu() {
     const runId = this.model.snapshot?.runId;
     const incomplete = this.model.snapshot?.state !== 'completed';
-    ++this.token;
+    const token = ++this.token;
     ++this.boardToken;
     this.cleanup();
     this.model.screen = 'menu';
@@ -85,7 +85,11 @@ export class OnlineController {
     this.model.rank = null;
     this.model.error = '';
     this.render();
-    if (runId && incomplete) this.api.call('abandon', { runId }).catch(() => {});
+    if (runId && incomplete) {
+      this.api.call('abandon', { runId }).then(() => {
+        if (token === this.token && this.model.screen === 'menu') this.loadPreview();
+      }).catch(() => {});
+    }
     this.loadConfig();
     this.loadPreview();
   }

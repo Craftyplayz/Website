@@ -5,7 +5,7 @@ import { promisify } from 'node:util';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
-import { randomUUID, createHash } from 'node:crypto';
+import { randomUUID, createHash, createHmac } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname, relative, sep } from 'node:path';
 import { BOOKS } from '../src/config/books.js';
@@ -423,4 +423,70 @@ test('HTTP website-root deployment cannot execute CLI fixtures or native test su
     assert.equal(await response.text(), '');
   }
   assert.equal((await request('config', undefined, { url })).status, 200);
+});
+
+test('HTTP question IDs use server-only randomness and upgrade legacy runs stably', async () => {
+  await fixture('clear-rate');
+  const ready = await create('normal', 'private question IDs');
+  const runId = ready.runId;
+  assert.match(runId, /^[a-f0-9]{64}$/);
+  assert.equal(Object.hasOwn(ready, 'questionIdKey'), false);
+  assert.equal(Object.hasOwn(ready, 'sequence'), false);
+  assert.deepEqual(await fixture('question-key-metadata', runId), { keyBytes: 32 });
+  const started = (await request('start', { runId })).data;
+  const canonical = await fixture('question', runId);
+  assert.notEqual(started.question.id, createHmac('sha256', runId).update(canonical.stable_id).digest('hex'));
+  assert.notEqual(started.question.id, createHmac('sha256', Buffer.from(runId, 'hex')).update(canonical.stable_id).digest('hex'));
+  assert.equal((await request('state', { runId })).data.question.id, started.question.id);
+  await fixture('drop-question-key', runId);
+  assert.deepEqual(await fixture('question-key-metadata', runId), { keyBytes: 0 });
+  const upgraded = (await request('state', { runId })).data;
+  assert.notEqual(upgraded.question.id, started.question.id);
+  assert.deepEqual(await fixture('question-key-metadata', runId), { keyBytes: 32 });
+  assert.equal((await request('state', { runId })).data.question.id, upgraded.question.id);
+  const requestId = randomUUID();
+  const accepted = (await answer(runId, 'book', canonical.book_id, requestId)).data;
+  assert.equal(accepted.question.id, upgraded.question.id);
+  const replayed = (await answer(runId, 'book', canonical.book_id, requestId)).data;
+  assert.equal(replayed.question.id, upgraded.question.id);
+  for (const snapshot of [started, upgraded, accepted, replayed]) {
+    assert.equal(Object.hasOwn(snapshot, 'questionIdKey'), false);
+    assert.equal(Object.hasOwn(snapshot, 'sequence'), false);
+    assert.equal(Object.hasOwn(snapshot.question, 'bookId'), false);
+    assert.equal(Object.hasOwn(snapshot.question, 'correctChapterId'), false);
+  }
+  await request('abandon', { runId });
+  await fixture('clear-rate');
+});
+
+test('HTTP timed abandon finalizes expired runs once but never ranks before expiry', async () => {
+  await fixture('clear-rate');
+  const early = await create('timed', 'early timed abandon');
+  await request('start', { runId: early.runId });
+  const earlyQuestion = await fixture('question', early.runId);
+  await answer(early.runId, 'book', earlyQuestion.book_id);
+  await answer(early.runId, 'chapter', earlyQuestion.chapter_id);
+  const abandoned = (await request('abandon', { runId: early.runId })).data;
+  assert.equal(abandoned.state, 'abandoned');
+  assert.equal(abandoned.score, 1);
+  assert.equal(abandoned.result, null);
+  assert.equal((await request('leaderboard&mode=timed')).data.entries.some(entry => entry.name === early.name), false);
+  const expired = await create('timed', 'expired timed leave');
+  await request('start', { runId: expired.runId });
+  const expiredQuestion = await fixture('question', expired.runId);
+  await answer(expired.runId, 'book', expiredQuestion.book_id);
+  await answer(expired.runId, 'chapter', expiredQuestion.chapter_id);
+  await fixture('expire', expired.runId);
+  const ended = (await request('abandon', { runId: expired.runId })).data;
+  assert.equal(ended.state, 'completed');
+  assert.equal(ended.result.reason, 'time-expired');
+  assert.equal(ended.result.elapsedMs, ended.duration * 1000);
+  assert.equal(ended.result.score, 1);
+  assert.equal(ended.result.accepted, true);
+  for (const action of ['abandon', 'finish', 'state']) {
+    assert.deepEqual((await request(action, { runId: expired.runId })).data, ended);
+  }
+  const entries = (await request('leaderboard&mode=timed')).data.entries;
+  assert.equal(entries.filter(entry => entry.id === ended.result.id).length, 1);
+  await fixture('clear-rate');
 });

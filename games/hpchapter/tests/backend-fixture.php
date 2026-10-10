@@ -40,6 +40,15 @@ $runId = $argv[3] ?? '';
 if ($action === 'question') {
     $run = json_decode($storage->query('SELECT data FROM runs WHERE id=?', [$runId])->fetchColumn(), true, 512, JSON_THROW_ON_ERROR);
     echo json_encode($storage->query('SELECT q.*,b.book_id,b.chapters FROM questions q JOIN book_versions b ON b.version=q.version WHERE q.id=?', [$run['sequence'][$run['position']]])->fetch(), JSON_THROW_ON_ERROR);
+} elseif ($action === 'drop-question-key' || $action === 'question-key-metadata') {
+    $run = json_decode($storage->query('SELECT data FROM runs WHERE id=?', [$runId])->fetchColumn(), true, 512, JSON_THROW_ON_ERROR);
+    if ($action === 'drop-question-key') {
+        unset($run['questionIdKey']);
+        $storage->query('UPDATE runs SET data=? WHERE id=?', [json_encode($run, JSON_THROW_ON_ERROR), $runId]);
+    } else {
+        $key = $run['questionIdKey'] ?? '';
+        echo json_encode(['keyBytes' => is_string($key) && preg_match('/^[a-f0-9]{64}$/D', $key) ? 32 : 0], JSON_THROW_ON_ERROR);
+    }
 } elseif ($action === 'expire') {
     $run = json_decode($storage->query('SELECT data FROM runs WHERE id=?', [$runId])->fetchColumn(), true, 512, JSON_THROW_ON_ERROR);
     $run['startedMs'] = (int) floor(microtime(true) * 1000) - 61000;
