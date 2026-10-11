@@ -1,6 +1,7 @@
 import { BOOKS } from '../config/books.js';
 import { MODES, modeDescription, SPECIFIC_NOTE, RANKING_NOTE } from '../modes/rules.js';
 import { leaderboardRows } from '../services/leaderboards.js';
+import { renderDescriptorQuestion } from './descriptor-question.js';
 
 export function libraryFailureMessages(failures = []) {
   return failures.map(failure => {
@@ -80,7 +81,8 @@ export class OnlineView {
       button.append(this.node('span', mode.symbol, 'mode-symbol'), this.node('strong', mode.title),
         this.node('span', {
           normal: 'The complete library', timed: `${model.config.duration}-second challenge`,
-          minimum: `${model.config.contextLimit} characters of context`, specific: 'Your chosen books'
+          minimum: `${model.config.contextLimit} characters of context`, specific: 'Your chosen books',
+          'between-the-lines': 'Type the missing expressive descriptor'
         }[mode.id], 'mode-caption'));
       modes.append(button);
     }
@@ -205,6 +207,10 @@ export class OnlineView {
     }
     screen.append(header);
     this.partialLibrary(screen, snapshot);
+    if (MODES.find(mode => mode.id === snapshot.mode)?.answerType === 'descriptor') {
+      renderDescriptorQuestion(this, screen, model);
+      return;
+    }
     const passage = this.node('blockquote', snapshot.question?.passage || '', 'passage-card');
     passage.id = 'passageCard';
     passage.tabIndex = 0;
@@ -264,10 +270,18 @@ export class OnlineView {
     title.tabIndex = -1;
     const score = this.node('span', String(result.score ?? model.snapshot.score), 'go-score');
     score.id = 'goScore';
-    const reason = { 'incorrect-book': 'Incorrect book', 'pool-exhausted': 'Every passage completed', 'time-expired': 'Time expired' }[result.reason] || 'Awaiting server confirmation';
-    card.append(title, score, this.node('p', 'chapters correctly identified', 'go-score-lbl'),
+    const descriptors = model.snapshot?.mode === 'between-the-lines';
+    const reason = { 'incorrect-book': 'Incorrect book',
+      'pool-exhausted': descriptors ? 'All questions in this run completed' : 'Every passage completed',
+      'time-expired': 'Time expired' }[result.reason] || 'Awaiting server confirmation';
+    card.append(title, score, this.node('p', descriptors ? 'descriptors correctly recalled' : 'chapters correctly identified', 'go-score-lbl'),
       this.node('p', `${reason} · ${(Number(result.elapsedMs || 0) / 1000).toFixed(2)} seconds`, 'go-context'),
       this.node('p', accepted ? 'Accepted by the server · saved to the global leaderboard.' : 'Provisional only — not confirmed, not a saved global score.', 'network-message'));
+    if (descriptors) {
+      const answered = result.answered ?? model.snapshot.answered;
+      const accuracy = answered ? Math.round(Number(result.score ?? model.snapshot.score) / answered * 100) : 0;
+      card.append(this.node('p', `${answered} questions answered · ${accuracy}% accuracy`, 'go-context'));
+    }
     const feedback = model.snapshot?.feedback;
     if (feedback?.correctBookId) {
       card.append(this.node('p', `The passage was from ${BOOKS.find(book => book.id === feedback.correctBookId)?.title || feedback.correctBookId}${feedback.chapterTitle ? ` · ${feedback.chapterTitle}` : ''}.`, 'intro'));
@@ -323,7 +337,8 @@ export class OnlineView {
     const caption = this.node('caption', 'Public server-confirmed scores', 'sr-only');
     const head = this.node('thead');
     const labels = this.node('tr');
-    const detailHeader = { specific: 'Books', minimum: 'Context limit', timed: 'Time limit' }[mode];
+    const detailHeader = { specific: 'Books', minimum: 'Context limit', timed: 'Time limit',
+      'between-the-lines': 'Answered · Accuracy' }[mode];
     for (const text of ['Rank', 'Name', 'Score', 'Elapsed', 'Date', ...(detailHeader ? [detailHeader] : [])]) {
       const cell = this.node('th', text);
       cell.scope = 'col';
@@ -333,7 +348,8 @@ export class OnlineView {
     const body = this.node('tbody');
     for (const row of leaderboardRows(entries)) {
       const item = this.node('tr');
-      const detail = { specific: row.books, minimum: row.contextLimit, timed: row.duration }[mode];
+      const detail = { specific: row.books, minimum: row.contextLimit, timed: row.duration,
+        'between-the-lines': row.questions }[mode];
       for (const value of [row.rank, row.name, row.score, row.elapsed, row.date, ...(detailHeader ? [detail] : [])]) {
         item.append(this.node('td', String(value)));
       }

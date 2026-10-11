@@ -16,7 +16,7 @@ export class OnlineController {
     this.delays = new Set();
     this.model = { screen: 'menu', mode: 'normal', name: '', selectedBooks: BOOKS.map(book => book.id),
       config: { ...DEFAULT_CONFIG }, configStatus: 'loading', preview: {}, previewStatus: 'loading',
-      boards: {}, boardMode: 'normal', boardStatus: 'idle', pending: false, snapshot: null, error: '' };
+      boards: {}, boardMode: 'normal', boardStatus: 'idle', pending: false, snapshot: null, error: '', answerDraft: '' };
     this.timer = new Countdown({ now, setTimeoutImpl, clearTimeoutImpl,
       onTick: ms => this.view.updateTimer(ms), onExpire: () => this.expire() });
   }
@@ -142,6 +142,7 @@ export class OnlineController {
     }
   }
   apply(snapshot, feedback = true) {
+    if (snapshot.question?.id !== this.model.snapshot?.question?.id) this.model.answerDraft = '';
     this.model.snapshot = snapshot;
     this.model.pending = false;
     this.model.error = '';
@@ -161,6 +162,10 @@ export class OnlineController {
       return;
     }
     this.model.screen = 'quiz';
+    if (snapshot.feedback?.type === 'descriptor') {
+      this.render();
+      return;
+    }
     if (feedback && snapshot.feedback) {
       this.model.pending = true;
       this.render();
@@ -191,23 +196,42 @@ export class OnlineController {
     if (snapshot.state !== `${type}-selection`) return;
     if (type === 'book' && !BOOKS.some(book => book.id === answerId)) return;
     if (type === 'chapter' && !snapshot.question?.chapterChoices?.some(choice => choice.id === answerId)) return;
-    await this.runCall('answer', { type, answerId, requestId: this.requestId() });
+    if (type === 'descriptor') {
+      answerId = String(answerId).trim();
+      if (!answerId) {
+        this.model.error = 'Type a descriptor before submitting.';
+        this.render();
+        return;
+      }
+      this.model.answerDraft = answerId;
+    }
+    await this.runCall('answer', { type, answerId, requestId: this.requestId(),
+      ...(type === 'descriptor' ? { questionId: snapshot.question.id } : {}) });
   }
   async runCall(action, extra = {}) {
     const token = this.token;
-    const runId = this.model.snapshot.runId;
+    const current = this.model.snapshot;
+    const runId = current.runId;
     this.model.pending = true;
     this.render();
     try {
       const snapshot = await this.api.call(action, { runId, ...extra });
       if (token !== this.token || this.model.screen === 'result') return;
       this.apply(snapshot);
-    } catch {
+    } catch (error) {
       if (token !== this.token || this.model.screen === 'result') return;
       await this.resume();
+      if (token === this.token && action === 'answer' && current.mode === 'between-the-lines'
+        && this.model.screen === 'quiz' && this.model.snapshot.state === 'descriptor-selection'
+        && this.model.snapshot.question?.id === current.question?.id) {
+        this.model.error = `${networkMessage(error)} Your answer was not recorded. Submit again when ready.`;
+        this.render();
+      }
     }
   }
   next() {
+    if (this.model.snapshot?.mode === 'between-the-lines'
+      && (this.model.pending || this.model.screen !== 'quiz' || this.model.snapshot.state !== 'answer-feedback')) return;
     if (this.timer.expired()) { this.expire(); return; }
     return this.runCall('next');
   }

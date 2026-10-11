@@ -152,7 +152,7 @@ final class Parser
         return $titles;
     }
 
-    public static function parse(string $file, string $bookId): array
+    public static function parse(string $file, string $bookId, bool $complete = false): array
     {
         $zip = new \ZipArchive();
         if ($zip->open($file) !== true) {
@@ -201,17 +201,22 @@ final class Parser
                 }
                 $seen = [];
                 $paragraphs = [];
+                $sourceParagraphs = [];
                 $chapterId = $bookId . ':' . ($itemId !== '' ? $itemId : $index);
                 foreach (self::elements($chapterDocument, 'p') as $paragraphIndex => $paragraph) {
                     $text = self::normalize($paragraph->textContent);
+                    if ($complete && $text !== '') {
+                        $sourceParagraphs[] = ['id' => $chapterId . ':p' . ($paragraphIndex + 1), 'text' => $text];
+                    }
                     if (!self::eligible($text) || isset($seen[$text])) {
                         continue;
                     }
                     $seen[$text] = true;
                     $paragraphs[] = ['id' => $chapterId . ':p' . ($paragraphIndex + 1), 'text' => $text];
                 }
-                if ($paragraphs) {
-                    $chapters[] = ['id' => $chapterId, 'title' => $title, 'href' => $path, 'paragraphs' => $paragraphs];
+                if ($paragraphs || ($complete && $sourceParagraphs)) {
+                    $chapters[] = ['id' => $chapterId, 'title' => $title, 'href' => $path, 'paragraphs' => $paragraphs]
+                        + ($complete ? ['sourceParagraphs' => $sourceParagraphs] : []);
                 }
             }
             return ['id' => $bookId, 'chapters' => $chapters];

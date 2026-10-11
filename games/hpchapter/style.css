@@ -8,6 +8,11 @@
 .mode-caption, .field-hint { font-size: 12px; color: var(--text-sub); line-height: 1.7; }
 .start-form { display: flex; flex-direction: column; gap: 12px; }
 .start-form > label { color: var(--gold2); font-size: 14px; }
+.descriptor-form { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+.descriptor-form > label { color: var(--gold2); }
+.descriptor-passage { white-space: pre-wrap; overflow-wrap: anywhere; }
+.descriptor-blank { color: var(--gold2); background: var(--gold-dim); padding: 0 6px; border-bottom: 2px solid var(--gold); }
+#questionProgress { max-width: none; text-align: left; margin: 12px 0; }
 .name-input { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--r-sm); color: var(--text); font: inherit; width: 100%; padding: 14px; margin: 4px 0; }
 .network-message { font-size: 13px; line-height: 1.7; margin: 16px 0; color: var(--text-sub); }
 .network-message.error-msg { color: var(--red); }
