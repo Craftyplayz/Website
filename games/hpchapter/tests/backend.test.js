@@ -153,7 +153,7 @@ test('HTTP config and empty boards follow exact contract with no CORS', async ()
   assert.deepEqual(config.data, { duration: 60, contextLimit: 150 });
   assert.equal(config.headers.get('cache-control'), 'no-store');
   const preview = await request('preview');
-  assert.deepEqual(preview.data, { boards: { normal: [], timed: [], minimum: [], specific: [] } });
+  assert.deepEqual(preview.data, { boards: { normal: [], timed: [], minimum: [], specific: [], 'between-the-lines': [] } });
   assert.deepEqual((await request('leaderboard&mode=normal&limit=100')).data, { mode: 'normal', entries: [] });
 });
 
@@ -340,7 +340,7 @@ test('HTTP minimum, specific pool boundaries, selected details and abandon never
   assert.equal((await request('finish', { runId: abandoned.runId })).data.result, null);
   const preview = (await request('preview')).data.boards;
   assert.equal(preview.normal.filter(entry => entry.name === 'menu abandonment').length, 0);
-  assert.deepEqual(Object.keys(preview), ['normal', 'timed', 'minimum', 'specific']);
+  assert.deepEqual(Object.keys(preview), ['normal', 'timed', 'minimum', 'specific', 'between-the-lines']);
   for (const entries of Object.values(preview)) assert.ok(entries.length <= 10);
 });
 

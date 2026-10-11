@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace HPChapter;
 
+require_once __DIR__ . '/BetweenTheLines.php';
+
 final class ApiError extends \RuntimeException
 {
     public function __construct(public readonly int $status, string $message, public readonly ?int $retryAfter = null)
@@ -13,7 +15,7 @@ final class ApiError extends \RuntimeException
 
 final class Service
 {
-    public const MODES = ['normal', 'timed', 'minimum', 'specific'];
+    public const MODES = ['normal', 'timed', 'minimum', 'specific', 'between-the-lines'];
     public readonly array $rules;
     private readonly \Closure $clock;
 
@@ -59,7 +61,7 @@ final class Service
         return $mode;
     }
 
-    private function version(string $bookId): string
+    private function version(string $bookId, bool $descriptors = false): string
     {
         $file = ($this->booksDirectory ?? dirname(__DIR__) . '/books') . '/book' . substr($bookId, 3) . '.epub';
         if (!is_file($file) || !is_readable($file)) {
@@ -69,18 +71,33 @@ final class Service
         if ($hash === false) {
             throw new \RuntimeException('The selected EPUB is unavailable.');
         }
-        $version = $bookId . ':p' . Parser::SCHEMA_VERSION . ':c' . $this->rules['contextLimit'] . ':' . $hash;
+        $version = $descriptors ? BetweenTheLines::version($bookId, $hash)
+            : $bookId . ':p' . Parser::SCHEMA_VERSION . ':c' . $this->rules['contextLimit'] . ':' . $hash;
         if ($this->storage->query('SELECT version FROM book_versions WHERE version=?', [$version])->fetch()) {
             return $version;
         }
-        $book = Parser::parse($file, $bookId);
+        $book = Parser::parse($file, $bookId, $descriptors);
         if (!$book['chapters']) {
             throw new \RuntimeException('The selected EPUB contains no usable chapters.');
         }
         $choices = array_map(static fn (array $chapter): array => ['id' => $chapter['id'], 'title' => $chapter['title']], $book['chapters']);
-        $this->storage->transaction(function () use ($book, $version, $bookId, $choices): void {
+        $candidates = $descriptors ? BetweenTheLines::extract($book) : null;
+        if ($descriptors && !$candidates) {
+            throw new \RuntimeException('The selected EPUB contains no unambiguous expressive attributions.');
+        }
+        $this->storage->transaction(function () use ($book, $version, $bookId, $choices, $candidates): void {
             $this->storage->query('INSERT OR IGNORE INTO book_versions(version,book_id,chapters) VALUES(?,?,?)', [$version, $bookId, json_encode($choices, JSON_THROW_ON_ERROR)]);
             $position = 0;
+            if ($candidates !== null) {
+                foreach ($candidates as $candidate) {
+                    $provenance = $candidate['provenance'];
+                    $this->storage->query('INSERT OR IGNORE INTO questions(version,stable_id,chapter_id,chapter_title,passage,excerpt,position,descriptor,provenance) VALUES(?,?,?,?,?,?,?,?,?)', [
+                        $version, $candidate['id'], $provenance['chapterId'], $provenance['chapterTitle'],
+                        $candidate['passage'], null, $position++, $candidate['descriptor'], json_encode($provenance, JSON_THROW_ON_ERROR),
+                    ]);
+                }
+                return;
+            }
             foreach ($book['chapters'] as $chapter) {
                 foreach ($chapter['paragraphs'] as $paragraph) {
                     $this->storage->query('INSERT OR IGNORE INTO questions(version,stable_id,chapter_id,chapter_title,passage,excerpt,position) VALUES(?,?,?,?,?,?,?)', [
@@ -104,7 +121,7 @@ final class Service
                 continue;
             }
             try {
-                $version = $this->version($bookId);
+                $version = $this->version($bookId, $mode === 'between-the-lines');
             } catch (\RuntimeException $error) {
                 if ($error instanceof \PDOException) {
                     throw $error;
@@ -167,6 +184,9 @@ final class Service
             $j = random_int(0, $i);
             [$sequence[$i], $sequence[$j]] = [$sequence[$j], $sequence[$i]];
         }
+        if ($mode === 'between-the-lines') {
+            $sequence = array_slice($sequence, 0, BetweenTheLines::SETTINGS['maximumQuestions']);
+        }
         $now = $this->now();
         $run = [
             'runId' => bin2hex(random_bytes(32)), 'mode' => $mode, 'name' => $name, 'selectedBooks' => $selected,
@@ -177,6 +197,10 @@ final class Service
             'failures' => $failures,
             'notice' => $failures ? 'Some books could not be loaded. This run uses the available books only. Return to the menu to retry.' : null,
         ];
+        if ($mode === 'between-the-lines') {
+            $run['answered'] = 0;
+            $run['questionCount'] = count($sequence);
+        }
         return $this->storage->transaction(function () use ($run, $now): array {
             $count = (int) $this->storage->query('SELECT COUNT(*) FROM runs')->fetchColumn();
             if ($count >= 2000) {
@@ -216,14 +240,18 @@ final class Service
             'question' => null, 'result' => $run['result'],
             'failures' => $run['failures'] ?? [], 'notice' => $run['notice'] ?? null,
         ];
-        if (in_array($run['state'], ['book-selection', 'chapter-selection', 'answer-feedback'], true)) {
+        if ($run['mode'] === 'between-the-lines') {
+            $snapshot['answered'] = $run['answered'];
+            $snapshot['questionCount'] = $run['questionCount'];
+        }
+        if (in_array($run['state'], ['book-selection', 'chapter-selection', 'descriptor-selection', 'answer-feedback'], true)) {
             $question = $this->question($run);
             // Stable IDs expose answers; use a private key, not the client-known bearer token.
             $snapshot['question'] = [
                 'id' => hash_hmac('sha256', $question['stable_id'], hex2bin($run['questionIdKey'])),
                 'passage' => $run['mode'] === 'minimum' ? $question['excerpt'] : $question['passage'],
             ];
-            if ($run['state'] !== 'book-selection') {
+            if ($run['mode'] !== 'between-the-lines' && $run['state'] !== 'book-selection') {
                 $snapshot['question']['chapterChoices'] = json_decode($question['chapters'], true, 512, JSON_THROW_ON_ERROR);
             }
         }
@@ -237,10 +265,11 @@ final class Service
     {
         $run['finishedMs'] = $reason === 'time-expired' ? $run['startedMs'] + $run['duration'] * 1000 : $now;
         $elapsed = $this->elapsed($run, $now);
-        $this->storage->query('INSERT INTO scores(run_id,name,mode,score,achieved_at,elapsed_ms,duration,context_limit,selected_books) VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(run_id) DO NOTHING', [
+        $this->storage->query('INSERT INTO scores(run_id,name,mode,score,achieved_at,elapsed_ms,duration,context_limit,selected_books,answered,question_count) VALUES(?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(run_id) DO NOTHING', [
             $run['runId'], $run['name'], $run['mode'], $run['score'], self::utc($now), $elapsed, $run['duration'],
             $run['contextLimit'],
             json_encode($run['selectedBooks'], JSON_THROW_ON_ERROR),
+            $run['answered'] ?? null, $run['questionCount'] ?? null,
         ]);
         $entry = $this->storage->query('SELECT id,score,elapsed_ms,achieved_at FROM scores WHERE run_id=?', [$run['runId']])->fetch();
         $rank = (int) $this->storage->query(<<<'SQL'
@@ -259,6 +288,12 @@ SQL, [
             'score' => $run['score'], 'reason' => $reason, 'elapsedMs' => $elapsed, 'accepted' => true,
             'id' => (int) $entry['id'], 'entryId' => (int) $entry['id'], 'rank' => $rank,
         ];
+        if ($run['mode'] === 'between-the-lines') {
+            $run['result'] += [
+                'answered' => $run['answered'], 'questionCount' => $run['questionCount'],
+                'accuracy' => $run['answered'] ? $run['score'] / $run['answered'] : 0,
+            ];
+        }
     }
 
     private static function utc(int $milliseconds): string
@@ -280,14 +315,26 @@ SQL, [
 
     public function act(string $action, array $body): array
     {
-        $this->fields($body, $action === 'answer' ? ['runId', 'type', 'answerId', 'requestId'] : ['runId']);
+        $this->fields($body, $action === 'answer' ? ['runId', 'type', 'answerId', 'requestId'] : ['runId'], $action === 'answer' ? ['questionId'] : []);
         if (!is_string($body['runId']) || !preg_match('/^[a-f0-9]{64}$/D', $body['runId'])) {
             throw new ApiError(400, 'Invalid run ID.');
         }
-        if ($action === 'answer' && (!is_string($body['type']) || !in_array($body['type'], ['book', 'chapter'], true)
+        if ($action === 'answer' && (!is_string($body['type']) || !in_array($body['type'], ['book', 'chapter', 'descriptor'], true)
             || !is_string($body['answerId']) || strlen($body['answerId']) > 200
+            || !mb_check_encoding($body['answerId'], 'UTF-8')
             || !is_string($body['requestId']) || !preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/iD', $body['requestId']))) {
             throw new ApiError(400, 'Invalid answer metadata or request UUID.');
+        }
+        if ($action === 'answer') {
+            if ($body['type'] === 'descriptor') {
+                if (!isset($body['questionId']) || !is_string($body['questionId']) || !preg_match('/^[a-f0-9]{64}$/D', $body['questionId'])
+                    || mb_strlen($body['answerId'], 'UTF-8') > 80 || BetweenTheLines::normalize($body['answerId']) === ''
+                    || preg_match('/[\p{C}\p{Zl}\p{Zp}]/u', BetweenTheLines::normalize($body['answerId']))) {
+                    throw new ApiError(400, 'Provide a descriptor and the current opaque question ID.');
+                }
+            } elseif (array_key_exists('questionId', $body)) {
+                throw new ApiError(400, 'questionId is only valid for descriptor answers.');
+            }
         }
         $response = $this->storage->transaction(function () use ($action, $body): array|ApiError {
             $row = $this->storage->query('SELECT data,updated_ms,expires_ms FROM runs WHERE id=?', [$body['runId']])->fetch();
@@ -300,7 +347,10 @@ SQL, [
                 $run['questionIdKey'] = bin2hex(random_bytes(32));
             }
             $initialState = $run['state'];
-            $payload = $action === 'answer' ? json_encode([$body['type'], $body['answerId']], JSON_THROW_ON_ERROR) : null;
+            $payload = $action === 'answer' ? json_encode(
+                isset($body['questionId']) ? [$body['type'], $body['answerId'], $body['questionId']] : [$body['type'], $body['answerId']],
+                JSON_THROW_ON_ERROR,
+            ) : null;
             $cached = $action === 'answer' ? $this->storage->query('SELECT payload,response FROM requests WHERE run_id=? AND request_id=?', [$run['runId'], $body['requestId']])->fetch() : false;
             $conflict = $cached && $cached['payload'] !== $payload;
             $active = !in_array($run['state'], ['completed', 'abandoned'], true);
@@ -344,7 +394,7 @@ SQL, [
         if ($action === 'start') {
             if ($run['state'] === 'ready') {
                 $run['startedMs'] = $now;
-                $run['state'] = 'book-selection';
+                $run['state'] = $run['mode'] === 'between-the-lines' ? 'descriptor-selection' : 'book-selection';
             }
             return;
         }
@@ -360,15 +410,28 @@ SQL, [
             if ($run['position'] >= count($run['sequence'])) {
                 $this->finalize($run, 'pool-exhausted', $now);
             } else {
-                $run['state'] = 'book-selection';
+                $run['state'] = $run['mode'] === 'between-the-lines' ? 'descriptor-selection' : 'book-selection';
             }
             return;
         }
-        $expected = $body['type'] === 'book' ? 'book-selection' : 'chapter-selection';
+        $expected = match ($body['type']) {
+            'book' => 'book-selection', 'chapter' => 'chapter-selection', 'descriptor' => 'descriptor-selection',
+        };
         if ($run['state'] !== $expected) {
             throw new ApiError(409, 'This answer is not allowed at the current stage.');
         }
         $question = $this->question($run);
+        if ($body['type'] === 'descriptor') {
+            if (!hash_equals(hash_hmac('sha256', $question['stable_id'], hex2bin($run['questionIdKey'])), $body['questionId'])) {
+                throw new ApiError(409, 'This answer belongs to a different question.');
+            }
+            $correct = BetweenTheLines::matches($body['answerId'], $question['descriptor']);
+            $run['score'] += $correct ? 1 : 0;
+            $run['answered']++;
+            $run['feedback'] = ['type' => 'descriptor', 'correct' => $correct, 'descriptor' => $question['descriptor']];
+            $run['state'] = 'answer-feedback';
+            return;
+        }
         if ($body['type'] === 'book') {
             if (!isset(Parser::TITLES[$body['answerId']])) {
                 throw new ApiError(400, 'Choose a valid book.');
@@ -419,12 +482,15 @@ SQL, [
         if ($limit < 1 || $limit > 100) {
             throw new ApiError(400, 'Leaderboard limit must be between 1 and 100.');
         }
-        $entries = $this->storage->query('SELECT id,name,mode,score,achieved_at,elapsed_ms,duration,context_limit,selected_books FROM scores WHERE mode=? ORDER BY score DESC,elapsed_ms ASC,achieved_at ASC,id ASC LIMIT ?', [$mode, $limit])->fetchAll();
+        $entries = $this->storage->query('SELECT id,name,mode,score,achieved_at,elapsed_ms,duration,context_limit,selected_books,answered,question_count FROM scores WHERE mode=? ORDER BY score DESC,elapsed_ms ASC,achieved_at ASC,id ASC LIMIT ?', [$mode, $limit])->fetchAll();
         return ['mode' => $mode, 'entries' => array_map(static fn (array $entry): array => [
             'id' => (int) $entry['id'], 'name' => $entry['name'], 'score' => (int) $entry['score'],
             'achievedAt' => $entry['achieved_at'], 'elapsedMs' => (int) $entry['elapsed_ms'],
             'duration' => (int) $entry['duration'], 'selectedBooks' => json_decode($entry['selected_books'], true, 8, JSON_THROW_ON_ERROR),
             'mode' => $entry['mode'], 'contextLimit' => (int) $entry['context_limit'],
-        ], $entries)];
+        ] + ($entry['mode'] === 'between-the-lines' ? [
+            'answered' => (int) $entry['answered'], 'questionCount' => (int) $entry['question_count'],
+            'accuracy' => $entry['answered'] ? $entry['score'] / $entry['answered'] : 0,
+        ] : []), $entries)];
     }
 }

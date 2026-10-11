@@ -4,7 +4,8 @@ export const MODES = Object.freeze([
   { id: 'normal', title: 'Normal', symbol: '✦' },
   { id: 'timed', title: 'Timed', symbol: '◷' },
   { id: 'minimum', title: 'Minimum context', symbol: '¶' },
-  { id: 'specific', title: 'Specific books', symbol: '▤' }
+  { id: 'specific', title: 'Specific books', symbol: '▤' },
+  { id: 'between-the-lines', title: 'Between the Lines', symbol: '“ ”', answerType: 'descriptor' }
 ]);
 export const DEFAULT_CONFIG = Object.freeze({ duration: 60, contextLimit: 150 });
 export const SPECIFIC_NOTE = 'One shared Specific leaderboard. Selected books change the passage pool, so runs are not directly comparable.';
@@ -18,6 +19,9 @@ export function validateServerConfig(config) {
 }
 
 export function modeDescription(mode, config = DEFAULT_CONFIG) {
+  if (mode === 'between-the-lines') {
+    return 'Read the dialogue, spot the missing expression, and remember exactly how the characters spoke. Type the missing expressive descriptor, not the book or chapter. Correct: +1; incorrect: +0. Small spelling mistakes and supported verb forms are accepted, not synonyms. Each question scores once. Continue when ready; a finite run uses unique questions from the available books, with no timer.';
+  }
   const base = 'Identify the book, then the chapter. Correct chapter: +1. Wrong chapter: continue; wrong book: game over. Passages never repeat.';
   return `${base} ${{
     normal: 'All seven books, with no time limit.',

@@ -1,14 +1,14 @@
 # Harry Potter Chapter Oracle
 
 The Chapter Oracle asks players to identify a passage's book and chapter. The
-landing screen offers four modes and public, server-persisted leaderboards.
+landing screen offers five modes and public, server-persisted leaderboards.
 `/games/hpchapter/`, `index.html`, `new.html`, and `hpchapter.html` remain entry
 points for the same native JavaScript application. This is not
 `games/newhpchapter/`.
 
 ## Mode rules
 
-All modes retain the two-step rules: identifying the book unlocks the chapter
+The original four modes retain the two-step rules: identifying the book unlocks the chapter
 without awarding a point; a wrong book ends the run. A correct chapter awards
 one point. A wrong chapter reveals the answer, awards no point, and continues.
 Passages never repeat in a run. Exhausting the pool completes the run.
@@ -27,6 +27,14 @@ Passages never repeat in a run. Exhausting the pool completes the run.
   books contribute passages; a selected book failing to load is an error, not
   permission to substitute another book. Select All and Clear All are provided;
   the selection remains available when returning to the menu.
+- **Between the Lines:** type the expressive speech descriptor missing from a
+  short, source-grounded passage. No book/chapter guessing and no timer. Correct
+  answers earn one point; incorrect answers earn zero. Each question locks after
+  submission and shows its original descriptor. Use Next to continue, or Finish
+  after the last answer. Runs contain at most 20 unique questions by default,
+  bounded by the available eligible pool. Results show answered count, accuracy
+  and server-confirmed global rank. Names, replay and menu navigation use the
+  same shared system as the other modes.
 
 Specific Book(s) has **one** leaderboard, not a category for every combination.
 Selected books appear alongside each score. Smaller selections have smaller
@@ -75,11 +83,15 @@ The added live modules have separate responsibilities:
 - `src/application/online-controller.js`: run lifecycle and guarded transitions.
 - `src/timer/countdown.js`: monotonic countdown lifecycle.
 - `src/ui/online-view.js`: accessible mode menu, gameplay and leaderboard screens.
+- `src/ui/descriptor-question.js`: labelled descriptor form, contextual blank,
+  locked answer feedback and explicit Next/Finish controls.
 - `src/services/api-client.js`: JSON transport and useful network failures.
 - `src/services/leaderboards.js`: independent mode results and refresh handling.
 - `src/services/request-id.js`: CSPRNG UUIDs, including the existing HTTP site's
   `getRandomValues` fallback when secure-context `randomUUID` is unavailable.
 - `api/Parser.php`: canonical EPUB parsing and deterministic excerpts.
+- `api/BetweenTheLines.php`: private, deterministic descriptor extraction,
+  target-centred context selection and answer matching.
 - `api/Service.php`: validated run state, scoring, deadlines and ranking queries.
 - `api/Storage.php`: private SQLite initialization, transactions and rate limits.
 - `api/index.php`: HTTP routing, JSON limits and same-origin checks.
@@ -91,6 +103,15 @@ scoring, and finalization. It reads the same `books/book1.epub` through
 identities. It sends a passage without its answer; chapter choices are sent only
 after a correct book answer. This avoids trusting a client-uploaded question
 registry or score. EPUB assets and the existing browser parser remain intact.
+
+Between the Lines extends that same question cache, run state machine and
+transactional scoring service. The parser additionally retains all source
+paragraphs in chapter order, including short dialogue that the original
+120-character minimum excludes. The original eligible paragraph pool and its
+scoring rules are unchanged. Descriptor answers include the current question's
+opaque ID as well as a request UUID; delayed answers cannot apply to a later
+question. Original descriptors and provenance remain in private SQLite, not in
+the active-question response or a downloadable answer registry.
 
 The countdown uses an elapsed-time monotonic browser clock rather than a
 decrementing counter. The server separately enforces its persisted start time and
@@ -109,7 +130,8 @@ registration. The repository does **not** establish that production PHP has all
 the required extensions or a writable persistent directory; the owner must
 verify those.
 
-- PHP 8.1 or newer with PDO SQLite, ZIP, DOM/libxml, and mbstring.
+- PHP 8.1 or newer with PDO SQLite, ZIP, DOM/libxml, and mbstring; Between the
+  Lines answer normalisation additionally requires intl (`Normalizer`).
 - A persistent directory outside the website document root writable by PHP.
   Use `HPCHAPTER_DB_PATH` to choose an absolute SQLite database path on hosts
   where the default location is not writable.
@@ -176,12 +198,12 @@ Write operations require `POST` with `Content-Type: application/json`.
 | Action | Method | Purpose |
 | --- | --- | --- |
 | `config` | GET | Server-configured timed duration and excerpt limit |
-| `preview` | GET | Top 10 entries in each of the four modes |
+| `preview` | GET | Top 10 entries in each of the five modes |
 | `leaderboard` | GET | `mode` and bounded `limit` (up to 100) |
 | `create` | POST | Validate name, mode and optional specific-book selection; create a ready run |
 | `start` | POST | Start once and issue the first playable question |
-| `answer` | POST | Validate the current book/chapter answer; derive score server-side |
-| `next` | POST | Advance after chapter feedback; never skip unanswered questions |
+| `answer` | POST | Validate the current book/chapter/descriptor answer; derive score server-side |
+| `next` | POST | Advance after answer feedback; never skip unanswered questions |
 | `state` | POST | Reconcile a response failure without resetting the deadline |
 | `finish` | POST | Finalize an expired timed run, or retrieve an already finalized result |
 | `abandon` | POST | Leave an unfinished run without submitting it |
@@ -196,7 +218,7 @@ stale countdown; reusing a UUID for a different answer is a conflict.
 ### Persistence and integrity
 
 Schema version 1 initializes automatically (`PRAGMA user_version`); additive
-score-metadata migration handles earlier score tables, and unsupported newer
+score-metadata and descriptor-question migrations handle earlier tables, and unsupported newer
 schemas are rejected. SQLite stores server-owned runs, their
 selected question sequence and answer state, finalized leaderboard entries,
 idempotent answer responses, and rate-limit counters. Indexes support
@@ -207,10 +229,10 @@ produce safe JSON rather than database paths or SQL stack traces.
 | Table | Contents |
 | --- | --- |
 | `book_versions` | Private versioned EPUB chapter-choice cache |
-| `questions` | Canonical paragraph identities, text, excerpts and answer attribution |
+| `questions` | Canonical identities, text, excerpts, answer attribution and private descriptor provenance |
 | `runs` | Opaque run ID, server-owned JSON state and retention timestamps |
 | `requests` | Answer idempotency keys and recorded outcomes, scoped to a run |
-| `scores` | Unique run record, public name, mode, score, UTC achievement, elapsed time, duration, context limit and books |
+| `scores` | Unique run record, public name, mode, score, UTC achievement, elapsed time, duration, context limit, books and descriptor-run answered/question counts |
 | `rate_limits` | Per-address request windows and counters |
 
 Modes and selected books are validated against a fixed registry. Duration and
@@ -274,6 +296,103 @@ monotonic deadlines, names, leaderboard failures and server persistence.
 Backend tests must use isolated temporary databases, never production data.
 PHP test helpers are CLI-only and reject HTTP execution; they are not public
 answer-key or database-reset endpoints.
+
+The wildcard Node command also runs the Between the Lines frontend/controller,
+PHP extraction/matcher/storage and real HTTP integration suites. To inspect
+per-book extraction counts and provenance checks independently:
+
+```sh
+php games/hpchapter/tests/between-lines-backend.test.php
+```
+
+This parses the actual local EPUBs, reports counts, tests synthetic edge cases,
+and uses temporary private storage; it does not modify production scores.
+
+## Between the Lines sourcing and integrity
+
+Only the existing local `books/book1.epub` through `books/book7.epub` are used.
+Questions are extracted on the server from chapter-attributed source paragraphs,
+not invented or paraphrased. Generation is deterministic; each private question
+records its book ID, stable chapter ID, paragraph ID, UTF-8 byte offset, original
+descriptor, original normalised paragraph, target sentence and source context. Chapter titles are descriptive,
+not unique identifiers. The active response contains only an opaque question ID
+and a masked passage. The source descriptor is revealed after resolution.
+
+Generation occurs lazily when a descriptor run needs a book. Its cache version
+includes the source hash and extraction settings; changing the relevant version
+or policy regenerates candidates without deleting leaderboard records. There is
+no offline dataset to download or maintain.
+
+The extractor uses a closed expressive speech-verb vocabulary and explicit
+grammatical-form mappings in `api/BetweenTheLines.php`. A nearby action verb
+alone is insufficient: a recognised, balanced spoken quotation must be directly
+associated with an attribution. Uncertain constructions are skipped. Multiword
+descriptors and adverbial answers such as “said angrily” are not supported.
+Ordinary “said” and bare “asked” never become answers.
+“Replied” is also excluded, together with say/says/saying, ask/asks/asking and
+reply/replies/replying. Any word outside the approved vocabulary is ineligible,
+including other basic tags such as answered and told.
+
+Inspection of the local XHTML found predominantly curly double-quoted speech,
+with a curly single-quoted paragraph also present in book 4. The extractor
+supports balanced curly double and single quotes and straight double quotes,
+including clear subject–verb and inverted verb–subject attributions after speech,
+or subject–verb-comma attributions before it. Straight single quotes, malformed
+or nested ambiguous quotes, complex subjects, incomplete sentences, unsupported
+adverbial tags and uncertain multi-target constructions are conservatively
+skipped. This policy favours reliable questions over exhaustive extraction.
+
+### Matching and owner configuration
+
+The canonical source answer must be a past-tense key in
+`BetweenTheLines::SETTINGS['descriptors']`; the associated forms are accepted
+answers, not invented source text. Only that explicit mapping permits
+inflections, for example whisper/whispers/whispering for whispered.
+The original EPUB spelling remains the revealed answer. There is no general
+stemmer, substring test, synonym lookup or remote AI checker.
+
+Matching normalises valid UTF-8 using Unicode NFKC, locale-independent lowercase,
+whitespace handling and harmless surrounding punctuation. Empty answers are
+rejected. Descriptors are single words: internal word breaks and meaningful
+apostrophes/hyphens do not become arbitrary equivalent answers.
+
+After exact normalised forms, deterministic Unicode Levenshtein distance permits
+**zero edits for lengths up to 4, one for lengths 5–8, and two for lengths 9+**,
+using the smaller of original-answer and submitted-answer lengths. A spelling
+must also be strictly closer to this descriptor's configured forms than to every
+other configured descriptor's forms. Equal-distance ambiguity and different
+valid descriptors are rejected, even if they fit an edit budget. No semantic
+similarity earns a point.
+
+Owner policy lives in `api/BetweenTheLines.php` under `SETTINGS`: the expressive
+vocabulary, excluded basic tags, permitted grammatical forms, run question limit,
+preceding/following context counts, passage cap and edit-distance thresholds.
+Default runs use 20 unique questions, three preceding units and one following
+unit when available; the maximum passage length is 2,500 Unicode code points.
+The existing `rules.json` still accepts only its original two keys and does not
+change the original modes' scoring.
+
+Context is centred on the target, using three preceding complete sentence units
+by default and exactly one following unit when available, in original order.
+Adjacent paragraphs must belong to the same chapter. Complete quoted utterances
+stay with their attributions rather than being cut into misleading fragments.
+Oversized or ambiguous contexts are excluded, not truncated through the target.
+The blank replaces only the target descriptor; another visible occurrence of
+the answer or its accepted verb forms disqualifies the question.
+
+Between the Lines uses the existing private SQLite question cache, server-owned
+run sequence, idempotent answer requests and unique score-per-run constraint.
+The server derives correctness and numeric scores itself; submitted scores,
+foreign question IDs, duplicate awards and premature completion are rejected.
+Its separate `between-the-lines` leaderboard uses the same deterministic
+tie-breaking and name validation as the original modes, with answered counts
+and accuracy added. Only server-confirmed completed runs are ranked.
+
+These are integrity safeguards, **not cheat-proofing**. The existing EPUB assets
+are publicly accessible: players can search the text or automate answers.
+Neither local matching nor opaque IDs can prevent that. No book copy or answer
+registry is added to the frontend, and no EPUB content or answer key is sent to
+an external API. Displayed source excerpts are limited to gameplay context.
 
 ## EPUB support and limitations
 

@@ -96,7 +96,19 @@ SQL);
                 }
             }
             $this->db->exec('CREATE INDEX IF NOT EXISTS runs_state ON runs(state,updated_ms)');
+            $questionColumns = array_column($this->db->query('PRAGMA table_info(questions)')->fetchAll(), 'name');
+            if (!in_array('descriptor', $questionColumns, true)) {
+                $this->db->exec('ALTER TABLE questions ADD COLUMN descriptor TEXT');
+            }
+            if (!in_array('provenance', $questionColumns, true)) {
+                $this->db->exec('ALTER TABLE questions ADD COLUMN provenance TEXT');
+            }
             $columns = $this->db->query('PRAGMA table_info(scores)')->fetchAll();
+            foreach (['answered', 'question_count'] as $column) {
+                if (!in_array($column, array_column($columns, 'name'), true)) {
+                    $this->db->exec('ALTER TABLE scores ADD COLUMN ' . $column . ' INTEGER');
+                }
+            }
             if (!in_array('context_limit', array_column($columns, 'name'), true)) {
                 $this->db->exec('ALTER TABLE scores ADD COLUMN context_limit INTEGER NOT NULL DEFAULT 150');
                 $existing = $this->query('SELECT s.id,r.data FROM scores s JOIN runs r ON r.id=s.run_id')->fetchAll();

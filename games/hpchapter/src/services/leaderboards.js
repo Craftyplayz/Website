@@ -8,7 +8,10 @@ export function leaderboardRows(entries) {
     contextLimit: Number.isInteger(entry.contextLimit) && entry.contextLimit > 0
       ? `${entry.contextLimit} characters` : 'Not recorded',
     duration: Number.isInteger(entry.duration) && entry.duration > 0
-      ? `${entry.duration}s` : 'Not recorded'
+      ? `${entry.duration}s` : 'Not recorded',
+    questions: Number.isInteger(entry.answered) && Number.isInteger(entry.questionCount)
+      ? `${entry.answered}/${entry.questionCount} · ${entry.answered ? Math.round(Number(entry.score) / entry.answered * 100) : 0}%`
+      : 'Not recorded'
   }));
 }
 
