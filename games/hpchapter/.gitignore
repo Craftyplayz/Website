@@ -1,0 +1,9 @@
+# Private databases must live outside this repository; these prevent accidental staging.
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+tests/.backend-runtime-*/
+tests/.backend-native-*/
