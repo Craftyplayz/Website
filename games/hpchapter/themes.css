@@ -1,0 +1,145 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Chapter Oracle colour schemes
+   ═══════════════════════════════════════════════════════════════════════
+
+   Every colour the page uses is a variable defined here; index.html only
+   ever refers to them by name.
+
+   When a series is picked, the page sets data-series on <html> to the
+   series' slug: its folder name in lowercase with only letters and digits
+   kept ("The Lord of the Rings" → "thelordoftherings"). A theme applies to
+   the series named in its selector; any series without one keeps the
+   default colours. Changes fade smoothly (see "Fading" below).
+
+   Adding a scheme:
+     1. Copy a theme block below and give it the slugs of its series.
+     2. Change the colours. Only list the ones that differ from the default.
+
+   Adding a new colour variable: define it in the default block, then add
+   it to the transition-property list and the @property lines so it fades
+   instead of switching instantly.
+
+   Note: --gold is the accent colour in every theme, whatever its hue.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+
+/* ── Default (Harry Potter and any series without its own theme) ── */
+:root {
+  /* backgrounds */
+  --bg:        #07070d;
+  --bg2:       #0d0d18;
+  --surface:   #111120;
+  --surface2:  #191928;
+  /* borders */
+  --border:    #222236;
+  --border2:   #2e2e48;
+  /* accent, and its faint tints */
+  --gold:      #c9a84c;
+  --gold2:     #e8cb7a;
+  --gold-dim:  rgba(201,168,76,0.14);
+  --gold-glow: rgba(201,168,76,0.07);
+  --gold-line: rgba(201,168,76,0.26);
+  /* second background glow, bottom right */
+  --haze:      rgba(90,60,180,0.07);
+  /* text */
+  --text:      #eaeaf6;
+  --text-sub:  #9090b0;
+  --text-muted:#52527a;
+  /* right / wrong / partial answers (same in every theme) */
+  --green:     #4ade80;
+  --green-dim: rgba(74,222,128,0.11);
+  --amber:     #fb923c;
+  --amber-dim: rgba(251,146,60,0.11);
+  --red:       #f87171;
+  --red-dim:   rgba(248,113,113,0.11);
+
+  /* Fading: themes change these over 0.9s */
+  transition-property: --bg, --bg2, --surface, --surface2, --border, --border2,
+    --gold, --gold2, --gold-dim, --gold-glow, --gold-line, --haze, --text-sub, --text-muted;
+  transition-duration: 0.9s;
+  transition-timing-function: ease;
+}
+
+/* Browsers can only fade a variable that is registered as a colour.
+   initial-value must match the default above. */
+@property --bg         { syntax: '<color>'; inherits: true; initial-value: #07070d; }
+@property --bg2        { syntax: '<color>'; inherits: true; initial-value: #0d0d18; }
+@property --surface    { syntax: '<color>'; inherits: true; initial-value: #111120; }
+@property --surface2   { syntax: '<color>'; inherits: true; initial-value: #191928; }
+@property --border     { syntax: '<color>'; inherits: true; initial-value: #222236; }
+@property --border2    { syntax: '<color>'; inherits: true; initial-value: #2e2e48; }
+@property --gold       { syntax: '<color>'; inherits: true; initial-value: #c9a84c; }
+@property --gold2      { syntax: '<color>'; inherits: true; initial-value: #e8cb7a; }
+@property --gold-dim   { syntax: '<color>'; inherits: true; initial-value: rgba(201,168,76,0.14); }
+@property --gold-glow  { syntax: '<color>'; inherits: true; initial-value: rgba(201,168,76,0.07); }
+@property --gold-line  { syntax: '<color>'; inherits: true; initial-value: rgba(201,168,76,0.26); }
+@property --haze       { syntax: '<color>'; inherits: true; initial-value: rgba(90,60,180,0.07); }
+@property --text-sub   { syntax: '<color>'; inherits: true; initial-value: #9090b0; }
+@property --text-muted { syntax: '<color>'; inherits: true; initial-value: #52527a; }
+
+
+/* ── The Lord of the Rings: elven green ── */
+:root[data-series="thelordoftherings"],
+:root[data-series="lordoftherings"] {
+  --bg:        #060a07;
+  --bg2:       #0a120c;
+  --surface:   #0f1a12;
+  --surface2:  #15241a;
+  --border:    #1f3325;
+  --border2:   #2b4633;
+  --gold:      #8fbf6e;
+  --gold2:     #bfe09d;
+  --gold-dim:  rgba(143,191,110,0.14);
+  --gold-glow: rgba(143,191,110,0.07);
+  --gold-line: rgba(143,191,110,0.28);
+  --haze:      rgba(40,110,60,0.09);
+  --text-sub:  #8fa896;
+  --text-muted:#50705a;
+}
+
+
+/* ── Percy Jackson and the Olympians / The Heroes of Olympus: ocean blue ── */
+:root[data-series="percyjacksonandtheolympians"],
+:root[data-series="percyjackson"],
+:root[data-series="theheroesofolympus"],
+:root[data-series="heroesofolympus"] {
+  --bg:        #050911;
+  --bg2:       #09111f;
+  --surface:   #0e1828;
+  --surface2:  #142137;
+  --border:    #1e2e4a;
+  --border2:   #2a4063;
+  --gold:      #5aa6ff;
+  --gold2:     #9ccaff;
+  --gold-dim:  rgba(90,166,255,0.14);
+  --gold-glow: rgba(90,166,255,0.07);
+  --gold-line: rgba(90,166,255,0.28);
+  --haze:      rgba(30,140,200,0.09);
+  --text-sub:  #8ea3c4;
+  --text-muted:#4f6488;
+}
+
+
+/* ── A Song of Ice and Fire: steel ── */
+:root[data-series="asongoficeandfire"] {
+  --bg:        #08090a;
+  --bg2:       #0e0f11;
+  --surface:   #141518;
+  --surface2:  #1c1e22;
+  --border:    #2a2d33;
+  --border2:   #3b3f47;
+  --gold:      #b9c1cc;
+  --gold2:     #e4e9f0;
+  --gold-dim:  rgba(185,193,204,0.13);
+  --gold-glow: rgba(185,193,204,0.06);
+  --gold-line: rgba(185,193,204,0.26);
+  --haze:      rgba(150,165,190,0.06);
+  --text-sub:  #9a9fa8;
+  --text-muted:#5a5f69;
+}
+/* Brushed-steel "Oracle" in the title */
+:root[data-series="asongoficeandfire"] .wordmark-title em {
+  background: linear-gradient(100deg, #8d949e 0%, #eef2f6 45%, #9aa1ab 60%, #d5dae1 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
