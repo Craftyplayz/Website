@@ -7,7 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<link rel="stylesheet" href="themes.css">
+<!-- Change the ?v= value whenever themes.css changes: Cloudflare caches CSS for
+     hours, and a new address makes it fetch the new file straight away -->
+<link rel="stylesheet" href="themes.css?v=2">
 <style>
 /* ── Reset & Base ─────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -391,6 +393,8 @@ body::after {
   transition: color 0.2s;
 }
 .btn-link:hover { color: var(--gold); }
+a.btn-link { text-decoration: none; }
+.info-link { text-align: center; margin-top: 16px; }
 .mode-tag {
   font-size: 11px; text-transform: uppercase;
   letter-spacing: 0.14em; color: var(--text-muted);
@@ -749,6 +753,7 @@ body::after {
         <button class="btn btn-ghost" onclick="retrySeriesList()">Try Again</button>
       </div>
     </div>
+    <p class="info-link"><a class="btn-link" href="info/">How to play &amp; what's new</a></p>
   </div>
 
   <!-- ══════════ MODE SELECT SCREEN ══════════ -->
@@ -1167,7 +1172,38 @@ function showScreen(id) {
   const el = document.getElementById(id);
   void el.offsetHeight;
   el.classList.add('active');
+  syncHistory(id);
 }
+
+// ── Browser back button ────────────────────────────────
+// Inside the game the page keeps one extra history entry, so the browser's
+// back button lands on the page itself instead of leaving it. The game then
+// does the screen's own back step and adds the entry again. On the series
+// list there's no extra entry, so back leaves the game as usual.
+const BACK_STEPS = {
+  menuScreen:     () => goToSeries(),
+  replayScreen:   () => backToBoard(),
+  pickScreen:     () => goToMenu(),
+  boardScreen:    () => goToMenu(),
+  loadingScreen:  () => goToMenu(),
+  errorScreen:    () => goToMenu(),
+  quizScreen:     () => goToMenu(),
+  gameoverScreen: () => goToMenu()
+};
+
+function syncHistory(id) {
+  const armed = history.state?.chapterOracle;
+  if (id === 'seriesScreen') {
+    if (armed) history.back(); // drop the extra entry; the popstate below ignores it
+  } else if (!armed) {
+    history.pushState({ chapterOracle: true }, '');
+  }
+}
+
+window.addEventListener('popstate', () => {
+  const current = document.querySelector('.screen.active')?.id;
+  BACK_STEPS[current]?.();
+});
 
 // Series list shown when the page opens
 function renderSeriesScreen() {
@@ -1235,10 +1271,49 @@ function goToSeries() {
 // "The Lord of the Rings" / "lord-of-the-rings" → "thelordoftherings" / "lordoftherings"
 function seriesSlug(name) { return String(name).toLowerCase().replace(/[^a-z0-9]/g, ''); }
 
-// themes.css picks the colours from the series slug on <html>, and fades between them
+// themes.css picks the colours from the series slug on <html>, and fades between them.
+// A series without its own theme there gets one of the shared themes instead.
 function applyTheme(s) {
-  if (s) document.documentElement.dataset.series = seriesSlug(s.id);
-  else delete document.documentElement.dataset.series;
+  const root = document.documentElement;
+  if (!s) {
+    delete root.dataset.series;
+    delete root.dataset.theme;
+    return;
+  }
+  const slug = seriesSlug(s.id);
+  root.dataset.series = slug;
+  const { series: themed, shared } = readThemes();
+  if (themed.has(slug) || !shared.length) delete root.dataset.theme;
+  else root.dataset.theme = shared[slugHash('theme16:' + slug) % shared.length];
+}
+
+// Which slugs have a series theme, and the shared theme names in file order,
+// read from the selectors in themes.css
+let themeInfo = null;
+function readThemes() {
+  if (themeInfo) return themeInfo;
+  const series = new Set(), shared = [];
+  for (const sheet of document.styleSheets || []) {
+    let rules;
+    try { rules = sheet.cssRules; } catch { continue; } // other sites' sheets (fonts) can't be read
+    for (const rule of rules) {
+      const sel = rule.selectorText || '';
+      for (const m of sel.matchAll(/\[data-series="([^"]+)"\]/g)) series.add(m[1]);
+      for (const m of sel.matchAll(/\[data-theme="([^"]+)"\]/g)) if (!shared.includes(m[1])) shared.push(m[1]);
+    }
+  }
+  const info = { series, shared };
+  if (shared.length || series.size) themeInfo = info; // keep trying if themes.css hasn't loaded
+  return info;
+}
+
+// FNV-1a: the same text always gives the same number. The 'theme16:' prefix
+// above is arbitrary; it was chosen because it spreads today's series across
+// different shared themes.
+function slugHash(slug) {
+  let h = 0x811c9dc5;
+  for (const ch of slug) h = Math.imul(h ^ ch.codePointAt(0), 0x01000193);
+  return h >>> 0;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2702,6 +2777,8 @@ function storageSet(key, value) {
 // ═══════════════════════════════════════════════════════
 // START
 // ═══════════════════════════════════════════════════════
+// Reloaded mid-game: the page starts on the series list, so drop the extra history entry
+if (history.state?.chapterOracle) history.back();
 // Only the series list loads up front; a series' books open once it's picked.
 loadSeriesList().catch(() => {}).finally(renderSeriesScreen);
 renderSeriesScreen();
