@@ -1,80 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<<<<<<< HEAD
-<<<<<<< HEAD
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#07070d">
-  <title>Chapter Oracle — Harry Potter Quiz</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="./style.css">
-  <script async defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous"></script>
-</head>
-<body>
-  <main class="app-wrap">
-    <section class="screen active" id="menuScreen" aria-label="Choose your challenge">
-      <header class="wordmark"><div class="wordmark-eyebrow">Harry Potter</div><h1 class="wordmark-title">Chapter <em>Oracle</em></h1></header>
-      <div class="card"><h2>Choose your challenge</h2><p>Normal · Timed · Minimum context · Specific books</p><noscript>Enable JavaScript to play this server-confirmed quiz.</noscript></div>
-    </section>
-    <section class="screen" id="loadingScreen" aria-labelledby="loadingTitle" aria-hidden="true">
-      <header class="wordmark">
-        <div class="wordmark-eyebrow">Harry Potter</div>
-        <h1 class="wordmark-title" id="loadingTitle">Chapter <em>Oracle</em></h1>
-        <div class="wordmark-divider"></div>
-      </header>
-      <div class="card">
-        <div class="loading-inner">
-          <div class="spinner-wrap" aria-hidden="true"><div class="spinner-ring"></div></div>
-          <h2 class="loading-title">Opening the books…</h2>
-          <p class="loading-book" id="loadingMessage" role="status" aria-live="polite">Summoning the library</p>
-          <div class="progress-track" role="progressbar" aria-label="Books processed" aria-valuemin="0" aria-valuemax="7">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-          <p class="loading-count" id="loadingCount">0 of 7 books loaded</p>
-          <ul class="loading-failures" id="loadingFailures" aria-live="polite"></ul>
-          <div class="book-dots" aria-label="Book loading status">
-            <span class="book-dot" data-book-dot="hp-1"></span>
-            <span class="book-dot" data-book-dot="hp-2"></span>
-            <span class="book-dot" data-book-dot="hp-3"></span>
-            <span class="book-dot" data-book-dot="hp-4"></span>
-            <span class="book-dot" data-book-dot="hp-5"></span>
-            <span class="book-dot" data-book-dot="hp-6"></span>
-            <span class="book-dot" data-book-dot="hp-7"></span>
-          </div>
-=======
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chapter Oracle — Harry Potter Quiz</title>
+<title>Chapter Oracle — Book Quiz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="stylesheet" href="themes.css">
 <style>
 /* ── Reset & Base ─────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
 
+/* Colours and series colour schemes live in themes.css */
 :root {
-  --bg:        #07070d;
-  --bg2:       #0d0d18;
-  --surface:   #111120;
-  --surface2:  #191928;
-  --border:    #222236;
-  --border2:   #2e2e48;
-  --gold:      #c9a84c;
-  --gold2:     #e8cb7a;
-  --gold-dim:  rgba(201,168,76,0.14);
-  --gold-glow: rgba(201,168,76,0.07);
-  --text:      #eaeaf6;
-  --text-sub:  #9090b0;
-  --text-muted:#52527a;
-  --green:     #4ade80;
-  --green-dim: rgba(74,222,128,0.11);
-  --amber:     #fb923c;
-  --amber-dim: rgba(251,146,60,0.11);
-  --red:       #f87171;
-  --red-dim:   rgba(248,113,113,0.11);
   --r:         14px;
   --r-sm:      9px;
 }
@@ -100,8 +40,8 @@ body::before {
   content: '';
   position: fixed; inset: 0;
   background:
-    radial-gradient(ellipse 70% 55% at 15% 5%,  rgba(201,168,76,0.055) 0%, transparent 55%),
-    radial-gradient(ellipse 55% 70% at 85% 95%, rgba(90,60,180,0.07)  0%, transparent 55%);
+    radial-gradient(ellipse 70% 55% at 15% 5%,  var(--gold-glow) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 70% at 85% 95%, var(--haze)      0%, transparent 55%);
   pointer-events: none; z-index: 0;
 }
 body::after {
@@ -171,6 +111,176 @@ body::after {
   opacity: 0.35;
 }
 
+/* ── Mode menu ──────────────────────────────────────── */
+.menu-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px; font-weight: 600;
+  text-align: center; margin-bottom: 6px;
+}
+.menu-sub {
+  font-size: 13px; color: var(--text-muted);
+  text-align: center; margin-bottom: 24px;
+}
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (max-width: 560px) { .mode-grid { grid-template-columns: 1fr; } }
+
+.mode-card {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-sub);
+  font-family: 'Outfit', sans-serif;
+  padding: 20px 18px; text-align: left;
+  cursor: pointer;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.15s;
+  animation: choiceIn 0.3s cubic-bezier(0.22,1,0.36,1) both;
+}
+.mode-card:nth-child(2) { animation-delay: 50ms; }
+.mode-card:nth-child(3) { animation-delay: 100ms; }
+.mode-card:nth-child(4) { animation-delay: 150ms; }
+.mode-card:nth-child(5) { animation-delay: 200ms; }
+/* An odd card out spans the row */
+.mode-grid .mode-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.mode-card:hover {
+  border-color: var(--gold); color: var(--text);
+  background: var(--gold-glow); transform: translateY(-2px);
+}
+.mode-card:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.mode-symbol { font-size: 22px; color: var(--gold); line-height: 1; }
+.mode-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 21px; font-weight: 600; color: var(--text);
+}
+.mode-desc { font-size: 13px; line-height: 1.5; flex: 1; }
+.mode-best {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text-muted);
+}
+.mode-best b { color: var(--gold); font-weight: 600; }
+.menu-status {
+  margin-top: 20px; min-height: 18px;
+  font-size: 12px; color: var(--text-muted); text-align: center;
+}
+.menu-status.error { color: var(--red); }
+
+.card-back { display: block; margin: -14px 0 8px; }
+#seriesRetry { margin-top: 14px; }
+
+/* ── Series list ────────────────────────────────────── */
+.series-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+.series-card { padding: 18px; gap: 4px; }
+.series-card .mode-name { font-size: 20px; }
+
+/* ── Book picker ────────────────────────────────────── */
+.pick-toolbar {
+  display: flex; justify-content: flex-end; gap: 18px;
+  margin-bottom: 10px;
+}
+.pick-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 8px; margin-bottom: 24px;
+}
+.pick-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 11px 14px;
+  font-size: 13px; color: var(--text-sub); line-height: 1.4;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.pick-item:hover { border-color: var(--gold); color: var(--text); }
+.pick-item.checked { border-color: var(--gold); background: var(--gold-glow); color: var(--text); }
+.pick-item input { accent-color: var(--gold); width: 16px; height: 16px; flex-shrink: 0; }
+.pick-item .book-num {
+  display: block;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--text-muted); margin-bottom: 2px;
+}
+.btn-primary:disabled { opacity: 0.4; cursor: default; transform: none; background: var(--gold); }
+
+/* ── Leaderboards ───────────────────────────────────── */
+.player-row {
+  display: flex; align-items: center; gap: 12px;
+  flex-wrap: wrap; justify-content: center;
+  margin-top: 22px; padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.player-label {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--text-muted);
+}
+.name-input {
+  flex: 1; min-width: 160px; max-width: 260px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif; font-size: 14px;
+  padding: 8px 12px;
+  transition: border-color 0.2s;
+}
+.name-input:focus { border-color: var(--gold); outline: none; }
+.name-input::placeholder { color: var(--text-muted); }
+
+.board-tabs {
+  display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+  margin-bottom: 18px;
+}
+.board-tab {
+  background: transparent;
+  border: 1.5px solid var(--border2);
+  border-radius: 100px;
+  color: var(--text-sub);
+  font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 500;
+  padding: 6px 14px; cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.board-tab:hover { border-color: var(--gold); color: var(--text); }
+.board-tab.active { border-color: var(--gold); background: var(--gold-dim); color: var(--gold); }
+
+.board-list { list-style: none; max-width: 520px; margin: 0 auto; }
+.board-row {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: baseline; gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px; color: var(--text-sub);
+}
+.board-row.me { background: var(--gold-glow); color: var(--text); border-radius: var(--r-sm); }
+.board-rank { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.board-row:nth-child(-n+3) .board-rank { color: var(--gold); font-weight: 600; }
+.board-name { overflow-wrap: anywhere; }
+.board-meta { display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.board-score {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-weight: 600; color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.lb-panel {
+  margin: -8px 0 22px;
+  font-size: 13px; color: var(--text-sub); line-height: 1.6;
+}
+.lb-panel:empty { display: none; }
+.lb-panel .error { color: var(--red); }
+.lb-form {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  margin-top: 10px;
+}
+
 /* ── Loading screen ─────────────────────────────────── */
 .loading-inner { text-align: center; padding: 12px 0 4px; }
 .spinner-wrap { display: flex; justify-content: center; margin-bottom: 22px; }
@@ -209,6 +319,26 @@ body::after {
   background: var(--border2); transition: background 0.3s;
 }
 .book-dot.loaded { background: var(--gold); }
+.book-dot.failed { background: var(--red); }
+
+/* ── Quiz top bar ───────────────────────────────────── */
+.quiz-topbar {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.btn-link {
+  background: none; border: none; padding: 4px 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px; letter-spacing: 0.06em;
+  color: var(--text-muted); cursor: pointer;
+  transition: color 0.2s;
+}
+.btn-link:hover { color: var(--gold); }
+.mode-tag {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--text-muted);
+}
 
 /* ── Quiz header ────────────────────────────────────── */
 .quiz-header {
@@ -235,6 +365,32 @@ body::after {
 .hs-lbl {
   font-size: 11px; text-transform: uppercase;
   letter-spacing: 0.1em; color: var(--text-muted);
+}
+
+/* ── Timer ──────────────────────────────────────────── */
+.timer-wrap { display: flex; flex-direction: column; align-items: center; }
+.timer-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 38px; font-weight: 600;
+  color: var(--text); line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s;
+}
+.timer-lbl {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text-muted); margin-top: 1px;
+}
+.timer-wrap.low .timer-num { color: var(--red); }
+
+/* ── Lives (response descriptor) ────────────────────── */
+.lives-wrap { display: flex; flex-direction: column; align-items: center; }
+.lives-num {
+  font-size: 26px; line-height: 1.2; letter-spacing: 0.12em;
+  color: var(--red);
+}
+.lives-lbl {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text-muted); margin-top: 1px;
 }
 
 /* ── Passage ────────────────────────────────────────── */
@@ -266,6 +422,37 @@ body::after {
 }
 .passage-card.animate { animation: passageIn 0.38s cubic-bezier(0.22,1,0.36,1) both; }
 
+/* ── Minimum context controls ───────────────────────── */
+.context-bar {
+  display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap;
+  margin: -8px 0 22px;
+}
+.btn-sm { padding: 8px 18px; font-size: 13px; }
+.btn-ghost:disabled {
+  opacity: 0.4; cursor: default;
+  border-color: var(--border2); color: var(--text-sub);
+}
+.context-info { font-size: 12px; color: var(--text-muted); }
+
+/* ── Response descriptor ────────────────────────────── */
+.descriptor-blank {
+  display: inline-block; min-width: 5.5em;
+  border-bottom: 2px solid var(--gold);
+  color: var(--gold); font-weight: 600;
+  text-align: center; line-height: 1.3;
+}
+.passage-card p + p { margin-top: 0.75em; }
+.passage-card .context-para { color: var(--text-sub); }
+.descriptor-blank.state-correct { border-color: var(--green); color: var(--green); }
+.descriptor-blank.state-wrong   { border-color: var(--red);   color: var(--red); }
+.descriptor-form {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  margin-bottom: 14px;
+}
+.descriptor-form .name-input { max-width: none; font-size: 16px; padding: 10px 14px; }
+.descriptor-hint { font-size: 12px; color: var(--text-muted); width: 100%; }
+
 /* ── Stage label ────────────────────────────────────── */
 .stage-label {
   font-size: 13px; color: var(--text-muted);
@@ -274,7 +461,7 @@ body::after {
 }
 .stage-badge {
   display: inline-flex; align-items: center; gap: 5px;
-  background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25);
+  background: var(--gold-dim); border: 1px solid var(--gold-line);
   border-radius: 100px; padding: 3px 10px;
   font-size: 11px; font-weight: 600; color: var(--gold);
   letter-spacing: 0.06em; text-transform: uppercase; flex-shrink: 0;
@@ -412,7 +599,7 @@ body::after {
 .go-record {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--gold-dim);
-  border: 1px solid rgba(201,168,76,0.28);
+  border: 1px solid var(--gold-line);
   border-radius: 100px; padding: 5px 16px;
   font-size: 12px; font-weight: 600; color: var(--gold2);
   margin-bottom: 28px;
@@ -462,7 +649,7 @@ body::after {
   border: 1.5px solid var(--border2);
   color: var(--text-sub);
 }
-.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-ghost:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
 
 /* ── Error screen ───────────────────────────────────── */
 .error-card {
@@ -488,457 +675,121 @@ body::after {
 </style>
 </head>
 <body>
-=======
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chapter Oracle — Harry Potter Quiz</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<style>
-/* ── Reset & Base ─────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg:        #07070d;
-  --bg2:       #0d0d18;
-  --surface:   #111120;
-  --surface2:  #191928;
-  --border:    #222236;
-  --border2:   #2e2e48;
-  --gold:      #c9a84c;
-  --gold2:     #e8cb7a;
-  --gold-dim:  rgba(201,168,76,0.14);
-  --gold-glow: rgba(201,168,76,0.07);
-  --text:      #eaeaf6;
-  --text-sub:  #9090b0;
-  --text-muted:#52527a;
-  --green:     #4ade80;
-  --green-dim: rgba(74,222,128,0.11);
-  --amber:     #fb923c;
-  --amber-dim: rgba(251,146,60,0.11);
-  --red:       #f87171;
-  --red-dim:   rgba(248,113,113,0.11);
-  --r:         14px;
-  --r-sm:      9px;
-}
-
-html { font-size: 16px; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Outfit', sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 28px 16px 48px;
-  position: relative;
-  overflow-x: hidden;
-}
-
-/* Atmosphere */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background:
-    radial-gradient(ellipse 70% 55% at 15% 5%,  rgba(201,168,76,0.055) 0%, transparent 55%),
-    radial-gradient(ellipse 55% 70% at 85% 95%, rgba(90,60,180,0.07)  0%, transparent 55%);
-  pointer-events: none; z-index: 0;
-}
-body::after {
-  content: '';
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 0; opacity: 0.55;
-}
-
-.app-wrap {
-  position: relative; z-index: 1;
-  width: 100%; max-width: 800px;
-}
-
-/* ── Screen transitions ─────────────────────────────── */
-.screen { display: none; width: 100%; }
-.screen.active {
-  display: block;
-  animation: revealUp 0.42s cubic-bezier(0.22,1,0.36,1) both;
-}
-@keyframes revealUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ── Wordmark ──────────────────────────────────────── */
-.wordmark {
-  text-align: center;
-  margin-bottom: 28px;
-  user-select: none;
-}
-.wordmark-eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-}
-.wordmark-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(30px, 5.5vw, 46px);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  line-height: 1;
-}
-.wordmark-title em { font-style: italic; color: var(--gold); }
-.wordmark-divider {
-  width: 40px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  margin: 10px auto 0;
-  opacity: 0.5;
-}
-
-/* ── Card ──────────────────────────────────────────── */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 32px;
-  position: relative;
-  overflow: hidden;
-}
-.card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  opacity: 0.35;
-}
-
-/* ── Loading screen ─────────────────────────────────── */
-.loading-inner { text-align: center; padding: 12px 0 4px; }
-.spinner-wrap { display: flex; justify-content: center; margin-bottom: 22px; }
-.spinner-ring {
-  width: 52px; height: 52px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--gold);
-  border-radius: 50%;
-  animation: spin 0.85s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 22px; font-weight: 600;
-  color: var(--text); margin-bottom: 8px;
-}
-.loading-book {
-  font-size: 13px; color: var(--text-muted);
-  margin-bottom: 22px; min-height: 20px;
-  transition: opacity 0.3s;
-}
-.progress-track {
-  background: var(--surface2);
-  border-radius: 100px; height: 3px; overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--gold), var(--gold2));
-  border-radius: 100px; transition: width 0.4s ease;
-}
-.book-dots {
-  display: flex; gap: 8px; justify-content: center; margin-top: 20px;
-}
-.book-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--border2); transition: background 0.3s;
-}
-.book-dot.loaded { background: var(--gold); }
-
-/* ── Quiz header ────────────────────────────────────── */
-.quiz-header {
-  display: flex; align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-.score-wrap { display: flex; flex-direction: column; }
-.score-num {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 48px; font-weight: 600;
-  color: var(--gold); line-height: 1;
-}
-.score-lbl {
-  font-size: 11px; text-transform: uppercase;
-  letter-spacing: 0.1em; color: var(--text-muted); margin-top: 1px;
-}
-.hs-wrap { text-align: right; }
-.hs-num {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 22px; color: var(--text-sub); line-height: 1;
-  display: block;
-}
-.hs-lbl {
-  font-size: 11px; text-transform: uppercase;
-  letter-spacing: 0.1em; color: var(--text-muted);
-}
-
-/* ── Passage ────────────────────────────────────────── */
-.passage-label {
-  font-size: 10px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--text-muted);
-  display: flex; align-items: center; gap: 8px;
-  margin-bottom: 12px;
-}
-.passage-label::before, .passage-label::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
-.passage-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--gold);
-  border-radius: 0 var(--r-sm) var(--r-sm) 0;
-  padding: 22px 24px;
-  margin-bottom: 22px;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(15px, 2.3vw, 17px);
-  line-height: 1.85; color: var(--text);
-  max-height: 1000px; overflow-y: auto;
-  scrollbar-width: thin; scrollbar-color: var(--border2) transparent;
-}
-@keyframes passageIn {
-  from { opacity: 0; transform: translateX(-6px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-.passage-card.animate { animation: passageIn 0.38s cubic-bezier(0.22,1,0.36,1) both; }
-
-/* ── Stage label ────────────────────────────────────── */
-.stage-label {
-  font-size: 13px; color: var(--text-muted);
-  margin-bottom: 14px; display: flex;
-  align-items: center; gap: 10px;
-}
-.stage-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25);
-  border-radius: 100px; padding: 3px 10px;
-  font-size: 11px; font-weight: 600; color: var(--gold);
-  letter-spacing: 0.06em; text-transform: uppercase; flex-shrink: 0;
-}
-
-/* ── Book grid ──────────────────────────────────────── */
-.book-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px; margin-bottom: 14px;
-}
-@media (max-width: 480px) { .book-grid { grid-template-columns: 1fr; } }
-
-.book-btn {
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-sm);
-  color: var(--text-sub);
-  font-family: 'Outfit', sans-serif;
-  font-size: 13px; font-weight: 400;
-  padding: 13px 16px; text-align: left;
-  cursor: pointer; line-height: 1.4;
-  transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.15s;
-  position: relative; overflow: hidden;
-  animation: choiceIn 0.3s cubic-bezier(0.22,1,0.36,1) both;
-}
-.book-btn .book-num {
-  display: block;
-  font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--text-muted); margin-bottom: 4px;
-}
-.book-btn:hover:not(:disabled) {
-  border-color: var(--gold); color: var(--text);
-  background: var(--gold-glow); transform: translateY(-2px);
-}
-.book-btn:disabled { cursor: default; transform: none !important; }
-.book-btn.state-correct {
-  border-color: var(--green); background: var(--green-dim); color: var(--green); font-weight: 500;
-}
-.book-btn.state-wrong {
-  border-color: var(--red); background: var(--red-dim); color: var(--red);
-}
-.book-btn.state-reveal {
-  border-color: var(--green); background: var(--green-dim); color: var(--green);
-}
-
-/* ── Chapter grid ───────────────────────────────────── */
-.chapter-scroll-wrap {
-  max-height: 320px; overflow-y: auto;
-  scrollbar-width: thin; scrollbar-color: var(--border2) transparent;
-  margin-bottom: 14px;
-  padding-right: 4px;
-}
-.chapter-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-@media (max-width: 500px) { .chapter-grid { grid-template-columns: 1fr; } }
-
-.chapter-btn {
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-sm);
-  color: var(--text-sub);
-  font-family: 'Outfit', sans-serif;
-  font-size: 13px; font-weight: 400;
-  padding: 12px 14px; text-align: left;
-  cursor: pointer; line-height: 1.4;
-  transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.15s;
-  animation: choiceIn 0.3s cubic-bezier(0.22,1,0.36,1) both;
-}
-.chapter-btn:hover:not(:disabled) {
-  border-color: var(--gold); color: var(--text);
-  background: var(--gold-glow); transform: translateY(-2px);
-}
-.chapter-btn:disabled { cursor: default; transform: none !important; }
-.chapter-btn.state-correct {
-  border-color: var(--green); background: var(--green-dim); color: var(--green); font-weight: 500;
-}
-.chapter-btn.state-wrong {
-  border-color: var(--red); background: var(--red-dim); color: var(--red);
-}
-.chapter-btn.state-reveal {
-  border-color: var(--amber); background: var(--amber-dim); color: var(--amber);
-}
-
-@keyframes choiceIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* stagger animation delays for grids */
-.book-btn:nth-child(1)  { animation-delay:  20ms; }
-.book-btn:nth-child(2)  { animation-delay:  50ms; }
-.book-btn:nth-child(3)  { animation-delay:  80ms; }
-.book-btn:nth-child(4)  { animation-delay: 110ms; }
-.book-btn:nth-child(5)  { animation-delay: 140ms; }
-.book-btn:nth-child(6)  { animation-delay: 170ms; }
-.book-btn:nth-child(7)  { animation-delay: 200ms; }
-
-/* ── Feedback bar ───────────────────────────────────── */
-.feedback-bar {
-  border-radius: var(--r-sm);
-  padding: 11px 18px;
-  font-size: 13px; font-weight: 500;
-  text-align: center;
-  min-height: 42px;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; transform: translateY(4px);
-  transition: opacity 0.25s, transform 0.25s;
-}
-.feedback-bar.show { opacity: 1; transform: translateY(0); }
-.feedback-bar.fb-correct { border: 1px solid var(--green);  color: var(--green);  background: var(--green-dim); }
-.feedback-bar.fb-wrong   { border: 1px solid var(--red);    color: var(--red);    background: var(--red-dim);   }
-.feedback-bar.fb-partial { border: 1px solid var(--amber);  color: var(--amber);  background: var(--amber-dim); }
-.feedback-bar.fb-info    { border: 1px solid var(--border2); color: var(--text-sub); background: var(--surface2); }
-
-/* ── Game Over ──────────────────────────────────────── */
-.go-inner { text-align: center; padding: 8px 0; }
-.go-eyebrow {
-  font-size: 11px; letter-spacing: 0.16em;
-  text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px;
-}
-.go-score {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(80px, 20vw, 128px);
-  font-weight: 600; color: var(--gold);
-  line-height: 1; display: block;
-}
-.go-score-lbl {
-  font-size: 14px; color: var(--text-muted);
-  margin-top: 8px; margin-bottom: 20px;
-}
-.go-record {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--gold-dim);
-  border: 1px solid rgba(201,168,76,0.28);
-  border-radius: 100px; padding: 5px 16px;
-  font-size: 12px; font-weight: 600; color: var(--gold2);
-  margin-bottom: 28px;
-  animation: bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
-}
-@keyframes bounceIn {
-  from { opacity: 0; transform: scale(0.6); }
-  to   { opacity: 1; transform: scale(1); }
-}
-.go-sep {
-  width: 50px; height: 1px;
-  background: var(--border2);
-  margin: 0 auto 24px;
-}
-/* Last answer context on game over */
-.go-context {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--red);
-  border-radius: 0 var(--r-sm) var(--r-sm) 0;
-  padding: 14px 18px; margin-bottom: 24px;
-  text-align: left; font-size: 13px; color: var(--text-sub);
-  line-height: 1.6;
-}
-.go-context strong { color: var(--text); }
-.go-btns {
-  display: flex; gap: 12px;
-  justify-content: center; flex-wrap: wrap;
-}
-
-/* ── Buttons ────────────────────────────────────────── */
-.btn {
-  display: inline-flex; align-items: center;
-  justify-content: center; gap: 8px;
-  padding: 12px 28px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 14px; font-weight: 600;
-  border-radius: var(--r-sm); border: none;
-  cursor: pointer; letter-spacing: 0.02em;
-  transition: all 0.2s;
-}
-.btn-primary { background: var(--gold); color: #0a0806; }
-.btn-primary:hover { background: var(--gold2); transform: translateY(-1px); }
-.btn-primary:active { transform: translateY(0); }
-.btn-ghost {
-  background: transparent;
-  border: 1.5px solid var(--border2);
-  color: var(--text-sub);
-}
-.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
-
-/* ── Error screen ───────────────────────────────────── */
-.error-card {
-  text-align: center; padding: 12px 0;
-}
-.error-icon { font-size: 40px; margin-bottom: 16px; }
-.error-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 24px; font-weight: 600;
-  color: var(--text); margin-bottom: 10px;
-}
-.error-msg { font-size: 14px; color: var(--text-sub); line-height: 1.6; margin-bottom: 24px; }
-.error-msg code {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 4px; padding: 2px 6px;
-  font-size: 12px; color: var(--gold);
-}
-
-/* ── Scrollbar ──────────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
-</style>
-</head>
-<body>
->>>>>>> parent of 86c75fe (Merge pull request #3 from Craftyplayz/copilot/refactor-hpchapter-game)
 <div class="app-wrap">
 
-  <!-- ══════════ LOADING SCREEN ══════════ -->
-  <div class="screen active" id="loadingScreen">
+  <!-- ══════════ SERIES SELECT SCREEN ══════════ -->
+  <div class="screen active" id="seriesScreen">
     <div class="wordmark">
-      <div class="wordmark-eyebrow">Harry Potter</div>
+      <div class="wordmark-eyebrow">Book Quiz</div>
+      <div class="wordmark-title">Chapter <em>Oracle</em></div>
+      <div class="wordmark-divider"></div>
+    </div>
+    <div class="card">
+      <div class="menu-title">Choose a series</div>
+      <p class="menu-sub">Pick the books you want to be quizzed on.</p>
+      <div class="series-grid" id="seriesGrid"></div>
+      <div class="menu-status" id="seriesStatus">Finding book series…</div>
+      <div class="go-btns" id="seriesRetry" hidden>
+        <button class="btn btn-ghost" onclick="retrySeriesList()">Try Again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ MODE SELECT SCREEN ══════════ -->
+  <div class="screen" id="menuScreen">
+    <div class="wordmark">
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
+      <div class="wordmark-title">Chapter <em>Oracle</em></div>
+      <div class="wordmark-divider"></div>
+    </div>
+    <div class="card">
+      <button class="btn-link card-back" onclick="goToSeries()">← Change series</button>
+      <div class="menu-title">Choose your challenge</div>
+      <p class="menu-sub" id="menuSub">How well do you know the story?</p>
+      <div class="mode-grid">
+        <button class="mode-card" onclick="startGame('normal')">
+          <span class="mode-symbol">✦</span>
+          <span class="mode-name">Normal</span>
+          <span class="mode-desc">Name the book, then the chapter. One wrong book and it's over.</span>
+          <span class="mode-best">Best <b id="best-normal">0</b></span>
+        </button>
+        <button class="mode-card" onclick="startGame('timed')">
+          <span class="mode-symbol">◷</span>
+          <span class="mode-name">Timed</span>
+          <span class="mode-desc">60 seconds on the clock. Wrong answers don't end the run — they just don't score.</span>
+          <span class="mode-best">Best <b id="best-timed">0</b></span>
+        </button>
+        <button class="mode-card" onclick="startGame('minimum')">
+          <span class="mode-symbol">¶</span>
+          <span class="mode-name">Minimum Context</span>
+          <span class="mode-desc">Start with a single word and add more one at a time. Fewer words, more points.</span>
+          <span class="mode-best">Best <b id="best-minimum">0</b></span>
+        </button>
+        <button class="mode-card" onclick="openBookPicker()">
+          <span class="mode-symbol">▤</span>
+          <span class="mode-name">Specific Books</span>
+          <span class="mode-desc">Practise on only the books you choose. Same rules as Normal.</span>
+          <span class="mode-best">Best <b id="best-specific">0</b></span>
+        </button>
+        <button class="mode-card" onclick="startGame('descriptor')">
+          <span class="mode-symbol">❝</span>
+          <span class="mode-name">Response Descriptor</span>
+          <span class="mode-desc">Fill in how a line was spoken — screamed, whispered, moaned… Small typos are forgiven. A first-letter hint halves the point. Three lives.</span>
+          <span class="mode-best">Best <b id="best-descriptor">0</b></span>
+        </button>
+      </div>
+      <div class="player-row">
+        <label class="player-label" for="playerName">Leaderboard name</label>
+        <input class="name-input" id="playerName" maxlength="20" autocomplete="nickname"
+               placeholder="Enter a name to join" oninput="setPlayerName(this.value)">
+        <button class="btn btn-ghost btn-sm" onclick="openLeaderboard('normal')">🏆 Leaderboards</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ LEADERBOARD SCREEN ══════════ -->
+  <div class="screen" id="boardScreen">
+    <div class="wordmark">
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
+      <div class="wordmark-title">Chapter <em>Oracle</em></div>
+      <div class="wordmark-divider"></div>
+    </div>
+    <div class="card">
+      <button class="btn-link card-back" onclick="goToMenu()">← Modes</button>
+      <div class="menu-title">Leaderboards</div>
+      <p class="menu-sub" id="boardSub">Shared by everyone who plays</p>
+      <div class="board-tabs" id="boardTabs"></div>
+      <ol class="board-list" id="boardList"></ol>
+      <div class="menu-status" id="boardStatus"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ BOOK PICKER SCREEN (specific books mode) ══════════ -->
+  <div class="screen" id="pickScreen">
+    <div class="wordmark">
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
+      <div class="wordmark-title">Chapter <em>Oracle</em></div>
+      <div class="wordmark-divider"></div>
+    </div>
+    <div class="card">
+      <button class="btn-link card-back" onclick="goToMenu()">← Modes</button>
+      <div class="menu-title">Choose your books</div>
+      <p class="menu-sub">Passages come only from the books you tick.</p>
+      <div class="pick-toolbar">
+        <button class="btn-link" onclick="setPicked(true)">Select all</button>
+        <button class="btn-link" onclick="setPicked(false)">Clear all</button>
+      </div>
+      <div class="pick-list" id="pickList"></div>
+      <div class="go-btns">
+        <button class="btn btn-primary" id="pickStartBtn" onclick="startGame('specific')">Start</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ LOADING SCREEN ══════════ -->
+  <div class="screen" id="loadingScreen">
+    <div class="wordmark">
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
       <div class="wordmark-title">Chapter <em>Oracle</em></div>
       <div class="wordmark-divider"></div>
     </div>
@@ -950,19 +801,7 @@ body::after {
         <div class="progress-track">
           <div class="progress-fill" id="progressFill" style="width:0%"></div>
         </div>
-        <div class="book-dots" id="bookDots">
-          <div class="book-dot" id="dot0"></div>
-          <div class="book-dot" id="dot1"></div>
-          <div class="book-dot" id="dot2"></div>
-          <div class="book-dot" id="dot3"></div>
-          <div class="book-dot" id="dot4"></div>
-          <div class="book-dot" id="dot5"></div>
-          <div class="book-dot" id="dot6"></div>
-<<<<<<< HEAD
->>>>>>> parent of 86c75fe (Merge pull request #3 from Craftyplayz/copilot/refactor-hpchapter-game)
-=======
->>>>>>> parent of 86c75fe (Merge pull request #3 from Craftyplayz/copilot/refactor-hpchapter-game)
-        </div>
+        <div class="book-dots" id="bookDots"></div>
       </div>
     </div>
   </div>
@@ -970,7 +809,7 @@ body::after {
   <!-- ══════════ ERROR SCREEN ══════════ -->
   <div class="screen" id="errorScreen">
     <div class="wordmark">
-      <div class="wordmark-eyebrow">Harry Potter</div>
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
       <div class="wordmark-title">Chapter <em>Oracle</em></div>
       <div class="wordmark-divider"></div>
     </div>
@@ -979,21 +818,35 @@ body::after {
         <div class="error-icon">📚</div>
         <div class="error-title">Books not found</div>
         <div class="error-msg" id="errorMsg">
-          Could not load the EPUB files. Make sure this HTML file is served
-          via a local web server and the books are placed at:<br><br>
-          <code>books/book1.epub</code> through <code>books/book7.epub</code>
+          Could not load the EPUB files.
         </div>
-        <button class="btn btn-primary" onclick="initLoad()">Try Again</button>
+        <div class="go-btns">
+          <button class="btn btn-primary" onclick="startGame(mode)">Try Again</button>
+          <button class="btn btn-ghost" onclick="goToMenu()">Change Mode</button>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ══════════ QUIZ SCREEN ══════════ -->
   <div class="screen" id="quizScreen">
+    <div class="quiz-topbar">
+      <button class="btn-link" onclick="goToMenu()">← Modes</button>
+      <span class="mode-tag" id="modeTag">Normal</span>
+    </div>
+
     <div class="quiz-header">
       <div class="score-wrap">
         <span class="score-num" id="scoreDisplay">0</span>
         <span class="score-lbl">Score</span>
+      </div>
+      <div class="timer-wrap" id="timerWrap" hidden>
+        <span class="timer-num" id="timerDisplay">1:00</span>
+        <span class="timer-lbl">Time left</span>
+      </div>
+      <div class="lives-wrap" id="livesWrap" hidden>
+        <span class="lives-num" id="livesDisplay" aria-hidden="true"></span>
+        <span class="lives-lbl" id="livesLabel">Lives</span>
       </div>
       <div class="hs-wrap">
         <span class="hs-num" id="hsDisplay">0</span>
@@ -1003,6 +856,11 @@ body::after {
 
     <div class="passage-label">Passage</div>
     <div class="passage-card" id="passageCard"></div>
+
+    <div class="context-bar" id="contextBar" hidden>
+      <button class="btn btn-ghost btn-sm" id="addWordBtn" onclick="addWord()">+ Add a word</button>
+      <span class="context-info" id="contextInfo"></span>
+    </div>
 
     <div class="stage-label" id="stageLabel">
       <span class="stage-badge" id="stageBadge">Step 1</span>
@@ -1016,20 +874,23 @@ body::after {
   <!-- ══════════ GAME OVER SCREEN ══════════ -->
   <div class="screen" id="gameoverScreen">
     <div class="wordmark">
-      <div class="wordmark-eyebrow">Harry Potter</div>
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
       <div class="wordmark-title">Chapter <em>Oracle</em></div>
       <div class="wordmark-divider"></div>
     </div>
     <div class="card">
       <div class="go-inner">
-        <div class="go-eyebrow">Game Over</div>
+        <div class="go-eyebrow" id="goEyebrow">Game Over</div>
         <span class="go-score" id="goScore">0</span>
-        <div class="go-score-lbl">chapters correctly identified</div>
+        <div class="go-score-lbl" id="goScoreLbl">chapters correctly identified</div>
         <div class="go-record" id="goRecord" style="display:none">✦ New High Score</div>
         <div class="go-context" id="goContext"></div>
+        <div class="lb-panel" id="lbPanel"></div>
         <div class="go-sep"></div>
         <div class="go-btns">
-          <button class="btn btn-primary" onclick="restartGame()">Play Again</button>
+          <button class="btn btn-primary" onclick="startGame(mode)">Play Again</button>
+          <button class="btn btn-ghost" onclick="openLeaderboard(mode)">Leaderboard</button>
+          <button class="btn btn-ghost" onclick="goToMenu()">Change Mode</button>
         </div>
       </div>
     </div>
@@ -1041,36 +902,185 @@ body::after {
 // ═══════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════
-const HP_TITLES = [
-  "Philosopher's Stone",
-  "Chamber of Secrets",
-  "Prisoner of Azkaban",
-  "Goblet of Fire",
-  "Order of the Phoenix",
-  "Half-Blood Prince",
-  "Deathly Hallows"
-];
+const MODES = {
+  normal:   { title: 'Normal' },
+  timed:    { title: 'Timed' },
+  minimum:  { title: 'Minimum Context' },
+  specific: { title: 'Specific Books' },
+  descriptor: { title: 'Response Descriptor' }
+};
 
-const HP_FULL_TITLES = [
-  "Harry Potter and the Philosopher's Stone",
-  "Harry Potter and the Chamber of Secrets",
-  "Harry Potter and the Prisoner of Azkaban",
-  "Harry Potter and the Goblet of Fire",
-  "Harry Potter and the Order of the Phoenix",
-  "Harry Potter and the Half-Blood Prince",
-  "Harry Potter and the Deathly Hallows"
-];
+// Series are the folders in books/, listed by series.php.
+const SERIES_KEY = 'chapterOracle_series';
+
+// Best scores saved before series support existed belong to Harry Potter
+// (matched by seriesSlug, so "Harry Potter" and "Harry-Potter" both count).
+const LEGACY_SERIES     = 'harrypotter';
+const LEGACY_SCORE_KEYS = { normal: 'hpOracle_hs', timed: 'hpOracle_hs_timed', minimum: 'hpOracle_hs_minimum' };
+
+const NAME_KEY = 'chapterOracle_name';
+
+const COUNT_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six',
+                     'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
+
+const TIMED_SECONDS = 60;
+
+// Minimum context: a correct chapter is worth this many points with one word
+// showing, one point less for each extra word, never less than 1.
+const MIN_CONTEXT_MAX_POINTS = 20;
+
+// Feedback pauses in ms. Timed mode keeps them short because the clock keeps running.
+const DELAYS = {
+  normal:  { bookCorrect: 900, bookWrong: 1800, chapterCorrect: 1200, chapterWrong: 2200 },
+  timed:   { bookCorrect: 400, bookWrong: 1100, chapterCorrect: 500,  chapterWrong: 1100 },
+  minimum: { bookCorrect: 900, bookWrong: 2400, chapterCorrect: 2000, chapterWrong: 2600 }
+};
+DELAYS.specific = DELAYS.normal;
+DELAYS.descriptor = { correct: 1400, typo: 2400, wrong: 2800 };
+
+// ═══════════════════════════════════════════════════════
+// RESPONSE DESCRIPTOR
+// ═══════════════════════════════════════════════════════
+// Speech words that can be blanked, mapped to their base form. "said" and other
+// near-neutral tags (asked, added, replied…) are left out on purpose.
+const DESCRIPTOR_VERBS = {
+  barked: 'bark', bellowed: 'bellow', blurted: 'blurt', boomed: 'boom', breathed: 'breathe',
+  cackled: 'cackle', called: 'call', chirped: 'chirp', choked: 'choke', chortled: 'chortle',
+  chuckled: 'chuckle', croaked: 'croak', cried: 'cry', demanded: 'demand', drawled: 'drawl',
+  exclaimed: 'exclaim', faltered: 'falter', gasped: 'gasp', giggled: 'giggle', groaned: 'groan',
+  growled: 'growl', grumbled: 'grumble', grunted: 'grunt', gulped: 'gulp', hissed: 'hiss',
+  howled: 'howl', insisted: 'insist', interrupted: 'interrupt', jeered: 'jeer', laughed: 'laugh',
+  moaned: 'moan', mumbled: 'mumble', murmured: 'murmur', muttered: 'mutter', panted: 'pant',
+  pleaded: 'plead', protested: 'protest', purred: 'purr', raged: 'rage', retorted: 'retort',
+  roared: 'roar', scoffed: 'scoff', screamed: 'scream', screeched: 'screech', shouted: 'shout',
+  shrieked: 'shriek', sighed: 'sigh', snapped: 'snap', snarled: 'snarl', sneered: 'sneer',
+  sniffed: 'sniff', sniggered: 'snigger', snorted: 'snort', sobbed: 'sob', spat: 'spit',
+  spluttered: 'splutter', squeaked: 'squeak', squealed: 'squeal', stammered: 'stammer',
+  stuttered: 'stutter', taunted: 'taunt', thundered: 'thunder', wailed: 'wail', wheezed: 'wheeze',
+  whimpered: 'whimper', whined: 'whine', whispered: 'whisper', yelled: 'yell', yelped: 'yelp'
+};
+
+const DESCRIPTOR_LIVES     = 3;
+// Sentences of conversation shown before and after the blank
+const DESCRIPTOR_CONTEXT_SENTENCES = 3;
+
+// Every way a player might reasonably write the word: whispered, whisper, whispers, whispering
+function descriptorForms(verb) {
+  const base = DESCRIPTOR_VERBS[verb];
+  const forms = new Set([verb, base, base + 's', base + 'es']);
+  if (base.endsWith('y')) forms.add(base.slice(0, -1) + 'ies');
+  const doubled = verb === base + base.slice(-1) + 'ed'; // snap → snapped
+  forms.add(base.endsWith('e') && !base.endsWith('ee') ? base.slice(0, -1) + 'ing'
+    : doubled ? base + base.slice(-1) + 'ing' : base + 'ing');
+  return forms;
+}
+
+const DESCRIPTOR_FORMS = Object.fromEntries(Object.keys(DESCRIPTOR_VERBS).map(v => [v, descriptorForms(v)]));
+// Any form of any listed word → the word, so a guess that is a different real answer isn't treated as a typo
+const DESCRIPTOR_LOOKUP = new Map(Object.entries(DESCRIPTOR_FORMS).flatMap(([v, fs]) => [...fs].map(f => [f, v])));
+
+// Dialogue tags: the word must sit against a quotation and next to a speaker
+// (a pronoun or a capitalised name of up to three words).
+const DESCRIPTOR_RE = (() => {
+  const who  = String.raw`(?:he|she|they|I|we|you|it|[A-Z][\p{L}'’-]+(?:\s+[A-Z][\p{L}'’-]+){0,2})`;
+  const verb = `(?<verb>${Object.keys(DESCRIPTOR_VERBS).join('|')})`;
+  const shut = String.raw`[,.!?…—–-]["”]\s*`; // a closing quote follows punctuation
+  return new RegExp([
+    String.raw`${shut}${who}\s+${verb}\b`,                                  // …,” Harry yelled
+    String.raw`${shut}${verb}\s+${who}\b`,                                  // …,” yelled Harry
+    String.raw`\b${who}\s+${verb}(?:\s+\p{L}+ly)?\s*[,:]\s*["“]`            // Harry yelled, “…
+  ].join('|'), 'gdu');
+})();
+
+// Blankable words in one paragraph: [{verb, start}]. A word is skipped when it
+// (in any form) appears more than once, since the other copy would give it away.
+function findDescriptors(text) {
+  const found = [];
+  for (const m of text.matchAll(DESCRIPTOR_RE)) {
+    const verb = m.groups.verb;
+    const start = m.indices.groups.verb[0];
+    const forms = [...DESCRIPTOR_FORMS[verb]].join('|');
+    const uses = text.match(new RegExp(String.raw`(?<![\p{L}])(?:${forms})(?![\p{L}])`, 'giu'))?.length ?? 0;
+    if (uses === 1 && !found.some(f => f.start === start)) found.push({ verb, start });
+  }
+  return found;
+}
+
+// Lowercase letters only: "Whisp-ered!" → "whispered"
+function normaliseGuess(raw) {
+  return String(raw).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^a-z]/g, '');
+}
+
+// Edit distance where swapping two neighbouring letters counts as one change
+function editDistance(a, b) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+    }
+  }
+  return d[a.length][b.length];
+}
+
+// Typos allowed grow with the word: none up to 4 letters, 1 up to 7, then 2
+function typoAllowance(word) { return word.length <= 4 ? 0 : word.length <= 7 ? 1 : 2; }
+
+// 'exact' | 'typo' | 'wrong'
+function judgeDescriptor(raw, verb) {
+  const guess = normaliseGuess(raw);
+  if (!guess) return 'wrong';
+  const forms = DESCRIPTOR_FORMS[verb];
+  if (forms.has(guess)) return 'exact';
+  if (DESCRIPTOR_LOOKUP.has(guess)) return 'wrong'; // a different real answer, not a typo
+  for (const form of [verb, DESCRIPTOR_VERBS[verb]]) {
+    if (editDistance(guess, form) <= typoAllowance(form)) return 'typo';
+  }
+  return 'wrong';
+}
 
 // ═══════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════
-let books         = [];   // [{title, chapters:[{title,paragraphs[],bookIndex}]}]
+let seriesList    = null; // [{id, name, books:[filename]}]
+let seriesPromise = null; // in-flight series list request
+let seriesError   = '';   // why the last series list request failed
+let series        = null; // selected entry of seriesList
+const libraries   = {};   // series id → parsed books and load state (see libraryFor)
+let picked        = new Set(); // specific books mode: ticked book indices
+let activeBooks   = [];   // book indices in play this run
+
+let playerName    = storageGet(NAME_KEY) || '';
+let lastRun       = null; // {series, mode, score, books} of the last finished run
+let lbState       = { kind: 'idle' }; // leaderboard panel on the game over screen
+let boardMode     = 'normal';
+let boardError    = '';
+let boardLoading  = false;
+let boardRequest  = 0;    // ignores responses for a tab that's no longer showing
+const boardCache  = {};   // "series|mode" → last entries fetched
+
 let paragraphPool = [];   // shuffled [{text, chapterTitle, bookIndex, bookChapters}]
 let score         = 0;
-let highScore     = parseInt(localStorage.getItem('hpOracle_hs') || '0', 10);
+let mode          = 'normal';
 let currentItem   = null; // current paragraph pool entry
 let quizStage     = 'book'; // 'book' | 'chapter'
 let answerLocked  = false;
+
+let gameId        = 0;    // bumped on every start/end so stale timeouts do nothing
+let timerInterval = null;
+let deadline      = 0;
+let attempted     = 0;    // passages answered this run (timed summary)
+let correctCount  = 0;
+
+let words         = [];   // minimum context: words of the current passage
+let wordsShown    = 0;
+let revealFull    = false;
+
+let lives         = 0;     // response descriptor: wrong guesses left
+let hintUsed      = false; // first letter shown for the current blank
+let blankState    = null;  // null while guessing, then 'correct' | 'wrong'
 
 // ═══════════════════════════════════════════════════════
 // SCREEN MANAGEMENT
@@ -1082,92 +1092,315 @@ function showScreen(id) {
   el.classList.add('active');
 }
 
-// ═══════════════════════════════════════════════════════
-// EPUB LOADING & PARSING
-// ═══════════════════════════════════════════════════════
-async function initLoad() {
-  showScreen('loadingScreen');
-  books         = [];
-  paragraphPool = [];
+// Series list shown when the page opens
+function renderSeriesScreen() {
+  const grid   = document.getElementById('seriesGrid');
+  const status = document.getElementById('seriesStatus');
+  grid.innerHTML = '';
+  status.classList.remove('error');
+  document.getElementById('seriesRetry').hidden = true;
 
-  let anyFailed = false;
-  const failedBooks = [];
-
-const loadPromises = HP_TITLES.map(async (_, i) => {
-  try {
-    setLoadingBook('Please wait…');
-
-    const resp = await fetch(`books/book${i + 1}.epub`);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-
-    const arrayBuffer = await resp.arrayBuffer();
-    const book = await parseEpub(arrayBuffer, i);
-
-    document.getElementById(`dot${i}`).classList.add('loaded');
-
-    return book;
-  } catch (err) {
-    console.warn(`Failed to load book${i + 1}.epub:`, err);
-
-    anyFailed = true;
-    failedBooks.push(`book${i + 1}.epub`);
-
-    document.getElementById(`dot${i}`).style.background = '#f87171';
-
-    return {
-      title: HP_FULL_TITLES[i],
-      chapters: []
-    };
-  }
-});
-
-books = await Promise.all(loadPromises);
-
-  setProgress(100);
-
-  // Build paragraph pool
-  for (let i = 0; i < books.length; i++) {
-    const book = books[i];
-    const chapterTitles = book.chapters.map(c => c.title);
-    for (const ch of book.chapters) {
-      for (const para of ch.paragraphs) {
-        paragraphPool.push({
-          text:          para,
-          chapterTitle:  ch.title,
-          bookIndex:     i,
-          bookChapters:  chapterTitles // all chapters of this book
-        });
-      }
+  if (!seriesList) {
+    if (seriesPromise) {
+      status.textContent = 'Finding book series…';
+    } else {
+      status.textContent = `Could not load the list of series. ${seriesError}`;
+      status.classList.add('error');
+      document.getElementById('seriesRetry').hidden = false;
     }
-  }
-
-  // Deduplicate paragraphs
-  const seenTexts = new Set();
-  paragraphPool = paragraphPool.filter(p => {
-    if (seenTexts.has(p.text)) return false;
-    seenTexts.add(p.text); return true;
-  });
-
-  shuffleArr(paragraphPool);
-
-  await sleep(350);
-
-  if (paragraphPool.length === 0) {
-    document.getElementById('errorMsg').innerHTML =
-      `No readable content was found. ${anyFailed ? `Failed to load: <code>${failedBooks.join('</code>, <code>')}</code>.<br><br>` : ''}
-      Make sure this page is served via HTTP (e.g. <code>python -m http.server</code>) and the books folder is in the same directory as this file.`;
-    showScreen('errorScreen');
     return;
   }
 
-  // Start game
-  score = 0;
-  updateScoreUI();
-  showScreen('quizScreen');
-  nextQuestion();
+  status.textContent = '';
+  for (const s of seriesList) {
+    const btn = document.createElement('button');
+    btn.className = 'mode-card series-card';
+    const name = document.createElement('span');
+    name.className   = 'mode-name';
+    name.textContent = s.name;
+    const count = document.createElement('span');
+    count.className   = 'mode-best';
+    count.textContent = `${s.books.length} book${s.books.length === 1 ? '' : 's'}`;
+    btn.appendChild(name);
+    btn.appendChild(count);
+    btn.addEventListener('click', () => selectSeries(s.id));
+    grid.appendChild(btn);
+  }
 }
 
-async function parseEpub(arrayBuffer, bookIndex) {
+// Mode menu for the selected series
+function renderMenu() {
+  for (const id of Object.keys(MODES)) {
+    document.getElementById(`best-${id}`).textContent = formatScore(getBest(series.id, id));
+  }
+  document.querySelectorAll('[data-series-name]').forEach(el => el.textContent = series.name);
+  document.getElementById('playerName').value = playerName;
+  const count = series.books.length;
+  document.getElementById('menuSub').textContent =
+    `${COUNT_WORDS[count] ?? count} book${count === 1 ? '' : 's'}. Countless chapters. How well do you know the story?`;
+}
+
+function goToMenu() {
+  gameId++;
+  stopTimer();
+  renderMenu();
+  showScreen('menuScreen');
+}
+
+function goToSeries() {
+  gameId++;
+  stopTimer();
+  applyTheme(null);
+  renderSeriesScreen();
+  showScreen('seriesScreen');
+}
+
+// "The Lord of the Rings" / "lord-of-the-rings" → "thelordoftherings" / "lordoftherings"
+function seriesSlug(name) { return String(name).toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+// themes.css picks the colours from the series slug on <html>, and fades between them
+function applyTheme(s) {
+  if (s) document.documentElement.dataset.series = seriesSlug(s.id);
+  else delete document.documentElement.dataset.series;
+}
+
+// ═══════════════════════════════════════════════════════
+// SERIES
+// ═══════════════════════════════════════════════════════
+function loadSeriesList() {
+  if (!seriesPromise) {
+    seriesError = '';
+    seriesPromise = fetchSeriesList()
+      .then(list => { seriesList = list; })
+      .catch(err => {
+        seriesPromise = null;
+        seriesError = err.message;
+        throw err;
+      });
+  }
+  return seriesPromise;
+}
+
+function retrySeriesList() {
+  loadSeriesList().catch(() => {}).finally(renderSeriesScreen);
+  renderSeriesScreen();
+}
+
+// The folders in books/, as listed by series.php. Errors say what went wrong
+// so the series screen can show it.
+async function fetchSeriesList() {
+  let resp;
+  try {
+    resp = await fetch('series.php', { cache: 'no-store' });
+  } catch {
+    throw new Error('Could not reach series.php.');
+  }
+  if (!resp.ok) throw new Error(`series.php returned HTTP ${resp.status}.`);
+  const body = await resp.text();
+  let list;
+  try {
+    list = JSON.parse(body);
+  } catch {
+    throw new Error(body.trimStart().startsWith('<?php')
+      ? 'series.php was sent as text instead of being run by PHP.'
+      : 'series.php did not return a valid list (it may have hit a PHP error).');
+  }
+  if (!Array.isArray(list)) throw new Error('series.php did not return a valid list.');
+  if (list.length === 0) throw new Error('No series found. Put each series in its own folder of EPUBs, such as books/Harry-Potter/.');
+  return list;
+}
+
+// Picking a series shows the modes and quietly starts opening its books
+function selectSeries(id) {
+  const next = seriesList?.find(s => s.id === id);
+  if (!next) return;
+  series = next;
+  storageSet(SERIES_KEY, id);
+  applyTheme(series);
+  loadLibrary(series).catch(() => { /* reported if they start a game */ });
+  renderMenu();
+  showScreen('menuScreen');
+}
+
+// ═══════════════════════════════════════════════════════
+// SPECIFIC BOOKS
+// ═══════════════════════════════════════════════════════
+// Remembered per series as filenames, so adding a book to the folder doesn't shift the choice
+function pickKey() { return `chapterOracle_pick:${series.id}`; }
+
+function loadPicked() {
+  try {
+    const saved = JSON.parse(storageGet(pickKey()));
+    if (Array.isArray(saved)) {
+      return new Set(series.books.map((file, i) => saved.includes(file) ? i : -1).filter(i => i >= 0));
+    }
+  } catch { /* nothing usable saved */ }
+  return new Set(series.books.map((_, i) => i));
+}
+
+function savePicked() {
+  storageSet(pickKey(), JSON.stringify([...picked].map(i => series.books[i])));
+}
+
+// Ticked books that actually loaded, in series order
+function usablePicked() {
+  const lib = currentLib();
+  return [...picked].filter(i => lib.books[i]?.chapters.length > 0).sort((a, b) => a - b);
+}
+
+async function openBookPicker() {
+  const id = ++gameId;
+  if (!currentLib().ready) {
+    showScreen('loadingScreen');
+    renderLoading(series);
+    try {
+      await loadLibrary(series);
+    } catch {
+      if (id === gameId) { mode = 'specific'; showLoadError(); }
+      return;
+    }
+    if (id !== gameId) return;
+  }
+  picked = loadPicked();
+  renderPicker();
+  showScreen('pickScreen');
+}
+
+function renderPicker() {
+  const lib  = currentLib();
+  const list = document.getElementById('pickList');
+  list.innerHTML = '';
+  lib.books.forEach((book, i) => {
+    const usable = book.chapters.length > 0;
+    const item = document.createElement('label');
+    item.className = 'pick-item' + (usable && picked.has(i) ? ' checked' : '');
+    const box = document.createElement('input');
+    box.type     = 'checkbox';
+    box.checked  = usable && picked.has(i);
+    box.disabled = !usable;
+    box.addEventListener('change', () => togglePicked(i, box.checked));
+    const text = document.createElement('span');
+    text.innerHTML = `<span class="book-num">Book ${i + 1}</span>${escHtml(lib.titles[i])}${usable ? '' : ' (could not load)'}`;
+    item.appendChild(box);
+    item.appendChild(text);
+    list.appendChild(item);
+  });
+  document.getElementById('pickStartBtn').disabled = usablePicked().length === 0;
+}
+
+function togglePicked(i, on) {
+  if (on) picked.add(i); else picked.delete(i);
+  savePicked();
+  renderPicker();
+}
+
+function setPicked(all) {
+  picked = new Set(all ? series.books.map((_, i) => i) : []);
+  savePicked();
+  renderPicker();
+}
+
+// ═══════════════════════════════════════════════════════
+// EPUB LOADING & PARSING
+// ═══════════════════════════════════════════════════════
+// Parsed books and load state for one series, kept so switching back is instant
+function libraryFor(s) {
+  return libraries[s.id] ??= {
+    books:   [],     // [{title, chapters:[{title,paragraphs[]}]}], same order as s.books
+    titles:  [],     // short button labels
+    status:  [],     // per book: 'pending' | 'loaded' | 'failed'
+    failed:  [],     // filenames that failed to load
+    opened:  0,
+    ready:   false,
+    promise: null,   // in-flight load
+    descriptors: null // blankable dialogue, found on first use (see descriptorCandidates)
+  };
+}
+function currentLib() { return libraryFor(series); }
+
+function loadLibrary(s) {
+  const lib = libraryFor(s);
+  if (!lib.promise) {
+    lib.promise = fetchBooks(s, lib).catch(err => {
+      lib.promise = null;
+      throw err;
+    });
+  }
+  return lib.promise;
+}
+
+async function fetchBooks(s, lib) {
+  lib.status = s.books.map(() => 'pending');
+  lib.failed = [];
+  lib.opened = 0;
+  lib.descriptors = null;
+  renderLoading(s);
+
+  lib.books = await Promise.all(s.books.map(async (file, i) => {
+    try {
+      const resp = await fetch(`books/${encodeURIComponent(s.id)}/${encodeURIComponent(file)}`);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+      const arrayBuffer = await resp.arrayBuffer();
+      const book = await parseEpub(arrayBuffer);
+      book.title ||= fileTitle(file);
+
+      lib.status[i] = 'loaded';
+      return book;
+    } catch (err) {
+      console.warn(`Failed to load ${s.id}/${file}:`, err);
+      lib.status[i] = 'failed';
+      lib.failed.push(file);
+      return { title: fileTitle(file), chapters: [] };
+    } finally {
+      lib.opened++;
+      renderLoading(s);
+    }
+  }));
+
+  lib.titles = shortTitles(lib.books.map(b => b.title));
+  if (buildPool(lib).length === 0) {
+    throw new Error('No readable content');
+  }
+  lib.ready = true;
+}
+
+// Loading screen progress for the selected series
+function renderLoading(s) {
+  if (s !== series) return;
+  const lib = libraryFor(s);
+  document.getElementById('bookDots').innerHTML = s.books
+    .map((_, i) => `<div class="book-dot${{ loaded: ' loaded', failed: ' failed' }[lib.status[i]] || ''}"></div>`)
+    .join('');
+  setProgress(lib.opened / s.books.length * 100);
+  setLoadingBook(lib.opened ? `${lib.opened} of ${s.books.length} books opened` : 'Please wait…');
+}
+
+function showLoadError() {
+  const failed = currentLib().failed;
+  document.getElementById('errorMsg').innerHTML =
+    `No readable content was found in <code>books/${escHtml(series.id)}/</code>.
+    ${failed.length ? `Failed to load: <code>${failed.map(escHtml).join('</code>, <code>')}</code>.<br><br>` : ''}
+    Make sure the files are valid EPUBs and this page is served by a web server.`;
+  showScreen('errorScreen');
+}
+
+// "book-1_final.epub" → "book 1 final"
+function fileTitle(file) {
+  return file.replace(/\.epub$/i, '').replace(/[-_]+/g, ' ').trim();
+}
+
+// Drop a phrase every title starts with ("Harry Potter and the …") so the
+// book buttons show the part that tells them apart.
+function shortTitles(titles) {
+  if (titles.length < 2) return titles;
+  const split = titles.map(t => t.split(' '));
+  let n = 0;
+  while (split.every(w => n < w.length - 1 && w[n] === split[0][n])) n++;
+  return split.map(w => w.slice(n).join(' '));
+}
+
+async function parseEpub(arrayBuffer) {
   const zip = await JSZip.loadAsync(arrayBuffer);
   const xp  = new DOMParser();
 
@@ -1186,12 +1419,19 @@ async function parseEpub(arrayBuffer, bookIndex) {
   const opfXml = await zip.file(opfPath)?.async('text');
   if (!opfXml) throw new Error('No OPF content');
   const opfDoc = xp.parseFromString(opfXml, 'application/xml');
+  const bookTitle = (
+    opfDoc.getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'title')[0]
+    || opfDoc.getElementsByTagName('dc:title')[0]
+  )?.textContent.replace(/\s+/g, ' ').trim();
+
+  // Hrefs may percent-encode file names ("Skeleton%20Key.html"); zip paths don't
+  const decode = s => { try { return decodeURIComponent(s); } catch { return s; } };
 
   // Manifest
   const manifest = {};
   opfDoc.querySelectorAll('manifest item').forEach(el => {
     manifest[el.getAttribute('id')] = {
-      href:       el.getAttribute('href') || '',
+      href:       decode(el.getAttribute('href') || ''),
       mediaType:  el.getAttribute('media-type') || '',
       properties: el.getAttribute('properties') || ''
     };
@@ -1204,23 +1444,33 @@ async function parseEpub(arrayBuffer, bookIndex) {
     if (id && manifest[id]) spineIds.push(id);
   });
 
-  // Chapter title map
-  const titleMap = {};
+  // Table of contents in reading order: [{ path, frag, title }], where path is
+  // the file relative to the OPF folder and frag the anchor inside it (or '').
+  const toc = [];
 
   function resolveHref(baseFilePath, relHref) {
-    const frag = relHref.split('#')[0];
-    if (!frag) return '';
-    if (frag.startsWith('/')) return frag.slice(1);
+    const target = decode(relHref.split('#')[0]);
+    if (!target) return '';
+    if (target.startsWith('/')) return target.slice(1);
     const parts = baseFilePath.split('/');
     parts.pop();
-    for (const seg of frag.split('/')) {
+    for (const seg of target.split('/')) {
       if (seg === '..') parts.pop();
       else if (seg && seg !== '.') parts.push(seg);
     }
     return parts.join('/');
   }
 
-  // Try EPUB3 nav
+  function addTocEntry(basePath, raw, title) {
+    title = title.replace(/\s+/g, ' ').trim();
+    if (!raw || raw.startsWith('http') || !title) return;
+    const resolved = resolveHref(basePath, raw);
+    const path = resolved.startsWith(opfDir) ? resolved.slice(opfDir.length) : resolved;
+    const frag = decode(raw.split('#')[1] || '');
+    if (path && !toc.some(e => e.path === path && e.frag === frag && e.title === title)) toc.push({ path, frag, title });
+  }
+
+  // Try EPUB3 nav: only its table of contents, not the landmarks or page list
   const navEntry = Object.entries(manifest)
     .find(([, m]) => m.properties.includes('nav'));
   if (navEntry) {
@@ -1230,22 +1480,15 @@ async function parseEpub(arrayBuffer, bookIndex) {
       let navDoc;
       try { navDoc = xp.parseFromString(navXml, 'application/xhtml+xml'); }
       catch { navDoc = xp.parseFromString(navXml, 'text/html'); }
-      navDoc.querySelectorAll('a[href]').forEach(a => {
-        const raw = a.getAttribute('href') || '';
-        if (!raw || raw.startsWith('http')) return;
-        const resolved = resolveHref(navFullPath, raw);
-        const rel = resolved.startsWith(opfDir) ? resolved.slice(opfDir.length) : resolved;
-        const title = a.textContent.trim();
-        if (rel && title) {
-          titleMap[rel] = title;
-          titleMap[rel.split('/').pop()] = title;
-        }
-      });
+      const navs = [...navDoc.querySelectorAll('nav')];
+      const tocNav = navs.find(n => /\btoc\b/.test(n.getAttribute('epub:type') || '')) || navs[0] || navDoc;
+      tocNav.querySelectorAll('a[href]').forEach(a =>
+        addTocEntry(navFullPath, a.getAttribute('href') || '', a.textContent));
     }
   }
 
   // EPUB2 NCX fallback
-  if (Object.keys(titleMap).length === 0) {
+  if (toc.length === 0) {
     const ncxEntry = Object.entries(manifest)
       .find(([, m]) => m.mediaType === 'application/x-dtbncx+xml');
     if (ncxEntry) {
@@ -1253,23 +1496,50 @@ async function parseEpub(arrayBuffer, bookIndex) {
       const ncxXml = await zip.file(ncxFullPath)?.async('text');
       if (ncxXml) {
         const ncxDoc = xp.parseFromString(ncxXml, 'application/xml');
-        ncxDoc.querySelectorAll('navPoint').forEach(np => {
-          const raw   = np.querySelector('content')?.getAttribute('src') || '';
-          const label = np.querySelector('navLabel text')?.textContent?.trim() || '';
-          if (!raw || !label) return;
-          const resolved = resolveHref(ncxFullPath, raw);
-          const rel = resolved.startsWith(opfDir) ? resolved.slice(opfDir.length) : resolved;
-          if (rel) {
-            titleMap[rel] = label;
-            titleMap[rel.split('/').pop()] = label;
-          }
-        });
+        ncxDoc.querySelectorAll('navPoint').forEach(np =>
+          addTocEntry(ncxFullPath,
+            np.querySelector('content')?.getAttribute('src') || '',
+            np.querySelector('navLabel text')?.textContent || ''));
       }
     }
   }
 
-  // Process spine items into chapters
+  // Entries per file, looked up by full path or file name
+  const tocByPath = new Map();
+  for (const e of toc) {
+    for (const key of new Set([e.path, e.path.split('/').pop()])) {
+      if (!tocByPath.has(key)) tocByPath.set(key, []);
+      tocByPath.get(key).push(e);
+    }
+  }
+
+  // When several chapters point at one file with no anchors to split on,
+  // a chapter starts where a block of text matches its title (in any file).
+  const titleKey = s => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+  const textTitles = new Map();
+  for (const [key, entries] of tocByPath) {
+    const plain = entries.filter(e => !e.frag);
+    if (key.includes('/') || plain.length < 2) continue;
+    plain.forEach(e => { if (titleKey(e.title)) textTitles.set(titleKey(e.title), e.title); });
+  }
+
+  // Leaf blocks are paragraphs: <p>, or <div> etc. holding text but no other blocks
+  const BLOCKS   = new Set(['p', 'div', 'li', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+  const HEADINGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+  const BLOCK_SELECTOR = [...BLOCKS].join(', ');
+
+  // Process spine items into chapters. A spine item with no table-of-contents
+  // entry continues the chapter before it: some EPUBs (e.g. Calibre "split"
+  // files) list only a short heading file per chapter and put the text in the
+  // files that follow. Items before the first listed chapter are front matter.
   const chapters = [];
+  let chapter = null;
+  const startChapter = title => {
+    if (chapter && chapter.title === title) return; // repeated heading
+    chapter = { title, paragraphs: [], lines: [], seen: new Set() };
+    chapters.push(chapter);
+  };
+
   for (const itemId of spineIds) {
     const item = manifest[itemId];
     if (!item || !item.mediaType.includes('html')) continue;
@@ -1278,8 +1548,11 @@ async function parseEpub(arrayBuffer, bookIndex) {
     const fullPath = opfDir + itemHref;
     const basename = itemHref.split('/').pop();
 
-    const chapterTitle = titleMap[itemHref] || titleMap[basename] || titleMap[fullPath];
-    if (!chapterTitle) continue;
+    const entries = tocByPath.get(itemHref) || tocByPath.get(fullPath) || tocByPath.get(basename) || [];
+    const anchors = new Map(entries.filter(e => e.frag).map(e => [e.frag, e.title]));
+    const atTop   = entries.find(e => !e.frag);
+    if (atTop) startChapter(atTop.title);
+    if (!chapter && !anchors.size && !textTitles.size) continue;
 
     const htmlRaw = await zip.file(fullPath)?.async('text');
     if (!htmlRaw) continue;
@@ -1288,22 +1561,242 @@ async function parseEpub(arrayBuffer, bookIndex) {
     try { htmlDoc = xp.parseFromString(htmlRaw, 'application/xhtml+xml'); }
     catch { htmlDoc = xp.parseFromString(htmlRaw, 'text/html'); }
 
-    const seen = new Set();
-    const paragraphs = [];
-    htmlDoc.querySelectorAll('p').forEach(p => {
-      const t = p.textContent.replace(/\s+/g, ' ').trim();
-      if (t.length >= 120 && t.length <= 2500 && !seen.has(t)) {
-        seen.add(t);
-        paragraphs.push(t);
+    // The root itself is included: some books put the chapter anchor on <body>
+    const root = htmlDoc.querySelector('body') || htmlDoc.documentElement;
+    for (const el of [root, ...root.querySelectorAll('*')]) {
+      const id = el.getAttribute('id') || el.getAttribute('name');
+      if (id && anchors.has(id)) {
+        startChapter(anchors.get(id));
+        anchors.delete(id);
       }
-    });
+      const tag = el.localName.toLowerCase();
+      if (!BLOCKS.has(tag) || el.querySelector(BLOCK_SELECTOR)) continue;
+      const t = el.textContent.replace(/\s+/g, ' ').trim();
+      if (!t) continue;
+      const matched = textTitles.get(titleKey(t));
+      if (matched) { startChapter(matched); continue; }
+      if (!chapter || HEADINGS.has(tag)) continue;
 
-    if (paragraphs.length > 0) {
-      chapters.push({ title: chapterTitle, paragraphs, bookIndex });
+      // lines: every paragraph in reading order, so response descriptor can show
+      // the conversation around a blank
+      chapter.lines.push(t);
+      if (t.length >= 120 && t.length <= 2500 && !chapter.seen.has(t)) {
+        chapter.seen.add(t);
+        chapter.paragraphs.push(t);
+      }
     }
   }
 
-  return { title: HP_FULL_TITLES[bookIndex], chapters };
+  // A chapter listed twice (e.g. in a contents page inside the book) is one chapter
+  const merged = new Map();
+  for (const c of chapters) {
+    const into = merged.get(c.title);
+    if (!into) { merged.set(c.title, c); continue; }
+    into.lines.push(...c.lines);
+    for (const p of c.paragraphs) if (!into.seen.has(p)) { into.seen.add(p); into.paragraphs.push(p); }
+  }
+  chapters.length = 0;
+  chapters.push(...merged.values());
+
+  return {
+    title: bookTitle,
+    chapters: chapters
+      .filter(c => c.paragraphs.length > 0)
+      .map(({ title, paragraphs, lines }) => ({ title, paragraphs, lines }))
+  };
+}
+
+// Fresh, deduplicated, shuffled pool from a series' parsed books (all, or only bookIndices)
+function buildPool(lib, bookIndices = lib.books.map((_, i) => i)) {
+  const pool = [];
+  const seenTexts = new Set();
+  for (const i of bookIndices) {
+    const book = lib.books[i];
+    const chapterTitles = book.chapters.map(c => c.title);
+    for (const ch of book.chapters) {
+      for (const para of ch.paragraphs) {
+        if (!seenTexts.has(para)) {
+          seenTexts.add(para);
+          pool.push({
+            text:         para,
+            chapterTitle: ch.title,
+            bookIndex:    i,
+            bookChapters: chapterTitles // all chapters of this book
+          });
+        }
+      }
+    }
+  }
+  shuffleArr(pool);
+  return pool;
+}
+
+// Every paragraph of a series with at least one blankable word, found once per library.
+// index points into the chapter's lines so the surrounding paragraphs can be shown.
+function descriptorCandidates(lib) {
+  return lib.descriptors ??= lib.books.flatMap((book, bookIndex) =>
+    book.chapters.flatMap(ch => ch.lines
+      .map((text, index) => ({ text, index, lines: ch.lines, bookIndex, chapterTitle: ch.title, found: findDescriptors(text) }))
+      .filter(c => c.found.length > 0)));
+}
+
+// Shuffled descriptor questions: each paragraph once, with one of its words picked to blank
+function buildDescriptorPool(lib, bookIndices) {
+  const pool = [];
+  const seenTexts = new Set();
+  for (const c of descriptorCandidates(lib)) {
+    if (!bookIndices.includes(c.bookIndex) || seenTexts.has(c.text)) continue;
+    seenTexts.add(c.text);
+    const pick = c.found[Math.floor(Math.random() * c.found.length)];
+    pool.push({
+      text: c.text, index: c.index, lines: c.lines, bookIndex: c.bookIndex, chapterTitle: c.chapterTitle,
+      verb: pick.verb, start: pick.start
+    });
+  }
+  shuffleArr(pool);
+  return pool;
+}
+
+// "Mr. Weasley sighed. “Fine.” He left." → three sentences
+function splitSentences(text) {
+  return text.split(/(?<=[.!?…]["”’)]*)(?<!\b(?:Mr|Mrs|Ms|Dr|St|Mt|Prof)\.)\s+(?=["“‘(]?\p{Lu})/u).filter(Boolean);
+}
+
+// The paragraphs around a question's blank, so the conversation reads in context:
+// neighbours are added until there are DESCRIPTOR_CONTEXT_SENTENCES sentences on
+// each side of the blank (its own paragraph counts), the furthest trimmed to just
+// what's needed. Stops at a scene break or heading, or a paragraph using the word.
+function descriptorContext(item) {
+  const { lines, index, text, verb, start } = item;
+  const giveaway = new RegExp(String.raw`(?<!\p{L})(?:${[...DESCRIPTOR_FORMS[verb]].join('|')})(?!\p{L})`, 'iu');
+  const gather = (need, step) => {
+    const out = [];
+    for (let i = index + step; need > 0 && i >= 0 && i < lines.length; i += step) {
+      const line = lines[i];
+      if (!/\p{Ll}/u.test(line) || giveaway.test(line)) break;
+      const parts = splitSentences(line);
+      const keep  = step < 0 ? parts.slice(-need) : parts.slice(0, need);
+      const cut   = keep.length < parts.length;
+      out.push(step < 0 ? (cut ? '… ' : '') + keep.join(' ') : keep.join(' ') + (cut ? ' …' : ''));
+      need -= keep.length;
+    }
+    return step < 0 ? out.reverse() : out;
+  };
+  // The blank's own sentence is split in two by start, so it counts once between both sides
+  return {
+    before: gather(DESCRIPTOR_CONTEXT_SENTENCES + 1 - splitSentences(text.slice(0, start)).length, -1),
+    after:  gather(DESCRIPTOR_CONTEXT_SENTENCES + 1 - splitSentences(text.slice(start)).length, 1)
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// GAME START
+// ═══════════════════════════════════════════════════════
+async function startGame(selectedMode) {
+  mode = selectedMode;
+  const id = ++gameId;
+  stopTimer();
+
+  // Books normally finish opening while the player picks a mode; wait here if not
+  if (!currentLib().ready) {
+    showScreen('loadingScreen');
+    renderLoading(series);
+    try {
+      await loadLibrary(series);
+    } catch {
+      if (id === gameId) showLoadError();
+      return;
+    }
+    await sleep(350);
+    if (id !== gameId) return;
+  }
+
+  activeBooks = mode === 'specific' ? usablePicked() : currentLib().books.map((_, i) => i);
+  if (activeBooks.length === 0) { openBookPicker(); return; }
+
+  paragraphPool = mode === 'descriptor'
+    ? buildDescriptorPool(currentLib(), activeBooks)
+    : buildPool(currentLib(), activeBooks);
+  if (paragraphPool.length === 0) { showNoDialogueError(); return; }
+  score         = 0;
+  attempted     = 0;
+  correctCount  = 0;
+  currentItem   = null;
+  lives         = DESCRIPTOR_LIVES;
+
+  document.getElementById('modeTag').textContent = `${series.name} · ${MODES[mode].title}`;
+  document.getElementById('timerWrap').hidden    = mode !== 'timed';
+  document.getElementById('contextBar').hidden   = mode !== 'minimum';
+  document.getElementById('livesWrap').hidden    = mode !== 'descriptor';
+  updateScoreUI();
+  updateLivesUI();
+  showScreen('quizScreen');
+
+  if (mode === 'timed') startTimer();
+  nextQuestion();
+}
+
+// Runs fn after ms, unless the game has since ended or restarted
+function later(fn, ms) {
+  const id = gameId;
+  setTimeout(() => { if (id === gameId) fn(); }, ms);
+}
+
+// ═══════════════════════════════════════════════════════
+// TIMER (timed mode)
+// ═══════════════════════════════════════════════════════
+function startTimer() {
+  deadline = performance.now() + TIMED_SECONDS * 1000;
+  updateTimer();
+  timerInterval = setInterval(updateTimer, 100);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+function updateTimer() {
+  const remaining = Math.max(0, deadline - performance.now());
+  const secs = Math.ceil(remaining / 1000);
+  document.getElementById('timerDisplay').textContent =
+    `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+  document.getElementById('timerWrap').classList.toggle('low', secs <= 10);
+  if (remaining <= 0) triggerGameOver('time');
+}
+
+// ═══════════════════════════════════════════════════════
+// MINIMUM CONTEXT
+// ═══════════════════════════════════════════════════════
+function contextPoints() {
+  return Math.max(1, MIN_CONTEXT_MAX_POINTS + 1 - wordsShown);
+}
+
+function renderPassage() {
+  const pc = document.getElementById('passageCard');
+  if (mode === 'descriptor') {
+    renderBlankPassage(pc);
+  } else if (mode !== 'minimum' || revealFull) {
+    pc.textContent = currentItem.text;
+  } else {
+    pc.textContent = words.slice(0, wordsShown).join(' ') + (wordsShown < words.length ? ' …' : '');
+  }
+  updateContextBar();
+}
+
+function updateContextBar() {
+  if (mode !== 'minimum') return;
+  const btn = document.getElementById('addWordBtn');
+  btn.disabled = answerLocked || revealFull || wordsShown >= words.length;
+  const pts = contextPoints();
+  document.getElementById('contextInfo').textContent =
+    `${wordsShown} of ${words.length} words · correct chapter worth ${pts} point${pts === 1 ? '' : 's'}`;
+}
+
+function addWord() {
+  if (mode !== 'minimum' || answerLocked || revealFull || wordsShown >= words.length) return;
+  wordsShown++;
+  renderPassage();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1311,17 +1804,22 @@ async function parseEpub(arrayBuffer, bookIndex) {
 // ═══════════════════════════════════════════════════════
 function nextQuestion() {
   if (paragraphPool.length === 0) {
-    triggerGameOver(null); // completed all passages — won!
+    triggerGameOver('complete'); // completed all passages — won!
     return;
   }
 
   currentItem   = paragraphPool.pop();
   quizStage     = 'book';
   answerLocked  = false;
+  words         = currentItem.text.split(' ');
+  wordsShown    = 1;
+  revealFull    = false;
+  hintUsed      = false;
+  blankState    = null;
 
   // Passage
   const pc = document.getElementById('passageCard');
-  pc.textContent = currentItem.text;
+  renderPassage();
   pc.classList.remove('animate');
   void pc.offsetHeight;
   pc.classList.add('animate');
@@ -1329,21 +1827,27 @@ function nextQuestion() {
   // Clear feedback
   setFeedback('', '');
 
-  // Show book stage
-  renderBookStage();
+  // A one-book series has nothing to ask at the book step
+  if (mode === 'descriptor') renderDescriptorStage();
+  else if (isSingleBook()) renderChapterStage();
+  else renderBookStage();
 }
+
+function isSingleBook() { return activeBooks.length === 1; }
+function fullTitle(bookIndex) { return currentLib().books[bookIndex].title; }
 
 function renderBookStage() {
   quizStage = 'book';
   document.getElementById('stageBadge').textContent = 'Step 1 of 2';
-  document.getElementById('stageText').textContent  = 'Which Harry Potter book is this from?';
+  document.getElementById('stageText').textContent  = `Which ${series.name} book is this from?`;
 
   const area = document.getElementById('choicesArea');
   area.innerHTML = '';
   const grid = document.createElement('div');
   grid.className = 'book-grid';
 
-  HP_TITLES.forEach((title, i) => {
+  activeBooks.forEach(i => {
+    const title = currentLib().titles[i];
     const btn = document.createElement('button');
     btn.className = 'book-btn';
     btn.innerHTML = `<span class="book-num">Book ${i + 1}</span>${escHtml(title)}`;
@@ -1357,20 +1861,22 @@ function renderBookStage() {
 function handleBookAnswer(btn, chosenIndex) {
   if (answerLocked) return;
   answerLocked = true;
+  updateContextBar();
 
   const allBtns = document.querySelectorAll('.book-btn');
   allBtns.forEach(b => b.disabled = true);
 
   const correct = chosenIndex === currentItem.bookIndex;
+  const delays  = DELAYS[mode];
 
   if (correct) {
     btn.classList.add('state-correct');
     setFeedback(`✓ Correct — now identify the chapter`, 'fb-info');
     // Transition to chapter stage after a short pause
-    setTimeout(() => {
+    later(() => {
       setFeedback('', '');
       renderChapterStage();
-    }, 900);
+    }, delays.bookCorrect);
   } else {
     btn.classList.add('state-wrong');
     // Reveal correct book
@@ -1379,19 +1885,28 @@ function handleBookAnswer(btn, chosenIndex) {
       const idx = parseInt(bookNum.replace('Book ', '')) - 1;
       if (idx === currentItem.bookIndex) b.classList.add('state-reveal');
     });
-    setFeedback(
-      `✗ Wrong — it was from ${HP_FULL_TITLES[currentItem.bookIndex]}`,
-      'fb-wrong'
-    );
-    setTimeout(() => triggerGameOver(btn), 1800);
+    if (mode === 'timed') {
+      // Timed mode: a wrong book just scores nothing and moves on
+      attempted++;
+      setFeedback(`✗ It was ${fullTitle(currentItem.bookIndex)} — no point`, 'fb-wrong');
+      later(nextQuestion, delays.bookWrong);
+    } else {
+      if (mode === 'minimum') { revealFull = true; renderPassage(); }
+      setFeedback(
+        `✗ Wrong — it was from ${fullTitle(currentItem.bookIndex)}`,
+        'fb-wrong'
+      );
+      later(() => triggerGameOver('wrong-book'), delays.bookWrong);
+    }
   }
 }
 
 function renderChapterStage() {
   quizStage    = 'chapter';
   answerLocked = false;
+  updateContextBar();
 
-  document.getElementById('stageBadge').textContent = 'Step 2 of 2';
+  document.getElementById('stageBadge').textContent = isSingleBook() ? 'Step 1 of 1' : 'Step 2 of 2';
   document.getElementById('stageText').textContent  = 'Now pick the exact chapter:';
 
   const chapters = currentItem.bookChapters; // all chapter titles for this book
@@ -1420,18 +1935,29 @@ function renderChapterStage() {
 function handleChapterAnswer(btn, chosenTitle) {
   if (answerLocked) return;
   answerLocked = true;
+  attempted++;
 
   const allBtns = document.querySelectorAll('.chapter-btn');
   allBtns.forEach(b => b.disabled = true);
 
   const correct = chosenTitle === currentItem.chapterTitle;
+  const delays  = DELAYS[mode];
+  const points  = mode === 'minimum' ? contextPoints() : 1;
+
+  if (mode === 'minimum') { revealFull = true; renderPassage(); }
 
   if (correct) {
     btn.classList.add('state-correct');
-    score++;
+    score += points;
+    correctCount++;
     updateScoreUI();
-    setFeedback(`✦ Perfect — 1 point!`, 'fb-correct');
-    setTimeout(nextQuestion, 1200);
+    setFeedback(
+      mode === 'minimum'
+        ? `✦ Perfect — ${points} point${points === 1 ? '' : 's'} with ${wordsShown} word${wordsShown === 1 ? '' : 's'}!`
+        : `✦ Perfect — 1 point!`,
+      'fb-correct'
+    );
+    later(nextQuestion, delays.chapterCorrect);
   } else {
     btn.classList.add('state-wrong');
     // Reveal correct chapter
@@ -1446,72 +1972,401 @@ function handleChapterAnswer(btn, chosenTitle) {
       `✗ Not quite — it was "${currentItem.chapterTitle}". No point this round.`,
       'fb-partial'
     );
-    setTimeout(nextQuestion, 2200);
+    later(nextQuestion, delays.chapterWrong);
   }
+}
+
+// ═══════════════════════════════════════════════════════
+// RESPONSE DESCRIPTOR GAME
+// ═══════════════════════════════════════════════════════
+// The passage with its speech word blanked; the blank shows the hint letter
+// while guessing and the word itself once answered.
+function renderBlankPassage(pc) {
+  const { text, verb, start } = currentItem;
+  const context = currentItem.context ??= descriptorContext(currentItem);
+  const para = (cls, ...content) => {
+    const p = document.createElement('p');
+    p.className = cls;
+    p.append(...content);
+    return p;
+  };
+  const blank = document.createElement('span');
+  blank.className   = 'descriptor-blank' + (blankState ? ` state-${blankState}` : '');
+  blank.textContent = blankState ? verb : hintUsed ? `${verb[0]}…` : ' ';
+  blank.setAttribute('aria-label', blankState ? verb : hintUsed ? `blank starting with ${verb[0]}` : 'blank');
+  pc.replaceChildren(
+    ...context.before.map(t => para('context-para', t)),
+    para('blank-para', text.slice(0, start), blank, text.slice(start + verb.length)),
+    ...context.after.map(t => para('context-para', t))
+  );
+}
+
+function renderDescriptorStage() {
+  answerLocked = false;
+  document.getElementById('stageBadge').textContent = 'Fill the blank';
+  document.getElementById('stageText').textContent  = 'How was this line spoken?';
+
+  const form = document.createElement('form');
+  form.className = 'descriptor-form';
+  const input = document.createElement('input');
+  input.className      = 'name-input';
+  input.id             = 'descriptorGuess';
+  input.maxLength      = 40;
+  input.placeholder    = 'Type the missing word';
+  input.autocomplete   = 'off';
+  input.spellcheck     = false;
+  input.setAttribute('autocapitalize', 'off');
+  input.setAttribute('aria-label', 'Missing word');
+  const guess = document.createElement('button');
+  guess.type        = 'submit';
+  guess.className   = 'btn btn-primary btn-sm';
+  guess.textContent = 'Guess';
+  const hint = document.createElement('button');
+  hint.type        = 'button';
+  hint.id          = 'hintBtn';
+  hint.className   = 'btn btn-ghost btn-sm';
+  hint.textContent = 'Show first letter (½ point)';
+  hint.addEventListener('click', useHint);
+  form.addEventListener('submit', ev => { ev.preventDefault(); handleDescriptorGuess(); });
+  form.append(input, guess, hint);
+
+  document.getElementById('choicesArea').replaceChildren(form);
+  input.focus({ preventScroll: true });
+}
+
+function useHint() {
+  if (answerLocked || hintUsed) return;
+  hintUsed = true;
+  renderPassage();
+  document.getElementById('hintBtn').disabled = true;
+  setFeedback('Hint used: a correct answer is now worth ½ point.', 'fb-info');
+  document.getElementById('descriptorGuess').focus({ preventScroll: true });
+}
+
+function handleDescriptorGuess() {
+  if (answerLocked) return;
+  const input = document.getElementById('descriptorGuess');
+  const raw   = input.value.trim();
+  if (!normaliseGuess(raw)) { setFeedback('Type a word to guess.', 'fb-info'); input.focus(); return; }
+
+  answerLocked = true;
+  attempted++;
+  document.querySelectorAll('.descriptor-form input, .descriptor-form button').forEach(el => el.disabled = true);
+
+  const verb    = currentItem.verb;
+  const verdict = judgeDescriptor(raw, verb);
+  const delays  = DELAYS.descriptor;
+
+  if (verdict !== 'wrong') {
+    const points = hintUsed ? 0.5 : 1;
+    score += points;
+    correctCount++;
+    blankState = 'correct';
+    renderPassage();
+    updateScoreUI();
+    const worth = points === 1 ? '1 point' : '½ point';
+    setFeedback(verdict === 'typo'
+      ? `✦ Close enough — it's “${verb}” (you typed “${raw}”). ${worth}!`
+      : `✦ Correct — ${worth}!`, 'fb-correct');
+    later(nextQuestion, verdict === 'typo' ? delays.typo : delays.correct);
+  } else {
+    lives--;
+    blankState = 'wrong';
+    renderPassage();
+    updateLivesUI();
+    setFeedback(lives > 0
+      ? `✗ It was “${verb}”. ${lives} ${lives === 1 ? 'life' : 'lives'} left.`
+      : `✗ It was “${verb}”. Out of lives!`, 'fb-wrong');
+    later(lives > 0 ? nextQuestion : () => triggerGameOver('lives'), delays.wrong);
+  }
+}
+
+function updateLivesUI() {
+  document.getElementById('livesDisplay').textContent =
+    '♥'.repeat(lives) + '♡'.repeat(DESCRIPTOR_LIVES - lives);
+  document.getElementById('livesLabel').textContent = `${lives} ${lives === 1 ? 'life' : 'lives'}`;
+}
+
+function showNoDialogueError() {
+  document.getElementById('errorMsg').textContent =
+    `No dialogue with a blankable speech word was found in ${series.name}. Try another mode or series.`;
+  showScreen('errorScreen');
 }
 
 // ═══════════════════════════════════════════════════════
 // GAME OVER
 // ═══════════════════════════════════════════════════════
-function triggerGameOver() {
-  const isRecord = score > highScore;
-  if (isRecord) {
-    highScore = score;
-    localStorage.setItem('hpOracle_hs', highScore);
-  }
+// reason: 'wrong-book' | 'time' | 'complete' | 'lives'
+function triggerGameOver(reason) {
+  gameId++; // cancel any pending feedback timeouts
+  stopTimer();
+  answerLocked = true;
 
-  document.getElementById('goScore').textContent      = score;
+  const isRecord = score > getBest(series.id, mode);
+  if (isRecord) setBest(series.id, mode, score);
+
+  document.getElementById('goEyebrow').textContent =
+    { 'time': "Time's Up", 'complete': 'Library Complete', 'lives': 'Out of Lives' }[reason] || 'Game Over';
+  document.getElementById('goScore').textContent      = formatScore(score);
+  document.getElementById('goScoreLbl').textContent   =
+    mode === 'minimum' || mode === 'descriptor' ? 'points'
+    : mode === 'timed' ? `chapters correctly identified in ${TIMED_SECONDS} seconds`
+    : 'chapters correctly identified';
   document.getElementById('goRecord').style.display   = isRecord ? 'inline-flex' : 'none';
 
   // Context: show what they got wrong
   const ctx = document.getElementById('goContext');
-  if (currentItem) {
+  ctx.style.borderLeftColor = reason === 'wrong-book' ? '' : 'var(--gold)';
+  if (reason === 'lives') {
     ctx.innerHTML =
-      `The passage was from <strong>${HP_FULL_TITLES[currentItem.bookIndex]}</strong>,
+      `The last word was <strong>${escHtml(currentItem.verb)}</strong>. You filled
+       <strong>${correctCount}</strong> of ${attempted} blank${attempted === 1 ? '' : 's'} correctly.`;
+  } else if (reason === 'complete' && mode === 'descriptor') {
+    ctx.innerHTML = 'You filled every blank in the library!';
+  } else if (reason === 'wrong-book') {
+    ctx.innerHTML =
+      `The passage was from <strong>${escHtml(fullTitle(currentItem.bookIndex))}</strong>,
        chapter <strong>${escHtml(currentItem.chapterTitle)}</strong>.`;
+  } else if (reason === 'time') {
+    ctx.innerHTML = attempted
+      ? `You answered <strong>${attempted}</strong> passage${attempted === 1 ? '' : 's'} and named
+         <strong>${correctCount}</strong> chapter${correctCount === 1 ? '' : 's'} correctly.`
+      : 'The clock ran out before you answered a passage.';
   } else {
     ctx.innerHTML = 'You conquered every passage in the library!';
-    ctx.style.borderLeftColor = 'var(--gold)';
   }
 
   updateScoreUI();
+  lastRun = { series, mode, score, books: activeBooks.length };
+  submitLastRun();
   showScreen('gameoverScreen');
-}
-
-function restartGame() {
-  // Rebuild pool from parsed books
-  paragraphPool = [];
-  const seenTexts = new Set();
-  for (let i = 0; i < books.length; i++) {
-    const book = books[i];
-    const chapterTitles = book.chapters.map(c => c.title);
-    for (const ch of book.chapters) {
-      for (const para of ch.paragraphs) {
-        if (!seenTexts.has(para)) {
-          seenTexts.add(para);
-          paragraphPool.push({
-            text:         para,
-            chapterTitle: ch.title,
-            bookIndex:    i,
-            bookChapters: chapterTitles
-          });
-        }
-      }
-    }
-  }
-  shuffleArr(paragraphPool);
-  score = 0;
-  updateScoreUI();
-  showScreen('quizScreen');
-  nextQuestion();
 }
 
 // ═══════════════════════════════════════════════════════
 // UI HELPERS
 // ═══════════════════════════════════════════════════════
 function updateScoreUI() {
-  document.getElementById('scoreDisplay').textContent = score;
-  document.getElementById('hsDisplay').textContent    = highScore;
+  document.getElementById('scoreDisplay').textContent = formatScore(score);
+  document.getElementById('hsDisplay').textContent    = formatScore(getBest(series.id, mode));
+}
+
+// Hints in response descriptor give half points: 2.5 → "2½"
+function formatScore(n) {
+  n = Number(n) || 0;
+  return Number.isInteger(n) ? String(n) : `${Math.floor(n) || ''}½`;
+}
+
+// ═══════════════════════════════════════════════════════
+// LEADERBOARDS (shared on the server via leaderboard.php, one per series and mode)
+// ═══════════════════════════════════════════════════════
+function boardKey(seriesId, m) { return `${seriesId}|${m}`; }
+
+function cleanName(raw) { return String(raw).replace(/\s+/g, ' ').trim(); }
+
+function nameProblem(name) {
+  if (!name) return 'Enter a name first.';
+  if ([...name].length > 20) return 'Names can be at most 20 characters.';
+  if (/\p{C}/u.test(name)) return 'Names can’t contain control characters.';
+  return '';
+}
+
+function setPlayerName(raw) {
+  playerName = cleanName(raw);
+  storageSet(NAME_KEY, playerName);
+}
+
+// GET with params, or POST body; resolves with the JSON reply, rejects with a readable message
+async function leaderboardRequest(params, body) {
+  const url = 'leaderboard.php' + (params ? '?' + new URLSearchParams(params) : '');
+  let resp;
+  try {
+    resp = await fetch(url, body
+      ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+      : { cache: 'no-store' });
+  } catch {
+    throw new Error('Could not reach the leaderboard. Check your connection.');
+  }
+  let data = null;
+  try { data = await resp.json(); } catch { /* not JSON */ }
+  if (!resp.ok || !data) throw new Error(data?.error || `The leaderboard returned HTTP ${resp.status}.`);
+  return data;
+}
+
+function openLeaderboard(m) {
+  gameId++;
+  stopTimer();
+  boardMode = m;
+  renderBoard();
+  showScreen('boardScreen');
+  refreshBoard();
+}
+
+function showBoardMode(m) {
+  boardMode = m;
+  renderBoard();
+  refreshBoard();
+}
+
+async function refreshBoard() {
+  const key = boardKey(series.id, boardMode);
+  const req = ++boardRequest;
+  boardLoading = true;
+  boardError   = '';
+  renderBoard();
+  try {
+    const data = await leaderboardRequest({ series: series.id, mode: boardMode });
+    if (req !== boardRequest) return;
+    boardCache[key] = data.entries;
+  } catch (err) {
+    if (req !== boardRequest) return;
+    boardError = err.message;
+  }
+  boardLoading = false;
+  renderBoard();
+}
+
+function renderBoard() {
+  const tabs = document.getElementById('boardTabs');
+  tabs.innerHTML = '';
+  for (const [id, info] of Object.entries(MODES)) {
+    const tab = document.createElement('button');
+    tab.className   = 'board-tab' + (id === boardMode ? ' active' : '');
+    tab.textContent = info.title;
+    tab.addEventListener('click', () => showBoardMode(id));
+    tabs.appendChild(tab);
+  }
+  document.getElementById('boardSub').textContent =
+    `${series.name} · ${MODES[boardMode].title} · shared by everyone who plays`;
+
+  const entries = boardCache[boardKey(series.id, boardMode)];
+  const list = document.getElementById('boardList');
+  list.innerHTML = '';
+  (entries || []).forEach(entry => list.appendChild(boardRow(entry)));
+
+  const status = document.getElementById('boardStatus');
+  status.classList.toggle('error', !!boardError);
+  status.textContent =
+    boardError ? boardError + (entries ? ' Showing the last scores loaded.' : '')
+    : boardLoading && !entries ? 'Loading…'
+    : entries && entries.length === 0 ? 'No scores yet. Be the first!'
+    : '';
+}
+
+function boardRow(entry) {
+  const row = document.createElement('li');
+  row.className = 'board-row' + (playerName && entry.name.toLowerCase() === playerName.toLowerCase() ? ' me' : '');
+  const rank = document.createElement('span');
+  rank.className   = 'board-rank';
+  rank.textContent = `#${entry.rank}`;
+  const who = document.createElement('span');
+  who.className   = 'board-name';
+  who.textContent = entry.name;
+  const meta = document.createElement('span');
+  meta.className   = 'board-meta';
+  meta.textContent = new Date(entry.date).toLocaleDateString()
+    + (entry.books ? ` · ${entry.books} book${entry.books === 1 ? '' : 's'}` : '');
+  who.appendChild(meta);
+  const pts = document.createElement('span');
+  pts.className   = 'board-score';
+  pts.textContent = formatScore(entry.score);
+  row.appendChild(rank);
+  row.appendChild(who);
+  row.appendChild(pts);
+  return row;
+}
+
+// Sends the finished run automatically once there's a name to put it under
+function submitLastRun() {
+  const run = lastRun;
+  if (!run) return;
+  if (run.score <= 0) { lbState = { kind: 'zero' }; renderLbPanel(); return; }
+  const problem = nameProblem(playerName);
+  if (problem) { lbState = { kind: 'noname', error: playerName ? problem : '' }; renderLbPanel(); return; }
+
+  lbState = { kind: 'saving' };
+  renderLbPanel();
+  const body = { series: run.series.id, mode: run.mode, name: playerName, score: run.score };
+  if (run.mode === 'specific') body.books = run.books;
+  leaderboardRequest(null, body).then(data => {
+    if (run !== lastRun) return;
+    boardCache[boardKey(run.series.id, run.mode)] = data.entries;
+    lbState = { kind: 'saved', ...data };
+    renderLbPanel();
+  }, err => {
+    if (run !== lastRun) return;
+    lbState = { kind: 'error', message: err.message };
+    renderLbPanel();
+  });
+}
+
+function renderLbPanel() {
+  const panel = document.getElementById('lbPanel');
+  panel.innerHTML = '';
+  const line = text => {
+    const p = document.createElement('div');
+    p.textContent = text;
+    panel.appendChild(p);
+    return p;
+  };
+  const board = lastRun ? `${lastRun.series.name} · ${MODES[lastRun.mode].title}` : '';
+
+  if (lbState.kind === 'zero') {
+    line('Score a point to join the leaderboard.');
+  } else if (lbState.kind === 'noname') {
+    line('Enter a name to put this score on the leaderboard.');
+    if (lbState.error) line(lbState.error).className = 'error';
+    const form = document.createElement('div');
+    form.className = 'lb-form';
+    const input = document.createElement('input');
+    input.className   = 'name-input';
+    input.maxLength   = 20;
+    input.placeholder = 'Your name';
+    input.value       = playerName;
+    const save = document.createElement('button');
+    save.className   = 'btn btn-primary btn-sm';
+    save.textContent = 'Save score';
+    const go = () => { setPlayerName(input.value); submitLastRun(); };
+    save.addEventListener('click', go);
+    input.addEventListener('keydown', ev => { if (ev.key === 'Enter') go(); });
+    form.appendChild(input);
+    form.appendChild(save);
+    panel.appendChild(form);
+  } else if (lbState.kind === 'saving') {
+    line('Saving to the leaderboard…');
+  } else if (lbState.kind === 'saved') {
+    if (lbState.rank === null) {
+      line(`Saved as ${playerName}, but it's outside the top 100 on the ${board} leaderboard.`);
+    } else if (lbState.improved) {
+      line(`Saved as ${playerName}: #${lbState.rank} on the ${board} leaderboard.`);
+    } else {
+      line(`${playerName}'s best of ${formatScore(lbState.best)} stays at #${lbState.rank} on the ${board} leaderboard.`);
+    }
+  } else if (lbState.kind === 'error') {
+    line(lbState.message).className = 'error';
+    const retry = document.createElement('button');
+    retry.className   = 'btn btn-ghost btn-sm';
+    retry.textContent = 'Retry';
+    retry.addEventListener('click', submitLastRun);
+    const form = document.createElement('div');
+    form.className = 'lb-form';
+    form.appendChild(retry);
+    panel.appendChild(form);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// BEST SCORES (one per series and mode)
+// ═══════════════════════════════════════════════════════
+function scoreKey(seriesId, m) { return `chapterOracle_hs:${seriesId}:${m}`; }
+
+function getBest(seriesId, m) {
+  let stored = storageGet(scoreKey(seriesId, m));
+  if (stored === null && seriesSlug(seriesId) === LEGACY_SERIES && LEGACY_SCORE_KEYS[m]) stored = storageGet(LEGACY_SCORE_KEYS[m]);
+  return parseFloat(stored || '0') || 0;
+}
+
+function setBest(seriesId, m, value) {
+  storageSet(scoreKey(seriesId, m), value);
 }
 function setProgress(pct) {
   document.getElementById('progressFill').style.width = pct + '%';
@@ -1540,12 +2395,20 @@ function escHtml(s) {
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+// localStorage can throw (private mode, blocked storage); scores just won't persist
+function storageGet(key) {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function storageSet(key, value) {
+  try { localStorage.setItem(key, value); } catch { /* ignore */ }
+}
 
 // ═══════════════════════════════════════════════════════
 // START
 // ═══════════════════════════════════════════════════════
-updateScoreUI();
-initLoad();
+// Only the series list loads up front; a series' books open once it's picked.
+loadSeriesList().catch(() => {}).finally(renderSeriesScreen);
+renderSeriesScreen();
 </script>
 </body>
 </html>

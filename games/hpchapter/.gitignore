@@ -7,3 +7,6 @@
 *.db-*
 tests/.backend-runtime-*/
 tests/.backend-native-*/
+
+# Live leaderboard scores stay on the server
+data/*.json
