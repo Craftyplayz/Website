@@ -47,28 +47,6 @@
     <?php
     include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
     ?>
-    <script>
-        const navSlide = () => {
-            const burger = document.querySelector('.hamburger');
-            const nav = document.querySelector('.nav-links');
-            burger.addEventListener('click', () => {
-                nav.classList.toggle('nav-active');
-            });
-        }
-        navSlide();
-    </script>
-
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://kit.fontawesome.com/af6ee4244b.js" crossorigin="anonymous"></script>
-
-    <script>
-        $(document).ready(function () {
-            $('#toggleHeader').click(function () {
-                $('#header').toggle();
-            });
-        });
-    </script>
 </body>
 
 </html>
