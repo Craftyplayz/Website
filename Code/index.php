@@ -21,7 +21,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
 <a href="/Code/minecraft/index.php">Minecraft</a><br>
 <?php
     $directory = $_SERVER['DOCUMENT_ROOT'] . '/Code/';
-    $excludedFiles = ['.', '..', 'index.php', 'jelly.php'];
+    $excludedFiles = ['.', '..', 'index.php', 'jelly.php', 'booru.php'];
 
     $files = scandir($directory);
     foreach ($files as $file) {
