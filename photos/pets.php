@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photos</title>
     <meta http-equiv="refresh" content="-1">
-    <link rel="stylesheet" href="/css/gallery.css">
+    <link rel="stylesheet" href="/assets/css/pages/gallery.css">
     <style>.gallery-image{height: 300px; width: 300px;} </style>
 </head>
 
@@ -25,7 +25,7 @@
 
 
         <?php
-        $folderPath = '/images/galleries/pets/';
+        $folderPath = '/media/pets/';
         /* list names of all folders in the folder */
         $folders = scandir($_SERVER['DOCUMENT_ROOT'] . $folderPath);
         foreach ($folders as $folder) {

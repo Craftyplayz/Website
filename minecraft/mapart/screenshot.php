@@ -10,13 +10,13 @@
         echo $_GET['id'];
         ?>
     </title>
-    <link rel="stylesheet" href="/css/minecraft.css">
-    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/assets/css/pages/minecraft.css">
+    <link rel="stylesheet" href="/assets/css/legacy.css">
 </head>
 
 <body>
     <?php
-    $imagePath = "/images/minecraft/mapart/";
+    $imagePath = "/media/minecraft/mapart/";
     $imageId = $_GET['id'];
     $imageAlt = "Screenshot " . $imageId;
     $imageClass = "mapart-image";

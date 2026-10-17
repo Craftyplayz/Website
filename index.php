@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crafty</title>
-    <link rel="stylesheet" href="/css/homepage.css">
+    <link rel="stylesheet" href="/assets/css/pages/homepage.css">
     <meta name="description" content="Crafty's Website">
     <?php if (isset($_GET['url'])) {$json = file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/shorten.json');$data = json_decode($json, true);foreach ($data as $key => $value) {if ($key == $_GET['url']) {echo '<meta http-equiv="refresh" content="0; url=' . $value . '">';}}}?>
     <style>
@@ -37,10 +37,10 @@
         }
 
         if (isMobile()) {
-            $imageFolder = 'images/SlideShows/homepagemobile/';
+            $imageFolder = 'media/slideshow/mobile/';
             echo '<script>console.log("Mobile");</script>';
         } else {
-            $imageFolder = 'images/SlideShows/homepage/';
+            $imageFolder = 'media/slideshow/desktop/';
             echo '<script>console.log("Desktop");</script>';
         }
 

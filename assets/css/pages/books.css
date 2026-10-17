@@ -260,8 +260,8 @@ h2::before {
     right: 0;
     width: 30px;
     height: 30px;
-    /* set background image to "https://www.craftyplayz.com/images/checkmark.png" */
-    background-image: url(https://www.craftyplayz.com/images/checkmark.png);
+    /* set background image to "/assets/img/checkmark.png" */
+    background-image: url(/assets/img/checkmark.png);
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -279,8 +279,8 @@ h2::before {
     right: 0;
     width: 30px;
     height: 30px;
-    /* set background image to "https://www.craftyplayz.com/images/checkmark.png" */
-    background-image: url(https://www.craftyplayz.com/images/checkmark.png);
+    /* set background image to "/assets/img/checkmark.png" */
+    background-image: url(/assets/img/checkmark.png);
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;

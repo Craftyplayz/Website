@@ -121,7 +121,7 @@ function site_header($path = null)
     $found = site_find($path);
     $activeId = $found && $found['section'] ? $found['section']['id'] : null;
     $current = site_norm($path);
-    $logo = $found && $found['group'] && !empty($found['group']['logo']) ? $found['group']['logo'] : '/images/catsmall.webp';
+    $logo = $found && $found['group'] && !empty($found['group']['logo']) ? $found['group']['logo'] : '/assets/img/catsmall.webp';
     $title = site_page_title($path);
 
     echo '<header class="site-header" id="header"' . ($title ? ' data-page-title="' . h($title) . '"' : '') . '>';

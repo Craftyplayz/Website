@@ -54,7 +54,7 @@
                 {
                     "title": "Captainalism Shop",
                     "subnav": true,
-                    "logo": "/images/minecraft/shoplogo.png",
+                    "logo": "/assets/img/shoplogo.png",
                     "pages": [
                         { "title": "Shop", "url": "/shop/", "description": "Captainalism shop" },
                         { "title": "Enchanted Books", "url": "/shop/books.php", "description": "Enchanted books for sale" },

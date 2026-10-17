@@ -20,7 +20,26 @@ RewriteEngine On
 # Duplicate folders that were removed
 RedirectMatch 301 ^/(Code/)?minecraft/items_1\.21\.11/(.*)$ /minecraft/itemlist/$2
 RedirectMatch 301 ^/Code/minecraft/(.*)$ /minecraft/$1
-RedirectMatch 301 ^/images/minecraft/skins/download/(.*)$ /images/minecraft/skins/$1
+RedirectMatch 301 ^/images/minecraft/skins/download/(.*)$ /media/minecraft/skins/$1
+# images/ split into /assets/img (site graphics) and /media (photos, screenshots, covers)
+RedirectMatch 301 ^/images/(catsmall\.webp|checkmark\.png|partial\.png)$ /assets/img/$1
+RedirectMatch 301 ^/images/minecraft/shoplogo\.png$ /assets/img/shoplogo.png
+RedirectMatch 301 ^/images/(icons|markers)/(.*)$ /assets/img/$1/$2
+RedirectMatch 301 ^/images/SlideShows/homepagemobile/(.*)$ /media/slideshow/mobile/$1
+RedirectMatch 301 ^/images/SlideShows/homepage/(.*)$ /media/slideshow/desktop/$1
+RedirectMatch 301 ^/images/galleries/pets/(.*)$ /media/pets/$1
+RedirectMatch 301 ^/images/minecraft/rawscreenshots/(.*)$ /media/minecraft/screenshots-raw/$1
+RedirectMatch 301 ^/images/minecraft/weird\ sizes/(.*)$ /media/minecraft/misc/$1
+RedirectMatch 301 ^/images/minecraft/(screenshots|mapart|skins)/(.*)$ /media/minecraft/$1/$2
+RedirectMatch 301 ^/images/books/(.*)$ /media/books/covers/$1
+RedirectMatch 301 ^/images/(harrypotter|quotes)/(.*)$ /media/$1/$2
+RedirectMatch 301 ^/images/update/(.*)$ /media/fake-updates/$1
+RedirectMatch 301 ^/images/trump-mugshot\.webp$ /media/memes/trump-mugshot.webp
+# css/ moved to /assets/css
+RedirectMatch 301 ^/css/global\.css$ /assets/css/legacy.css
+RedirectMatch 301 ^/css/fakescreen/win10\.css$ /assets/css/pages/win10.css
+RedirectMatch 301 ^/css/hypixel/collection\.css$ /assets/css/pages/hypixel-collection.css
+RedirectMatch 301 ^/css/(books|dnd|factorio|gallery|homepage|minecraft|speedtest|steam|steamnew|tools)\.css$ /assets/css/pages/$1.css
 # Duplicate or old page versions (archived in /_dev/archive)
 RedirectMatch 301 ^/minecraft/test(\.php)?$ /minecraft/stats.php
 RedirectMatch 301 ^/minecraft/schemcalc(\.html)?$ /minecraft/shulker-schematic-calculator.html

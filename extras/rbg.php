@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/assets/css/legacy.css">
   <title>Flashing Colors</title>
   <style>
     body {

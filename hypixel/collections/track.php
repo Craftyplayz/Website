@@ -8,7 +8,7 @@
     <title>Hypixel Collection</title>
     <meta http-equiv="refresh" content="60">
     <meta http-equiv="cache-control" content="no-cache" />
-    <link rel="stylesheet" href="/css/hypixel/collection.css">
+    <link rel="stylesheet" href="/assets/css/pages/hypixel-collection.css">
 </head>
 
 <body>
