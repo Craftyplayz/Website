@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Untitled</title>
     <meta http-equiv="refresh" content="-1">
-    <link rel="stylesheet" href="/css/gallery.css">
+    <link rel="stylesheet" href="/assets/css/pages/gallery.css">
     <style>.gallery-image{height: 300px; width: 300px;} </style>
 </head>
 
@@ -28,11 +28,11 @@
 
     <div class="gallery">
         <?php
-        $images = scandir($_SERVER['DOCUMENT_ROOT'] . '/images/galleries/pets/' . $folder);
+        $images = scandir($_SERVER['DOCUMENT_ROOT'] . '/media/pets/' . $folder);
         foreach ($images as $image) {
             if (!in_array($image, ['.', '..', 'raw', 'Raw'])) {
                 echo '<div class="gallery-item">';
-                echo '<a href="/images/galleries/pets/' . $folder . '/raw/' . pathinfo($image, PATHINFO_FILENAME) . '"><img src="/images/galleries/pets/' . $folder . '/' . $image . '" class="gallery-image" /></a>';
+                echo '<a href="/media/pets/' . $folder . '/raw/' . pathinfo($image, PATHINFO_FILENAME) . '"><img src="/media/pets/' . $folder . '/' . $image . '" class="gallery-image" /></a>';
                 echo '</div>';
             }
         }

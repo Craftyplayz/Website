@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Windows 10</title>
-    <link rel="stylesheet" href="/css/gallery.css">
+    <link rel="stylesheet" href="/assets/css/pages/gallery.css">
     <style>
         .gallery-image {
             height: 281x;
@@ -29,11 +29,11 @@
     <div class="gallery">
         <div class="gallery-item">
             <a href="/update/windows10/crash.html"><img class="gallery-image"
-                    src="/images/update/win10crash.jpeg"></img></a>
+                    src="/media/fake-updates/win10crash.jpeg"></img></a>
         </div>
         <div class="gallery-item">
             <a href="/update/windows10/update.html"><img class="gallery-image"
-                    src="/images/update/win10update.jpeg"></img></a>
+                    src="/media/fake-updates/win10update.jpeg"></img></a>
         </div>
     </div>
 

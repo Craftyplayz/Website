@@ -70,7 +70,7 @@
         </p>
     </div>
     <div id="container">
-  <img id="bouncing-image" style="width: 200px; height: 200px; " src="/images/trump-mugshot.webp" alt="Bouncing Image">
+  <img id="bouncing-image" style="width: 200px; height: 200px; " src="/media/memes/trump-mugshot.webp" alt="Bouncing Image">
 </div>
 
     <?php

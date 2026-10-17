@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapart</title>
     <meta http-equiv="refresh" content="-1">
-    <link rel="stylesheet" href="/css/minecraft.css">
+    <link rel="stylesheet" href="/assets/css/pages/minecraft.css">
 </head>
 
 
@@ -24,10 +24,10 @@
 
     <div class="screenshots">
         <?php
-        $images = scandir($_SERVER['DOCUMENT_ROOT'] . '/images/minecraft/mapart');
+        $images = scandir($_SERVER['DOCUMENT_ROOT'] . '/media/minecraft/mapart');
         foreach ($images as $image) {
             if ($image !== '.' && $image !== '..') {
-                echo '<div class="screenshot"><img src="/images/minecraft/mapart/' . $image . '" alt="Screenshot" class="mapart-image"></div></a>' . PHP_EOL;
+                echo '<div class="screenshot"><img src="/media/minecraft/mapart/' . $image . '" alt="Screenshot" class="mapart-image"></div></a>' . PHP_EOL;
             }
         }
         ?>

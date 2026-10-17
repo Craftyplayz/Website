@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crafty Playz</title>
-    <link rel="stylesheet" href="/css/minecraft.css">
+    <link rel="stylesheet" href="/assets/css/pages/minecraft.css">
 </head>
 
 <body>
@@ -31,10 +31,10 @@
         }
 
         if (isMobile()) {
-            $imageFolder = '/images/SlideShows/homepagemobile/';
+            $imageFolder = '/media/slideshow/mobile/';
             echo '<script>console.log("Mobile");</script>';
         } else {
-            $imageFolder = '/images/SlideShows/homepage/';
+            $imageFolder = '/media/slideshow/desktop/';
             echo '<script>console.log("Desktop");</script>';
         }
 
@@ -71,13 +71,13 @@
 
     <div class="screenshots">
 <?php
-$images = scandir($_SERVER['DOCUMENT_ROOT'] . '/images/minecraft/screenshots');
+$images = scandir($_SERVER['DOCUMENT_ROOT'] . '/media/minecraft/screenshots');
 $images = array_reverse($images);
 
 foreach ($images as $image) {
     if ($image !== '.' && $image !== '..') {
         echo '<a href="/minecraft/screenshot?id=' . $image . '">' . PHP_EOL .
-             '<div class="screenshot"><img src="/images/minecraft/screenshots/' . $image . '" alt="Screenshot" class="screenshot-image"></div></a>' . PHP_EOL;
+             '<div class="screenshot"><img src="/media/minecraft/screenshots/' . $image . '" alt="Screenshot" class="screenshot-image"></div></a>' . PHP_EOL;
     }
 }
 ?>

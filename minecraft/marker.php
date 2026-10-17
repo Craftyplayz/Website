@@ -52,7 +52,7 @@
     <select id="icon">
         <?php
         
-        $dir    = $_SERVER['DOCUMENT_ROOT'] . '/images/markers/';
+        $dir    = $_SERVER['DOCUMENT_ROOT'] . '/assets/img/markers/';
         $files1 = scandir($dir);
         foreach ($files1 as $file) {
             if ('.' !== $file[0]) {

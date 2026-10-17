@@ -21,7 +21,7 @@
     <h1>QR Code generator</h1>
     <input type="text" id="urlInput" placeholder="Enter URL">
     <button onclick="generateQRCode()">Generate QR Code</button><br><br>
-    <img style="width: 25%;" id="qrCodeImage" src="\images\update\rickroll.png" alt="QR Code">
+    <img style="width: 25%;" id="qrCodeImage" src="/media/fake-updates/rickroll.png" alt="QR Code">
 </div>
 
 <script>

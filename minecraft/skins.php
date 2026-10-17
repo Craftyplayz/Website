@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft Skins</title>
     <meta http-equiv="refresh" content="-1">
-    <link rel="stylesheet" href="/css/gallery.css">
+    <link rel="stylesheet" href="/assets/css/pages/gallery.css">
 </head>
 
 <body>
@@ -23,13 +23,13 @@
 
     <div class="gallery">
 <?php
-$dir = $_SERVER['DOCUMENT_ROOT'] . '/images/minecraft/skins/';
+$dir = $_SERVER['DOCUMENT_ROOT'] . '/media/minecraft/skins/';
 $images = glob($dir . '*.png');
 foreach ($images as $image) {
     $name = basename($image);
     $borderStyle = ($name === "purple.png") ? ' style="border: 3px solid purple;"' : '';
     echo '<div class="gallery-item"' . $borderStyle . '>';
-    echo '<a href="/images/minecraft/skins/' . $name . '" download><img src="/images/minecraft/skins/' . $name . '"></a>';
+    echo '<a href="/media/minecraft/skins/' . $name . '" download><img src="/media/minecraft/skins/' . $name . '"></a>';
     echo '</div>';
 }
 ?>

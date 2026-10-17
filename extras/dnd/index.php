@@ -13,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dnd Character</title>
     <meta http-equiv="refresh" content="100000000">
-    <link rel="stylesheet" href="/css/dnd.css">
+    <link rel="stylesheet" href="/assets/css/pages/dnd.css">
 </head>
 
 <body>
