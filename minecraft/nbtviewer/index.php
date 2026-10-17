@@ -376,7 +376,7 @@
         <div id="errors"></div>
 
         <section class="drop" id="drop">
-            <img class="big-ico" src="api.php?item=chest" alt="" onerror="this.src='/minecraft/items_1.21.11/minecraft_chest.png'">
+            <img class="big-ico" src="api.php?item=chest" alt="" onerror="this.src='/minecraft/itemlist/minecraft_chest.png'">
             <h1>NBT Viewer</h1>
             <p>Drop one or more Minecraft player files here to explore their inventory, ender chest, stats and every last bit of NBT data.</p>
             <p class="muted">Files are read in your browser and only leave it if you press Share. Accepts <span class="mono">.dat</span>, <span class="mono">.dat_old</span>, <span class="mono">.nbt</span>, <span class="mono">.json</span> and SNBT (<span class="mono">/data get</span> output).<br>
@@ -866,7 +866,7 @@
             const id = typeof it === 'string' ? it : it.base;
             // skinned player heads: 3D isometric render with the hat layer (minecraftitems.xyz only draws Steve)
             if (typeof it !== 'string' && it.head) return `https://mc-heads.net/head/${encodeURIComponent(it.head)}/128`;
-            if (localFirst(id)) return `/minecraft/items_1.21.11/minecraft_${id}.png`;
+            if (localFirst(id)) return `/minecraft/itemlist/minecraft_${id}.png`;
             let u = 'api.php?item=' + encodeURIComponent(id);
             if (rpActive) {
                 u += '&rp=' + rpActive;
@@ -884,7 +884,7 @@
             if (img.tagName !== 'IMG' || !img.dataset.id) return;
             const step = +(img.dataset.f || 0);
             img.dataset.f = step + 1;
-            const next = step === 0 ? `/minecraft/items_1.21.11/minecraft_${img.dataset.id}.png` : step === 1 ? MISSING : null;
+            const next = step === 0 ? `/minecraft/itemlist/minecraft_${img.dataset.id}.png` : step === 1 ? MISSING : null;
             if (!next) return;
             img.src = next;
             if (img.parentElement && img.parentElement.style.getPropertyValue('--m')) img.parentElement.style.setProperty('--m', `url("${next}")`);
@@ -951,7 +951,7 @@
 
         // empty armor slots show a dark silhouette, like in game
         const PH = { head: 'leather_helmet', chest: 'leather_chestplate', legs: 'leather_leggings', feet: 'leather_boots', offhand: 'shield' };
-        const phSlot = (k) => `<div class="slot"><span class="ph" style="background-image:url('/minecraft/items_1.21.11/minecraft_${PH[k]}.png')"></span></div>`;
+        const phSlot = (k) => `<div class="slot"><span class="ph" style="background-image:url('/minecraft/itemlist/minecraft_${PH[k]}.png')"></span></div>`;
 
         /* =====================================================================
            Gather data from a player compound

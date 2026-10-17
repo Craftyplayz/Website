@@ -2,7 +2,24 @@ RewriteCond %{HTTP_HOST} ^craftyplayz.com [NC]
 RewriteRule ^(.*)$ http://www.craftyplayz.com/$1 [L,R=301]
 ErrorDocument 404 /php/404
 RewriteEngine On
-RewriteRule ^steam/gamer/([A-Za-z0-9_-]+)$ /php/steam.php?gameid=$1 [L]
+
+# ---- Old URLs from the reorganisation (see plan.html) ----
+# Duplicate folders that were removed
+RedirectMatch 301 ^/(Code/)?minecraft/items_1\.21\.11/(.*)$ /minecraft/itemlist/$2
+RedirectMatch 301 ^/Code/minecraft/(.*)$ /minecraft/$1
+RedirectMatch 301 ^/images/minecraft/skins/download/(.*)$ /images/minecraft/skins/$1
+# Duplicate or old page versions (archived in /_dev/archive)
+RedirectMatch 301 ^/minecraft/test(\.php)?$ /minecraft/stats.php
+RedirectMatch 301 ^/minecraft/schemcalc(\.html)?$ /minecraft/shulker-schematic-calculator.html
+RedirectMatch 301 ^/hypixel/hotm(\.php)?$ /hypixel/
+RedirectMatch 301 ^/hypixel/minions2(\.php)?$ /hypixel/minions.php
+RedirectMatch 301 ^/hypixel/collections/melonwar2(\.php)?$ /hypixel/collections/melonwar.php
+RedirectMatch 301 ^/books/index2(\.php)?$ /books/
+RedirectMatch 301 ^/steam/(steam2|newgame)(\.php)?(/.*)?$ /steam/
+RedirectMatch 301 ^/steam/gamer(/.*)?$ /steam/
+RedirectMatch 301 ^/tools/random/image2(\.php)?$ /tools/random/image.php
+RedirectMatch 301 ^/Code/transcripts/index2(\.php)?$ /Code/transcripts/
+RedirectMatch 301 ^/extras/thegame/temp(/.*)?$ /extras/thegame/
 
 <IfModule mod_deflate.c>
          AddOutputFilterByType DEFLATE application/javascript

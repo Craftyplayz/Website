@@ -45,7 +45,7 @@
     </div>
 </div>
 
-<p><br><a href="/Code/yugioh2.php">Next</a></p>
+<p><br><a href="/games/yugioh/yugioh2.php">Next</a></p>
 
     </div>
 
