@@ -29,7 +29,7 @@ foreach ($images as $image) {
     $name = basename($image);
     $borderStyle = ($name === "purple.png") ? ' style="border: 3px solid purple;"' : '';
     echo '<div class="gallery-item"' . $borderStyle . '>';
-    echo '<a href="/images/minecraft/skins/download/' . $name . '" target="_blank"><img src="/images/minecraft/skins/' . $name . '"></a>';
+    echo '<a href="/images/minecraft/skins/' . $name . '" download><img src="/images/minecraft/skins/' . $name . '"></a>';
     echo '</div>';
 }
 ?>
