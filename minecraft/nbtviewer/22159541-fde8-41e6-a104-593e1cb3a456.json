@@ -1,0 +1,348 @@
+{
+    "seenCredits": 0,
+    "DeathTime": 0,
+    "Bukkit.updateLevel": 2,
+    "foodTickTimer": 0,
+    "recipeBook": {
+        "recipes": [
+            "minecraft:cobblestone_wall",
+            "minecraft:tuff_stairs",
+            "minecraft:lever",
+            "minecraft:cobblestone_stairs_from_cobblestone_stonecutting",
+            "minecraft:tuff_wall_from_tuff_stonecutting",
+            "minecraft:stone_hoe",
+            "minecraft:bamboo_raft",
+            "minecraft:polished_diorite_from_diorite_stonecutting",
+            "minecraft:diorite_wall",
+            "minecraft:polished_tuff_wall_from_tuff_stonecutting",
+            "minecraft:redstone",
+            "minecraft:leather_leggings",
+            "minecraft:oak_pressure_plate",
+            "minecraft:leather_horse_armor",
+            "minecraft:jungle_boat",
+            "minecraft:mossy_stone_bricks_from_moss_block",
+            "minecraft:leather_boots",
+            "minecraft:item_frame",
+            "minecraft:oak_slab",
+            "minecraft:stick",
+            "minecraft:mangrove_boat",
+            "minecraft:polished_diorite_stairs_from_diorite_stonecutting",
+            "minecraft:lectern",
+            "minecraft:stone_axe",
+            "minecraft:tuff_brick_wall_from_tuff_stonecutting",
+            "minecraft:diorite_stairs",
+            "minecraft:tuff_brick_slab_from_tuff_stonecutting",
+            "minecraft:pale_oak_boat",
+            "minecraft:diorite_slab",
+            "minecraft:polished_tuff_from_tuff_stonecutting",
+            "minecraft:oak_fence",
+            "minecraft:bookshelf",
+            "minecraft:cobblestone_slab",
+            "minecraft:chest",
+            "minecraft:polished_diorite_slab_from_diorite_stonecutting",
+            "minecraft:tuff_stairs_from_tuff_stonecutting",
+            "minecraft:leather_chestplate",
+            "minecraft:oak_trapdoor",
+            "minecraft:chiseled_bookshelf",
+            "minecraft:oak_fence_gate",
+            "minecraft:polished_tuff_stairs_from_tuff_stonecutting",
+            "minecraft:diorite_wall_from_diorite_stonecutting",
+            "minecraft:oak_sign",
+            "minecraft:redstone_lamp",
+            "minecraft:polished_tuff",
+            "minecraft:diorite_stairs_from_diorite_stonecutting",
+            "minecraft:acacia_boat",
+            "minecraft:cobblestone_wall_from_cobblestone_stonecutting",
+            "minecraft:stone",
+            "minecraft:stone_sword",
+            "minecraft:crafting_table",
+            "minecraft:chiseled_tuff_from_tuff_stonecutting",
+            "minecraft:cobblestone_stairs",
+            "minecraft:tuff_slab_from_tuff_stonecutting",
+            "minecraft:cauldron",
+            "minecraft:mossy_cobblestone_from_moss_block",
+            "minecraft:oak_stairs",
+            "minecraft:tuff_brick_stairs_from_tuff_stonecutting",
+            "minecraft:birch_boat",
+            "minecraft:saddle",
+            "minecraft:diorite_slab_from_diorite_stonecutting",
+            "minecraft:oak_boat",
+            "minecraft:furnace",
+            "minecraft:dark_oak_boat",
+            "minecraft:cherry_boat",
+            "minecraft:tuff_bricks_from_tuff_stonecutting",
+            "minecraft:stone_pickaxe",
+            "minecraft:tuff_slab",
+            "minecraft:spruce_boat",
+            "minecraft:oak_door",
+            "minecraft:arrow",
+            "minecraft:moss_carpet",
+            "minecraft:writable_book",
+            "minecraft:cake",
+            "minecraft:barrel",
+            "minecraft:glow_item_frame",
+            "minecraft:andesite",
+            "minecraft:stone_shovel",
+            "minecraft:polished_diorite",
+            "minecraft:leather_helmet",
+            "minecraft:polished_tuff_slab_from_tuff_stonecutting",
+            "minecraft:cobblestone_slab_from_cobblestone_stonecutting",
+            "minecraft:oak_button",
+            "minecraft:tuff_wall",
+            "minecraft:chiseled_tuff_bricks_from_tuff_stonecutting"
+        ],
+        "toBeDisplayed": [
+            "minecraft:cobblestone_wall",
+            "minecraft:tuff_stairs",
+            "minecraft:lever",
+            "minecraft:cobblestone_stairs_from_cobblestone_stonecutting",
+            "minecraft:tuff_wall_from_tuff_stonecutting",
+            "minecraft:stone_hoe",
+            "minecraft:bamboo_raft",
+            "minecraft:polished_diorite_from_diorite_stonecutting",
+            "minecraft:diorite_wall",
+            "minecraft:polished_tuff_wall_from_tuff_stonecutting",
+            "minecraft:redstone",
+            "minecraft:leather_leggings",
+            "minecraft:oak_pressure_plate",
+            "minecraft:leather_horse_armor",
+            "minecraft:jungle_boat",
+            "minecraft:mossy_stone_bricks_from_moss_block",
+            "minecraft:leather_boots",
+            "minecraft:item_frame",
+            "minecraft:oak_slab",
+            "minecraft:stick",
+            "minecraft:mangrove_boat",
+            "minecraft:polished_diorite_stairs_from_diorite_stonecutting",
+            "minecraft:lectern",
+            "minecraft:stone_axe",
+            "minecraft:tuff_brick_wall_from_tuff_stonecutting",
+            "minecraft:diorite_stairs",
+            "minecraft:tuff_brick_slab_from_tuff_stonecutting",
+            "minecraft:pale_oak_boat",
+            "minecraft:diorite_slab",
+            "minecraft:polished_tuff_from_tuff_stonecutting",
+            "minecraft:oak_fence",
+            "minecraft:bookshelf",
+            "minecraft:cobblestone_slab",
+            "minecraft:chest",
+            "minecraft:polished_diorite_slab_from_diorite_stonecutting",
+            "minecraft:tuff_stairs_from_tuff_stonecutting",
+            "minecraft:leather_chestplate",
+            "minecraft:oak_trapdoor",
+            "minecraft:chiseled_bookshelf",
+            "minecraft:oak_fence_gate",
+            "minecraft:polished_tuff_stairs_from_tuff_stonecutting",
+            "minecraft:diorite_wall_from_diorite_stonecutting",
+            "minecraft:oak_sign",
+            "minecraft:redstone_lamp",
+            "minecraft:polished_tuff",
+            "minecraft:diorite_stairs_from_diorite_stonecutting",
+            "minecraft:acacia_boat",
+            "minecraft:cobblestone_wall_from_cobblestone_stonecutting",
+            "minecraft:stone",
+            "minecraft:stone_sword",
+            "minecraft:crafting_table",
+            "minecraft:chiseled_tuff_from_tuff_stonecutting",
+            "minecraft:cobblestone_stairs",
+            "minecraft:tuff_slab_from_tuff_stonecutting",
+            "minecraft:cauldron",
+            "minecraft:mossy_cobblestone_from_moss_block",
+            "minecraft:oak_stairs",
+            "minecraft:tuff_brick_stairs_from_tuff_stonecutting",
+            "minecraft:birch_boat",
+            "minecraft:saddle",
+            "minecraft:diorite_slab_from_diorite_stonecutting",
+            "minecraft:oak_boat",
+            "minecraft:furnace",
+            "minecraft:dark_oak_boat",
+            "minecraft:cherry_boat",
+            "minecraft:tuff_bricks_from_tuff_stonecutting",
+            "minecraft:stone_pickaxe",
+            "minecraft:tuff_slab",
+            "minecraft:spruce_boat",
+            "minecraft:oak_door",
+            "minecraft:arrow",
+            "minecraft:moss_carpet",
+            "minecraft:writable_book",
+            "minecraft:cake",
+            "minecraft:barrel",
+            "minecraft:glow_item_frame",
+            "minecraft:andesite",
+            "minecraft:stone_shovel",
+            "minecraft:polished_diorite",
+            "minecraft:leather_helmet",
+            "minecraft:polished_tuff_slab_from_tuff_stonecutting",
+            "minecraft:cobblestone_slab_from_cobblestone_stonecutting",
+            "minecraft:oak_button",
+            "minecraft:tuff_wall",
+            "minecraft:chiseled_tuff_bricks_from_tuff_stonecutting"
+        ]
+    },
+    "XpTotal": 0,
+    "OnGround": 0,
+    "AbsorptionAmount": 0,
+    "spawn_extra_particles_on_fall": 0,
+    "playerGameType": 3,
+    "Invulnerable": 0,
+    "SelectedItemSlot": 1,
+    "Brain": {
+        "memories": {}
+    },
+    "bukkit": {
+        "newTotalExp": 0,
+        "newLevel": 0,
+        "newExp": 0,
+        "keepLevel": 0,
+        "lastPlayed": [
+            417,
+            1246170237
+        ],
+        "firstPlayed": [
+            414,
+            -2001427821
+        ],
+        "expToDrop": 0,
+        "lastKnownName": "CraftyPlayz_"
+    },
+    "Dimension": "minecraft:overworld",
+    "Paper.Origin": [
+        829.9283254449597,
+        265.07349085913404,
+        -483.3787763970053
+    ],
+    "abilities": {
+        "walkSpeed": 0.10000000149011612,
+        "flySpeed": 0.05000000074505806,
+        "flying": 1,
+        "instabuild": 0,
+        "mayfly": 1,
+        "invulnerable": 1,
+        "mayBuild": 0
+    },
+    "Score": 0,
+    "Rotation": [
+        -72.42254638671875,
+        42.75621795654297
+    ],
+    "HurtByTimestamp": 0,
+    "foodSaturationLevel": 20,
+    "attributes": [
+        {
+            "base": 4.5,
+            "id": "minecraft:block_interaction_range"
+        },
+        {
+            "base": 20,
+            "id": "minecraft:max_health"
+        },
+        {
+            "base": 1,
+            "id": "minecraft:scale"
+        },
+        {
+            "base": 60000000,
+            "id": "minecraft:waypoint_transmit_range"
+        },
+        {
+            "base": 3,
+            "id": "minecraft:entity_interaction_range"
+        },
+        {
+            "base": 4,
+            "id": "minecraft:attack_speed"
+        },
+        {
+            "base": 1,
+            "id": "minecraft:attack_damage"
+        },
+        {
+            "base": 0,
+            "id": "minecraft:armor"
+        },
+        {
+            "base": 0.10000000149011612,
+            "id": "minecraft:movement_speed"
+        },
+        {
+            "base": 3,
+            "id": "minecraft:safe_fall_distance"
+        }
+    ],
+    "WorldUUIDMost": [
+        96679782,
+        -1345827049
+    ],
+    "fall_distance": 0,
+    "Tags": [
+        "informed_boundary",
+        "human"
+    ],
+    "Paper.OriginWorld": [
+        96679782,
+        -1345827049,
+        -1543163793,
+        -103671271
+    ],
+    "Paper": {
+        "LastLogin": [
+            417,
+            1245132122
+        ],
+        "LastSeen": [
+            417,
+            1246170237
+        ]
+    },
+    "previousPlayerGameType": 1,
+    "EnderItems": [],
+    "Air": 300,
+    "foodLevel": 20,
+    "XpSeed": 1980067080,
+    "XpLevel": 0,
+    "UUID": [
+        571839809,
+        -35110426,
+        -1593550530,
+        481535062
+    ],
+    "Spigot.ticksLived": 148471,
+    "Inventory": [
+        {
+            "Slot": 0,
+            "id": "minecraft:feather",
+            "count": 1
+        }
+    ],
+    "XpP": 0,
+    "WorldUUIDLeast": [
+        -1543163793,
+        -103671271
+    ],
+    "DataVersion": 4556,
+    "SleepTimer": 0,
+    "Motion": [
+        0,
+        0,
+        0
+    ],
+    "warden_spawn_tracker": {
+        "ticks_since_last_warning": 9884,
+        "warning_level": 0,
+        "cooldown_ticks": 0
+    },
+    "current_impulse_context_reset_grace_time": 0,
+    "Pos": [
+        278.1953108281256,
+        87.99510691210347,
+        298.6389157372954
+    ],
+    "Health": 20,
+    "HurtTime": 0,
+    "FallFlying": 0,
+    "Fire": -20,
+    "ignore_fall_damage_from_current_explosion": 0,
+    "PortalCooldown": 0,
+    "foodExhaustionLevel": 1.4460030794143677,
+    "Paper.SpawnReason": "DEFAULT"
+}
