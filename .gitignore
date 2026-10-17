@@ -1,5 +1,5 @@
-/php/
+# API keys and passwords - copy php/config.example.php to php/config.php and fill it in
 php/config.php
-php/config.php
-php/404.php
-php/config.php
+
+# Python bytecode
+__pycache__/
