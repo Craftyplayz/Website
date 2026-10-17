@@ -1,31 +1,5 @@
-<body>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-QPBCTT7P8J"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-
-    gtag('config', 'G-QPBCTT7P8J');
-</script>
-<link rel="stylesheet" href="/css/global.css">
-<link rel="stylesheet" href="/shop/styles.css">
-<header id="header">
-    <nav>
-        <a href="/"><img src="/images/minecraft/shoplogo.png" alt="Crafty Playz Logo"></a>
-        <div class="hamburger">
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
-        <ul class="nav-links">
-            <li><a href="/shop">Home</a></li>
-            <li><a href="/shop/books.php">Enchanted Books</a></li>
-            <li><a href="/shop/upcoming">Upcoming</a></li>
-            <li><a href="/shop/requests">Special requests</a></li>
-            <li><a href="/shop/casino">Casino (Coming Soon)</a></li>
-    </nav>
-</header>
-
-
-
+<?php
+// Old shop pages include this instead of header.php. The shop now uses the normal site header,
+// which adds the shop tabs and logo itself (see "Captainalism Shop" in data/site.json).
+include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
+echo '<link rel="stylesheet" href="/shop/styles.css">' . "\n";
