@@ -7,6 +7,7 @@
     <title>NBT Viewer - Crafty Playz</title>
     <meta name="description" content="Drop Minecraft player .dat files and explore every bit of their NBT data visually.">
     <link rel="preconnect" href="https://crafthead.net">
+    <link rel="preconnect" href="https://mc-heads.net">
 </head>
 
 <body>
@@ -326,6 +327,9 @@
         .extra-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 10px 14px; border: 1px dashed #4a4a4a; border-radius: 12px; font-size: 14px; }
         .extra-bar .muted { flex: 1; min-width: 200px; font-size: 13px; }
         .note { background: #24384a; border: 1px solid #3a628a; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; }
+        /* toasts: small stack in the bottom right */
+        #errors { position: fixed; right: 16px; bottom: 16px; z-index: 1000; width: min(340px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+        #errors > div { margin: 0; padding: 8px 12px; font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; box-shadow: 0 4px 14px rgba(0, 0, 0, .4); pointer-events: auto; cursor: pointer; }
 
         /* ---------- tree ---------- */
         .tree { font-family: ui-monospace, Consolas, monospace; font-size: 13px; line-height: 1.55; overflow-x: auto; }
@@ -376,7 +380,7 @@
             <h1>NBT Viewer</h1>
             <p>Drop one or more Minecraft player files here to explore their inventory, ender chest, stats and every last bit of NBT data.</p>
             <p class="muted">Files are read in your browser and only leave it if you press Share. Accepts <span class="mono">.dat</span>, <span class="mono">.dat_old</span>, <span class="mono">.nbt</span>, <span class="mono">.json</span> and SNBT (<span class="mono">/data get</span> output).<br>
-                Player files live in <span class="mono">world/playerdata/&lt;uuid&gt;.dat</span> - you can also drop <span class="mono">stats/</span> and <span class="mono">advancements/</span> files, or a whole world folder.</p>
+                Player files live in <span class="mono">world/playerdata/&lt;uuid&gt;.dat</span> (<span class="mono">world/players/data/</span> since 26.1) - you can also drop <span class="mono">stats/</span> and <span class="mono">advancements/</span> files, or a whole world folder.</p>
             <div class="row">
                 <button class="btn primary" id="pick">Choose files</button>
                 <button class="btn" data-example="22159541-fde8-41e6-a104-593e1cb3a456 larger example.json">Try an example</button>
@@ -670,6 +674,25 @@
         // entities have no item render - show their spawn egg (or a stand-in) instead
         const MOB_ICON = { player: 'player_head', ender_dragon: 'dragon_head', wither: 'nether_star', giant: 'zombie_head', illusioner: 'bow', area_effect_cloud: 'lingering_potion', lightning_bolt: 'lightning_rod', tnt: 'tnt', falling_block: 'sand', arrow: 'arrow' };
         const mobIcon = (id) => MOB_ICON[strip(id)] || strip(id) + '_spawn_egg';
+        // "mined" stats use block ids - some blocks have no item of their own (redstone_wire, carrots, oak_wall_sign...)
+        const BLOCK_ITEM = {
+            redstone_wire: 'redstone', tripwire: 'string', carrots: 'carrot', potatoes: 'potato', beetroots: 'beetroot', cocoa: 'cocoa_beans',
+            sweet_berry_bush: 'sweet_berries', cave_vines: 'glow_berries', cave_vines_plant: 'glow_berries', torchflower_crop: 'torchflower_seeds',
+            pitcher_crop: 'pitcher_pod', melon_stem: 'melon_seeds', attached_melon_stem: 'melon_seeds', pumpkin_stem: 'pumpkin_seeds',
+            attached_pumpkin_stem: 'pumpkin_seeds', kelp_plant: 'kelp', bamboo_sapling: 'bamboo', twisting_vines_plant: 'twisting_vines',
+            weeping_vines_plant: 'weeping_vines', tall_seagrass: 'seagrass', big_dripleaf_stem: 'big_dripleaf', water: 'water_bucket',
+            lava: 'lava_bucket', bubble_column: 'water_bucket', powder_snow: 'powder_snow_bucket', fire: 'flint_and_steel', soul_fire: 'flint_and_steel',
+            frosted_ice: 'ice', piston_head: 'piston', moving_piston: 'piston', nether_portal: 'obsidian', end_portal: 'end_portal_frame',
+            end_gateway: 'end_portal_frame', redstone_wall_torch: 'redstone_torch',
+        };
+        const blockIcon = (id) => {
+            const b = strip(id);
+            if (BLOCK_ITEM[b]) return BLOCK_ITEM[b];
+            if (b.startsWith('potted_')) return 'flower_pot';
+            if (b.endsWith('candle_cake')) return 'cake';
+            if (b === 'wall_torch') return 'torch';
+            return b.replace(/_wall_(torch|sign|hanging_sign|banner|head|skull|fan)$/, '_$1');
+        };
 
         /* =====================================================================
            Text components (names, lore)
@@ -762,6 +785,26 @@
             return Math.max(fixed[id] || 27, maxSlot);
         }
 
+        // a player head's skin, as something mc-heads.net understands: texture hash > uuid > name.
+        // minecraft:profile (1.20.5+) or SkullOwner (older) - a plain name string or {name, id, properties}
+        function headOf(p) {
+            if (typeof p === 'string') return /^\w{1,16}$/.test(p) ? p : null;
+            if (!isObj(p)) return null;
+            const props = p.properties ?? p.Properties;
+            const tex = Array.isArray(props) ? props.find((x) => isObj(x) && x.name === 'textures') : isObj(props) && Array.isArray(props.textures) ? props.textures[0] : null;
+            const val = isObj(tex) ? tex.value ?? tex.Value : null;
+            if (typeof val === 'string') {
+                try {
+                    const m = /textures\.minecraft\.net\/texture\/([0-9a-f]{32,64})/i.exec(atob(val));
+                    if (m) return m[1];
+                } catch (e) { }
+            }
+            const id = Array.isArray(p.id ?? p.Id) ? uuidOf(p.id ?? p.Id) : typeof (p.id ?? p.Id) === 'string' ? p.id ?? p.Id : null;
+            if (id && UUID_RE.test(id)) return id.replace(/-/g, '');
+            const name = p.name ?? p.Name;
+            return typeof name === 'string' && /^\w{1,16}$/.test(name) ? name : null;
+        }
+
         function normItem(r) {
             if (!isObj(r) || !r.id) return null;
             const full = String(r.id);
@@ -782,6 +825,7 @@
             it.glint = go !== undefined ? truthy(go) : it.ench.length > 0 || ['enchanted_golden_apple', 'experience_bottle', 'nether_star', 'end_crystal', 'debug_stick', 'written_book', 'enchanted_book'].includes(it.base);
             const cmd = c['minecraft:custom_model_data'] ?? tag.CustomModelData;
             it.cmd = typeof cmd === 'number' ? cmd : isObj(cmd) && Array.isArray(cmd.floats) && cmd.floats.length ? cmd.floats[0] : null;
+            if (it.base === 'player_head') it.head = headOf(c['minecraft:profile'] ?? tag.SkullOwner);
             it.rarity = c['minecraft:rarity'] || (EPIC.has(it.base) ? 'epic' : RARE.has(it.base) ? 'rare' : UNCOMMON.has(it.base) ? 'uncommon' : 'common');
             if (it.ench.length && it.rarity !== 'epic') it.rarity = it.rarity === 'rare' ? 'epic' : 'rare';
 
@@ -820,6 +864,8 @@
         const localFirst = (id) => !rpActive && LOCAL_FIRST.test(id);
         function iconURL(it) {
             const id = typeof it === 'string' ? it : it.base;
+            // skinned player heads: 3D isometric render with the hat layer (minecraftitems.xyz only draws Steve)
+            if (typeof it !== 'string' && it.head) return `https://mc-heads.net/head/${encodeURIComponent(it.head)}/128`;
             if (localFirst(id)) return `/minecraft/items_1.21.11/minecraft_${id}.png`;
             let u = 'api.php?item=' + encodeURIComponent(id);
             if (rpActive) {
@@ -1147,6 +1193,21 @@
             const t = [b.lastPlayed, paper.LastSeen, paper.LastLogin].map(Number).filter((n) => n > 1e11);
             return t.length ? Math.max(...t) : pl.modified || 0;
         }
+        // ticks played, from world/stats/<uuid>.json - null when no stats file is loaded
+        function playTicksOf(pl) {
+            const raw = pl.extras.stats && pl.extras.stats.data;
+            if (!isObj(raw)) return null;
+            const c = isObj(raw.stats) ? raw.stats['minecraft:custom'] || raw.stats.custom || {} : raw;
+            const v = c['minecraft:play_time'] ?? c.play_time ?? c['minecraft:play_one_minute'] ?? c.play_one_minute ?? c['stat.playOneMinute'];
+            return typeof v === 'number' ? v : null;
+        }
+        // most play time first when any stats are loaded, otherwise most recent login first
+        function sortedPlayers() {
+            const list = players.map((pl, i) => ({ pl, i, t: activityOf(pl), play: playTicksOf(pl) }));
+            const byPlay = list.some((r) => r.play !== null);
+            list.sort((a, b) => (byPlay ? (b.play ?? -1) - (a.play ?? -1) : 0) || b.t - a.t || labelOf(a.pl).localeCompare(labelOf(b.pl)));
+            return { list, byPlay };
+        }
         const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
         function ago(ms) {
             if (!ms) return '';
@@ -1180,14 +1241,13 @@
         function renderPickList() {
             const box = $('#tabs');
             const f = pickFilter.trim().toLowerCase();
-            const list = players.map((pl, i) => ({ pl, i, t: activityOf(pl) }))
-                .filter(({ pl }) => !f || `${labelOf(pl)} ${pl.file} ${pl.P.uuid || ''}`.toLowerCase().includes(f))
-                .sort((a, b) => b.t - a.t || labelOf(a.pl).localeCompare(labelOf(b.pl)));
-            $('.pick-list', box).innerHTML = list.map(({ pl, i, t }, n) => `<div class="pick-row${i === active ? ' on' : ''}${n === pickKb ? ' kb' : ''}" data-tab="${i}" role="option" title="${esc(pl.file)}">` +
+            const { list: all, byPlay } = sortedPlayers();
+            const list = all.filter(({ pl }) => !f || `${labelOf(pl)} ${pl.file} ${pl.P.uuid || ''}`.toLowerCase().includes(f));
+            $('.pick-list', box).innerHTML = list.map(({ pl, i, t, play }, n) => `<div class="pick-row${i === active ? ' on' : ''}${n === pickKb ? ' kb' : ''}" data-tab="${i}" role="option" title="${esc(pl.file)}">` +
                 `<img src="${avatarOf(pl)}" alt="" loading="lazy" onerror="this.src='${MISSING}'"><div class="grow"><b>${esc(labelOf(pl))}</b>` +
-                `<small>${t ? 'active ' + esc(ago(t)) : 'no activity date'}${pl.name ? ' · ' + esc(pl.file) : ''}</small></div>` +
+                `<small>${play !== null ? esc(fmtStat('play_time', play)) + ' played · ' : ''}${t ? 'active ' + esc(ago(t)) : 'no activity date'}${pl.name ? ' · ' + esc(pl.file) : ''}</small></div>` +
                 `<button class="x" data-close="${i}" title="Remove">✕</button></div>`).join('') || '<div class="muted" style="padding:10px;font-size:13px">No players match.</div>';
-            $('.pick-foot', box).innerHTML = `<span>${list.length} of ${players.length} · most recently active first</span>${players.length > 1 ? '<button class="btn small" data-act="closeall">Remove all</button>' : ''}`;
+            $('.pick-foot', box).innerHTML = `<span>${list.length} of ${players.length} · ${byPlay ? 'most play time' : 'most recently active'} first</span>${players.length > 1 ? '<button class="btn small" data-act="closeall">Remove all</button>' : ''}`;
         }
         function togglePicker(open = !pickOpen) {
             pickOpen = open;
@@ -1468,7 +1528,7 @@
             const panel = ([c, , , list]) => `<div class="stgrid${c === first ? '' : ' hide'}" data-spanel="${c}">${list.map(([id, v]) => {
                 const label = pretty(id);
                 if (c === 'custom') return `<div class="sti" data-s="${esc((id + ' ' + label).toLowerCase())}"><div><span title="${esc(id)}">${esc(label)}</span><b>${esc(fmtStat(id, v))}</b></div></div>`;
-                const icon = c === 'killed' || c === 'killed_by' ? mobIcon(id) : strip(id);
+                const icon = c === 'killed' || c === 'killed_by' ? mobIcon(id) : blockIcon(id);
                 return `<div class="sti" data-s="${esc((id + ' ' + label).toLowerCase())}" title="${esc(id)}"><span class="ico">${imgTag(icon)}</span><div><span>${esc(label)}</span><b>${num(v)}</b></div></div>`;
             }).join('')}</div>`;
 
@@ -1738,14 +1798,19 @@
            ===================================================================== */
         const UUID_RE = /[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}/i;
         function toast(msg, cls) {
-            const el = document.createElement('div');
+            const box = $('#errors'), el = document.createElement('div');
             el.className = cls;
             el.textContent = msg;
-            $('#errors').appendChild(el);
-            setTimeout(() => el.remove(), 9000);
+            el.title = 'Click to dismiss';
+            el.onclick = () => el.remove();
+            box.appendChild(el);
+            while (box.childElementCount > 4) box.firstElementChild.remove();
+            setTimeout(() => el.remove(), cls === 'err' ? 9000 : 5000);
         }
-        const showError = (msg) => toast(msg, 'err');
-        const showNote = (msg) => toast(msg, 'note');
+        // while loadEntries runs, messages are collected and summed up in one toast
+        let batch = null;
+        const showError = (msg) => (batch ? batch.errors.push(msg) : toast(msg, 'err'));
+        const showNote = (msg) => (batch ? batch.notes.push(msg) : toast(msg, 'note'));
         const uuidKey = (s) => (s ? String(s).toLowerCase().replace(/-/g, '') : null);
         const fileUuid = (name) => { const m = String(name).match(UUID_RE); return m ? uuidKey(m[0]) : null; };
         const pendingExtras = new Map();    // uuid -> {stats, advancements} waiting for that player's file
@@ -1802,6 +1867,9 @@
         }
 
         async function loadEntries(entries) {
+            const prev = players[active], prevKey = prev && prev.key;
+            const before = new Set(players);
+            batch = { notes: [], errors: [] };
             const parsed = [];
             for (const f of entries) {
                 try {
@@ -1816,6 +1884,23 @@
             // players first, so stats / advancements can find their owner
             parsed.filter((p) => p.kind === 'player').sort((a, b) => a.modified - b.modified).forEach((p) => addPlayer(p.name, p.data, p.modified));
             parsed.filter((p) => p.kind !== 'player').forEach((p) => attachExtra(p.kind, p.name, p.data, fileUuid(p.name)));
+            if (prev) {
+                // players were already open - stay on the one being viewed (it may have been swapped for a newer file)
+                const i = players.findIndex((p) => p === prev || (prevKey && p.key === prevKey));
+                if (i >= 0) active = i;
+            } else if (parsed.filter((p) => p.kind === 'player').length > 1) active = sortedPlayers().list[0].i;
+            const { notes, errors } = batch;
+            batch = null;
+            const added = players.filter((p) => !before.has(p));
+            const extras = parsed.length - parsed.filter((p) => p.kind === 'player').length;
+            if (added.length > 1 || notes.length > 2) {
+                toast(`${added.length} player${added.length === 1 ? '' : 's'} imported` + (extras ? ` · ${extras} stats/advancement file${extras === 1 ? '' : 's'}` : ''), 'note');
+            } else {
+                if (added.length === 1) toast(`Imported ${added[0].file}`, 'note');
+                notes.forEach((m) => toast(m, 'note'));
+            }
+            if (errors.length > 2) toast(`Could not read ${errors.length} files - see the browser console for details.`, 'err');
+            else errors.forEach((m) => toast(m, 'err'));
             closeDrawer();
             render();
         }
@@ -1837,13 +1922,14 @@
             const fileOf = (en) => new Promise((res) => en.file(res, () => res(null)));
             async function walk(en, depth) {
                 if (en.isFile) {
-                    if (/\.(dat|dat_old|nbt|json|snbt)$/i.test(en.name) && (depth === 0 || /\/(playerdata|stats|advancements)\/[^/]+$/i.test(en.fullPath))) {
+                    if (/\.(dat|dat_old|nbt|json|snbt)$/i.test(en.name) && (depth === 0 || /\/(playerdata|players\/data|stats|advancements)\/[^/]+$/i.test(en.fullPath))) {
                         const f = await fileOf(en);
                         if (f) out.push(f);
                     }
                     return;
                 }
-                if (depth > 4 || (depth > 0 && /^(region|entities|poi|DIM-1|DIM1|data|datapacks|backups|logs)$/i.test(en.name))) return;
+                // 26.1+ worlds keep players in players/{data,stats,advancements}/ - only skip the world-level data/
+                if (depth > 4 || (depth > 0 && /^(region|entities|poi|DIM-1|DIM1|dimensions|data|datapacks|backups|logs)$/i.test(en.name) && !/\/players\/data$/i.test(en.fullPath))) return;
                 for (const c of await readDir(en)) await walk(c, depth + 1);
             }
             for (const en of entries) await walk(en, 0);
@@ -2095,7 +2181,11 @@
                 return;
             }
             if (typing) return;
-            if ((e.key === '[' || e.key === ']') && players.length > 1) { active = (active + (e.key === ']' ? 1 : -1) + players.length) % players.length; closeDrawer(); render(); }
+            if ((e.key === '[' || e.key === ']') && players.length > 1) {
+                const order = sortedPlayers().list.map((r) => r.i), at = order.indexOf(active);
+                active = order[(at + (e.key === ']' ? 1 : -1) + order.length) % order.length];
+                closeDrawer(); render();
+            }
             // arrow keys walk between slots while the drawer is open
             if (drawer.classList.contains('open') && stack.length === 1 && /^Arrow(Left|Right)$/.test(e.key)) {
                 const all = $$('#player .slot.has');
