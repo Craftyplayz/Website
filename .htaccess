@@ -29,7 +29,7 @@ RedirectMatch 301 ^/images/SlideShows/homepagemobile/(.*)$ /media/slideshow/mobi
 RedirectMatch 301 ^/images/SlideShows/homepage/(.*)$ /media/slideshow/desktop/$1
 RedirectMatch 301 ^/images/galleries/pets/(.*)$ /media/pets/$1
 RedirectMatch 301 ^/images/minecraft/rawscreenshots/(.*)$ /media/minecraft/screenshots-raw/$1
-RedirectMatch 301 ^/images/minecraft/weird\ sizes/(.*)$ /media/minecraft/misc/$1
+RedirectMatch 301 ^/images/minecraft/weird.sizes/(.*)$ /media/minecraft/misc/$1
 RedirectMatch 301 ^/images/minecraft/(screenshots|mapart|skins)/(.*)$ /media/minecraft/$1/$2
 RedirectMatch 301 ^/images/books/(.*)$ /media/books/covers/$1
 RedirectMatch 301 ^/images/(harrypotter|quotes)/(.*)$ /media/$1/$2
