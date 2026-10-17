@@ -6,17 +6,12 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Site Reorganisation Plan</title>
 <style>
+    /* dark-only, same palette as /minecraft/nbtviewer */
     :root {
-        --bg: #f6f6f4; --panel: #ffffff; --text: #1d1d1f; --muted: #6b6b70; --line: #e2e2e0;
-        --accent: #6a4cff; --accent-soft: #ece8ff;
-        --new: #1f8a4c; --moved: #2563eb; --merged: #9333ea; --delete: #c62828; --private: #b45309; --dev: #6b7280;
-    }
-    @media (prefers-color-scheme: dark) {
-        :root {
-            --bg: #151517; --panel: #1f1f23; --text: #ececf0; --muted: #9a9aa3; --line: #2f2f35;
-            --accent: #9d8bff; --accent-soft: #2b2647;
-            --new: #4ade80; --moved: #60a5fa; --merged: #c084fc; --delete: #f87171; --private: #fbbf24; --dev: #a1a1aa;
-        }
+        color-scheme: dark;
+        --bg: #202020; --panel: #2a2a2a; --panel2: #323232; --text: #ececec; --muted: #9b9b9b; --line: #3d3d3d;
+        --accent: #7ed957; --accent-soft: #2d4224; --btn: #3d7a2a; --btn-line: #5aa83f;
+        --new: #7ed957; --moved: #8cc8ff; --merged: #c9a0ff; --delete: #ff8080; --private: #ffd84a; --dev: #9b9b9b;
     }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -49,8 +44,12 @@
     .opts input { margin-right: 6px; }
     .opts label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
     textarea { width: 100%; min-height: 80px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 10px; font: inherit; }
-    .btn { background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer; }
-    .btn.ghost { background: none; color: var(--text); border: 1px solid var(--line); }
+    .btn { background: var(--btn); color: #fff; border: 1px solid var(--btn-line); border-radius: 8px; padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer; transition: background .12s, transform .06s; }
+    .btn:hover { background: #4a9033; }
+    .btn:active { transform: translateY(1px); }
+    .btn.ghost { background: #3a3a3a; color: var(--text); border: 1px solid #555; }
+    .btn.ghost:hover { background: #474747; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
     #progress { color: var(--muted); font-size: 13px; }
     pre#output { white-space: pre-wrap; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px; font: 13px ui-monospace, Consolas, monospace; display: none; }
@@ -73,7 +72,57 @@
     li.collapsed > ul { display: none; }
     .tree-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
     .tree-tools input { flex: 1; min-width: 180px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; }
-    .hit { background: #fde68a; color: #000; border-radius: 3px; }
+    .hit { background: #6b5a00; border-radius: 3px; }
+
+    /* design guide */
+    .principles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .principle { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; padding: 14px; }
+    .principle b { display: block; margin-bottom: 4px; }
+    .principle span { color: var(--muted); font-size: 14px; }
+    .guide-nav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .guide-nav a { font-size: 13px; padding: 3px 10px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); color: var(--text); text-decoration: none; }
+    .guide-nav a:hover { border-color: var(--accent); }
+    .card { scroll-margin-top: 12px; }
+    .card h2 .n { font-weight: 400; color: var(--muted); font-size: 13px; margin-left: 8px; }
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+    .sw { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font-size: 12px; }
+    .sw i { display: block; height: 42px; }
+    .sw div { padding: 6px 8px; background: var(--panel2); }
+    .sw code { background: none; padding: 0; }
+    .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .do, .dont { border-radius: 8px; padding: 10px 12px; background: var(--panel2); }
+    .do h4, .dont h4 { margin: 0 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+    .do h4 { color: var(--new); } .dont h4 { color: var(--delete); }
+    .do ul, .dont ul { margin: 0; padding-left: 18px; font-size: 14px; }
+    .do li, .dont li { margin: 3px 0; }
+    .ref { color: var(--muted); font-size: 12px; font-family: ui-monospace, Consolas, monospace; }
+    pre.anatomy { font: 12.5px/1.45 ui-monospace, Consolas, monospace; background: #1a1a1a; border: 1px solid var(--line); border-radius: 8px; padding: 12px; overflow-x: auto; margin: 0; }
+    /* live component samples */
+    .demo { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px; background: var(--bg); border: 1px dashed var(--line); border-radius: 10px; margin: 8px 0 4px; }
+    .d-badge { font-size: 12px; padding: 2px 9px; border-radius: 999px; background: #3a3a3a; border: 1px solid #4d4d4d; }
+    .d-badge.g { background: #2d4a24; border-color: #4f8a3a; } .d-badge.r { background: #4a2424; border-color: #8a3a3a; }
+    .d-badge.p { background: #3d2a4f; border-color: #6c4b8f; } .d-badge.b { background: #24384a; border-color: #3a628a; }
+    .d-tile { background: var(--panel2); border-radius: 8px; padding: 8px 10px; min-width: 110px; }
+    .d-tile b { display: block; font-size: 20px; line-height: 1.2; } .d-tile span { font-size: 12px; color: var(--muted); }
+    .d-pills a { font-size: 13px; padding: 3px 10px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); color: var(--text); text-decoration: none; }
+    .d-search { background: #161616; border: 1px solid #4a4a4a; color: var(--text); border-radius: 8px; padding: 8px 12px; font: inherit; font-size: 14px; outline: none; min-width: 180px; }
+    .d-search:focus { border-color: var(--accent); }
+    .d-err { background: #4a2424; border: 1px solid #8a3a3a; border-radius: 8px; padding: 8px 12px; font-size: 14px; }
+    .d-note { background: #24384a; border: 1px solid #3a628a; border-radius: 8px; padding: 8px 12px; font-size: 14px; }
+    .d-prog { height: 6px; width: 200px; background: #3a3a3a; border-radius: 3px; overflow: hidden; }
+    .d-prog i { display: block; height: 100%; width: 64%; background: linear-gradient(90deg, #4f8a3a, #7ed957); }
+    .d-drawer-host { position: relative; overflow: hidden; height: 150px; flex: 1 1 100%; background: #1d1d1d; border-radius: 8px; }
+    .d-drawer { position: absolute; top: 0; right: 0; bottom: 0; width: min(260px, 80%); background: #1b1b1b; border-left: 1px solid #444; padding: 12px; box-shadow: -12px 0 30px #0009; transform: translateX(105%); transition: transform .18s ease-out; font-size: 14px; }
+    .d-drawer.open { transform: none; }
+    .motion-table td:first-child { white-space: nowrap; }
+    ul.check { list-style: none; padding: 0; margin: 0; }
+    ul.check li { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-top: 1px solid var(--line); }
+    ul.check li:first-child { border-top: 0; }
+    ul.check input { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--accent); flex: none; }
+    .decisions { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 16px; font-size: 14px; }
+    .decisions div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--line); padding: 4px 0; }
+    .decisions span { color: var(--muted); }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0s !important; animation: none !important; } }
 
     /* nav preview */
     .mock { border: 1px solid var(--line); border-radius: 10px; overflow: visible; background: #222; color: #fff; }
@@ -87,10 +136,10 @@
     .item.open .mega { display: flex; flex-wrap: wrap; }
     .mega h4 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #aaa; }
     .mega a { display: block; color: #fff; text-decoration: none; padding: 3px 0; font-size: 14px; white-space: nowrap; }
-    .mega a:hover { color: #c4b5fd; }
-    .mega .all { color: #c4b5fd; margin-top: 4px; }
+    .mega a:hover { color: var(--accent); }
+    .mega .all { color: var(--accent); margin-top: 4px; }
     .subnav { background: #2d2d2d; border-top: 1px solid #3a3a3a; padding: 6px 14px; font-size: 13px; display: flex; gap: 14px; flex-wrap: wrap; border-radius: 0 0 10px 10px; }
-    .subnav span { color: #bbb; } .subnav span.on { color: #fff; border-bottom: 2px solid #9d8bff; }
+    .subnav span { color: #bbb; } .subnav span.on { color: #fff; border-bottom: 2px solid var(--accent); }
     .crumbs { color: var(--muted); font-size: 13px; margin: 10px 0 0; }
 
     /* phases */
@@ -118,6 +167,7 @@
         <button data-tab="overview">Overview</button>
         <button data-tab="tree">New structure</button>
         <button data-tab="nav">Nav preview</button>
+        <button data-tab="design">Design guide</button>
         <button data-tab="phases">Migration steps</button>
     </div>
 
@@ -145,6 +195,11 @@
             <div class="stat"><b>~3,700</b><span>files after the reorganisation</span></div>
             <div class="stat"><b>12 → 70+</b><span>pages reachable from the menu</span></div>
             <div class="stat"><b>~90</b><span>301 redirects so old links keep working</span></div>
+        </div>
+        <div class="card">
+            <h2>Decisions so far</h2>
+            <div class="decisions" id="decisions"></div>
+            <p class="muted" style="margin:12px 0 0;font-size:14px"><b>Hosting: IONOS.</b> IONOS webhosting usually lets you point a domain at any folder in your webspace (Domains &amp; SSL → your domain → change the target directory), so a <code>public/</code> web root is probably possible. That's worth a look, but nothing depends on it. As decided, <code>private/</code> is protected with <code>.htaccess</code> basic auth (<code>AuthType Basic</code> + an <code>.htpasswd</code> kept outside the folder), and <code>_dev/</code> and <code>_templates/</code> are blocked with <code>Require all denied</code>.</p>
         </div>
         <div class="card">
             <h2>Biggest problems today</h2>
@@ -225,6 +280,321 @@
         </div>
     </section>
 
+    <!-- DESIGN GUIDE -->
+    <section class="tab" id="tab-design">
+        <p class="sub">Every page on the new site follows these notes. They're based on <code>/minecraft/nbtviewer</code>, the most polished page on the site. References like <span class="ref">nbtviewer:1119</span> point to the line in <code>minecraft/nbtviewer/index.php</code> where the pattern is used.</p>
+
+        <div class="principles">
+            <div class="principle"><b>⚡ Lightning fast</b><span>Content is visible and usable in under 1 second on a phone. Nothing blocks the first paint, and everything heavy loads only when it's needed.</span></div>
+            <div class="principle"><b>↔ Reactive layouts</b><span>Fluid sizing and auto-filling grids. The page works at 320px and at 2560px, with almost no breakpoints.</span></div>
+            <div class="principle"><b>◻ No clutter</b><span>One clear job per page. Empty sections are hidden, and details stay behind a click until they're asked for.</span></div>
+            <div class="principle"><b>● Dark theme</b><span>A single dark palette (#202020 base) shared by every page, with green as the accent.</span></div>
+            <div class="principle"><b>〰 Calm motion</b><span>Short, smooth transitions only where they explain something: a panel opening, a press, a state change. No decoration.</span></div>
+        </div>
+
+        <nav class="guide-nav">
+            <a href="#g-learn">What the viewer gets right</a><a href="#g-colour">Colour</a><a href="#g-type">Type and spacing</a>
+            <a href="#g-layout">Layout</a><a href="#g-speed">Speed</a><a href="#g-motion">Animation</a><a href="#g-clutter">Clutter</a>
+            <a href="#g-components">Components</a><a href="#g-anatomy">Page anatomy</a><a href="#g-a11y">Accessibility</a>
+            <a href="#g-fix">Viewer lessons</a><a href="#g-sitewide">Site-wide fixes</a><a href="#g-checklist">Checklist</a>
+        </nav>
+
+        <div class="card" id="g-learn">
+            <h2>What the NBT viewer gets right</h2>
+            <table>
+                <tr><th>Pattern</th><th>How the viewer does it</th><th>Rule for every page</th></tr>
+                <tr><td>No framework, no build step</td><td>Vanilla JS in one IIFE, with tiny <code>$</code> / <code>$$</code> helpers <span class="ref">nbtviewer:435</span></td><td>Plain HTML, CSS and JS. Pull in a library only for one specific job (e.g. skinview3d), and only when it's used.</td></tr>
+                <tr><td>Design tokens</td><td><code>:root</code> holds <code>--bg --card --card2 --line --text --muted --accent</code> <span class="ref">nbtviewer:19</span></td><td>Colours exist only as variables in <code>global.css</code>. Pages use the variables and never hard-code hex values.</td></tr>
+                <tr><td>System fonts</td><td><code>system-ui, -apple-system, "Segoe UI", Roboto</code> <span class="ref">nbtviewer:37</span></td><td>No web-font download. Text appears immediately in the OS font.</td></tr>
+                <tr><td>Fluid sizing</td><td><code>--s: clamp(30px, 8.6vw, 46px)</code> sizes every inventory slot. Headings use <code>clamp()</code> too <span class="ref">nbtviewer:29, 64</span></td><td>Size with <code>clamp()</code> instead of breakpoints wherever possible.</td></tr>
+                <tr><td>Self-filling grids</td><td><code>repeat(auto-fill, minmax(120px, 1fr))</code> for tiles, stats and advancements. <code>columns: 3 340px</code> masonry for cards <span class="ref">nbtviewer:134, 157</span></td><td>Grids decide their own column count. Use masonry for mixed-height cards.</td></tr>
+                <tr><td>Sticky toolbar</td><td>Search plus actions stick to the top, with a translucent blurred background <span class="ref">nbtviewer:86</span></td><td>Tool pages get one sticky toolbar. Content pages don't need one.</td></tr>
+                <tr><td>Jump links</td><td>Pill links generated <b>only for sections that exist</b> <span class="ref">nbtviewer:1045</span></td><td>Long pages get a jump-pill row under the title.</td></tr>
+                <tr><td>No empty sections</td><td>Stats and advancements cards render only when data exists. A single "+ Add" bar replaces them <span class="ref">nbtviewer:1053</span></td><td>Never show an empty card or a "nothing here" heading. Hide it, or show one compact prompt.</td></tr>
+                <tr><td>Progressive enhancement</td><td>A 2D skin image shows instantly, and the 3D library loads from a CDN on first use. If that fails, the 2D image stays <span class="ref">nbtviewer:1064–1095</span></td><td>Show something useful immediately, then upgrade it. A failed upgrade must never break the page.</td></tr>
+                <tr><td>Pause offscreen work</td><td><code>IntersectionObserver</code> stops 3D rendering when the model scrolls out of view <span class="ref">nbtviewer:1119</span></td><td>Animations, canvases and polling stop when they're not visible.</td></tr>
+                <tr><td>Lazy images</td><td><code>loading="lazy" decoding="async"</code> on every icon <span class="ref">nbtviewer:833</span></td><td>Every image below the fold is lazy and has width and height set.</td></tr>
+                <tr><td>Graceful image fallback</td><td>One capture-phase <code>error</code> listener: API render → local texture → missing-texture pattern <span class="ref">nbtviewer:836</span></td><td>Broken images get a sensible fallback, never a broken-image icon.</td></tr>
+                <tr><td>Lazy rendering</td><td>Tree nodes build only when opened, 250 at a time with "Show more". "Expand all" stops at 3 levels <span class="ref">nbtviewer:1551</span></td><td>Never render thousands of rows up front. Build on demand and in chunks.</td></tr>
+                <tr><td>Cheap search</td><td>An 80ms debounce, then toggle a <code>.hit</code> class to dim non-matches instead of re-rendering. Raw search is capped at 300 results <span class="ref">nbtviewer:1706, 2086</span></td><td>Filters toggle classes on existing elements. Cap result counts.</td></tr>
+                <tr><td>Event delegation</td><td>One document <code>click</code> listener routes on <code>data-act</code>, <code>data-copy</code> and similar attributes <span class="ref">nbtviewer:1981</span></td><td>Avoid per-element listeners and inline <code>onclick</code>.</td></tr>
+                <tr><td>Details in a drawer</td><td>Clicking an item opens a side drawer with breadcrumbs for nested containers. Hover shows a light tooltip <span class="ref">nbtviewer:1640</span></td><td>The main view stays scannable. Depth lives in a drawer, dialog or <code>&lt;details&gt;</code>.</td></tr>
+                <tr><td>Native dialogs</td><td><code>&lt;dialog&gt;.showModal()</code> for share and resource packs <span class="ref">nbtviewer:1887</span></td><td>Use the browser's dialog (free focus trap, Esc and backdrop), not custom modals.</td></tr>
+                <tr><td>Keyboard</td><td><code>/</code> focuses search. <code>Esc</code> closes the innermost layer first. <code>[ ]</code> switch players. Arrow keys walk slots <span class="ref">nbtviewer:2088</span></td><td>Every tool page supports <code>/</code> and layered <code>Esc</code>.</td></tr>
+                <tr><td>Instant feedback</td><td>A "Copied!" swap for 1s, buttons disabled while loading, toasts that disappear on their own <span class="ref">nbtviewer:2019, 1740</span></td><td>Every action responds within 100ms, even if it only says "working…".</td></tr>
+                <tr><td>Server-side caching</td><td><code>api.php</code>: renders cached on disk, <code>immutable</code> 30-day headers, misses re-checked after a day, session lock released so images load in parallel <span class="ref">api.php:57–110</span></td><td>Every PHP endpoint that calls an external API caches its result and sends real cache headers.</td></tr>
+                <tr><td>Privacy by default</td><td>Files are parsed in the browser and only uploaded when you press Share. The API key stays server-side</td><td>Do the work client-side where possible. Keys never reach the browser.</td></tr>
+            </table>
+        </div>
+
+        <div class="card" id="g-colour">
+            <h2>Colour <span class="n">dark only, taken from the viewer</span></h2>
+            <div class="swatches">
+                <div class="sw"><i style="background:#202020"></i><div><b>--bg</b><br><code>#202020</code> page</div></div>
+                <div class="sw"><i style="background:#2a2a2a"></i><div><b>--card</b><br><code>#2a2a2a</code> cards</div></div>
+                <div class="sw"><i style="background:#323232"></i><div><b>--card2</b><br><code>#323232</code> inset rows, tiles</div></div>
+                <div class="sw"><i style="background:#1b1b1b"></i><div><b>--sunken</b><br><code>#1b1b1b</code> drawer, inputs</div></div>
+                <div class="sw"><i style="background:#3d3d3d"></i><div><b>--line</b><br><code>#3d3d3d</code> borders</div></div>
+                <div class="sw"><i style="background:#ececec"></i><div><b>--text</b><br><code>#ececec</code></div></div>
+                <div class="sw"><i style="background:#9b9b9b"></i><div><b>--muted</b><br><code>#9b9b9b</code> secondary text</div></div>
+                <div class="sw"><i style="background:#7ed957"></i><div><b>--accent</b><br><code>#7ed957</code> focus, progress</div></div>
+                <div class="sw"><i style="background:#3d7a2a"></i><div><b>--btn</b><br><code>#3d7a2a</code> primary button</div></div>
+                <div class="sw"><i style="background:#8cc8ff"></i><div><b>--link</b><br><code>#8cc8ff</code></div></div>
+                <div class="sw"><i style="background:#ffd84a"></i><div><b>--highlight</b><br><code>#ffd84a</code> search hits, "new"</div></div>
+                <div class="sw"><i style="background:#4a2424"></i><div><b>--danger-bg</b><br><code>#4a2424</code> errors</div></div>
+                <div class="sw"><i style="background:#24384a"></i><div><b>--info-bg</b><br><code>#24384a</code> notes</div></div>
+            </div>
+            <h3>Rules</h3>
+            <ul class="plain">
+                <li><b>Three surface levels, no more:</b> page (<code>--bg</code>), card (<code>--card</code>), and inset rows inside cards (<code>--card2</code>). Depth comes from these steps, not from shadows.</li>
+                <li><b>Green means "act" or "done":</b> primary buttons, focus rings, progress, active tabs. Never use it for decoration.</li>
+                <li><b>Status colours are tinted backgrounds with a matching border</b> (<code>#2d4a24</code> + <code>#4f8a3a</code> for green), never bright fills. They're used in badges, toasts and states.</li>
+                <li><b>A section may re-tint <code>--accent</code></b> (e.g. Steam blue, Books warm gold), but surfaces and text stay the same everywhere.</li>
+                <li>Set <code>color-scheme: dark</code> so scrollbars, form controls and date pickers render dark too.</li>
+                <li>Contrast: <code>--muted</code> on <code>--card</code> is about 5.2:1, which passes WCAG AA. Never put text darker than <code>--muted</code> on any surface.</li>
+            </ul>
+        </div>
+
+        <div class="card" id="g-type">
+            <h2>Type and spacing</h2>
+            <div class="two">
+                <table>
+                    <tr><th>Use</th><th>Size</th></tr>
+                    <tr><td>Page title</td><td><code>clamp(24px, 4vw, 34px)</code>, 700</td></tr>
+                    <tr><td>Hero / landing title</td><td><code>clamp(26px, 5vw, 42px)</code></td></tr>
+                    <tr><td>Card heading</td><td>17px, 600, icon 22px</td></tr>
+                    <tr><td>Body</td><td>15px / 1.45</td></tr>
+                    <tr><td>Rows, controls</td><td>14px</td></tr>
+                    <tr><td>Meta, counts, pills</td><td>12–13px, <code>--muted</code></td></tr>
+                    <tr><td>Code, IDs, NBT</td><td><code>ui-monospace, Consolas</code>, 13px</td></tr>
+                </table>
+                <table>
+                    <tr><th>Token</th><th>Value</th></tr>
+                    <tr><td>Spacing scale</td><td>4 · 6 · 8 · 10 · 12 · 16 · 20 · 24px</td></tr>
+                    <tr><td>Card padding</td><td>16px</td></tr>
+                    <tr><td>Gap between cards</td><td>16px</td></tr>
+                    <tr><td>Gap inside lists</td><td>6px</td></tr>
+                    <tr><td>Radius</td><td>8px controls · 12px cards · 999px pills</td></tr>
+                    <tr><td>Content width</td><td>max 1280px, 16px side padding</td></tr>
+                </table>
+            </div>
+            <ul class="plain" style="margin-top:12px">
+                <li><b>Counts go in the card heading, right-aligned and muted</b> ("Inventory … <span class="muted">36 stacks · 1,204 items</span>"). The number is there without needing its own element.</li>
+                <li>Format numbers with <code>toLocaleString()</code>, show times as relative ("3 days ago") with the exact date on hover, and keep IDs in monospace.</li>
+            </ul>
+        </div>
+
+        <div class="card" id="g-layout">
+            <h2>Reactive layout</h2>
+            <div class="two">
+                <div class="do"><h4>Do</h4><ul>
+                    <li>Mobile first. Start at 320px wide and let the layout grow.</li>
+                    <li><code>auto-fill / minmax()</code> grids, <code>flex-wrap</code> toolbars, and <code>columns</code> masonry.</li>
+                    <li><code>clamp()</code> for font sizes and repeated UI sizes (like the viewer's <code>--s</code>).</li>
+                    <li><code>min-width: 0</code> on flex and grid children, and ellipsis on long names.</li>
+                    <li>Only add a breakpoint where content actually breaks (the viewer needs just 3: 560px hero, 520px crafting grid, header).</li>
+                    <li>Panels like the drawer use <code>width: min(460px, 100vw)</code>, so they're full-screen on phones automatically.</li>
+                    <li>Tap targets are at least 40px on touch.</li>
+                </ul></div>
+                <div class="dont"><h4>Don't</h4><ul>
+                    <li>Scroll the page sideways. Only code and tree blocks may scroll horizontally.</li>
+                    <li>Use fixed pixel widths on containers.</li>
+                    <li>Use separate mobile and desktop markup or images (the homepage currently picks a different slideshow by user agent). Use CSS and <code>srcset</code> instead.</li>
+                    <li>Rely on hover for anything essential. Hover only adds polish.</li>
+                    <li>Use <code>body { overflow: hidden }</code> (the homepage does).</li>
+                </ul></div>
+            </div>
+        </div>
+
+        <div class="card" id="g-speed">
+            <h2>Lightning fast <span class="n">performance budget</span></h2>
+            <table>
+                <tr><th>Budget (per page, excluding content images)</th><th>Target</th></tr>
+                <tr><td>Time until content is visible on 4G</td><td>&lt; 1s</td></tr>
+                <tr><td>HTML + CSS + JS sent over the network (gzipped)</td><td>&lt; 60 KB for content pages, &lt; 150 KB for tools</td></tr>
+                <tr><td><code>global.css</code></td><td>&lt; 12 KB uncompressed</td></tr>
+                <tr><td>Render-blocking third-party requests</td><td><b>0</b></td></tr>
+                <tr><td>Layout shift after load</td><td>none (all images and embeds have dimensions)</td></tr>
+                <tr><td>Interaction response</td><td>&lt; 100ms (debounce input by about 80ms like the viewer)</td></tr>
+            </table>
+            <h3>Rules</h3>
+            <ul class="plain">
+                <li><b>Server-render the first view in PHP.</b> JS enhances the page and isn't needed to see content. The data-driven header is rendered in PHP, not fetched (plain HTML pages are the only exception).</li>
+                <li><b>Defer every script</b> (<code>defer</code> or end of body). Load libraries on first use, like <code>loadSkinLib()</code> <span class="ref">nbtviewer:1064</span>.</li>
+                <li><b>Images:</b> WebP (or AVIF) with <code>width</code>, <code>height</code>, <code>loading="lazy"</code> and <code>decoding="async"</code> below the fold. Galleries show <b>generated thumbnails</b> (≈400px) and open the full image on click.</li>
+                <li><b>Cache everything static for a year</b> with versioned URLs (<code>global.css?v=3</code>). The <code>.htaccess</code> rule: <code>Cache-Control: public, max-age=31536000, immutable</code> for <code>/assets</code> and <code>/media</code>.</li>
+                <li><b>API pages cache server-side</b> to disk, like <code>api.php</code>. Steam, Hypixel, Retro and Google Books responses get a cache file with a sensible lifetime (5 min to 1 day).</li>
+                <li><b>Close the PHP session early</b> (<code>session_write_close()</code>) on endpoints that can be hit in parallel <span class="ref">api.php:16</span>.</li>
+                <li><b>Render lists in chunks</b> (about 250 at a time) and build hidden content only when it's opened.</li>
+                <li><b><code>preconnect</code></b> to any external host a page needs straight away (the viewer does this for crafthead.net).</li>
+                <li>Use <code>content-visibility: auto</code> on long below-the-fold sections (stats, raw data) so the browser skips laying them out until they're near the screen.</li>
+            </ul>
+        </div>
+
+        <div class="card" id="g-motion">
+            <h2>Animation <span class="n">smooth, short, and only when needed</span></h2>
+            <p style="margin-top:0">Motion is allowed only when it <b>explains a change</b>: something opened, something was pressed, or state moved. It is never used just to look nice.</p>
+            <table class="motion-table">
+                <tr><th>Use</th><th>Duration and easing</th><th>Property</th><th>From the viewer</th></tr>
+                <tr><td>Hover / focus colour</td><td>120ms linear</td><td>background, border-color</td><td><code>.btn</code> <span class="ref">:70</span></td></tr>
+                <tr><td>Press</td><td>60ms</td><td><code>translateY(1px)</code></td><td><code>.btn:active</code></td></tr>
+                <tr><td>Caret / chevron flip</td><td>120ms</td><td>rotate</td><td>player picker <span class="ref">:102</span></td></tr>
+                <tr><td>Drawer / panel open</td><td>180ms ease-out</td><td>transform only</td><td><code>#drawer</code> <span class="ref">:250</span></td></tr>
+                <tr><td>Dropdown / mega-menu</td><td>120–150ms ease-out</td><td>opacity + 4px translate</td><td>(new header)</td></tr>
+                <tr><td>Smooth scroll to section</td><td>browser default</td><td><code>scrollIntoView({behavior:'smooth'})</code></td><td>owned-items click <span class="ref">:2029</span></td></tr>
+                <tr><td>Direct manipulation</td><td>physics, ease back</td><td>rotation</td><td>skin drag and fling <span class="ref">:1101</span></td></tr>
+                <tr><td>Meaningful loop</td><td>3s linear, infinite</td><td>background-position</td><td>enchant glint, because it mimics the game <span class="ref">:210</span></td></tr>
+            </table>
+            <div class="demo">
+                <button class="btn">Hover and press me</button>
+                <button class="btn ghost" id="demoDrawerBtn">Toggle drawer (180ms)</button>
+                <div class="d-drawer-host"><div class="d-drawer" id="demoDrawer"><b>Diamond Sword</b><p class="muted" style="margin:6px 0 0">Slides in using only <code>transform</code>, so it never triggers layout.</p></div></div>
+            </div>
+            <div class="two" style="margin-top:12px">
+                <div class="do"><h4>Do</h4><ul>
+                    <li>Animate only <code>transform</code> and <code>opacity</code> (plus colour on hover).</li>
+                    <li>Keep it under 200ms. Anything longer feels slow on a fast site.</li>
+                    <li>Use ease-out for things entering. Exits can be instant.</li>
+                    <li>Respect <code>prefers-reduced-motion</code>: turn off loops, spins and smooth scroll.</li>
+                    <li>Stop loops when they're offscreen (IntersectionObserver).</li>
+                </ul></div>
+                <div class="dont"><h4>Don't</h4><ul>
+                    <li>Use page-load or entrance animations (fade-in on scroll, staggered cards).</li>
+                    <li>Animate <code>width</code>, <code>height</code>, <code>top</code> or <code>margin</code>.</li>
+                    <li>Use <code>transition: all</code> (current <code>global.css</code> uses it 4 times).</li>
+                    <li>Use slow 0.5s transitions, like the current mobile nav and input hover.</li>
+                    <li>Flash colours on hover (the current <code>button:hover { background: lime }</code>).</li>
+                </ul></div>
+            </div>
+        </div>
+
+        <div class="card" id="g-clutter">
+            <h2>No unnecessary clutter</h2>
+            <ul class="plain">
+                <li><b>One job per page and one primary (green) button per view.</b> Everything else is a secondary button or a link.</li>
+                <li><b>Progressive disclosure:</b> overview first, details on click (drawer, <code>&lt;details&gt;</code>, "Show all 312 recipes" <span class="ref">nbtviewer:1434</span>), raw data last.</li>
+                <li><b>Hide what's empty.</b> No empty cards, no "0 results" headings, no placeholder sections.</li>
+                <li><b>Muted secondary text</b> instead of extra headings or boxes. Help text is one line, muted, under the title.</li>
+                <li><b>No decoration for its own sake:</b> no gradients, glows, borders inside borders, or shadows on cards.</li>
+                <li><b>Nothing plays or flashes on load:</b> no autoplay media, no popups. The epilepsy-warning page keeps its warning gate.</li>
+                <li><b>Toasts disappear on their own</b> (about 9s for errors, shorter for confirmations), stack in one place and never block content.</li>
+                <li><b>Remove debug output</b> (the homepage logs <code>console.log("Mobile")</code>).</li>
+                <li><b>The footer stays light:</b> section links, Sitemap, and one line of copyright. The cat fact can stay, but it loads after the page is idle.</li>
+            </ul>
+        </div>
+
+        <div class="card" id="g-components">
+            <h2>Shared components <span class="n">move from the viewer into <code>assets/css/components/</code></span></h2>
+            <p class="muted" style="margin-top:0">These are live samples using the viewer's exact styles.</p>
+            <h3>Buttons</h3>
+            <div class="demo"><button class="btn">Primary</button><button class="btn ghost">Secondary</button><button class="btn ghost" style="padding:5px 10px;font-size:13px">Small</button></div>
+            <h3>Badges, tiles, pills</h3>
+            <div class="demo">
+                <span class="d-badge">Survival</span><span class="d-badge g">Online</span><span class="d-badge r">Hardcore</span><span class="d-badge p">Op</span><span class="d-badge b">Flying</span>
+                <div class="d-tile"><b>1,204</b><span>items</span></div><div class="d-tile"><b>47h</b><span>played</span></div>
+                <span class="d-pills"><a href="#">Inventory</a> <a href="#">Stats</a> <a href="#">Raw NBT</a></span>
+            </div>
+            <h3>Search, progress, messages</h3>
+            <div class="demo">
+                <input class="d-search" type="search" placeholder="Search…  ( / )">
+                <div class="d-prog"><i></i></div>
+                <div class="d-err">Could not read that file.</div>
+                <div class="d-note">Uploaded. It's being processed.</div>
+            </div>
+            <table style="margin-top:12px">
+                <tr><th>Component</th><th>Class</th><th>Used for</th></tr>
+                <tr><td>Button</td><td><code>.btn</code> <code>.primary</code> <code>.small</code></td><td>All actions</td></tr>
+                <tr><td>Card</td><td><code>.card</code> + <code>h2 .n</code> count</td><td>Every content block</td></tr>
+                <tr><td>Masonry</td><td><code>.masonry</code></td><td>Mixed-height card groups</td></tr>
+                <tr><td>Tile grid</td><td><code>.tiles</code> / <code>.tile</code></td><td>Headline numbers</td></tr>
+                <tr><td>Badge</td><td><code>.badge .g .r .p .b</code></td><td>Status labels</td></tr>
+                <tr><td>Row list</td><td><code>.rows</code> / <code>.rowi</code></td><td>Lists with an icon, text and a value</td></tr>
+                <tr><td>Key / value</td><td><code>.kv</code></td><td>Detail facts</td></tr>
+                <tr><td>Pill tabs</td><td><code>.stabs</code></td><td>Switching panels inside a card</td></tr>
+                <tr><td>Jump nav</td><td><code>.jump</code></td><td>Long pages</td></tr>
+                <tr><td>Toolbar</td><td><code>.bar</code> (sticky)</td><td>Tool pages</td></tr>
+                <tr><td>Drop zone</td><td><code>.drop</code></td><td>File tools (NBT viewer, Litematica converter, map art)</td></tr>
+                <tr><td>Drawer</td><td><code>#drawer</code></td><td>Item and row details</td></tr>
+                <tr><td>Dialog</td><td>native <code>&lt;dialog&gt;</code></td><td>Settings, share, confirmations</td></tr>
+                <tr><td>Toast</td><td><code>.err</code> / <code>.note</code></td><td>Feedback</td></tr>
+                <tr><td>Progress</td><td><code>.progress</code></td><td>Completion bars</td></tr>
+                <tr><td>Tree</td><td><code>.tree</code> (lazy <code>&lt;details&gt;</code>)</td><td>Raw JSON or NBT anywhere</td></tr>
+            </table>
+            <p class="muted" style="margin-bottom:0">Shared JS (<code>assets/js/ui.js</code>): <code>$</code>, <code>$$</code>, <code>esc()</code>, <code>store</code> (safe localStorage), <code>toast()</code>, <code>copy()</code>, <code>debounce()</code>, <code>ago()</code>, and the <code>/</code> and <code>Esc</code> keyboard handling. Pages import only what they use.</p>
+        </div>
+
+        <div class="card" id="g-anatomy">
+            <h2>Page anatomy</h2>
+<pre class="anatomy">┌──────────────────────────────────────────────────────────────┐
+│ [logo] Minecraft▾ Games▾ Books▾ Tools▾ Extras▾ About  [/ 🔍] │  site header (PHP, from site.json)
+├──────────────────────────────────────────────────────────────┤
+│ Minecraft:  Overview  Tools  Projects  Screenshots  Shop     │  section sub-nav (only inside a section)
+├──────────────────────────────────────────────────────────────┤
+│ Home › Minecraft › Tools › Nether Portal                     │  breadcrumbs (muted, 13px)
+│                                                              │
+│ Nether Portal Converter                                      │  h1, clamp() size
+│ Convert Overworld ↔ Nether coordinates.                      │  one muted line, no more
+│                                                              │
+│ ┌ sticky toolbar: [search] [actions…]   [Primary] ┐          │  tool pages only
+│ (Inputs)(Results)(Raw)                                       │  jump pills, only if long
+│                                                              │
+│ ┌ card ─────────────┐ ┌ card ──────────┐ ┌ card ─────┐       │  auto-fill / masonry
+│ │ Heading     3 · 12│ │                │ │           │       │
+│ └───────────────────┘ └────────────────┘ └───────────┘       │
+│                                                              │
+│ More in Minecraft Tools:  Storage Sorter · Shulker Calc · …  │  page-nav.php
+├──────────────────────────────────────────────────────────────┤
+│ Minecraft · Games · Books · Tools · Extras · Sitemap   © 2026│  footer
+└──────────────────────────────────────────────────────────────┘</pre>
+        </div>
+
+        <div class="card" id="g-a11y">
+            <h2>Accessibility basics</h2>
+            <ul class="plain">
+                <li>Visible <code>:focus-visible</code> ring in <code>--accent</code> on everything clickable. Never remove an outline without a replacement.</li>
+                <li>Real <code>&lt;button&gt;</code> elements for actions and <code>&lt;a&gt;</code> for navigation (not clickable divs).</li>
+                <li><code>aria-hidden</code> or <code>aria-expanded</code> on drawers and menus (the viewer already does this <span class="ref">nbtviewer:1678</span>). <code>role="option"</code> in custom pickers.</li>
+                <li>Every image has <code>alt</code> (empty if decorative). Every input has a label.</li>
+                <li>Full keyboard use: Tab through everything, <code>Esc</code> closes, Enter activates.</li>
+                <li>One <code>&lt;h1&gt;</code> per page, with headings in order.</li>
+            </ul>
+        </div>
+
+        <div class="card" id="g-fix">
+            <h2>Lessons from the viewer <span class="n">things not to repeat</span></h2>
+            <ul class="plain">
+                <li><b>It spends about 10 lines undoing <code>global.css</code></b> (<code>:where(...) button { padding:0; background:none… }</code>, <code>!important</code> on the picker, and <code>margin:auto</code> on dialogs because global zeroes every margin) <span class="ref">nbtviewer:42–47, 361</span>. <b>Fix:</b> the new <code>global.css</code> must not style bare <code>button</code>, <code>input</code>, <code>label</code>, <code>table</code> or <code>*</code> margins. Components are opt-in classes.</li>
+                <li><b>Lots of inline <code>style=""</code></b> in templates (dialogs, drawer headings, flag icons). <b>Fix:</b> give them small classes.</li>
+                <li><b>Glint and the idle spin ignore reduced-motion.</b> <b>Fix:</b> add a <code>prefers-reduced-motion</code> block.</li>
+                <li><b>Hard-coded <code>/minecraft/items_1.21.11/</code> paths</b> (4 places), which break once that duplicate folder is deleted. <b>Fix:</b> use one <code>ITEMS_BASE</code> constant pointing at <code>/minecraft/tools/item-list/</code>.</li>
+                <li><b>The 34 MB <code>merged_resource_pack.zip</code> and example JSONs sit in the web root.</b> Keep only the example the "Try an example" button uses. Move the rest to <code>_dev/</code>.</li>
+                <li><b>160 KB in one file is fine for a tool</b>, but the shared parts (buttons, cards, badges, drawer, dialog, toast, tree) belong in <code>components/</code> so other pages get them for free and the browser caches them.</li>
+                <li><b>Some greys are hard-coded</b> (<code>#3a3a3a</code>, <code>#474747</code>, <code>#555</code>). <b>Fix:</b> map them to tokens (<code>--btn2</code>, <code>--btn2-hover</code>, <code>--line-strong</code>).</li>
+            </ul>
+        </div>
+
+        <div class="card" id="g-sitewide">
+            <h2>Site-wide problems these rules fix</h2>
+            <table>
+                <tr><th>Today</th><th>Change</th></tr>
+                <tr><td>jQuery is loaded on <b>every</b> PHP page by <code>footer.php</code></td><td>Load it only on the few pages that use it, then rewrite those pages in plain JS</td></tr>
+                <tr><td>The Font Awesome kit loads on every page for one icon</td><td>Use inline SVG icons (114 already exist in <code>images/icons</code>)</td></tr>
+                <tr><td><code>global.css</code> sets the font to <code>'Roboto'</code> without loading it</td><td>Use the system font stack</td></tr>
+                <tr><td>The homepage outputs <b>all 56 slideshow images</b> at once</td><td>Load the first eagerly, then each next image just before it's shown. Serve one responsive set with <code>srcset</code></td></tr>
+                <tr><td>The pets gallery is 1.5 GB of full-size photos</td><td>Generate 400px WebP thumbnails and load the full image on click</td></tr>
+                <tr><td>The cat fact is fetched from Heroku on every page load</td><td>Fetch it in <code>requestIdleCallback</code>, or drop it</td></tr>
+                <tr><td>The header is fetched by JS for <code>.html</code> pages, so it appears late</td><td>Render it in PHP, so those pages become <code>.php</code> or get it from the server</td></tr>
+                <tr><td><code>button:hover { background: lime }</code>, 0.5s input transitions</td><td>Use the motion and colour rules above</td></tr>
+                <tr><td>Many "Untitled" pages and no meta descriptions</td><td><code>includes/head.php</code> sets them from <code>site.json</code></td></tr>
+            </table>
+        </div>
+
+        <div class="card" id="g-checklist">
+            <h2>Per-page checklist <span class="n">tick these off as each page moves (saved in this browser)</span></h2>
+            <ul class="check" id="checklist"></ul>
+        </div>
+    </section>
+
     <!-- PHASES -->
     <section class="tab" id="tab-phases">
         <div class="card" id="phases"></div>
@@ -237,7 +607,15 @@ const KEY = 'reorg-plan-v1';
 function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
 const state = load();
-state.answers = state.answers || {};
+// answers given in chat on 2026-10-17 - used unless changed on this page
+const DEFAULT_ANSWERS = {
+    books: 'index.php', steamIndex: 'index.php', steamGame: 'game.php', minions: 'minions.php', randomImage: 'image.php',
+    yugioh: 'yugioh.php', thegame: 'index.php', shulker: 'shulker-schematic-calculator.html', transcripts: 'index.php',
+    private: 'Keep on site behind a password', docroot: 'Not sure', funName: 'Extras', gamesMenu: 'One merged Games menu',
+    shopPlace: 'Under /minecraft/shop/',
+};
+state.answers = Object.assign({}, DEFAULT_ANSWERS, state.answers);
+state.checks = state.checks || {};
 state.phases = state.phases || {};
 
 /* ---------- tabs ---------- */
@@ -284,7 +662,7 @@ questions.forEach(item => {
         const input = document.createElement('input');
         input.type = 'radio'; input.name = item.id; input.value = o;
         input.checked = state.answers[item.id] === o;
-        input.addEventListener('change', () => { state.answers[item.id] = o; save(); updateProgress(); renderNav(); });
+        input.addEventListener('change', () => { state.answers[item.id] = o; save(); updateProgress(); renderNav(); renderDecisions(); });
         label.append(input, o);
         opts.appendChild(label);
     });
@@ -315,10 +693,16 @@ document.getElementById('copy').addEventListener('click', () => {
 document.getElementById('reset').addEventListener('click', () => {
     if (!confirm('Clear all answers?')) return;
     state.answers = {}; state.notes = ''; notes.value = ''; save();
+    renderDecisions();
     document.querySelectorAll('#questions input').forEach(i => i.checked = false);
     document.getElementById('output').style.display = 'none';
     updateProgress(); renderNav();
 });
+
+function renderDecisions() {
+    document.getElementById('decisions').innerHTML = realQs.map(q =>
+        '<div><span>' + q.q + '</span><b>' + esc(state.answers[q.id] || '-') + '</b></div>').join('');
+}
 
 /* ---------- tree ----------
    Format: two spaces per level. "name | tag | from | note" (tag/from/note optional). */
@@ -411,8 +795,8 @@ Website/
     tips/ | moved | tips.php
     downloads/ | moved | Invisible Bossbar (all).zip
     shop/ | moved | shop/ | Captainalism: books, casino, requests
-  games/
-    index.php | | | hub
+  games/ | | | one merged menu: play + stats and guides
+    index.php | | | hub with "Play" and "Stats & guides" groups
     chapter-oracle/ | moved | games/chapterguesser/ | live files only
     guess-who/ | merged | games/guesswho/ | one shared game.js
       og/ · atla/ · template/
@@ -423,15 +807,13 @@ Website/
       harry-potter/ | merged | quiz/HarryPotter/* | one engine, 4 question sets
         engine/ | merged | 4 copies of js/css/php
         sets/ | moved | */assets/json/
-  gaming/ | new | | stats and guides
-    index.php | new | | hub
-    steam/ | moved | steam/ + php/steam.php
+    steam/ | moved | steam/ + php/steam.php | index.php + game.php kept; steam2/newgame archived
     retro/ | moved | retro/
     factorio/ | moved | factorio/
       commands/ | moved | Code/factorio.html
     hypixel/ | moved | hypixel/
       collections/ | moved | hypixel/collections/
-      minions/ | moved | minions.php or minions2.php
+      minions/ | moved | minions.php | minions2.php archived
       ghast-calculator/ | moved | calculators/ghast.php
       regex-builder/ | moved | hypixel/filter.html
     yugioh/ | moved | games/yugioh/
@@ -451,8 +833,8 @@ Website/
     docker-script/ | moved | Code/docker.php
     install-script/ | moved | Code/install.html
     launchers/ | moved | calculator.html, clip.html
-  fun/ | moved | extras/
-    index.php | moved | extras/index.php | broken links fixed
+  extras/ | | | keeps its name, so most old /extras/ links survive
+    index.php | | | hub, broken links fixed
     trump-quotes/ | moved | extras/trump.php
     insults/ | moved | extras/insult.php
     facts/ | moved | extras/fact.php
@@ -464,7 +846,7 @@ Website/
     memes/ | moved | memes/
     quotes/ | moved | quote.php
     pets/ | moved | photos/
-  private/ | private | | blocked or outside the web root
+  private/ | private | | password-protected (.htaccess basic auth)
     bs/ | private | Code/bs/
     transcripts/ | private | Code/transcripts/
     booru/ | private | Code/booru.php
@@ -646,11 +1028,46 @@ function setCrumbs(section, url, page) {
 document.addEventListener('click', () => document.querySelectorAll('#mocknav .item').forEach(i => i.classList.remove('open')));
 renderNav();
 
+renderDecisions();
+
+/* ---------- design guide ---------- */
+document.getElementById('demoDrawerBtn').addEventListener('click', () => document.getElementById('demoDrawer').classList.toggle('open'));
+
+const checklist = [
+    'Uses includes/head.php, header.php and footer.php, and has an entry in data/site.json (title, description, keywords)',
+    'Real <title>, one <h1>, and a one-line muted description under it',
+    'Only uses colour tokens: no hard-coded hex values, works on the dark palette',
+    'No styles for bare button / input / label: uses .btn, .card and other component classes',
+    'Layout checked at 320px, 768px and 1440px, with no sideways scroll',
+    'Grids use auto-fill / minmax, sizes use clamp() where they repeat',
+    'All scripts deferred. Libraries load on first use. No jQuery unless it is truly needed',
+    'Images: WebP, width/height set, lazy below the fold, thumbnails for galleries',
+    'External API calls are cached server-side with real Cache-Control headers',
+    'Lists of more than 250 items render in chunks; hidden content builds on open',
+    'Search and filters are debounced (~80ms) and toggle classes instead of re-rendering',
+    'Animations only use transform/opacity, are 200ms or shorter, and respect prefers-reduced-motion',
+    'No empty sections, no autoplay, no console.log left in',
+    'Keyboard: / focuses search (if any), Esc closes the top layer, visible focus ring',
+    'Fallbacks: broken images and failed fetches show something sensible plus a toast',
+    'Old URL added to the 301 map in .htaccess and tested',
+];
+const clEl = document.getElementById('checklist');
+checklist.forEach((text, i) => {
+    const li = document.createElement('li');
+    const box = document.createElement('input');
+    box.type = 'checkbox'; box.checked = !!state.checks[i];
+    box.addEventListener('change', () => { state.checks[i] = box.checked; save(); });
+    const span = document.createElement('span');
+    span.textContent = text;
+    li.append(box, span);
+    clEl.appendChild(li);
+});
+
 /* ---------- phases ---------- */
 const phases = [
     ['Safety', 'Track /php/ in git (except config.php), add config.example.php, tag the current state as pre-reorg.'],
     ['Remove dead weight', 'Delete the duplicates and empty files, and resolve each v1/v2 pair using your answers.'],
-    ['Private and dev', 'Move Discord exports, transcripts, booru, kindle and jellyfin to private/. Move the Factorio mod, samples and tests to _dev/. Add deny rules.'],
+    ['Private and dev', 'Move Discord exports, transcripts, booru, kindle and jellyfin to private/ and password-protect it with .htaccess basic auth. Move the Factorio mod, samples and tests to _dev/ and block it.'],
     ['Infrastructure', 'Add includes/, assets/, data/site.json and the new header and footer. Leave the old /php/header.php as a one-line shim for now.'],
     ['Media', 'Move images/ to assets/img + media/. Rewrite the ~310 /images/ and 33 /css/ references and add 301s. Fix the scandir() paths on the home and Minecraft pages.'],
     ['Sections one by one', 'Minecraft → Games → Gaming → Books → Tools → Fun: git mv, convert each page to the standard template, add 301s.'],
