@@ -370,6 +370,59 @@
         dialog::backdrop { background: #000a; }
         dialog input { width: 100%; background: #161616; border: 1px solid #4a4a4a; color: var(--text); border-radius: 8px; padding: 8px 10px; margin: 4px 0 10px; }
         .err { background: #4a2424; border: 1px solid #8a3a3a; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; }
+
+        /* ---------- world / server files ---------- */
+        /* private values (IPs, chat, passwords, seeds) stay behind a click and never go into share links */
+        .priv { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px !important; padding: 1px 9px !important; border-radius: 6px !important; color: #e8c872 !important; border: 1px dashed #8a6d2a !important; background: repeating-linear-gradient(45deg, #3a2d18 0 6px, #33280f 6px 12px) !important; }
+        .priv:hover { border-style: solid !important; }
+        .revealed { display: inline-block; max-width: 100%; background: #2f2a1c; border-radius: 6px; padding: 2px 6px; box-shadow: inset 0 0 0 1px #6b5a2a; overflow-wrap: anywhere; }
+        .sub { font-size: 12px; color: var(--muted); font-weight: 400; margin: 14px 0 6px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+        .scroll { max-height: 420px; overflow-y: auto; }
+        .searching .srow:not(.hit) { display: none; }
+        .srow { flex-wrap: wrap; }
+        .kv > * { min-width: 0; overflow-wrap: anywhere; }
+        .rowi .ico { position: relative; width: 30px; height: 30px; flex: none; }
+        .mapimg { display: block; width: 100%; max-width: 256px; image-rendering: pixelated; border-radius: 4px; box-shadow: 0 0 0 2px #000; background: #1a1a1a; }
+        img[data-map] { image-rendering: pixelated; }
+        .maps { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+        .maps figure { margin: 0; font-size: 12px; color: var(--muted); }
+        .maps figcaption { margin-top: 4px; }
+        .modslots { display: flex; flex-wrap: wrap; gap: 6px 12px; max-width: calc(var(--s) * 9 + 4px); }
+        .modslots .ms > span { display: block; font-size: 11px; color: #9a9a9a; margin: 0 0 2px 2px; }
+        .modrow img { width: 32px; height: 32px; image-rendering: pixelated; flex: none; border-radius: 4px; }
+        .modrow .desc { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        pre.cfg { white-space: pre-wrap; word-break: break-all; font-size: 12px; max-height: 420px; overflow: auto; background: #1c1c1c; padding: 8px; border-radius: 8px; margin: 6px 0 0; }
+        .fileblk { margin-top: 6px; }
+        .fileblk > summary { cursor: pointer; font-size: 13px; padding: 4px 8px; border-radius: 6px; background: var(--card2); overflow-wrap: anywhere; }
+        .fileblk > .tree { margin-top: 6px; }
+
+        /* ---------- schematic folder browser ---------- */
+        .fbrowse { display: grid; grid-template-columns: minmax(160px, 240px) 1fr; gap: 12px; align-items: start; }
+        .ftree, .fpane .rows { max-height: 420px; overflow-y: auto; }
+        .ftree { display: flex; flex-direction: column; gap: 2px; background: #1c1c1c; border-radius: 8px; padding: 4px; }
+        .fbrowse button { text-align: left; }
+        .fnode { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 6px; font-size: 13px; min-width: 0; }
+        .fnode .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .fnode img { width: 16px; height: 16px; image-rendering: pixelated; flex: none; }
+        .fnode small { color: var(--muted); }
+        .fnode:hover, .fitem:hover { background: #2a2a2a; }
+        .fnode.on { background: var(--card2); box-shadow: inset 2px 0 var(--accent); }
+        .fitem { width: 100%; border: 1px solid transparent; }
+        .fitem.on { border-color: var(--accent); }
+        .fitem .grow { overflow-wrap: anywhere; }
+        .fpane { min-width: 0; }
+        .fcrumbs { display: flex; flex-wrap: wrap; gap: 4px; font-size: 13px; margin-bottom: 8px; color: var(--muted); }
+        .fcrumbs button { color: var(--accent); }
+        .fcrumbs button:hover { text-decoration: underline; }
+        #player:not(.searching) .fitem[data-off], #player.searching .fitem:not(.srow) { display: none; }
+        .fsel { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+        .fsel > h3 { margin: 0 0 8px; font-size: 15px; }
+        .fsel > h3 .n { color: var(--muted); font-weight: 400; font-size: 12px; }
+        @media (max-width: 640px) { .fbrowse { grid-template-columns: 1fr; } .ftree { max-height: 200px; } }
+        .drop details { max-width: 760px; margin: 14px auto 0; text-align: left; font-size: 13px; }
+        .drop details summary { cursor: pointer; text-align: center; color: var(--muted); }
+        .drop details ul { margin: 8px 0 0; padding-left: 20px; line-height: 1.6; }
     </style>
 
     <div class="nbt" id="app">
@@ -379,12 +432,25 @@
             <img class="big-ico" src="api.php?item=chest" alt="" onerror="this.src='/minecraft/itemlist/minecraft_chest.png'">
             <h1>NBT Viewer</h1>
             <p>Drop one or more Minecraft player files here to explore their inventory, ender chest, stats and every last bit of NBT data.</p>
-            <p class="muted">Files are read in your browser and only leave it if you press Share. Accepts <span class="mono">.dat</span>, <span class="mono">.dat_old</span>, <span class="mono">.nbt</span>, <span class="mono">.json</span> and SNBT (<span class="mono">/data get</span> output).<br>
-                Player files live in <span class="mono">world/playerdata/&lt;uuid&gt;.dat</span> (<span class="mono">world/players/data/</span> since 26.1) - you can also drop <span class="mono">stats/</span> and <span class="mono">advancements/</span> files, or a whole world folder.</p>
+            <p class="muted">Files are read in your browser and only leave it if you press Share. Private details like IP addresses, chat and passwords are hidden until you click them and are never put in share links.<br>
+                Player files live in <span class="mono">world/playerdata/&lt;uuid&gt;.dat</span> (<span class="mono">world/players/data/</span> since 26.1). Drop a whole world or server folder, or a <span class="mono">.zip</span> / <span class="mono">.tar.gz</span> backup, to pick up everything below at once.</p>
             <div class="row">
                 <button class="btn primary" id="pick">Choose files</button>
+                <button class="btn" id="pickDir">Choose folder</button>
                 <button class="btn" data-example="22159541-fde8-41e6-a104-593e1cb3a456 larger example.json">Try an example</button>
             </div>
+            <details>
+                <summary>What can I drop?</summary>
+                <ul>
+                    <li><b>Players:</b> <span class="mono">playerdata/*.dat</span>, <span class="mono">stats/</span>, <span class="mono">advancements/</span>, SNBT from <span class="mono">/data get</span>, singleplayer <span class="mono">level.dat</span></li>
+                    <li><b>Server:</b> <span class="mono">usercache.json</span>, <span class="mono">ops.json</span>, <span class="mono">whitelist.json</span>, <span class="mono">banned-players.json</span>, <span class="mono">banned-ips.json</span>, <span class="mono">server.properties</span>, <span class="mono">logs/</span> (sessions, deaths, chat)</li>
+                    <li><b>World:</b> <span class="mono">level.dat</span>, <span class="mono">data/scoreboard.dat</span>, <span class="mono">data/map_*.dat</span> (maps drawn in the inventory), <span class="mono">data/command_storage_*.dat</span>, <span class="mono">uid.dat</span>, <span class="mono">entities/</span> (owned pets - drop that folder on its own, it is skipped inside a world)</li>
+                    <li><b>Paper / Spigot / Bukkit:</b> <span class="mono">bukkit.yml</span>, <span class="mono">spigot.yml</span>, <span class="mono">config/paper-*.yml</span>, plugin configs, EssentialsX userdata, LuckPerms (YAML/JSON storage or <span class="mono">/lp export</span>), mcMMO, GriefPrevention, WorldGuard, Towny, Multiverse</li>
+                    <li><b>Fabric / Forge / NeoForge:</b> <span class="mono">mods/*.jar</span> (names and icons for modded items), Trinkets and Curios slots, <span class="mono">config/</span>, <span class="mono">serverconfig/</span>, FTB Quests / Teams / Chunks, Sophisticated Backpacks</li>
+                    <li><b>Client:</b> <span class="mono">hotbar.nbt</span> (saved creative hotbars), <span class="mono">servers.dat</span>, resource pack <span class="mono">.zip</span>s (local textures)</li>
+                    <li><b>Builds:</b> <span class="mono">.schem</span>, <span class="mono">.litematic</span>, <span class="mono">.schematic</span> and structure <span class="mono">.nbt</span> files - size and material list</li>
+                </ul>
+            </details>
         </section>
 
         <div id="viewer" class="hide">
@@ -392,13 +458,15 @@
                 <div class="tabs" id="tabs"></div>
                 <input class="search" id="q" type="search" placeholder="Search items, enchants, keys…  ( / )" autocomplete="off">
                 <button class="btn small" id="add" title="Add more files">+ Add</button>
+                <button class="btn small hide" id="srvBtn" title="World, server, plugin and mod files">World &amp; server</button>
                 <button class="btn small" id="rpBtn" title="Render items with custom resource packs">Resource packs</button>
                 <button class="btn small primary" id="shareBtn" title="Create a link to this player">Share</button>
             </div>
             <div id="player"></div>
         </div>
 
-        <input type="file" id="file" multiple accept=".dat,.dat_old,.nbt,.json,.snbt,.txt" hidden>
+        <input type="file" id="file" multiple hidden>
+        <input type="file" id="dirFile" webkitdirectory multiple hidden>
         <input type="file" id="extraFile" multiple accept=".json" hidden>
     </div>
 
@@ -420,7 +488,11 @@
     </dialog>
 
     <dialog id="shareDlg">
-        <h2 style="margin-top:0">Share player</h2>
+        <h2 style="margin-top:0" id="shareTitle">Share player</h2>
+        <div id="shareScope" class="hide" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;font-size:14px">
+            <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="radio" name="shareScope" value="one" checked style="width:auto;margin:0"><span id="shareOneLbl">Just this player</span></label>
+            <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="radio" name="shareScope" value="all" style="width:auto;margin:0"><span id="shareAllLbl">All players</span></label>
+        </div>
         <p id="shareMsg" class="muted" style="font-size:14px"></p>
         <input id="shareUrl" readonly>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
@@ -525,22 +597,28 @@
             function val() {
                 ws();
                 const c = s[i];
+                // FTB Quests style SNBT separates entries with newlines instead of commas - accept both
                 if (c === '{') {
-                    i++; const o = {}; ws();
-                    if (s[i] === '}') { i++; return o; }
+                    i++; const o = {};
                     for (; ;) {
-                        ws(); const k = s[i] === '"' || s[i] === "'" ? quoted() : bare(true);
+                        ws(); if (s[i] === '}') { i++; return o; }
+                        if (i >= s.length) fail();
+                        const k = s[i] === '"' || s[i] === "'" ? quoted() : bare(true);
                         ws(); if (s[i++] !== ':') fail();
                         o[k] = val(); ws();
-                        const d = s[i++]; if (d === '}') return o; if (d !== ',') fail();
+                        if (s[i] === ',') i++;
                     }
                 }
                 if (c === '[') {
                     i++; ws();
                     if (/[BIL]/.test(s[i]) && s[i + 1] === ';') i += 2;
-                    const a = []; ws();
-                    if (s[i] === ']') { i++; return a; }
-                    for (; ;) { a.push(val()); ws(); const d = s[i++]; if (d === ']') return a; if (d !== ',') fail(); }
+                    const a = [];
+                    for (; ;) {
+                        ws(); if (s[i] === ']') { i++; return a; }
+                        if (i >= s.length) fail();
+                        a.push(val()); ws();
+                        if (s[i] === ',') i++;
+                    }
                 }
                 if (c === '"' || c === "'") return quoted();
                 const t = bare();
@@ -560,6 +638,236 @@
             const text = new TextDecoder().decode(u).replace(/^﻿/, '');
             try { return JSON.parse(text); } catch (e) { }
             return parseSNBT(text);
+        }
+        const inflateAs = async (u, fmt) => new Uint8Array(await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream(fmt))).arrayBuffer());
+        const textOf = (u) => new TextDecoder().decode(u).replace(/^﻿/, '');
+
+        // JSON with comments, trailing commas and bare keys (json5 configs, some mod metadata)
+        function parseLoose(text) {
+            try { return JSON.parse(text); } catch (e) { }
+            let out = '', i = 0;
+            while (i < text.length) {
+                const c = text[i];
+                if (c === '"' || c === "'") {
+                    let j = i + 1, s = '';
+                    while (j < text.length && text[j] !== c) { if (text[j] === '\\') { s += text[j] + text[j + 1]; j += 2; continue; } s += text[j++]; }
+                    out += c === '"' ? '"' + s + '"' : '"' + s.replace(/\\'/g, "'").replace(/"/g, '\\"') + '"';
+                    i = j + 1;
+                    continue;
+                }
+                if (c === '/' && text[i + 1] === '/') { while (i < text.length && text[i] !== '\n') i++; continue; }
+                if (c === '/' && text[i + 1] === '*') { const e = text.indexOf('*/', i + 2); i = e < 0 ? text.length : e + 2; continue; }
+                out += c; i++;
+            }
+            return JSON.parse(out.replace(/,(\s*[}\]])/g, '$1').replace(/([{,]\s*)([A-Za-z_$][\w$-]*)(\s*:)/g, '$1"$2"$3'));
+        }
+
+        // Java .properties (server.properties, Towny data, old .lang files)
+        function parseProps(text) {
+            const unesc = (s) => s.replace(/\\(u[0-9a-fA-F]{4}|.)/g, (m, e) => (e.length === 5 ? String.fromCharCode(parseInt(e.slice(1), 16)) : { n: '\n', t: '\t', r: '\r' }[e] ?? e));
+            const o = {};
+            for (const raw of text.replace(/\\\r?\n[ \t]*/g, '').split(/\r?\n/)) {
+                const l = raw.replace(/^\s+/, '');
+                if (!l || l[0] === '#' || l[0] === '!') continue;
+                const m = /^((?:\\.|[^=:\s\\])+)\s*[=:\s]?\s*(.*)$/.exec(l);
+                if (m) o[unesc(m[1])] = unesc(m[2]);
+            }
+            return o;
+        }
+
+        // TOML (Forge/NeoForge configs and mods.toml) - dates are kept as text
+        function parseTOML(s) {
+            const root = {};
+            let cur = root, i = 0;
+            const fail = (m) => { throw new Error(`TOML ${m} on line ${s.slice(0, i).split('\n').length}`); };
+            const ws = () => { while (s[i] === ' ' || s[i] === '\t') i++; };
+            const wsnl = () => { for (; ;) { while (i < s.length && /\s/.test(s[i])) i++; if (s[i] !== '#') return; while (i < s.length && s[i] !== '\n') i++; } };
+            const unesc = (r) => r.replace(/\\(u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8}|.)/g, (m, e) => (e.length > 1 ? String.fromCodePoint(parseInt(e.slice(1), 16)) : { n: '\n', t: '\t', r: '\r', b: '\b', f: '\f' }[e] ?? e));
+            function str() {
+                const q = s[i];
+                if (s.startsWith(q + q + q, i)) {
+                    i += 3;
+                    if (s[i] === '\r') i++;
+                    if (s[i] === '\n') i++;
+                    const end = s.indexOf(q + q + q, i);
+                    if (end < 0) fail('unclosed string');
+                    let r = s.slice(i, end);
+                    i = end + 3;
+                    while (s[i] === q) { r += q; i++; }
+                    return q === '"' ? unesc(r.replace(/\\\r?\n\s*/g, '')) : r;
+                }
+                i++;
+                let r = '';
+                while (i < s.length && s[i] !== q) {
+                    if (s[i] === '\n') fail('newline in string');
+                    if (q === '"' && s[i] === '\\') { r += s[i] + s[i + 1]; i += 2; continue; }
+                    r += s[i++];
+                }
+                i++;
+                return q === '"' ? unesc(r) : r;
+            }
+            function key() {
+                const parts = [];
+                for (; ;) {
+                    ws();
+                    if (s[i] === '"' || s[i] === "'") parts.push(str());
+                    else { const st = i; while (i < s.length && /[A-Za-z0-9_-]/.test(s[i])) i++; if (st === i) fail('bad key'); parts.push(s.slice(st, i)); }
+                    ws();
+                    if (s[i] !== '.') return parts;
+                    i++;
+                }
+            }
+            const setPath = (o, parts, v) => { let t = o; parts.slice(0, -1).forEach((p) => { if (!isObj(t[p])) t[p] = {}; t = t[p]; }); t[parts[parts.length - 1]] = v; };
+            function val() {
+                ws();
+                const c = s[i];
+                if (c === '"' || c === "'") return str();
+                if (c === '[') {
+                    i++;
+                    const a = [];
+                    for (; ;) { wsnl(); if (s[i] === ']') { i++; return a; } if (i >= s.length) fail('unclosed array'); a.push(val()); wsnl(); if (s[i] === ',') i++; }
+                }
+                if (c === '{') {
+                    i++;
+                    const o = {};
+                    for (; ;) { ws(); if (s[i] === '}') { i++; return o; } if (i >= s.length || s[i] === '\n') fail('unclosed table'); const k = key(); if (s[i++] !== '=') fail('expected ='); setPath(o, k, val()); ws(); if (s[i] === ',') i++; }
+                }
+                const st = i;
+                while (i < s.length && !/[,\]}\r\n#]/.test(s[i])) i++;
+                const t = s.slice(st, i).trim();
+                if (!t) fail('missing value');
+                if (t === 'true' || t === 'false') return t === 'true';
+                const n = t.replace(/_/g, '');
+                if (/^[+-]?(\d+(\.\d+)?([eE][+-]?\d+)?|0x[0-9a-fA-F]+|0o[0-7]+|0b[01]+|inf|nan)$/.test(n)) return Number(n.replace(/inf/, 'Infinity').replace(/nan/, 'NaN'));
+                return t;
+            }
+            for (; ;) {
+                wsnl();
+                if (i >= s.length) return root;
+                if (s[i] === '[') {
+                    const arr = s[i + 1] === '[';
+                    i += arr ? 2 : 1;
+                    const parts = key();
+                    i += arr ? 2 : 1;
+                    let t = root;
+                    parts.forEach((p, n) => {
+                        if (n === parts.length - 1 && arr) { if (!Array.isArray(t[p])) t[p] = []; const o = {}; t[p].push(o); t = o; return; }
+                        if (Array.isArray(t[p])) t = t[p][t[p].length - 1];
+                        else { if (!isObj(t[p])) t[p] = {}; t = t[p]; }
+                    });
+                    cur = t;
+                    continue;
+                }
+                const k = key();
+                if (s[i++] !== '=') fail('expected =');
+                setPath(cur, k, val());
+            }
+        }
+
+        // YAML (Bukkit/Paper configs, plugin data) - js-yaml is loaded the first time it is needed
+        let yamlLib = null;
+        const loadYaml = () => yamlLib || (yamlLib = new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js';
+            s.onload = () => res(window.jsyaml);
+            s.onerror = () => { yamlLib = null; rej(new Error('the YAML parser could not be loaded')); };
+            document.head.appendChild(s);
+        }));
+        // the JSON round trip turns YAML dates into plain strings
+        const parseYAML = async (text) => JSON.parse(JSON.stringify((await loadYaml()).load(text) ?? null));
+
+        /* ---------- archives: zip / jar (random access) and tar / tar.gz (streamed) ---------- */
+        async function zipList(blob) {
+            const tail = new Uint8Array(await blob.slice(Math.max(0, blob.size - 66000)).arrayBuffer());
+            const tv = new DataView(tail.buffer);
+            let eo = -1;
+            for (let i = tail.length - 22; i >= 0; i--) if (tv.getUint32(i, true) === 0x06054b50) { eo = i; break; }
+            if (eo < 0) throw new Error('not a zip file');
+            let count = tv.getUint16(eo + 10, true), size = tv.getUint32(eo + 12, true), off = tv.getUint32(eo + 16, true);
+            if ((off === 0xffffffff || count === 0xffff) && eo >= 20 && tv.getUint32(eo - 20, true) === 0x07064b50) {
+                const z64 = Number(tv.getBigUint64(eo - 12, true));
+                const z = new DataView(await blob.slice(z64, z64 + 56).arrayBuffer());
+                count = Number(z.getBigUint64(32, true)); size = Number(z.getBigUint64(40, true)); off = Number(z.getBigUint64(48, true));
+            }
+            const cd = new Uint8Array(await blob.slice(off, off + size).arrayBuffer()), dv = new DataView(cd.buffer), td = new TextDecoder();
+            const out = [];
+            for (let p = 0, n = 0; n < count && p + 46 <= cd.length && dv.getUint32(p, true) === 0x02014b50; n++) {
+                const nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true);
+                const time = dv.getUint16(p + 12, true), date = dv.getUint16(p + 14, true);
+                const z = { name: td.decode(cd.subarray(p + 46, p + 46 + nl)).replace(/\\/g, '/'), method: dv.getUint16(p + 10, true), csize: dv.getUint32(p + 20, true), usize: dv.getUint32(p + 24, true), loff: dv.getUint32(p + 42, true) };
+                z.time = new Date(1980 + (date >> 9), ((date >> 5) & 15) - 1, date & 31, time >> 11, (time >> 5) & 63, (time & 31) * 2).getTime();
+                // zip64: oversized values live in the extra field
+                for (let x = p + 46 + nl; x + 4 <= p + 46 + nl + xl; x += 4 + dv.getUint16(x + 2, true)) {
+                    if (dv.getUint16(x, true) !== 1) continue;
+                    let y = x + 4;
+                    if (z.usize === 0xffffffff) { z.usize = Number(dv.getBigUint64(y, true)); y += 8; }
+                    if (z.csize === 0xffffffff) { z.csize = Number(dv.getBigUint64(y, true)); y += 8; }
+                    if (z.loff === 0xffffffff) z.loff = Number(dv.getBigUint64(y, true));
+                }
+                out.push(z);
+                p += 46 + nl + xl + cl;
+            }
+            return out;
+        }
+        async function zipData(blob, z) {
+            const lh = new DataView(await blob.slice(z.loff, z.loff + 30).arrayBuffer());
+            const start = z.loff + 30 + lh.getUint16(26, true) + lh.getUint16(28, true);
+            return blob.slice(start, start + z.csize);
+        }
+        async function zipRead(blob, z) {
+            const raw = await zipData(blob, z);
+            if (z.method === 0) return new Uint8Array(await raw.arrayBuffer());
+            if (z.method === 8) return new Uint8Array(await new Response(raw.stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+            throw new Error('unsupported zip compression (method ' + z.method + ')');
+        }
+        const zipBlobOf = async (blob, z) => (z.method === 0 ? zipData(blob, z) : new Blob([await zipRead(blob, z)]));
+
+        // pulls exact byte counts out of a stream without copying everything that is skipped
+        function byteReader(stream) {
+            const r = stream.getReader(), q = [];
+            let off = 0, avail = 0, done = false;
+            const pull = async () => { const { value, done: d } = await r.read(); if (d) done = true; else if (value.length) { q.push(value); avail += value.length; } };
+            async function consume(n, copy) {
+                while (avail < n && !done) await pull();
+                n = Math.min(n, avail);
+                const out = copy ? new Uint8Array(n) : null;
+                for (let w = 0; w < n;) {
+                    const c = q[0], k = Math.min(n - w, c.length - off);
+                    if (copy) out.set(c.subarray(off, off + k), w);
+                    w += k; off += k;
+                    if (off >= c.length) { q.shift(); off = 0; }
+                }
+                avail -= n;
+                return out;
+            }
+            return {
+                take: (n) => consume(n, true),
+                async skip(n) { while (n > 0) { if (!avail) { if (done) return; await pull(); continue; } const k = Math.min(n, avail); await consume(k, false); n -= k; } },
+            };
+        }
+        // calls want(path) for each file; keeps the bytes of the ones it accepts
+        async function tarList(blob, gz, want) {
+            let stream = blob.stream();
+            if (gz) stream = stream.pipeThrough(new DecompressionStream('gzip'));
+            const rd = byteReader(stream), td = new TextDecoder(), out = [];
+            let longName = null, pax = null;
+            for (; ;) {
+                const h = await rd.take(512);
+                if (!h || h.length < 512 || h.every((b) => b === 0)) return out;
+                const str = (o, n) => { let e = o; while (e < o + n && h[e]) e++; return td.decode(h.subarray(o, e)); };
+                const size = parseInt(str(124, 12).trim() || '0', 8) || 0, padded = Math.ceil(size / 512) * 512;
+                const type = String.fromCharCode(h[156] || 48);
+                let name = str(0, 100);
+                if (str(257, 5) === 'ustar' && str(345, 155)) name = str(345, 155) + '/' + name;
+                if (longName) name = longName;
+                if (pax && pax.path) name = pax.path;
+                longName = pax = null;
+                if (type === 'L') { longName = td.decode((await rd.take(padded)).subarray(0, size)).replace(/\0+$/, ''); continue; }
+                if (type === 'x') { pax = {}; for (const m of td.decode((await rd.take(padded)).subarray(0, size)).matchAll(/\d+ ([^=]+)=([^\n]*)\n/g)) pax[m[1]] = m[2]; continue; }
+                const path = name.replace(/^\.\//, '');
+                if ((type === '0' || type === '7') && size < 512 * 1024 * 1024 && want(path)) out.push({ path, data: (await rd.take(padded)).subarray(0, size) });
+                else await rd.skip(padded);
+            }
         }
 
         /* =====================================================================
@@ -693,6 +1001,18 @@
             if (b === 'wall_torch') return 'torch';
             return b.replace(/_wall_(torch|sign|hanging_sign|banner|head|skull|fan)$/, '_$1');
         };
+
+        // map item colours: base colour id = byte >> 2, brightness = byte & 3
+        const MAP_BASE = [null, [127, 178, 56], [247, 233, 163], [199, 199, 199], [255, 0, 0], [160, 160, 255], [167, 167, 167], [0, 124, 0], [255, 255, 255], [164, 168, 184], [151, 109, 77], [112, 112, 112], [64, 64, 255], [143, 119, 72], [255, 252, 245], [216, 127, 51], [178, 76, 216], [102, 153, 216], [229, 229, 51], [127, 204, 25], [242, 127, 165], [76, 76, 76], [153, 153, 153], [76, 127, 153], [127, 63, 178], [51, 76, 178], [102, 76, 51], [102, 127, 51], [153, 51, 51], [25, 25, 25], [250, 238, 77], [92, 219, 213], [74, 128, 255], [0, 217, 58], [129, 86, 49], [112, 2, 0], [209, 177, 161], [159, 82, 36], [149, 87, 108], [112, 108, 138], [186, 133, 36], [103, 117, 53], [160, 77, 78], [57, 41, 35], [135, 107, 98], [87, 92, 92], [122, 73, 88], [76, 62, 92], [76, 50, 35], [76, 82, 42], [142, 60, 46], [37, 22, 16], [189, 48, 49], [148, 63, 97], [92, 25, 29], [22, 126, 134], [58, 142, 140], [86, 44, 62], [20, 180, 133], [100, 100, 100], [216, 175, 147], [127, 167, 150]];
+        const MAP_SHADE = [180, 220, 255, 135];
+
+        // mcMMO flatfile columns: [skill, level column, xp column]
+        const MCMMO = [['Mining', 1, 4], ['Woodcutting', 5, 6], ['Repair', 7, 15], ['Unarmed', 8, 16], ['Herbalism', 9, 17], ['Excavation', 10, 18], ['Archery', 11, 19], ['Swords', 12, 20], ['Axes', 13, 21], ['Acrobatics', 14, 22], ['Taming', 24, 25], ['Fishing', 34, 35], ['Alchemy', 39, 40], ['Crossbows', 46, 45], ['Tridents', 48, 47], ['Maces', 53, 52]];
+        const MCMMO_ICON = { Mining: 'iron_pickaxe', Woodcutting: 'iron_axe', Repair: 'anvil', Unarmed: 'leather', Herbalism: 'wheat', Excavation: 'iron_shovel', Archery: 'bow', Swords: 'iron_sword', Axes: 'golden_axe', Acrobatics: 'feather', Taming: 'bone', Fishing: 'fishing_rod', Alchemy: 'brewing_stand', Crossbows: 'crossbow', Tridents: 'trident', Maces: 'mace' };
+
+        // config keys whose values are hidden until clicked (and never shared)
+        const PRIVATE_KEY = /pass(word)?|secret|token|api[-_.]?key|private[-_.]?key|webhook|seed|^server-ip$|ip-?address|credential|salt|jdbc|license/i;
+        const DEATH_RE = /^(was |were |died|drowned|blew up|hit the ground|fell |went up in flames|went off with a bang|walked into|burned to death|tried to swim in lava|suffocated|starved|froze to death|withered away|experienced kinetic energy|discovered the floor|didn't want to live|left the confines|is no more)/;
 
         /* =====================================================================
            Text components (names, lore)
@@ -836,8 +1156,19 @@
             }
             const bun = c['minecraft:bundle_contents'] ?? (/bundle$/.test(it.base) ? tag.Items : undefined);
             if (Array.isArray(bun)) it.bundle = bun.map(normItem).filter(Boolean);
+            const mapId = c['minecraft:map_id'] ?? tag.map;
+            if (typeof mapId === 'number') it.mapId = mapId;
+            // storage mods (Sophisticated Backpacks...) keep the contents in world data, keyed by a uuid on the item
+            if (!it.contents && CTX.backpacks.size) {
+                const u = storageUuid(c) || storageUuid(tag);
+                if (u && CTX.backpacks.has(u)) {
+                    it.bpUuid = u;
+                    it.contents = CTX.backpacks.get(u).map((x, i) => ({ slot: x.Slot ?? x.slot ?? i, item: normItem(x) })).filter((x) => x.item);
+                    it.size = containerSize(it.base, it.contents);
+                }
+            }
             const rc = RARITY_COLOR[it.rarity] || '#FFFFFF';
-            const name = it.customName !== undefined ? textHTML(it.customName, { color: rc, italic: true }) : it.itemName !== undefined ? textHTML(it.itemName, { color: rc }) : spanFor(pretty(it.base), { color: rc });
+            const name = it.customName !== undefined ? textHTML(it.customName, { color: rc, italic: true }) : it.itemName !== undefined ? textHTML(it.itemName, { color: rc }) : spanFor(langName(it) || pretty(it.base), { color: rc });
             it.nameHTML = name;
             it.namePlain = plain(name);
             return it;
@@ -845,11 +1176,82 @@
 
         const RARITY_COLOR = { common: '#FFFFFF', uncommon: '#FFFF55', rare: '#55FFFF', epic: '#FF55FF' };
 
+        function storageUuid(o) {
+            if (!isObj(o)) return null;
+            for (const [k, v] of Object.entries(o)) {
+                if (!/uuid/i.test(k)) continue;
+                const u = normUuid(v);
+                if (u) return u;
+            }
+            return null;
+        }
+        const dashUuid = (k) => (k && k.length === 32 ? `${k.slice(0, 8)}-${k.slice(8, 12)}-${k.slice(12, 16)}-${k.slice(16, 20)}-${k.slice(20)}` : k);
+        const normUuid = (v) => {
+            if (Array.isArray(v) && v.length === 4 && v.every(Number.isInteger)) return uuidOf(v);
+            const m = typeof v === 'string' && v.match(/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i);
+            return m ? dashUuid(m[0].toLowerCase().replace(/-/g, '')) : null;
+        };
+        // Bukkit stores the world a player is in as two longs
+        const worldUuid = (d) => {
+            if (d.WorldUUIDMost === undefined || d.WorldUUIDLeast === undefined) return null;
+            try {
+                const h = (v) => BigInt.asUintN(64, BigInt(v)).toString(16).padStart(16, '0');
+                return dashUuid(h(d.WorldUUIDMost) + h(d.WorldUUIDLeast));
+            } catch (e) { return null; }
+        };
+
+        /* ---------- names + textures from dropped mod jars and resource packs ---------- */
+        const LANG = new Map();         // translation key -> English name
+        const TEXREF = new Map();       // "namespace:name" -> {blob, e} zip entry, read the first time it is shown
+        const TEX = new Map();          // "namespace:name" -> object URL
+        const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+        const langName = (it) => (it.mod && LANG.size ? LANG.get(`item.${it.mod}.${it.base}`) || LANG.get(`block.${it.mod}.${it.base}`) || null : null);
+        const langId = (id) => { const m = /^([a-z0-9_.-]+):(.+)$/.exec(String(id)); return m && m[1] !== 'minecraft' && LANG.size ? LANG.get(`item.${m[1]}.${m[2]}`) || LANG.get(`block.${m[1]}.${m[2]}`) || LANG.get(`entity.${m[1]}.${m[2]}`) || null : null; };
+        const texKey = (it) => { const id = typeof it === 'string' ? strip(it) : it.id; return id.includes(':') ? id : 'minecraft:' + id; };
+        function texURL(key) {
+            if (TEX.has(key)) return TEX.get(key);
+            const ref = TEXREF.get(key);
+            if (!ref) return null;
+            TEX.set(key, BLANK);
+            zipRead(ref.blob, ref.e).then((u) => {
+                const url = URL.createObjectURL(new Blob([u], { type: 'image/png' }));
+                TEX.set(key, url);
+                $$(`img[data-tex="${CSS.escape(key)}"]`).forEach((img) => {
+                    img.src = url;
+                    if (img.parentElement && img.parentElement.style.getPropertyValue('--m')) img.parentElement.style.setProperty('--m', `url("${url}")`);
+                });
+            }).catch(() => TEX.set(key, MISSING));
+            return BLANK;
+        }
+        const texImg = (key, fallback) => (TEXREF.has(key) ? `<img src="${texURL(key)}" data-tex="${esc(key)}" data-f="2" alt="" loading="lazy">` : imgTag(fallback));
+
+        // filled maps: drawn from data/map_<id>.dat
+        function mapURL(id) {
+            const m = CTX.maps.get(String(id));
+            if (!m) return null;
+            if (m.url) return m.url;
+            const cv = document.createElement('canvas');
+            cv.width = cv.height = 128;
+            const g = cv.getContext('2d'), img = g.createImageData(128, 128);
+            for (let i = 0; i < 16384; i++) {
+                const v = m.colors[i] || 0, base = MAP_BASE[v >> 2];
+                if (!base) continue;
+                const s = MAP_SHADE[v & 3];
+                img.data[i * 4] = (base[0] * s) / 255;
+                img.data[i * 4 + 1] = (base[1] * s) / 255;
+                img.data[i * 4 + 2] = (base[2] * s) / 255;
+                img.data[i * 4 + 3] = 255;
+            }
+            g.putImageData(img, 0, 0);
+            return (m.url = cv.toDataURL());
+        }
+
         /* =====================================================================
            Icons (minecraftitems.xyz via api.php, local textures, missing texture)
            ===================================================================== */
         const MISSING = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2" shape-rendering="crispEdges"><rect width="2" height="2" fill="#000"/><rect width="1" height="1" fill="#f0f"/><rect x="1" y="1" width="1" height="1" fill="#f0f"/></svg>');
-        // resource packs: [{id, name, status, on}] in priority order (first = highest)
+        // resource packs: [{id, name, status, on, def?}] in priority order (first = highest)
+        // def = file name of a site pack from ./resourcepacks (offered to everyone, can't be removed)
         function rpPacks() {
             const packs = store.get('nbt.rp.packs', []);
             const old = store.get('nbt.rp.active', null);      // single-pack setting from before multi-pack support
@@ -857,7 +1259,10 @@
             return packs;
         }
         let rpActive = '';
-        const refreshRp = () => (rpActive = rpPacks().filter((p) => p.on).slice(0, 5).map((p) => p.id).join(','));
+        // packs that came with a share link: used instead of your own ticks until you keep or dismiss them
+        let rpShared = null;
+        const rpUsed = () => (rpShared || rpPacks().filter((p) => p.on && p.id)).slice(0, 5);
+        const refreshRp = () => (rpActive = rpUsed().map((p) => p.id).join(','));
         refreshRp();
         // the API draws these as flat squares - the local textures are proper 3D icons
         const LOCAL_FIRST = /shulker_box$/;
@@ -866,6 +1271,9 @@
             const id = typeof it === 'string' ? it : it.base;
             // skinned player heads: 3D isometric render with the hat layer (minecraftitems.xyz only draws Steve)
             if (typeof it !== 'string' && it.head) return `https://mc-heads.net/head/${encodeURIComponent(it.head)}/128`;
+            if (typeof it !== 'string' && it.mapId !== undefined) { const m = mapURL(it.mapId); if (m) return m; }
+            const local = texURL(texKey(it));
+            if (local) return local;
             if (localFirst(id)) return `/minecraft/itemlist/minecraft_${id}.png`;
             let u = 'api.php?item=' + encodeURIComponent(id);
             if (rpActive) {
@@ -876,7 +1284,10 @@
         }
         const imgTag = (it, lazy = true) => {
             const id = typeof it === 'string' ? it : it.base;
-            return `<img src="${iconURL(it)}" data-id="${esc(id)}"${localFirst(id) ? ' data-f="1"' : ''} alt=""${lazy ? ' loading="lazy"' : ''} decoding="async">`;
+            const url = iconURL(it), obj = typeof it !== 'string';
+            // data-f="2": no fallback chain (maps and textures from dropped jars / packs)
+            const attr = obj && it.head ? '' : obj && url.startsWith('data:image/png') ? ' data-map="1" data-f="2"' : TEXREF.has(texKey(it)) ? ` data-tex="${esc(texKey(it))}" data-f="2"` : localFirst(id) ? ' data-f="1"' : '';
+            return `<img src="${url}" data-id="${esc(id)}"${attr} alt=""${lazy ? ' loading="lazy"' : ''} decoding="async">`;
         };
         // fallback chain: API -> local texture -> missing texture
         document.addEventListener('error', (e) => {
@@ -927,6 +1338,25 @@
         let REG = [];            // slot registry for the current render
         let NODES = [];          // raw tree lazy nodes
         let query = '';
+        let view = 'player';     // 'player' or 'server' (world / server / plugin / mod files)
+
+        // everything that is not a player file: server lists, world data, plugin + mod data.
+        // It only lives in this tab - share links get a per-player extract without the private parts (linkFor().pub)
+        function freshCtx() {
+            return {
+                files: [], names: new Map(), usercache: new Map(), ops: new Map(), opsLoaded: false, whitelist: new Set(), whitelistLoaded: false,
+                bans: new Map(), bansLoaded: false, ipBans: [], props: null, level: null, scoreboard: null, maps: new Map(), worlds: new Map(),
+                data: [], pets: new Map(), hotbars: null, servers: null, logEvents: [], logSeq: 0, logFiles: [], logUuids: new Map(), logDirty: false, sess: null,
+                configs: [], ess: new Map(), lpUsers: new Map(), lpGroups: new Map(), mcmmo: [], gpPlayers: new Map(), gpClaims: [], wg: [],
+                towny: { residents: new Map(), towns: new Map(), nations: new Map() }, mv: new Map(), mods: [], packs: [],
+                ftb: { chapters: [], lang: new Map(), progress: new Map(), teams: [], chunks: new Map() }, backpacks: new Map(), schems: [],
+            };
+        }
+        const CTX = freshCtx();
+
+        // private values render as a button and are only put in the page when clicked
+        let PRIV = [];
+        const privHTML = (label, html) => `<button class="priv" data-priv="${PRIV.push(html) - 1}" title="Private - click to show. Never included in share links.">&#128274; ${esc(label)}</button>`;
 
         function reg(item, where) { REG.push({ item, where }); return REG.length - 1; }
 
@@ -976,9 +1406,13 @@
             P.owned = new Map();
             P.points = [];
             P.stats = { items: 0, stacks: 0, enchanted: 0, containers: 0 };
+            P.mapIds = new Set();
+            P.bpIds = new Set();
             const walk = (it, where) => {
                 P.stats.items += it.count; P.stats.stacks++;
                 if (it.ench.length) P.stats.enchanted++;
+                if (it.mapId !== undefined) P.mapIds.add(String(it.mapId));
+                if (it.bpUuid) P.bpIds.add(it.bpUuid);
                 const e = P.owned.get(it.base) || { it, total: 0, where: new Map() };
                 e.total += it.count;
                 e.where.set(where, (e.where.get(where) || 0) + it.count);
@@ -991,6 +1425,9 @@
             Object.values(P.equip).forEach((it) => walk(it, 'Equipment'));
             Object.values(P.inv).forEach((it) => walk(it, 'Inventory'));
             Object.values(P.ender).forEach((it) => walk(it, 'Ender Chest'));
+            // Trinkets / Curios / other mod slots
+            P.modInv = modInventories(d);
+            P.modInv.forEach((g) => g.items.forEach((x) => walk(x.item, g.label)));
 
             // attributes (new + old format)
             P.attrs = [];
@@ -1051,30 +1488,68 @@
             return P;
         }
 
+        // item lists inside mod data: Trinkets (cardinal_components), Curios (ForgeCaps / neoforge:attachments) and friends
+        function modInventories(d) {
+            const found = [];
+            const isItem = (x) => isObj(x) && typeof x.id === 'string' && (x.Count !== undefined || x.count !== undefined || isObj(x.components) || isObj(x.tag));
+            const walk = (v, path, depth) => {
+                if (depth > 9 || !v || typeof v !== 'object') return;
+                if (Array.isArray(v)) {
+                    if (v.length && v.every(isItem)) { found.push({ path, raw: v }); return; }
+                    v.forEach((x, i) => walk(x, path.concat(isObj(x) && typeof (x.Identifier ?? x.identifier) === 'string' ? x.Identifier ?? x.identifier : String(i)), depth + 1));
+                    return;
+                }
+                for (const [k, x] of Object.entries(v)) walk(x, path.concat(k), depth + 1);
+            };
+            for (const k of ['cardinal_components', 'ForgeCaps', 'neoforge:attachments', 'fabric:attachments', 'ForgeData']) if (isObj(d[k])) walk(d[k], [], 0);
+            const NOISE = /^(Items|items|Stacks|stacks|StacksHandler|Curios|curios|Cosmetics|cosmetics|Inventory|inventory|\d+)$/;
+            return found.map(({ path, raw }) => {
+                const label = path.filter((p) => !NOISE.test(p)).map((p) => pretty(p.includes(':') ? p.split(':')[0] : p)).join(' › ') || 'Mod items';
+                const items = raw.map((x, i) => ({ slot: x.Slot ?? x.slot ?? i, item: normItem(x) })).filter((x) => x.item && x.item.base !== 'air');
+                return { label: label + (path.some((p) => /^cosmetics$/i.test(p)) ? ' (cosmetic)' : ''), items };
+            }).filter((g) => g.items.length);
+        }
+
         /* =====================================================================
            Rendering
            ===================================================================== */
-        const HANDLED = new Set(['Inventory', 'EnderItems', 'equipment', 'SelectedItemSlot', 'Health', 'foodLevel', 'foodSaturationLevel', 'foodExhaustionLevel', 'foodTickTimer', 'XpLevel', 'XpP', 'XpTotal', 'XpSeed', 'Score', 'Air', 'AbsorptionAmount', 'active_effects', 'ActiveEffects', 'attributes', 'Attributes', 'abilities', 'playerGameType', 'previousPlayerGameType', 'Pos', 'Rotation', 'Motion', 'Dimension', 'respawn', 'SpawnX', 'SpawnY', 'SpawnZ', 'SpawnDimension', 'SpawnForced', 'SpawnAngle', 'LastDeathLocation', 'ender_pearls', 'recipeBook', 'UUID', 'DataVersion', 'Fire', 'OnGround', 'FallFlying', 'fall_distance', 'FallDistance', 'Invulnerable', 'PortalCooldown', 'HurtTime', 'HurtByTimestamp', 'DeathTime', 'SleepTimer', 'seenCredits', 'warden_spawn_tracker', 'enteredNetherPosition']);
+        const HANDLED = new Set(['Inventory', 'EnderItems', 'equipment', 'SelectedItemSlot', 'Health', 'foodLevel', 'foodSaturationLevel', 'foodExhaustionLevel', 'foodTickTimer', 'XpLevel', 'XpP', 'XpTotal', 'XpSeed', 'Score', 'Air', 'AbsorptionAmount', 'active_effects', 'ActiveEffects', 'attributes', 'Attributes', 'abilities', 'playerGameType', 'previousPlayerGameType', 'Pos', 'Rotation', 'Motion', 'Dimension', 'respawn', 'SpawnX', 'SpawnY', 'SpawnZ', 'SpawnDimension', 'SpawnForced', 'SpawnAngle', 'LastDeathLocation', 'ender_pearls', 'recipeBook', 'UUID', 'DataVersion', 'Fire', 'OnGround', 'FallFlying', 'fall_distance', 'FallDistance', 'Invulnerable', 'PortalCooldown', 'HurtTime', 'HurtByTimestamp', 'DeathTime', 'SleepTimer', 'seenCredits', 'warden_spawn_tracker', 'enteredNetherPosition', 'bukkit', 'Paper', 'Spigot.ticksLived', 'WorldUUIDLeast', 'WorldUUIDMost']);
 
         function render() {
-            REG = []; NODES = [];
-            $('#drop').classList.toggle('hide', players.length > 0);
-            $('#viewer').classList.toggle('hide', players.length === 0);
+            REG = []; NODES = []; PRIV = [];
+            const hasCtx = CTX.files.length > 0;
+            if (!players.length) view = hasCtx ? 'server' : 'player';
+            if (!hasCtx) view = 'player';
+            $('#drop').classList.toggle('hide', players.length > 0 || hasCtx);
+            $('#viewer').classList.toggle('hide', players.length === 0 && !hasCtx);
+            const srvBtn = $('#srvBtn');
+            srvBtn.classList.toggle('hide', !hasCtx || (!players.length && view === 'server'));
+            srvBtn.textContent = view === 'server' ? 'Back to player' : 'World & server';
+            $('#shareBtn').classList.toggle('hide', view === 'server' || !players.length);
             renderTabs();
-            if (active < 0) { $('#player').innerHTML = ''; return; }
             disposeSkins();
+            if (view === 'server') { $('#player').innerHTML = serverViewHTML(); applySearch(); return; }
+            if (active < 0) { $('#player').innerHTML = ''; return; }
             const pl = players[active];
             const P = pl.P, d = P.d;
+            let L;
+            try { L = linkFor(pl); } catch (e) { console.error(e); L = { pub: {}, priv: {}, points: [] }; }
             const sections = [];
 
-            sections.push(heroHTML(pl));
-            sections.push(`<div class="section card" id="s-inv"><h2>${imgTag('chest', false)} Inventory <span class="n">${P.stats.stacks} stacks · ${num(P.stats.items)} items</span></h2><div class="guis">${invHTML(P)}${enderHTML(P)}</div></div>`);
+            sections.push(heroHTML(pl, L));
+            sections.push(`<div class="section card" id="s-inv"><h2>${imgTag('chest', false)} Inventory <span class="n">${P.stats.stacks} stacks · ${num(P.stats.items)} items</span></h2><div class="guis">${invHTML(P)}${enderHTML(P)}${modInvHTML(P)}</div></div>`);
             if (pl.extras.stats) sections.push(statsHTML(pl.extras.stats));
             if (pl.extras.advancements) sections.push(advHTML(pl.extras.advancements));
             if (P.owned.size) sections.push(ownedHTML(P));
 
             const cards = [];
-            if (P.points.length) cards.push(locHTML(P));
+            // server / plugin cards - one bad value (e.g. from an old share link) only drops that card
+            const safe = (f) => { try { return f(); } catch (e) { console.error(e); return ''; } };
+            const srv = safe(() => serverCardHTML(pl, L));
+            if (srv) cards.push(srv);
+            const points = P.points.concat(L.points);
+            if (points.length) cards.push(locHTML({ ...P, points }));
+            for (const f of [essHTML, permHTML, townyHTML, mcmmoHTML, claimsHTML, sessHTML, petsHTML, questsHTML]) { const h = safe(() => f(L)); if (h) cards.push(h); }
             if (P.effects.length) cards.push(effectsHTML(P));
             if (P.attrs.length) cards.push(attrsHTML(P));
             if (isObj(d.abilities)) cards.push(abilitiesHTML(d));
@@ -1088,7 +1563,7 @@
             if (!pl.extras.stats || !pl.extras.advancements) sections.push(extraBarHTML(pl));
             sections.push(rawHTML(d));
 
-            const jumps = [['s-inv', 'Inventory'], ['s-stats', 'Statistics'], ['s-adv', 'Advancements'], ['s-owned', 'All items'], ['s-loc', 'Locations'], ['s-eff', 'Effects'], ['s-attr', 'Attributes'], ['s-abil', 'Abilities'], ['s-vit', 'Vitals'], ['s-pearl', 'Pearls'], ['s-warden', 'Warden'], ['s-other', 'Other data'], ['s-recipe', 'Recipes'], ['s-raw', 'Raw NBT']];
+            const jumps = [['s-inv', 'Inventory'], ['s-stats', 'Statistics'], ['s-adv', 'Advancements'], ['s-owned', 'All items'], ['s-server', 'Server'], ['s-loc', 'Locations'], ['s-ess', 'Essentials'], ['s-perm', 'Permissions'], ['s-towny', 'Towny'], ['s-mcmmo', 'mcMMO'], ['s-claims', 'Claims'], ['s-sess', 'Sessions'], ['s-pets', 'Pets'], ['s-quests', 'Quests'], ['s-eff', 'Effects'], ['s-attr', 'Attributes'], ['s-abil', 'Abilities'], ['s-vit', 'Vitals'], ['s-pearl', 'Pearls'], ['s-warden', 'Warden'], ['s-other', 'Other data'], ['s-recipe', 'Recipes'], ['s-raw', 'Raw NBT']];
             const html = sections.join('');
             const jumpHTML = '<nav class="jump">' + jumps.filter(([id]) => html.includes(`id="${id}"`)).map(([id, t]) => `<a href="#${id}">${t}</a>`).join('') + '</nav>';
             $('#player').innerHTML = jumpHTML + html;
@@ -1234,8 +1709,9 @@
                 });
             }
             const pl = players[active];
-            if (pl) $('.pick-btn', box).innerHTML = `<img src="${avatarOf(pl)}" alt="" onerror="this.src='${MISSING}'"><span class="nm">${esc(labelOf(pl))}</span>` +
+            if (pl) $('.pick-btn', box).innerHTML = `<img src="${avatarOf(pl)}" alt="" onerror="this.src='${MISSING}'"><span class="nm">${esc(view === 'server' ? 'World & server' : labelOf(pl))}</span>` +
                 (players.length > 1 ? `<span class="n">${players.length} players</span>` : '') + '<span class="car">▾</span>';
+            else $('.pick-btn', box).innerHTML = '<span class="nm" style="padding-left:6px">No players loaded</span>';
             if (pickOpen) renderPickList();
         }
         function renderPickList() {
@@ -1274,8 +1750,8 @@
             }
         }
 
-        function heroHTML(pl) {
-            const P = pl.P, d = P.d;
+        function heroHTML(pl, L) {
+            const P = pl.P, d = P.d, X = L.pub;
             const gm = GAMEMODES[d.playerGameType] ?? null;
             const ver = versionOf(d.DataVersion);
             const raw = P.uuid ? P.uuid.replace(/-/g, '') : '';
@@ -1288,6 +1764,16 @@
             if (d.arcade || d.ForgeCaps || d['neoforge:attachments'] || d.cardinal_components) badges.push('<span class="badge b">Modded</span>');
             if (truthy(d.FallFlying)) badges.push('<span class="badge">Gliding</span>');
             if ((d.Fire ?? -20) > 0) badges.push('<span class="badge r">On fire</span>');
+            if (X.op) badges.push(`<span class="badge p" title="Permission level ${esc(X.op.level)}">Operator · level ${esc(X.op.level)}</span>`);
+            if (X.ban) badges.push(`<span class="badge r" title="${esc(X.ban.reason || '')}">Banned</span>`);
+            if (X.whitelisted) badges.push('<span class="badge g">Whitelisted</span>');
+            else if (X.whitelisted === false) badges.push('<span class="badge">Not whitelisted</span>');
+            if (P.uuid && P.uuid[14] === '3') badges.push('<span class="badge" title="Version 3 UUID - made from the name on an offline-mode (cracked) server">Offline-mode account</span>');
+            if (X.team) badges.push(`<span class="badge">Team ${teamHTML(X.team)}</span>`);
+            if (X.lp && X.lp.primary) badges.push(`<span class="badge b">Group: ${esc(X.lp.primary)}</span>`);
+            if (X.towny && X.towny.town) badges.push(`<span class="badge">${X.towny.mayor ? 'Mayor of ' : 'Town: '}${esc(X.towny.town)}</span>`);
+            if (X.sess && X.sess.online) badges.push('<span class="badge g">Online when the log ended</span>');
+            if (X.ess && Array.isArray(X.ess.flags)) for (const f of X.ess.flags) badges.push(`<span class="badge${/muted|jailed/.test(f) ? ' r' : ''}">${esc(ESS_FLAG[f] || f)}</span>`);
             const hp = d.Health ?? 0;
             const tiles = [
                 [num(d.XpLevel ?? 0), 'XP level'], [num(d.XpTotal ?? 0), 'Total XP'], [num(d.Score ?? 0), 'Score'],
@@ -1300,6 +1786,7 @@
                 ${skinHTML(P, 0.85)}
                 <div>
                     <h1>${esc(pl.name || (P.uuid ? 'Unknown player' : pl.file))}</h1>
+                    ${X.ess && X.ess.nick ? `<div class="muted" style="font-size:14px">Nickname: ${ampHTML(X.ess.nick)}</div>` : ''}
                     ${P.uuid ? `<div class="uuid muted mono" data-copy="${P.uuid}" title="Click to copy">${P.uuid}</div>` : ''}
                     <div class="badges">${badges.join('')}</div>
                     <div class="vit">
@@ -1346,6 +1833,21 @@
         function enderHTML(P) {
             return `<div class="gui"><div class="ttl">Ender Chest</div>${gridHTML(P.ender, 0, 27, 'Ender Chest')}</div>`;
         }
+        // one GUI per mod (Trinkets, Curios...), a labelled row per slot group
+        function modInvHTML(P) {
+            const byRoot = new Map();
+            for (const g of P.modInv) {
+                const [root, ...rest] = g.label.split(' › ');
+                if (!byRoot.has(root)) byRoot.set(root, []);
+                byRoot.get(root).push({ ...g, sub: rest.join(' › ') });
+            }
+            return [...byRoot].map(([root, gs]) => `<div class="gui"><div class="ttl">${esc(root)}</div><div class="modslots">${gs.map((g) => {
+                const by = {};
+                g.items.forEach((x) => (by[x.slot] = x.item));
+                const n = Math.min(27, Math.max(g.items.length, ...g.items.map((x) => x.slot + 1)));
+                return `<div class="ms">${g.sub ? `<span>${esc(g.sub)}</span>` : ''}<div class="slots" style="grid-template-columns:repeat(${Math.min(9, n)},var(--s))">${Array.from({ length: n }, (_, i) => slotHTML(by[i], `${root}${g.sub ? ' › ' + g.sub : ''} › Slot ${i}`)).join('')}</div></div>`;
+            }).join('')}</div></div>`).join('');
+        }
 
         function ownedHTML(P) {
             const list = [...P.owned.values()].sort((a, b) => b.total - a.total);
@@ -1361,7 +1863,7 @@
             const byDim = new Map();
             P.points.forEach((p) => { const k = p.dim || 'minecraft:overworld'; if (!byDim.has(k)) byDim.set(k, []); byDim.get(k).push(p); });
             const me = P.points.find((p) => p.kind === 'player');
-            const color = { player: '#7ed957', spawn: '#5aa8ff', death: '#ff5555', pearl: '#3fd6a8', lodestone: '#ffd84a', misc: '#bbbbbb' };
+            const color = { player: '#7ed957', spawn: '#5aa8ff', death: '#ff5555', pearl: '#3fd6a8', lodestone: '#ffd84a', misc: '#bbbbbb', home: '#ff9f40', pet: '#ff7ad9', claim: '#b3a1ff' };
             // radar per dimension: centred on the player (or first point), true direction, log-scaled distance
             const maps = [...byDim].map(([dim, pts]) => {
                 if (pts.length < 2) return '';
@@ -1526,7 +2028,7 @@
             const tabs = STAT_CATS.map(([c, label, icon]) => [c, label, icon, Object.entries(cat(c)).filter(([, v]) => typeof v === 'number' && v > 0).sort((a, b) => b[1] - a[1])]).filter((t) => t[3].length);
             const first = (tabs.find((t) => t[0] === 'mined') || tabs[0] || [])[0];
             const panel = ([c, , , list]) => `<div class="stgrid${c === first ? '' : ' hide'}" data-spanel="${c}">${list.map(([id, v]) => {
-                const label = pretty(id);
+                const label = langId(id) || pretty(id);
                 if (c === 'custom') return `<div class="sti" data-s="${esc((id + ' ' + label).toLowerCase())}"><div><span title="${esc(id)}">${esc(label)}</span><b>${esc(fmtStat(id, v))}</b></div></div>`;
                 const icon = c === 'killed' || c === 'killed_by' ? mobIcon(id) : blockIcon(id);
                 return `<div class="sti" data-s="${esc((id + ' ' + label).toLowerCase())}" title="${esc(id)}"><span class="ico">${imgTag(icon)}</span><div><span>${esc(label)}</span><b>${num(v)}</b></div></div>`;
@@ -1584,6 +2086,645 @@
                 <div class="tree">${keys.map((k) => treeNode(k, d[k], 0, true)).join('')}</div></div>`;
         }
 
+        /* =====================================================================
+           Server, world, plugin and mod data for one player.
+           pub  - safe to put in share links (also what a share link brings back)
+           priv - IPs, chat, commands, mail: shown only after a click, never shared
+           ===================================================================== */
+        const fmtDate = (ms) => (ms ? new Date(ms).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '');
+        const dateAgo = (ms) => (ms ? `${esc(fmtDate(ms))} <small class="muted">(${esc(ago(ms))})</small>` : null);
+        const dur = (ms) => { const m = Math.max(0, Math.round(ms / 60000)); return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`; };
+        const ampHTML = (s) => legacyHTML(String(s ?? '').replace(/&([0-9a-fk-or])/gi, '§$1'), {});
+        const kvHTML = (rows) => `<div class="kv">${rows.filter((r) => r && r[1] !== null && r[1] !== undefined && r[1] !== '').map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join('')}</div>`;
+        const tpBtn = (x, y, z) => (Number.isFinite(+x) && Number.isFinite(+z) ? `<button class="btn small" data-copy="/tp @s ${Math.round(x)} ${Number.isFinite(+y) && y !== null ? Math.round(y) : '~'} ${Math.round(z)}" title="Copy teleport command">/tp</button>` : '');
+        const xyz = (x, y, z) => [x, y, z].map((v) => (Number.isFinite(+v) && v !== null ? Math.round(v) : '~')).join(', ');
+        const parseMcDate = (s) => {
+            if (typeof s !== 'string') return 0;
+            const m = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) ([+-]\d{2})(\d{2})$/.exec(s.trim());
+            return Date.parse(m ? `${m[1]}T${m[2]}${m[3]}:${m[4]}` : s) || 0;
+        };
+        const nameFor = (k) => CTX.names.get(k) || (players.find((p) => p.key === k) || {}).name || dashUuid(k);
+        const ESS_FLAG = { afk: 'AFK', godmode: 'God mode', muted: 'Muted', jailed: 'Jailed', socialspy: 'Social spy', npc: 'NPC', tpoff: 'Teleports off', baltopExempt: 'Hidden from baltop' };
+        const teamHTML = (t) => `${t.prefix ? textHTML(t.prefix) : ''}${t.display !== undefined && t.display !== null ? textHTML(t.display, { color: MC_COLORS[t.color] }) : spanFor(t.name, { color: MC_COLORS[t.color] })}${t.suffix ? textHTML(t.suffix) : ''}`;
+        const itemIdOf = (v) => (typeof v === 'string' ? strip(v) : isObj(v) && typeof v.id === 'string' ? strip(v.id) : null);
+
+        // which Bukkit world name / dimension a location is in
+        function worldDim(w) {
+            const s = String(w || ''), main = (CTX.props && CTX.props.data['level-name']) || 'world';
+            const env = String((CTX.mv.get(s) || {}).environment || '').toUpperCase();
+            if (env === 'NETHER' || s === main + '_nether' || /^DIM-1$/i.test(s)) return 'minecraft:the_nether';
+            if (env === 'THE_END' || s === main + '_the_end' || /^DIM1$/i.test(s)) return 'minecraft:the_end';
+            if (!s || s === main || s.includes(':')) return s.includes(':') ? s : 'minecraft:overworld';
+            return s;
+        }
+
+        // every lowercased name this player is known by (scoreboards, logs and Towny go by name)
+        function namesOf(pl) {
+            const s = new Set();
+            const add = (n) => { if (n) s.add(String(n).toLowerCase()); };
+            add(pl.name);
+            add(pl.key && CTX.names.get(pl.key));
+            add(isObj(pl.P.d.bukkit) && pl.P.d.bukkit.lastKnownName);
+            for (const [n, k] of CTX.logUuids) if (k === pl.key) add(n);
+            return s;
+        }
+
+        function lpAllNodes(user) {
+            const all = [...user.nodes], seen = new Set();
+            const visit = (g, depth) => {
+                g = String(g).toLowerCase();
+                if (seen.has(g) || depth > 6) return;
+                seen.add(g);
+                const nodes = CTX.lpGroups.get(g) || [];
+                all.push(...nodes);
+                nodes.filter((n) => n.value && /^group\./.test(n.key)).forEach((n) => visit(n.key.slice(6), depth + 1));
+            };
+            user.nodes.filter((n) => n.value && /^group\./.test(n.key)).forEach((n) => visit(n.key.slice(6), 0));
+            if (user.primary) visit(user.primary, 0);
+            return all;
+        }
+        const lpMeta = (nodes, type) => {
+            let best = null;
+            for (const n of nodes) {
+                const m = n.value && new RegExp(`^${type}\\.(-?\\d+)\\.(.*)$`).exec(n.key);
+                if (m && (!best || +m[1] > best[0])) best = [+m[1], m[2]];
+            }
+            return best ? best[1] : null;
+        };
+
+        function petOf(e) {
+            const items = [];
+            const push = (x) => { if (isObj(x) && typeof x.id === 'string') items.push(x); };
+            (Array.isArray(e.Items) ? e.Items : []).forEach(push);
+            [e.SaddleItem, e.ArmorItem, e.DecorItem, e.body_armor_item, e.saddle].forEach(push);
+            if (isObj(e.equipment)) Object.values(e.equipment).forEach(push);
+            [...(Array.isArray(e.ArmorItems) ? e.ArmorItems : []), ...(Array.isArray(e.HandItems) ? e.HandItems : [])].forEach(push);
+            return { id: String(e.id || ''), name: e.CustomName ?? null, pos: Array.isArray(e.Pos) ? e.Pos.map(Number) : null, dim: e._dim || 'minecraft:overworld', hp: typeof e.Health === 'number' ? e.Health : null, sitting: truthy(e.Sitting ?? e.OrderedToSit ?? 0), baby: (e.Age ?? 0) < 0, items: items.slice(0, 40) };
+        }
+
+        const b64 = (u) => { let s = ''; for (let i = 0; i < u.length; i += 8192) s += String.fromCharCode.apply(null, u.subarray(i, i + 8192)); return btoa(s); };
+        const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+        function linkFor(pl) {
+            const key = pl.key, names = namesOf(pl), d = pl.P.d, uuid = pl.P.uuid;
+            const live = {}, priv = {};
+            if (key) {
+                const op = CTX.ops.get(key);
+                if (op) live.op = { level: op.level ?? 4, bypass: truthy(op.bypassesPlayerLimit) };
+                else if (CTX.opsLoaded) live.op = false;
+                if (CTX.whitelistLoaded) live.whitelisted = CTX.whitelist.has(key);
+                const ban = CTX.bans.get(key);
+                if (ban) live.ban = { reason: ban.reason || '', source: ban.source || '', created: ban.created || '', expires: ban.expires || '' };
+                else if (CTX.bansLoaded) live.ban = false;
+                const uc = CTX.usercache.get(key);
+                if (uc && uc.seen) live.cacheSeen = uc.seen;
+            }
+            const wu = worldUuid(d);
+            if (wu && CTX.worlds.has(wu)) live.world = CTX.worlds.get(wu);
+
+            const sb = CTX.scoreboard;
+            if (sb) {
+                const ids = new Set([...names, uuid || '-']);
+                const scores = sb.scores.filter((s) => ids.has(String(s.Name).toLowerCase())).map((s) => { const o = sb.objectives.get(s.Objective) || {}; return { obj: s.Objective, name: o.name ?? null, criteria: o.criteria || '', score: s.Score }; });
+                if (scores.length) live.scores = scores;
+                const t = sb.teams.find((t) => (t.Players || []).some((p) => ids.has(String(p).toLowerCase())));
+                if (t) live.team = { name: t.Name, display: t.DisplayName ?? null, color: t.TeamColor || '', prefix: t.MemberNamePrefix ?? null, suffix: t.MemberNameSuffix ?? null };
+            }
+
+            const ess = key && CTX.ess.get(key);
+            if (ess) {
+                const loc = (l) => (isObj(l) && l.x !== undefined ? { world: l['world-name'] || CTX.worlds.get(String(l.world)) || String(l.world || ''), x: +l.x, y: +l.y, z: +l.z } : null);
+                const ts = isObj(ess.timestamps) ? ess.timestamps : {};
+                const flags = ['afk', 'godmode', 'muted', 'jailed', 'socialspy', 'npc'].filter((f) => truthy(ess[f]));
+                if (ess.teleportenabled === false || ess['teleport-enabled'] === false) flags.push('tpoff');
+                if (truthy(ess['baltop-exempt'])) flags.push('baltopExempt');
+                live.ess = {
+                    name: ess.lastAccountName ?? ess['last-account-name'] ?? null, money: ess.money !== undefined && ess.money !== null ? String(ess.money) : null,
+                    nick: ess.nickname ?? ess.nick ?? null, flags, jail: ess.jail || null, muteUntil: +ts.mute || 0, login: +ts.login || 0, logoutAt: +ts.logout || 0,
+                    homes: isObj(ess.homes) ? Object.entries(ess.homes).map(([n, l]) => ({ name: n, ...loc(l) })).filter((h) => Number.isFinite(h.x)) : [],
+                    logout: loc(ess.logoutlocation ?? ess['logout-location']), last: loc(ess.lastlocation ?? ess['last-location']),
+                    kits: isObj(ts.kits) ? Object.keys(ts.kits) : [], powertools: isObj(ess.powertools) ? Object.keys(ess.powertools).length : 0,
+                    ignore: Array.isArray(ess.ignore) ? ess.ignore.length : 0,
+                };
+                const ip = ess.ipAddress ?? ess['ip-address'];
+                if (ip) priv.essIp = String(ip);
+                if (Array.isArray(ess.mail) && ess.mail.length) priv.mail = ess.mail.map((m) => { let o = m; if (typeof m === 'string') try { o = JSON.parse(m); } catch (e) { return m; } return isObj(o) ? `${o['sender-name'] || o.sender || '?'}: ${o.message ?? ''}` : String(m); });
+            }
+
+            const lp = key && CTX.lpUsers.get(key);
+            if (lp) {
+                const all = lpAllNodes(lp);
+                live.lp = {
+                    primary: lp.primary || 'default', groups: lp.nodes.filter((n) => n.value && /^group\./.test(n.key)).map((n) => n.key.slice(6)),
+                    prefix: lpMeta(all, 'prefix'), suffix: lpMeta(all, 'suffix'),
+                    perms: lp.nodes.filter((n) => !/^(group|prefix|suffix|meta|weight|displayname)\./.test(n.key)).slice(0, 500).map((n) => ({ k: n.key, v: n.value, ctx: n.context ? Object.entries(n.context).map(([a, b]) => `${a}=${b}`).join(', ') : '', exp: n.expiry || 0 })),
+                };
+            }
+
+            const mc = CTX.mcmmo.find((r) => (key && r.uuid === key) || names.has(r.name.toLowerCase()));
+            if (mc) live.mcmmo = { skills: mc.skills, power: Object.values(mc.skills).reduce((s, [l]) => s + l, 0) };
+
+            if (key) {
+                const gp = CTX.gpPlayers.get(key), claims = CTX.gpClaims.filter((c) => c.owner === key);
+                if (gp || claims.length) live.gp = { accrued: gp ? gp.accrued : null, bonus: gp ? gp.bonus : null, claims: claims.map((c) => ({ id: c.id, world: c.world, a: c.a, b: c.b, area: c.area, parent: c.parent, trusted: c.trusted })) };
+            }
+            const inGroup = (g) => (key && g.ids.includes(key)) || [...names].some((n) => g.names.includes(n));
+            const wg = CTX.wg.map((r) => { const role = inGroup(r.owners) ? 'owner' : inGroup(r.members) ? 'member' : null; return role && { id: r.id, world: r.world, role, type: r.type || '', priority: r.priority ?? 0, min: r.min || null, max: r.max || null }; }).filter(Boolean);
+            if (wg.length) live.wg = wg;
+
+            const res = (key && [...CTX.towny.residents.values()].find((r) => uuidKey(r.uuid) === key)) || [...names].map((n) => CTX.towny.residents.get(n)).find(Boolean);
+            if (res) {
+                const town = res.town ? CTX.towny.towns.get(String(res.town).toLowerCase()) : null;
+                live.towny = { town: res.town || null, nation: (town && town.nation) || null, mayor: !!(town && names.has(String(town.mayor || '').toLowerCase())), ranks: res['town-ranks'] || '', nationRanks: res['nation-ranks'] || '', title: res.title || '', surname: res.surname || '', registered: +res.registered || 0, lastOnline: +res.lastOnline || 0, friends: String(res.friends || '').split(',').filter(Boolean) };
+            }
+
+            const pets = key && CTX.pets.get(key);
+            if (pets && pets.length) live.pets = pets.slice(0, 300).map(petOf);
+
+            if (CTX.sess) {
+                const ps = [...names].map((n) => CTX.sess.players.get(n)).filter(Boolean);
+                if (ps.length) {
+                    const sessions = ps.flatMap((p) => p.sessions).sort((a, b) => a.start - b.start);
+                    const deaths = ps.flatMap((p) => p.deaths).sort((a, b) => a[0] - b[0]);
+                    const lastS = sessions[sessions.length - 1];
+                    live.sess = {
+                        files: CTX.logFiles.length, count: sessions.length, total: sessions.reduce((s, x) => s + ((x.end || CTX.sess.last) - x.start), 0),
+                        first: sessions.length ? sessions[0].start : 0, last: lastS ? lastS.end || lastS.start : 0, online: sessions.some((s) => s.online),
+                        recent: sessions.slice(-25).reverse().map((s) => ({ start: s.start, end: s.end, why: s.why || '', online: !!s.online, world: s.world || null, pos: s.pos || null })),
+                        deaths: deaths.slice(-40), adv: ps.reduce((s, p) => s + p.adv.length, 0),
+                    };
+                    const ips = new Map();
+                    ps.forEach((p) => p.ips.forEach((n, ip) => ips.set(ip, (ips.get(ip) || 0) + n)));
+                    if (ips.size) priv.ips = [...ips].sort((a, b) => b[1] - a[1]).map(([ip, n]) => [ip, n, CTX.ipBans.some((b) => b.ip === ip)]);
+                    const chat = ps.flatMap((p) => p.chat).sort((a, b) => a[0] - b[0]);
+                    if (chat.length) { priv.chat = chat.slice(-300); priv.chatCount = chat.length; }
+                    const cmds = ps.flatMap((p) => p.cmds).sort((a, b) => a[0] - b[0]);
+                    if (cmds.length) { priv.cmds = cmds.slice(-300); priv.cmdCount = cmds.length; }
+                }
+            }
+
+            const F = CTX.ftb;
+            if (uuid && (F.chapters.length || F.chunks.size)) {
+                const team = F.teams.find((t) => t.type === 'party' && t.members.includes(uuid)) || F.teams.find((t) => t.id === uuid);
+                const tid = team ? team.id : uuid;
+                const prog = F.progress.get(tid) || F.progress.get(uuid);
+                if (F.chapters.length && prog) {
+                    const done = new Set(Object.keys(prog.completed).map((k) => k.toLowerCase()));
+                    const chapters = [...F.chapters].sort((a, b) => a.order - b.order).map((c) => ({ title: ftbTitle('chapter', c.id, c.title) || pretty(c.file), icon: itemIdOf(c.icon), done: c.quests.filter((q) => done.has(q.id.toLowerCase())).length, total: c.quests.length }));
+                    live.quests = { team: team && team.type === 'party' ? team.name || 'Party' : null, chapters, done: chapters.reduce((s, c) => s + c.done, 0), total: chapters.reduce((s, c) => s + c.total, 0) };
+                }
+                const ch = F.chunks.get(tid) || F.chunks.get(uuid);
+                if (ch) live.chunks = { ...ch, team: team && team.type === 'party' ? team.name || 'Party' : null };
+            }
+
+            // map pictures + backpack contents travel with the share so the inventory still renders
+            const maps = {};
+            for (const id of pl.P.mapIds) { const m = CTX.maps.get(id); if (m && Object.keys(maps).length < 32) maps[id] = { c: b64(m.colors), scale: m.scale, dim: m.dim, x: m.x, z: m.z, locked: m.locked }; }
+            if (Object.keys(maps).length) live.maps = maps;
+            const bps = {};
+            for (const u of pl.P.bpIds) if (CTX.backpacks.has(u)) bps[u] = CTX.backpacks.get(u);
+            if (Object.keys(bps).length) live.backpacks = bps;
+
+            // what this player brought from a share link, overridden by anything loaded here
+            const pub = { ...(isObj(pl.extras.ctx) ? pl.extras.ctx : {}), ...live };
+            const points = [];
+            if (pub.ess) {
+                (pub.ess.homes || []).forEach((h) => points.push({ label: `Home "${h.name}"`, pos: [h.x, h.y, h.z], dim: worldDim(h.world), kind: 'home' }));
+                if (pub.ess.logout && Number.isFinite(pub.ess.logout.x)) points.push({ label: 'Logout spot (Essentials)', pos: [pub.ess.logout.x, pub.ess.logout.y, pub.ess.logout.z], dim: worldDim(pub.ess.logout.world), kind: 'misc' });
+            }
+            (pub.pets || []).slice(0, 40).forEach((p) => p.pos && points.push({ label: (p.name !== null && plain(textHTML(p.name))) || pretty(p.id), pos: p.pos, dim: p.dim, kind: 'pet' }));
+            if (pub.gp) pub.gp.claims.filter((c) => c.parent < 0).forEach((c) => points.push({ label: `Claim ${c.id}`, pos: [(c.a.x + c.b.x) / 2, c.a.y, (c.a.z + c.b.z) / 2], dim: worldDim(c.world), kind: 'claim' }));
+            return { pub, priv, points };
+        }
+        const ftbTitle = (type, id, title) => (title ? String(title) : CTX.ftb.lang.get(`${type}.${id}.title`) || null);
+
+        function serverCardHTML(pl, L) {
+            const d = pl.P.d, b = isObj(d.bukkit) ? d.bukkit : {}, pp = isObj(d.Paper) ? d.Paper : {}, X = L.pub;
+            const ms = (v) => (+v > 1e11 ? dateAgo(+v) : null);
+            const wu = worldUuid(d);
+            const rows = [
+                ['First joined', ms(b.firstPlayed)], ['Last played', ms(b.lastPlayed)], ['Last login', ms(pp.LastLogin)], ['Last seen', ms(pp.LastSeen)],
+                ['Last known name', b.lastKnownName ? esc(b.lastKnownName) : null],
+                ['World', X.world ? esc(X.world) : wu ? `<span class="mono" title="Drop the world's uid.dat to see its name">${esc(wu)}</span>` : null],
+                ['Ticks lived', d['Spigot.ticksLived'] !== undefined ? esc(ticks(d['Spigot.ticksLived'])) : null],
+                ['Server data version', d['Bukkit.updateLevel'] !== undefined ? esc(d['Bukkit.updateLevel']) : null],
+                ['Operator', X.op ? `Level ${esc(X.op.level)}${X.op.bypass ? ' · bypasses the player limit' : ''}` : X.op === false ? 'No' : null],
+                ['Whitelisted', X.whitelisted === true ? 'Yes' : X.whitelisted === false ? 'No' : null],
+                ['Banned', X.ban ? `<b style="color:#ff8080">Yes</b>${X.ban.reason ? ' - ' + esc(X.ban.reason) : ''}<br><small class="muted">by ${esc(X.ban.source || '?')} · ${esc(X.ban.created || '?')} · expires ${esc(X.ban.expires || 'never')}</small>` : X.ban === false ? 'No' : null],
+                ['Last login (user cache)', X.cacheSeen ? dateAgo(X.cacheSeen) : null],
+                ['Team', X.team ? teamHTML(X.team) : null],
+            ];
+            const scores = (X.scores || []).map((s) => `<div class="rowi"><div class="grow">${s.name !== null && s.name !== undefined ? textHTML(s.name) : esc(s.obj)} <small class="mono">${esc(s.obj)}</small>${s.criteria && s.criteria !== 'dummy' ? ` <small>${esc(s.criteria)}</small>` : ''}</div><b>${esc(num(s.score))}</b></div>`).join('');
+            if (!rows.some((r) => r[1] !== null && r[1] !== undefined) && !scores) return '';
+            return `<div class="card" id="s-server"><h2>${imgTag('command_block', false)} Server</h2>${kvHTML(rows)}${scores ? `<h3 class="sub">Scoreboard</h3><div class="rows">${scores}</div>` : ''}</div>`;
+        }
+
+        function essHTML(L) {
+            const E = L.pub.ess, pv = L.priv;
+            if (!E) return '';
+            const loc = (l) => (l && Number.isFinite(l.x) ? `<span class="mono">${xyz(l.x, l.y, l.z)}</span> <small>${esc(l.world || '')}</small> ${tpBtn(l.x, l.y, l.z)}` : null);
+            const rows = [
+                ['Balance', E.money !== null && E.money !== '' ? esc(Number.isFinite(+E.money) ? num(+E.money, 2) : E.money) : null], ['Nickname', E.nick ? ampHTML(E.nick) : null],
+                ['Account name', E.name ? esc(E.name) : null], ['Last login', dateAgo(E.login)], ['Last logout', dateAgo(E.logoutAt)],
+                ['Logout spot', loc(E.logout)], ['Last teleported from', loc(E.last)], ['Muted until', E.muteUntil > Date.now() ? dateAgo(E.muteUntil) : null],
+                ['Jail', E.jail ? esc(E.jail) : null], ['Kits used', E.kits && E.kits.length ? esc(E.kits.join(', ')) : null],
+                ['Power tools', E.powertools ? esc(E.powertools) : null], ['Ignoring', E.ignore ? esc(E.ignore) + ' players' : null],
+                ['IP address', pv.essIp ? privHTML('IP address', `<span class="mono">${esc(pv.essIp)}</span>`) : null],
+                ['Mail', pv.mail ? privHTML(`${pv.mail.length} message${pv.mail.length === 1 ? '' : 's'}`, pv.mail.map((m) => `<div>${esc(m)}</div>`).join('')) : null],
+            ];
+            const homes = (E.homes || []).map((h) => `<div class="rowi"><span class="dot" style="background:#ff9f40"></span><div class="grow"><b>${esc(h.name)}</b><br><small class="mono">${xyz(h.x, h.y, h.z)}</small> <small>${esc(h.world || '')}</small></div>${tpBtn(h.x, h.y, h.z)}</div>`).join('');
+            return `<div class="card" id="s-ess"><h2>${imgTag('gold_ingot', false)} EssentialsX <span class="n">${(E.homes || []).length} home${(E.homes || []).length === 1 ? '' : 's'}</span></h2>
+                ${E.flags && E.flags.length ? `<div class="badges">${E.flags.map((f) => `<span class="badge">${esc(ESS_FLAG[f] || f)}</span>`).join('')}</div>` : ''}${kvHTML(rows)}
+                ${homes ? `<h3 class="sub">Homes</h3><div class="rows">${homes}</div>` : ''}</div>`;
+        }
+
+        function permHTML(L) {
+            const P = L.pub.lp;
+            if (!P) return '';
+            const chips = (P.perms || []).map((n) => `<span class="chip" data-s="${esc(n.k.toLowerCase())}" style="padding:2px 7px;${n.v ? '' : 'color:#ff8080;text-decoration:line-through'}" title="${esc(n.ctx || 'global')}${n.exp ? ' · expires ' + esc(fmtDate(n.exp * 1000)) : ''}">${esc(n.k)}${n.ctx ? ` <small class="muted">${esc(n.ctx)}</small>` : ''}</span>`).join('');
+            return `<div class="card" id="s-perm"><h2>${imgTag('name_tag', false)} LuckPerms <span class="n">${(P.perms || []).length} permission${(P.perms || []).length === 1 ? '' : 's'}</span></h2>
+                ${kvHTML([['Primary group', esc(P.primary)], ['Groups', P.groups && P.groups.length ? P.groups.map((g) => `<span class="badge b">${esc(g)}</span>`).join(' ') : null], ['Prefix', P.prefix ? ampHTML(P.prefix) : null], ['Suffix', P.suffix ? ampHTML(P.suffix) : null]])}
+                ${chips ? `<div class="chips" style="margin-top:10px">${chips}</div>` : ''}</div>`;
+        }
+
+        function townyHTML(L) {
+            const T = L.pub.towny;
+            if (!T) return '';
+            return `<div class="card" id="s-towny"><h2>${imgTag('white_banner', false)} Towny</h2>${kvHTML([
+                ['Town', T.town ? esc(T.town) + (T.mayor ? ' <span class="badge g">Mayor</span>' : '') : 'None'], ['Nation', T.nation ? esc(T.nation) : null],
+                ['Town ranks', T.ranks ? esc(T.ranks) : null], ['Nation ranks', T.nationRanks ? esc(T.nationRanks) : null],
+                ['Title', T.title ? ampHTML(T.title) : null], ['Surname', T.surname ? ampHTML(T.surname) : null],
+                ['Registered', dateAgo(T.registered)], ['Last online', dateAgo(T.lastOnline)], ['Friends', T.friends && T.friends.length ? esc(T.friends.join(', ')) : null],
+            ])}</div>`;
+        }
+
+        function mcmmoHTML(L) {
+            const M = L.pub.mcmmo;
+            if (!M) return '';
+            return `<div class="card" id="s-mcmmo"><h2>${imgTag('experience_bottle', false)} mcMMO <span class="n">power level ${esc(num(M.power))}</span></h2><div class="stgrid">${Object.entries(M.skills).map(([n, [lvl, xp]]) =>
+                `<div class="sti" data-s="${esc(n.toLowerCase())}"><span class="ico">${imgTag(Object.hasOwn(MCMMO_ICON, n) ? MCMMO_ICON[n] : 'book')}</span><div><span>${esc(n)}</span><b>${esc(num(lvl))}</b> <small class="muted">${esc(num(xp))} xp</small></div></div>`).join('')}</div></div>`;
+        }
+
+        function claimsHTML(L) {
+            const { gp, wg, chunks } = L.pub;
+            if (!gp && !wg && !chunks) return '';
+            let h = '';
+            if (gp) {
+                const used = gp.claims.filter((c) => c.parent < 0).reduce((s, c) => s + c.area, 0), total = (gp.accrued || 0) + (gp.bonus || 0);
+                h += `<h3 class="sub" style="margin-top:0">GriefPrevention</h3>${kvHTML([['Claim blocks', gp.accrued !== null ? `${esc(num(total))} <small class="muted">(${esc(num(gp.accrued))} earned + ${esc(num(gp.bonus))} bonus)</small>` : null], ['In use', esc(num(used))], ['Left', gp.accrued !== null ? esc(num(total - used)) : null]])}
+                    <div class="rows" style="margin-top:6px">${gp.claims.map((c) => `<div class="rowi"><span class="dot" style="background:#b3a1ff"></span><div class="grow"><b>Claim ${esc(c.id)}</b>${c.parent >= 0 ? ' <small>subdivision</small>' : ''}<br><small class="mono">${esc(c.a.x)}, ${esc(c.a.z)} → ${esc(c.b.x)}, ${esc(c.b.z)}</small> <small>${esc(c.world)} · ${esc(num(c.area))} blocks${c.trusted ? ` · ${esc(c.trusted)} trusted` : ''}</small></div>${tpBtn((c.a.x + c.b.x) / 2, null, (c.a.z + c.b.z) / 2)}</div>`).join('')}</div>`;
+            }
+            if (wg) {
+                h += `<h3 class="sub">WorldGuard regions</h3><div class="rows">${wg.map((r) => {
+                    const b = isObj(r.min) && isObj(r.max) ? `${esc(r.min.x)}, ${esc(r.min.y)}, ${esc(r.min.z)} → ${esc(r.max.x)}, ${esc(r.max.y)}, ${esc(r.max.z)}` : esc(r.type);
+                    return `<div class="rowi"><div class="grow"><b>${esc(r.id)}</b> <span class="badge ${r.role === 'owner' ? 'g' : ''}">${esc(r.role)}</span><br><small class="mono">${b}</small> <small>${esc(r.world)} · priority ${esc(r.priority)}</small></div>${isObj(r.min) && isObj(r.max) ? tpBtn((r.min.x + r.max.x) / 2, null, (r.min.z + r.max.z) / 2) : ''}</div>`;
+                }).join('')}</div>`;
+            }
+            if (chunks) {
+                const total = Object.values(chunks.byDim || {}).reduce((s, n) => s + n, 0);
+                h += `<h3 class="sub">FTB Chunks${chunks.team ? ' · ' + esc(chunks.team) : ''}</h3>${kvHTML([['Claimed chunks', esc(num(total))], ['Force loaded', chunks.forced ? esc(num(chunks.forced)) : null], ...Object.entries(chunks.byDim || {}).map(([dm, n]) => [esc(dimName(dm)), esc(num(n))])])}`;
+            }
+            return `<div class="card" id="s-claims"><h2>${imgTag('golden_shovel', false)} Claims &amp; regions</h2>${h}</div>`;
+        }
+
+        function sessHTML(L) {
+            const S = L.pub.sess, pv = L.priv;
+            if (!S) return '';
+            const tiles = [[num(S.count), 'Sessions'], [dur(S.total), 'Time online'], [S.first ? new Date(S.first).toLocaleDateString() : '?', 'First seen'], [S.last ? ago(S.last) : '?', 'Last seen'], [num(S.deaths.length), 'Deaths logged'], [num(S.adv), 'Advancements logged']];
+            const quiet = /^(left|Disconnected|disconnect\.quitting|Disconnected by client)$/i;
+            const rows = S.recent.map((s) => `<div class="rowi"><div class="grow"><b>${esc(fmtDate(s.start))}</b><br><small>${s.end ? dur(s.end - s.start) + (s.why && !quiet.test(s.why) ? ' · ' + esc(s.why) : '') : s.online ? 'still online when the log ended' : 'end not logged'}${s.world ? ' · ' + esc(s.world) : ''}</small></div>${s.pos ? `<small class="mono">${xyz(...s.pos)}</small>` : ''}</div>`).join('');
+            const deaths = S.deaths.slice(-15).reverse().map(([t, m]) => `<div class="rowi"><span class="ico">${imgTag('skeleton_skull')}</span><div class="grow">${esc(m)}<br><small>${esc(fmtDate(t))}</small></div></div>`).join('');
+            const log = (list) => `<div class="scroll" style="max-height:300px;font-size:13px">${list.map(([t, m]) => `<div><small class="muted">${esc(fmtDate(t))}</small> ${esc(m)}</div>`).join('')}</div>`;
+            const privRows = [
+                ['IP addresses', pv.ips ? privHTML(`${pv.ips.length} address${pv.ips.length === 1 ? '' : 'es'}`, pv.ips.map(([ip, n, banned]) => `<div class="mono">${esc(ip)} <small class="muted">${n} login${n === 1 ? '' : 's'}${banned ? ' · IP banned' : ''}</small></div>`).join('')) : null],
+                ['Chat', pv.chat ? privHTML(`${num(pv.chatCount)} message${pv.chatCount === 1 ? '' : 's'}`, log(pv.chat)) : null],
+                ['Commands', pv.cmds ? privHTML(`${num(pv.cmdCount)} command${pv.cmdCount === 1 ? '' : 's'}`, log(pv.cmds)) : null],
+            ];
+            return `<div class="card" id="s-sess"><h2>${imgTag('clock', false)} Sessions <span class="n">from ${esc(num(S.files))} log file${S.files === 1 ? '' : 's'}</span></h2>
+                <div class="tiles">${tiles.map(([v, l]) => `<div class="tile"><b>${esc(v)}</b><span>${l}</span></div>`).join('')}</div>
+                ${privRows.some((r) => r[1]) ? `<div style="margin-top:10px">${kvHTML(privRows)}</div>` : ''}
+                ${rows ? `<h3 class="sub">Recent sessions</h3><div class="rows scroll" style="max-height:300px">${rows}</div>` : ''}
+                ${deaths ? `<h3 class="sub">Deaths</h3><div class="rows">${deaths}</div>` : ''}</div>`;
+        }
+
+        function petsHTML(L) {
+            const list = L.pub.pets;
+            if (!list || !list.length) return '';
+            return `<div class="card" id="s-pets"><h2>${imgTag('lead', false)} Pets <span class="n">${list.length} owned</span></h2><div class="rows">${list.map((p) => {
+                const name = p.name !== null && p.name !== undefined ? textHTML(p.name) : '';
+                const items = (p.items || []).map(normItem).filter((it) => it && it.base !== 'air');
+                return `<div class="rowi" style="flex-wrap:wrap"><span class="ico">${imgTag(mobIcon(p.id))}</span><div class="grow"><b>${name || esc(pretty(p.id))}</b>${name ? ` <small>${esc(pretty(p.id))}</small>` : ''}<br>
+                    <small>${p.hp !== null ? esc(num(p.hp, 1)) + ' hp · ' : ''}${esc(dimName(p.dim))}${p.pos ? ` · <span class="mono">${xyz(...p.pos)}</span>` : ''}${p.sitting ? ' · sitting' : ''}${p.baby ? ' · baby' : ''}</small></div>${p.pos ? tpBtn(...p.pos) : ''}
+                    ${items.length ? `<div class="slots" style="grid-template-columns:repeat(${Math.min(9, items.length)},var(--s));flex-basis:100%;margin-top:4px">${items.map((it, j) => slotHTML(it, `Pets › ${plain(name) || pretty(p.id)} › ${j + 1}`)).join('')}</div>` : ''}</div>`;
+            }).join('')}</div></div>`;
+        }
+
+        function questsHTML(L) {
+            const Q = L.pub.quests;
+            if (!Q) return '';
+            return `<div class="card" id="s-quests"><h2>${imgTag('book', false)} FTB Quests <span class="n">${esc(num(Q.done))} / ${esc(num(Q.total))}${Q.team ? ' · team ' + esc(Q.team) : ''}</span></h2>
+                <div class="progress" style="height:10px"><i style="width:${Q.total ? (Q.done / Q.total) * 100 : 0}%"></i></div>
+                ${(Q.chapters || []).map((c) => `<div class="adv-cat"><h3>${c.icon ? imgTag(String(c.icon), false).replace('<img', '<img style="width:20px;height:20px"') : ''}${ampHTML(c.title)}<span class="n">${esc(c.done)} / ${esc(c.total)}</span></h3><div class="progress"><i style="width:${c.total ? (c.done / c.total) * 100 : 0}%"></i></div></div>`).join('')}</div>`;
+        }
+
+        /* =====================================================================
+           World & server page (never shared)
+           ===================================================================== */
+        let FILEBLK = [];       // config / data files shown on the page, filled into a tree when opened
+        function serverViewHTML() {
+            FILEBLK = [];
+            const S = [], cards = [];
+            const groups = new Map();
+            CTX.files.forEach((f) => groups.set(f.kind, (groups.get(f.kind) || 0) + 1));
+            S.push(`<div class="section card"><h2>${imgTag('command_block', false)} World &amp; server <span class="n">${num(CTX.files.length)} file${CTX.files.length === 1 ? '' : 's'}</span><button class="btn small" data-act="clearctx" title="Forget all world and server files">Clear</button></h2>
+                <p class="muted" style="font-size:13px;margin:0 0 8px">Read in your browser only. Private values - IP addresses, chat, passwords, seeds - stay hidden until you click them, and nothing on this page goes into share links. Player pages show what applies to each player.</p>
+                <div class="badges">${[...groups].map(([k, n]) => `<span class="badge">${esc(k)}${n > 1 ? ' × ' + num(n) : ''}</span>`).join('')}</div></div>`);
+            if (CTX.level) cards.push(worldHTML());
+            if (CTX.props) cards.push(propsHTML());
+            if (CTX.ipBans.length) cards.push(ipBansHTML());
+            if (CTX.scoreboard) cards.push(scoreboardHTML());
+            if (CTX.servers) cards.push(serversHTML());
+            const plug = pluginsHTML();
+            if (plug) cards.push(plug);
+            if (CTX.packs.length) cards.push(packsHTML());
+            if (cards.length) S.push(`<div class="masonry">${cards.join('')}</div>`);
+            S.push(rosterHTML());
+            if (CTX.sess) S.push(logsHTML());
+            if (CTX.maps.size) S.push(mapsHTML());
+            if (CTX.hotbars) S.push(hotbarsHTML());
+            if (CTX.mods.length) S.push(modsHTML());
+            if (CTX.ftb.chapters.length) S.push(questBookHTML());
+            if (CTX.schems.length) S.push(schemsHTML());
+            if (CTX.configs.length) S.push(filesHTML('w-config', 'Config files', 'comparator', CTX.configs));
+            if (CTX.data.length) S.push(filesHTML('w-data', 'Other data files', 'structure_block', CTX.data));
+            const html = S.join('');
+            const jumps = [['w-world', 'World'], ['w-props', 'server.properties'], ['w-ipbans', 'IP bans'], ['w-score', 'Scoreboard'], ['w-servers', 'Server list'], ['w-plugins', 'Plugins'], ['w-packs', 'Resource packs'], ['w-players', 'Players'], ['w-logs', 'Logs'], ['w-maps', 'Maps'], ['w-hotbar', 'Hotbars'], ['w-mods', 'Mods'], ['w-quests', 'Quests'], ['w-schem', 'Schematics'], ['w-config', 'Configs'], ['w-data', 'Data files']];
+            return '<nav class="jump">' + jumps.filter(([id]) => html.includes(`id="${id}"`)).map(([id, t]) => `<a href="#${id}">${t}</a>`).join('') + '</nav>' + html;
+        }
+
+        function worldHTML() {
+            const L = CTX.level.data;
+            const seed = isObj(L.WorldGenSettings) ? L.WorldGenSettings.seed : L.RandomSeed ?? (isObj(L.world_gen_settings) ? L.world_gen_settings.seed : undefined);
+            const day = L.DayTime ?? L.Time ?? 0, tod = ((day % 24000) + 24000) % 24000;
+            const clock = `${String(Math.floor((tod / 1000 + 6) % 24)).padStart(2, '0')}:${String(Math.floor(((tod % 1000) / 1000) * 60)).padStart(2, '0')}`;
+            const spawn = isObj(L.spawn) && Array.isArray(L.spawn.pos) ? L.spawn.pos : L.SpawnX !== undefined ? [L.SpawnX, L.SpawnY, L.SpawnZ] : null;
+            const rules = isObj(L.GameRules) ? L.GameRules : isObj(L.game_rules) ? L.game_rules : null;
+            const packs = isObj(L.DataPacks) ? L.DataPacks : null;
+            const diff = L.Difficulty ?? (isObj(L.difficulty_settings) ? L.difficulty_settings.difficulty : undefined);
+            const rows = [
+                ['Name', L.LevelName !== undefined ? esc(L.LevelName) : null],
+                ['Version', isObj(L.Version) ? esc(L.Version.Name) + (truthy(L.Version.Snapshot) ? ' (snapshot)' : '') : L.DataVersion ? esc(versionOf(L.DataVersion)) : null],
+                ['Game mode', L.GameType !== undefined ? esc(GAMEMODES[L.GameType] ?? L.GameType) : null],
+                ['Difficulty', diff !== undefined ? esc(typeof diff === 'number' ? ['Peaceful', 'Easy', 'Normal', 'Hard'][diff] ?? diff : pretty(diff)) + (truthy(L.DifficultyLocked) ? ' (locked)' : '') : null],
+                ['Hardcore', L.hardcore !== undefined ? (truthy(L.hardcore) ? 'Yes' : 'No') : null],
+                ['Cheats', L.allowCommands !== undefined ? (truthy(L.allowCommands) ? 'Allowed' : 'Off') : null],
+                ['Day', `${num(Math.floor(day / 24000) + 1)} · ${clock}`],
+                ['Weather', truthy(L.thundering) ? `Thunderstorm (${ticks(L.thunderTime || 0)} left)` : truthy(L.raining) ? `Rain (${ticks(L.rainTime || 0)} left)` : L.clearWeatherTime ? `Clear (${ticks(L.clearWeatherTime)} left)` : 'Clear'],
+                ['World spawn', spawn ? `<span class="mono">${esc(spawn.join(', '))}</span> ${tpBtn(...spawn)}` : null],
+                ['World border', L.BorderSize !== undefined ? `${esc(num(L.BorderSize))} wide around ${esc(num(L.BorderCenterX ?? 0))}, ${esc(num(L.BorderCenterZ ?? 0))}` : null],
+                ['Last played', +L.LastPlayed > 1e11 ? dateAgo(+L.LastPlayed) : null],
+                ['Ender Dragon', isObj(L.DragonFight) ? (truthy(L.DragonFight.DragonKilled) ? 'Killed' : 'Alive') + (truthy(L.DragonFight.PreviouslyKilled) ? ' · has been killed before' : '') : null],
+                ['Wandering trader', L.WanderingTraderSpawnChance !== undefined ? `${esc(L.WanderingTraderSpawnChance)}% chance, next try in ${ticks(L.WanderingTraderSpawnDelay || 0)}` : null],
+                ['Seed', seed !== undefined ? privHTML('Seed', `<span class="mono">${esc(seed)}</span>`) : null],
+            ];
+            const chip = (p, on) => `<span class="chip" data-s="${esc(String(p).toLowerCase())}" style="padding:2px 7px${on ? '' : ';opacity:.5'}"${on ? '' : ' title="disabled"'}>${esc(p)}</span>`;
+            return `<div class="card" id="w-world"><h2>${imgTag('grass_block', false)} World <span class="n">${esc(CTX.level.file)}</span></h2>${kvHTML(rows)}
+                ${packs ? `<h3 class="sub">Data packs</h3><div class="chips">${(packs.Enabled || []).map((p) => chip(p, true)).join('')}${(packs.Disabled || []).map((p) => chip(p, false)).join('')}</div>` : ''}
+                ${rules ? `<details style="margin-top:10px"><summary class="btn small" style="list-style:none">Game rules (${Object.keys(rules).length})</summary><div class="kv" style="margin-top:8px">${Object.entries(rules).sort().map(([k, v]) => `<span>${esc(k)}</span><span>${esc(v)}</span>`).join('')}</div></details>` : ''}</div>`;
+        }
+
+        function propsHTML() {
+            const p = CTX.props.data;
+            const top = ['motd', 'level-name', 'gamemode', 'difficulty', 'hardcore', 'max-players', 'online-mode', 'white-list', 'enforce-whitelist', 'pvp', 'view-distance', 'simulation-distance', 'spawn-protection', 'allow-flight', 'server-port', 'enable-command-block', 'enforce-secure-profile'];
+            const val = (k, v) => (PRIVATE_KEY.test(k) && String(v) !== '' ? privHTML('hidden', `<span class="mono">${esc(v)}</span>`) : k === 'motd' ? legacyHTML(String(v), {}) : `<span class="mono">${esc(v)}</span>`);
+            const main = top.filter((k) => k in p), rest = Object.keys(p).filter((k) => !top.includes(k)).sort();
+            return `<div class="card" id="w-props"><h2>${imgTag('comparator', false)} Server settings <span class="n">${esc(CTX.props.file)}</span></h2>
+                ${p['online-mode'] === 'false' ? '<div class="note" style="font-size:13px">Offline mode: player UUIDs are made from their names, so name lookups only work with this server\'s usercache.json.</div>' : ''}
+                ${kvHTML(main.map((k) => [esc(k), val(k, p[k])]))}
+                ${rest.length ? `<details style="margin-top:10px"><summary class="btn small" style="list-style:none">All ${Object.keys(p).length} settings</summary><div class="kv" style="margin-top:8px">${rest.map((k) => `<span>${esc(k)}</span><span>${val(k, p[k])}</span>`).join('')}</div></details>` : ''}</div>`;
+        }
+
+        function ipBansHTML() {
+            return `<div class="card" id="w-ipbans"><h2>${imgTag('barrier', false)} IP bans <span class="n">${CTX.ipBans.length}</span></h2><div class="rows">${CTX.ipBans.map((b) =>
+                `<div class="rowi"><div class="grow">${privHTML('IP address', `<span class="mono">${esc(b.ip)}</span>`)}${b.reason ? ' ' + esc(b.reason) : ''}<br><small>by ${esc(b.source || '?')} · ${esc(b.created || '?')} · expires ${esc(b.expires || 'never')}</small></div></div>`).join('')}</div></div>`;
+        }
+
+        function scoreboardHTML() {
+            const sb = CTX.scoreboard;
+            const holder = (n) => { const k = uuidKey(n); return k && k.length === 32 && /^[0-9a-f]+$/.test(k) ? nameFor(k) : n; };
+            const objs = [...sb.objectives].map(([id, o], i) => {
+                const list = sb.scores.filter((s) => s.Objective === id).sort((a, b) => b.Score - a.Score);
+                return `<details${i < 2 ? ' open' : ''} style="margin-top:6px"><summary style="cursor:pointer">${o.name !== undefined && o.name !== null ? textHTML(o.name) : esc(id)} <small class="mono muted">${esc(id)} · ${esc(o.criteria || '')} · ${list.length}</small></summary>
+                    <div class="rows" style="margin-top:4px">${list.slice(0, 15).map((s, n) => `<div class="rowi srow" data-s="${esc(String(holder(s.Name)).toLowerCase())}"><small class="muted" style="width:20px">${n + 1}</small><div class="grow">${esc(holder(s.Name))}</div><b>${esc(num(s.Score))}</b></div>`).join('')}${list.length > 15 ? `<small class="muted">and ${list.length - 15} more</small>` : ''}</div></details>`;
+            }).join('');
+            const teams = sb.teams.map((t) => `<div class="rowi"><div class="grow">${teamHTML({ name: t.Name, display: t.DisplayName, color: t.TeamColor, prefix: t.MemberNamePrefix, suffix: t.MemberNameSuffix })} <small class="mono muted">${esc(t.Name)}</small><br><small>${esc((t.Players || []).slice(0, 20).join(', '))}${(t.Players || []).length > 20 ? '…' : ''}</small></div><small>${(t.Players || []).length} members</small></div>`).join('');
+            const slots = Object.entries(sb.slots || {}).map(([k, v]) => `<span class="badge">${esc(k.replace(/^slot_/, 'slot '))}: ${esc(v)}</span>`).join('');
+            return `<div class="card" id="w-score"><h2>${imgTag('oak_sign', false)} Scoreboard <span class="n">${sb.objectives.size} objectives · ${sb.teams.length} teams</span></h2>
+                ${slots ? `<div class="badges">${slots}</div>` : ''}${objs}${teams ? `<h3 class="sub">Teams</h3><div class="rows">${teams}</div>` : ''}</div>`;
+        }
+
+        function serversHTML() {
+            const list = CTX.servers.list;
+            return `<div class="card" id="w-servers"><h2>${imgTag('ender_eye', false)} Server list <span class="n">${list.length} · servers.dat</span></h2><div class="rows">${list.map((s) => {
+                const icon = typeof s.icon === 'string' && /^[A-Za-z0-9+/=]+$/.test(s.icon) ? `<img src="data:image/png;base64,${s.icon}" alt="" style="width:32px;height:32px;image-rendering:pixelated;border-radius:4px;flex:none">` : `<span class="ico">${imgTag('grass_block')}</span>`;
+                return `<div class="rowi">${icon}<div class="grow"><b>${esc(s.name || 'Minecraft Server')}</b>${truthy(s.hidden) ? ' <small>hidden</small>' : ''}<br>${s.ip ? privHTML('address', `<span class="mono">${esc(s.ip)}</span>`) : ''}</div>${s.acceptTextures !== undefined ? `<small>${truthy(s.acceptTextures) ? 'server pack: on' : 'server pack: off'}</small>` : ''}</div>`;
+            }).join('')}</div></div>`;
+        }
+
+        function pluginsHTML() {
+            const parts = [];
+            const count = (label, n) => (n ? [label, num(n)] : null);
+            parts.push(kvHTML([count('EssentialsX users', CTX.ess.size), count('LuckPerms users', CTX.lpUsers.size), count('mcMMO users', CTX.mcmmo.length), count('GriefPrevention players', CTX.gpPlayers.size),
+                CTX.gpClaims.length ? ['GriefPrevention claims', `${num(CTX.gpClaims.length)} · ${num(CTX.gpClaims.filter((c) => c.parent < 0).reduce((s, c) => s + c.area, 0))} blocks`] : null,
+                count('WorldGuard regions', CTX.wg.length), count('Towny residents', CTX.towny.residents.size), count('FTB teams', CTX.ftb.teams.length),
+                count('Backpacks indexed', CTX.backpacks.size), CTX.pets.size ? ['Pets found', `${num([...CTX.pets.values()].reduce((s, l) => s + l.length, 0))} for ${num(CTX.pets.size)} owners`] : null]));
+            if (CTX.mv.size) parts.push(`<h3 class="sub">Multiverse worlds</h3><div class="rows">${[...CTX.mv].map(([n, w]) => `<div class="rowi"><div class="grow"><b>${esc(n)}</b>${w.alias ? ' · ' + ampHTML(w.alias) : ''}</div><small>${esc(w.environment || '')}</small></div>`).join('')}</div>`);
+            if (CTX.lpGroups.size) {
+                const members = (g) => [...CTX.lpUsers.values()].filter((u) => String(u.primary || '').toLowerCase() === g || u.nodes.some((n) => n.value && n.key.toLowerCase() === 'group.' + g)).length;
+                parts.push(`<h3 class="sub">LuckPerms groups</h3><div class="rows">${[...CTX.lpGroups].map(([g, nodes]) => {
+                    const pre = lpMeta(nodes, 'prefix'), w = nodes.map((n) => /^weight\.(\d+)$/.exec(n.key)).find(Boolean);
+                    return `<div class="rowi"><div class="grow"><b>${esc(g)}</b> ${pre ? ampHTML(pre) : ''}<br><small>${nodes.length} nodes${w ? ' · weight ' + w[1] : ''}</small></div><small>${members(g)} users</small></div>`;
+                }).join('')}</div>`);
+            }
+            if (CTX.towny.towns.size) {
+                const res = [...CTX.towny.residents.values()];
+                parts.push(`<h3 class="sub">Towny towns</h3><div class="rows">${[...CTX.towny.towns.values()].map((t) => `<div class="rowi"><div class="grow"><b>${esc(t.name)}</b>${t.nation ? ' · ' + esc(t.nation) : ''}<br><small>mayor ${esc(t.mayor || '?')}</small></div><small>${res.filter((r) => String(r.town || '').toLowerCase() === String(t.name).toLowerCase()).length} residents</small></div>`).join('')}</div>`);
+            }
+            if (CTX.mcmmo.length) {
+                const top = CTX.mcmmo.map((r) => [r.name, Object.values(r.skills).reduce((s, [l]) => s + l, 0)]).sort((a, b) => b[1] - a[1]).slice(0, 10);
+                parts.push(`<h3 class="sub">mcMMO power levels</h3><div class="rows">${top.map(([n, p], i) => `<div class="rowi srow" data-s="${esc(n.toLowerCase())}"><small class="muted" style="width:20px">${i + 1}</small><div class="grow">${esc(n)}</div><b>${num(p)}</b></div>`).join('')}</div>`);
+            }
+            if (CTX.wg.length) {
+                const byWorld = new Map();
+                CTX.wg.forEach((r) => byWorld.set(r.world, (byWorld.get(r.world) || 0) + 1));
+                parts.push(`<h3 class="sub">WorldGuard regions per world</h3>${kvHTML([...byWorld].map(([w, n]) => [esc(w), num(n)]))}`);
+            }
+            const body = parts.filter((p) => p && p !== '<div class="kv"></div>');
+            return body.length ? `<div class="card" id="w-plugins"><h2>${imgTag('writable_book', false)} Plugin &amp; mod data</h2>${body.join('')}</div>` : '';
+        }
+
+        function packsHTML() {
+            return `<div class="card" id="w-packs"><h2>${imgTag('painting', false)} Local resource packs</h2><p class="muted" style="font-size:13px;margin:0 0 8px">Item textures from these packs replace the normal icons on this device only. Packs loaded later win.</p><div class="rows">${CTX.packs.map((p) =>
+                `<div class="rowi modrow">${texImg('packicon:' + p.file, 'painting')}<div class="grow"><b>${esc(p.file)}</b><br><small class="desc">${p.desc ? textHTML(p.desc) : ''}</small></div><small>${num(p.textures)} textures</small></div>`).join('')}</div></div>`;
+        }
+
+        function rosterHTML() {
+            const keys = new Set([...CTX.usercache.keys(), ...CTX.ops.keys(), ...CTX.whitelist, ...CTX.bans.keys(), ...CTX.ess.keys(), ...CTX.lpUsers.keys(), ...CTX.gpPlayers.keys()]);
+            if (!keys.size) return '';
+            players.forEach((p) => p.key && keys.add(p.key));
+            const rows = [...keys].map((k) => ({ k, name: nameFor(k), op: CTX.ops.get(k), wl: CTX.whitelist.has(k), ban: CTX.bans.get(k), seen: (CTX.usercache.get(k) || {}).seen || 0, pi: players.findIndex((p) => p.key === k) }))
+                .sort((a, b) => (b.pi >= 0) - (a.pi >= 0) || b.seen - a.seen || String(a.name).localeCompare(String(b.name)));
+            return `<div class="card section" id="w-players"><h2>${imgTag('player_head', false)} Players known to the server <span class="n">${num(rows.length)}</span></h2>
+                <p class="muted" style="font-size:13px;margin:0 0 8px">From usercache, ops, whitelist, bans, EssentialsX, LuckPerms and GriefPrevention. Filter with the search box; click a loaded player to open them.</p>
+                <div class="rows scroll" style="max-height:520px">${rows.slice(0, 3000).map((r) => `<div class="rowi srow"${r.pi >= 0 ? ` data-tab="${r.pi}" style="cursor:pointer"` : ''} data-s="${esc((r.name + ' ' + r.k).toLowerCase())}">
+                    <img src="https://crafthead.net/avatar/${esc(r.k)}/32" alt="" loading="lazy" style="width:26px;height:26px;border-radius:4px;image-rendering:pixelated;flex:none" onerror="this.src='${MISSING}'">
+                    <div class="grow"><b>${esc(r.name)}</b><br><small class="mono">${esc(dashUuid(r.k))}</small></div>
+                    ${r.pi >= 0 ? '<span class="badge g">Loaded</span>' : ''}${r.op ? `<span class="badge p">OP ${esc(r.op.level ?? 4)}</span>` : ''}${r.wl ? '<span class="badge">Whitelisted</span>' : ''}${r.ban ? `<span class="badge r" title="${esc(r.ban.reason || '')}">Banned</span>` : ''}
+                    ${r.seen ? `<small title="Last login (from the user cache)">${esc(ago(r.seen))}</small>` : ''}</div>`).join('')}</div></div>`;
+        }
+
+        function logsHTML() {
+            const S = CTX.sess;
+            const list = [...S.players.values()].map((p) => ({ ...p, total: p.sessions.reduce((s, x) => s + ((x.end || S.last) - x.start), 0), last: p.sessions.length ? p.sessions[p.sessions.length - 1].end || S.last : 0 })).sort((a, b) => b.total - a.total);
+            const pidx = (name) => players.findIndex((p) => namesOf(p).has(name.toLowerCase()));
+            const log = (rows) => `<div class="scroll" style="max-height:360px;font-size:13px">${rows.map(([t, n, m]) => `<div><small class="muted">${esc(fmtDate(t))}</small> <b>${esc(n)}</b> ${esc(m)}</div>`).join('')}</div>`;
+            const chat = S.chat.slice(-500), cmds = S.cmds.slice(-500);
+            return `<div class="card section" id="w-logs"><h2>${imgTag('clock', false)} Logs <span class="n">${num(CTX.logFiles.length)} file${CTX.logFiles.length === 1 ? '' : 's'}</span></h2>
+                <div class="tiles">${[[S.first < Infinity ? new Date(S.first).toLocaleDateString() : '?', 'From'], [S.last ? new Date(S.last).toLocaleDateString() : '?', 'To'], [num(list.length), 'Players'], [num(list.reduce((s, p) => s + p.sessions.length, 0)), 'Sessions'], [num(S.chat.length), 'Chat messages']].map(([v, l]) => `<div class="tile"><b>${esc(v)}</b><span>${l}</span></div>`).join('')}</div>
+                ${S.versions.length ? `<div class="badges" style="margin-top:10px">${S.versions.map((v) => `<span class="badge">Minecraft ${esc(v)}</span>`).join('')}</div>` : ''}
+                <div style="margin-top:10px">${kvHTML([['Chat', chat.length ? privHTML(`last ${num(chat.length)} messages`, log(chat)) : null], ['Commands', cmds.length ? privHTML(`last ${num(cmds.length)} commands`, log(cmds)) : null]])}</div>
+                <h3 class="sub">Most time online</h3><div class="rows scroll">${list.slice(0, 200).map((p, i) => { const pi = pidx(p.name); return `<div class="rowi srow"${pi >= 0 ? ` data-tab="${pi}" style="cursor:pointer"` : ''} data-s="${esc(p.name.toLowerCase())}"><small class="muted" style="width:26px">${i + 1}</small><div class="grow"><b>${esc(p.name)}</b><br><small>${num(p.sessions.length)} sessions · ${p.deaths.length} deaths${p.sessions.some((s) => s.online) ? ' · online at the end of the log' : ''}</small></div><div style="text-align:right"><b>${dur(p.total)}</b><br><small>${p.last ? esc(ago(p.last)) : ''}</small></div></div>`; }).join('')}</div></div>`;
+        }
+
+        function mapsHTML() {
+            const ids = [...CTX.maps.keys()].sort((a, b) => a - b);
+            return `<div class="card section" id="w-maps"><h2>${imgTag('filled_map', false)} Maps <span class="n">${num(ids.length)}</span></h2><div class="maps">${ids.slice(0, 600).map((id) => {
+                const m = CTX.maps.get(id);
+                return `<figure><img class="mapimg" src="${mapURL(id)}" alt="Map ${esc(id)}" loading="lazy"><figcaption><b style="color:var(--text)">#${esc(id)}</b> · 1:${2 ** (m.scale || 0)} · ${esc(dimName(m.dim || 'minecraft:overworld'))}<br>centre ${esc(m.x)}, ${esc(m.z)}${m.locked ? ' · locked' : ''}</figcaption></figure>`;
+            }).join('')}</div></div>`;
+        }
+
+        function hotbarsHTML() {
+            const d = CTX.hotbars.data;
+            const rows = Array.from({ length: 9 }, (_, r) => (Array.isArray(d[String(r)]) ? d[String(r)] : []).map((x) => { const it = normItem(x); return it && it.base !== 'air' ? it : null; }));
+            return `<div class="card section" id="w-hotbar"><h2>${imgTag('chest', false)} Saved creative hotbars <span class="n">${esc(CTX.hotbars.file)}</span></h2><div class="gui">${rows.map((items, r) =>
+                `<div style="display:flex;align-items:center;gap:8px;margin-top:${r ? 4 : 0}px"><span class="mono" style="width:12px;color:#888">${r + 1}</span><div class="slots">${Array.from({ length: 9 }, (_, i) => slotHTML(items[i], `Saved hotbar ${r + 1} › Slot ${i + 1}`)).join('')}</div></div>`).join('')}</div></div>`;
+        }
+
+        function modsHTML() {
+            const list = [...CTX.mods].sort((a, b) => String(a.name || a.file).localeCompare(String(b.name || b.file)));
+            return `<div class="card section" id="w-mods"><h2>${imgTag('crafting_table', false)} Mods <span class="n">${num(list.length)} · ${num(LANG.size)} names · ${num(TEXREF.size)} textures</span></h2>
+                <div class="stgrid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">${list.map((m) => `<div class="rowi modrow srow" data-s="${esc(`${m.name} ${m.id} ${m.file}`.toLowerCase())}">${texImg('modicon:' + (m.id || m.file), 'crafting_table')}<div class="grow"><b>${esc(m.name || m.file)}</b> <small>${esc(m.version || '')}</small><br><small class="mono">${esc(m.id || '')}</small> <small>${esc(m.loader || '')}</small>${m.desc ? `<br><small class="desc muted">${esc(m.desc)}</small>` : ''}</div></div>`).join('')}</div></div>`;
+        }
+
+        function questBookHTML() {
+            const F = CTX.ftb;
+            const total = F.chapters.reduce((s, c) => s + c.quests.length, 0);
+            const teams = [...F.progress].map(([id, p]) => {
+                const t = F.teams.find((x) => x.id === id);
+                const done = new Set(Object.keys(p.completed).map((k) => k.toLowerCase()));
+                return { name: t ? t.name || (t.type === 'player' ? nameFor(uuidKey(id)) : 'Party') : nameFor(uuidKey(id)), done: F.chapters.reduce((s, c) => s + c.quests.filter((q) => done.has(q.id.toLowerCase())).length, 0) };
+            }).sort((a, b) => b.done - a.done);
+            return `<div class="card section" id="w-quests"><h2>${imgTag('book', false)} FTB Quests <span class="n">${F.chapters.length} chapters · ${num(total)} quests</span></h2>
+                <div class="stgrid">${[...F.chapters].sort((a, b) => a.order - b.order).map((c) => `<div class="sti" data-s="${esc(String(ftbTitle('chapter', c.id, c.title) || c.file).toLowerCase())}">${c.icon ? `<span class="ico">${imgTag(itemIdOf(c.icon) || 'book')}</span>` : ''}<div><span>${ampHTML(ftbTitle('chapter', c.id, c.title) || pretty(c.file))}</span><b>${c.quests.length}</b> <small class="muted">quests</small></div></div>`).join('')}</div>
+                ${teams.length ? `<h3 class="sub">Progress</h3><div class="rows">${teams.map((t) => `<div class="rowi srow" data-s="${esc(String(t.name).toLowerCase())}"><div class="grow"><b>${esc(t.name)}</b><div class="progress" style="margin:4px 0 0"><i style="width:${total ? (t.done / total) * 100 : 0}%"></i></div></div><small>${num(t.done)} / ${num(total)}</small></div>`).join('')}</div>` : ''}</div>`;
+        }
+
+        // schematics from more than one folder get a folder browser instead of one card each
+        const SCHEM = { dir: null, sel: -1 };
+        const schemDir = (s) => { const p = s.file.replace(/\\/g, '/'), i = p.lastIndexOf('/'); return i < 0 ? '' : p.slice(0, i); };
+        function schemsHTML() {
+            if (new Set(CTX.schems.map(schemDir)).size < 2) return CTX.schems.map((s, i) => schemHTML(s, i)).join('');
+            return `<div class="card section" id="w-schem">${schemBrowserHTML()}</div>`;
+        }
+        function schemTree() {
+            const root = { name: '', path: '', kids: new Map(), files: [], total: 0 };
+            CTX.schems.forEach((s, i) => {
+                let n = root;
+                n.total++;
+                for (const part of schemDir(s).split('/').filter(Boolean)) {
+                    if (!n.kids.has(part)) n.kids.set(part, { name: part, path: n.path ? n.path + '/' + part : part, kids: new Map(), files: [], total: 0 });
+                    n = n.kids.get(part);
+                    n.total++;
+                }
+                n.files.push(i);
+            });
+            // skip leading folders that only hold one folder
+            while (!root.files.length && root.kids.size === 1) { const k = [...root.kids.values()][0]; root.kids = k.kids; root.files = k.files; root.path = k.path; root.name = k.name; }
+            return root;
+        }
+        function schemBrowserHTML() {
+            const root = schemTree(), byPath = new Map();
+            (function index(n) { byPath.set(n.path, n); n.kids.forEach(index); })(root);
+            if (!byPath.has(SCHEM.dir)) SCHEM.dir = root.path;
+            if (!CTX.schems[SCHEM.sel]) SCHEM.sel = -1;
+            const cur = byPath.get(SCHEM.dir), folders = byPath.size - 1;
+            const sorted = (m) => [...m.values()].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+            const tree = (n, d) => `<button class="fnode${n === cur ? ' on' : ''}" data-act="sdir" data-dir="${esc(n.path)}" style="padding-left:${8 + d * 14}px" title="${esc(n.path || 'All schematics')}">
+                    ${imgTag(n.kids.size ? 'chest' : 'barrel')}<span class="grow">${esc(n === root ? n.name || 'All' : n.name)}</span><small>${num(n.total)}</small></button>${sorted(n.kids).map((k) => tree(k, d + 1)).join('')}`;
+            // breadcrumb from the browser root down to the open folder
+            const crumbs = [root];
+            if (cur !== root) { let p = root.path; for (const part of cur.path.slice(root.path ? root.path.length + 1 : 0).split('/')) { p = p ? p + '/' + part : part; crumbs.push(byPath.get(p)); } }
+            const here = new Set(cur.files);
+            const fileRow = (i) => {
+                const s = CTX.schems[i], m = s.meta || {}, off = !here.has(i);
+                return `<button class="rowi srow fitem${i === SCHEM.sel ? ' on' : ''}" data-act="ssel" data-i="${i}" data-s="${esc(String(m.name || s.name).toLowerCase())}"${off ? ' data-off' : ''}>
+                    <span class="ico">${imgTag('structure_block')}</span><span class="grow"><b>${esc(m.name || s.name)}</b><br><small>${esc(s.kind)}${s.size ? ' · ' + esc(s.size.map((v) => Math.abs(v)).join('×')) : ''} · ${esc(num(s.total))} blocks${off ? ' · <span class="mono">' + esc(schemDir(s)) + '</span>' : ''}</small></span></button>`;
+            };
+            const folderRow = (k) => `<button class="rowi fitem" data-act="sdir" data-dir="${esc(k.path)}"><span class="ico">${imgTag('chest')}</span><span class="grow"><b>${esc(k.name)}</b></span><small>${num(k.total)} schematic${k.total === 1 ? '' : 's'}</small></button>`;
+            const order = CTX.schems.map((s, i) => i).sort((a, b) => String(CTX.schems[a].name).localeCompare(CTX.schems[b].name, undefined, { numeric: true }));
+            const sel = CTX.schems[SCHEM.sel];
+            return `<h2>${imgTag('structure_block', false)} Schematics <span class="n">${num(CTX.schems.length)} in ${num(folders)} folder${folders === 1 ? '' : 's'}</span></h2>
+                <div class="fbrowse">
+                    <nav class="ftree">${tree(root, 0)}</nav>
+                    <div class="fpane">
+                        <div class="fcrumbs">${crumbs.map((n, j) => (j === crumbs.length - 1 ? `<b>${esc(n.name || 'All')}</b>` : `<button data-act="sdir" data-dir="${esc(n.path)}">${esc(n.name || 'All')}</button>`)).join('<span>/</span>')}</div>
+                        <div class="rows">${sorted(cur.kids).map(folderRow).join('')}${order.map(fileRow).join('')}</div>
+                    </div>
+                </div>
+                ${sel ? `<div class="fsel"><h3>${esc((sel.meta || {}).name || sel.name)} <span class="n">${esc(sel.kind)}</span></h3>${schemBody(sel)}</div>` : '<p class="muted" style="font-size:13px;margin:10px 0 0">Pick a schematic to see its size and materials.</p>'}`;
+        }
+        function schemPick(a, el) {
+            if (a === 'sdir') { SCHEM.dir = el.dataset.dir; SCHEM.sel = -1; }
+            else SCHEM.sel = +el.dataset.i;
+            const card = $('#w-schem');
+            card.innerHTML = schemBrowserHTML();
+            applySearch();
+            if (a === 'ssel' && innerWidth < 700) $('.fsel', card).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function schemHTML(s, i) {
+            const m = s.meta || {};
+            return `<div class="card section"${i === 0 ? ' id="w-schem"' : ''}><h2>${imgTag('structure_block', false)} ${esc(m.name || s.name)} <span class="n">${esc(s.kind)}</span></h2>${schemBody(s)}</div>`;
+        }
+        function schemBody(s) {
+            const m = s.meta || {};
+            const created = +m.created > 1e11 ? +m.created : 0;
+            return `${kvHTML([['File', `<span class="mono">${esc(s.file)}</span>`], ['Size', s.size ? esc(s.size.map((v) => Math.abs(v)).join(' × ')) : null], ['Author', m.author ? esc(m.author) : null], ['Description', m.desc ? esc(m.desc) : null], ['Created', dateAgo(created)],
+                    ['Blocks', esc(num(s.total))], ['Block types', esc(num(s.list.length))], ['Block entities', s.tiles ? esc(num(s.tiles)) : null], ['Entities', s.entities ? esc(num(s.entities)) : null]])}
+                <h3 class="sub">Materials</h3><div class="chips">${s.list.slice(0, 1000).map(([n, c]) => `<span class="chip" data-s="${esc(n.toLowerCase())}" title="${esc(n)}"><span class="ico">${imgTag(blockIcon(n))}</span>${esc(langId(n) || pretty(n))} × ${esc(num(c))}${c >= 64 ? ` <small class="muted">(${esc(num(Math.floor(c / 64)))} stacks${c % 64 ? ' + ' + (c % 64) : ''})</small>` : ''}</span>`).join('')}</div>`;
+        }
+
+        // values under keys like "password" or "secret" are swapped for a click-to-show placeholder
+        function maskTree(v, key = '') {
+            if (Array.isArray(v)) return v.map((x) => maskTree(x, key));
+            if (isObj(v)) { const o = {}; for (const [k, x] of Object.entries(v)) o[k] = maskTree(x, k); return o; }
+            return PRIVATE_KEY.test(String(key)) && v !== '' && v !== null && typeof v !== 'boolean' ? { __priv: v } : v;
+        }
+        function filesHTML(id, title, icon, files) {
+            return `<div class="card section" id="${id}"><h2>${imgTag(icon, false)} ${title} <span class="n">${num(files.length)}</span></h2>${files.map((f) =>
+                `<details class="fileblk" data-blk="${FILEBLK.push(f) - 1}"><summary class="mono">${esc(f.file)}</summary></details>`).join('')}</div>`;
+        }
+        function fillBlock(det) {
+            if (det.dataset.filled) return;
+            det.dataset.filled = 1;
+            const f = FILEBLK[+det.dataset.blk];
+            if (f.text !== undefined) { det.insertAdjacentHTML('beforeend', `<pre class="cfg">${esc(f.text)}</pre>`); return; }
+            const data = maskTree(f.data);
+            const entries = Array.isArray(data) ? data.map((x, i) => [i, x]) : isObj(data) ? Object.entries(data) : [['value', data]];
+            det.insertAdjacentHTML('beforeend', `<div class="tree">${entries.slice(0, 500).map(([k, v]) => treeNode(k, v, 0)).join('')}${entries.length > 500 ? `<div class="muted">and ${entries.length - 500} more keys</div>` : ''}</div>`);
+        }
+
         /* ---------- raw tree ---------- */
         function hintFor(k, v) {
             if (Array.isArray(v) && v.length === 4 && v.every(Number.isInteger) && /uuid|owner|^id$/i.test(String(k))) return uuidOf(v);
@@ -1597,6 +2738,7 @@
             return `<span class="v number">${esc(String(v))}</span>`;
         }
         function treeNode(k, v, depth, top) {
+            if (isObj(v) && '__priv' in v && Object.keys(v).length === 1) return `<div class="tl"><span class="k">${esc(k)}</span>: ${privHTML('hidden', leafVal(v.__priv))}</div>`;
             const hint = hintFor(k, v);
             const gl = top && GLOSSARY[k] ? `<span class="hint">// ${esc(GLOSSARY[k])}</span>` : '';
             const h = hint ? `<span class="hint">${esc(hint)}</span>` : '';
@@ -1632,6 +2774,7 @@
         function tipLines(it, full = false) {
             const L = [];
             L.push(`<div class="nm">${it.nameHTML}</div>`);
+            if (it.mapId !== undefined) L.push(`<div style="color:#AAAAAA">Map #${esc(it.mapId)}${CTX.maps.has(String(it.mapId)) ? '' : ' (drop data/map_' + esc(it.mapId) + '.dat to see it)'}</div>`);
             for (const e of it.ench) {
                 const curse = /curse/.test(e.id);
                 L.push(`<div style="color:${curse ? '#FF5555' : '#AAAAAA'}">${esc(pretty(e.id))}${e.lvl === 1 && SINGLE_LVL.has(e.id.split(':').pop()) ? '' : ' ' + roman(e.lvl)}</div>`);
@@ -1715,7 +2858,10 @@
             if (it.bundle) {
                 contents += `<h3>Bundle · ${it.bundle.length} stacks</h3><div class="gui"><div class="slots" style="grid-template-columns:repeat(${Math.min(9, Math.max(4, it.bundle.length))},var(--s))">${it.bundle.map((x, i) => slotHTML(x, `${it.namePlain} › #${i + 1}`)).join('')}</div></div>`;
             }
+            const map = it.mapId !== undefined && CTX.maps.get(String(it.mapId));
+            if (map) contents = `<h3>Map #${esc(it.mapId)}</h3><img class="mapimg" src="${mapURL(it.mapId)}" alt=""><div class="muted" style="font-size:12px;margin-top:4px">Scale 1:${2 ** (map.scale || 0)} · ${esc(dimName(map.dim || 'minecraft:overworld'))} · centre ${esc(map.x)}, ${esc(map.z)}${map.locked ? ' · locked' : ''}</div>` + contents;
             const facts = [['Location', esc(where)], ['ID', `<span class="mono">${esc(it.full)}</span>`], ['Count', it.count]];
+            if (it.bpUuid) facts.push(['Contents from', 'world data (backpack storage)']);
             if (it.maxDamage) facts.push(['Durability', `${it.maxDamage - it.damage} / ${it.maxDamage} (${Math.round((1 - it.damage / it.maxDamage) * 100)}%)`]);
             if (it.ench.length) facts.push(['Enchantments', it.ench.length]);
             const rc = it.c['minecraft:repair_cost'] ?? it.tag.RepairCost;
@@ -1769,7 +2915,7 @@
             root.classList.toggle('searching', !!q);
             if (q) {
                 $$('[data-k]', root).forEach((el) => el.classList.toggle('hit', itemText(REG[+el.dataset.k].item).includes(q)));
-                $$('.chip, .sti, .adv', root).forEach((el) => el.classList.toggle('hit', el.dataset.s.includes(q.replace(/ /g, '_')) || el.textContent.toLowerCase().includes(q)));
+                $$('.chip, .sti, .adv, .srow', root).forEach((el) => el.classList.toggle('hit', (el.dataset.s || '').includes(q.replace(/ /g, '_')) || el.textContent.toLowerCase().includes(q)));
             }
             const hits = $('#hits'), tree = $('#rawTree');
             if (!hits) return;
@@ -1816,16 +2962,28 @@
         const pendingExtras = new Map();    // uuid -> {stats, advancements} waiting for that player's file
 
         function unwrap(data) {
-            if (isObj(data) && isObj(data.Data) && !data.Inventory) data = data.Data;          // level.dat
             if (isObj(data) && isObj(data['']) && Object.keys(data).length === 1) data = data[''];
             return data;
         }
-        // player NBT, world/stats/<uuid>.json or world/advancements/<uuid>.json?
-        function classify(data) {
+        // what a parsed NBT / JSON / SNBT compound is - by file name first, then by its keys
+        const PLAYERISH = ['Inventory', 'EnderItems', 'Pos', 'UUID', 'playerGameType', 'abilities', 'XpLevel', 'foodLevel', 'Health', 'Rotation', 'recipeBook', 'equipment'];
+        function classify(data, name = '', path = '') {
+            const n = name.toLowerCase(), p = path.toLowerCase().replace(/\\/g, '/'), sd = isObj(data.data) ? data.data : null;
+            if (n === 'level.dat' || (isObj(data.Data) && !data.Inventory && ('LevelName' in data.Data || 'GameRules' in data.Data || 'WorldGenSettings' in data.Data || 'version' in data.Data))) return 'level';
+            if (n === 'hotbar.nbt' || ['0', '1', '2', '3', '4', '5', '6', '7', '8'].every((k) => Array.isArray(data[k]))) return 'hotbar';
+            if (n === 'servers.dat' || (Array.isArray(data.servers) && Object.keys(data).length <= 2)) return 'servers';
+            if (/^map_\d+\.dat$/.test(n) || (sd && Array.isArray(sd.colors) && sd.colors.length === 16384)) return 'map';
+            if (n === 'scoreboard.dat' || (sd && (Array.isArray(sd.Objectives) || Array.isArray(sd.PlayerScores)))) return 'scoreboard';
+            if (/backpack/.test(n) && sd) return 'backpacks';
+            if ((Array.isArray(data.size) && (Array.isArray(data.palette) || Array.isArray(data.palettes)) && Array.isArray(data.blocks)) || isObj(data.Schematic) || (isObj(data.Regions) && isObj(data.Metadata)) || (data.Width !== undefined && data.Length !== undefined && data.Height !== undefined)) return 'schem';
+            if (isObj(data.users) && isObj(data.groups)) return 'lp-export';
+            if (/luckperms\//.test(p) || (data.uuid && (data.primaryGroup !== undefined || data['primary-group'] !== undefined))) return 'lp';
             if (isObj(data.stats) || Object.keys(data).some((k) => /^stat\./.test(k))) return 'stats';
             const vals = Object.entries(data).filter(([k]) => k !== 'DataVersion');
             if (vals.length && vals.every(([k, v]) => k.includes(':') && isObj(v) && ('criteria' in v || 'done' in v))) return 'advancements';
-            return 'player';
+            if (/(^|\/)data\/[^/]+\.dat$/.test(p) || (sd && Object.keys(data).every((k) => k === 'data' || k === 'DataVersion'))) return 'data';
+            if (PLAYERISH.some((k) => k in data)) return 'player';
+            return 'data';
         }
 
         function addPlayer(file, data, modified, extras = {}) {
@@ -1866,21 +3024,648 @@
             active = players.indexOf(pl);
         }
 
-        async function loadEntries(entries) {
-            const prev = players[active], prevKey = prev && prev.key;
-            const before = new Set(players);
-            batch = { notes: [], errors: [] };
-            const parsed = [];
-            for (const f of entries) {
-                try {
-                    const data = unwrap(await parseFile(f.name, f.buf));
-                    if (!isObj(data)) throw new Error('The file did not contain an NBT compound.');
-                    parsed.push({ ...f, data, kind: classify(data) });
-                } catch (e) {
-                    console.error(e);
-                    showError(`Could not read ${f.name}: ${e.message}`);
+        /* ---------- which files in a folder / archive are worth reading ---------- */
+        // first match wins; null = ignore
+        const ROUTES = [
+            [/(^|\/)(playerdata|players\/data)\/[^/]+\.dat(_old)?$/, 'nbt'],
+            [/(^|\/)(players\/)?(stats|advancements)\/[^/]+\.json$/, 'nbt'],
+            [/(^|\/)level\.dat$/, 'nbt'],
+            [/(^|\/)uid\.dat$/, 'uid'],
+            [/(^|\/)entities\/r\.-?\d+\.-?\d+\.mca$/, 'entities'],
+            [/(^|\/)data\/ftb[^/]*\/.+\.snbt$/, 'ftb'],
+            [/(^|\/)data\/[^/]+\.dat$/, 'nbt'],
+            [/(^|\/)(usercache|ops|whitelist|banned-players|banned-ips)\.json$/, 'nbt'],
+            [/(^|\/)server\.properties$/, 'props'],
+            [/(^|\/)logs\/[^/]+\.log(\.gz)?$/, 'log'],
+            [/(^|\/)plugins\/essentials\/userdata\/[^/]+\.yml$/, 'yaml'],
+            [/(^|\/)plugins\/luckperms\/yaml-storage\/(users|groups)\/[^/]+\.yml$/, 'yaml'],
+            [/(^|\/)plugins\/luckperms\/json-storage\/(users|groups)\/[^/]+\.json$/, 'lpjson'],
+            [/(^|\/)plugins\/mcmmo\/flatfile\/mcmmo\.users$/, 'mcmmo'],
+            [/(^|\/)plugins\/griefpreventiondata\/playerdata\/[0-9a-f-]{36}$/, 'gp'],
+            [/(^|\/)plugins\/griefpreventiondata\/claimdata\/[^/]+\.yml$/, 'yaml'],
+            [/(^|\/)plugins\/worldguard\/worlds\/[^/]+\/regions\.yml$/, 'yaml'],
+            [/(^|\/)towny\/data\/(residents|towns|nations)\/[^/]+\.txt$/, 'towny'],
+            [/(^|\/)plugins\/multiverse-core\/worlds2?\.yml$/, 'yaml'],
+            [/(^|\/)plugins\/[^/]+\/config\.yml$/, 'config'],
+            [/(^|\/)(bukkit|spigot|paper|paper-global|paper-world-defaults|paper-world|purpur|pufferfish|commands|permissions|help|leaves)\.yml$/, 'config'],
+            [/(^|\/)mods\/[^/]+\.jar$/, 'archive'],
+            [/(^|\/)config\/ftbquests\/quests\/(chapters\/[^/]+|lang\/.+)\.snbt$/, 'ftb'],
+            [/(^|\/)config\/ftbquests\//, null],
+            [/(^|\/)(serverdata\/)?ftb(quests|teams|chunks)\/.+\.snbt$/, 'ftb'],
+            [/(^|\/)(serverconfig|defaultconfigs)\/[^/]+\.toml$/, 'config'],
+            [/(^|\/)config\/[^/]+\.(toml|json5?|properties|cfg|ya?ml)$/, 'config'],
+            [/(^|\/)hotbar\.nbt$/, 'nbt'],
+            [/(^|\/)servers\.dat$/, 'nbt'],
+            [/\.(schem|schematic|litematic)$/, 'schem'],
+            [/(^|\/)(schematics|structures|generated\/[^/]+\/structures)\/.+\.nbt$/, 'schem'],
+        ];
+        // folders never worth walking into (huge, or nothing to read)
+        // entities/ too: thousands of region-sized files - drop that folder on its own to find owned pets
+        const SKIP_DIRS = /^(region|entities|poi|\.?voxy|datapacks|backups?|cache|\.cache|libraries|versions|bundler|crash-reports|debug|screenshots|resourcepacks|shaderpacks|\.git|node_modules|dynmap|bluemap|squaremap|pl3xmap|web|tiles|coreprotect|\.paper-remapped|\.fabric|journeymap|xaero\w*|assets|natives|downloads)$/i;
+        const SKIP_PATH = /(^|\/)(region|entities|poi|\.?voxy|datapacks|backups?|cache|libraries|versions|bundler|crash-reports|dynmap|bluemap|squaremap|pl3xmap|coreprotect|assets)\//i;
+        function kindOf(path) {
+            const p = path.replace(/\\/g, '/').toLowerCase();
+            for (const [re, k] of ROUTES) if (re.test(p)) return k;
+            return null;
+        }
+        // a file picked or dropped on its own - guess from the name
+        function kindOfLoose(name) {
+            const k = kindOf(name);
+            if (k) return k;
+            const n = name.toLowerCase();
+            if (/\.(zip|jar|tar|tgz|tar\.gz)$/.test(n)) return 'archive';
+            if (/\.mca$/.test(n)) return 'entities';
+            if (/\.log(\.gz)?$/.test(n)) return 'log';
+            if (/\.ya?ml$/.test(n)) return 'yaml';
+            if (/\.(toml|json5|cfg|properties)$/.test(n)) return 'config';
+            if (/\.users$/.test(n)) return 'mcmmo';
+            if (UUID_RE.test(n) && !n.includes('.')) return 'gp';
+            return 'nbt';
+        }
+
+        const ctxFile = (e, kind) => CTX.files.push({ path: e.path, kind });
+        const readText = async (e) => textOf(await inflate(await e.read()));
+
+        let progEl = null;
+        function progress(msg) {
+            if (!msg) { if (progEl) progEl.remove(); progEl = null; return; }
+            if (!progEl || !progEl.isConnected) { progEl = document.createElement('div'); progEl.className = 'note'; $('#errors').appendChild(progEl); }
+            progEl.textContent = msg;
+        }
+
+        // a zip / jar / tar: a mod, a resource pack, or a zipped world / server folder
+        async function openArchive(e) {
+            const n = e.name.toLowerCase();
+            const blob = e.blob || new Blob([await e.read()]);
+            const want = (path) => !SKIP_PATH.test(path) && (kindOf(path) || (!path.includes('/') && /\.(dat|dat_old|nbt)$/i.test(path) ? 'nbt' : null));
+            if (/\.(tar|tgz|tar\.gz)$/.test(n)) {
+                const files = await tarList(blob, !/\.tar$/.test(n), (p) => !!want(p));
+                const out = [];
+                for (const f of files) {
+                    const kind = want(f.path);
+                    const child = { name: f.path.split('/').pop(), path: f.path, modified: e.modified, kind, read: async () => f.data };
+                    if (kind === 'archive') out.push(...await openArchive({ ...child, blob: new Blob([f.data]) }).catch((err) => (showError(`Could not open ${f.path}: ${err.message}`), [])));
+                    else out.push(child);
+                }
+                return out;
+            }
+            const list = await zipList(blob);
+            const has = (p) => list.some((z) => z.name === p);
+            if (has('fabric.mod.json') || has('quilt.mod.json') || has('META-INF/mods.toml') || has('META-INF/neoforge.mods.toml') || has('mcmod.info')) { await loadMod(e, blob, list); return []; }
+            const mcmeta = list.find((z) => /^([^/]+\/)?pack\.mcmeta$/.test(z.name));
+            if (mcmeta) {
+                const root = mcmeta.name.slice(0, -'pack.mcmeta'.length);
+                if (list.some((z) => z.name.startsWith(root + 'assets/'))) { await loadPack(e, blob, list, root); return []; }
+            }
+            const out = [];
+            for (const z of list) {
+                if (z.name.endsWith('/')) continue;
+                const kind = want(z.name);
+                if (!kind) continue;
+                const child = { name: z.name.split('/').pop(), path: z.name, modified: z.time || e.modified, kind, read: () => zipRead(blob, z) };
+                if (kind === 'archive') {
+                    try { out.push(...await openArchive({ ...child, blob: await zipBlobOf(blob, z) })); } catch (err) { showError(`Could not open ${z.name}: ${err.message}`); }
+                } else out.push(child);
+            }
+            if (!out.length) showNote(`Nothing the viewer understands was found in ${e.name}.`);
+            return out;
+        }
+
+        async function loadMod(e, blob, list) {
+            const get = (p) => list.find((z) => z.name === p);
+            const text = async (z) => textOf(await zipRead(blob, z));
+            let info = { file: e.name, id: '', name: '', version: '', loader: '', desc: '', icon: '' };
+            try {
+                if (get('fabric.mod.json')) {
+                    const j = parseLoose(await text(get('fabric.mod.json')));
+                    info = { ...info, loader: 'Fabric', id: j.id, name: j.name || j.id, version: j.version, desc: j.description, icon: typeof j.icon === 'string' ? j.icon : isObj(j.icon) ? Object.values(j.icon).pop() : '' };
+                } else if (get('quilt.mod.json')) {
+                    const q = parseLoose(await text(get('quilt.mod.json'))).quilt_loader || {}, m = q.metadata || {};
+                    info = { ...info, loader: 'Quilt', id: q.id, name: m.name || q.id, version: q.version, desc: m.description, icon: typeof m.icon === 'string' ? m.icon : '' };
+                } else if (get('META-INF/neoforge.mods.toml') || get('META-INF/mods.toml')) {
+                    const neo = !!get('META-INF/neoforge.mods.toml');
+                    const t = parseTOML(await text(get(neo ? 'META-INF/neoforge.mods.toml' : 'META-INF/mods.toml')));
+                    const m = (Array.isArray(t.mods) && t.mods[0]) || {};
+                    let version = String(m.version || '');
+                    if (/\$\{/.test(version) && get('META-INF/MANIFEST.MF')) { const v = /Implementation-Version:\s*(.+)/.exec(await text(get('META-INF/MANIFEST.MF'))); if (v) version = v[1].trim(); }
+                    info = { ...info, loader: neo ? 'NeoForge' : 'Forge', id: m.modId, name: m.displayName || m.modId, version, desc: m.description, icon: m.logoFile || t.logoFile || '' };
+                } else if (get('mcmod.info')) {
+                    let j = parseLoose(await text(get('mcmod.info')));
+                    if (isObj(j) && Array.isArray(j.modList)) j = j.modList;
+                    const m = (Array.isArray(j) ? j[0] : j) || {};
+                    info = { ...info, loader: 'Forge (legacy)', id: m.modid, name: m.name, version: m.version, desc: m.description, icon: m.logoFile || '' };
+                }
+            } catch (err) { showNote(`${e.name}: could not read the mod details (${err.message}).`); }
+            // item textures first; block textures stand in for block items (exact name, then _side / _front / _top)
+            const blocks = [];
+            let tex = 0;
+            for (const z of list) {
+                const m = /^assets\/([^/]+)\/textures\/(item|items|block|blocks)\/([^/]+)\.png$/.exec(z.name);
+                if (m && m[1] !== 'minecraft') {
+                    if (m[2][0] === 'i') { TEXREF.set(`${m[1]}:${m[3]}`, { blob, e: z }); tex++; } else blocks.push([m[1], m[3], z]);
+                    continue;
+                }
+                const l = /^assets\/([^/]+)\/lang\/en_us\.(json|lang)$/i.exec(z.name);
+                if (l) try { const t = await text(z); for (const [k, v] of Object.entries(l[2].toLowerCase() === 'json' ? parseLoose(t) : parseProps(t))) if (typeof v === 'string') LANG.set(k, v); } catch (err) { }
+            }
+            const rank = (n) => (/_side$/.test(n) ? 1 : /_front$/.test(n) ? 2 : /_top$/.test(n) ? 3 : 0);
+            blocks.sort((a, b) => rank(a[1]) - rank(b[1]));
+            for (const [ns, n, z] of blocks) {
+                const k = `${ns}:${n.replace(/_(side|front|top)$/, '')}`;
+                if (!TEXREF.has(k)) { TEXREF.set(k, { blob, e: z }); tex++; }
+            }
+            const icon = info.icon && get(String(info.icon).replace(/^\.?\//, ''));
+            if (icon) TEXREF.set('modicon:' + (info.id || e.name), { blob, e: icon });
+            CTX.mods.push({ ...info, textures: tex });
+            ctxFile(e, 'Mod');
+        }
+
+        async function loadPack(e, blob, list, root) {
+            let n = 0, desc = '';
+            for (const z of list) {
+                if (!z.name.startsWith(root)) continue;
+                const m = /^assets\/([^/]+)\/textures\/items?\/([^/]+)\.png$/.exec(z.name.slice(root.length));
+                if (!m) continue;
+                const k = `${m[1]}:${m[2]}`;
+                TEXREF.set(k, { blob, e: z });
+                TEX.delete(k);      // later packs win
+                n++;
+            }
+            try { const j = parseLoose(textOf(await zipRead(blob, list.find((z) => z.name === root + 'pack.mcmeta')))); desc = isObj(j.pack) ? j.pack.description ?? '' : ''; } catch (err) { }
+            const icon = list.find((z) => z.name === root + 'pack.png');
+            if (icon) TEXREF.set('packicon:' + e.name, { blob, e: icon });
+            CTX.packs.push({ file: e.name, desc, textures: n });
+            ctxFile(e, 'Resource pack');
+        }
+
+        /* ---------- handlers for each kind of world / server / plugin file ---------- */
+        function loadList(name, arr) {
+            const n = name.toLowerCase(), has = (k) => arr.some((x) => isObj(x) && k in x);
+            const kind = /usercache/.test(n) ? 'usercache' : /^ops/.test(n) ? 'ops' : /whitelist|allowlist/.test(n) ? 'whitelist' : /banned-ips/.test(n) ? 'ipbans' : /banned-players/.test(n) ? 'bans'
+                : has('ip') ? 'ipbans' : has('level') ? 'ops' : has('reason') ? 'bans' : has('expiresOn') ? 'usercache' : arr.length && arr.every((x) => isObj(x) && x.uuid && x.name) ? 'whitelist' : null;
+            if (!kind) return null;
+            if (kind === 'ipbans') { CTX.ipBans = arr.filter((x) => isObj(x) && x.ip); return 'IP bans'; }
+            for (const x of arr) {
+                const k = isObj(x) && uuidKey(x.uuid);
+                if (!k) continue;
+                if (x.name) CTX.names.set(k, String(x.name));
+                // the cache entry expires a month after the player's last login
+                if (kind === 'usercache') CTX.usercache.set(k, { name: x.name, seen: parseMcDate(x.expiresOn) ? parseMcDate(x.expiresOn) - 2592000000 : 0 });
+                if (kind === 'ops') CTX.ops.set(k, x);
+                if (kind === 'whitelist') CTX.whitelist.add(k);
+                if (kind === 'bans') CTX.bans.set(k, x);
+            }
+            if (kind === 'ops') CTX.opsLoaded = true;
+            if (kind === 'whitelist') CTX.whitelistLoaded = true;
+            if (kind === 'bans') CTX.bansLoaded = true;
+            return { usercache: 'User cache', ops: 'Operators', whitelist: 'Whitelist', bans: 'Bans' }[kind];
+        }
+
+        function lpNodes(o) {
+            const nodes = [];
+            const add = (key, p = {}) => nodes.push({ key: String(key), value: p.value !== false && p.value !== 'false', context: isObj(p.context) && Object.keys(p.context).length ? p.context : null, expiry: +p.expiry || 0 });
+            const list = (arr, prefix = '') => (Array.isArray(arr) ? arr : isObj(arr) ? Object.entries(arr).map(([k, v]) => ({ [k]: v })) : []).forEach((x) => {
+                if (typeof x === 'string') return add(prefix + x);
+                if (!isObj(x)) return;
+                if (x.permission || x.key) return add(x.permission || x.key, x);         // json storage / export
+                if (x.group) return add('group.' + x.group, x);
+                const [k, v] = Object.entries(x)[0] || [];
+                if (k) add(prefix + k, isObj(v) ? v : {});
+            });
+            list(o.permissions); list(o.nodes); list(o.parents, 'group.');
+            for (const type of ['prefix', 'suffix']) {
+                for (const x of Array.isArray(o[type + 'es']) ? o[type + 'es'] : []) {
+                    if (!isObj(x)) continue;
+                    if (typeof x[type] === 'string') { add(`${type}.${x.priority || 0}.${x[type]}`, x); continue; }
+                    const [txt, v] = Object.entries(x)[0] || [];
+                    if (txt) add(`${type}.${(isObj(v) && v.priority) || 0}.${txt}`, isObj(v) ? v : {});
                 }
             }
+            return nodes;
+        }
+        function lpUser(o, fallbackId) {
+            const k = uuidKey(o.uuid || fallbackId);
+            if (!k) return;
+            const name = o.name || o.username;
+            CTX.lpUsers.set(k, { name, primary: o['primary-group'] || o.primaryGroup || 'default', nodes: lpNodes(o) });
+            if (name && !CTX.names.has(k)) CTX.names.set(k, String(name));
+        }
+
+        function indexStorage(root) {
+            let n = 0;
+            const findItems = (v, depth) => {
+                if (depth > 8 || !v || typeof v !== 'object') return null;
+                if (Array.isArray(v.Items) && v.Items.every((x) => isObj(x))) return v.Items;
+                for (const x of Object.values(v)) { const r = isObj(x) ? findItems(x, depth + 1) : null; if (r) return r; }
+                return null;
+            };
+            const walk = (v, depth) => {
+                if (depth > 12 || !v || typeof v !== 'object') return;
+                if (Array.isArray(v)) { v.forEach((x) => walk(x, depth + 1)); return; }
+                const u = storageUuid(v), items = u && findItems(v, 0);
+                if (items) { CTX.backpacks.set(u, items); n++; return; }
+                for (const x of Object.values(v)) walk(x, depth + 1);
+            };
+            walk(root, 0);
+            return n;
+        }
+
+        function schemInfo(name, d) {
+            const counts = new Map();
+            const add = (n, c = 1) => { n = strip(String(n).replace(/\[.*$/, '')); if (/^(air|cave_air|void_air|structure_void)$/.test(n)) return; counts.set(n, (counts.get(n) || 0) + c); };
+            let size = null, kind = '', meta = {}, entities = 0, tiles = 0;
+            if (Array.isArray(d.size) && Array.isArray(d.blocks)) {
+                kind = 'Structure';
+                size = d.size;
+                const pal = Array.isArray(d.palette) ? d.palette : (d.palettes || [])[0] || [];
+                for (const b of d.blocks) { const p = pal[b.state]; if (p) add(p.Name); if (b.nbt) tiles++; }
+                entities = (d.entities || []).length;
+            } else if (isObj(d.Regions) && isObj(d.Metadata)) {
+                kind = 'Litematica schematic';
+                const m = d.Metadata, es = m.EnclosingSize;
+                meta = { name: m.Name, author: m.Author, desc: m.Description, created: m.TimeCreated };
+                size = isObj(es) ? [es.x, es.y, es.z] : null;
+                for (const r of Object.values(d.Regions)) {
+                    if (!isObj(r)) continue;
+                    const pal = r.BlockStatePalette || [], s = r.Size || {}, vol = Math.abs(s.x * s.y * s.z);
+                    entities += (r.Entities || []).length; tiles += (r.TileEntities || []).length;
+                    if (!vol || vol > 6e7 || !pal.length) continue;
+                    // block states are packed back to back across the longs, low bits first
+                    const bits = Math.max(2, 32 - Math.clz32(pal.length - 1)), mask = bits >= 32 ? 0xffffffff : (1 << bits) - 1;
+                    const longs = r.BlockStates || [], w = new Uint32Array(longs.length * 2 + 1);
+                    longs.forEach((v, i) => { const b = BigInt.asUintN(64, BigInt(v)); w[i * 2] = Number(b & 0xffffffffn); w[i * 2 + 1] = Number(b >> 32n); });
+                    const tally = new Uint32Array(pal.length);
+                    for (let i = 0; i < vol; i++) {
+                        const o = i * bits, wi = o >>> 5, sh = o & 31;
+                        let v = w[wi] >>> sh;
+                        if (sh + bits > 32) v |= w[wi + 1] << (32 - sh);
+                        v = (v & mask) >>> 0;
+                        if (v < tally.length) tally[v]++;
+                    }
+                    pal.forEach((p, i) => tally[i] && add(p.Name, tally[i]));
+                }
+            } else {
+                const s = isObj(d.Schematic) ? d.Schematic : d;
+                if (s.Width === undefined || s.Height === undefined || s.Length === undefined) return null;
+                size = [s.Width, s.Height, s.Length];
+                const md = isObj(s.Metadata) ? s.Metadata : {};
+                meta = { name: md.Name, author: md.Author, created: md.Date };
+                const blocks = isObj(s.Blocks) ? s.Blocks : null, pal = blocks ? blocks.Palette : s.Palette, data = blocks ? blocks.Data : s.BlockData;
+                if (isObj(pal) && Array.isArray(data)) {
+                    kind = 'Sponge schematic v' + (s.Version || (blocks ? 3 : 2));
+                    const byId = [];
+                    for (const [n, id] of Object.entries(pal)) byId[id] = n;
+                    const tally = new Map();
+                    for (let i = 0, v = 0, sh = 0; i < data.length; i++) {        // varints
+                        const b = data[i] & 255;
+                        v |= (b & 127) << sh;
+                        if (b & 128) { sh += 7; continue; }
+                        tally.set(v, (tally.get(v) || 0) + 1);
+                        v = 0; sh = 0;
+                    }
+                    for (const [id, c] of tally) if (byId[id]) add(byId[id], c);
+                    tiles = ((blocks ? blocks.BlockEntities : s.BlockEntities || s.TileEntities) || []).length;
+                    entities = (s.Entities || []).length;
+                } else if (Array.isArray(s.Blocks)) {
+                    kind = 'MCEdit schematic';
+                    const map = isObj(s.SchematicaMapping) ? Object.fromEntries(Object.entries(s.SchematicaMapping).map(([n, id]) => [id, n])) : null;
+                    const tally = new Map();
+                    for (const b of s.Blocks) { const id = b & 255; if (id) tally.set(id, (tally.get(id) || 0) + 1); }
+                    for (const [id, c] of tally) add(map && map[id] ? map[id] : 'legacy_block_' + id, c);
+                    tiles = (s.TileEntities || []).length; entities = (s.Entities || []).length;
+                } else return null;
+            }
+            const list = [...counts].sort((a, b) => b[1] - a[1]);
+            return { kind, size, meta, list, total: list.reduce((s, x) => s + x[1], 0), entities, tiles, name };
+        }
+
+        // parsed NBT / JSON / SNBT: players go to `parsed`, everything else into CTX
+        async function loadNbt(e, parsed) {
+            let data = await parseFile(e.name, await e.read());
+            if (Array.isArray(data)) {
+                const what = loadList(e.name, data);
+                if (what) ctxFile(e, what); else { CTX.data.push({ file: e.path, data }); ctxFile(e, 'Data'); }
+                return;
+            }
+            data = unwrap(data);
+            if (!isObj(data)) throw new Error('The file did not contain an NBT compound.');
+            const kind = classify(data, e.name, e.path);
+            const sd = isObj(data.data) ? data.data : {};
+            switch (kind) {
+                case 'player': case 'stats': case 'advancements':
+                    parsed.push({ name: e.name, data, kind, modified: e.modified });
+                    return;
+                case 'level':
+                    CTX.level = { file: e.path, data: data.Data };
+                    ctxFile(e, 'World');
+                    if (isObj(data.Data.Player)) parsed.push({ name: e.name, data: data.Data.Player, kind: 'player', modified: e.modified });
+                    return;
+                case 'hotbar': CTX.hotbars = { file: e.path, data }; return ctxFile(e, 'Saved hotbars');
+                case 'servers': CTX.servers = { file: e.path, list: (data.servers || []).filter(isObj) }; return ctxFile(e, 'Server list');
+                case 'map': {
+                    const id = (/map_(\d+)/.exec(e.name) || [])[1] ?? String(CTX.maps.size);
+                    const dim = typeof sd.dimension === 'number' ? ['minecraft:the_nether', 'minecraft:overworld', 'minecraft:the_end'][sd.dimension + 1] : sd.dimension;
+                    CTX.maps.set(id, { colors: Uint8Array.from(sd.colors, (v) => v & 255), scale: sd.scale || 0, dim, x: sd.xCenter ?? 0, z: sd.zCenter ?? 0, locked: truthy(sd.locked) });
+                    return ctxFile(e, 'Map');
+                }
+                case 'scoreboard':
+                    CTX.scoreboard = { objectives: new Map((sd.Objectives || []).map((o) => [o.Name, { name: o.DisplayName ?? null, criteria: o.CriteriaName || '' }])), scores: sd.PlayerScores || [], teams: sd.Teams || [], slots: isObj(sd.DisplaySlots) ? sd.DisplaySlots : {} };
+                    return ctxFile(e, 'Scoreboard');
+                case 'backpacks':
+                    if (!indexStorage(data)) { CTX.data.push({ file: e.path, data }); return ctxFile(e, 'Data'); }
+                    return ctxFile(e, 'Backpack storage');
+                case 'schem': {
+                    const info = schemInfo(e.name, data);
+                    if (!info) throw new Error('not a schematic or structure');
+                    CTX.schems.push({ file: e.path, ...info });
+                    return ctxFile(e, 'Schematic');
+                }
+                case 'lp-export':
+                    for (const [u, x] of Object.entries(data.users)) if (isObj(x)) lpUser({ ...x, uuid: u });
+                    for (const [g, x] of Object.entries(data.groups)) if (isObj(x)) CTX.lpGroups.set(g.toLowerCase(), lpNodes(x));
+                    return ctxFile(e, 'LuckPerms export');
+                case 'lp':
+                    if (/\/groups\//.test(e.path.replace(/\\/g, '/').toLowerCase())) CTX.lpGroups.set(String(data.name || e.name.replace(/\.\w+$/, '')).toLowerCase(), lpNodes(data));
+                    else lpUser(data, e.name.replace(/\.\w+$/, ''));
+                    return ctxFile(e, 'LuckPerms');
+                default:
+                    // other world data (command storage, raids, mod data...) - still index any backpack-style storage in it
+                    if (/(^|\/)data\//i.test(e.path.replace(/\\/g, '/')) && indexStorage(data)) return ctxFile(e, 'Backpack storage');
+                    CTX.data.push({ file: e.path, data });
+                    return ctxFile(e, 'Data');
+            }
+        }
+
+        const HANDLERS = {
+            async uid(e) {
+                const u = await e.read();
+                if (u.length < 16) throw new Error('too short for a uid.dat');
+                const parts = e.path.replace(/\\/g, '/').split('/');
+                CTX.worlds.set(dashUuid([...u.subarray(0, 16)].map((b) => b.toString(16).padStart(2, '0')).join('')), parts.length > 1 ? parts[parts.length - 2] : 'world');
+                ctxFile(e, 'World id');
+            },
+            // owned pets: tamed animals whose Owner is a player
+            async entities(e) {
+                const u = await e.read();
+                const p = '/' + e.path.replace(/\\/g, '/').toLowerCase();
+                const dm = /\/dimensions\/([^/]+)\/([^/]+)\/entities\//.exec(p);
+                const dim = dm ? `${dm[1]}:${dm[2]}` : /\/dim-1\//.test(p) ? 'minecraft:the_nether' : /\/dim1\//.test(p) ? 'minecraft:the_end' : 'minecraft:overworld';
+                const dv = new DataView(u.buffer, u.byteOffset, u.byteLength), jobs = [];
+                const owner = (en) => {
+                    if (!isObj(en)) return;
+                    const k = 'Health' in en && strip(en.id) !== 'item' ? uuidKey(Array.isArray(en.Owner) ? uuidOf(en.Owner) : typeof en.Owner === 'string' ? en.Owner : en.OwnerUUID) : null;
+                    if (k) { en._dim = dim; if (!CTX.pets.has(k)) CTX.pets.set(k, []); CTX.pets.get(k).push(en); }
+                    (Array.isArray(en.Passengers) ? en.Passengers : []).forEach(owner);
+                };
+                for (let i = 0; i < 1024 && u.length >= 8192; i++) {
+                    const loc = dv.getUint32(i * 4), off = (loc >>> 8) * 4096;
+                    if (!off || off + 5 > u.length) continue;
+                    const len = dv.getUint32(off), ct = u[off + 4];
+                    if (len < 2 || off + 4 + len > u.length || ct < 1 || ct > 3) continue;
+                    const raw = u.subarray(off + 5, off + 4 + len);
+                    jobs.push((ct === 3 ? Promise.resolve(raw) : inflateAs(raw, ct === 1 ? 'gzip' : 'deflate')).then((c) => {
+                        if (hasBytes(c, OWNER)) (readNBT(c).Entities || []).forEach(owner);
+                    }).catch(() => { }));
+                }
+                await Promise.all(jobs);
+                ctxFile(e, 'Entities');
+            },
+            async props(e) { CTX.props = { file: e.path, data: parseProps(await readText(e)) }; ctxFile(e, 'Server settings'); },
+            async log(e) {
+                if (CTX.logFiles.includes(e.path)) return;
+                parseLog(await readText(e), e.name, e.modified);
+                CTX.logFiles.push(e.path);
+                CTX.logDirty = true;
+                ctxFile(e, 'Log');
+            },
+            async yaml(e) {
+                const y = await parseYAML(await readText(e));
+                const lp = e.path.replace(/\\/g, '/').toLowerCase(), base = e.name.replace(/\.ya?ml$/i, '');
+                if (!isObj(y)) { CTX.configs.push({ file: e.path, data: y }); return ctxFile(e, 'Config'); }
+                if (/essentials\/userdata\//.test(lp) || (UUID_RE.test(base) && (y.timestamps || y.money !== undefined || y.homes || y.lastAccountName || y['last-account-name']))) {
+                    const k = uuidKey((base.match(UUID_RE) || [])[0]);
+                    if (!k) return;
+                    CTX.ess.set(k, y);
+                    const n = y.lastAccountName ?? y['last-account-name'];
+                    if (n && !CTX.names.has(k)) CTX.names.set(k, String(n));
+                    return ctxFile(e, 'EssentialsX user');
+                }
+                if (/luckperms\/yaml-storage\/groups\//.test(lp)) { CTX.lpGroups.set(String(y.name || base).toLowerCase(), lpNodes(y)); return ctxFile(e, 'LuckPerms group'); }
+                if (/luckperms\/yaml-storage\/users\//.test(lp) || (y.uuid && 'primary-group' in y)) { lpUser(y, base); return ctxFile(e, 'LuckPerms user'); }
+                if (/claimdata\//.test(lp) || y['Lesser Boundary Corner']) {
+                    const corner = (s) => { const p = String(s || '').split(';'); return p.length >= 4 ? { world: p[0], x: +p[1], y: +p[2], z: +p[3] } : null; };
+                    const a = corner(y['Lesser Boundary Corner']), b = corner(y['Greater Boundary Corner']);
+                    if (a && b) CTX.gpClaims.push({ id: base, owner: uuidKey(y.Owner), world: a.world, a, b, area: (Math.abs(b.x - a.x) + 1) * (Math.abs(b.z - a.z) + 1), parent: +(y['Parent Claim ID'] ?? -1), trusted: ['Builders', 'Containers', 'Accessors', 'Managers'].reduce((s, k) => s + (Array.isArray(y[k]) ? y[k].length : 0), 0) });
+                    return ctxFile(e, 'GriefPrevention claim');
+                }
+                if (/worldguard\/worlds\//.test(lp) || (isObj(y.regions) && Object.values(y.regions).some((r) => isObj(r) && 'type' in r))) {
+                    const world = (/worlds\/([^/]+)\/regions\.yml$/i.exec(e.path.replace(/\\/g, '/')) || [])[1] || '?';
+                    const grp = (g) => ({ ids: (isObj(g) && Array.isArray(g['unique-ids']) ? g['unique-ids'] : []).map(uuidKey), names: (isObj(g) && Array.isArray(g.players) ? g.players : []).map((n) => String(n).toLowerCase()) });
+                    for (const [id, r] of Object.entries(y.regions || {})) if (isObj(r)) CTX.wg.push({ world, id, type: r.type, priority: r.priority, min: r.min, max: r.max, owners: grp(r.owners), members: grp(r.members) });
+                    return ctxFile(e, 'WorldGuard regions');
+                }
+                if (/multiverse-core\/worlds/.test(lp)) {
+                    for (const [n, w] of Object.entries(isObj(y.worlds) ? y.worlds : y)) if (isObj(w)) CTX.mv.set(n, { alias: w.alias || '', environment: w.environment || w.env || '' });
+                    return ctxFile(e, 'Multiverse worlds');
+                }
+                CTX.configs.push({ file: e.path, data: y });
+                ctxFile(e, 'Config');
+            },
+            async lpjson(e) {
+                const j = parseLoose(await readText(e));
+                if (/\/groups\//.test(e.path.replace(/\\/g, '/').toLowerCase())) CTX.lpGroups.set(String(j.name || e.name.replace(/\.json$/i, '')).toLowerCase(), lpNodes(j));
+                else lpUser(j, e.name.replace(/\.json$/i, ''));
+                ctxFile(e, 'LuckPerms');
+            },
+            async mcmmo(e) {
+                const rows = [];
+                for (const line of (await readText(e)).split(/\r?\n/)) {
+                    if (!line || line[0] === '#') continue;
+                    const f = line.split(':');
+                    if (f.length < 20) continue;
+                    const skills = {};
+                    for (const [n, li, xi] of MCMMO) if (f[li] !== undefined && f[li] !== '') skills[n] = [parseInt(f[li], 10) || 0, parseFloat(f[xi]) || 0];
+                    rows.push({ name: f[0], uuid: uuidKey(f[41]), skills });
+                }
+                CTX.mcmmo = rows;
+                ctxFile(e, 'mcMMO users');
+            },
+            async gp(e) {
+                const k = uuidKey((e.name.match(UUID_RE) || [])[0]);
+                if (!k) return;
+                // line 1: retired last-login date, 2: accrued claim blocks, 3: bonus claim blocks
+                const lines = (await readText(e)).split(/\r?\n/);
+                CTX.gpPlayers.set(k, { accrued: parseInt(lines[1], 10) || 0, bonus: parseInt(lines[2], 10) || 0 });
+                ctxFile(e, 'GriefPrevention player');
+            },
+            async towny(e) {
+                const o = parseProps(await readText(e)), lp = e.path.replace(/\\/g, '/').toLowerCase(), n = e.name.replace(/\.txt$/i, '');
+                const rec = { name: o.name || n, ...o };
+                if (/\/towns\//.test(lp) || (!/\/residents\//.test(lp) && 'mayor' in o)) CTX.towny.towns.set(n.toLowerCase(), rec);
+                else if (/\/nations\//.test(lp) || (!/\/residents\//.test(lp) && 'capital' in o)) CTX.towny.nations.set(n.toLowerCase(), rec);
+                else CTX.towny.residents.set(n.toLowerCase(), rec);
+                ctxFile(e, 'Towny');
+            },
+            async config(e) {
+                const text = await readText(e), n = e.name.toLowerCase();
+                let data;
+                try {
+                    if (n.endsWith('.toml')) data = parseTOML(text);
+                    else if (/\.json5?$/.test(n)) data = parseLoose(text);
+                    else if (n.endsWith('.properties')) data = parseProps(text);
+                    else if (/\.ya?ml$/.test(n)) data = await parseYAML(text);
+                } catch (err) { console.warn(e.path, err); }
+                CTX.configs.push(data && typeof data === 'object' ? { file: e.path, data } : { file: e.path, text: text.slice(0, 300000) });
+                ctxFile(e, 'Config');
+            },
+            async ftb(e) {
+                const lp = e.path.replace(/\\/g, '/').toLowerCase(), d = parseSNBT(await readText(e)), F = CTX.ftb;
+                const fileId = normUuid(e.name.replace(/\.snbt$/i, ''));
+                if (/quests\/lang\//.test(lp)) { for (const [k, v] of Object.entries(d)) F.lang.set(k, Array.isArray(v) ? v.join(' ') : String(v)); return ctxFile(e, 'FTB Quests'); }
+                if (/quests\/chapters\//.test(lp)) {
+                    const task = (q) => { const t = (q.tasks || [])[0]; return t ? itemIdOf(t.item) : null; };
+                    F.chapters.push({ id: String(d.id || ''), title: d.title || null, icon: d.icon || null, order: d.order_index ?? F.chapters.length, file: d.filename || e.name.replace(/\.snbt$/i, ''), quests: (d.quests || []).filter(isObj).map((q) => ({ id: String(q.id || ''), title: q.title || null, task: task(q) })) });
+                    return ctxFile(e, 'FTB Quests');
+                }
+                if (/ftbteams\//.test(lp)) {
+                    const members = [...Object.entries(isObj(d.ranks) ? d.ranks : {}).filter(([, r]) => !/invited|ally|enemy|none/i.test(String(r))).map(([u]) => normUuid(u)), ...(Array.isArray(d.members) ? d.members.map(normUuid) : []), normUuid(d.owner)].filter(Boolean);
+                    const props = isObj(d.properties) ? d.properties : {};
+                    F.teams.push({ id: normUuid(d.id) || fileId, type: String(d.type || (/\/party\//.test(lp) ? 'party' : 'player')), name: props['ftbteams:display_name'] ?? null, members });
+                    return ctxFile(e, 'FTB Teams');
+                }
+                if (/ftbchunks\//.test(lp)) {
+                    const byDim = {};
+                    let forced = 0;
+                    for (const [dm, list] of Object.entries(isObj(d.chunks) ? d.chunks : {})) if (Array.isArray(list)) { byDim[dm] = list.length; forced += list.filter((c) => isObj(c) && (c.force_loaded || c.forced)).length; }
+                    const id = normUuid(d.id) || fileId;
+                    if (id) F.chunks.set(id, { byDim, forced });
+                    return ctxFile(e, 'FTB Chunks');
+                }
+                const id = normUuid(d.id) || fileId;
+                if (id) F.progress.set(id, { completed: isObj(d.completed) ? d.completed : {} });
+                ctxFile(e, 'FTB Quests progress');
+            },
+            async schem(e) { await loadNbt({ ...e }, []); },
+        };
+        const OWNER = new TextEncoder().encode('Owner');
+        function hasBytes(u, pat) {
+            for (let i = u.indexOf(pat[0]); i >= 0 && i <= u.length - pat.length; i = u.indexOf(pat[0], i + 1)) {
+                let j = 1;
+                while (j < pat.length && u[i + j] === pat[j]) j++;
+                if (j === pat.length) return true;
+            }
+            return false;
+        }
+
+        /* ---------- server logs: sessions, deaths, advancements, chat ---------- */
+        const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        function parseLog(text, fname, modified) {
+            const dm = /(\d{4})-(\d{2})-(\d{2})-\d+\.log/.exec(fname);
+            const rows = [];
+            let wraps = 0, lastSec = -1;
+            for (const line of text.split(/\r?\n/)) {
+                const tm = /^\[(?:(\d{1,2})([A-Za-z]{3})(\d{4}) )?(\d{2}):(\d{2}):(\d{2})/.exec(line);
+                if (!tm) continue;
+                // strip "[time] [thread/LEVEL]:", "[time LEVEL]:", Forge's "[logger/]:" and Fabric's "(Minecraft)"
+                const m = /^((?:\[[^\]]*\]\s?)+)(?:\([^)]*\)\s?)?:?\s?(.*)$/.exec(line);
+                if (!m) continue;
+                const sec = +tm[4] * 3600 + +tm[5] * 60 + +tm[6];
+                let full = null;
+                if (tm[3]) full = new Date(+tm[3], MONTHS.indexOf(tm[2].toLowerCase()), +tm[1], +tm[4], +tm[5], +tm[6]).getTime();
+                else { if (lastSec >= 0 && sec < lastSec - 3600) wraps++; lastSec = sec; }
+                rows.push({ sec, day: wraps, full, msg: m[2] });
+            }
+            // dated logs start on their date; latest.log ends on the day it was last written
+            const base = dm ? new Date(+dm[1], +dm[2] - 1, +dm[3]).getTime() : (() => { const d = new Date(modified || Date.now()); d.setHours(0, 0, 0, 0); return d.getTime() - wraps * 86400000; })();
+            const seen = new Set();
+            for (const r of rows) logEvent(r.full ?? base + r.day * 86400000 + r.sec * 1000, r.msg, seen);
+        }
+        function logEvent(t, msg, seen) {
+            const push = (ev) => CTX.logEvents.push({ t, seq: CTX.logSeq++, ...ev });
+            let m;
+            if ((m = /^Starting minecraft server version (\S+)/.exec(msg))) return push({ type: 'start', ver: m[1] });
+            if (/^Stopping (the )?server/.test(msg)) return push({ type: 'stop' });
+            if ((m = /^UUID of player (\w{1,16}) is ([0-9a-f-]{32,36})/i.exec(msg))) {
+                const k = uuidKey(m[2]);
+                CTX.logUuids.set(m[1].toLowerCase(), k);
+                if (!CTX.names.has(k)) CTX.names.set(k, m[1]);
+                return;
+            }
+            if ((m = /^(\w{1,16})\[\/?([^\]]*)\] logged in with entity id \d+ at \((?:\[([^\]]+)\])?\s*(-?[\d.]+), (-?[\d.]+), (-?[\d.]+)\)/.exec(msg))) {
+                seen.add(m[1].toLowerCase());
+                return push({ type: 'login', name: m[1], ip: /^local/i.test(m[2]) ? null : m[2].replace(/:\d+$/, ''), world: m[3] || null, pos: [+m[4], +m[5], +m[6]] });
+            }
+            if ((m = /^(\w{1,16}) joined the game/.exec(msg))) { seen.add(m[1].toLowerCase()); return push({ type: 'join', name: m[1] }); }
+            if ((m = /^(\w{1,16}) lost connection: (.*)/.exec(msg))) return push({ type: 'leave', name: m[1], reason: m[2] });
+            if ((m = /^(\w{1,16}) left the game/.exec(msg))) return push({ type: 'leave', name: m[1], reason: 'left' });
+            if ((m = /^(?:\[Not Secure\] )?<(\w{1,16})> (.*)/.exec(msg))) return push({ type: 'chat', name: m[1], text: m[2] });
+            if ((m = /^(\w{1,16}) issued server command: (.*)/.exec(msg))) return push({ type: 'cmd', name: m[1], text: m[2] });
+            if ((m = /^(\w{1,16}) has (?:made the advancement|completed the challenge|reached the goal) \[(.+)\]$/.exec(msg))) return push({ type: 'adv', name: m[1], text: m[2] });
+            if ((m = /^(\w{1,16}) (.+)$/.exec(msg)) && seen.has(m[1].toLowerCase()) && DEATH_RE.test(m[2])) return push({ type: 'death', name: m[1], text: msg });
+        }
+        function buildSessions() {
+            const ev = CTX.logEvents.sort((a, b) => a.t - b.t || a.seq - b.seq);
+            const P = new Map(), open = new Map(), versions = new Set(), chat = [], cmds = [];
+            const get = (n) => { const k = n.toLowerCase(); if (!P.has(k)) P.set(k, { name: n, sessions: [], deaths: [], adv: [], chat: [], cmds: [], ips: new Map() }); return P.get(k); };
+            const close = (k, t, why) => { const s = open.get(k); if (s) { s.end = t; s.why = why; open.delete(k); } };
+            const seenAt = new Map();       // last log line from each player - where a session cut short by a crash ends
+            let first = Infinity, last = 0;
+            for (const e of ev) {
+                first = Math.min(first, e.t); last = Math.max(last, e.t);
+                if (e.type === 'start') { if (e.ver) versions.add(e.ver); for (const k of [...open.keys()]) close(k, seenAt.get(k) || open.get(k).start, 'server restarted - logout not logged'); continue; }
+                if (e.type === 'stop') { for (const k of [...open.keys()]) close(k, e.t, 'server stopped'); continue; }
+                const p = get(e.name), k = e.name.toLowerCase();
+                seenAt.set(k, e.t);
+                if (e.type === 'login' || (e.type === 'join' && !open.has(k))) {
+                    if (e.type === 'login') { close(k, e.t, 'logged in again'); if (e.ip) p.ips.set(e.ip, (p.ips.get(e.ip) || 0) + 1); }
+                    const s = { start: e.t, end: null, world: e.world || null, pos: e.pos || null };
+                    p.sessions.push(s);
+                    open.set(k, s);
+                } else if (e.type === 'leave') close(k, e.t, e.reason);
+                else if (e.type === 'chat') { p.chat.push([e.t, e.text]); chat.push([e.t, e.name, e.text]); }
+                else if (e.type === 'cmd') { p.cmds.push([e.t, e.text]); cmds.push([e.t, e.name, e.text]); }
+                else if (e.type === 'adv') p.adv.push([e.t, e.text]);
+                else if (e.type === 'death') p.deaths.push([e.t, e.text]);
+            }
+            for (const s of open.values()) s.online = true;
+            CTX.sess = { players: P, first, last, versions: [...versions], chat, cmds };
+            CTX.logDirty = false;
+        }
+
+        async function loadEntries(entries) {
+            const prev = players[active], prevKey = prev && prev.key;
+            const before = new Set(players), ctxBefore = CTX.files.length, extrasBefore = new Set(players.flatMap((p) => [p.extras.stats, p.extras.advancements]).filter(Boolean));
+            batch = { notes: [], errors: [] };
+            // archives turn into more entries
+            const queue = [];
+            for (const e of entries) {
+                const kind = e.kind || (e.loose ? kindOfLoose(e.path) : kindOf(e.path));
+                if (kind === 'archive') {
+                    progress(`Opening ${e.name}…`);
+                    try { queue.push(...await openArchive(e)); } catch (err) { console.error(err); showError(`Could not open ${e.name}: ${err.message}`); }
+                } else if (kind) queue.push({ ...e, kind });
+            }
+            const parsed = [];
+            let n = 0;
+            for (const e of queue) {
+                if (queue.length > 20 && ++n % 10 === 0) progress(`Reading files… ${n} / ${queue.length}`);
+                try {
+                    if (e.kind === 'nbt') await loadNbt(e, parsed);
+                    else await HANDLERS[e.kind](e);
+                } catch (err) {
+                    // a lone .txt that is Towny data rather than SNBT
+                    if (e.kind === 'nbt' && /\.txt$/i.test(e.name)) {
+                        try { if (/^(lastOnline|registered|mayor)=/m.test(await readText(e))) { await HANDLERS.towny(e); continue; } } catch (er) { }
+                    }
+                    console.error(e.path, err);
+                    showError(`Could not read ${e.path}: ${err.message}`);
+                }
+            }
+            if (CTX.logDirty) buildSessions();
+            progress(null);
+            const ctxAdded = CTX.files.length - ctxBefore;
+            // server data can change how items render (backpacks, maps, mod names) and who players are
+            if (ctxAdded) players.forEach((p) => { p.P = analyse(p.P.d); lookupName(p); });
             // players first, so stats / advancements can find their owner
             parsed.filter((p) => p.kind === 'player').sort((a, b) => a.modified - b.modified).forEach((p) => addPlayer(p.name, p.data, p.modified));
             parsed.filter((p) => p.kind !== 'player').forEach((p) => attachExtra(p.kind, p.name, p.data, fileUuid(p.name)));
@@ -1892,27 +3677,30 @@
             const { notes, errors } = batch;
             batch = null;
             const added = players.filter((p) => !before.has(p));
-            const extras = parsed.length - parsed.filter((p) => p.kind === 'player').length;
-            if (added.length > 1 || notes.length > 2) {
-                toast(`${added.length} player${added.length === 1 ? '' : 's'} imported` + (extras ? ` · ${extras} stats/advancement file${extras === 1 ? '' : 's'}` : ''), 'note');
+            const extras = players.flatMap((p) => [p.extras.stats, p.extras.advancements]).filter((x) => x && !extrasBefore.has(x)).length;
+            if (added.length > 1 || notes.length > 2 || ctxAdded) {
+                const parts = [added.length && `${added.length} player${added.length === 1 ? '' : 's'}`, extras && `${extras} stats/advancement file${extras === 1 ? '' : 's'}`, ctxAdded && `${num(ctxAdded)} world/server file${ctxAdded === 1 ? '' : 's'}`].filter(Boolean);
+                toast(parts.length ? 'Imported ' + parts.join(' · ') + (ctxAdded && players.length ? ' - see World & server' : '') : 'Nothing new was imported.', 'note');
             } else {
                 if (added.length === 1) toast(`Imported ${added[0].file}`, 'note');
                 notes.forEach((m) => toast(m, 'note'));
             }
             if (errors.length > 2) toast(`Could not read ${errors.length} files - see the browser console for details.`, 'err');
             else errors.forEach((m) => toast(m, 'err'));
+            if (added.length) view = 'player';
             closeDrawer();
             render();
         }
+        // files: [{file, path, loose}] - loose = picked on its own, so guess its kind from the name
         async function addFiles(files) {
-            await loadEntries(await Promise.all(files.map(async (f) => ({ name: f.name, buf: await f.arrayBuffer(), modified: f.lastModified || Date.now() }))));
-            if (players.length) scrollTo({ top: $('#viewer').offsetTop - 10, behavior: 'smooth' });
+            await loadEntries(files.map(({ file, path, loose }) => ({ name: file.name, path: path || file.name, loose, blob: file, modified: file.lastModified || Date.now(), read: async () => new Uint8Array(await file.arrayBuffer()) })));
+            if (players.length || CTX.files.length) scrollTo({ top: $('#viewer').offsetTop - 10, behavior: 'smooth' });
         }
 
-        // a dropped world folder: pick up playerdata/, stats/ and advancements/ (skip region files etc.)
+        // a dropped folder (world, server, .minecraft...): walk it and keep what ROUTES knows
         async function filesFromDrop(dt) {
             const entries = [...dt.items].map((i) => (i.webkitGetAsEntry ? i.webkitGetAsEntry() : null)).filter(Boolean);
-            if (!entries.some((en) => en.isDirectory)) return [...dt.files];
+            if (!entries.some((en) => en.isDirectory)) return [...dt.files].map((f) => ({ file: f, path: f.name, loose: true }));
             const out = [];
             const readDir = (dir) => new Promise((res) => {
                 const reader = dir.createReader(), all = [];
@@ -1922,18 +3710,17 @@
             const fileOf = (en) => new Promise((res) => en.file(res, () => res(null)));
             async function walk(en, depth) {
                 if (en.isFile) {
-                    if (/\.(dat|dat_old|nbt|json|snbt)$/i.test(en.name) && (depth === 0 || /\/(playerdata|players\/data|stats|advancements)\/[^/]+$/i.test(en.fullPath))) {
-                        const f = await fileOf(en);
-                        if (f) out.push(f);
-                    }
+                    const path = en.fullPath.replace(/^\//, '');
+                    if (depth === 0 || kindOf(path)) { const f = await fileOf(en); if (f) out.push({ file: f, path, loose: depth === 0 }); }
                     return;
                 }
-                // 26.1+ worlds keep players in players/{data,stats,advancements}/ - only skip the world-level data/
-                if (depth > 4 || (depth > 0 && /^(region|entities|poi|DIM-1|DIM1|dimensions|data|datapacks|backups|logs)$/i.test(en.name) && !/\/players\/data$/i.test(en.fullPath))) return;
+                if (depth > 10 || (depth > 0 && SKIP_DIRS.test(en.name))) return;
+                if (out.length && out.length % 200 === 0) progress(`Looking through the folder… ${out.length} files`);
                 for (const c of await readDir(en)) await walk(c, depth + 1);
             }
             for (const en of entries) await walk(en, 0);
-            if (!out.length) showError('No player, stats or advancement files found in that folder.');
+            progress(null);
+            if (!out.length) showError('Nothing the viewer understands was found in that folder.');
             return out;
         }
 
@@ -1942,10 +3729,14 @@
             if (!id) return;
             const names = store.get('nbt.names', {});
             const set = (n) => { pl.name = n; renderTabs(); const h = $('#player .hero h1'); if (h && players[active] === pl) h.textContent = n; };
+            // the server's own records (usercache, ops, logs...) know offline-mode names too
+            const srv = CTX.names.get(uuidKey(id));
+            if (srv) return set(srv);
             if (names[id]) return set(names[id]);
             // Bukkit/Paper servers store the name in the file - use it straight away, playerdb can still correct it
             const known = isObj(pl.P.d.bukkit) && pl.P.d.bukkit.lastKnownName;
             if (known) set(String(known));
+            if (uuidKey(id)[12] === '3') return;        // offline-mode (version 3) uuid - Mojang has never heard of it
             nameQueue.push(async () => {
                 try {
                     const r = await fetch('https://playerdb.co/api/player/minecraft/' + id);
@@ -1964,25 +3755,68 @@
         async function gzip(str) {
             return new Uint8Array(await new Response(new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());
         }
-        $('#shareBtn').onclick = async () => {
+        let shareSeq = 0;
+        async function createShare() {
             const pl = players[active];
             if (!pl) return;
-            const msg = $('#shareMsg'), input = $('#shareUrl');
+            const all = players.length > 1 && $('input[name="shareScope"]:checked').value === 'all';
+            const list = all ? players : [pl];
+            const msg = $('#shareMsg'), input = $('#shareUrl'), seq = ++shareSeq;
             input.value = '';
             msg.textContent = 'Creating link…';
-            shareDlg.showModal();
             try {
-                const payload = { v: 1, players: [{ file: pl.file, name: pl.name, data: pl.P.d, extras: pl.extras }] };
+                const payload = { v: 1, players: list.map((p) => ({ file: p.file, name: p.name, data: p.P.d, extras: shareExtras(p) })) };
+                if (all) payload.active = active;
+                // the packs the items are drawn with travel with the link (ids only - the packs live on minecraftitems.xyz)
+                const packs = rpUsed().map((p) => ({ id: p.id, name: p.name }));
+                if (packs.length) payload.packs = packs;
                 const r = await fetch('api.php?share=create', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: await gzip(JSON.stringify(payload)) });
                 const j = await r.json();
                 if (!r.ok || !j.id) throw new Error(j.error || 'Could not create the link.');
+                if (seq !== shareSeq) return; // scope changed while this was uploading
                 input.value = location.origin + location.pathname + '?s=' + j.id;
                 input.select();
-                const what = [pl.extras.stats && 'statistics', pl.extras.advancements && 'advancements'].filter(Boolean);
-                msg.textContent = `Anyone with this link can view ${pl.name || 'this player'}'s inventory${what.length ? ', ' + what.join(', ') : ''} and NBT data.`;
+                const priv = CTX.files.length ? ' Private details (IP addresses, chat, commands, mail, passwords, seeds) are left out.' : '';
+                if (all) msg.textContent = `Anyone with this link can view all ${list.length} players' inventories, statistics, advancements, server data and NBT data.${priv}`;
+                else {
+                    const what = [pl.extras.stats && 'statistics', pl.extras.advancements && 'advancements', payload.players[0].extras.ctx && 'server data'].filter(Boolean);
+                    msg.textContent = `Anyone with this link can view ${pl.name || 'this player'}'s inventory${what.length ? ', ' + what.join(', ') : ''} and NBT data.${priv}`;
+                }
+                if (packs.length) msg.textContent += ` Items show with ${packs.length > 1 ? 'the resource packs' : 'the resource pack'} ${packs.map((p) => p.name).join(', ')}.`;
                 history.replaceState(null, '', '?s=' + j.id);
-            } catch (err) { msg.textContent = 'Error: ' + err.message; }
+            } catch (err) { if (seq === shareSeq) msg.textContent = 'Error: ' + err.message; }
+        }
+        // only the public part of linkFor() goes in - never linkFor().priv
+        function shareExtras(p) {
+            const x = {};
+            if (p.extras.stats) x.stats = p.extras.stats;
+            if (p.extras.advancements) x.advancements = p.extras.advancements;
+            const pub = linkFor(p).pub;
+            if (Object.keys(pub).length) x.ctx = pub;
+            return x;
+        }
+        // maps + backpack contents from a share, so the shared inventory renders like the original
+        function absorbShared(ctx) {
+            if (!isObj(ctx)) return;
+            if (isObj(ctx.maps)) for (const [id, m] of Object.entries(ctx.maps)) {
+                if (!isObj(m) || typeof m.c !== 'string' || CTX.maps.has(id)) continue;
+                try { const colors = unb64(m.c); if (colors.length === 16384) CTX.maps.set(id, { colors, scale: +m.scale || 0, dim: String(m.dim || 'minecraft:overworld'), x: +m.x || 0, z: +m.z || 0, locked: !!m.locked }); } catch (e) { }
+            }
+            if (isObj(ctx.backpacks)) for (const [u, items] of Object.entries(ctx.backpacks)) if (Array.isArray(items) && !CTX.backpacks.has(u)) CTX.backpacks.set(u, items);
+        }
+        $('#shareBtn').onclick = () => {
+            const pl = players[active];
+            if (!pl) return;
+            const multi = players.length > 1;
+            $('#shareScope').classList.toggle('hide', !multi);
+            $('#shareTitle').textContent = multi ? 'Share players' : 'Share player';
+            $('input[name="shareScope"][value="one"]').checked = true;
+            $('#shareOneLbl').textContent = `Just ${pl.name || pl.file}`;
+            $('#shareAllLbl').textContent = `All ${players.length} players`;
+            shareDlg.showModal();
+            createShare();
         };
+        for (const r of document.querySelectorAll('input[name="shareScope"]')) r.onchange = createShare;
         $('#shareClose').onclick = () => shareDlg.close();
         $('#shareCopy').onclick = async (e) => {
             if (!$('#shareUrl').value) return;
@@ -1996,10 +3830,15 @@
                 if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || 'HTTP ' + r.status); }
                 // inflate() leaves it alone if the server already decoded it
                 const j = JSON.parse(new TextDecoder().decode(await inflate(new Uint8Array(await r.arrayBuffer()))));
-                for (const p of j.players || []) {
+                (j.players || []).forEach((p) => absorbShared(p.extras && p.extras.ctx));
+                useSharedPacks(j.packs);
+                const added = (j.players || []).map((p) => {
                     const pl = addPlayer(p.file, p.data, 0, p.extras || {});
                     if (p.name && !pl.name) pl.name = p.name;
-                }
+                    return pl;
+                });
+                // multi-player shares open on whichever player the sharer had selected
+                if (added[j.active]) active = players.indexOf(added[j.active]);
                 render();
             } catch (e) { showError('Could not open the share link: ' + e.message); }
         }
@@ -2008,15 +3847,42 @@
            Resource packs (several at once, in priority order)
            ===================================================================== */
         const dlg = $('#rpDlg');
+        const PACK_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        function useSharedPacks(list) {
+            if (!Array.isArray(list)) return;
+            const packs = list.filter((p) => isObj(p) && PACK_ID_RE.test(p.id)).slice(0, 5).map((p) => ({ id: String(p.id).toLowerCase(), name: String(p.name || 'Shared pack').slice(0, 60) }));
+            if (!packs.length) return;
+            rpShared = packs;
+            refreshRp();
+            $('#rpBtn').textContent = 'Resource packs (shared)';
+        }
+        // keep: the shared packs become your ticked packs, at the top of the list
+        function endSharedPacks(keep) {
+            const shared = rpShared;
+            rpShared = null;
+            $('#rpBtn').textContent = 'Resource packs';
+            if (!keep) return savePacks(rpPacks());
+            const mine = rpPacks(), ids = new Set(shared.map((p) => p.id));
+            const rest = mine.filter((p) => !ids.has(p.id));
+            rest.forEach((p) => (p.on = false));
+            // packs you already had (site default packs included) keep their entry, just moved up and ticked
+            savePacks([...shared.map((p) => { const had = mine.find((x) => x.id === p.id); return had ? { ...had, on: true } : { ...p, status: 'ready', on: true }; }), ...rest]);
+        }
         function renderPacks() {
+            if (rpShared) {
+                $('#rpList').innerHTML = `<div class="rowi" style="flex-wrap:wrap"><div class="grow"><b style="font-weight:600">This share link uses:</b> ${rpShared.map((p, i) => `${i + 1}. ${esc(p.name)}`).join(', ')}</div>
+                    <button class="btn small primary" id="rpKeep" title="Save these packs and use them from now on">Keep these packs</button>
+                    <button class="btn small" id="rpMine" title="Go back to your own resource packs">Use my packs</button></div>`;
+                return;
+            }
             const packs = rpPacks();
-            const on = packs.filter((p) => p.on).length;
+            const on = packs.filter((p) => p.on && p.id).length;
             $('#rpList').innerHTML = packs.length
-                ? packs.map((p, i) => `<div class="rowi"><input type="checkbox" data-rpon="${i}" ${p.on ? 'checked' : ''} style="width:auto;margin:0" title="Use this pack">
-                    <div class="grow"><b style="font-weight:600">${i + 1}. ${esc(p.name)}</b><br><small class="mono">${esc(p.id)}</small> <small>${esc(p.status || '')}</small></div>
+                ? packs.map((p, i) => `<div class="rowi"><input type="checkbox" data-rpon="${i}" ${p.on ? 'checked' : ''} ${p.id ? '' : 'disabled'} style="width:auto;margin:0" title="Use this pack">
+                    <div class="grow"><b style="font-weight:600">${i + 1}. ${esc(p.name)}</b>${p.def ? ' <small class="muted">· site pack</small>' : ''}<br><small class="mono">${esc(p.id || '')}</small> <small>${esc(p.status || '')}</small></div>
                     <button class="btn small" data-rpmove="${i}:-1" ${i === 0 ? 'disabled' : ''} title="Higher priority">▲</button>
                     <button class="btn small" data-rpmove="${i}:1" ${i === packs.length - 1 ? 'disabled' : ''} title="Lower priority">▼</button>
-                    <button class="btn small" data-rpdel="${i}" title="Remove">✕</button></div>`).join('') +
+                    ${p.def ? '' : `<button class="btn small" data-rpdel="${i}" title="Remove">✕</button>`}</div>`).join('') +
                   (on > 5 ? '<small class="muted">Only the top 5 ticked packs are used.</small>' : '')
                 : '<div class="muted" style="font-size:13px">No packs yet - vanilla textures are used.</div>';
         }
@@ -2026,6 +3892,22 @@
             refreshRp();
             if (before !== rpActive && active >= 0) render();
             renderPacks();
+        }
+        // merge the site packs into this device's list: new ones go at the bottom, switched off
+        async function loadDefaultPacks() {
+            let defs;
+            try { defs = await (await fetch('api.php?rp=defaults')).json(); } catch (e) { return; }
+            if (!Array.isArray(defs)) return;
+            const packs = rpPacks().filter((p) => !p.def || defs.some((d) => d.file === p.def));
+            for (const d of defs) {
+                const p = packs.find((x) => x.def === d.file);
+                if (p) {
+                    if (p.id !== d.id) p.on = p.on && !!d.id;
+                    Object.assign(p, { id: d.id, name: d.name, status: d.status });
+                } else packs.push({ id: d.id, name: d.name, status: d.status, on: false, def: d.file });
+            }
+            savePacks(packs);
+            packs.forEach((p) => p.def && p.id && /process|pending|queue|download/i.test(p.status) && pollPack(p.id));
         }
         async function rpStatus(id) {
             try {
@@ -2046,11 +3928,20 @@
         /* =====================================================================
            Events
            ===================================================================== */
-        const fileInput = $('#file'), extraInput = $('#extraFile');
+        const fileInput = $('#file'), extraInput = $('#extraFile'), dirInput = $('#dirFile');
+        const loose = (list) => [...list].map((f) => ({ file: f, path: f.name, loose: true }));
         $('#pick').onclick = () => fileInput.click();
+        $('#pickDir').onclick = () => dirInput.click();
         $('#add').onclick = () => fileInput.click();
-        fileInput.onchange = () => { addFiles([...fileInput.files]); fileInput.value = ''; };
-        extraInput.onchange = () => { addFiles([...extraInput.files]); extraInput.value = ''; };
+        fileInput.onchange = () => { addFiles(loose(fileInput.files)); fileInput.value = ''; };
+        extraInput.onchange = () => { addFiles(loose(extraInput.files)); extraInput.value = ''; };
+        dirInput.onchange = () => {
+            const list = [...dirInput.files].map((f) => ({ file: f, path: f.webkitRelativePath || f.name, loose: false }))
+                .filter((x) => !x.path.split('/').slice(1, -1).some((d) => SKIP_DIRS.test(d)) && kindOf(x.path));
+            dirInput.value = '';
+            if (list.length) addFiles(list); else showError('Nothing the viewer understands was found in that folder.');
+        };
+        $('#srvBtn').onclick = () => { view = view === 'server' ? 'player' : 'server'; closeDrawer(); render(); scrollTo({ top: $('#viewer').offsetTop - 10 }); };
 
         let dragDepth = 0;
         addEventListener('dragenter', (e) => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) { dragDepth++; $('#dragOverlay').classList.remove('hide'); } });
@@ -2072,13 +3963,22 @@
                 try {
                     const r = await fetch(encodeURIComponent(ex.dataset.example));
                     if (!r.ok) throw new Error(r.status);
-                    await loadEntries([{ name: ex.dataset.example, buf: await r.arrayBuffer(), modified: Date.now() }]);
+                    const buf = new Uint8Array(await r.arrayBuffer());
+                    await loadEntries([{ name: ex.dataset.example, path: ex.dataset.example, loose: true, modified: Date.now(), read: async () => buf }]);
                 } catch (err) { showError('Could not load the example: ' + err.message); }
                 ex.disabled = false;
                 return;
             }
+            const pv = t.closest('[data-priv]');
+            if (pv) {
+                const span = document.createElement('span');
+                span.className = 'revealed';
+                span.innerHTML = PRIV[+pv.dataset.priv] ?? '';
+                pv.replaceWith(span);
+                return;
+            }
             if (pickOpen && !t.closest('#tabs')) togglePicker(false);
-            if (t.closest('[data-pick]')) { togglePicker(); return; }
+            if (t.closest('[data-pick]')) { if (players.length) togglePicker(); return; }
             const cl = t.closest('[data-close]');
             if (cl) {
                 e.stopPropagation();
@@ -2090,7 +3990,7 @@
                 return;
             }
             const tab = t.closest('[data-tab]');
-            if (tab) { active = +tab.dataset.tab; togglePicker(false); closeDrawer(); render(); scrollTo({ top: $('#viewer').offsetTop - 10 }); return; }
+            if (tab) { active = +tab.dataset.tab; view = 'player'; togglePicker(false); closeDrawer(); render(); scrollTo({ top: $('#viewer').offsetTop - 10 }); return; }
             const stab = t.closest('[data-stab]');
             if (stab) {
                 const card = stab.closest('.card');
@@ -2127,6 +4027,15 @@
                 if (a === 'close') closeDrawer();
                 if (a === 'closeall' && confirm(`Remove all ${players.length} players?`)) { players.length = 0; active = -1; pickOpen = false; closeDrawer(); render(); }
                 if (a === 'extra') extraInput.click();
+                if (a === 'sdir' || a === 'ssel') schemPick(a, act);
+                if (a === 'clearctx' && confirm('Forget all world, server, plugin and mod files? Loaded players stay.')) {
+                    TEX.forEach((u) => u.startsWith('blob:') && URL.revokeObjectURL(u));
+                    TEX.clear(); TEXREF.clear(); LANG.clear();
+                    Object.assign(CTX, freshCtx());
+                    players.forEach((p) => (p.P = analyse(p.P.d)));
+                    view = 'player';
+                    closeDrawer(); render();
+                }
                 if (a === 'expand') {
                     const tree = $('#rawTree');
                     const open = act.textContent === 'Expand all';
@@ -2153,6 +4062,7 @@
             const det = e.target;
             if (det.tagName !== 'DETAILS' || !det.open) return;
             if (det.dataset.n !== undefined) fillNode(det);
+            if (det.dataset.blk !== undefined) fillBlock(det);
             if (det.dataset.lazy === 'recipes') { const f = $('[data-fill]', det); if (!f.childElementCount) fillRecipes(f); }
         }, true);
 
@@ -2184,6 +4094,7 @@
             if ((e.key === '[' || e.key === ']') && players.length > 1) {
                 const order = sortedPlayers().list.map((r) => r.i), at = order.indexOf(active);
                 active = order[(at + (e.key === ']' ? 1 : -1) + order.length) % order.length];
+                view = 'player';
                 closeDrawer(); render();
             }
             // arrow keys walk between slots while the drawer is open
@@ -2196,7 +4107,7 @@
         });
 
         // resource pack dialog
-        $('#rpBtn').onclick = () => { renderPacks(); $('#rpMsg').textContent = ''; dlg.showModal(); rpPacks().forEach((p) => pollPack(p.id, 99)); };
+        $('#rpBtn').onclick = () => { renderPacks(); $('#rpMsg').textContent = ''; dlg.showModal(); if (!rpShared) rpPacks().forEach((p) => p.id && pollPack(p.id, 99)); };
         $('#rpClose').onclick = () => dlg.close();
         dlg.addEventListener('change', (e) => {
             if (e.target.dataset.rpon === undefined) return;
@@ -2205,6 +4116,7 @@
             savePacks(packs);
         });
         dlg.addEventListener('click', (e) => {
+            if (e.target.closest('#rpKeep, #rpMine')) { e.preventDefault(); return endSharedPacks(e.target.closest('#rpKeep') !== null); }
             const mv = e.target.closest('[data-rpmove]'), del = e.target.closest('[data-rpdel]');
             if (!mv && !del) return;
             e.preventDefault();
@@ -2225,6 +4137,7 @@
                 const j = await r.json();
                 const id = j.packId || j.id || j.resourcePackId || (j.pack && (j.pack.id || j.pack.packId));
                 if (!r.ok || !id) throw new Error(j.error || j.message || 'Upload failed');
+                if (rpShared) endSharedPacks(false);
                 const packs = rpPacks();
                 packs.unshift({ id, name, status: j.status || 'processing', on: false });
                 store.set('nbt.rp.packs', packs);
@@ -2237,6 +4150,7 @@
 
         const shareId = new URLSearchParams(location.search).get('s');
         if (shareId) loadShare(shareId);
+        loadDefaultPacks();
     })();
     </script>
 

@@ -5,6 +5,7 @@
 //   GET  api.php?item=diamond_sword[&rp=<packId>,<packId>...][&cmd=123] -> PNG (disk cached)
 //   POST api.php?rp=upload   {"name": "...", "url": "https://.../pack.zip"} -> JSON from the API
 //   GET  api.php?rp=status&id=<packId>                          -> JSON from the API
+//   GET  api.php?rp=defaults                                    -> the packs in ./resourcepacks
 //   POST api.php?share=create / GET api.php?share=<id>          -> share links (stored in ./shares)
 
 // config.php starts a session and prints markup meant for full pages - swallow all of it,
@@ -155,6 +156,56 @@ if ($rpAction === 'upload' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'downloadUrl' => $url,
     ]);
     json_out($code, $body !== '' ? $body : ['error' => 'No response from minecraftitems.xyz']);
+}
+
+// The packs in ./resourcepacks are offered to everyone. Each one is registered with the API the
+// first time it is seen (and again if the file changes); the pack ids are kept in cache/default-packs.json.
+//   GET api.php?rp=defaults -> [{"file": "...", "name": "...", "id": "<packId>" | null, "status": "..."}]
+if ($rpAction === 'defaults') {
+    $packDir = __DIR__ . '/resourcepacks';
+    $regFile = __DIR__ . '/cache/default-packs.json';
+    if (!is_dir(dirname($regFile))) @mkdir(dirname($regFile), 0755, true);
+    $lock = fopen($regFile . '.lock', 'c');
+    if ($lock) flock($lock, LOCK_EX);
+    $reg = is_file($regFile) ? (json_decode(file_get_contents($regFile), true) ?: []) : [];
+
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https' ? 'https' : 'http';
+    $base = $scheme . '://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\') . '/resourcepacks/';
+
+    $out = [];
+    $seen = [];
+    foreach (glob($packDir . '/*.zip') ?: [] as $path) {
+        $file = basename($path);
+        $seen[$file] = true;
+        $sig = filesize($path) . '-' . filemtime($path);
+        $r = $reg[$file] ?? null;
+        $stale = !$r || $r['sig'] !== $sig;
+        // failed registrations are retried after 10 minutes
+        if ($stale || (empty($r['id']) && ($r['tried'] ?? 0) < time() - 600)) {
+            $name = substr(preg_replace('/[-_]+/', ' ', pathinfo($file, PATHINFO_FILENAME)), 0, 60);
+            [$code, $body] = fetch_url(MC_API . '/api/setup/resourcepack?apiKey=' . urlencode($key), [
+                'packName' => $name,
+                'downloadUrl' => $base . rawurlencode($file),
+            ]);
+            $j = json_decode($body, true) ?: [];
+            $id = $j['packId'] ?? $j['id'] ?? $j['resourcePackId'] ?? ($j['pack']['id'] ?? $j['pack']['packId'] ?? null);
+            $ok = $code >= 200 && $code < 300 && is_string($id) && preg_match($uuidRe, $id);
+            $r = [
+                'sig' => $sig,
+                'name' => $name,
+                'id' => $ok ? strtolower($id) : null,
+                'status' => $ok ? (string)($j['status'] ?? 'processing') : 'error: ' . ($j['error'] ?? $j['message'] ?? 'HTTP ' . $code),
+                'tried' => time(),
+            ];
+            $reg[$file] = $r;
+        }
+        $out[] = ['file' => $file, 'name' => $r['name'], 'id' => $r['id'], 'status' => $r['status']];
+    }
+    $reg = array_intersect_key($reg, $seen);
+    @file_put_contents($regFile, json_encode($reg, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    if ($lock) { flock($lock, LOCK_UN); fclose($lock); }
+    usort($out, fn($a, $b) => strnatcasecmp($a['name'], $b['name']));
+    json_out(200, $out);
 }
 
 if ($rpAction === 'status' && isset($_GET['id']) && preg_match($uuidRe, $_GET['id'])) {
