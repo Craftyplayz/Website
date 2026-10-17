@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Site Reorganisation Plan</title>
+<style>
+    :root {
+        --bg: #f6f6f4; --panel: #ffffff; --text: #1d1d1f; --muted: #6b6b70; --line: #e2e2e0;
+        --accent: #6a4cff; --accent-soft: #ece8ff;
+        --new: #1f8a4c; --moved: #2563eb; --merged: #9333ea; --delete: #c62828; --private: #b45309; --dev: #6b7280;
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg: #151517; --panel: #1f1f23; --text: #ececf0; --muted: #9a9aa3; --line: #2f2f35;
+            --accent: #9d8bff; --accent-soft: #2b2647;
+            --new: #4ade80; --moved: #60a5fa; --merged: #c084fc; --delete: #f87171; --private: #fbbf24; --dev: #a1a1aa;
+        }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 24px 16px 60px; }
+    h1 { margin: 0 0 4px; font-size: 26px; }
+    h2 { font-size: 19px; margin: 0 0 12px; }
+    h3 { font-size: 15px; margin: 18px 0 8px; }
+    .sub { color: var(--muted); margin: 0 0 20px; }
+    code { font: 13px ui-monospace, Consolas, monospace; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+    .tabs button { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); padding: 10px 12px; font: inherit; cursor: pointer; }
+    .tabs button.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+    .stat b { display: block; font-size: 24px; }
+    .stat span { color: var(--muted); font-size: 13px; }
+
+    /* questions */
+    .q { padding: 14px 0; border-top: 1px solid var(--line); }
+    .q:first-of-type { border-top: 0; padding-top: 0; }
+    .q p { margin: 0 0 8px; font-weight: 600; }
+    .q small { display: block; color: var(--muted); font-weight: 400; margin-top: 2px; }
+    .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+    .opts label { border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer; background: var(--bg); }
+    .opts input { margin-right: 6px; }
+    .opts label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+    textarea { width: 100%; min-height: 80px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 10px; font: inherit; }
+    .btn { background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer; }
+    .btn.ghost { background: none; color: var(--text); border: 1px solid var(--line); }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+    #progress { color: var(--muted); font-size: 13px; }
+    pre#output { white-space: pre-wrap; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px; font: 13px ui-monospace, Consolas, monospace; display: none; }
+
+    /* tree */
+    .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 13px; margin-bottom: 12px; }
+    .tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; padding: 1px 6px; border-radius: 4px; border: 1px solid currentColor; white-space: nowrap; }
+    .tag.new { color: var(--new); } .tag.moved { color: var(--moved); } .tag.merged { color: var(--merged); }
+    .tag.delete { color: var(--delete); } .tag.private { color: var(--private); } .tag.dev { color: var(--dev); }
+    .tree { font: 13.5px ui-monospace, Consolas, monospace; }
+    .tree ul { list-style: none; margin: 0; padding-left: 18px; border-left: 1px dashed var(--line); }
+    .tree > ul { padding-left: 0; border-left: 0; }
+    .tree li { margin: 2px 0; }
+    .node { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; padding: 2px 4px; border-radius: 4px; }
+    .node.dir { cursor: pointer; font-weight: 600; }
+    .node.dir:hover { background: var(--accent-soft); }
+    .node .caret { width: 10px; display: inline-block; color: var(--muted); }
+    .node .from { color: var(--muted); font-size: 12px; }
+    .node .note { color: var(--muted); font-size: 12px; font-style: italic; font-family: system-ui, sans-serif; }
+    li.collapsed > ul { display: none; }
+    .tree-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .tree-tools input { flex: 1; min-width: 180px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; }
+    .hit { background: #fde68a; color: #000; border-radius: 3px; }
+
+    /* nav preview */
+    .mock { border: 1px solid var(--line); border-radius: 10px; overflow: visible; background: #222; color: #fff; }
+    .mock nav { display: flex; align-items: center; gap: 4px; padding: 8px 12px; flex-wrap: wrap; position: relative; }
+    .mock .logo { width: 34px; height: 34px; border-radius: 50%; background: #555; display: grid; place-items: center; margin-right: 8px; font-size: 18px; }
+    .mock .item { position: relative; }
+    .mock .item > a { display: block; padding: 8px 10px; color: #fff; text-decoration: none; border-radius: 6px; cursor: pointer; }
+    .mock .item > a:hover, .mock .item.open > a { background: #3a3a3a; }
+    .mock .search { margin-left: auto; background: #333; border: 1px solid #444; border-radius: 6px; padding: 6px 10px; color: #aaa; font-size: 13px; }
+    .mega { display: none; position: absolute; top: 100%; left: 0; z-index: 5; background: #2b2b2b; border: 1px solid #444; border-radius: 8px; padding: 14px; gap: 22px; min-width: 240px; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+    .item.open .mega { display: flex; flex-wrap: wrap; }
+    .mega h4 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #aaa; }
+    .mega a { display: block; color: #fff; text-decoration: none; padding: 3px 0; font-size: 14px; white-space: nowrap; }
+    .mega a:hover { color: #c4b5fd; }
+    .mega .all { color: #c4b5fd; margin-top: 4px; }
+    .subnav { background: #2d2d2d; border-top: 1px solid #3a3a3a; padding: 6px 14px; font-size: 13px; display: flex; gap: 14px; flex-wrap: wrap; border-radius: 0 0 10px 10px; }
+    .subnav span { color: #bbb; } .subnav span.on { color: #fff; border-bottom: 2px solid #9d8bff; }
+    .crumbs { color: var(--muted); font-size: 13px; margin: 10px 0 0; }
+
+    /* phases */
+    .phase { display: flex; gap: 12px; align-items: flex-start; }
+    .phase input { margin-top: 5px; width: 18px; height: 18px; accent-color: var(--accent); }
+    .phase .num { font-weight: 700; color: var(--accent); }
+    .phase.done .body { opacity: .5; text-decoration: line-through; }
+    .phase .body p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+
+    ul.plain { margin: 0; padding-left: 18px; }
+    ul.plain li { margin: 4px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+    @media (max-width: 600px) { .mega { position: static; } .mock .search { margin-left: 0; width: 100%; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <h1>Site reorganisation plan</h1>
+    <p class="sub">Answer the questions, explore the new structure, and preview the new navigation. Nothing has been moved yet.</p>
+
+    <div class="tabs" role="tablist">
+        <button class="active" data-tab="questions">Questions</button>
+        <button data-tab="overview">Overview</button>
+        <button data-tab="tree">New structure</button>
+        <button data-tab="nav">Nav preview</button>
+        <button data-tab="phases">Migration steps</button>
+    </div>
+
+    <!-- QUESTIONS -->
+    <section class="tab active" id="tab-questions">
+        <div class="card">
+            <h2>Decisions needed</h2>
+            <div id="questions"></div>
+            <h3>Anything else?</h3>
+            <textarea id="notes" placeholder="Extra notes, things to keep, things to rename…"></textarea>
+            <div class="row">
+                <button class="btn" id="copy">Copy answers</button>
+                <button class="btn ghost" id="reset">Clear</button>
+                <span id="progress"></span>
+            </div>
+            <pre id="output"></pre>
+        </div>
+    </section>
+
+    <!-- OVERVIEW -->
+    <section class="tab" id="tab-overview">
+        <div class="stats">
+            <div class="stat"><b>6,746</b><span>files today</span></div>
+            <div class="stat"><b>~3,050</b><span>files removed (duplicates and empty files)</span></div>
+            <div class="stat"><b>~3,700</b><span>files after the reorganisation</span></div>
+            <div class="stat"><b>12 → 70+</b><span>pages reachable from the menu</span></div>
+            <div class="stat"><b>~90</b><span>301 redirects so old links keep working</span></div>
+        </div>
+        <div class="card">
+            <h2>Biggest problems today</h2>
+            <ul class="plain">
+                <li><b>Three copies of the 1,507-file item list:</b> <code>minecraft/itemlist</code>, <code>minecraft/items_1.21.11</code> and <code>Code/minecraft/items_1.21.11</code>.</li>
+                <li><b><code>Code/minecraft/</code> is a byte-for-byte copy</b> of files in <code>minecraft/</code>.</li>
+                <li><b>The header links only 12 pages.</b> Hypixel, Retro, Games, Tools, Shop, Life Series, Map Art and more can't be reached from it.</li>
+                <li><b>Broken links:</b> <code>/extas/rgb.php</code>, <code>/extas/chaos.html</code>, <code>/steam/newindex</code> and <code>\quiz/harrypotter/</code>.</li>
+                <li><b><code>/php/</code> is gitignored as a whole</b>, so the header, footer and layout.js aren't version-controlled.</li>
+                <li><b>Private and dev files are publicly served:</b> Discord exports, a transcript recording, a Factorio mod with <code>.dll</code> files, API dumps and tests.</li>
+                <li><b>Many "v2" forks</b> of pages, and many pages titled "Untitled".</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h2>How it fixes that</h2>
+            <table>
+                <tr><th>Idea</th><th>What it means</th></tr>
+                <tr><td>One folder per page</td><td>Clean URLs like <code>/minecraft/tools/nether-portal/</code>.</td></tr>
+                <tr><td><code>data/site.json</code></td><td>One list of every page. The header, hub pages, sitemap, breadcrumbs, search and 404 suggestions are all generated from it.</td></tr>
+                <tr><td><code>includes/</code> · <code>assets/</code> · <code>media/</code></td><td>Shared PHP, small static files, and large photos are kept apart.</td></tr>
+                <tr><td><code>private/</code> · <code>_dev/</code></td><td>Personal and dev material is no longer browsable.</td></tr>
+                <tr><td>301 map in <code>.htaccess</code></td><td>Old bookmarks and short links keep working.</td></tr>
+            </table>
+        </div>
+    </section>
+
+    <!-- TREE -->
+    <section class="tab" id="tab-tree">
+        <div class="card">
+            <div class="legend">
+                <span class="tag new">new</span>
+                <span class="tag moved">moved</span>
+                <span class="tag merged">merged</span>
+                <span class="tag private">private</span>
+                <span class="tag dev">dev only</span>
+                <span class="tag delete">delete</span>
+            </div>
+            <div class="tree-tools">
+                <input id="treeSearch" type="search" placeholder="Find an old or new path, e.g. nether.html">
+                <button class="btn ghost" id="expandAll">Expand all</button>
+                <button class="btn ghost" id="collapseAll">Collapse all</button>
+            </div>
+            <div class="tree" id="tree"></div>
+        </div>
+        <div class="card">
+            <h2>Deleted outright</h2>
+            <div class="tree" id="deleted"></div>
+        </div>
+    </section>
+
+    <!-- NAV PREVIEW -->
+    <section class="tab" id="tab-nav">
+        <div class="card">
+            <h2>Top bar preview</h2>
+            <p class="sub" style="margin-bottom:12px">Click a menu to open it. The preview follows your naming answers on the Questions tab.</p>
+            <div class="mock">
+                <nav id="mocknav"></nav>
+                <div class="subnav" id="mocksub"></div>
+            </div>
+            <p class="crumbs" id="mockcrumbs"></p>
+        </div>
+        <div class="card">
+            <h2>Navigation files that get added</h2>
+            <table>
+                <tr><th>File</th><th>Job</th></tr>
+                <tr><td><code>data/site.json</code></td><td>The list of every page: title, URL, description, icon, keywords and the date it was added.</td></tr>
+                <tr><td><code>includes/header.php</code></td><td>Builds the mega-menu from site.json and highlights the current section.</td></tr>
+                <tr><td><code>includes/header-fragment.php</code></td><td>The same header for plain <code>.html</code> pages, fetched by <code>layout.js</code>.</td></tr>
+                <tr><td><code>includes/subnav.php</code></td><td>A second row of tabs inside a section (replaces <code>shopheader.php</code>).</td></tr>
+                <tr><td><code>includes/page-nav.php</code></td><td>"More in this section" plus prev / next links at the bottom of each page.</td></tr>
+                <tr><td><code>includes/head.php</code></td><td>Title, meta description and CSS, so no more "Untitled" pages.</td></tr>
+                <tr><td><code>assets/js/search.js</code></td><td>The header search box. Press <code>/</code> to focus it.</td></tr>
+                <tr><td><code>sitemap/</code> · <code>sitemap.xml.php</code></td><td>A full page list for people and an XML sitemap for search engines.</td></tr>
+                <tr><td><code>whats-new/</code></td><td>The newest pages, sorted by their "added" date.</td></tr>
+                <tr><td><code>404.php</code></td><td>"Did you mean…?" suggestions.</td></tr>
+                <tr><td><code>go/</code> + <code>data/links.json</code></td><td>Short links (<code>/go/discord</code>, <code>/go/melon</code>) that replace <code>invite.php</code>, <code>spotify.html</code> and <code>shorten.json</code>.</td></tr>
+            </table>
+        </div>
+    </section>
+
+    <!-- PHASES -->
+    <section class="tab" id="tab-phases">
+        <div class="card" id="phases"></div>
+    </section>
+</div>
+
+<script>
+/* ---------- storage (optional, per browser) ---------- */
+const KEY = 'reorg-plan-v1';
+function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+const state = load();
+state.answers = state.answers || {};
+state.phases = state.phases || {};
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button, .tab').forEach(el => el.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('tab-' + b.dataset.tab).classList.add('active');
+}));
+
+/* ---------- questions ---------- */
+const questions = [
+    { group: 'Which version should stay?' },
+    { id: 'books', q: 'Books list', hint: 'books/index.php vs index2.php (404 lines differ); hannah.php is a separate person\'s list',
+      opts: ['index.php', 'index2.php', 'Keep both, plus hannah.php as its own page'] },
+    { id: 'steamIndex', q: 'Steam stats page', hint: 'steam/index.php vs steam2.php (181 lines differ)', opts: ['index.php', 'steam2.php'] },
+    { id: 'steamGame', q: 'Steam game page', hint: 'steam/game.php vs newgame.php (215 lines differ)', opts: ['game.php', 'newgame.php'] },
+    { id: 'minions', q: 'Hypixel minions', hint: 'minions.php vs minions2.php (95 lines differ)', opts: ['minions.php', 'minions2.php'] },
+    { id: 'randomImage', q: 'Random image', hint: 'image.php vs image2.php (only 4 lines differ)', opts: ['image.php', 'image2.php'] },
+    { id: 'yugioh', q: 'Yu-Gi-Oh guide', hint: 'yugioh.php vs yugioh2.php (20 lines differ)', opts: ['yugioh.php', 'yugioh2.php'] },
+    { id: 'thegame', q: 'The Game', hint: 'extras/thegame/index.php vs temp/index.php vs temp/index2.php', opts: ['index.php', 'temp/index.php', 'temp/index2.php'] },
+    { id: 'shulker', q: 'Shulker calculator', hint: 'shulker-schematic-calculator.html vs schemcalc.html (72 lines differ)', opts: ['shulker-schematic-calculator.html', 'schemcalc.html'] },
+    { id: 'transcripts', q: 'Transcripts page', hint: 'Code/transcripts/index.php vs index2.php', opts: ['index.php', 'index2.php', 'Keep both (private)'] },
+    { group: 'Structure' },
+    { id: 'private', q: 'Where should private material go?', hint: 'Discord exports, transcripts, booru, jellyfin test, kindle controller',
+      opts: ['Move above the web root', 'Keep on site behind a password', 'Delete it from the server'] },
+    { id: 'docroot', q: 'Can your host change the document root (for example to a public/ folder)?',
+      hint: 'If yes, private/, _dev/ and _templates/ can sit completely outside the website', opts: ['Yes', 'No', 'Not sure'] },
+    { group: 'Naming' },
+    { id: 'funName', q: 'Name for the misc section', hint: 'Trump quotes, insults, fake update screens, memes, pets…', opts: ['Fun', 'Extras'] },
+    { id: 'gamesMenu', q: 'Games menus', hint: 'Playable games (Chapter Oracle, Guess Who…) vs stats and guides (Steam, Hypixel, Factorio…)',
+      opts: ['Two menus: Games + Gaming', 'One merged Games menu'] },
+    { id: 'shopPlace', q: 'Captainalism shop', hint: 'Currently /shop/ with its own header', opts: ['Under /minecraft/shop/', 'Keep at /shop/'] },
+];
+
+const qBox = document.getElementById('questions');
+questions.forEach(item => {
+    if (item.group) { const h = document.createElement('h3'); h.textContent = item.group; qBox.appendChild(h); return; }
+    const div = document.createElement('div');
+    div.className = 'q';
+    div.innerHTML = '<p>' + item.q + '<small>' + item.hint + '</small></p><div class="opts"></div>';
+    const opts = div.querySelector('.opts');
+    item.opts.forEach(o => {
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        input.type = 'radio'; input.name = item.id; input.value = o;
+        input.checked = state.answers[item.id] === o;
+        input.addEventListener('change', () => { state.answers[item.id] = o; save(); updateProgress(); renderNav(); });
+        label.append(input, o);
+        opts.appendChild(label);
+    });
+    qBox.appendChild(div);
+});
+const notes = document.getElementById('notes');
+notes.value = state.notes || '';
+notes.addEventListener('input', () => { state.notes = notes.value; save(); });
+
+const realQs = questions.filter(q => q.id);
+function updateProgress() {
+    const n = realQs.filter(q => state.answers[q.id]).length;
+    document.getElementById('progress').textContent = n + ' of ' + realQs.length + ' answered';
+}
+updateProgress();
+
+document.getElementById('copy').addEventListener('click', () => {
+    const lines = ['Reorganisation plan answers:'];
+    realQs.forEach(q => lines.push('- ' + q.q + ': ' + (state.answers[q.id] || '(no answer)')));
+    if (notes.value.trim()) lines.push('', 'Notes:', notes.value.trim());
+    const text = lines.join('\n');
+    const out = document.getElementById('output');
+    out.textContent = text; out.style.display = 'block';
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => {
+        document.getElementById('progress').textContent = 'Copied. Paste it into the chat.';
+    }).catch(() => {});
+});
+document.getElementById('reset').addEventListener('click', () => {
+    if (!confirm('Clear all answers?')) return;
+    state.answers = {}; state.notes = ''; notes.value = ''; save();
+    document.querySelectorAll('#questions input').forEach(i => i.checked = false);
+    document.getElementById('output').style.display = 'none';
+    updateProgress(); renderNav();
+});
+
+/* ---------- tree ----------
+   Format: two spaces per level. "name | tag | from | note" (tag/from/note optional). */
+const TREE = `
+Website/
+  .htaccess | moved | | clean URLs, 301 map, blocks internal folders
+  .gitignore | moved | | only ignore includes/config.php
+  README.md | new | | how to add a page
+  index.php | moved | index.php | home, short-link code moved to /go/
+  robots.txt | new
+  sitemap.xml.php | new
+  404.php | moved | php/404.php | adds "did you mean…"
+  favicon.ico
+  includes/ | new | | PHP partials, blocked from the web
+    bootstrap.php | new
+    head.php | new | | title, meta, CSS
+    header.php | moved | php/header.php + header.html | built from site.json
+    header-fragment.php | new | | for plain .html pages
+    subnav.php | new | php/shopheader.php
+    footer.php | moved | php/footer.php + footer.html
+    page-nav.php | new | | related pages, prev / next
+    functions.php | new
+    config.php | moved | php/config.php | gitignored
+    config.example.php | new
+  data/ | new
+    site.json | new | | single source of truth for navigation
+    links.json | moved | shorten.json + invite.php + spotify.html
+  assets/ | new
+    css/ | moved | css/
+      global.css | moved | css/global.css
+      components/ | new | | cards, gallery, forms
+      pages/ | moved | css/*.css | steam.css + steamnew.css merged
+    js/ | new
+      layout.js | moved | php/layout.js
+      search.js | new
+      konami.js | moved | konami.js
+    img/ | moved | images/*.png, catsmall.webp, shoplogo.png
+      icons/ | moved | images/icons/ | 114 svg
+      markers/ | moved | images/markers/ | 101 files
+  media/ | moved | images/ | 2.5 GB of content
+    slideshow/ | moved | images/SlideShows/
+    pets/ | moved | images/galleries/pets/ | 1.5 GB
+    minecraft/ | moved | images/minecraft/
+      screenshots/ | moved | images/minecraft/screenshots/
+      screenshots-raw/ | moved | images/minecraft/rawscreenshots/
+      mapart/ | moved | images/minecraft/mapart/
+      skins/ | moved | images/minecraft/skins/
+      misc/ | moved | images/minecraft/weird sizes/
+    books/covers/ | moved | images/books/
+    harrypotter/ | moved | images/harrypotter/
+    quotes/ | moved | images/quotes/
+    fake-updates/ | moved | images/update/
+    memes/ | moved | memes/*.mp4, *.jpg, trump-mugshot.webp
+  go/ | new | | /go/discord, /go/melon …
+    index.php | new
+  about/ | moved | about.php
+  sitemap/ | new | | every page by section
+  whats-new/ | new
+  minecraft/
+    index.php | | | hub
+    tools/ | new
+      index.php | new | | hub
+      nether-portal/ | moved | minecraft/nether.html
+      storage-sorter/ | moved | minecraft/storage/
+      shulker-calculator/ | moved | shulker-schematic-calculator.html
+      material-list/ | moved | materiallist.html
+      litematica-converter/ | moved | litematica_material_converter.html
+      nbt-viewer/ | moved | minecraft/nbtviewer/
+      item-list/ | moved | minecraft/itemlist/ | one copy instead of three
+      day-calculator/ | moved | minecraft/day.php
+      dynmap-marker/ | moved | minecraft/marker.php
+      book-generator/ | moved | minecraft/minecart.html
+      transaction-generator/ | moved | minecraft/transactions.html
+      stats-editor/ | moved | minecraft/stats.php
+      json-viewer/ | moved | minecraft/chatfilter.php
+      tnt-cannon/ | moved | minigames/battleships.html
+      playtime/ | moved | minecraft/playtime/
+    projects/ | new
+      index.php | new | | hub
+      metro/ | moved | minecraft/network/
+      rail-router/ | moved | boltnetwork.php
+      milestones/ | moved | milestones.php
+      mapart/ | moved | minecraft/mapart/
+        frame-extractor/ | moved | mapart/code/
+      stonecrest/ | moved | stonecrest.php
+      life-series/ | moved | minecraft/life/
+        season-1/episode-1..3/ | moved | life/s1/e1-e3.php
+    screenshots/ | moved | screenshot.php
+    skins/ | moved | skins.php
+    tips/ | moved | tips.php
+    downloads/ | moved | Invisible Bossbar (all).zip
+    shop/ | moved | shop/ | Captainalism: books, casino, requests
+  games/
+    index.php | | | hub
+    chapter-oracle/ | moved | games/chapterguesser/ | live files only
+    guess-who/ | merged | games/guesswho/ | one shared game.js
+      og/ · atla/ · template/
+    a-dark-room/ | moved | games/adarkroom/ | build files removed
+    bingo/geriant/
+    the-game/ | moved | extras/thegame/
+    quizzes/ | moved | quiz/
+      harry-potter/ | merged | quiz/HarryPotter/* | one engine, 4 question sets
+        engine/ | merged | 4 copies of js/css/php
+        sets/ | moved | */assets/json/
+  gaming/ | new | | stats and guides
+    index.php | new | | hub
+    steam/ | moved | steam/ + php/steam.php
+    retro/ | moved | retro/
+    factorio/ | moved | factorio/
+      commands/ | moved | Code/factorio.html
+    hypixel/ | moved | hypixel/
+      collections/ | moved | hypixel/collections/
+      minions/ | moved | minions.php or minions2.php
+      ghast-calculator/ | moved | calculators/ghast.php
+      regex-builder/ | moved | hypixel/filter.html
+    yugioh/ | moved | games/yugioh/
+    skyrim/ | moved | Code/skyrim.html
+  books/
+    index.php | | | books I've read
+    covers/ | moved | books/cover.php
+      bulk/ | moved | books/bulkcover.php
+    harry-potter/ | moved | extras/harrypotter/
+  tools/
+    index.php | | | hub
+    qr-code/ | moved | extras/qr.php
+    random/number/ | moved | random/number.php
+    random/image/ | moved | random/image.php
+    reading-speed/ | moved | tests/speedtest/
+    secret-santa/ | moved | extras/santa/
+    docker-script/ | moved | Code/docker.php
+    install-script/ | moved | Code/install.html
+    launchers/ | moved | calculator.html, clip.html
+  fun/ | moved | extras/
+    index.php | moved | extras/index.php | broken links fixed
+    trump-quotes/ | moved | extras/trump.php
+    insults/ | moved | extras/insult.php
+    facts/ | moved | extras/fact.php
+    live-laugh-love/ | moved | extras/livelaughlove.php
+    cyberpunk/ · brb/ · bee-movie/ · dnd/ | moved | extras/*
+    flashing-colours/ | moved | extras/rbg.php
+    twitch-chat/ | moved | extras/chaos.html
+    fake-updates/ | moved | update/
+    memes/ | moved | memes/
+    quotes/ | moved | quote.php
+    pets/ | moved | photos/
+  private/ | private | | blocked or outside the web root
+    bs/ | private | Code/bs/
+    transcripts/ | private | Code/transcripts/
+    booru/ | private | Code/booru.php
+    jellyfin/ | private | Code/jelly.php
+    kindle/ | private | books/kindlecontrol.html, pages.php
+    downloads/ | private | Code/downloads/
+    scripts/ | private | Code/index.php, timesince.php, redirect.html
+  _templates/ | dev
+    page.php | dev | template.php
+    page.html | new
+  _dev/ | dev | | not served
+    factorio-maps-mod/ | dev | Code/Factorio/
+    samples/ | dev | extras/examples/, hypixel/calculators/*.json, nbtviewer examples
+    scripts/ | dev | Code/book_md5.py, names.csv, books/sort.js
+    tests/ | dev | chapterguesser/tests, quiz tests
+    archive/ | dev | | old v1/v2 versions until you're sure
+`;
+
+const DELETED = `
+Code/minecraft/ | delete | | identical copy of minecraft/ files (1,518 files)
+minecraft/items_1.21.11/ | delete | | identical to itemlist/ (1,507 files)
+minecraft/test.php | delete | | identical to stats.php
+minecraft/New Text Document.txt | delete
+hypixel/hotm.php | delete | | identical to template.php
+hypixel/collections/melonwar2.php | delete | | identical to melonwar.php
+hypixel/calculators/profile (1).json | delete
+Code/church.php | delete | | empty
+Code/test.php | delete | | empty
+factorio/maps/error.html | delete | | empty
+images/minecraft/skins/download/ | delete | | identical images
+games/hpchapter/ | delete | | becomes a 301 redirect
+invite.php · spotify.html | delete | | become /go/ links
+__pycache__/ folders | delete
+css/characters.css · minecraft2.css · save.css · fakescreen.css | delete | | not used anywhere
+`;
+
+function parse(text) {
+    const root = { children: [] }, stack = [{ depth: -1, node: root }];
+    text.split('\n').filter(l => l.trim()).forEach(line => {
+        const depth = line.match(/^ */)[0].length / 2;
+        const [name, tag, from, note] = line.trim().split('|').map(s => (s || '').trim());
+        const node = { name, tag, from, note, children: [] };
+        while (stack[stack.length - 1].depth >= depth) stack.pop();
+        stack[stack.length - 1].node.children.push(node);
+        stack.push({ depth, node });
+    });
+    return root.children;
+}
+function esc(s) { return s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]); }
+function build(nodes, depth) {
+    const ul = document.createElement('ul');
+    nodes.forEach(n => {
+        const li = document.createElement('li');
+        const isDir = n.children.length > 0;
+        li.dataset.text = (n.name + ' ' + (n.from || '') + ' ' + (n.note || '')).toLowerCase();
+        const row = document.createElement('div');
+        row.className = 'node' + (isDir ? ' dir' : '');
+        row.innerHTML = '<span class="caret">' + (isDir ? '▾' : '') + '</span><span class="name">' + esc(n.name) + '</span>'
+            + (n.tag ? '<span class="tag ' + n.tag + '">' + n.tag + '</span>' : '')
+            + (n.from ? '<span class="from">← ' + esc(n.from) + '</span>' : '')
+            + (n.note ? '<span class="note">' + esc(n.note) + '</span>' : '');
+        li.appendChild(row);
+        if (isDir) {
+            li.appendChild(build(n.children, depth + 1));
+            if (depth >= 1) li.classList.add('collapsed');
+            row.addEventListener('click', () => li.classList.toggle('collapsed'));
+        }
+        ul.appendChild(li);
+    });
+    return ul;
+}
+function caretUpdate() {
+    document.querySelectorAll('#tree li').forEach(li => {
+        const c = li.querySelector(':scope > .node .caret');
+        if (c && c.textContent) c.textContent = li.classList.contains('collapsed') ? '▸' : '▾';
+    });
+}
+const treeEl = document.getElementById('tree');
+treeEl.appendChild(build(parse(TREE), 0));
+document.getElementById('deleted').appendChild(build(parse(DELETED), 0));
+treeEl.addEventListener('click', caretUpdate);
+caretUpdate();
+
+document.getElementById('expandAll').onclick = () => { treeEl.querySelectorAll('li').forEach(li => li.classList.remove('collapsed')); caretUpdate(); };
+document.getElementById('collapseAll').onclick = () => {
+    treeEl.querySelectorAll('ul ul li').forEach(li => { if (li.querySelector('ul')) li.classList.add('collapsed'); });
+    caretUpdate();
+};
+document.getElementById('treeSearch').addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase();
+    const items = treeEl.querySelectorAll('li');
+    items.forEach(li => { li.style.display = ''; li.querySelector(':scope > .node').classList.remove('hit'); });
+    if (!q) return;
+    items.forEach(li => {
+        const match = li.dataset.text.includes(q);
+        const sub = [...li.querySelectorAll('li')].some(c => c.dataset.text.includes(q));
+        li.style.display = match || sub ? '' : 'none';
+        if (match) li.querySelector(':scope > .node').classList.add('hit');
+        if (sub) li.classList.remove('collapsed');
+    });
+    caretUpdate();
+});
+
+/* ---------- nav preview ---------- */
+function navData() {
+    const fun = state.answers.funName === 'Extras' ? 'Extras' : 'Fun';
+    const merged = state.answers.gamesMenu === 'One merged Games menu';
+    const shopInMc = state.answers.shopPlace !== 'Keep at /shop/';
+    const play = { h: 'Play', links: ['Chapter Oracle', 'Guess Who', 'A Dark Room', 'Geriant Bingo', 'The Game'] };
+    const quiz = { h: 'Quizzes', links: ['HP Easy', 'HP Medium', 'HP Hard', 'HP Extra Hard'] };
+    const stats = { h: 'Stats', links: ['Steam Stats', 'Retro Achievements', 'Factorio Maps'] };
+    const hyp = { h: 'Hypixel', links: ['Collections', 'Minions', 'Ghast Calculator', 'Regex Builder'] };
+    const guides = { h: 'Guides', links: ['Yu-Gi-Oh', 'Skyrim Mods'] };
+    const menus = [
+        { t: 'Minecraft', url: '/minecraft/', cols: [
+            { h: 'Tools', links: ['Nether Portal', 'Storage Sorter', 'Shulker Calculator', 'NBT Viewer', 'Item List'], all: 'All tools →' },
+            { h: 'Projects', links: ['Metro Network', 'Rail Router', 'Milestones', 'Map Art', 'Stonecrest', 'Life Series'] },
+            { h: 'More', links: ['Screenshots', 'Skins', 'Tips', 'Downloads'].concat(shopInMc ? ['Captainalism Shop'] : []) } ] },
+    ];
+    if (merged) menus.push({ t: 'Games', url: '/games/', cols: [play, quiz, stats, hyp, guides] });
+    else menus.push({ t: 'Games', url: '/games/', cols: [play, quiz] }, { t: 'Gaming', url: '/gaming/', cols: [stats, hyp, guides] });
+    menus.push(
+        { t: 'Books', url: '/books/', cols: [{ h: 'Books', links: ["Books I've Read", 'Cover Search', 'Bulk Covers', 'HP Characters'] }] },
+        { t: 'Tools', url: '/tools/', cols: [{ h: 'Tools', links: ['QR Code', 'Random Number', 'Random Image', 'Reading Speed Test', 'Secret Santa', 'Docker Script'] }] },
+        { t: fun, url: '/' + fun.toLowerCase() + '/', cols: [
+            { h: 'Random', links: ['Trump Quotes', 'Insults', 'Facts', 'Live Laugh Love'] },
+            { h: 'Screens', links: ['Fake Updates', 'Flashing Colours', 'Twitch Chat', 'BRB'] },
+            { h: 'Media', links: ['Memes', 'Pets', 'Quotes'] } ] });
+    if (!shopInMc) menus.push({ t: 'Shop', url: '/shop/', cols: [{ h: 'Captainalism', links: ['Home', 'Enchanted Books', 'Requests', 'Casino'] }] });
+    menus.push({ t: 'About', url: '/about/' });
+    return menus;
+}
+function renderNav() {
+    const nav = document.getElementById('mocknav');
+    nav.innerHTML = '<div class="logo">🐱</div>';
+    navData().forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'item';
+        const a = document.createElement('a');
+        a.textContent = m.t + (m.cols ? ' ▾' : '');
+        item.appendChild(a);
+        if (m.cols) {
+            const mega = document.createElement('div');
+            mega.className = 'mega';
+            m.cols.forEach(c => {
+                const col = document.createElement('div');
+                col.innerHTML = '<h4>' + c.h + '</h4>' + c.links.map(l => '<a href="#" data-sec="' + m.t + '" data-url="' + m.url + '">' + l + '</a>').join('')
+                    + '<a href="#" class="all" data-sec="' + m.t + '" data-url="' + m.url + '">' + (c.all || 'All ' + m.t.toLowerCase() + ' →') + '</a>';
+                mega.appendChild(col);
+            });
+            item.appendChild(mega);
+        }
+        a.addEventListener('click', e => {
+            e.stopPropagation();
+            const open = item.classList.contains('open');
+            nav.querySelectorAll('.item').forEach(i => i.classList.remove('open'));
+            if (!open && m.cols) item.classList.add('open');
+            setCrumbs(m.t, m.url, null);
+        });
+        nav.appendChild(item);
+    });
+    const s = document.createElement('div');
+    s.className = 'search'; s.textContent = '🔍 Search… (press /)';
+    nav.appendChild(s);
+    nav.querySelectorAll('.mega a').forEach(link => link.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation();
+        nav.querySelectorAll('.item').forEach(i => i.classList.remove('open'));
+        setCrumbs(link.dataset.sec, link.dataset.url, link.classList.contains('all') ? null : link.textContent);
+    }));
+    setCrumbs('Minecraft', '/minecraft/', 'Nether Portal');
+}
+function setCrumbs(section, url, page) {
+    document.getElementById('mockcrumbs').textContent = 'Breadcrumbs: Home › ' + section + (page ? ' › ' + page : '');
+    const sub = { Minecraft: ['Overview', 'Tools', 'Projects', 'Screenshots', 'Skins', 'Shop'], Shop: ['Home', 'Enchanted Books', 'Requests', 'Casino'] }[section]
+        || ['Overview'];
+    document.getElementById('mocksub').innerHTML = '<span style="color:#888">' + section + ':</span> '
+        + sub.map((s, i) => '<span class="' + (i === 0 && !page ? 'on' : (page && i === 1 ? 'on' : '')) + '">' + s + '</span>').join('');
+}
+document.addEventListener('click', () => document.querySelectorAll('#mocknav .item').forEach(i => i.classList.remove('open')));
+renderNav();
+
+/* ---------- phases ---------- */
+const phases = [
+    ['Safety', 'Track /php/ in git (except config.php), add config.example.php, tag the current state as pre-reorg.'],
+    ['Remove dead weight', 'Delete the duplicates and empty files, and resolve each v1/v2 pair using your answers.'],
+    ['Private and dev', 'Move Discord exports, transcripts, booru, kindle and jellyfin to private/. Move the Factorio mod, samples and tests to _dev/. Add deny rules.'],
+    ['Infrastructure', 'Add includes/, assets/, data/site.json and the new header and footer. Leave the old /php/header.php as a one-line shim for now.'],
+    ['Media', 'Move images/ to assets/img + media/. Rewrite the ~310 /images/ and 33 /css/ references and add 301s. Fix the scandir() paths on the home and Minecraft pages.'],
+    ['Sections one by one', 'Minecraft → Games → Gaming → Books → Tools → Fun: git mv, convert each page to the standard template, add 301s.'],
+    ['Generated pages', 'Hub pages, sitemap, sitemap.xml, What\'s new, smarter 404, header search.'],
+    ['Clean up', 'Remove the /php/ shims, run a link check on every new and old URL, then delete _dev/archive.'],
+];
+const phEl = document.getElementById('phases');
+phEl.innerHTML = '<h2>Migration steps</h2><p class="sub">Each step is one commit, and the site keeps working between steps. Tick them off as they\'re done.</p>';
+phases.forEach((p, i) => {
+    const div = document.createElement('label');
+    div.className = 'phase card' + (state.phases[i] ? ' done' : '');
+    div.innerHTML = '<input type="checkbox"' + (state.phases[i] ? ' checked' : '') + '><div class="body"><span class="num">' + (i + 1) + '.</span> <b>' + p[0] + '</b><p>' + p[1] + '</p></div>';
+    div.querySelector('input').addEventListener('change', e => { state.phases[i] = e.target.checked; div.classList.toggle('done', e.target.checked); save(); });
+    phEl.appendChild(div);
+});
+</script>
+</body>
+</html>
