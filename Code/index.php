@@ -17,7 +17,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
     <h2>Should be harmless, I just needed an easy place to store them and access anywhere</h2>
 </div>
 <div class="title">
-<a href="/Code/downloads/index.php">Downloads</a><br>
+<a href="/private/downloads/">Downloads</a><br>
 <a href="/minecraft/">Minecraft</a><br>
 <?php
     $directory = $_SERVER['DOCUMENT_ROOT'] . '/Code/';
