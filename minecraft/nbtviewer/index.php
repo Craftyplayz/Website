@@ -89,15 +89,33 @@
             padding: 10px 0; border-bottom: 1px solid var(--line); margin-bottom: 16px;
         }
         .tabs { display: flex; gap: 6px; flex-wrap: wrap; flex: 1 1 260px; min-width: 0; }
-        .tab {
-            display: flex; align-items: center; gap: 8px; padding: 5px 10px 5px 5px; border-radius: 8px;
-            background: var(--card); border: 1px solid var(--line); max-width: 240px;
+        /* player picker: one button + dropdown instead of a tab per player */
+        .tabs { position: relative; }
+        .pick-btn {
+            display: flex !important; align-items: center; gap: 8px; padding: 5px 12px 5px 5px !important; border-radius: 8px !important;
+            background: #35502b !important; border: 1px solid #5aa83f !important; max-width: 100%;
         }
-        .tab img { width: 26px; height: 26px; border-radius: 4px; image-rendering: pixelated; }
-        .tab span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .tab.on { background: #35502b; border-color: #5aa83f; }
-        .tab .x { opacity: .5; padding: 0 2px; }
-        .tab .x:hover { opacity: 1; }
+        .pick-btn:hover { background: #3f5f33 !important; }
+        .pick-btn img, .pick-row img { width: 26px; height: 26px; border-radius: 4px; image-rendering: pixelated; flex: none; }
+        .pick-btn .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+        .pick-btn .n { font-size: 12px; color: #b9d8ad; white-space: nowrap; }
+        .pick-btn .car { font-size: 11px; opacity: .8; transition: transform .12s; }
+        .tabs.open .pick-btn .car { transform: rotate(180deg); }
+        .pick-menu {
+            position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; width: min(400px, calc(100vw - 32px));
+            background: #1c1c1c; border: 1px solid #4a4a4a; border-radius: 10px; box-shadow: 0 12px 30px #000a; overflow: hidden;
+        }
+        .pick-menu input { width: 100%; border: 0 !important; border-bottom: 1px solid #3a3a3a !important; border-radius: 0 !important; background: #161616 !important; color: var(--text); padding: 10px 12px !important; outline: none; }
+        .pick-list { max-height: min(60vh, 520px); overflow-y: auto; padding: 4px; }
+        .pick-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+        .pick-row:hover, .pick-row.kb { background: #2e2e2e; }
+        .pick-row.on { background: #2d4224; }
+        .pick-row .grow { flex: 1; min-width: 0; }
+        .pick-row .grow b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pick-row small { color: var(--muted); font-size: 12px; }
+        .pick-row .x { opacity: .4; padding: 2px 6px !important; }
+        .pick-row .x:hover { opacity: 1; color: #ff8080; }
+        .pick-foot { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-top: 1px solid #3a3a3a; font-size: 12px; color: var(--muted); }
         .search {
             flex: 0 1 300px; min-width: 160px; background: #161616; border: 1px solid #4a4a4a; color: var(--text);
             border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none;
@@ -1122,10 +1140,78 @@
                 `<img src="${raw ? `https://crafthead.net/body/${raw}/180` : iconURL('armor_stand')}" alt="" onerror="this.remove()"></div>`;
         }
 
+        /* ---------- player picker ---------- */
+        // last activity: the server's own timestamps beat file dates (downloading files resets those)
+        function activityOf(pl) {
+            const d = pl.P.d, b = isObj(d.bukkit) ? d.bukkit : {}, paper = isObj(d.Paper) ? d.Paper : {};
+            const t = [b.lastPlayed, paper.LastSeen, paper.LastLogin].map(Number).filter((n) => n > 1e11);
+            return t.length ? Math.max(...t) : pl.modified || 0;
+        }
+        const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
+        function ago(ms) {
+            if (!ms) return '';
+            const s = (ms - Date.now()) / 1000;
+            for (const [u, n] of [['year', 31536000], ['month', 2592000], ['week', 604800], ['day', 86400], ['hour', 3600], ['minute', 60]]) if (Math.abs(s) >= n) return rtf.format(Math.round(s / n), u);
+            return 'just now';
+        }
+        const avatarOf = (pl) => (pl.P.uuid ? `https://crafthead.net/avatar/${pl.P.uuid.replace(/-/g, '')}/32` : iconURL('player_head'));
+        const labelOf = (pl) => pl.name || pl.file;
+        let pickOpen = false, pickFilter = '', pickKb = 0;
+
         function renderTabs() {
-            $('#tabs').innerHTML = players.map((pl, i) => `<div class="tab${i === active ? ' on' : ''}" data-tab="${i}" title="${esc(pl.file)}">` +
-                `<img src="${pl.P.uuid ? `https://crafthead.net/avatar/${pl.P.uuid.replace(/-/g, '')}/32` : iconURL('player_head')}" alt="" onerror="this.src='${MISSING}'">` +
-                `<span>${esc(pl.name || pl.file)}</span><button class="x" data-close="${i}" title="Close" style="background:none;border:0">✕</button></div>`).join('');
+            const box = $('#tabs');
+            if (!box.querySelector('.pick-btn')) {
+                box.innerHTML = '<button class="pick-btn" data-pick aria-haspopup="listbox"></button>' +
+                    '<div class="pick-menu hide"><input type="search" placeholder="Filter players…" autocomplete="off"><div class="pick-list" role="listbox"></div><div class="pick-foot"></div></div>';
+                const input = $('input', box);
+                input.addEventListener('input', () => { pickFilter = input.value; pickKb = 0; renderPickList(); });
+                input.addEventListener('keydown', (e) => {
+                    const rows = $$('.pick-row', box);
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); pickKb = (pickKb + (e.key === 'ArrowDown' ? 1 : -1) + rows.length) % Math.max(rows.length, 1); renderPickList(); }
+                    if (e.key === 'Enter' && rows[pickKb]) { e.preventDefault(); rows[pickKb].click(); }
+                    if (e.key === 'Escape') { e.stopPropagation(); togglePicker(false); }
+                });
+            }
+            const pl = players[active];
+            if (pl) $('.pick-btn', box).innerHTML = `<img src="${avatarOf(pl)}" alt="" onerror="this.src='${MISSING}'"><span class="nm">${esc(labelOf(pl))}</span>` +
+                (players.length > 1 ? `<span class="n">${players.length} players</span>` : '') + '<span class="car">▾</span>';
+            if (pickOpen) renderPickList();
+        }
+        function renderPickList() {
+            const box = $('#tabs');
+            const f = pickFilter.trim().toLowerCase();
+            const list = players.map((pl, i) => ({ pl, i, t: activityOf(pl) }))
+                .filter(({ pl }) => !f || `${labelOf(pl)} ${pl.file} ${pl.P.uuid || ''}`.toLowerCase().includes(f))
+                .sort((a, b) => b.t - a.t || labelOf(a.pl).localeCompare(labelOf(b.pl)));
+            $('.pick-list', box).innerHTML = list.map(({ pl, i, t }, n) => `<div class="pick-row${i === active ? ' on' : ''}${n === pickKb ? ' kb' : ''}" data-tab="${i}" role="option" title="${esc(pl.file)}">` +
+                `<img src="${avatarOf(pl)}" alt="" loading="lazy" onerror="this.src='${MISSING}'"><div class="grow"><b>${esc(labelOf(pl))}</b>` +
+                `<small>${t ? 'active ' + esc(ago(t)) : 'no activity date'}${pl.name ? ' · ' + esc(pl.file) : ''}</small></div>` +
+                `<button class="x" data-close="${i}" title="Remove">✕</button></div>`).join('') || '<div class="muted" style="padding:10px;font-size:13px">No players match.</div>';
+            $('.pick-foot', box).innerHTML = `<span>${list.length} of ${players.length} · most recently active first</span>${players.length > 1 ? '<button class="btn small" data-act="closeall">Remove all</button>' : ''}`;
+        }
+        function togglePicker(open = !pickOpen) {
+            pickOpen = open;
+            const box = $('#tabs');
+            box.classList.toggle('open', open);
+            $('.pick-menu', box).classList.toggle('hide', !open);
+            if (open) {
+                pickFilter = ''; pickKb = 0;
+                const input = $('input', box);
+                input.value = '';
+                renderPickList();
+                input.focus();
+            }
+        }
+
+        // name lookups: cached ones are instant, the rest go to playerdb a few at a time (bulk world uploads)
+        const nameQueue = [];
+        let nameBusy = 0;
+        function pumpNames() {
+            while (nameBusy < 4 && nameQueue.length) {
+                const job = nameQueue.shift();
+                nameBusy++;
+                job().finally(() => { nameBusy--; pumpNames(); });
+            }
         }
 
         function heroHTML(pl) {
@@ -1771,12 +1857,18 @@
             const names = store.get('nbt.names', {});
             const set = (n) => { pl.name = n; renderTabs(); const h = $('#player .hero h1'); if (h && players[active] === pl) h.textContent = n; };
             if (names[id]) return set(names[id]);
-            try {
-                const r = await fetch('https://playerdb.co/api/player/minecraft/' + id);
-                const j = await r.json();
-                const n = j && j.data && j.data.player && j.data.player.username;
-                if (n) { names[id] = n; store.set('nbt.names', names); set(n); }
-            } catch (e) { }
+            // Bukkit/Paper servers store the name in the file - use it straight away, playerdb can still correct it
+            const known = isObj(pl.P.d.bukkit) && pl.P.d.bukkit.lastKnownName;
+            if (known) set(String(known));
+            nameQueue.push(async () => {
+                try {
+                    const r = await fetch('https://playerdb.co/api/player/minecraft/' + id);
+                    const j = await r.json();
+                    const n = j && j.data && j.data.player && j.data.player.username;
+                    if (n) { names[id] = n; store.set('nbt.names', names); set(n); }
+                } catch (e) { }
+            });
+            pumpNames();
         }
 
         /* =====================================================================
@@ -1899,16 +1991,20 @@
                 ex.disabled = false;
                 return;
             }
+            if (pickOpen && !t.closest('#tabs')) togglePicker(false);
+            if (t.closest('[data-pick]')) { togglePicker(); return; }
             const cl = t.closest('[data-close]');
             if (cl) {
                 e.stopPropagation();
-                players.splice(+cl.dataset.close, 1);
-                active = Math.min(active, players.length - 1);
+                const i = +cl.dataset.close;
+                players.splice(i, 1);
+                if (i < active || active >= players.length) active--;
+                if (!players.length) active = -1, pickOpen = false;
                 closeDrawer(); render();
                 return;
             }
             const tab = t.closest('[data-tab]');
-            if (tab) { active = +tab.dataset.tab; closeDrawer(); render(); return; }
+            if (tab) { active = +tab.dataset.tab; togglePicker(false); closeDrawer(); render(); scrollTo({ top: $('#viewer').offsetTop - 10 }); return; }
             const stab = t.closest('[data-stab]');
             if (stab) {
                 const card = stab.closest('.card');
@@ -1943,6 +2039,7 @@
             if (act) {
                 const a = act.dataset.act;
                 if (a === 'close') closeDrawer();
+                if (a === 'closeall' && confirm(`Remove all ${players.length} players?`)) { players.length = 0; active = -1; pickOpen = false; closeDrawer(); render(); }
                 if (a === 'extra') extraInput.click();
                 if (a === 'expand') {
                     const tree = $('#rawTree');
@@ -1992,7 +2089,8 @@
             const typing = /INPUT|TEXTAREA/.test(document.activeElement.tagName);
             if (e.key === '/' && !typing && players.length) { e.preventDefault(); $('#q').focus(); return; }
             if (e.key === 'Escape') {
-                if (drawer.classList.contains('open')) { if (stack.length > 1) { const k = stack[stack.length - 2]; stack = stack.slice(0, -2); openItem(k, true); } else closeDrawer(); }
+                if (pickOpen) togglePicker(false);
+                else if (drawer.classList.contains('open')) { if (stack.length > 1) { const k = stack[stack.length - 2]; stack = stack.slice(0, -2); openItem(k, true); } else closeDrawer(); }
                 else if (typing && query) { $('#q').value = ''; query = ''; applySearch(); }
                 return;
             }
