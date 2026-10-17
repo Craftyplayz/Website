@@ -431,7 +431,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             <div class="row">
                 <button class="btn primary" id="pick">Choose files</button>
                 <button class="btn" id="pickDir">Choose folder</button>
-                <button class="btn" data-example="22159541-fde8-41e6-a104-593e1cb3a456 larger example.json">Try an example</button>
+                <button class="btn" data-example="Sampledata/playerdata-sample.dat|Sampledata/playerstats-sample.json|Sampledata/playeradvancement-sample.json">Try an example</button>
             </div>
             <details>
                 <summary>What can I drop?</summary>
@@ -3926,10 +3926,14 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             if (ex) {
                 ex.disabled = true;
                 try {
-                    const r = await fetch(encodeURIComponent(ex.dataset.example));
-                    if (!r.ok) throw new Error(r.status);
-                    const buf = new Uint8Array(await r.arrayBuffer());
-                    await loadEntries([{ name: ex.dataset.example, path: ex.dataset.example, loose: true, modified: Date.now(), read: async () => buf }]);
+                    // the player file plus its stats and advancements
+                    const files = await Promise.all(ex.dataset.example.split('|').map(async (path) => {
+                        const r = await fetch(path.split('/').map(encodeURIComponent).join('/'));
+                        if (!r.ok) throw new Error(r.status);
+                        const buf = new Uint8Array(await r.arrayBuffer());
+                        return { name: path.split('/').pop(), path, loose: true, modified: Date.now(), read: async () => buf };
+                    }));
+                    await loadEntries(files);
                 } catch (err) { showError('Could not load the example: ' + err.message); }
                 ex.disabled = false;
                 return;
