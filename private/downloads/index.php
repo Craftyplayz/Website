@@ -17,13 +17,13 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
 </div>
 <div class="title">
 <?php
-    $directory = $_SERVER['DOCUMENT_ROOT'] . '/Code/downloads';
+    $directory = __DIR__;
     $excludedFiles = ['.', '..', 'index.php', 'jelly.php'];
 
     $files = scandir($directory);
     foreach ($files as $file) {
-        if (!in_array($file, $excludedFiles) && is_file($directory . $file)) {
-            echo '<a href="/Code/downloads/' . $file . '">' . $file . '</a><br>';
+        if (!in_array($file, $excludedFiles) && is_file($directory . '/' . $file)) {
+            echo '<a href="/private/downloads/' . rawurlencode($file) . '">' . $file . '</a><br>';
         }
     }
 ?>

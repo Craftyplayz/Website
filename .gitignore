@@ -1,5 +1,7 @@
 # API keys and passwords - copy php/config.example.php to php/config.php and fill it in
 php/config.php
+# password file for /private/ - see private/.htaccess
+private/.htpasswd
 
 # Python bytecode
 __pycache__/

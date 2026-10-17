@@ -18,8 +18,16 @@ RedirectMatch 301 ^/books/index2(\.php)?$ /books/
 RedirectMatch 301 ^/steam/(steam2|newgame)(\.php)?(/.*)?$ /steam/
 RedirectMatch 301 ^/steam/gamer(/.*)?$ /steam/
 RedirectMatch 301 ^/tools/random/image2(\.php)?$ /tools/random/image.php
-RedirectMatch 301 ^/Code/transcripts/index2(\.php)?$ /Code/transcripts/
+RedirectMatch 301 ^/Code/transcripts/index2(\.php)?$ /private/transcripts/
 RedirectMatch 301 ^/extras/thegame/temp(/.*)?$ /extras/thegame/
+RedirectMatch 301 ^/books/hannah(\.php)?$ /books/
+# Personal pages moved to the password-protected /private/
+RedirectMatch 301 ^/Code/(bs|transcripts|downloads)(/.*)?$ /private/$1$2
+RedirectMatch 301 ^/Code/booru(\.php)?$ /private/booru/
+RedirectMatch 301 ^/Code/jelly(\.php)?$ /private/jellyfin/
+RedirectMatch 301 ^/Code/(timesince\.php|redirect\.html)$ /private/scripts/$1
+RedirectMatch 301 ^/books/kindlecontrol(\.html)?$ /private/kindle/
+RedirectMatch 301 ^/books/pages(\.php)?$ /private/kindle/pages.php
 
 <IfModule mod_deflate.c>
          AddOutputFilterByType DEFLATE application/javascript
