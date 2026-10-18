@@ -16,14 +16,14 @@
 .gallery-image.current { border: 2px solid var(--accent); }
 .gallery-image.missing { display: flex; align-items: center; justify-content: center; padding: 8px; color: var(--muted); font-size: 12px; text-align: center; }
 
-/* corner marks: ✓ top right (the old checkmark image), read/listened counts top left, +N series count bottom right */
+/* corner marks: ✓ top right = I own a physical copy, read/listened counts top left, +N series count bottom right */
 .bookshelf::after, .cnt, .more {
     position: absolute; display: grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px;
     border: 1px solid; border-radius: 999px; color: var(--text); font-size: 12px; line-height: 1;
 }
 .bookshelf::after { content: "✓"; top: 6px; right: 6px; background: var(--accent-soft); border-color: var(--btn-line); }
 .cnt { top: 6px; left: 6px; }
-.cnt.rd { background: var(--accent-soft); border-color: var(--btn-line); }
+.cnt.rd, .cnt.own { background: var(--accent-soft); border-color: var(--btn-line); }
 .cnt.au { background: var(--danger-bg); border-color: var(--danger-line); }
 .gallery-item .cnt.rd + .cnt.au { left: 34px; }
 .more { right: 6px; bottom: 6px; background: var(--btn2); border-color: var(--line-strong); }
