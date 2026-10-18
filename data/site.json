@@ -131,13 +131,6 @@
                         { "title": "Book Cover Search", "url": "/books/covers/", "description": "Find covers for a book" },
                         { "title": "Bulk Cover Downloader", "url": "/books/covers/bulk/", "description": "Download covers for a whole series" }
                     ]
-                },
-                {
-                    "title": "Harry Potter",
-                    "pages": [
-                        { "title": "Harry Potter Info", "url": "/books/harry-potter/info/", "nav": false },
-                        { "title": "Harry Potter Quiz (old)", "url": "/books/harry-potter/quiz/", "nav": false, "search": false }
-                    ]
                 }
             ]
         },

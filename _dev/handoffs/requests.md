@@ -19,12 +19,14 @@ Line 155 (`/tests/speedtest/(.*)`) can stay; `/tests/speedtest/index.html` redir
 **Why:** the design guide says keys never reach the browser.
 
 **File:** `.htaccess`
-**Change:** the Harry Potter Characters page (`/books/harry-potter/`) and its Character stub (`/books/harry-potter/character/`) were moved to `_dev/archive/books/harry-potter/` at the owner's request. Point their old URLs at the Books page:
+**Change:** everything under `books/harry-potter/` (the Characters page, the Character stub, `json/`, Info and the old Quiz) was moved to `_dev/archive/books/harry-potter/` at the owner's request, and the Harry Potter group was removed from `data/site.json`. Point the old URLs at the Books page:
 ```
-RedirectMatch 301 ^/books/harry-potter/?$ /books/
-RedirectMatch 301 ^/books/harry-potter/character/?$ /books/
+RedirectMatch 301 ^/books/harry-potter(/.*)?$ /books/
 ```
-and change lines 146–147 (`/extras/harrypotter/` and `/extras/harrypotter/characters`) to redirect to `/books/` instead of `/books/harry-potter/`. Line 148 must keep `info` and `quiz` but drop `character`; line 149 (`/json/`) can go, since the JSON is archived.
+and replace lines 146–149 (all the `^/extras/harrypotter/...` rules) with:
+```
+RedirectMatch 301 ^/extras/harrypotter(/.*)?$ /books/
+```
 **Why:** those URLs now 404.
 
 ## Games
