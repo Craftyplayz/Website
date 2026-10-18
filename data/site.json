@@ -81,50 +81,51 @@
                         { "title": "Guess Who: Avatar", "url": "/games/guesswho/atla/", "description": "Guess Who with Avatar characters", "keywords": ["atla"] },
                         { "title": "A Dark Room", "url": "/games/adarkroom/", "description": "A minimalist text adventure" },
                         { "title": "Geriant Bingo", "url": "/games/bingo/geriant/", "description": "Bingo card" },
-                        { "title": "The Game", "url": "/extras/thegame/", "description": "You just lost it" }
+                        { "title": "The Game", "url": "/games/the-game/", "description": "You just lost it" }
                     ]
                 },
                 {
                     "title": "Quizzes",
+                    "url": "/games/quizzes/",
                     "pages": [
-                        { "title": "Harry Potter Quiz", "url": "/quiz/HarryPotter/", "description": "Four difficulty levels", "keywords": ["hp"] },
-                        { "title": "HP Quiz: Easy", "url": "/quiz/HarryPotter/easy/", "nav": false },
-                        { "title": "HP Quiz: Medium", "url": "/quiz/HarryPotter/medium/", "nav": false },
-                        { "title": "HP Quiz: Hard", "url": "/quiz/HarryPotter/hard/", "nav": false },
-                        { "title": "HP Quiz: Extra Hard", "url": "/quiz/HarryPotter/extrahard/", "nav": false },
-                        { "title": "Quizzes", "url": "/quiz/", "nav": false }
+                        { "title": "Harry Potter Quiz", "url": "/games/quizzes/harry-potter/", "description": "Four difficulty levels", "keywords": ["hp"] },
+                        { "title": "HP Quiz: Easy", "url": "/games/quizzes/harry-potter/easy/", "nav": false, "hub_skip": true },
+                        { "title": "HP Quiz: Medium", "url": "/games/quizzes/harry-potter/medium/", "nav": false, "hub_skip": true },
+                        { "title": "HP Quiz: Hard", "url": "/games/quizzes/harry-potter/hard/", "nav": false, "hub_skip": true },
+                        { "title": "HP Quiz: Extra Hard", "url": "/games/quizzes/harry-potter/extrahard/", "nav": false, "hub_skip": true }
                     ]
                 },
                 {
                     "title": "Stats",
                     "pages": [
-                        { "title": "Steam Stats", "url": "/steam/", "description": "My Steam library and achievements", "keywords": ["achievements"] },
-                        { "title": "Steam Game", "url": "/steam/game.php", "nav": false, "search": false },
-                        { "title": "Retro Achievements", "url": "/retro/", "description": "Retro game achievements" },
-                        { "title": "Factorio Saves", "url": "/factorio/", "description": "Maps of my Factorio saves" },
-                        { "title": "Factorio Map", "url": "/factorio/map.php", "nav": false, "search": false }
+                        { "title": "Steam Stats", "url": "/games/steam/", "description": "My Steam library and achievements", "keywords": ["achievements"] },
+                        { "title": "Steam Game", "url": "/games/steam/game/", "nav": false, "search": false },
+                        { "title": "Retro Achievements", "url": "/games/retro/", "description": "Retro game achievements" },
+                        { "title": "Factorio Saves", "url": "/games/factorio/", "description": "Maps of my Factorio saves" },
+                        { "title": "Factorio Map", "url": "/games/factorio/map/", "nav": false, "search": false },
+                        { "title": "Factorio Command Generator", "url": "/games/factorio/commands/", "description": "Generate Factorio map render commands", "nav": false }
                     ]
                 },
                 {
                     "title": "Hypixel Skyblock",
+                    "url": "/games/hypixel/",
                     "pages": [
-                        { "title": "Hypixel Tools", "url": "/hypixel/", "description": "Skyblock tools", "nav": false },
-                        { "title": "Collection Tracker", "url": "/hypixel/collections/", "description": "Track Skyblock collections" },
-                        { "title": "Collection", "url": "/hypixel/collections/track.php", "nav": false, "search": false },
-                        { "title": "Melon War", "url": "/hypixel/collections/melonwar.php", "description": "The Great Melon War" },
-                        { "title": "Minions", "url": "/hypixel/minions.php", "description": "Minion calculator" },
-                        { "title": "Ghast Tear Calculator", "url": "/hypixel/calculators/ghast.php", "description": "Bazaar ghast tear profits" },
-                        { "title": "Regex Builder", "url": "/hypixel/filter.html", "description": "Build chat filter regexes" }
+                        { "title": "Collection Tracker", "url": "/games/hypixel/collections/", "description": "Track Skyblock collections" },
+                        { "title": "Collection", "url": "/games/hypixel/collections/track/", "nav": false, "search": false },
+                        { "title": "Melon War", "url": "/games/hypixel/collections/melon-war/", "description": "The Great Melon War" },
+                        { "title": "Minions", "url": "/games/hypixel/minions/", "description": "Minion calculator" },
+                        { "title": "Ghast Tear Calculator", "url": "/games/hypixel/ghast-calculator/", "description": "Bazaar ghast tear profits" },
+                        { "title": "Regex Builder", "url": "/games/hypixel/regex-builder/", "description": "Build chat filter regexes" }
                     ]
                 },
                 {
                     "title": "Guides",
                     "pages": [
-                        { "title": "Yu-Gi-Oh Deck Guide", "url": "/games/yugioh/yugioh.php", "description": "Progression series setup for EDOPro", "keywords": ["edopro"] },
-                        { "title": "Yu-Gi-Oh Guide: Next Packs", "url": "/games/yugioh/yugioh2.php", "nav": false },
-                        { "title": "Yu-Gi-Oh Sets", "url": "/games/yugioh/sets.php", "description": "Sets worth opening", "nav": false },
-                        { "title": "Yu-Gi-Oh Extra Rules", "url": "/games/yugioh/extrarules.php", "nav": false },
-                        { "title": "Skyrim Mods", "url": "/Code/skyrim.html", "description": "Skyrim mods I use" }
+                        { "title": "Yu-Gi-Oh Deck Guide", "url": "/games/yugioh/", "description": "Progression series setup for EDOPro", "keywords": ["edopro"] },
+                        { "title": "Yu-Gi-Oh: Next Packs", "url": "/games/yugioh/next-packs/", "nav": false, "hub_skip": true },
+                        { "title": "Yu-Gi-Oh Sets", "url": "/games/yugioh/sets/", "description": "Sets worth opening", "nav": false },
+                        { "title": "Yu-Gi-Oh Extra Rules", "url": "/games/yugioh/extra-rules/", "nav": false },
+                        { "title": "Skyrim Mods", "url": "/games/skyrim/", "description": "Skyrim mods I use" }
                     ]
                 }
             ]
@@ -176,7 +177,6 @@
                     "title": "Scripts",
                     "pages": [
                         { "title": "Docker Install Script", "url": "/Code/docker.php", "description": "Build a Docker install script" },
-                        { "title": "Factorio Command Generator", "url": "/Code/factorio.html", "description": "Generate Factorio map commands" },
                         { "title": "Install Script", "url": "/Code/install.html", "nav": false },
                         { "title": "Scripts", "url": "/Code/", "nav": false },
                         { "title": "Speed Test (old)", "url": "/tests/speedtest.php", "nav": false, "search": false },

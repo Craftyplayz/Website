@@ -43,15 +43,15 @@ RedirectMatch 301 ^/css/(books|dnd|factorio|gallery|homepage|minecraft|speedtest
 # Duplicate or old page versions (archived in /_dev/archive)
 RedirectMatch 301 ^/minecraft/test(\.php)?$ /minecraft/tools/stats-editor/
 RedirectMatch 301 ^/minecraft/schemcalc(\.html)?$ /minecraft/tools/shulker-calculator/
-RedirectMatch 301 ^/hypixel/hotm(\.php)?$ /hypixel/
-RedirectMatch 301 ^/hypixel/minions2(\.php)?$ /hypixel/minions.php
-RedirectMatch 301 ^/hypixel/collections/melonwar2(\.php)?$ /hypixel/collections/melonwar.php
+RedirectMatch 301 ^/hypixel/hotm(\.php)?$ /games/hypixel/
+RedirectMatch 301 ^/hypixel/minions2(\.php)?$ /games/hypixel/minions/
+RedirectMatch 301 ^/hypixel/collections/melonwar2(\.php)?$ /games/hypixel/collections/melon-war/
 RedirectMatch 301 ^/books/index2(\.php)?$ /books/
-RedirectMatch 301 ^/steam/(steam2|newgame)(\.php)?(/.*)?$ /steam/
-RedirectMatch 301 ^/steam/gamer(/.*)?$ /steam/
+RedirectMatch 301 ^/steam/(steam2|newgame)(\.php)?(/.*)?$ /games/steam/
+RedirectMatch 301 ^/steam/gamer(/.*)?$ /games/steam/
 RedirectMatch 301 ^/tools/random/image2(\.php)?$ /tools/random/image.php
 RedirectMatch 301 ^/Code/transcripts/index2(\.php)?$ /private/transcripts/
-RedirectMatch 301 ^/extras/thegame/temp(/.*)?$ /extras/thegame/
+RedirectMatch 301 ^/extras/thegame/temp(/.*)?$ /games/the-game/
 RedirectMatch 301 ^/books/hannah(\.php)?$ /books/
 # Personal pages moved to the password-protected /private/
 RedirectMatch 301 ^/Code/(bs|transcripts|downloads)(/.*)?$ /private/$1$2
@@ -98,6 +98,37 @@ RedirectMatch 301 ^/shop/books(\.php)?$ /minecraft/shop/enchanted-books/
 RedirectMatch 301 ^/shop/(requests|casino)(\.php)?$ /minecraft/shop/$1/
 RedirectMatch 301 ^/shop/upcoming(\.php)?$ /minecraft/shop/
 RedirectMatch 301 ^/shop/styles\.css$ /minecraft/shop/styles.css
+# Phase 6: everything game-related moved under /games/
+RedirectMatch 301 ^/steam/?$ /games/steam/
+RedirectMatch 301 ^/steam/index(\.php)?$ /games/steam/
+RedirectMatch 301 ^/steam/game(\.php)?/?$ /games/steam/game/
+RedirectMatch 301 ^/steam/game/([0-9]+)/?$ /games/steam/game/?game=$1
+RedirectMatch 301 ^/steam/data/(.*)$ /games/steam/data/$1
+RedirectMatch 301 ^/retro(/.*)?$ /games/retro/
+RedirectMatch 301 ^/factorio/map(\.php)?/?$ /games/factorio/map/
+RedirectMatch 301 ^/factorio(/.*)?$ /games/factorio/
+RedirectMatch 301 ^/Code/factorio(\.html)?$ /games/factorio/commands/
+RedirectMatch 301 ^/hypixel/?$ /games/hypixel/
+RedirectMatch 301 ^/hypixel/index(\.php)?$ /games/hypixel/
+RedirectMatch 301 ^/hypixel/minions(\.php)?$ /games/hypixel/minions/
+RedirectMatch 301 ^/hypixel/calculators/ghast(\.php)?$ /games/hypixel/ghast-calculator/
+RedirectMatch 301 ^/hypixel/calculators/bazaar\.json$ /games/hypixel/ghast-calculator/bazaar.json
+RedirectMatch 301 ^/hypixel/collections/?$ /games/hypixel/collections/
+RedirectMatch 301 ^/hypixel/collections/index(\.php)?$ /games/hypixel/collections/
+RedirectMatch 301 ^/hypixel/collections/track(\.php)?$ /games/hypixel/collections/track/
+RedirectMatch 301 ^/hypixel/collections/melonwar(\.php)?$ /games/hypixel/collections/melon-war/
+RedirectMatch 301 ^/hypixel/filter(\.html)?$ /games/hypixel/regex-builder/
+# quiz URLs were linked with mixed case (/quiz/harrypotter/normal), so match any case
+RedirectMatch 301 (?i)^/quiz/?$ /games/quizzes/
+RedirectMatch 301 (?i)^/quiz/harrypotter/?$ /games/quizzes/harry-potter/
+RedirectMatch 301 (?i)^/quiz/harrypotter/normal(/.*)?$ /games/quizzes/harry-potter/medium/
+RedirectMatch 301 (?i)^/quiz/harrypotter/(easy|medium|hard|extrahard)(/.*)?$ /games/quizzes/harry-potter/$1$2
+RedirectMatch 301 ^/games/yugioh/yugioh(\.php)?$ /games/yugioh/
+RedirectMatch 301 ^/games/yugioh/yugioh2(\.php)?$ /games/yugioh/next-packs/
+RedirectMatch 301 ^/games/yugioh/sets(\.php)?$ /games/yugioh/sets/
+RedirectMatch 301 ^/games/yugioh/extrarules(\.php)?$ /games/yugioh/extra-rules/
+RedirectMatch 301 ^/extras/thegame(/.*)?$ /games/the-game/
+RedirectMatch 301 ^/Code/skyrim(\.html)?$ /games/skyrim/
 
 <IfModule mod_deflate.c>
          AddOutputFilterByType DEFLATE application/javascript
