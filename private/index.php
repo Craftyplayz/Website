@@ -1,17 +1,18 @@
+<?php
+$site_page = ['legacy' => true];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php page_head(); ?>
     <meta name="robots" content="noindex, nofollow">
-    <title>Private</title>
 </head>
 
 <body>
     <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
+    site_header(); echo '<main class="page page-legacy" id="main">';
 
     // folder => description
     $sections = [
@@ -37,7 +38,7 @@
         <?php endforeach; ?>
     </div>
 
-    <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php'; ?>
+    <?php echo '</main>'; site_footer(); ?>
 </body>
 
 </html>
