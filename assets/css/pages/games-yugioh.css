@@ -1,0 +1,12 @@
+/* Yu-Gi-Oh guide pages (/games/yugioh/) */
+
+.ygo { max-width: 900px; }
+.ygo .jump a[aria-current] { background: var(--accent-soft); border-color: var(--btn-line); }
+.ygo .card ol, .ygo .card ul { display: grid; gap: 6px; margin: 0; padding-left: 22px; }
+.ygo .card li::marker { color: var(--muted); }
+.ygo .card p { margin: -4px 0 10px; font-size: 14px; }
+.ygo code { padding: 1px 5px; background: var(--sunken); border-radius: 4px; font: 13px var(--mono); }
+.ygo-note { margin: 0 0 12px; }
+.ygo-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 16px; }
+.ygo .card .ygo-sets { display: block; columns: 2 220px; column-gap: 24px; }
+.ygo-sets li { margin-bottom: 6px; break-inside: avoid; }
