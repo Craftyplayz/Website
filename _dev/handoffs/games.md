@@ -4,13 +4,15 @@
 
 ## Your files
 - **Folders you may edit:** `games/` (everything below it).
-- **Stylesheets that are yours:** `assets/css/pages/steam.css`, `steamnew.css`, `factorio.css` (only Games pages use them), plus any new `assets/css/pages/games-*.css`.
+- **Stylesheets that are yours:** any `assets/css/pages/games-*.css`. (`steam.css`, `steamnew.css`, `factorio.css` and `hypixel-collection.css` are archived or deleted.)
 
 ## Don't touch
 - `games/chapterguesser/`: it has its own finished UI, a live leaderboard (`data/leaderboards.json`, server only) and tests.
 - `games/adarkroom/`: a third-party game.
 - `games/index.php`, `games/quizzes/index.php`: already modern card grids.
 - `_dev/archive/hypixel/`: every Hypixel Skyblock page was archived at the owner's request on 2026-10-19. Don't restyle them.
+- `_dev/archive/bingo/` (Geriant Bingo) and `_dev/archive/guesswho/template/` were archived at the owner's request on 2026-10-19.
+- **Guess Who** (`games/guesswho/index.php`) finds its boards by scanning its own folder: each subfolder of images is a board. Don't add per-board code; `og/` and `atla/` are old-URL redirects.
 - `games/factorio/map/`: a full-screen iframe.
 - **Live data:** `games/the-game/thegame.json` (gitignored, server only). Testing The Game locally creates it, so delete it before committing.
 
@@ -27,5 +29,3 @@
 | Yu-Gi-Oh Guide, Next Packs, Sets, Extra Rules | `games/yugioh/{,next-packs/,sets/,extra-rules/}index.php` | Text guides; one shared style fits all 4. |
 | Skyrim Mods | `games/skyrim/index.php` | A link list. |
 | The Game | `games/the-game/index.php` | Writes `thegame.json`, see above. |
-| Guess Who, Guess Who: Avatar | `games/guesswho/{og,atla}/` | Full-screen games with no site header. Ask the user before adding one. |
-| Geriant Bingo | `games/bingo/geriant/index.html` | Full-screen, with no site header. Ask the user first. |

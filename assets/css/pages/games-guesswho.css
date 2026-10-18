@@ -1,0 +1,42 @@
+/* Guess Who (/games/guesswho/) */
+
+/* ---------- board picker ---------- */
+.gw-games { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 16px; }
+.gw-game { display: grid; gap: 4px; color: var(--text) !important; text-decoration: none !important; transition: border-color var(--fast); }
+.gw-game:hover { border-color: var(--accent); }
+.gw-game small { color: var(--muted); }
+.gw-cover { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 8px; overflow: hidden; border-radius: var(--radius); }
+.gw-cover img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; background: var(--card2); }
+
+/* ---------- playing ---------- */
+.gw-play { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 16px; align-items: start; }
+.gw-mine { position: sticky; top: 16px; grid-column: 2; grid-row: 1; }
+.gw-board-card { grid-column: 1; grid-row: 1; }
+.gw-mine figure { margin: 0 0 12px; text-align: center; }
+.gw-mine figure img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); background: var(--card2); }
+.gw-mine figcaption { margin-top: 8px; font-size: 18px; font-weight: 600; }
+.gw-mine figure.hidden img { visibility: hidden; }
+.gw-mine figure.hidden figcaption { visibility: hidden; }
+.gw-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.gw-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(84px, 22vw, 120px), 1fr)); gap: 8px; }
+.gw-card {
+    display: grid; gap: 4px; min-width: 0; margin: 0; padding: 6px; background: var(--card2); border: 1px solid transparent;
+    border-radius: var(--radius); color: var(--text); font: inherit; font-size: 13px; text-align: center; cursor: pointer;
+    transition: border-color var(--fast), opacity var(--fast);
+}
+.gw-card:hover { border-color: var(--line-strong); }
+.gw-card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 6px; background: var(--sunken); }
+.gw-card span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gw-card[aria-pressed="true"] { opacity: .25; }
+.gw-card[aria-pressed="true"] img { filter: grayscale(1); }
+
+@media (max-width: 720px) {
+    .gw-play { grid-template-columns: minmax(0, 1fr); }
+    .gw-mine { position: static; grid-column: 1; }
+    .gw-board-card { grid-row: 2; }
+    .gw-mine { display: grid; grid-template-columns: 96px 1fr; gap: 0 12px; align-items: center; }
+    .gw-mine h2 { grid-column: 1 / -1; }
+    .gw-mine figure { margin: 0; }
+    .gw-mine figcaption { font-size: 15px; }
+}
