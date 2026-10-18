@@ -1,0 +1,10 @@
+# API keys - never served (pages include config.php from the server side).
+# Only the config files are blocked, so the root .htaccess can still redirect old /php/ URLs.
+<FilesMatch "^config.*\.php$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Deny from all
+    </IfModule>
+</FilesMatch>

@@ -1,6 +1,12 @@
 <?php
 $site_page = ['legacy' => true];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+// no pet picked (or one that does not exist): back to the gallery
+$pet = basename((string)($_GET['pet'] ?? ''));
+if ($pet === '' || !is_dir(SITE_ROOT . '/media/pets/' . $pet)) {
+    header('Location: /extras/pets/', true, 302);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

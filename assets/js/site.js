@@ -1,5 +1,5 @@
 // Site-wide behaviour: header menus, search, analytics, footer extras.
-// Loaded on every page (with defer) by the PHP header, or by /php/layout.js on old .html pages.
+// Loaded on every page (with defer) by page_head(), or by a <script> tag on plain .html pages.
 // Plain .html pages can put <div id="site-header"></div> / <div id="site-footer"></div>
 // where the header and footer should go, and this fills them in.
 (function () {
