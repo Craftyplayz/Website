@@ -36,7 +36,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 <button type="button" data-f="rp">Ready Player One/Two</button>
                 <button type="button" data-f="lr">Lord of the Rings/Hobbit</button>
             </div>
-            <p class="shelf-key"><span class="cnt rd">3</span> times read <span class="cnt au">3</span> times listened to</p>
+            <p class="shelf-key"><span class="cnt rd">3</span> times read <span class="cnt au">3</span> times listened to <span class="cnt own">✓</span> I own a physical copy</p>
             <div class="shelf" id="read">
             <div class="gallery-item lr bookshelf" title="The Hobbit">
                 <img src="/media/books/covers/LordOfTheRings/ho1.webp" class="gallery-image" alt="The Hobbit" width="200" height="300" decoding="async">
