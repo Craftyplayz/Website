@@ -165,22 +165,25 @@
                 {
                     "title": "Tools",
                     "pages": [
-                        { "title": "QR Code Generator", "url": "/extras/qr.php", "description": "Make a QR code", "keywords": ["qr"] },
-                        { "title": "Random Number", "url": "/tools/random/number.php", "description": "Random number generator" },
-                        { "title": "Random Image", "url": "/tools/random/image.php", "description": "Random image" },
-                        { "title": "Random Generators", "url": "/tools/random/", "nav": false },
-                        { "title": "Reading Speed Test", "url": "/tests/speedtest/", "description": "How fast do you read?", "keywords": ["wpm"] },
-                        { "title": "Secret Santa", "url": "/extras/santa/", "description": "Encrypted Secret Santa pairings", "keywords": ["christmas"] },
-                        { "title": "Secret Santa Pairing", "url": "/extras/santa/pairing.html", "nav": false, "search": false }
+                        { "title": "QR Code Generator", "url": "/tools/qr-code/", "description": "Make a QR code", "keywords": ["qr"] },
+                        { "title": "Reading Speed Test", "url": "/tools/reading-speed/", "description": "How fast do you read?", "keywords": ["wpm", "speedtest"] },
+                        { "title": "Secret Santa", "url": "/tools/secret-santa/", "description": "Encrypted Secret Santa pairings", "keywords": ["christmas"] },
+                        { "title": "Secret Santa Pairing", "url": "/tools/secret-santa/pairing.html", "nav": false, "search": false }
+                    ]
+                },
+                {
+                    "title": "Random",
+                    "url": "/tools/random/",
+                    "pages": [
+                        { "title": "Random Number", "url": "/tools/random/number/", "description": "Random number generator" },
+                        { "title": "Random Image", "url": "/tools/random/image/", "description": "Random image" }
                     ]
                 },
                 {
                     "title": "Scripts",
                     "pages": [
-                        { "title": "Docker Install Script", "url": "/Code/docker.php", "description": "Build a Docker install script" },
-                        { "title": "Install Script", "url": "/Code/install.html", "nav": false },
-                        { "title": "Scripts", "url": "/Code/", "nav": false },
-                        { "title": "Speed Test (old)", "url": "/tests/speedtest.php", "nav": false, "search": false },
+                        { "title": "Docker Install Script", "url": "/tools/docker-script/", "description": "Build a Docker install script" },
+                        { "title": "Install Script", "url": "/tools/install-script/", "description": "Click-to-copy install commands", "nav": false },
                         { "title": "Calculator", "url": "/tools/calculator.html", "nav": false, "search": false },
                         { "title": "Snipping Tool", "url": "/tools/clip.html", "nav": false, "search": false }
                     ]
