@@ -1,4 +1,4 @@
-/* Small Tools pages: QR Code, Random Number. */
+/* Small Tools pages: QR Code, Random Number, Random Image. */
 .tl-card { max-width: 760px; }
 .tl-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
 .tl-form label { display: grid; gap: 6px; flex: 1 1 160px; min-width: 0; font-size: 13px; color: var(--muted); }
@@ -7,3 +7,6 @@
 .tl-qr { display: block; width: min(100%, 240px); height: auto; border-radius: var(--radius); image-rendering: pixelated; }
 .tl-num { margin: 16px 0 0; font: 700 clamp(32px, 8vw, 56px) / 1.1 var(--mono); color: var(--accent); }
 .tl-num:empty { display: none; }
+.tl-big { justify-content: center; width: 100%; min-height: clamp(160px, 40vh, 500px); margin-top: 16px; font-size: clamp(18px, 3vw, 28px); }
+.tl-status { margin: 10px 0 0; font-size: 13px; }
+.tl-status:empty { display: none; }
