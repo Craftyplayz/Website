@@ -1,83 +1,51 @@
 <?php
-$site_page = [];
+$site_page = ['components' => true, 'ui' => true, 'css' => ['/assets/css/pages/tools.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+
+$steps = [
+    'Allow signed scripts' => 'Set-ExecutionPolicy AllSigned',
+    'Install Chocolatey' => "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))",
+    'Install the apps' => implode("\n", array_map(fn($p) => "choco install $p -y", [
+        'wiztree', 'googlechrome', 'python', '7zip', 'googledrive', 'vscode', 'spotify', 'putty', 'winscp',
+        'vortex', 'discord', 'qbittorrent-enhanced', 'steam', 'epicgameslauncher', 'modernflyouts', 'tor',
+        'razer-synapse-3', 'lghub', 'pia', 'minecraft-launcher', 'msedgeredirect', 'microsoft-windows-terminal',
+        'powertoys', 'files', 'autohotkey', 'autoruns', 'everything',
+    ])),
+];
 ?>
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="en">
+
+<head>
     <?php page_head(); ?>
-    <style>
-      p {
-        cursor: pointer;
-      }
+</head>
 
-      p.green {
-        color: green;
-      }
-    </style>
-    <script>
-      function copyToClipboard(text) {
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-      }
-
-      function handleClick(event) {
-        const paragraph = event.target;
-        const textToCopy = paragraph.textContent;
-        copyToClipboard(textToCopy);
-        paragraph.classList.add("green");
-        setTimeout(() => {
-          paragraph.classList.remove("green");
-        }, 1000);
-      }
-    </script>
-  </head>
-  <body>
+<body>
     <?php site_header(); ?>
+
     <main class="page" id="main">
-    <p id="1" onclick="handleClick(event)">Set-ExecutionPolicy AllSigned</p>
-    <p id="2" onclick="handleClick(event)">
-      Set-ExecutionPolicy Bypass -Scope Process -Force;
-      [System.Net.ServicePointManager]::SecurityProtocol =
-      [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex
-      ((New-Object
-      System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-    </p>
-    <p id="3" onclick="handleClick(event)">
-      choco install wiztree -y <br />
-      choco install googlechrome -y <br />
-      choco install python -y <br />
-      choco install 7zip -y <br />
-      choco install googledrive -y <br />
-      choco install vscode -y <br />
-      choco install spotify -y <br />
-      choco install putty -y <br />
-      choco install winscp -y <br />
-      choco install vortex -y <br />
-      choco install discord -y <br />
-      choco install qbittorrent-enhanced -y <br />
-      choco install steam -y <br />
-      choco install epicgameslauncher -y <br />
-      choco install modernflyouts -y <br />
-      choco install tor -y <br />
-      choco install razer-synapse-3 -y <br />
-      choco install lghub -y <br />
-      choco install pia -y <br />
-      choco install minecraft-launcher -y <br />
-      choco install msedgeredirect -y <br />
-      choco install microsoft-windows-terminal -y <br />
-      choco install powertoys -y <br />
-      choco install files -y <br />
-      choco install autohotkey -y <br />
-      choco install autoruns -y <br />
-      choco install everything -y <br />
-    </p>
-    Click to copy to clipboard and run all 3 commands in powershell
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Install Script</h1>
+        <p class="page-lede">Copy each command and run all three, in order, in an admin PowerShell.</p>
+
+        <div class="card tl-card">
+            <?php $i = 0; foreach ($steps as $title => $cmd): $i++; ?>
+                <div class="tl-step">
+                    <h2><?= $i ?>. <?= h($title) ?> <button class="btn small" type="button" data-copy="cmd<?= $i ?>">Copy</button></h2>
+                    <pre class="tl-code" id="cmd<?= $i ?>"><?= h($cmd) ?></pre>
+                </div>
+            <?php endforeach; ?>
+        </div>
     </main>
-      <?php site_footer(); ?>
+
+    <?php site_footer(null, false); ?>
+
+    <script>
+        document.addEventListener('click', e => {
+            const b = e.target.closest('[data-copy]');
+            if (b) UI.copy(document.getElementById(b.dataset.copy).textContent, b);
+        });
+    </script>
 </body>
+
 </html>
