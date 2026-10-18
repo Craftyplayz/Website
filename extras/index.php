@@ -22,16 +22,16 @@
         <h1>Currently working</h1>
         <div>
             <p><a href="/update/">Fake pc updates and crashes</a></p><br>
-            <p><a href="/tests/speedtest/">Reading Speed test</a></p><br>
+            <p><a href="/tools/reading-speed/">Reading Speed test</a></p><br>
             <p><a href="/extas/rgb.php">RGB Strobe light</a></p><br>
             <p><a href="/extas/chaos.html">Fullscreen Twitch chat</a></p><br>
             <p><a href="/extras/trump">Random Trump Quote</a></p><br>
             <p><a href="/extras/insult">Random Insult</a></p><br>
             <p><a href="/books/harry-potter/">Harry Potter character info</a></p><br>
             <p><a href="/games/steam/">Improved steam stats showcase</a></p><br>
-            <p><a href="/extras/qr">QR Code generator</a></p><br>
+            <p><a href="/tools/qr-code/">QR Code generator</a></p><br>
             <p><a href="/extras/livelaughlove">Live Laugh Love alternatives</a></p>
-            <p><a href="/extras/santa">Secret Santa Generator</a></p><br>
+            <p><a href="/tools/secret-santa/">Secret Santa Generator</a></p><br>
         </div>
     </div>
 

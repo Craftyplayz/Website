@@ -1,29 +1,28 @@
+<?php
+$site_page = [
+    'title' => 'Random Generators',
+    'description' => 'Random numbers and images',
+];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Generators</title>
+    <?php page_head(); ?>
 </head>
+
 <body>
-<?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-?>
+    <?php site_header(); ?>
 
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title"><?= h($site_page['title']) ?></h1>
+        <p class="page-lede"><?= h($site_page['description']) ?></p>
+        <?php site_hub('tools', ['Random'], false); ?>
+    </main>
 
-<div class="title">
-    <h1>Random Generators</h1>
-</div>
-
-<div class="title">
-    <a href="/tools/random/number"><p>Random Number Generator</p></a>
-</div>
-
-<?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-?>
-
+    <?php site_footer(null, false); ?>
 </body>
+
 </html>

@@ -1,6 +1,11 @@
+<?php
+$site_page = [];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 <!DOCTYPE html>
 <html>
   <head>
+    <?php page_head(); ?>
     <style>
       p {
         cursor: pointer;
@@ -32,6 +37,8 @@
     </script>
   </head>
   <body>
+    <?php site_header(); ?>
+    <main class="page" id="main">
     <p id="1" onclick="handleClick(event)">Set-ExecutionPolicy AllSigned</p>
     <p id="2" onclick="handleClick(event)">
       Set-ExecutionPolicy Bypass -Scope Process -Force;
@@ -70,5 +77,7 @@
       choco install everything -y <br />
     </p>
     Click to copy to clipboard and run all 3 commands in powershell
-  </body>
+    </main>
+      <?php site_footer(); ?>
+</body>
 </html>

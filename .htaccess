@@ -49,7 +49,7 @@ RedirectMatch 301 ^/hypixel/collections/melonwar2(\.php)?$ /games/hypixel/collec
 RedirectMatch 301 ^/books/index2(\.php)?$ /books/
 RedirectMatch 301 ^/steam/(steam2|newgame)(\.php)?(/.*)?$ /games/steam/
 RedirectMatch 301 ^/steam/gamer(/.*)?$ /games/steam/
-RedirectMatch 301 ^/tools/random/image2(\.php)?$ /tools/random/image.php
+RedirectMatch 301 ^/tools/random/image2(\.php)?$ /tools/random/image/
 RedirectMatch 301 ^/Code/transcripts/index2(\.php)?$ /private/transcripts/
 RedirectMatch 301 ^/extras/thegame/temp(/.*)?$ /games/the-game/
 RedirectMatch 301 ^/books/hannah(\.php)?$ /books/
@@ -136,6 +136,16 @@ RedirectMatch 301 ^/extras/harrypotter/?$ /books/harry-potter/
 RedirectMatch 301 ^/extras/harrypotter/characters(\.php)?$ /books/harry-potter/
 RedirectMatch 301 ^/extras/harrypotter/(character|info|quiz)(\.php)?$ /books/harry-potter/$1/
 RedirectMatch 301 ^/extras/harrypotter/json/(.*)$ /books/harry-potter/json/$1
+# Phase 6: Tools
+RedirectMatch 301 ^/tools/random/(number|image)(\.php)?$ /tools/random/$1/
+RedirectMatch 301 ^/extras/qr(\.php)?$ /tools/qr-code/
+RedirectMatch 301 ^/extras/santa(/.*)?$ /tools/secret-santa$1
+RedirectMatch 301 ^/tests/speedtest(\.php)?$ /tools/reading-speed/
+RedirectMatch 301 ^/tests/speedtest/(.*)$ /tools/reading-speed/$1
+RedirectMatch 301 ^/tests/?$ /tools/
+RedirectMatch 301 ^/Code/docker(\.php)?$ /tools/docker-script/
+RedirectMatch 301 ^/Code/install(\.html)?$ /tools/install-script/
+RedirectMatch 301 ^/Code(/|/index\.php)?$ /tools/
 
 <IfModule mod_deflate.c>
          AddOutputFilterByType DEFLATE application/javascript
