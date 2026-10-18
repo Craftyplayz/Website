@@ -34,7 +34,7 @@
         </div>
         <div class="item">
             <h1>Intrests</h1>
-            <p><a href="/steam">Gaming</a> - My main games are Minecraft, Rocket League & Factorio<br>You can see my steam stats here -<a href="/steam/"> Steam Stats</a></p><br>
+            <p><a href="/games/steam/">Gaming</a> - My main games are Minecraft, Rocket League & Factorio<br>You can see my steam stats here -<a href="/games/steam/"> Steam Stats</a></p><br>
             <p>Books - Im currently reading the Heroes of Olympus series<br>I have read Harry Potter over 135 times now - <a href="/books">Books Ive read</a></p><br>
         </div>
         <div class="item">

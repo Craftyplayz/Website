@@ -1,34 +1,28 @@
+<?php
+$site_page = [
+    'title' => 'Games',
+    'description' => 'Games to play, plus stats and guides for the ones I play',
+];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Untitled</title>
-    <meta http-equiv="refresh" content="-1">
+    <?php page_head(); ?>
 </head>
 
 <body>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <?php site_header(); ?>
 
-    <div class="title">
-        <h1>Games</h1>
-<?php
-$folders = glob('*/');
-foreach ($folders as $folder) {
-    $folder = rtrim($folder, '/');
-    echo '<p><a href="' . $folder . '">' . $folder . '</a></p><br>';
-}
-?>
-</div>
-<?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-?>
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title"><?= h($site_page['title']) ?></h1>
+        <p class="page-lede"><?= h($site_page['description']) ?></p>
+        <?php site_hub('games'); ?>
+    </main>
 
+    <?php site_footer(null, false); ?>
 </body>
 
 </html>

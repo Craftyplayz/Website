@@ -28,7 +28,7 @@
             <p><a href="/extras/trump">Random Trump Quote</a></p><br>
             <p><a href="/extras/insult">Random Insult</a></p><br>
             <p><a href="/extras/harrypotter/characters">Harry Potter character info</a></p><br>
-            <p><a href="/steam/newindex">Improved steam stats showcase</a></p><br>
+            <p><a href="/games/steam/">Improved steam stats showcase</a></p><br>
             <p><a href="/extras/qr">QR Code generator</a></p><br>
             <p><a href="/extras/livelaughlove">Live Laugh Love alternatives</a></p>
             <p><a href="/extras/santa">Secret Santa Generator</a></p><br>

@@ -7,4 +7,4 @@ private/.htpasswd
 __pycache__/
 
 # data the live site writes at runtime
-extras/thegame/thegame.json
+games/the-game/thegame.json
