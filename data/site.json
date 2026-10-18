@@ -77,10 +77,8 @@
                     "title": "Play",
                     "pages": [
                         { "title": "Chapter Oracle", "url": "/games/chapterguesser/", "description": "Guess the book chapter from a passage", "keywords": ["harry potter", "quiz", "chapter guesser"] },
-                        { "title": "Guess Who", "url": "/games/guesswho/og/", "description": "Classic Guess Who" },
-                        { "title": "Guess Who: Avatar", "url": "/games/guesswho/atla/", "description": "Guess Who with Avatar characters", "keywords": ["atla"] },
+                        { "title": "Guess Who", "url": "/games/guesswho/", "description": "Guess Who boards: Classic, Avatar and more", "keywords": ["atla", "avatar"] },
                         { "title": "A Dark Room", "url": "/games/adarkroom/", "description": "A minimalist text adventure" },
-                        { "title": "Geriant Bingo", "url": "/games/bingo/geriant/", "description": "Bingo card" },
                         { "title": "The Game", "url": "/games/the-game/", "description": "You just lost it" }
                     ]
                 },

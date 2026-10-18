@@ -42,3 +42,11 @@ and delete line 52 (`/css/hypixel/collection.css`), whose target no longer exist
 **File:** `data/links.json`
 **Change:** remove the `"melon"` short link (line 2). It points at `/games/hypixel/collections/track/?item=MELON&name=Melon`, which is archived; with the rule above it would land on `/games/`.
 **Why:** a short link to an archived page.
+
+**File:** `.htaccess` (Games, 2026-10-19)
+**Change:** Geriant Bingo was moved to `_dev/archive/bingo/` at the owner's request. Add:
+```
+RedirectMatch 301 ^/games/bingo(/.*)?$ /games/
+```
+and on line 53 (`/css/(books|dnd|factorio|gallery|...|steam|steamnew|tools)\.css`) drop `factorio`, `steam` and `steamnew`: those stylesheets are archived or deleted, so the redirect targets 404.
+**Why:** the old Bingo URL now 404s. (Guess Who needs nothing: `games/guesswho/og/` and `atla/` redirect to the new page themselves.)
