@@ -1,5 +1,8 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = [
+    'components' => true,
+    'css' => ['/assets/css/pages/minecraft-gallery.css'],
+];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
@@ -7,35 +10,28 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <head>
     <?php page_head(); ?>
-    <link rel="stylesheet" href="/assets/css/pages/gallery.css">
 </head>
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">My Minecraft Skins</h1>
+        <p class="page-lede">Made by <a href="https://www.twitch.tv/spooky_clang">Spooky Clang</a>, except the original rainbow skin. Click one to download it.</p>
 
-    <div class="title">
-        <h1>My Minecraft Skins</h1>
-        <h2>Made by <a title="Except the original rainbow skin" href="https://www.twitch.tv/spooky_clang">Spooky Clang</a></h2>
-    </div>
-
-    <div class="gallery">
-<?php
-$dir = $_SERVER['DOCUMENT_ROOT'] . '/media/minecraft/skins/';
-$images = glob($dir . '*.png');
-foreach ($images as $image) {
-    $name = basename($image);
-    $borderStyle = ($name === "purple.png") ? ' style="border: 3px solid purple;"' : '';
-    echo '<div class="gallery-item"' . $borderStyle . '>';
-    echo '<a href="/media/minecraft/skins/' . $name . '" download><img src="/media/minecraft/skins/' . $name . '"></a>';
-    echo '</div>';
-}
-?>
-    </div>
-
+        <div class="skins">
+            <?php foreach (glob(SITE_ROOT . '/media/minecraft/skins/*.png') ?: [] as $image):
+                $file = basename($image);
+                $name = ucfirst(pathinfo($file, PATHINFO_FILENAME));
+                $size = @getimagesize($image) ?: [276, 368]; ?>
+                <a class="skin<?= $file === 'purple.png' ? ' skin-hl' : '' ?>" href="/media/minecraft/skins/<?= h(rawurlencode($file)) ?>" download>
+                    <img src="/media/minecraft/skins/<?= h(rawurlencode($file)) ?>" width="<?= (int)$size[0] ?>" height="<?= (int)$size[1] ?>" alt="<?= h($name) ?> skin" loading="lazy" decoding="async">
+                    <span><?= h($name) ?></span>
+                </a>
+            <?php endforeach; ?>
+        </div>
     </main>
     <?php site_footer(); ?>
-
 </body>
 
 </html>

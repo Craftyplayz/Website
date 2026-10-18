@@ -16,3 +16,15 @@
 }
 .shot-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 16px 0 0; }
 .page a.btn { color: var(--text); }
+
+/* skins: rendered player models, downloaded on click */
+.skins { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(170px, 100%), 1fr)); gap: 12px; }
+.page a.skin {
+    display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    color: var(--text); text-decoration: none; transition: border-color var(--fast);
+}
+.page a.skin:hover { border-color: var(--accent); text-decoration: none; }
+.page a.skin.skin-hl { border-color: #6c4b8f; } /* the purple skin keeps its purple frame, same tint as .badge.p */
+.skin img { display: block; width: 100%; max-width: 180px; height: auto; }
+.skin span { font-size: 14px; }
