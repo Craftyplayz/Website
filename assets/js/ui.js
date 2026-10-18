@@ -1,4 +1,4 @@
-// Small shared helpers, taken from /minecraft/nbtviewer. Opt-in: pages load this with
+// Small shared helpers, taken from /minecraft/tools/nbt-viewer. Opt-in: pages load this with
 // $site_page['ui'] = true, then use window.UI, e.g. const { $, $$, esc, toast } = UI;
 (function () {
     'use strict';

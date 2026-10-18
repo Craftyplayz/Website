@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crafty Playz</title>
+    <link rel="stylesheet" href="/assets/css/legacy.css">
+    <link rel="stylesheet" href="speedtest.css">
+</head>
+
+<body>
+    <div id="site-header"></div>
+
+    <div class="options">
+        <label>Language
+            <select id="language"></select>
+        </label>
+        <label>Text
+            <select id="passage"></select>
+        </label>
+    </div>
+    <p id="info"></p>
+
+    <button id="start" class="button" disabled>Start</button>
+    <p id="time">0:00.0</p>
+    <p id="speed">0 Words Per Minute</p>
+
+    <div class="reading" id="reading">
+        <div id="text"></div>
+    </div>
+    <button id="stop" class="button" disabled>Stop</button>
+
+    <div id="site-footer"></div>
+
+    <script src="/php/layout.js"></script>
+    <script src="speedtest.js"></script>
+</body>
+
+</html>

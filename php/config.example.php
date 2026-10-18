@@ -50,7 +50,7 @@ $apininjakey = '';
 ?>
 
 <?php
-/* minecraftitems.xyz (used by /minecraft/nbtviewer/api.php) */
+/* minecraftitems.xyz (used by /minecraft/tools/nbt-viewer/api.php) */
 global $mcitemskey;
 $mcitemskey = '';
 ?>
