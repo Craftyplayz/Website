@@ -15,8 +15,8 @@ header('X-Robots-Tag: noindex');
 if (isset($_GET['part']) && $_GET['part'] === 'footer') {
     site_footer($path);
 } else {
-    // same stylesheets the PHP header adds (old pages still rely on /css/global.css)
-    echo '<link rel="stylesheet" href="' . h(asset('/css/global.css')) . '">';
+    // same stylesheets the PHP header adds (old pages still rely on /assets/css/legacy.css)
+    echo '<link rel="stylesheet" href="' . h(asset('/assets/css/legacy.css')) . '">';
     echo '<link rel="stylesheet" href="' . h(asset('/assets/css/global.css')) . '">';
     site_header($path);
 }

@@ -121,7 +121,7 @@ function site_header($path = null)
     $found = site_find($path);
     $activeId = $found && $found['section'] ? $found['section']['id'] : null;
     $current = site_norm($path);
-    $logo = $found && $found['group'] && !empty($found['group']['logo']) ? $found['group']['logo'] : '/images/catsmall.webp';
+    $logo = $found && $found['group'] && !empty($found['group']['logo']) ? $found['group']['logo'] : '/assets/img/catsmall.webp';
     $title = site_page_title($path);
 
     echo '<header class="site-header" id="header"' . ($title ? ' data-page-title="' . h($title) . '"' : '') . '>';
@@ -143,7 +143,8 @@ function site_header($path = null)
                 $links .= '<li><a href="' . h($page['url']) . '"' . $here . '>' . h($page['title']) . '</a></li>';
             }
             if ($links === '') continue;
-            echo '<div class="sh-col"><h3>' . h($group['title']) . '</h3><ul>' . $links . '</ul></div>';
+            $heading = !empty($group['url']) ? '<a href="' . h($group['url']) . '">' . h($group['title']) . '</a>' : h($group['title']);
+            echo '<div class="sh-col"><h3>' . $heading . '</h3><ul>' . $links . '</ul></div>';
         }
         echo '</div><a class="sh-all" href="' . h($section['url']) . '">All ' . h(strtolower($section['title'])) . ' →</a></div>';
         echo '</li>';
@@ -204,10 +205,41 @@ function page_head()
     echo '<title>' . h($title ? $title . ' · ' . $name : $name) . '</title>' . "\n";
     if ($desc !== '') echo '<meta name="description" content="' . h($desc) . '">' . "\n";
     echo '<link rel="icon" href="/favicon.ico">' . "\n";
+    // pages that haven't been restyled yet still need the old site-wide styles, loaded first
+    if (!empty($p['legacy'])) echo '<link rel="stylesheet" href="' . h(asset('/assets/css/legacy.css')) . '">' . "\n";
     echo '<link rel="stylesheet" href="' . h(asset('/assets/css/global.css')) . '">' . "\n";
     if (!empty($p['components'])) echo '<link rel="stylesheet" href="' . h(asset('/assets/css/components.css')) . '">' . "\n";
     foreach (isset($p['css']) ? (array)$p['css'] : [] as $css) echo '<link rel="stylesheet" href="' . h(asset($css)) . '">' . "\n";
     echo '<script src="' . h(asset('/assets/js/site.js')) . '" defer></script>' . "\n";
     if (!empty($p['ui'])) echo '<script src="' . h(asset('/assets/js/ui.js')) . '" defer></script>' . "\n";
     $GLOBALS['site_head_done'] = true;
+}
+
+// Card grid of the pages in a section, straight from data/site.json - used by hub pages.
+// $groups limits it to some group titles, e.g. site_hub('minecraft', ['Tools']).
+// Pages marked "search": false (viewers that need a ?id=) are left out.
+function site_hub($sectionId, $groups = null, $headings = true)
+{
+    foreach (site_data()['sections'] as $section) {
+        if ($section['id'] !== $sectionId) continue;
+        echo '<div class="hub">';
+        foreach ($section['groups'] as $group) {
+            if ($groups !== null && !in_array($group['title'], $groups, true)) continue;
+            $cards = '';
+            foreach ($group['pages'] as $page) {
+                if ((isset($page['search']) && $page['search'] === false) || !empty($page['hub_skip'])) continue;
+                if (!empty($group['url']) && site_norm($page['url']) === site_norm($group['url'])) continue;
+                $cards .= '<a class="hub-card" href="' . h($page['url']) . '"><b>' . h($page['title']) . '</b>' .
+                    (!empty($page['description']) ? '<span>' . h($page['description']) . '</span>' : '') . '</a>';
+            }
+            if ($cards === '') continue;
+            echo '<section class="hub-group">';
+            if ($headings) {
+                $title = !empty($group['url']) ? '<a href="' . h($group['url']) . '">' . h($group['title']) . '</a>' : h($group['title']);
+                echo '<h2>' . $title . '</h2>';
+            }
+            echo '<div class="hub-grid">' . $cards . '</div></section>';
+        }
+        echo '</div>';
+    }
 }

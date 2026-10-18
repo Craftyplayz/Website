@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Untitled</title>
     <meta http-equiv="refresh" content="0; url=https://discord.gg/GJUabXxDXE">
-    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="/assets/css/legacy.css">
 </head>
     <div class="title">
         <h1>Discord redirect</h1>

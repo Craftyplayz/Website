@@ -5,7 +5,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 if (empty($GLOBALS['site_head_done'])) {
     // old page styles first, so the new header styles win
-    echo '<link rel="stylesheet" href="' . h(asset('/css/global.css')) . '">' . "\n";
+    echo '<link rel="stylesheet" href="' . h(asset('/assets/css/legacy.css')) . '">' . "\n";
     echo '<link rel="stylesheet" href="' . h(asset('/assets/css/global.css')) . '">' . "\n";
     echo '<script src="' . h(asset('/assets/js/site.js')) . '" defer></script>' . "\n";
 }

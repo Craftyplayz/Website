@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Me</title>
-    <link rel="stylesheet" href="css/homepage.css">
+    <link rel="stylesheet" href="/assets/css/pages/homepage.css">
     <!-- <meta http-equiv="refresh" content="3"> -->
 </head>
 
@@ -34,7 +34,7 @@
         </div>
         <div class="item">
             <h1>Intrests</h1>
-            <p><a href="/steam">Gaming</a> - My main games are Minecraft, Rocket League & Factorio<br>You can see my steam stats here -<a href="/steam/"> Steam Stats</a></p><br>
+            <p><a href="/games/steam/">Gaming</a> - My main games are Minecraft, Rocket League & Factorio<br>You can see my steam stats here -<a href="/games/steam/"> Steam Stats</a></p><br>
             <p>Books - Im currently reading the Heroes of Olympus series<br>I have read Harry Potter over 135 times now - <a href="/books">Books Ive read</a></p><br>
         </div>
         <div class="item">

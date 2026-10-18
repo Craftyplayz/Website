@@ -5,3 +5,6 @@ private/.htpasswd
 
 # Python bytecode
 __pycache__/
+
+# data the live site writes at runtime
+games/the-game/thegame.json

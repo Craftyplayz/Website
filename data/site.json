@@ -9,57 +9,60 @@
             "groups": [
                 {
                     "title": "Tools",
+                    "url": "/minecraft/tools/",
                     "pages": [
-                        { "title": "NBT Viewer", "url": "/minecraft/nbtviewer/", "description": "Explore player .dat files: inventory, stats and raw NBT", "keywords": ["playerdata", "dat", "inventory"] },
-                        { "title": "Nether Portal Converter", "url": "/minecraft/nether.html", "description": "Convert Overworld and Nether coordinates", "keywords": ["coords", "portal"] },
-                        { "title": "Storage Sorter", "url": "/minecraft/storage/", "description": "Plan an item sorting system", "keywords": ["sorter", "items"] },
-                        { "title": "Shulker Schematic Calculator", "url": "/minecraft/shulker-schematic-calculator.html", "description": "How many shulker boxes a schematic needs", "keywords": ["litematica", "schematic"] },
-                        { "title": "Material List to Sheets", "url": "/minecraft/materiallist.html", "description": "Turn a Litematica material list into a spreadsheet", "keywords": ["litematica"] },
-                        { "title": "Litematica Material Converter", "url": "/minecraft/litematica_material_converter.html", "description": "Convert Litematica material lists", "keywords": ["litematica"] },
-                        { "title": "Item List", "url": "/minecraft/itemlist/", "description": "Every Minecraft item texture", "keywords": ["textures", "icons"] },
-                        { "title": "Day Calculator", "url": "/minecraft/day.php", "description": "Work out the in-game day", "nav": false },
-                        { "title": "Dynmap Marker Creator", "url": "/minecraft/marker.php", "description": "Build Dynmap marker commands", "nav": false },
-                        { "title": "Book Generator", "url": "/minecraft/minecart.html", "description": "Generate written book commands", "nav": false },
-                        { "title": "Transaction Generator", "url": "/minecraft/transactions.html", "description": "Fake Minecraft transaction generator", "nav": false },
-                        { "title": "Stats Editor", "url": "/minecraft/stats.php", "description": "Edit Minecraft stats files", "nav": false },
-                        { "title": "JSON Viewer", "url": "/minecraft/chatfilter.php", "description": "View chat filter JSON files", "nav": false },
-                        { "title": "TNT Cannon Targeting", "url": "/minecraft/minigames/battleships.html", "description": "Aim a TNT cannon for battleships", "nav": false },
-                        { "title": "Instance Playtime", "url": "/minecraft/playtime/", "description": "Playtime across Minecraft instances", "nav": false }
+                        { "title": "NBT Viewer", "url": "/minecraft/tools/nbt-viewer/", "description": "Explore player .dat files: inventory, stats and raw NBT", "keywords": ["playerdata", "dat", "inventory", "nbt"] },
+                        { "title": "Nether Portal Converter", "url": "/minecraft/tools/nether-portal/", "description": "Convert Overworld and Nether coordinates", "keywords": ["coords", "portal"] },
+                        { "title": "Storage Sorter", "url": "/minecraft/tools/storage-sorter/", "description": "Plan an item sorting system", "keywords": ["sorter", "items"] },
+                        { "title": "Shulker Schematic Calculator", "url": "/minecraft/tools/shulker-calculator/", "description": "How many shulker boxes a schematic needs", "keywords": ["litematica", "schematic"] },
+                        { "title": "Material List to Sheets", "url": "/minecraft/tools/material-list/", "description": "Turn a Litematica material list into a spreadsheet", "keywords": ["litematica"] },
+                        { "title": "Litematica Material Converter", "url": "/minecraft/tools/litematica-converter/", "description": "Convert Litematica material lists for Google Sheets", "keywords": ["litematica"] },
+                        { "title": "Item List", "url": "/minecraft/tools/item-list/", "description": "Every Minecraft item texture", "keywords": ["textures", "icons"] },
+                        { "title": "Day Calculator", "url": "/minecraft/tools/day-calculator/", "description": "Work out the in-game day", "nav": false },
+                        { "title": "Dynmap Marker Creator", "url": "/minecraft/tools/dynmap-marker/", "description": "Build Dynmap marker commands", "nav": false },
+                        { "title": "Book Generator", "url": "/minecraft/tools/book-generator/", "description": "Generate written book commands", "nav": false },
+                        { "title": "Transaction Generator", "url": "/minecraft/tools/transaction-generator/", "description": "Fake Minecraft transaction generator", "nav": false },
+                        { "title": "Stats Editor", "url": "/minecraft/tools/stats-editor/", "description": "Edit Minecraft stats files", "nav": false },
+                        { "title": "JSON Viewer", "url": "/minecraft/tools/json-viewer/", "description": "View chat filter JSON files", "nav": false },
+                        { "title": "TNT Cannon Targeting", "url": "/minecraft/tools/tnt-cannon/", "description": "Aim a TNT cannon for battleships", "nav": false },
+                        { "title": "Instance Playtime", "url": "/minecraft/tools/playtime/", "description": "Playtime across Minecraft instances", "nav": false }
                     ]
                 },
                 {
                     "title": "Projects",
+                    "url": "/minecraft/projects/",
                     "pages": [
-                        { "title": "Metro Network", "url": "/minecraft/network/", "description": "Metro stations on the server", "keywords": ["rail", "stations"] },
-                        { "title": "Rail Router", "url": "/minecraft/boltnetwork.php", "description": "Find a route across the rail network", "keywords": ["rail", "route"] },
-                        { "title": "Milestones", "url": "/minecraft/milestones.php", "description": "Milestone tracker" },
-                        { "title": "Map Art", "url": "/minecraft/mapart/", "description": "Map art I have made" },
-                        { "title": "Frame Extractor", "url": "/minecraft/mapart/code/", "description": "Extract frames for map art", "nav": false },
-                        { "title": "Stonecrest", "url": "/minecraft/stonecrest.php", "description": "Stonecrest world downloads" },
-                        { "title": "Life Series", "url": "/minecraft/life/", "description": "Life Series session notes" },
-                        { "title": "Life Series S1 Session 1", "url": "/minecraft/life/s1/e1.php", "nav": false },
-                        { "title": "Life Series S1 Session 2", "url": "/minecraft/life/s1/e2.php", "nav": false },
-                        { "title": "Life Series S1 Session 3", "url": "/minecraft/life/s1/e3.php", "nav": false }
+                        { "title": "Metro Network", "url": "/minecraft/projects/metro/", "description": "Metro stations on the server", "keywords": ["rail", "stations"] },
+                        { "title": "Rail Router", "url": "/minecraft/projects/rail-router/", "description": "Find a route across the rail network", "keywords": ["rail", "route"] },
+                        { "title": "Milestones", "url": "/minecraft/projects/milestones/", "description": "Milestone tracker" },
+                        { "title": "Map Art", "url": "/minecraft/projects/map-art/", "description": "Map art I have made" },
+                        { "title": "Frame Extractor", "url": "/minecraft/projects/map-art/frame-extractor/", "description": "Extract frames from a GIF for map art", "nav": false },
+                        { "title": "Stonecrest", "url": "/minecraft/projects/stonecrest/", "description": "Stonecrest world downloads" },
+                        { "title": "Life Series", "url": "/minecraft/projects/life-series/", "description": "Life Series session notes" },
+                        { "title": "Life Series S1 Session 1", "url": "/minecraft/projects/life-series/season-1/session-1/", "nav": false, "hub_skip": true },
+                        { "title": "Life Series S1 Session 2", "url": "/minecraft/projects/life-series/season-1/session-2/", "nav": false, "hub_skip": true },
+                        { "title": "Life Series S1 Session 3", "url": "/minecraft/projects/life-series/season-1/session-3/", "nav": false, "hub_skip": true }
                     ]
                 },
                 {
                     "title": "More",
                     "pages": [
-                        { "title": "Screenshots", "url": "/minecraft/", "description": "Minecraft overview and screenshots" },
-                        { "title": "Screenshot", "url": "/minecraft/screenshot.php", "nav": false, "search": false },
-                        { "title": "Skins", "url": "/minecraft/skins.php", "description": "My Minecraft skins" },
-                        { "title": "Tips", "url": "/minecraft/tips.php", "description": "Minecraft tips" }
+                        { "title": "Screenshots", "url": "/minecraft/screenshots/", "description": "Screenshots from years of playing" },
+                        { "title": "Skins", "url": "/minecraft/skins/", "description": "My Minecraft skins" },
+                        { "title": "Tips", "url": "/minecraft/tips/", "description": "Minecraft tips and mods" },
+                        { "title": "Downloads", "url": "/minecraft/downloads/", "description": "Data packs and other files" }
                     ]
                 },
                 {
                     "title": "Captainalism Shop",
+                    "url": "/minecraft/shop/",
                     "subnav": true,
-                    "logo": "/images/minecraft/shoplogo.png",
+                    "logo": "/assets/img/shoplogo.png",
                     "pages": [
-                        { "title": "Shop", "url": "/shop/", "description": "Captainalism shop" },
-                        { "title": "Enchanted Books", "url": "/shop/books.php", "description": "Enchanted books for sale" },
-                        { "title": "Special Requests", "url": "/shop/requests.php", "description": "Request something special" },
-                        { "title": "Casino", "url": "/shop/casino.php", "description": "Coming soon" }
+                        { "title": "Shop", "url": "/minecraft/shop/", "description": "Captainalism price lists" },
+                        { "title": "Enchanted Books", "url": "/minecraft/shop/enchanted-books/", "description": "Enchanted books for sale" },
+                        { "title": "Special Requests", "url": "/minecraft/shop/requests/", "description": "Request something special" },
+                        { "title": "Casino", "url": "/minecraft/shop/casino/", "description": "Coming soon" }
                     ]
                 }
             ]
@@ -78,50 +81,51 @@
                         { "title": "Guess Who: Avatar", "url": "/games/guesswho/atla/", "description": "Guess Who with Avatar characters", "keywords": ["atla"] },
                         { "title": "A Dark Room", "url": "/games/adarkroom/", "description": "A minimalist text adventure" },
                         { "title": "Geriant Bingo", "url": "/games/bingo/geriant/", "description": "Bingo card" },
-                        { "title": "The Game", "url": "/extras/thegame/", "description": "You just lost it" }
+                        { "title": "The Game", "url": "/games/the-game/", "description": "You just lost it" }
                     ]
                 },
                 {
                     "title": "Quizzes",
+                    "url": "/games/quizzes/",
                     "pages": [
-                        { "title": "Harry Potter Quiz", "url": "/quiz/HarryPotter/", "description": "Four difficulty levels", "keywords": ["hp"] },
-                        { "title": "HP Quiz: Easy", "url": "/quiz/HarryPotter/easy/", "nav": false },
-                        { "title": "HP Quiz: Medium", "url": "/quiz/HarryPotter/medium/", "nav": false },
-                        { "title": "HP Quiz: Hard", "url": "/quiz/HarryPotter/hard/", "nav": false },
-                        { "title": "HP Quiz: Extra Hard", "url": "/quiz/HarryPotter/extrahard/", "nav": false },
-                        { "title": "Quizzes", "url": "/quiz/", "nav": false }
+                        { "title": "Harry Potter Quiz", "url": "/games/quizzes/harry-potter/", "description": "Four difficulty levels", "keywords": ["hp"] },
+                        { "title": "HP Quiz: Easy", "url": "/games/quizzes/harry-potter/easy/", "nav": false, "hub_skip": true },
+                        { "title": "HP Quiz: Medium", "url": "/games/quizzes/harry-potter/medium/", "nav": false, "hub_skip": true },
+                        { "title": "HP Quiz: Hard", "url": "/games/quizzes/harry-potter/hard/", "nav": false, "hub_skip": true },
+                        { "title": "HP Quiz: Extra Hard", "url": "/games/quizzes/harry-potter/extrahard/", "nav": false, "hub_skip": true }
                     ]
                 },
                 {
                     "title": "Stats",
                     "pages": [
-                        { "title": "Steam Stats", "url": "/steam/", "description": "My Steam library and achievements", "keywords": ["achievements"] },
-                        { "title": "Steam Game", "url": "/steam/game.php", "nav": false, "search": false },
-                        { "title": "Retro Achievements", "url": "/retro/", "description": "Retro game achievements" },
-                        { "title": "Factorio Saves", "url": "/factorio/", "description": "Maps of my Factorio saves" },
-                        { "title": "Factorio Map", "url": "/factorio/map.php", "nav": false, "search": false }
+                        { "title": "Steam Stats", "url": "/games/steam/", "description": "My Steam library and achievements", "keywords": ["achievements"] },
+                        { "title": "Steam Game", "url": "/games/steam/game/", "nav": false, "search": false },
+                        { "title": "Retro Achievements", "url": "/games/retro/", "description": "Retro game achievements" },
+                        { "title": "Factorio Saves", "url": "/games/factorio/", "description": "Maps of my Factorio saves" },
+                        { "title": "Factorio Map", "url": "/games/factorio/map/", "nav": false, "search": false },
+                        { "title": "Factorio Command Generator", "url": "/games/factorio/commands/", "description": "Generate Factorio map render commands", "nav": false }
                     ]
                 },
                 {
                     "title": "Hypixel Skyblock",
+                    "url": "/games/hypixel/",
                     "pages": [
-                        { "title": "Hypixel Tools", "url": "/hypixel/", "description": "Skyblock tools", "nav": false },
-                        { "title": "Collection Tracker", "url": "/hypixel/collections/", "description": "Track Skyblock collections" },
-                        { "title": "Collection", "url": "/hypixel/collections/track.php", "nav": false, "search": false },
-                        { "title": "Melon War", "url": "/hypixel/collections/melonwar.php", "description": "The Great Melon War" },
-                        { "title": "Minions", "url": "/hypixel/minions.php", "description": "Minion calculator" },
-                        { "title": "Ghast Tear Calculator", "url": "/hypixel/calculators/ghast.php", "description": "Bazaar ghast tear profits" },
-                        { "title": "Regex Builder", "url": "/hypixel/filter.html", "description": "Build chat filter regexes" }
+                        { "title": "Collection Tracker", "url": "/games/hypixel/collections/", "description": "Track Skyblock collections" },
+                        { "title": "Collection", "url": "/games/hypixel/collections/track/", "nav": false, "search": false },
+                        { "title": "Melon War", "url": "/games/hypixel/collections/melon-war/", "description": "The Great Melon War" },
+                        { "title": "Minions", "url": "/games/hypixel/minions/", "description": "Minion calculator" },
+                        { "title": "Ghast Tear Calculator", "url": "/games/hypixel/ghast-calculator/", "description": "Bazaar ghast tear profits" },
+                        { "title": "Regex Builder", "url": "/games/hypixel/regex-builder/", "description": "Build chat filter regexes" }
                     ]
                 },
                 {
                     "title": "Guides",
                     "pages": [
-                        { "title": "Yu-Gi-Oh Deck Guide", "url": "/games/yugioh/yugioh.php", "description": "Progression series setup for EDOPro", "keywords": ["edopro"] },
-                        { "title": "Yu-Gi-Oh Guide: Next Packs", "url": "/games/yugioh/yugioh2.php", "nav": false },
-                        { "title": "Yu-Gi-Oh Sets", "url": "/games/yugioh/sets.php", "description": "Sets worth opening", "nav": false },
-                        { "title": "Yu-Gi-Oh Extra Rules", "url": "/games/yugioh/extrarules.php", "nav": false },
-                        { "title": "Skyrim Mods", "url": "/Code/skyrim.html", "description": "Skyrim mods I use" }
+                        { "title": "Yu-Gi-Oh Deck Guide", "url": "/games/yugioh/", "description": "Progression series setup for EDOPro", "keywords": ["edopro"] },
+                        { "title": "Yu-Gi-Oh: Next Packs", "url": "/games/yugioh/next-packs/", "nav": false, "hub_skip": true },
+                        { "title": "Yu-Gi-Oh Sets", "url": "/games/yugioh/sets/", "description": "Sets worth opening", "nav": false },
+                        { "title": "Yu-Gi-Oh Extra Rules", "url": "/games/yugioh/extra-rules/", "nav": false },
+                        { "title": "Skyrim Mods", "url": "/games/skyrim/", "description": "Skyrim mods I use" }
                     ]
                 }
             ]
@@ -136,17 +140,18 @@
                     "title": "Books",
                     "pages": [
                         { "title": "Books I've Read", "url": "/books/", "description": "My reading list", "keywords": ["reading"] },
-                        { "title": "Book Cover Search", "url": "/books/cover.php", "description": "Find covers for a book" },
-                        { "title": "Bulk Cover Downloader", "url": "/books/bulkcover.php", "description": "Download covers for a whole series" }
+                        { "title": "Book Cover Search", "url": "/books/covers/", "description": "Find covers for a book" },
+                        { "title": "Bulk Cover Downloader", "url": "/books/covers/bulk/", "description": "Download covers for a whole series" }
                     ]
                 },
                 {
                     "title": "Harry Potter",
+                    "url": "/books/harry-potter/",
                     "pages": [
-                        { "title": "Harry Potter Characters", "url": "/extras/harrypotter/characters.php", "description": "Character info", "keywords": ["hp"] },
-                        { "title": "Harry Potter Character", "url": "/extras/harrypotter/character.php", "nav": false, "search": false },
-                        { "title": "Harry Potter Info", "url": "/extras/harrypotter/info.php", "nav": false },
-                        { "title": "Harry Potter Quiz (old)", "url": "/extras/harrypotter/quiz.php", "nav": false, "search": false }
+                        { "title": "Harry Potter Characters", "url": "/books/harry-potter/", "description": "Character info", "keywords": ["hp"] },
+                        { "title": "Harry Potter Character", "url": "/books/harry-potter/character/", "nav": false, "search": false },
+                        { "title": "Harry Potter Info", "url": "/books/harry-potter/info/", "nav": false },
+                        { "title": "Harry Potter Quiz (old)", "url": "/books/harry-potter/quiz/", "nav": false, "search": false }
                     ]
                 }
             ]
@@ -160,23 +165,25 @@
                 {
                     "title": "Tools",
                     "pages": [
-                        { "title": "QR Code Generator", "url": "/extras/qr.php", "description": "Make a QR code", "keywords": ["qr"] },
-                        { "title": "Random Number", "url": "/tools/random/number.php", "description": "Random number generator" },
-                        { "title": "Random Image", "url": "/tools/random/image.php", "description": "Random image" },
-                        { "title": "Random Generators", "url": "/tools/random/", "nav": false },
-                        { "title": "Reading Speed Test", "url": "/tests/speedtest/", "description": "How fast do you read?", "keywords": ["wpm"] },
-                        { "title": "Secret Santa", "url": "/extras/santa/", "description": "Encrypted Secret Santa pairings", "keywords": ["christmas"] },
-                        { "title": "Secret Santa Pairing", "url": "/extras/santa/pairing.html", "nav": false, "search": false }
+                        { "title": "QR Code Generator", "url": "/tools/qr-code/", "description": "Make a QR code", "keywords": ["qr"] },
+                        { "title": "Reading Speed Test", "url": "/tools/reading-speed/", "description": "How fast do you read?", "keywords": ["wpm", "speedtest"] },
+                        { "title": "Secret Santa", "url": "/tools/secret-santa/", "description": "Encrypted Secret Santa pairings", "keywords": ["christmas"] },
+                        { "title": "Secret Santa Pairing", "url": "/tools/secret-santa/pairing.html", "nav": false, "search": false }
+                    ]
+                },
+                {
+                    "title": "Random",
+                    "url": "/tools/random/",
+                    "pages": [
+                        { "title": "Random Number", "url": "/tools/random/number/", "description": "Random number generator" },
+                        { "title": "Random Image", "url": "/tools/random/image/", "description": "Random image" }
                     ]
                 },
                 {
                     "title": "Scripts",
                     "pages": [
-                        { "title": "Docker Install Script", "url": "/Code/docker.php", "description": "Build a Docker install script" },
-                        { "title": "Factorio Command Generator", "url": "/Code/factorio.html", "description": "Generate Factorio map commands" },
-                        { "title": "Install Script", "url": "/Code/install.html", "nav": false },
-                        { "title": "Scripts", "url": "/Code/", "nav": false },
-                        { "title": "Speed Test (old)", "url": "/tests/speedtest.php", "nav": false, "search": false },
+                        { "title": "Docker Install Script", "url": "/tools/docker-script/", "description": "Build a Docker install script" },
+                        { "title": "Install Script", "url": "/tools/install-script/", "description": "Click-to-copy install commands", "nav": false },
                         { "title": "Calculator", "url": "/tools/calculator.html", "nav": false, "search": false },
                         { "title": "Snipping Tool", "url": "/tools/clip.html", "nav": false, "search": false }
                     ]
@@ -192,38 +199,38 @@
                 {
                     "title": "Random",
                     "pages": [
-                        { "title": "Trump Quotes", "url": "/extras/trump.php", "description": "A random Donald Trump quote" },
-                        { "title": "Insults", "url": "/extras/insult.php", "description": "Random insult generator" },
-                        { "title": "Random Fact", "url": "/extras/fact.php", "description": "A random fact" },
-                        { "title": "Live Laugh Love", "url": "/extras/livelaughlove.php", "description": "Live Laugh Love alternatives" },
-                        { "title": "Random Quote", "url": "/quote.php", "nav": false }
+                        { "title": "Trump Quotes", "url": "/extras/trump-quotes/", "description": "A random Donald Trump quote" },
+                        { "title": "Insults", "url": "/extras/insults/", "description": "Random insult generator" },
+                        { "title": "Random Fact", "url": "/extras/facts/", "description": "A random fact" },
+                        { "title": "Live Laugh Love", "url": "/extras/live-laugh-love/", "description": "Live Laugh Love alternatives" },
+                        { "title": "Random Quote", "url": "/extras/quotes/", "description": "A random screenshot quote", "nav": false }
                     ]
                 },
                 {
                     "title": "Screens",
                     "pages": [
-                        { "title": "Fake Update Screens", "url": "/update/", "description": "Fake Windows updates and crashes", "keywords": ["prank"] },
-                        { "title": "Windows 10 Screens", "url": "/update/windows10/", "nav": false },
-                        { "title": "Flashing Colours", "url": "/extras/rbg.php", "description": "Epilepsy warning: flashing RGB", "keywords": ["rgb"] },
-                        { "title": "Twitch Chat", "url": "/extras/chaos.html", "description": "Fullscreen Twitch chat" },
-                        { "title": "BRB Screen", "url": "/extras/brb.php", "description": "Be right back screen" }
+                        { "title": "Fake Update Screens", "url": "/extras/fake-updates/", "description": "Fake Windows updates and crashes", "keywords": ["prank"] },
+                        { "title": "Windows 10 Screens", "url": "/extras/fake-updates/windows10/", "nav": false, "hub_skip": true },
+                        { "title": "Flashing Colours", "url": "/extras/flashing-colours/", "description": "Epilepsy warning: flashing RGB", "keywords": ["rgb"] },
+                        { "title": "Twitch Chat", "url": "/extras/twitch-chat/", "description": "Fullscreen Twitch chat" },
+                        { "title": "BRB Screen", "url": "/extras/brb/", "description": "Be right back screen" }
                     ]
                 },
                 {
                     "title": "Media",
                     "pages": [
-                        { "title": "Memes", "url": "/memes/meme.html", "description": "Memes" },
-                        { "title": "Cat", "url": "/memes/cat/", "description": "Cat" },
-                        { "title": "Pets", "url": "/photos/pets.php", "description": "People's pets", "keywords": ["photos"] },
-                        { "title": "Pet", "url": "/photos/pet.php", "nav": false, "search": false }
+                        { "title": "Memes", "url": "/extras/memes/", "description": "Memes" },
+                        { "title": "Cat", "url": "/extras/memes/cat/", "description": "Cat", "nav": false },
+                        { "title": "Pets", "url": "/extras/pets/", "description": "People's pets", "keywords": ["photos"] },
+                        { "title": "Pet", "url": "/extras/pets/pet/", "nav": false, "search": false }
                     ]
                 },
                 {
                     "title": "Other",
                     "pages": [
-                        { "title": "Cyberpunk 2077", "url": "/extras/cyberpunk.php", "description": "A question about Cyberpunk" },
+                        { "title": "Cyberpunk 2077", "url": "/extras/cyberpunk/", "description": "A question about Cyberpunk" },
                         { "title": "D&D Character", "url": "/extras/dnd/", "description": "D&D character sheet" },
-                        { "title": "Bee Movie", "url": "/extras/bee.php", "description": "The whole Bee Movie script", "nav": false }
+                        { "title": "Bee Movie", "url": "/extras/bee-movie/", "description": "The whole Bee Movie script", "nav": false }
                     ]
                 }
             ]
