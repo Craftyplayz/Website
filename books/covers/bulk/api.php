@@ -41,8 +41,6 @@ curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT => 15,
     CURLOPT_CONNECTTIMEOUT => 5,
-    // shortcut: $googlebookskey is restricted to www.craftyplayz.com referrers, so send that; switch the key to an IP restriction in Google Cloud Console, then drop this line.
-    CURLOPT_REFERER => 'https://www.craftyplayz.com/',
 ]);
 $body = curl_exec($ch);
 $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
