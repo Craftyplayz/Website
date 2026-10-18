@@ -30,3 +30,9 @@ dialog.dlg .code { max-height: 50vh; }
 .code .number { color: #b5cea8; }
 .code .boolean { color: #569cd6; }
 .code .null { color: var(--muted); }
+
+/* raw output behind a toggle (Material List) */
+.raw { margin-top: 12px; }
+.raw summary { color: var(--link); cursor: pointer; font-size: 14px; }
+.raw .data-text { margin-top: 8px; }
+.card h2 .muted { font-size: 14px; font-weight: 400; }
