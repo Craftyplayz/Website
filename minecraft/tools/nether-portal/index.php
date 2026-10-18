@@ -6,153 +6,145 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 <html lang="en">
 <head>
     <?php page_head(); ?>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; color: inherit; }
-
+    /* full-screen tool: no footer, the card sits in the middle of what's left under the header */
     body {
-        font-family: 'Roboto', sans-serif;
-        color: #ffffff;
-        background-color: #202020;
         display: flex;
         flex-direction: column;
         height: 100vh;
         overflow: hidden;
+        color: var(--text);
     }
 
     .topbar {
-        display: flex;
-        align-items: center;
-        padding: 20px 40px;
-        background-color: #2726269a;
-        border-bottom: 1px solid #ffffff;
-        height: 100px;
+        box-sizing: border-box;
         flex-shrink: 0;
+        width: 100%;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 16px 16px 0;
     }
 
-    .topbar h1 { font-size: 30px; font-weight: 700; }
+    .topbar h1 { margin: 0; font-size: clamp(24px, 4vw, 34px); line-height: 1.2; }
+    .topbar p { margin: 4px 0 0; color: var(--muted); }
 
     .content {
         flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 40px;
+        padding: 16px;
     }
 
     .card {
-        background-color: #272626;
-        border: 1px solid #ffffff;
-        border-radius: 15px;
-        padding: 36px;
+        box-sizing: border-box;
         width: min(480px, 100%);
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 12px;
+        padding: 20px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
     }
+
+    .card * { box-sizing: border-box; }
 
     input[type="text"] {
         width: 100%;
-        padding: 10px 20px;
-        background-color: #636262;
-        border: none;
-        border-radius: 15px;
-        font-size: 20px;
-        font-weight: 500;
-        color: #ffffff;
-        font-family: monospace;
+        margin: 0;
+        padding: 10px 14px;
+        background: #161616;
+        border: 1px solid #4a4a4a;
+        border-radius: var(--radius);
+        color: var(--text);
+        font: 18px var(--mono);
         outline: none;
-        transition: background 0.2s;
+        transition: border-color var(--fast);
     }
 
-    input[type="text"]::placeholder { color: #ccc; }
-    input[type="text"]:focus { background-color: #757474; }
+    input[type="text"]::placeholder { color: var(--muted); }
+    input[type="text"]:focus { border-color: var(--accent); }
 
     .dim-options {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 8px;
     }
 
-    .dim-option input { display: none; }
+    /* visually hidden but still focusable, so the arrow keys work */
+    .dim-option input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 
     .dim-option label {
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 10px 16px;
-        background-color: #3a3a3a;
-        border-radius: 12px;
+        min-height: 40px;
+        padding: 8px 12px;
+        background: var(--card2);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 14px;
         cursor: pointer;
-        font-size: 15px;
-        font-weight: 500;
-        color: #aaa;
-        transition: background 0.15s, color 0.15s;
-        border: 2px solid transparent;
+        transition: background var(--fast), color var(--fast);
     }
 
-    .dim-option input:checked + label {
-        border-color: #ffffff88;
-        background-color: #636262;
-        color: #fff;
-    }
-
-    .dim-option label:hover { background-color: #484848; color: #fff; }
+    .dim-option label:hover { color: var(--text); }
+    .dim-option input:checked + label { background: var(--accent-soft); border-color: var(--btn-line); color: var(--text); }
+    .dim-option input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     .result-box {
-        background-color: #3a3a3a;
-        border-radius: 15px;
-        padding: 14px 20px;
-        font-family: monospace;
-        font-size: 20px;
-        font-weight: 500;
-        color: #fff;
-        min-height: 52px;
         display: flex;
         align-items: center;
+        min-height: 48px;
+        padding: 10px 14px;
+        background: var(--sunken);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        font: 18px var(--mono);
     }
 
-    .result-box.empty { color: #555; font-size: 15px; font-style: italic; font-family: 'Roboto', sans-serif; font-weight: 400; }
+    .result-box.empty { color: var(--muted); font: 14px var(--font); }
 
-    .error { color: #ff6b6b; font-size: 13px; min-height: 18px; }
+    .error { min-height: 18px; color: #ff8a8a; font-size: 13px; }
 
     button {
-        padding: 10px 20px;
-        background-color: #636262;
-        color: #ffffff;
-        border: none;
-        border-radius: 15px;
-        font-size: 18px;
-        font-weight: 500;
-        font-family: 'Roboto', sans-serif;
-        transition: background 0.2s;
-        cursor: pointer;
         width: 100%;
+        margin: 0;
+        padding: 10px 16px;
+        background: var(--btn);
+        border: 1px solid var(--btn-line);
+        border-radius: var(--radius);
+        color: #fff;
+        font: 15px var(--font);
+        cursor: pointer;
+        transition: background var(--fast), transform .06s;
     }
 
-    button:hover { background-color: #757474; }
-    button:disabled { opacity: 0.35; cursor: default; }
-    button:disabled:hover { background-color: #636262; }
+    button:hover { background: #4a9033; }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: .5; cursor: default; transform: none; }
+    button:disabled:hover { background: var(--btn); }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     .toast {
         position: fixed;
-        bottom: 24px;
-        right: 24px;
-        background-color: #636262;
-        color: #fff;
-        font-family: 'Roboto', sans-serif;
-        font-size: 16px;
-        font-weight: 500;
-        padding: 10px 20px;
-        border-radius: 15px;
-        opacity: 0;
-        transform: translateY(8px);
-        transition: opacity 0.2s, transform 0.2s;
-        pointer-events: none;
+        right: 16px;
+        bottom: 16px;
         z-index: 200;
+        padding: 10px 14px;
+        background: #2d4a24;
+        border: 1px solid #4f8a3a;
+        border-radius: var(--radius);
+        font-size: 14px;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: opacity var(--fast) ease-out, transform var(--fast) ease-out;
+        pointer-events: none;
     }
 
-    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.show { opacity: 1; transform: none; }
 </style>
 </head>
 <body>
@@ -160,9 +152,10 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <div class="topbar">
     <h1>Nether Portal Converter</h1>
+    <p>Convert Overworld and Nether coordinates from a /tp command.</p>
 </div>
 
-<div class="content">
+<main class="content" id="main">
     <div class="card">
         <input type="text" id="input" placeholder="/tp -8676 ~ 4405" oninput="convert()" autofocus>
 
@@ -182,7 +175,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
         <button id="copy-btn" onclick="copyResult()" disabled>Copy to clipboard</button>
     </div>
-</div>
+</main>
 
 <div class="toast" id="toast"></div>
 
