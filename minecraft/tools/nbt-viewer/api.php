@@ -151,6 +151,138 @@ if (isset($_GET['srv'])) {
     exit;
 }
 
+/* ---------- mod textures ---------- */
+// Textures and English names pulled out of mod jars in the browser, kept in ./cache/mods for good
+// so a mod only ever has to be uploaded once. The first upload of a texture wins - files are never replaced.
+//   GET  api.php?mods=index               -> {"<namespace>": {"t": textures, "l": names, "m": "<mod name>"}}
+//   GET  api.php?mods=lang&ns=a,b         -> {"item.a.thing": "Thing", ...}
+//   GET  api.php?tex=<namespace>:<name>   -> PNG
+//   POST api.php?mods=upload  (body: gzipped JSON {mod: {...}, lang: {...}, tex: {"ns:name": "<base64 png>"}})
+$modDir = __DIR__ . '/cache/mods';
+const MOD_NS_RE = '/^[a-z0-9_-][a-z0-9_.-]{0,63}$/';
+const MOD_TEX_RE = '/^[a-z0-9_-][a-z0-9_.-]{0,99}$/';
+const MOD_MAX_BYTES = 1024 * 1024 * 1024;      // stop accepting uploads once the store reaches 1 GB
+
+if (isset($_GET['tex'])) {
+    $p = explode(':', strtolower((string)$_GET['tex']), 2);
+    $file = count($p) === 2 && $p[0] !== 'minecraft' && preg_match(MOD_NS_RE, $p[0]) && preg_match(MOD_TEX_RE, $p[1]) ? "$modDir/{$p[0]}/{$p[1]}.png" : '';
+    if ($file === '' || !is_file($file)) {
+        http_response_code(404);
+        header('Cache-Control: public, max-age=600');
+        exit;
+    }
+    header('Content-Type: image/png');
+    header('X-Content-Type-Options: nosniff');
+    header('Cache-Control: public, max-age=2592000');
+    readfile($file);
+    exit;
+}
+
+$modsAction = isset($_GET['mods']) ? $_GET['mods'] : '';
+if ($modsAction === 'index') {
+    $idx = is_file("$modDir/index.json") ? (json_decode(file_get_contents("$modDir/index.json"), true) ?: []) : [];
+    $out = [];
+    // t / l also count what was offered but turned down, so clients don't keep re-sending a mod
+    foreach ($idx['ns'] ?? [] as $ns => $r) $out[$ns] = ['t' => max($r['t'] ?? 0, $r['to'] ?? 0), 'l' => max($r['l'] ?? 0, $r['lo'] ?? 0), 'm' => $r['m'] ?? ''];
+    http_response_code(200);
+    header('Content-Type: application/json');
+    header('Cache-Control: public, max-age=60');
+    echo json_encode((object)$out);
+    exit;
+}
+
+if ($modsAction === 'lang') {
+    $out = [];
+    foreach (array_slice(explode(',', strtolower((string)($_GET['ns'] ?? ''))), 0, 200) as $ns) {
+        if (!preg_match(MOD_NS_RE, $ns) || !is_file("$modDir/$ns/lang.json")) continue;
+        $out += json_decode(file_get_contents("$modDir/$ns/lang.json"), true) ?: [];
+    }
+    http_response_code(200);
+    header('Content-Type: application/json');
+    header('Cache-Control: public, max-age=600');
+    echo json_encode((object)$out, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+if ($modsAction === 'upload' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $raw = file_get_contents('php://input', false, null, 0, 8 * 1024 * 1024 + 1);
+    if ($raw === false || strlen($raw) < 20 || strlen($raw) > 8 * 1024 * 1024) json_out(413, ['error' => 'Each upload must be under 8 MB.']);
+    $json = @gzdecode($raw, 32 * 1024 * 1024);
+    $in = $json === false ? null : json_decode($json, true);
+    if (!is_array($in)) json_out(400, ['error' => 'Invalid upload.']);
+    $mod = is_array($in['mod'] ?? null) ? $in['mod'] : [];
+    $modName = substr(trim(preg_replace('/[\x00-\x1f]+/', ' ', (string)($mod['name'] ?? $mod['id'] ?? ''))), 0, 80);
+
+    if (!is_dir($modDir)) @mkdir($modDir, 0755, true);
+    $lock = fopen("$modDir/index.lock", 'c');
+    if ($lock) flock($lock, LOCK_EX);
+    $idx = is_file("$modDir/index.json") ? (json_decode(file_get_contents("$modDir/index.json"), true) ?: []) : [];
+    $idx += ['bytes' => 0, 'ns' => []];
+    if ($idx['bytes'] > MOD_MAX_BYTES) {
+        if ($lock) { flock($lock, LOCK_UN); fclose($lock); }
+        json_out(507, ['error' => 'The mod texture store is full.']);
+    }
+
+    $added = 0;
+    $offered = ['to' => [], 'lo' => []];
+    $touch = function ($ns) use (&$idx, $modDir, $modName) {
+        if (!isset($idx['ns'][$ns])) $idx['ns'][$ns] = ['t' => 0, 'l' => 0, 'm' => $modName, 'added' => time()];
+        if (!is_dir("$modDir/$ns")) @mkdir("$modDir/$ns", 0755, true);
+    };
+    foreach (is_array($in['tex'] ?? null) ? $in['tex'] : [] as $key => $b64) {
+        $p = explode(':', strtolower((string)$key), 2);
+        if (count($p) !== 2 || $p[0] === 'minecraft' || !preg_match(MOD_NS_RE, $p[0]) || !preg_match(MOD_TEX_RE, $p[1]) || !is_string($b64)) continue;
+        $file = "$modDir/{$p[0]}/{$p[1]}.png";
+        $offered['to'][$p[0]] = ($offered['to'][$p[0]] ?? 0) + 1;
+        if (is_file($file)) continue;
+        $png = base64_decode($b64, true);
+        // real PNGs only, at texture sizes (animated textures are tall strips)
+        if ($png === false || strlen($png) > 256 * 1024 || strncmp($png, "\x89PNG\r\n\x1a\n", 8) !== 0) continue;
+        $size = @getimagesizefromstring($png);
+        if (!$size || $size[2] !== IMAGETYPE_PNG || $size[0] < 1 || $size[0] > 512 || $size[1] > 512 * 64) continue;
+        $touch($p[0]);
+        $tmp = $file . '.' . getmypid() . '.tmp';
+        if (@file_put_contents($tmp, $png) === false || !@rename($tmp, $file)) { @unlink($tmp); continue; }
+        $idx['ns'][$p[0]]['t']++;
+        $idx['bytes'] += strlen($png);
+        $added++;
+    }
+
+    // names: item.<ns>.<id>, block.<ns>.<id>, entity.<ns>.<id> - new keys are added, existing ones kept
+    $lang = [];
+    foreach (is_array($in['lang'] ?? null) ? $in['lang'] : [] as $k => $v) {
+        if (!is_string($v) || !preg_match('/^(item|block|entity)\.([a-z0-9_.-]{1,64}?)\.([a-z0-9_.\/-]{1,100})$/', (string)$k, $m) || $m[2] === 'minecraft' || !preg_match(MOD_NS_RE, $m[2])) continue;
+        $lang[$m[2]][$k] = substr(preg_replace('/[\x00-\x1f]+/', ' ', $v), 0, 200);
+    }
+    $names = 0;
+    foreach ($lang as $ns => $entries) $offered['lo'][$ns] = count($entries);
+    foreach ($lang as $ns => $entries) {
+        $touch($ns);
+        $have = is_file("$modDir/$ns/lang.json") ? (json_decode(file_get_contents("$modDir/$ns/lang.json"), true) ?: []) : [];
+        $new = array_diff_key($entries, $have);
+        if (!$new) continue;
+        $all = $have + $new;
+        $body = json_encode($all, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (@file_put_contents("$modDir/$ns/lang.json", $body) === false) continue;
+        $idx['ns'][$ns]['l'] = count($all);
+        $idx['bytes'] += strlen($body) - strlen(json_encode($have, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $names += count($new);
+    }
+
+    // a big mod comes in several batches - "counts" is how many the whole jar has
+    $claim = is_array($in['counts'] ?? null) ? $in['counts'] : [];
+    foreach ($offered as $f => $byNs) foreach ($byNs as $ns => $n) {
+        if (!isset($idx['ns'][$ns])) continue;
+        $c = $claim[$f === 'to' ? 't' : 'l'][$ns] ?? 0;
+        $idx['ns'][$ns][$f] = max($idx['ns'][$ns][$f] ?? 0, $n, is_int($c) ? min($c, 20000) : 0);
+    }
+    // written to a temp file and renamed, so ?mods=index never reads half a file
+    $tmp = "$modDir/index.json." . getmypid() . '.tmp';
+    if (@file_put_contents($tmp, json_encode($idx, JSON_UNESCAPED_SLASHES)) === false || !@rename($tmp, "$modDir/index.json")) @unlink($tmp);
+    if ($lock) { flock($lock, LOCK_UN); fclose($lock); }
+    json_out(200, ['textures' => $added, 'names' => $names]);
+}
+
 /* ---------- share links ---------- */
 // POST api.php?share=create  (body: gzipped JSON {v, players: [...]})  -> {"id": "..."}
 // GET  api.php?share=<id>                                              -> the gzipped JSON

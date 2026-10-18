@@ -393,6 +393,16 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
         /* ---------- schematic folder browser ---------- */
         .fbrowse { display: grid; grid-template-columns: minmax(160px, 240px) 1fr; gap: 12px; align-items: start; }
+        .bpbrowse { display: grid; grid-template-columns: minmax(220px, 340px) 1fr; gap: 14px; align-items: start; }
+        .bpbrowse button { text-align: left; }
+        .bprows { max-height: 75vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+        .bpsel { min-width: 0; }
+        .bphead { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .bphead .grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+        .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; border: 1px solid #0008; margin-right: 4px; }
+        .bploc { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .linkish { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; font: inherit; text-decoration: underline; }
+        @media (max-width: 700px) { .bpbrowse { grid-template-columns: 1fr; } .bprows { max-height: 300px; } .bpsel { --s: clamp(26px, 7.4vw, 46px); } }
         .ftree, .fpane .rows { max-height: 420px; overflow-y: auto; }
         .ftree { display: flex; flex-direction: column; gap: 2px; background: #1c1c1c; border-radius: 8px; padding: 4px; }
         .fbrowse button { text-align: left; }
@@ -442,17 +452,19 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 <button class="btn" id="pickDir">Choose folder</button>
                 <button class="btn" data-example="Sampledata/playerdata-sample.dat|Sampledata/playerstats-sample.json|Sampledata/playeradvancement-sample.json">Try an example</button>
                 <button class="btn" id="mySrv" data-srv="sync">View my server stats</button>
+                <button class="btn" id="pickJar" title="Save a mod's item textures and names to this site">Upload mod jars</button>
             </div>
             <p class="muted srv-about">“View my server stats” opens every player on my Minecraft server and saves a copy in your browser, so next time only changed files are downloaded.</p>
+            <p class="muted srv-about">“Upload mod jars” saves a mod's item textures and names to this site, so modded items show properly for everyone without the jar. Each mod only ever needs uploading once.</p>
             <div id="srvSync" class="srv hide" role="status" aria-live="polite"><div class="srv-msg"></div><div class="progress"><i></i></div><div class="srv-act"></div></div>
             <details>
                 <summary>What can I drop?</summary>
                 <ul>
                     <li><b>Players:</b> <span class="mono">playerdata/*.dat</span>, <span class="mono">stats/</span>, <span class="mono">advancements/</span>, SNBT from <span class="mono">/data get</span>, singleplayer <span class="mono">level.dat</span></li>
                     <li><b>Server:</b> <span class="mono">usercache.json</span>, <span class="mono">ops.json</span>, <span class="mono">whitelist.json</span>, <span class="mono">banned-players.json</span>, <span class="mono">banned-ips.json</span>, <span class="mono">server.properties</span>, <span class="mono">logs/</span> (sessions, deaths, chat)</li>
-                    <li><b>World:</b> <span class="mono">level.dat</span>, <span class="mono">data/scoreboard.dat</span>, <span class="mono">data/map_*.dat</span> (maps drawn in the inventory), <span class="mono">data/command_storage_*.dat</span>, <span class="mono">uid.dat</span>, <span class="mono">entities/</span> (owned pets - drop that folder on its own, it is skipped inside a world)</li>
+                    <li><b>World:</b> <span class="mono">level.dat</span>, <span class="mono">data/scoreboard.dat</span>, <span class="mono">data/map_*.dat</span> (maps drawn in the inventory), <span class="mono">data/command_storage_*.dat</span>, <span class="mono">uid.dat</span>, <span class="mono">region/</span> and <span class="mono">entities/</span> (placed backpacks, backpacks in chests and on the ground, owned pets, raw chunk NBT - a big world is only scanned when you press Scan)</li>
                     <li><b>Paper / Spigot / Bukkit:</b> <span class="mono">bukkit.yml</span>, <span class="mono">spigot.yml</span>, <span class="mono">config/paper-*.yml</span>, plugin configs, EssentialsX userdata, LuckPerms (YAML/JSON storage or <span class="mono">/lp export</span>), mcMMO, GriefPrevention, WorldGuard, Towny, Multiverse</li>
-                    <li><b>Fabric / Forge / NeoForge:</b> <span class="mono">mods/*.jar</span> (names and icons for modded items), Trinkets and Curios slots, <span class="mono">config/</span>, <span class="mono">serverconfig/</span>, FTB Quests / Teams / Chunks, Sophisticated Backpacks</li>
+                    <li><b>Fabric / Forge / NeoForge:</b> <span class="mono">mods/*.jar</span> (names and icons for modded items - saved to the site so nobody has to drop that mod again), Trinkets and Curios slots, <span class="mono">config/</span>, <span class="mono">serverconfig/</span>, FTB Quests / Teams / Chunks, Sophisticated Backpacks</li>
                     <li><b>Client:</b> <span class="mono">hotbar.nbt</span> (saved creative hotbars), <span class="mono">servers.dat</span>, resource pack <span class="mono">.zip</span>s (local textures)</li>
                     <li><b>Builds:</b> <span class="mono">.schem</span>, <span class="mono">.litematic</span>, <span class="mono">.schematic</span> and structure <span class="mono">.nbt</span> files - size and material list</li>
                 </ul>
@@ -465,6 +477,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 <input class="search" id="q" type="search" placeholder="Search items, enchants, keys…  ( / )" autocomplete="off">
                 <button class="btn small" id="add" title="Add more files">+ Add</button>
                 <button class="btn small hide" id="srvBtn" title="World, server, plugin and mod files">World &amp; server</button>
+                <button class="btn small hide" id="bpBtn" title="Every backpack found in the world, player files and backpack storage">Backpacks</button>
                 <button class="btn small" id="rpBtn" title="Render items with custom resource packs">Resource packs</button>
                 <button class="btn small primary" id="shareBtn" title="Create a link to this player">Share</button>
             </div>
@@ -474,6 +487,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         <input type="file" id="file" multiple hidden>
         <input type="file" id="dirFile" webkitdirectory multiple hidden>
         <input type="file" id="extraFile" multiple accept=".json" hidden>
+        <input type="file" id="jarFile" multiple accept=".jar" hidden>
     </div>
 
     <div id="tip" class="hide"></div>
@@ -1211,8 +1225,94 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         const TEXREF = new Map();       // "namespace:name" -> {blob, e} zip entry, read the first time it is shown
         const TEX = new Map();          // "namespace:name" -> object URL
         const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
-        const langName = (it) => (it.mod && LANG.size ? LANG.get(`item.${it.mod}.${it.base}`) || LANG.get(`block.${it.mod}.${it.base}`) || null : null);
-        const langId = (id) => { const m = /^([a-z0-9_.-]+):(.+)$/.exec(String(id)); return m && m[1] !== 'minecraft' && LANG.size ? LANG.get(`item.${m[1]}.${m[2]}`) || LANG.get(`block.${m[1]}.${m[2]}`) || LANG.get(`entity.${m[1]}.${m[2]}`) || null : null; };
+        const langName = (it) => (it.mod ? langGet(it.mod, [`item.${it.mod}.${it.base}`, `block.${it.mod}.${it.base}`]) : null);
+        const langId = (id) => { const m = /^([a-z0-9_.-]+):(.+)$/.exec(String(id)); return m && m[1] !== 'minecraft' ? langGet(m[1], [`item.${m[1]}.${m[2]}`, `block.${m[1]}.${m[2]}`, `entity.${m[1]}.${m[2]}`]) : null; };
+        function langGet(ns, keys) {
+            for (const k of keys) if (LANG.has(k)) return LANG.get(k);
+            const s = SRVMODS.get(ns);
+            if (s && s.l && !langAsked.has(ns)) wantLang(ns);
+            return null;
+        }
+
+        /* ---------- mod textures + names saved on the site (cache/mods, see api.php) ---------- */
+        // namespace -> {t: textures, l: names}. Uploaded once by anyone, used by everyone after that.
+        const SRVMODS = new Map();
+        const srvModsReady = fetch('api.php?mods=index').then((r) => (r.ok ? r.json() : null)).then((j) => {
+            if (!isObj(j)) return false;
+            for (const [ns, v] of Object.entries(j)) if (isObj(v)) SRVMODS.set(ns, v);
+            if (SRVMODS.size && (players.length || CTX.files.length)) srvModsRefresh();
+            return true;
+        }).catch(() => false);
+        const srvTex = (key) => { const ns = key.slice(0, key.indexOf(':')), s = SRVMODS.get(ns); return ns !== 'minecraft' && s && s.t ? 'api.php?tex=' + encodeURIComponent(key) : null; };
+        // names are fetched per namespace the first time an item from that mod is shown
+        const langAsked = new Set(), langWant = new Set();
+        let langTimer = 0;
+        function wantLang(ns) {
+            langAsked.add(ns);
+            langWant.add(ns);
+            clearTimeout(langTimer);
+            langTimer = setTimeout(async () => {
+                const list = [...langWant];
+                langWant.clear();
+                try {
+                    const j = await (await fetch('api.php?mods=lang&ns=' + encodeURIComponent(list.join(',')))).json();
+                    let n = 0;
+                    if (isObj(j)) for (const [k, v] of Object.entries(j)) if (typeof v === 'string' && !LANG.has(k)) { LANG.set(k, v); n++; }
+                    if (n) srvModsRefresh();
+                } catch (e) { }
+            }, 30);
+        }
+        // item names are worked out when a player is analysed, so redo that and draw again
+        function srvModsRefresh() {
+            if (batch) return setTimeout(srvModsRefresh, 200);
+            players.forEach((p) => (p.P = analyse(p.P.d)));
+            render();
+        }
+        // after a mod jar is read: send the textures and names the site doesn't have yet, in batches of ~3 MB
+        let modQueue = Promise.resolve(), modTally = null;
+        function saveModToSite(info, blob, tex, names) {
+            if (!tex.length && !Object.keys(names).length) return;
+            const tally = (modTally = modTally || { mods: 0, tex: 0, names: 0, err: '', pending: 0 });
+            tally.pending++;
+            modQueue = modQueue.then(async () => {
+                if (!await srvModsReady) return;
+                const count = (list) => list.reduce((m, ns) => m.set(ns, (m.get(ns) || 0) + 1), new Map());
+                const texNs = count(tex.map(([k]) => k.split(':')[0])), nameNs = count(Object.keys(names).map((k) => k.split('.')[1]));
+                const short = (ns, n, f) => ((SRVMODS.get(ns) || {})[f] || 0) < n;
+                const sendTex = tex.filter(([k]) => { const ns = k.split(':')[0]; return short(ns, texNs.get(ns), 't'); });
+                const sendNames = [...nameNs].some(([ns, n]) => short(ns, n, 'l')) ? names : {};
+                if (!sendTex.length && !Object.keys(sendNames).length) return;
+                const mod = { id: info.id, name: info.name, version: info.version, loader: info.loader };
+                const counts = { t: Object.fromEntries(texNs), l: Object.fromEntries(nameNs) };
+                let part = { mod, counts, lang: sendNames, tex: {} }, size = 0, got = 0;
+                const send = async () => {
+                    const r = await fetch('api.php?mods=upload', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: await gzip(JSON.stringify(part)) });
+                    const j = await r.json().catch(() => ({}));
+                    if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+                    tally.tex += j.textures || 0;
+                    tally.names += j.names || 0;
+                    got += (j.textures || 0) + (j.names || 0);
+                    part = { mod, counts, lang: {}, tex: {} };
+                    size = 0;
+                };
+                for (const [k, z] of sendTex) {
+                    const u = await zipRead(blob, z);
+                    if (u.length > 256 * 1024) continue;
+                    part.tex[k] = b64(u);
+                    size += u.length;
+                    if (size > 3 * 1024 * 1024) await send();
+                }
+                if (size || Object.keys(part.lang).length) await send();
+                if (got) tally.mods++;
+                for (const [ns, n] of texNs) { const s = SRVMODS.get(ns) || { t: 0, l: 0 }; s.t = Math.max(s.t, n); SRVMODS.set(ns, s); }
+                for (const [ns, n] of nameNs) { const s = SRVMODS.get(ns) || { t: 0, l: 0 }; s.l = Math.max(s.l, n); SRVMODS.set(ns, s); }
+            }).catch((err) => { console.warn('mod upload', info.file, err); tally.err = err.message; }).then(() => {
+                if (--tally.pending) return;
+                if (modTally === tally) modTally = null;
+                if (tally.mods) toast(`Saved ${num(tally.tex)} textures and ${num(tally.names)} names from ${tally.mods} mod${tally.mods === 1 ? '' : 's'} to the site - nobody needs to upload ${tally.mods === 1 ? 'it' : 'them'} again.`, 'note');
+                else if (tally.err) toast(`Could not save the mod textures to the site: ${tally.err}`, 'err');
+            });
+        }
         const texKey = (it) => { const id = typeof it === 'string' ? strip(it) : it.id; return id.includes(':') ? id : 'minecraft:' + id; };
         function texURL(key) {
             if (TEX.has(key)) return TEX.get(key);
@@ -1278,7 +1378,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             // skinned player heads: 3D isometric render with the hat layer (minecraftitems.xyz only draws Steve)
             if (typeof it !== 'string' && it.head) return `https://mc-heads.net/head/${encodeURIComponent(it.head)}/128`;
             if (typeof it !== 'string' && it.mapId !== undefined) { const m = mapURL(it.mapId); if (m) return m; }
-            const local = texURL(texKey(it));
+            const local = texURL(texKey(it)) || srvTex(texKey(it));
             if (local) return local;
             if (localFirst(id)) return `/minecraft/tools/item-list/minecraft_${id}.png`;
             let u = 'api.php?item=' + encodeURIComponent(id);
@@ -1356,6 +1456,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 configs: [], ess: new Map(), lpUsers: new Map(), lpGroups: new Map(), mcmmo: [], gpPlayers: new Map(), gpClaims: [], wg: [],
                 towny: { residents: new Map(), towns: new Map(), nations: new Map() }, mv: new Map(), mods: [], packs: [],
                 ftb: { chapters: [], lang: new Map(), progress: new Map(), teams: [], chunks: new Map() }, backpacks: new Map(), schems: [],
+                bpStore: new Map(), bpLog: new Map(), bpSeen: [], regions: [], regionDone: new Set(), raw: [],
             };
         }
         const CTX = freshCtx();
@@ -1520,17 +1621,23 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         function render() {
             REG = []; NODES = [];
             const hasCtx = CTX.files.length > 0;
-            if (!players.length) view = hasCtx ? 'server' : 'player';
+            const bpN = bpList().length;
             if (!hasCtx) view = 'player';
+            else if (!players.length && view === 'player') view = 'server';
+            if (view === 'backpacks' && !bpN) view = players.length ? 'player' : 'server';
             $('#drop').classList.toggle('hide', players.length > 0 || hasCtx);
             $('#viewer').classList.toggle('hide', players.length === 0 && !hasCtx);
             const srvBtn = $('#srvBtn');
             srvBtn.classList.toggle('hide', !hasCtx || (!players.length && view === 'server'));
             srvBtn.textContent = view === 'server' ? 'Back to player' : 'World & server';
-            $('#shareBtn').classList.toggle('hide', view === 'server' || !players.length);
+            const bpBtn = $('#bpBtn');
+            bpBtn.classList.toggle('hide', !bpN);
+            bpBtn.textContent = view === 'backpacks' ? 'Close backpacks' : `Backpacks (${num(bpN)})`;
+            $('#shareBtn').classList.toggle('hide', view !== 'player' || !players.length);
             renderTabs();
             disposeSkins();
             if (view === 'server') { $('#player').innerHTML = serverViewHTML(); applySearch(); return; }
+            if (view === 'backpacks') { $('#player').innerHTML = bpViewHTML(); applySearch(); return; }
             if (active < 0) { $('#player').innerHTML = ''; return; }
             const pl = players[active];
             const P = pl.P, d = P.d;
@@ -1711,7 +1818,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 });
             }
             const pl = players[active];
-            if (pl) $('.pick-btn', box).innerHTML = `<img src="${avatarOf(pl)}" alt="" onerror="this.src='${MISSING}'"><span class="nm">${esc(view === 'server' ? 'World & server' : labelOf(pl))}</span>` +
+            if (pl) $('.pick-btn', box).innerHTML = `<img src="${avatarOf(pl)}" alt="" onerror="this.src='${MISSING}'"><span class="nm">${esc(view === 'server' ? 'World & server' : view === 'backpacks' ? 'Backpacks' : labelOf(pl))}</span>` +
                 (players.length > 1 ? `<span class="n">${players.length} players</span>` : '') + '<span class="car">▾</span>';
             else $('.pick-btn', box).innerHTML = '<span class="nm" style="padding-left:6px">No players loaded</span>';
             if (pickOpen) renderPickList();
@@ -2439,9 +2546,11 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             if (CTX.ftb.chapters.length) S.push(questBookHTML());
             if (CTX.schems.length) S.push(schemsHTML());
             if (CTX.configs.length) S.push(filesHTML('w-config', 'Config files', 'comparator', CTX.configs));
-            if (CTX.data.length) S.push(filesHTML('w-data', 'Other data files', 'structure_block', CTX.data));
+            if (CTX.regions.length) S.push(regionsHTML());
+            const rawList = worldRawList();
+            if (rawList.length) S.push(filesHTML('w-data', 'World data <small class="muted">raw NBT</small>', 'structure_block', rawList, true));
             const html = S.join('');
-            const jumps = [['w-world', 'World'], ['w-props', 'server.properties'], ['w-bans', 'Bans'], ['w-score', 'Scoreboard'], ['w-servers', 'Server list'], ['w-plugins', 'Plugins'], ['w-packs', 'Resource packs'], ['w-players', 'Players'], ['w-logs', 'Logs'], ['w-maps', 'Maps'], ['w-hotbar', 'Hotbars'], ['w-mods', 'Mods'], ['w-quests', 'Quests'], ['w-schem', 'Schematics'], ['w-config', 'Configs'], ['w-data', 'Data files']];
+            const jumps = [['w-region', 'Region files'],['w-world', 'World'], ['w-props', 'server.properties'], ['w-bans', 'Bans'], ['w-score', 'Scoreboard'], ['w-servers', 'Server list'], ['w-plugins', 'Plugins'], ['w-packs', 'Resource packs'], ['w-players', 'Players'], ['w-logs', 'Logs'], ['w-maps', 'Maps'], ['w-hotbar', 'Hotbars'], ['w-mods', 'Mods'], ['w-quests', 'Quests'], ['w-schem', 'Schematics'], ['w-config', 'Configs'], ['w-data', 'Raw world data']];
             return '<nav class="jump">' + jumps.filter(([id]) => html.includes(`id="${id}"`)).map(([id, t]) => `<a href="#${id}">${t}</a>`).join('') + '</nav>' + html;
         }
 
@@ -2684,22 +2793,211 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 <h3 class="sub">Materials</h3><div class="chips">${s.list.slice(0, 1000).map(([n, c]) => `<span class="chip" data-s="${esc(n.toLowerCase())}" title="${esc(n)}"><span class="ico">${imgTag(blockIcon(n))}</span>${esc(langId(n) || pretty(n))} × ${esc(num(c))}${c >= 64 ? ` <small class="muted">(${esc(num(Math.floor(c / 64)))} stacks${c % 64 ? ' + ' + (c % 64) : ''})</small>` : ''}</span>`).join('')}</div>`;
         }
 
+        /* =====================================================================
+           Backpacks: every Sophisticated Backpacks (or similar) backpack found in backpack storage,
+           region / entities files and player files, with where it is and what is in it
+           ===================================================================== */
+        let BPC = null;          // {sig, list, byKey} - rebuilt when files or players change
+        let BPSEL = null;        // key of the backpack open on the Backpacks page
+        const BP_SLOTS = { backpack: 27, copper_backpack: 45, iron_backpack: 54, gold_backpack: 81, diamond_backpack: 108, netherite_backpack: 120 };
+        function bpList() {
+            const sig = `${CTX.files.length}|${CTX.bpSeen.length}|${CTX.bpStore.size}|${players.map((p) => p.key || p.file).join()}`;
+            if (BPC && BPC.sig === sig) return BPC.list;
+            const byKey = new Map();
+            const get = (k) => { if (!byKey.has(k)) byKey.set(k, { key: k, uuid: k.startsWith('item:') ? null : k, locs: [], raws: [] }); return byKey.get(k); };
+            const add = (h, loc, fallbackKey) => {
+                if (!isBp(h.raw.id) && !(h.uuid && CTX.bpStore.has(h.uuid))) return;
+                const b = get(h.uuid || fallbackKey);
+                b.raws.push(h.raw);
+                b.locs.push({ ...loc, chain: h.chain });
+            };
+            CTX.bpSeen.forEach((h, i) => add(h, h, `item:w${i}`));
+            players.forEach((p) => {
+                const d = p.P.d, pos = Array.isArray(d.Pos) ? d.Pos : null;
+                for (const [k, v] of Object.entries(d)) {
+                    if (!v || typeof v !== 'object') continue;
+                    const where = k === 'Inventory' ? 'Inventory' : k === 'EnderItems' ? 'Ender chest' : k === 'equipment' ? 'Equipment' : 'Mod slots';
+                    bpFind(v, [], [where]).forEach((h, j) => add(h, { kind: 'player', player: p, dim: p.P.dim, pos }, `item:${p.key || p.file}:${k}:${j}`));
+                }
+            });
+            // backpacks kept inside other backpacks
+            for (const [u, s] of CTX.bpStore) bpFind(s.entry, [], []).forEach((h, j) => { if (h.uuid !== u) add(h, { kind: 'inside', parent: u }, `item:in:${u}:${j}`); });
+            for (const u of CTX.bpStore.keys()) get(u);
+            for (const u of CTX.bpLog.keys()) get(u);
+            for (const b of byKey.values()) {
+                b.log = ((b.uuid && CTX.bpLog.get(b.uuid)) || []).slice().sort((x, y) => (+y.accessTime || 0) - (+x.accessTime || 0));
+                b.store = (b.uuid && CTX.bpStore.get(b.uuid)) || null;
+                const last = b.log[0] || {};
+                const logId = Object.entries(last).find(([k, v]) => /registry|itemid/i.test(k) && typeof v === 'string');
+                b.synthetic = !b.raws.length;
+                b.item = normItem(b.raws[0] || { id: logId ? logId[1] : 'sophisticatedbackpacks:backpack', count: 1, components: b.uuid ? { 'sophisticatedcore:storage_uuid': b.uuid } : {} });
+                if (b.synthetic && typeof last.backpackName === 'string' && last.backpackName) { b.item.nameHTML = esc(last.backpackName); b.item.namePlain = last.backpackName; }
+                b.contents = b.item.contents || [];
+                b.total = b.contents.reduce((s, x) => s + x.item.count, 0);
+            }
+            const list = [...byKey.values()].sort((a, b) => b.contents.length - a.contents.length || a.item.namePlain.localeCompare(b.item.namePlain));
+            BPC = { sig, list, byKey };
+            return list;
+        }
+        const bpColor = (v) => (typeof v === 'number' ? `#${(v >>> 0 & 0xffffff).toString(16).padStart(6, '0')}` : null);
+        // the first value under the item's components / tag whose key matches re
+        const bpVal = (it, re) => { for (const o of [it.c, it.tag]) for (const [k, v] of Object.entries(o)) if (re.test(k)) return v; return undefined; };
+        function bpFindKey(v, re, depth = 0) {
+            if (depth > 8 || !isObj(v)) return null;
+            for (const [k, x] of Object.entries(v)) if (re.test(k) && isObj(x)) return x;
+            for (const x of Object.values(v)) { const r = bpFindKey(x, re, depth + 1); if (r) return r; }
+            return null;
+        }
+        function bpWhere(l, short) {
+            if (l.kind === 'player') return `${esc(l.chain.join(' › '))} of <b>${esc(labelOf(l.player))}</b>`;
+            if (l.kind === 'inside') {
+                const p = BPC && BPC.byKey.get(l.parent);
+                return `Inside ${short ? 'another backpack' : `<button class="linkish" data-act="bpsel" data-b="${esc(l.parent)}">${p ? p.item.namePlain : 'another backpack'}</button>`}`;
+            }
+            const at = l.pos && l.pos.every((v) => Number.isFinite(+v)) ? l.pos.map((v) => Math.floor(v)).join(', ') : '?';
+            return `${esc(l.placed ? 'Placed' : l.chain.join(' › '))} at <span class="mono">${at}</span> · ${esc(dimName(l.dim || 'minecraft:overworld'))}`;
+        }
+        // names of every player uuid under keys like "owner" in the item or its storage entry
+        function bpOwners(b) {
+            const out = new Set();
+            const walk = (v, depth) => {
+                if (depth > 10 || !v || typeof v !== 'object') return;
+                for (const [k, x] of Object.entries(v)) {
+                    if (/owner/i.test(k)) { const u = normUuid(x); if (u) out.add(nameFor(uuidKey(u))); else if (typeof x === 'string' && x && !/[{}]/.test(x)) out.add(x); }
+                    if (x && typeof x === 'object') walk(x, depth + 1);
+                }
+            };
+            walk(b.item.raw, 0);
+            if (b.store) walk(b.store.entry, 0);
+            return [...out];
+        }
+        function bpSearchText(b) {
+            return [b.item.namePlain, b.item.full, b.uuid || '', ...b.locs.map((l) => plain(bpWhere(l, true))), ...b.log.map((r) => r.playerName), ...b.contents.map((x) => x.item.namePlain + ' ' + x.item.id)].join(' ').toLowerCase();
+        }
+        function bpRowHTML(b) {
+            const l = b.locs[0];
+            const where = l ? bpWhere(l, true) + (b.locs.length > 1 ? ` <span class="muted">+${b.locs.length - 1} more</span>` : '') : b.store ? 'Location not found' : 'No contents saved';
+            return `<button class="rowi srow fitem${b.key === BPSEL ? ' on' : ''}" data-act="bpsel" data-b="${esc(b.key)}" data-s="${esc(bpSearchText(b))}">
+                <span class="ico">${imgTag(b.item)}</span><span class="grow"><b>${b.item.nameHTML}</b><br><small>${where}</small></span><small>${b.contents.length ? `${num(b.total)} items` : 'empty'}</small></button>`;
+        }
+        function bpViewHTML() {
+            const list = bpList();
+            if (!BPC.byKey.has(BPSEL)) BPSEL = list.length ? list[0].key : null;
+            const pending = CTX.regions.filter((r) => !CTX.regionDone.has(r.path)), mb = pending.reduce((s, r) => s + mcaSize(r), 0) / 1e6;
+            const located = list.filter((b) => b.locs.length).length, items = list.reduce((s, b) => s + b.total, 0);
+            const notes = [];
+            if (!CTX.bpStore.size) notes.push('No backpack storage loaded, so contents are unknown - add <span class="mono">data/sophisticatedbackpacks.dat</span> from the world.');
+            if (!CTX.regions.length) notes.push('To find placed backpacks and ones in chests or on the ground, drop the whole world folder (with <span class="mono">region/</span> and <span class="mono">entities/</span>).');
+            else if (pending.length) notes.push(`${num(pending.length)} region file${pending.length === 1 ? ' has' : 's have'} not been scanned yet, so some locations may be missing.`);
+            const sel = BPSEL && BPC.byKey.get(BPSEL);
+            return `<div class="section card" id="b-list"><h2>${imgTag(list[0] ? list[0].item : 'chest', false)} Backpacks <span class="n">${num(list.length)} found · ${num(located)} located · ${num(items)} items inside</span>
+                    ${pending.length ? `<button class="btn small primary" data-act="scanmca">Scan world${mb >= 1 ? ` (${num(Math.round(mb))} MB)` : ''}</button>` : ''}</h2>
+                ${notes.map((n) => `<p class="muted" style="font-size:13px;margin:0 0 6px">${n}</p>`).join('')}
+                <div class="bpbrowse"><div class="bprows">${list.map(bpRowHTML).join('')}</div>
+                <div class="bpsel" id="b-sel">${sel ? bpDetailHTML(sel) : ''}</div></div></div>`;
+        }
+        function bpDetailHTML(b) {
+            const it = b.item;
+            const slots = +bpVal(it, /inventory_?slots/i) || 0, upSlots = bpVal(it, /upgrade_?slots/i);
+            const maxSlot = b.contents.reduce((m, x) => Math.max(m, +x.slot || 0), -1);
+            const size = Math.max(slots || BP_SLOTS[it.base] || 27, maxSlot + 1);
+            const main = bpColor(bpVal(it, /main_?color|cloth_?color/i)), accent = bpColor(bpVal(it, /accent_?color|border_?color|trim_?color/i));
+            const holders = [...new Set(b.locs.filter((l) => l.kind === 'player').map((l) => labelOf(l.player)))];
+            const owners = bpOwners(b), last = b.log[0];
+            const when = (r) => (+r.accessTime > 1e11 ? dateAgo(+r.accessTime) : r.accessTime !== undefined ? esc(String(r.accessTime)) : '');
+            const rows = [
+                ['Type', esc(langId(it.full) || pretty(it.base))],
+                ['Storage id', b.uuid ? `<span class="mono">${esc(b.uuid)}</span> <button class="btn small" data-copy="${esc(b.uuid)}">Copy</button>` : '<span class="muted">none - never opened, so nothing is stored</span>'],
+                ['Used', b.store ? `${num(b.contents.length)} / ${num(size)} slots · ${num(b.total)} items` : '<span class="muted">contents unknown (no backpack storage loaded)</span>'],
+                ['Upgrade slots', upSlots !== undefined ? esc(String(upSlots)) : null],
+                ['Colours', main || accent ? [main, accent].filter(Boolean).map((c) => `<span class="swatch" style="background:${c}"></span><span class="mono">${c}</span>`).join(' ') : null],
+                ['Held by', holders.length ? holders.map(esc).join(', ') : null],
+                ['Owner', owners.length ? owners.map(esc).join(', ') : null],
+                ['Last opened by', last ? `${esc(last.playerName)} ${when(last)}` : null],
+                ['Storage file', b.store ? `<span class="mono">${esc(b.store.file)}</span>` : null],
+            ];
+            const locs = b.locs.map((l) => `<div class="rowi bploc"><span class="grow">${bpWhere(l)}</span>${l.kind !== 'inside' && l.pos ? tpBtn(...l.pos) : ''}</div>`).join('');
+            const bySlot = {};
+            b.contents.forEach((x) => (bySlot[x.slot] = x.item));
+            const grid = b.store ? `<h3 class="sub">Contents</h3><div class="gui"><div class="slots" style="grid-template-columns:repeat(9,var(--s))">${Array.from({ length: size }, (_, i) => slotHTML(bySlot[i], `${it.namePlain} › Slot ${i}`)).join('')}</div></div>` : '';
+            const upInv = b.store && bpFindKey(b.store.entry, /^upgrade_?inventory$/i);
+            const ups = upInv && Array.isArray(upInv.Items) ? upInv.Items.map((x, i) => ({ slot: x.Slot ?? x.slot ?? i, item: normItem(isObj(x.item) ? x.item : x) })).filter((x) => x.item) : [];
+            const upGrid = ups.length ? `<h3 class="sub">Upgrades</h3><div class="gui"><div class="slots">${ups.map((x) => slotHTML(x.item, `${it.namePlain} › Upgrade ${x.slot}`)).join('')}</div></div>` : '';
+            const log = b.log.length > 1 ? `<h3 class="sub">Access log</h3><div class="rows">${b.log.map((r) => `<div class="rowi"><span class="grow">${esc(r.playerName)}</span><small>${when(r)}</small></div>`).join('')}</div>` : '';
+            const tree = (title, v) => (isObj(v) ? `<details class="fileblk"><summary>${title}</summary><div class="tree">${Object.entries(maskTree(v)).map(([k, x]) => treeNode(k, x, 1)).join('')}</div></details>` : '');
+            const anchor = b.locs.find((l) => l.anchor);
+            return `<div class="bphead">${slotHTML(it, 'Backpacks')}<div class="grow"><div style="font-size:20px;font-weight:700;text-shadow:2px 2px #000">${it.nameHTML}</div><div class="muted mono" style="font-size:12px">${esc(it.full)}</div></div></div>
+                ${kvHTML(rows)}
+                <h3 class="sub">Where it is</h3>${locs ? `<div class="rows">${locs}</div>` : `<p class="muted" style="font-size:13px">Not found in any loaded player file${CTX.regions.length ? ' or scanned region file' : ' - drop the world folder to search the world'}.</p>`}
+                ${grid}${upGrid}${log}
+                <h3 class="sub">Raw NBT</h3>
+                ${tree('Backpack storage entry', b.store && b.store.entry)}${tree(b.synthetic ? 'Item (rebuilt from storage - not found in the world)' : 'Item', it.raw)}${tree(`Container: ${esc(anchor ? bpLabel(anchor.anchor.id || '?') : '')}`, anchor && anchor.anchor)}`;
+        }
+        function bpPick(key) {
+            BPSEL = key;
+            const sel = BPC && BPC.byKey.get(key), box = $('#b-sel');
+            if (!sel || !box) return;
+            $$('#b-list .bprows .fitem').forEach((el) => el.classList.toggle('on', el.dataset.b === key));
+            box.innerHTML = bpDetailHTML(sel);
+            if (innerWidth < 700) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
         // values under keys like "password" or "secret" are swapped for a click-to-show placeholder
         function maskTree(v, key = '') {
             if (Array.isArray(v)) return v.map((x) => maskTree(x, key));
             if (isObj(v)) { const o = {}; for (const [k, x] of Object.entries(v)) o[k] = maskTree(x, k); return o; }
             return PRIVATE_KEY.test(String(key)) && v !== '' && v !== null && typeof v !== 'boolean' ? { __priv: v } : v;
         }
-        function filesHTML(id, title, icon, files) {
-            return `<div class="card section" id="${id}"><h2>${imgTag(icon, false)} ${title} <span class="n">${num(files.length)}</span></h2>${files.map((f) =>
-                `<details class="fileblk" data-blk="${FILEBLK.push(f) - 1}"><summary class="mono">${esc(f.file)}</summary></details>`).join('')}</div>`;
+        // searchable: the page search looks through every file's keys and values (see applySearch)
+        function filesHTML(id, title, icon, files, searchable) {
+            const list = files.map((f) => `<details class="fileblk" data-blk="${FILEBLK.push(f) - 1}"><summary class="mono">${esc(f.file)}</summary></details>`).join('');
+            return `<div class="card section" id="${id}"><h2>${imgTag(icon, false)} ${title} <span class="n">${num(files.length)}</span></h2>` +
+                (searchable ? `<p class="muted" style="font-size:13px;margin:0 0 8px">Open a file to explore every key, or use the search box to look through all of them.</p><div class="hits tree hide" id="hits"></div><div id="rawTree">${list}</div>` : list) + '</div>';
+        }
+        const maskedOf = (f) => f.masked || (f.masked = maskTree(f.data));
+        // every world / data file as raw NBT: the NBT files, plus JSON lists nothing else understood
+        function worldRawList() {
+            const seen = new Set(CTX.raw.map((f) => f.file));
+            return CTX.raw.concat(CTX.data.filter((f) => !seen.has(f.file)));
+        }
+
+        /* ---------- region files: a list of chunks, each opened as raw NBT ---------- */
+        let CHUNKS = [];
+        function regionsHTML() {
+            CHUNKS = [];
+            const pending = CTX.regions.filter((r) => !CTX.regionDone.has(r.path)), mb = pending.reduce((s, r) => s + mcaSize(r), 0) / 1e6;
+            const byDim = new Map();
+            CTX.regions.forEach((e) => { const k = `${dimName(mcaDim(e.path))} · ${/(^|\/)entities\//i.test(e.path.replace(/\\/g, '/')) ? 'entities' : 'blocks'}`; if (!byDim.has(k)) byDim.set(k, []); byDim.get(k).push(e); });
+            const sortKey = (e) => { const m = /r\.(-?\d+)\.(-?\d+)\.mca$/i.exec(e.path) || [0, 0, 0]; return Math.abs(+m[1]) + Math.abs(+m[2]); };
+            return `<div class="card section" id="w-region"><h2>${imgTag('grass_block', false)} Region files <span class="n">${num(CTX.regions.length)}</span>
+                    ${pending.length ? `<button class="btn small primary" data-act="scanmca" title="Read every chunk looking for backpacks and owned pets">Scan ${num(pending.length)} for backpacks${mb >= 1 ? ` (${num(Math.round(mb))} MB)` : ''}</button>` : ''}</h2>
+                <p class="muted" style="font-size:13px;margin:0 0 8px">${pending.length ? 'Not scanned yet - press Scan to find placed backpacks, backpacks in chests and on the ground, and owned pets.' : 'Scanned for backpacks and owned pets.'} Open a file to browse its chunks as raw NBT.</p>
+                ${[...byDim].map(([k, list]) => `<details class="fileblk"><summary>${esc(k)} <span class="n">${num(list.length)}</span></summary>${list.sort((a, b) => sortKey(a) - sortKey(b)).slice(0, 2000).map((e) =>
+                    `<details class="fileblk" data-blk="${FILEBLK.push({ file: e.path, mca: e }) - 1}"><summary class="mono">${esc(e.path.split('/').pop())}</summary></details>`).join('')}${list.length > 2000 ? `<div class="muted">and ${num(list.length - 2000)} more</div>` : ''}</details>`).join('')}</div>`;
+        }
+        async function fillRegion(det, f) {
+            det.insertAdjacentHTML('beforeend', '<div class="muted tl">Reading…</div>');
+            try {
+                const chunks = mcaChunks(f.mca, await f.mca.read());
+                det.lastElementChild.remove();
+                det.insertAdjacentHTML('beforeend', chunks.length ? chunks.map((ch) => `<details class="fileblk" data-chunk="${CHUNKS.push(ch) - 1}"><summary class="mono">Chunk ${ch.cx}, ${ch.cz} <small class="muted">blocks ${ch.cx * 16}, ${ch.cz * 16}</small></summary></details>`).join('') : '<div class="muted tl">No chunks saved in this file.</div>');
+            } catch (err) { det.lastElementChild.textContent = 'Could not read this file: ' + err.message; }
+        }
+        async function fillChunk(det) {
+            if (det.dataset.filled) return;
+            det.dataset.filled = 1;
+            try {
+                const data = maskTree(readNBT(await CHUNKS[+det.dataset.chunk].read()));
+                det.insertAdjacentHTML('beforeend', `<div class="tree">${Object.entries(data).map(([k, v]) => treeNode(k, v, 0)).join('')}</div>`);
+            } catch (err) { det.insertAdjacentHTML('beforeend', `<div class="muted tl">Could not read this chunk: ${esc(err.message)}</div>`); }
         }
         function fillBlock(det) {
             if (det.dataset.filled) return;
             det.dataset.filled = 1;
             const f = FILEBLK[+det.dataset.blk];
+            if (f.mca) { fillRegion(det, f); return; }
             if (f.text !== undefined) { det.insertAdjacentHTML('beforeend', `<pre class="cfg">${esc(f.text)}</pre>`); return; }
-            const data = maskTree(f.data);
+            const data = maskedOf(f);
             const entries = Array.isArray(data) ? data.map((x, i) => [i, x]) : isObj(data) ? Object.entries(data) : [['value', data]];
             det.insertAdjacentHTML('beforeend', `<div class="tree">${entries.slice(0, 500).map(([k, v]) => treeNode(k, v, 0)).join('')}${entries.length > 500 ? `<div class="muted">and ${entries.length - 500} more keys</div>` : ''}</div>`);
         }
@@ -2906,13 +3204,14 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             (function walk(v, path) {
                 for (const [k, x] of Array.isArray(v) ? v.map((x, i) => [i, x]) : Object.entries(v)) {
                     if (out.length >= 300) return;
+                    if (isObj(x) && '__priv' in x) continue;       // masked private value - never searchable
                     const p = Array.isArray(v) ? `${path}[${k}]` : path ? `${path}.${k}` : String(k);
                     if (x !== null && typeof x === 'object') {
                         if (re.test(String(k))) out.push([p, Array.isArray(x) ? `[${x.length}]` : `{${Object.keys(x).length}}`]);
                         walk(x, p);
                     } else if (re.test(String(k)) || re.test(String(x))) out.push([p, JSON.stringify(x)]);
                 }
-            })(players[active].P.d, '');
+            })(view === 'server' ? Object.fromEntries(worldRawList().map((f) => [f.file, maskedOf(f)])) : players[active].P.d, '');
             hits.innerHTML = `<div class="muted" style="margin-bottom:6px">${out.length >= 300 ? '300+' : out.length} matches for “${esc(q)}”</div>` + out.map(([p, v]) => `<div class="tl"><span class="k">${mark(p)}</span> = <span class="v string">${mark(v)}</span></div>`).join('');
             hits.classList.remove('hide');
             tree.classList.add('hide');
@@ -3010,7 +3309,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             [/(^|\/)(players\/)?(stats|advancements)\/[^/]+\.json$/, 'nbt'],
             [/(^|\/)level\.dat$/, 'nbt'],
             [/(^|\/)uid\.dat$/, 'uid'],
-            [/(^|\/)entities\/r\.-?\d+\.-?\d+\.mca$/, 'entities'],
+            [/(^|\/)(region|entities)\/r\.-?\d+\.-?\d+\.mca$/, 'mca'],
             [/(^|\/)data\/ftb[^/]*\/.+\.snbt$/, 'ftb'],
             [/(^|\/)data\/[^/]+\.dat$/, 'nbt'],
             [/(^|\/)(usercache|ops|whitelist|banned-players|banned-ips)\.json$/, 'nbt'],
@@ -3039,9 +3338,9 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             [/(^|\/)(schematics|structures|generated\/[^/]+\/structures)\/.+\.nbt$/, 'schem'],
         ];
         // folders never worth walking into (huge, or nothing to read)
-        // entities/ too: thousands of region-sized files - drop that folder on its own to find owned pets
-        const SKIP_DIRS = /^(region|entities|poi|\.?voxy|datapacks|backups?|cache|\.cache|libraries|versions|bundler|crash-reports|debug|screenshots|resourcepacks|shaderpacks|\.git|node_modules|dynmap|bluemap|squaremap|pl3xmap|web|tiles|coreprotect|\.paper-remapped|\.fabric|journeymap|xaero\w*|assets|natives|downloads)$/i;
-        const SKIP_PATH = /(^|\/)(region|entities|poi|\.?voxy|datapacks|backups?|cache|libraries|versions|bundler|crash-reports|dynmap|bluemap|squaremap|pl3xmap|coreprotect|assets)\//i;
+        // region/ and entities/ are walked, but their files are only listed - they are read when scanned (scanRegions)
+        const SKIP_DIRS = /^(poi|\.?voxy|datapacks|backups?|cache|\.cache|libraries|versions|bundler|crash-reports|debug|screenshots|resourcepacks|shaderpacks|\.git|node_modules|dynmap|bluemap|squaremap|pl3xmap|web|tiles|coreprotect|\.paper-remapped|\.fabric|journeymap|xaero\w*|assets|natives|downloads)$/i;
+        const SKIP_PATH = /(^|\/)(poi|\.?voxy|datapacks|backups?|cache|libraries|versions|bundler|crash-reports|dynmap|bluemap|squaremap|pl3xmap|coreprotect|assets)\//i;
         function kindOf(path) {
             const p = path.replace(/\\/g, '/').toLowerCase();
             for (const [re, k] of ROUTES) if (re.test(p)) return k;
@@ -3053,7 +3352,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             if (k) return k;
             const n = name.toLowerCase();
             if (/\.(zip|jar|tar|tgz|tar\.gz)$/.test(n)) return 'archive';
-            if (/\.mca$/.test(n)) return 'entities';
+            if (/\.mca$/.test(n)) return 'mca';
             if (/\.log(\.gz)?$/.test(n)) return 'log';
             if (/\.ya?ml$/.test(n)) return 'yaml';
             if (/\.(toml|json5|cfg|properties)$/.test(n)) return 'config';
@@ -3394,23 +3693,31 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 }
             } catch (err) { showNote(`${e.name}: could not read the mod details (${err.message}).`); }
             // item textures first; block textures stand in for block items (exact name, then _side / _front / _top)
-            const blocks = [];
+            // mine / names: what gets saved to the site for everyone (saveModToSite)
+            const blocks = [], mine = [], names = {};
             let tex = 0;
             for (const z of list) {
                 const m = /^assets\/([^/]+)\/textures\/(item|items|block|blocks)\/([^/]+)\.png$/.exec(z.name);
                 if (m && m[1] !== 'minecraft') {
-                    if (m[2][0] === 'i') { TEXREF.set(`${m[1]}:${m[3]}`, { blob, e: z }); tex++; } else blocks.push([m[1], m[3], z]);
+                    if (m[2][0] === 'i') { TEXREF.set(`${m[1]}:${m[3]}`, { blob, e: z }); mine.push([`${m[1]}:${m[3]}`, z]); tex++; } else blocks.push([m[1], m[3], z]);
                     continue;
                 }
                 const l = /^assets\/([^/]+)\/lang\/en_us\.(json|lang)$/i.exec(z.name);
-                if (l) try { const t = await text(z); for (const [k, v] of Object.entries(l[2].toLowerCase() === 'json' ? parseLoose(t) : parseProps(t))) if (typeof v === 'string') LANG.set(k, v); } catch (err) { }
+                if (l) try {
+                    const t = await text(z);
+                    for (const [k, v] of Object.entries(l[2].toLowerCase() === 'json' ? parseLoose(t) : parseProps(t))) if (typeof v === 'string') {
+                        LANG.set(k, v);
+                        if (/^(item|block|entity)\.[a-z0-9_.-]+$/.test(k) && k.split('.')[1] !== 'minecraft') names[k] = v;
+                    }
+                } catch (err) { }
             }
             const rank = (n) => (/_side$/.test(n) ? 1 : /_front$/.test(n) ? 2 : /_top$/.test(n) ? 3 : 0);
             blocks.sort((a, b) => rank(a[1]) - rank(b[1]));
             for (const [ns, n, z] of blocks) {
                 const k = `${ns}:${n.replace(/_(side|front|top)$/, '')}`;
-                if (!TEXREF.has(k)) { TEXREF.set(k, { blob, e: z }); tex++; }
+                if (!TEXREF.has(k)) { TEXREF.set(k, { blob, e: z }); mine.push([k, z]); tex++; }
             }
+            saveModToSite(info, blob, mine.filter(([k]) => /^[a-z0-9_-][a-z0-9_.-]*:[a-z0-9_-][a-z0-9_.-]*$/.test(k)), names);
             const icon = info.icon && get(String(info.icon).replace(/^\.?\//, ''));
             if (icon) TEXREF.set('modicon:' + (info.id || e.name), { blob, e: icon });
             CTX.mods.push({ ...info, textures: tex });
@@ -3488,19 +3795,24 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             if (name && !CTX.names.has(k)) CTX.names.set(k, String(name));
         }
 
-        function indexStorage(root) {
+        // the main inventory list somewhere under a storage entry ("inventory" wins over upgrades / filters)
+        const findItems = (v, depth = 0) => {
+            if (depth > 8 || !v || typeof v !== 'object') return null;
+            if (Array.isArray(v.Items) && v.Items.every((x) => isObj(x))) return v.Items;
+            if (isObj(v.inventory)) { const r = findItems(v.inventory, depth + 1); if (r) return r; }
+            for (const x of Object.values(v)) { const r = isObj(x) ? findItems(x, depth + 1) : null; if (r) return r; }
+            return null;
+        };
+        function indexStorage(root, file = '') {
             let n = 0;
-            const findItems = (v, depth) => {
-                if (depth > 8 || !v || typeof v !== 'object') return null;
-                if (Array.isArray(v.Items) && v.Items.every((x) => isObj(x))) return v.Items;
-                for (const x of Object.values(v)) { const r = isObj(x) ? findItems(x, depth + 1) : null; if (r) return r; }
-                return null;
-            };
             const walk = (v, depth) => {
                 if (depth > 12 || !v || typeof v !== 'object') return;
                 if (Array.isArray(v)) { v.forEach((x) => walk(x, depth + 1)); return; }
-                const u = storageUuid(v), items = u && findItems(v, 0);
-                if (items) { CTX.backpacks.set(u, items); n++; return; }
+                const u = storageUuid(v);
+                // Sophisticated Backpacks' access log: who last opened each backpack, and when
+                if (u && typeof v.playerName === 'string') { if (!CTX.bpLog.has(u)) CTX.bpLog.set(u, []); CTX.bpLog.get(u).push(v); n++; return; }
+                const items = u && findItems(v);
+                if (items) { CTX.backpacks.set(u, items); CTX.bpStore.set(u, { file, entry: v }); n++; return; }
                 for (const x of Object.values(v)) walk(x, depth + 1);
             };
             walk(root, 0);
@@ -3588,6 +3900,8 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             if (!isObj(data)) throw new Error('The file did not contain an NBT compound.');
             const kind = classify(data, e.name, e.path);
             const sd = isObj(data.data) ? data.data : {};
+            // every world file stays explorable as raw NBT on the World & server page
+            if (kind !== 'player' && kind !== 'stats' && kind !== 'advancements') CTX.raw.push({ file: e.path, data });
             switch (kind) {
                 case 'player': case 'stats': case 'advancements':
                     parsed.push({ name: e.name, data, kind, modified: e.modified });
@@ -3609,7 +3923,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                     CTX.scoreboard = { objectives: new Map((sd.Objectives || []).map((o) => [o.Name, { name: o.DisplayName ?? null, criteria: o.CriteriaName || '' }])), scores: sd.PlayerScores || [], teams: sd.Teams || [], slots: isObj(sd.DisplaySlots) ? sd.DisplaySlots : {} };
                     return ctxFile(e, 'Scoreboard');
                 case 'backpacks':
-                    if (!indexStorage(data)) { CTX.data.push({ file: e.path, data }); return ctxFile(e, 'Data'); }
+                    if (!indexStorage(data, e.path)) { CTX.data.push({ file: e.path, data }); return ctxFile(e, 'Data'); }
                     return ctxFile(e, 'Backpack storage');
                 case 'schem': {
                     const info = schemInfo(e.name, data);
@@ -3627,7 +3941,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                     return ctxFile(e, 'LuckPerms');
                 default:
                     // other world data (command storage, raids, mod data...) - still index any backpack-style storage in it
-                    if (/(^|\/)data\//i.test(e.path.replace(/\\/g, '/')) && indexStorage(data)) return ctxFile(e, 'Backpack storage');
+                    if (/(^|\/)data\//i.test(e.path.replace(/\\/g, '/')) && indexStorage(data, e.path)) return ctxFile(e, 'Backpack storage');
                     CTX.data.push({ file: e.path, data });
                     return ctxFile(e, 'Data');
             }
@@ -3641,31 +3955,11 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 CTX.worlds.set(dashUuid([...u.subarray(0, 16)].map((b) => b.toString(16).padStart(2, '0')).join('')), parts.length > 1 ? parts[parts.length - 2] : 'world');
                 ctxFile(e, 'World id');
             },
-            // owned pets: tamed animals whose Owner is a player
-            async entities(e) {
-                const u = await e.read();
-                const p = '/' + e.path.replace(/\\/g, '/').toLowerCase();
-                const dm = /\/dimensions\/([^/]+)\/([^/]+)\/entities\//.exec(p);
-                const dim = dm ? `${dm[1]}:${dm[2]}` : /\/dim-1\//.test(p) ? 'minecraft:the_nether' : /\/dim1\//.test(p) ? 'minecraft:the_end' : 'minecraft:overworld';
-                const dv = new DataView(u.buffer, u.byteOffset, u.byteLength), jobs = [];
-                const owner = (en) => {
-                    if (!isObj(en)) return;
-                    const k = 'Health' in en && strip(en.id) !== 'item' ? uuidKey(Array.isArray(en.Owner) ? uuidOf(en.Owner) : typeof en.Owner === 'string' ? en.Owner : en.OwnerUUID) : null;
-                    if (k) { en._dim = dim; if (!CTX.pets.has(k)) CTX.pets.set(k, []); CTX.pets.get(k).push(en); }
-                    (Array.isArray(en.Passengers) ? en.Passengers : []).forEach(owner);
-                };
-                for (let i = 0; i < 1024 && u.length >= 8192; i++) {
-                    const loc = dv.getUint32(i * 4), off = (loc >>> 8) * 4096;
-                    if (!off || off + 5 > u.length) continue;
-                    const len = dv.getUint32(off), ct = u[off + 4];
-                    if (len < 2 || off + 4 + len > u.length || ct < 1 || ct > 3) continue;
-                    const raw = u.subarray(off + 5, off + 4 + len);
-                    jobs.push((ct === 3 ? Promise.resolve(raw) : inflateAs(raw, ct === 1 ? 'gzip' : 'deflate')).then((c) => {
-                        if (hasBytes(c, OWNER)) (readNBT(c).Entities || []).forEach(owner);
-                    }).catch(() => { }));
-                }
-                await Promise.all(jobs);
-                ctxFile(e, 'Entities');
+            // region / entities files are only listed here - a world has thousands, so they are read by scanRegions()
+            async mca(e) {
+                if (CTX.regions.some((r) => r.path === e.path)) return;
+                CTX.regions.push(e);
+                ctxFile(e, /(^|\/)entities\//i.test(e.path.replace(/\\/g, '/')) ? 'Entities' : 'Region');
             },
             async props(e) { CTX.props = { file: e.path, data: parseProps(await readText(e)) }; ctxFile(e, 'Server settings'); },
             async log(e) {
@@ -3794,6 +4088,87 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             return false;
         }
 
+        /* ---------- region + entities files: backpacks placed or stored in the world, owned pets ---------- */
+        // a backpack by its item name, not its namespace (sophisticatedbackpacks:pickup_upgrade is not one)
+        const isBp = (id) => /backpack/i.test(String(id).split(':').pop());
+        const BP_PAT = ['backpack', 'torage_uuid', 'ontentsUuid'].map((s) => new TextEncoder().encode(s));
+        const mcaDim = (path) => {
+            const p = '/' + path.replace(/\\/g, '/').toLowerCase();
+            const dm = /\/dimensions\/([^/]+)\/([^/]+)\/(region|entities)\//.exec(p);
+            return dm ? `${dm[1]}:${dm[2]}` : /\/dim-1\//.test(p) ? 'minecraft:the_nether' : /\/dim1\//.test(p) ? 'minecraft:the_end' : 'minecraft:overworld';
+        };
+        const mcaSize = (e) => (e.blob ? e.blob.size : e.size || 4e6);
+        // the chunks in a region file: [{cx, cz, read() -> decompressed NBT bytes}]
+        function mcaChunks(e, u) {
+            const m = /r\.(-?\d+)\.(-?\d+)\.mca$/i.exec(e.path) || [0, 0, 0];
+            const dv = new DataView(u.buffer, u.byteOffset, u.byteLength), out = [];
+            for (let i = 0; i < 1024 && u.length >= 8192; i++) {
+                const off = (dv.getUint32(i * 4) >>> 8) * 4096;
+                if (!off || off + 5 > u.length) continue;
+                const len = dv.getUint32(off), ct = u[off + 4];
+                if (len < 2 || off + 4 + len > u.length || ct < 1 || ct > 3) continue;
+                const raw = u.subarray(off + 5, off + 4 + len);
+                out.push({ cx: +m[1] * 32 + (i % 32), cz: +m[2] * 32 + Math.floor(i / 32), read: () => (ct === 3 ? Promise.resolve(raw) : inflateAs(raw, ct === 1 ? 'gzip' : 'deflate')) });
+            }
+            return out;
+        }
+        // owned pets: tamed animals whose Owner is a player
+        function petOwner(en, dim) {
+            if (!isObj(en)) return;
+            const k = 'Health' in en && strip(en.id) !== 'item' ? uuidKey(Array.isArray(en.Owner) ? uuidOf(en.Owner) : typeof en.Owner === 'string' ? en.Owner : en.OwnerUUID) : null;
+            if (k) { en._dim = dim; if (!CTX.pets.has(k)) CTX.pets.set(k, []); CTX.pets.get(k).push(en); }
+            (Array.isArray(en.Passengers) ? en.Passengers : []).forEach((p) => petOwner(p, dim));
+        }
+        const itemLike = (v) => typeof v.id === 'string' && !('x' in v && 'z' in v) && !Array.isArray(v.Pos) && ('count' in v || 'Count' in v || isObj(v.components) || isObj(v.tag));
+        const bpLabel = (id) => (strip(String(id)) === 'item' ? 'Dropped item' : langId(id) || pretty(strip(String(id))));
+        // every backpack-like item under v -> [{raw, uuid, chain}], chain = the containers it sits in
+        function bpFind(v, out, chain, depth = 0) {
+            if (depth > 48 || !v || typeof v !== 'object') return out;
+            if (Array.isArray(v)) { for (const x of v) if (x && typeof x === 'object') bpFind(x, out, chain, depth + 1); return out; }
+            let next = chain;
+            if (itemLike(v)) {
+                const u = storageUuid(v.components) || storageUuid(v.tag);
+                if (u || isBp(v.id)) out.push({ raw: v, uuid: u, chain });
+                next = chain.concat(bpLabel(v.id));
+            }
+            for (const x of Object.values(v)) if (x && typeof x === 'object') bpFind(x, out, next, depth + 1);
+            return out;
+        }
+        function scanChunk(root, dim, file, pets) {
+            const lv = isObj(root.Level) ? root.Level : root, anchors = [];
+            for (const be of [lv.block_entities, lv.TileEntities].find(Array.isArray) || []) if (isObj(be)) anchors.push({ kind: 'block', raw: be, pos: [be.x, be.y, be.z] });
+            for (const en of [lv.Entities, root.Entities].find(Array.isArray) || []) {
+                if (!isObj(en)) continue;
+                anchors.push({ kind: 'entity', raw: en, pos: Array.isArray(en.Pos) ? en.Pos : null });
+                if (pets) petOwner(en, dim);
+            }
+            for (const a of anchors) {
+                const id = String(a.raw.id || '?');
+                for (const h of bpFind(a.raw, [], [bpLabel(id)])) CTX.bpSeen.push({ ...h, kind: a.kind, dim, pos: a.pos, anchor: a.raw, file, placed: a.kind === 'block' && isBp(id) && h.chain.length === 1 });
+            }
+        }
+        let scanning = false;
+        async function scanRegions(list = CTX.regions.filter((e) => !CTX.regionDone.has(e.path))) {
+            if (scanning || !list.length) return 0;
+            scanning = true;
+            const before = CTX.bpSeen.length;
+            let n = 0;
+            try {
+                for (const e of list) {
+                    progress(`Scanning region files for backpacks and pets… ${++n} / ${list.length}`);
+                    try {
+                        const u = await e.read(), dim = mcaDim(e.path);
+                        await Promise.all(mcaChunks(e, u).map((ch) => ch.read().then((c) => {
+                            const pets = hasBytes(c, OWNER);
+                            if (pets || BP_PAT.some((p) => hasBytes(c, p))) scanChunk(readNBT(c), dim, e.path, pets);
+                        }).catch(() => { })));
+                    } catch (err) { console.error(e.path, err); }
+                    CTX.regionDone.add(e.path);
+                }
+            } finally { scanning = false; progress(null); }
+            return CTX.bpSeen.length - before;
+        }
+
         /* ---------- server logs: sessions, deaths, advancements, chat ---------- */
         const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
         function parseLog(text, fname, modified) {
@@ -3896,6 +4271,9 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                     showError(`Could not read ${e.path}: ${err.message}`);
                 }
             }
+            // a few region files (a dropped entities/ folder, a small world) are scanned right away; big worlds wait for the button
+            const pendingMca = CTX.regions.filter((r) => !CTX.regionDone.has(r.path));
+            if (pendingMca.length && pendingMca.reduce((s, r) => s + mcaSize(r), 0) <= 96e6) await scanRegions(pendingMca);
             if (CTX.logDirty) buildSessions();
             progress(null);
             const ctxAdded = CTX.files.length - ctxBefore;
@@ -4163,7 +4541,9 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         /* =====================================================================
            Events
            ===================================================================== */
-        const fileInput = $('#file'), extraInput = $('#extraFile'), dirInput = $('#dirFile');
+        const fileInput = $('#file'), extraInput = $('#extraFile'), dirInput = $('#dirFile'), jarInput = $('#jarFile');
+        $('#pickJar').onclick = () => jarInput.click();
+        jarInput.onchange = () => { addFiles(loose(jarInput.files)); jarInput.value = ''; };
         const loose = (list) => [...list].map((f) => ({ file: f, path: f.name, loose: true }));
         $('#pick').onclick = () => fileInput.click();
         $('#pickDir').onclick = () => dirInput.click();
@@ -4177,6 +4557,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             if (list.length) addFiles(list); else showError('Nothing the viewer understands was found in that folder.');
         };
         $('#srvBtn').onclick = () => { view = view === 'server' ? 'player' : 'server'; closeDrawer(); render(); scrollTo({ top: $('#viewer').offsetTop - 10 }); };
+        $('#bpBtn').onclick = () => { view = view === 'backpacks' ? (players.length ? 'player' : 'server') : 'backpacks'; closeDrawer(); render(); scrollTo({ top: $('#viewer').offsetTop - 10 }); };
 
         let dragDepth = 0;
         addEventListener('dragenter', (e) => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) { dragDepth++; $('#dragOverlay').classList.remove('hide'); } });
@@ -4265,6 +4646,8 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 if (a === 'closeall' && confirm(`Remove all ${players.length} players?`)) { players.length = 0; active = -1; pickOpen = false; closeDrawer(); render(); }
                 if (a === 'extra') extraInput.click();
                 if (a === 'sdir' || a === 'ssel') schemPick(a, act);
+                if (a === 'bpsel') bpPick(act.dataset.b);
+                if (a === 'scanmca') scanRegions().then((n) => { toast(n ? `Found ${num(n)} more backpack${n === 1 ? '' : 's'} in the world` : 'Scan finished', 'note'); render(); });
                 if (a === 'clearctx' && confirm('Forget all world, server, plugin and mod files? Loaded players stay.')) {
                     TEX.forEach((u) => u.startsWith('blob:') && URL.revokeObjectURL(u));
                     TEX.clear(); TEXREF.clear(); LANG.clear();
@@ -4300,6 +4683,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             if (det.tagName !== 'DETAILS' || !det.open) return;
             if (det.dataset.n !== undefined) fillNode(det);
             if (det.dataset.blk !== undefined) fillBlock(det);
+            if (det.dataset.chunk !== undefined) fillChunk(det);
             if (det.dataset.lazy === 'recipes') { const f = $('[data-fill]', det); if (!f.childElementCount) fillRecipes(f); }
         }, true);
 
