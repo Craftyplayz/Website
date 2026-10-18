@@ -1,398 +1,59 @@
 <?php
-$site_page = [];
+$site_page = [
+    'components' => true,
+    'ui' => true,
+    'css' => ['/assets/css/pages/books-covers-bulk.css'],
+];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <?php page_head(); ?>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        .tool-wrap {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 40px;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .search-section {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            margin-bottom: 30px;
-        }
-
-        .search-container {
-            position: relative;
-            width: 100%;
-        }
-
-        #searchInput {
-            width: 100%;
-            padding: 15px 20px;
-            font-size: 1.1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        #searchInput:focus {
-            border-color: #667eea;
-        }
-
-        #suggestions {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            max-height: 400px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .suggestion-item {
-            padding: 12px 15px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background-color 0.2s;
-        }
-
-        .suggestion-item:hover {
-            background-color: #f8f9ff;
-        }
-
-        .suggestion-item img {
-            width: 40px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-
-        .suggestion-info {
-            flex: 1;
-        }
-
-        .suggestion-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
-        }
-
-        .suggestion-author {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-
-        .results-section {
-            display: none;
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .results-title {
-            font-size: 1.5rem;
-            color: #333;
-        }
-
-        .download-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        .info-box {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 6px;
-            padding: 12px;
-            margin-top: 15px;
-            font-size: 0.9rem;
-            color: #856404;
-        }
-
-        .info-box strong {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        select {
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            cursor: pointer;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .books-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
-        }
-
-        .book-card {
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
-            transition: all 0.3s;
-            position: relative;
-        }
-
-        .book-card.selected {
-            border-color: #667eea;
-            background-color: #f8f9ff;
-        }
-
-        .book-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .book-checkbox {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .book-cover {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            background: #f0f0f0;
-        }
-
-        .book-number {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .book-title {
-            font-size: 0.9rem;
-            color: #333;
-            font-weight: 500;
-            line-height: 1.3;
-            margin-top: 8px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        .no-cover {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f0f0f0;
-            color: #999;
-            font-size: 0.85rem;
-        }
-
-        .message {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9ff;
-            border-radius: 8px;
-            color: #666;
-            margin: 20px 0;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-
-            .books-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            }
-
-            .results-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .download-controls {
-                width: 100%;
-                flex-wrap: wrap;
-            }
-        }
-    </style>
+    <link rel="preconnect" href="https://www.googleapis.com">
 </head>
 <body>
     <?php site_header(); ?>
-    <div class="tool-wrap">
-    <div class="container">
-        <header>
-            <h1>📚 Book Series Cover Downloader</h1>
-            <p class="subtitle">Search for a book and download all covers from its series</p>
-        </header>
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Bulk Cover Downloader</h1>
+        <p class="page-lede">Search for a book, then download the covers of every book in its series.</p>
 
-        <div class="search-section">
-            <div class="search-container">
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    placeholder="Search for a book (e.g., Harry Potter, Dune, The Hunger Games...)"
-                    autocomplete="off"
-                >
-                <div id="suggestions"></div>
-            </div>
+        <div class="bulk-search">
+            <label class="visually-hidden" for="searchInput">Search for a book</label>
+            <input type="search" class="field" id="searchInput" autocomplete="off"
+                placeholder="Search for a book (e.g. Harry Potter, Dune, The Hunger Games)  /">
+            <div class="suggest" id="suggestions" role="listbox" hidden></div>
         </div>
 
-        <div class="results-section" id="resultsSection">
-            <div class="results-header">
-                <h2 class="results-title" id="resultsTitle">Series Books</h2>
-                <div class="download-controls">
-                    <select id="sizeSelect">
-                        <option value="1">Thumbnail</option>
-                        <option value="3" selected>Medium</option>
-                        <option value="5">Large</option>
-                    </select>
-                    <button class="btn btn-secondary" id="openTabsBtn">
-                        Open in Tabs (<span id="tabsCount">0</span>)
-                    </button>
-                    <button class="btn btn-primary" id="downloadBtn">
-                        Download ZIP (<span id="selectedCount">0</span>)
-                    </button>
-                </div>
+        <section class="card" id="resultsSection" hidden>
+            <div class="bulk-head">
+                <h2 id="resultsTitle">Series books</h2>
+                <label class="visually-hidden" for="sizeSelect">Cover size</label>
+                <select class="field" id="sizeSelect">
+                    <option value="1">Thumbnail</option>
+                    <option value="3" selected>Medium</option>
+                    <option value="5">Large</option>
+                </select>
+                <button type="button" class="btn" id="openTabsBtn">Open in tabs <span id="tabsCount">0</span></button>
+                <button type="button" class="btn primary" id="downloadBtn">Download ZIP <span id="selectedCount">0</span></button>
             </div>
-            <div class="info-box">
-                <strong>💡 Download Tips:</strong>
-                Google may block automated downloads with CAPTCHAs. If ZIP download fails, use "Open in Tabs" to view all covers in separate tabs, then right-click to save each one.
-            </div>
-            <div id="booksGrid" class="books-grid"></div>
-        </div>
-    </div>
+            <p class="note bulk-tip">Google may block automated downloads. If the ZIP fails, use "Open in tabs" and save each cover from its tab.</p>
+            <div id="booksGrid" class="covers"></div>
+        </section>
+    </main>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
-        // ============================================
-        // CONFIGURATION - ENTER YOUR API KEY HERE
-        // ============================================
-        const GOOGLE_BOOKS_API_KEY = 'AIzaSyBOk3ZcZ3Em4H2atm6LYo6U54Ut939f2x4';
-        // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+        const { esc, toast } = UI;
 
+        // shortcut: this key is visible in the page source; move the calls behind a PHP proxy if it gets abused.
+        const GOOGLE_BOOKS_API_KEY = 'AIzaSyBOk3ZcZ3Em4H2atm6LYo6U54Ut939f2x4';
         const API_BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
-        
+
         let debounceTimer;
         let currentSeriesBooks = [];
-        
+
         const searchInput = document.getElementById('searchInput');
         const suggestionsDiv = document.getElementById('suggestions');
         const resultsSection = document.getElementById('resultsSection');
@@ -404,12 +65,14 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         const tabsCountSpan = document.getElementById('tabsCount');
         const resultsTitle = document.getElementById('resultsTitle');
 
+        const message = (el, text) => { el.innerHTML = `<p class="msg">${esc(text)}</p>`; };
+
         // Search input with debounce
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.trim();
-            
+
             if (query.length < 3) {
-                suggestionsDiv.style.display = 'none';
+                suggestionsDiv.hidden = true;
                 return;
             }
 
@@ -422,92 +85,97 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         // Close suggestions when clicking outside
         document.addEventListener('click', (e) => {
             if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
-                suggestionsDiv.style.display = 'none';
+                suggestionsDiv.hidden = true;
+            }
+        });
+
+        // "/" focuses the search, Esc closes the suggestions
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/' && !/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) {
+                e.preventDefault();
+                searchInput.focus();
+            } else if (e.key === 'Escape' && !suggestionsDiv.hidden) {
+                suggestionsDiv.hidden = true;
+                searchInput.focus();
             }
         });
 
         // Fetch autocomplete suggestions
         async function fetchSuggestions(query) {
             try {
-                suggestionsDiv.innerHTML = '<div class="loading">Searching...</div>';
-                suggestionsDiv.style.display = 'block';
+                message(suggestionsDiv, 'Searching…');
+                suggestionsDiv.hidden = false;
 
-                // Search for books with proper filtering
                 const url = `${API_BASE_URL}?q=${encodeURIComponent(query)}&maxResults=10&printType=books&key=${GOOGLE_BOOKS_API_KEY}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
                 if (!data.items || data.items.length === 0) {
-                    suggestionsDiv.innerHTML = '<div class="loading">No results found</div>';
+                    message(suggestionsDiv, 'No results found');
                     return;
                 }
 
-                // Filter to only show books (not magazines) with covers
-                const filteredBooks = data.items.filter(item => {
-                    const info = item.volumeInfo;
-                    return info.imageLinks?.thumbnail; // Only show books with covers
-                });
+                // Only show books with covers
+                const filteredBooks = data.items.filter(item => item.volumeInfo.imageLinks?.thumbnail);
 
                 if (filteredBooks.length === 0) {
-                    suggestionsDiv.innerHTML = '<div class="loading">No books with covers found</div>';
+                    message(suggestionsDiv, 'No books with covers found');
                     return;
                 }
 
                 displaySuggestions(filteredBooks);
             } catch (error) {
                 console.error('Error fetching suggestions:', error);
-                suggestionsDiv.innerHTML = '<div class="loading">Error loading suggestions</div>';
+                message(suggestionsDiv, 'Could not load suggestions');
             }
         }
 
         // Display autocomplete suggestions
         function displaySuggestions(books) {
             suggestionsDiv.innerHTML = '';
-            
+
             books.forEach(book => {
                 const info = book.volumeInfo;
-                const item = document.createElement('div');
-                item.className = 'suggestion-item';
-                
-                const thumbnail = info.imageLinks?.thumbnail || '';
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'sug';
+                item.setAttribute('role', 'option');
+
+                const thumbnail = (info.imageLinks?.thumbnail || '').replace('http://', 'https://');
                 const title = info.title || 'Unknown Title';
                 const authors = info.authors?.join(', ') || 'Unknown Author';
-                
+
                 item.innerHTML = `
-                    ${thumbnail ? `<img src="${thumbnail}" alt="${title}">` : '<div style="width:40px;height:60px;background:#f0f0f0;border-radius:4px;"></div>'}
-                    <div class="suggestion-info">
-                        <div class="suggestion-title">${title}</div>
-                        <div class="suggestion-author">${authors}</div>
-                    </div>
+                    ${thumbnail ? `<img src="${esc(thumbnail)}" alt="" width="40" height="60">` : '<span class="ph"></span>'}
+                    <span><b>${esc(title)}</b><small>${esc(authors)}</small></span>
                 `;
-                
+
                 item.addEventListener('click', () => {
-                    suggestionsDiv.style.display = 'none';
+                    suggestionsDiv.hidden = true;
                     searchInput.value = title;
                     findSeriesBooks(book);
                 });
-                
+
                 suggestionsDiv.appendChild(item);
             });
-            
-            suggestionsDiv.style.display = 'block';
+
+            suggestionsDiv.hidden = false;
         }
 
         // Find all books in the series
         async function findSeriesBooks(selectedBook) {
             try {
-                booksGrid.innerHTML = '<div class="spinner"></div>';
-                resultsSection.style.display = 'block';
+                message(booksGrid, 'Finding the rest of the series…');
+                resultsSection.hidden = false;
 
                 const info = selectedBook.volumeInfo;
                 const title = info.title;
                 const authors = info.authors?.[0] || '';
 
-                // Extract series name from title
                 const seriesName = extractSeriesName(title);
-                
+
                 let books = [];
-                
+
                 if (seriesName) {
                     resultsTitle.textContent = `Series: ${seriesName}`;
                     books = await searchBySeriesName(seriesName, authors);
@@ -517,18 +185,19 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 }
 
                 if (books.length === 0) {
-                    booksGrid.innerHTML = '<div class="message">No series books found. Try searching for another book.</div>';
+                    message(booksGrid, 'No series books found. Try searching for another book.');
+                    currentSeriesBooks = [];
+                    updateSelectedCount();
                     return;
                 }
 
-                // Sort books
                 books = sortSeriesBooks(books);
                 currentSeriesBooks = books;
-                
+
                 displaySeriesBooks(books);
             } catch (error) {
                 console.error('Error finding series:', error);
-                booksGrid.innerHTML = '<div class="message">Error loading series books. Please try again.</div>';
+                message(booksGrid, 'Could not load the series. Please try again.');
             }
         }
 
@@ -536,7 +205,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         function extractSeriesName(title) {
             // Remove subtitle after colon first for cleaner matching
             const mainTitle = title.split(':')[0];
-            
+
             // Pattern 1: "Series Name (Book 1)" or "Series Name #1" or "Series Name, Book 1"
             let match = mainTitle.match(/^(.+?)\s*[\(,#]\s*(?:Book|Vol|Volume|#)?\s*\d+/i);
             if (match) return match[1].trim();
@@ -544,7 +213,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             // Pattern 2: "Series Name Number" (e.g., "Dune 1", "Foundation 3")
             match = mainTitle.match(/^(.+?)\s+\d+$/);
             if (match) return match[1].trim();
-            
+
             // Pattern 3: "The Series Name Series" (e.g., "The Hunger Games Series")
             match = mainTitle.match(/^(.+?)\s+Series$/i);
             if (match) return match[1].trim();
@@ -565,27 +234,24 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         async function searchBySeriesName(seriesName, author) {
             // Try multiple search strategies for best results
             const searches = [
-                // Strategy 1: Use series parameter (most specific)
                 `subject:"${seriesName}" inauthor:"${author}"`,
-                // Strategy 2: Regular search with series in quotes
                 `"${seriesName}" inauthor:"${author}"`,
-                // Strategy 3: Fallback without quotes
                 `${seriesName} ${author}`
             ];
 
             let allBooks = [];
-            
+
             for (const query of searches) {
                 const url = `${API_BASE_URL}?q=${encodeURIComponent(query)}&maxResults=40&printType=books&key=${GOOGLE_BOOKS_API_KEY}`;
-                
+
                 try {
                     const response = await fetch(url);
                     const data = await response.json();
-                    
+
                     if (data.items) {
                         allBooks = allBooks.concat(data.items);
                     }
-                    
+
                     // If we found good results, don't try other strategies
                     if (allBooks.length >= 5) break;
                 } catch (error) {
@@ -598,7 +264,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             // Remove duplicates by ID
             const uniqueBooks = [];
             const seenIds = new Set();
-            
+
             for (const item of allBooks) {
                 if (!seenIds.has(item.id)) {
                     seenIds.add(item.id);
@@ -620,13 +286,12 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         // Search by author (fallback)
         async function searchByAuthor(author) {
             const url = `${API_BASE_URL}?q=inauthor:"${encodeURIComponent(author)}"&maxResults=40&printType=books&key=${GOOGLE_BOOKS_API_KEY}`;
-            
+
             const response = await fetch(url);
             const data = await response.json();
-            
+
             if (!data.items) return [];
-            
-            // Filter to only include books with covers
+
             return data.items
                 .filter(item => item.volumeInfo.imageLinks?.thumbnail)
                 .map(item => formatBookData(item));
@@ -667,61 +332,44 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         // Sort series books
         function sortSeriesBooks(books) {
             return books.sort((a, b) => {
-                // Sort by book number if available
                 if (a.bookNumber !== null && b.bookNumber !== null) {
                     return a.bookNumber - b.bookNumber;
                 }
-                
-                // Otherwise sort by publication date
                 return (a.publishedDate || '').localeCompare(b.publishedDate || '');
             });
         }
 
         // Display series books
         function displaySeriesBooks(books) {
-            booksGrid.innerHTML = '';
-            
-            books.forEach((book, index) => {
-                const card = document.createElement('div');
-                card.className = 'book-card selected';
-                card.dataset.index = index;
-                
-                let coverImg;
-                if (book.coverUrl) {
-                    coverImg = `<img src="${book.coverUrl}" alt="${book.title}" class="book-cover" onerror="this.parentElement.querySelector('.book-cover').classList.add('no-cover'); this.style.display='none';">`;
-                } else {
-                    coverImg = `<div class="book-cover no-cover">No Cover</div>`;
-                }
-                
-                card.innerHTML = `
-                    <input type="checkbox" class="book-checkbox" checked data-index="${index}">
-                    ${book.bookNumber ? `<div class="book-number">Book ${book.bookNumber}</div>` : ''}
-                    ${coverImg}
-                    <div class="book-title">${book.title}</div>
-                `;
-                
-                booksGrid.appendChild(card);
-            });
+            booksGrid.innerHTML = books.map((book, index) => `
+                <label class="bc">
+                    <input type="checkbox" checked data-index="${index}" aria-label="Include ${esc(book.title)}">
+                    ${book.bookNumber ? `<span class="badge">Book ${book.bookNumber}</span>` : ''}
+                    ${book.coverUrl
+                        ? `<img src="${esc(getCoverUrl(book.coverUrl, 1))}" alt="" width="128" height="192" loading="lazy" decoding="async">`
+                        : '<span class="no-cover">No cover</span>'}
+                    <span class="t">${esc(book.title)}</span>
+                </label>
+            `).join('');
 
             updateSelectedCount();
-            setupCheckboxListeners();
         }
 
-        // Setup checkbox listeners
-        function setupCheckboxListeners() {
-            const checkboxes = document.querySelectorAll('.book-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', (e) => {
-                    const index = parseInt(e.target.dataset.index);
-                    currentSeriesBooks[index].selected = e.target.checked;
-                    
-                    const card = e.target.closest('.book-card');
-                    card.classList.toggle('selected', e.target.checked);
-                    
-                    updateSelectedCount();
-                });
-            });
-        }
+        // A cover that fails to load becomes a "No cover" box
+        booksGrid.addEventListener('error', (e) => {
+            if (e.target.tagName !== 'IMG') return;
+            const ph = document.createElement('span');
+            ph.className = 'no-cover';
+            ph.textContent = 'No cover';
+            e.target.replaceWith(ph);
+        }, true);
+
+        booksGrid.addEventListener('change', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            if (isNaN(index)) return;
+            currentSeriesBooks[index].selected = e.target.checked;
+            updateSelectedCount();
+        });
 
         // Update selected count
         function updateSelectedCount() {
@@ -736,15 +384,15 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         openTabsBtn.addEventListener('click', () => {
             const selectedBooks = currentSeriesBooks.filter(b => b.selected);
             const size = sizeSelect.value;
-            
+
             if (selectedBooks.length === 0) {
-                alert('Please select at least one book');
+                toast('Select at least one book', 'err');
                 return;
             }
 
             if (selectedBooks.length > 10) {
-                const confirm = window.confirm(`This will open ${selectedBooks.length} tabs. Your browser may block some pop-ups. Continue?`);
-                if (!confirm) return;
+                const ok = window.confirm(`This will open ${selectedBooks.length} tabs. Your browser may block some pop-ups. Continue?`);
+                if (!ok) return;
             }
 
             selectedBooks.forEach(book => {
@@ -754,35 +402,35 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 }
             });
 
-            alert(`Opened ${selectedBooks.length} covers in new tabs. If some didn't open, check your pop-up blocker settings.`);
+            toast(`Opened ${selectedBooks.length} covers in new tabs. If some didn't open, check your pop-up blocker.`);
         });
 
         // Download covers
         downloadBtn.addEventListener('click', async () => {
             const selectedBooks = currentSeriesBooks.filter(b => b.selected);
             const size = sizeSelect.value;
-            
+
             if (selectedBooks.length === 0) {
-                alert('Please select at least one book');
+                toast('Select at least one book', 'err');
                 return;
             }
 
             downloadBtn.disabled = true;
             const originalText = downloadBtn.innerHTML;
-            downloadBtn.textContent = 'Preparing download...';
+            downloadBtn.textContent = 'Preparing download…';
 
             try {
                 if (selectedBooks.length === 1) {
                     // Single download - open in new tab (avoids CAPTCHA)
                     downloadSingleCover(selectedBooks[0], size);
-                    downloadBtn.textContent = 'Download opened in new tab';
+                    downloadBtn.textContent = 'Opened in a new tab';
                 } else {
                     // Multiple downloads as ZIP with delays to avoid rate limiting
                     await downloadAsZip(selectedBooks, size);
                 }
             } catch (error) {
                 console.error('Download error:', error);
-                alert('Error downloading covers. Google may be blocking automated downloads. Try downloading fewer books or one at a time.');
+                toast('Could not download the covers. Google may be blocking automated downloads. Try fewer books, or one at a time.', 'err');
             }
 
             setTimeout(() => {
@@ -795,27 +443,37 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         function downloadSingleCover(book, size) {
             const url = getCoverUrl(book.coverUrl, size);
             if (!url) {
-                alert('No cover available for this book');
+                toast('No cover available for this book', 'err');
                 return;
             }
-
-            // Open image in new tab - user can right-click save
-            // This avoids CAPTCHA issues with direct fetch
             window.open(url, '_blank');
+        }
+
+        // JSZip loads on the first ZIP download only
+        let zipLib;
+        function loadJSZip() {
+            return zipLib ??= new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+                s.onload = () => resolve(window.JSZip);
+                s.onerror = () => { zipLib = null; reject(new Error('Could not load JSZip')); };
+                document.head.append(s);
+            });
         }
 
         // Download multiple covers as ZIP with delays
         async function downloadAsZip(books, size) {
+            const JSZip = await loadJSZip();
             const zip = new JSZip();
             let successCount = 0;
             let failCount = 0;
-            
-            downloadBtn.textContent = `Downloading 0/${books.length}...`;
-            
+
+            downloadBtn.textContent = `Downloading 0/${books.length}…`;
+
             for (let i = 0; i < books.length; i++) {
                 const book = books[i];
                 const url = getCoverUrl(book.coverUrl, size);
-                
+
                 if (!url) {
                     failCount++;
                     continue;
@@ -826,18 +484,15 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                     if (i > 0) {
                         await new Promise(resolve => setTimeout(resolve, 500));
                     }
-                    
-                    const response = await fetch(url, {
-                        method: 'GET',
-                        mode: 'cors',
-                    });
-                    
+
+                    const response = await fetch(url, { method: 'GET', mode: 'cors' });
+
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}`);
                     }
-                    
+
                     const blob = await response.blob();
-                    
+
                     // Check if we got an actual image (not an error page)
                     if (blob.type.startsWith('image/')) {
                         const filename = `${String(i + 1).padStart(2, '0')} - ${sanitizeFilename(book.title)}.jpg`;
@@ -846,9 +501,9 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                     } else {
                         failCount++;
                     }
-                    
-                    downloadBtn.textContent = `Downloading ${i + 1}/${books.length}...`;
-                    
+
+                    downloadBtn.textContent = `Downloading ${i + 1}/${books.length}…`;
+
                 } catch (error) {
                     console.error(`Error downloading cover for ${book.title}:`, error);
                     failCount++;
@@ -856,52 +511,42 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             }
 
             if (successCount === 0) {
-                alert('Failed to download any covers. Google is blocking the requests. Try:\n\n1. Selecting fewer books\n2. Downloading one at a time\n3. Waiting a few minutes before trying again');
+                toast('No covers downloaded: Google is blocking the requests. Try fewer books, one at a time, or wait a few minutes.', 'err');
                 return;
             }
 
-            downloadBtn.textContent = 'Creating ZIP...';
-            
-            const content = await zip.generateAsync({type: 'blob'});
+            downloadBtn.textContent = 'Creating ZIP…';
+
+            const content = await zip.generateAsync({ type: 'blob' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
             link.download = 'book_series_covers.zip';
             link.click();
-            
+
             URL.revokeObjectURL(link.href);
-            
+
             if (failCount > 0) {
-                alert(`Downloaded ${successCount} of ${books.length} covers.\n\n${failCount} covers failed (may be blocked by Google or unavailable).`);
+                toast(`Downloaded ${successCount} of ${books.length} covers. ${failCount} failed (blocked by Google or unavailable).`, 'err');
             } else {
-                downloadBtn.textContent = `Downloaded ${successCount} covers!`;
+                downloadBtn.textContent = `Downloaded ${successCount} covers`;
             }
         }
 
         // Get cover URL with size modification
         function getCoverUrl(baseUrl, size) {
             if (!baseUrl) return null;
-            
-            // Google Books URLs can come in different formats:
-            // 1. With zoom parameter: ...&zoom=1
-            // 2. Without zoom parameter
-            // 3. Different image servers
-            
-            let url = baseUrl;
-            
-            // Replace http with https for security
-            url = url.replace('http://', 'https://');
-            
-            // If URL has zoom parameter, replace it
+
+            let url = baseUrl.replace('http://', 'https://');
+
             if (url.includes('zoom=')) {
                 url = url.replace(/zoom=\d+/, `zoom=${size}`);
             } else {
-                // Add zoom parameter if it doesn't exist
                 url = url.includes('?') ? `${url}&zoom=${size}` : `${url}?zoom=${size}`;
             }
-            
+
             // Remove edge=curl parameter which can reduce quality
             url = url.replace(/&?edge=curl/g, '');
-            
+
             return url;
         }
 
@@ -913,8 +558,8 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 .trim()
                 .substring(0, 100);
         }
+    });
     </script>
-    </div>
     <?php site_footer(); ?>
 </body>
 </html>
