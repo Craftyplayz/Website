@@ -1,50 +1,37 @@
-<?php
-// The screenshot gallery, or one screenshot at full size with ?id=<file>
-$id = isset($_GET['id']) ? basename((string)$_GET['id']) : '';
-$site_page = [
-    'title' => $id !== '' ? 'Screenshot' : 'Screenshots',
-    'description' => 'Screenshots from my years of playing Minecraft',
-    'legacy' => true,
-    'css' => ['/assets/css/pages/minecraft.css'],
-];
-require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
-?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <?php page_head(); ?>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <?php
+        echo "screenshot";
+        echo $_GET['id'];
+        ?>
+    </title>
+    <link rel="stylesheet" href="/assets/css/pages/minecraft.css">
+    <link rel="stylesheet" href="/assets/css/legacy.css">
 </head>
 
 <body>
-    <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
-        <?php if ($id !== ''): ?>
-            <?php
-            // full-size versions are always .png
-            $file = pathinfo($id, PATHINFO_FILENAME) . '.png';
-            ?>
-            <img src="/media/minecraft/screenshots-raw/<?= h(rawurlencode($file)) ?>" alt="Screenshot <?= h($file) ?>" class="screenshotfull">
-            <p style="text-align: center; margin: 12px 0;"><a href="/minecraft/screenshots/"><button>Back to all screenshots</button></a></p>
-        <?php else: ?>
-            <div class="title">
-                <h1>Minecraft Screenshots</h1>
-                <h2>Some screenshots from my years of playing minecraft</h2>
-                <h2>Click any image to view full quality</h2>
-            </div>
+<?php
+$imagePath = "/media/minecraft/screenshots-raw/";
+$imageId = $_GET['id'];
 
-            <div class="screenshots">
-                <?php
-                $images = array_reverse(array_values(array_diff(scandir($_SERVER['DOCUMENT_ROOT'] . '/media/minecraft/screenshots') ?: [], ['.', '..'])));
-                foreach ($images as $image) {
-                    echo '<a href="/minecraft/screenshots/?id=' . h(rawurlencode($image)) . '">' .
-                        '<div class="screenshot"><img src="/media/minecraft/screenshots/' . h(rawurlencode($image)) . '" alt="Screenshot" class="screenshot-image" loading="lazy" decoding="async"></div></a>' . PHP_EOL;
-                }
-                ?>
-            </div>
-        <?php endif; ?>
-    </main>
-    <?php site_footer(); ?>
+// force .png extension
+$imageId = pathinfo($imageId, PATHINFO_FILENAME) . ".png";
+
+$imageAlt = "Screenshot " . $imageId;
+$imageClass = "screenshot-image";
+?>
+
+
+    <img src="<?php echo $imagePath . $imageId; ?>" alt="<?php echo $imageAlt; ?>" class="screenshotfull">
+    <button onclick="window.history.back()" style="display: block; margin: 0 auto;">Back</button>
+    <?php
+    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
+    ?>
 </body>
 
 </html>

@@ -49,7 +49,6 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         }
         ?>
     </div>
-    </main>
     <?php site_footer(); ?>
 </body>
 </html>

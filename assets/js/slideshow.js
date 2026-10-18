@@ -26,8 +26,9 @@
     // their height decides too, but without the pixel ratio, or phones would pull 5K originals.
     function fullUrl(s) {
         const need = Math.max(innerWidth * Math.min(devicePixelRatio || 1, 2), innerHeight * s.a);
-        const hit = s.src.find(([w]) => w >= need);
-        return (hit || s.src[s.src.length - 1])[1];
+        const full = s.src.length > 1 ? s.src.slice(1) : s.src; // never the low-quality placeholder
+        const hit = full.find(([w]) => w >= need);
+        return (hit || full[full.length - 1])[1];
     }
 
     // resolves with a decoded <img>, or null if it failed

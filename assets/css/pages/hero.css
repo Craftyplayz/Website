@@ -1,6 +1,6 @@
-/* Homepage: full-screen slideshow with the intro card on top. */
+/* Full-screen slideshow with a card on top - homepage and /minecraft/. See includes/slideshow.php. */
 
-.home-hero {
+.hero {
     position: relative; isolation: isolate;
     display: grid; place-items: center;
     min-height: calc(100svh - var(--header-h)); padding: 24px 16px;
@@ -24,6 +24,16 @@
 }
 .hero-card h1 { margin: 0 0 6px; font-size: clamp(26px, 5vw, 42px); font-weight: 700; line-height: 1.15; }
 .hero-card p { margin: 0; font-size: clamp(15px, 2.2vw, 18px); line-height: 1.45; }
+
+.hero-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+.hero-links a {
+    display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px;
+    background: var(--btn2); border: 1px solid var(--line-strong); border-radius: 999px;
+    color: var(--text); font-size: 14px; font-weight: 500; text-decoration: none;
+    transition: background var(--fast), border-color var(--fast);
+}
+.hero-links a:hover { background: var(--btn2-hover); border-color: var(--accent); }
+.hero-links a:active { transform: translateY(1px); }
 
 @media (prefers-reduced-motion: reduce) {
     .hero-stage img { transition: none; }
