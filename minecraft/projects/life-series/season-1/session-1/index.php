@@ -1,5 +1,8 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = [
+    'components' => true,
+    'css' => ['/assets/css/pages/minecraft-life-series.css'],
+];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
@@ -11,13 +14,11 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
-
-    <div class="title">
-        <h1>Life Series Season 1 Session 1</h1>
-    </div>
-    <div class="content">
-        <pre style="white-space: pre-wrap; padding:20px; margin:0 20px; display:block;">
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Life Series: Season 1, Session 1</h1>
+        <p class="page-lede">Session transcript from the Secret Life mod. <a href="/minecraft/projects/life-series/">All sessions</a></p>
+        <pre class="transcript">
 -----  Life Series Mod by Mat0u5  |  Mod version: 1.4.3.1  -----
 -----  SECRET_LIFE  |  Time and date: 2025-11-30 18:54:09  -----
 -----  Session Transcript  -----
