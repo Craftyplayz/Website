@@ -4,12 +4,13 @@
 
 ## Your files
 - **Folders you may edit:** `games/` (everything below it).
-- **Stylesheets that are yours:** `assets/css/pages/steam.css`, `steamnew.css`, `factorio.css` and `hypixel-collection.css` (only Games pages use them), plus any new `assets/css/pages/games-*.css`.
+- **Stylesheets that are yours:** `assets/css/pages/steam.css`, `steamnew.css`, `factorio.css` (only Games pages use them), plus any new `assets/css/pages/games-*.css`.
 
 ## Don't touch
 - `games/chapterguesser/`: it has its own finished UI, a live leaderboard (`data/leaderboards.json`, server only) and tests.
 - `games/adarkroom/`: a third-party game.
-- `games/index.php`, `games/hypixel/index.php`, `games/quizzes/index.php`: already modern card grids.
+- `games/index.php`, `games/quizzes/index.php`: already modern card grids.
+- `_dev/archive/hypixel/`: every Hypixel Skyblock page was archived at the owner's request on 2026-10-19. Don't restyle them.
 - `games/factorio/map/`: a full-screen iframe.
 - **Live data:** `games/the-game/thegame.json` (gitignored, server only). Testing The Game locally creates it, so delete it before committing.
 
@@ -23,12 +24,6 @@
 | Factorio Command Generator | `games/factorio/commands/index.php` | A plain text tool. |
 | HP Quiz index | `games/quizzes/harry-potter/index.php` | Links the 4 levels. |
 | HP Quiz Easy, Medium, Hard, Extra Hard | `games/quizzes/harry-potter/<level>/index.php` | The 4 pages share the same markup. Each loads jQuery 3.3.1 plus its own `assets/js/scripts.js` and `assets/css/styles.css` through relative paths, so the URL must end in `/`. Extra Hard has tests in `tests/`. Rework one level, then copy it to the rest. |
-| Collection Tracker | `games/hypixel/collections/index.php` | Hypixel API. Needs `'config' => true`. |
-| Collection (track) | `games/hypixel/collections/track/index.php` | Needs `?item=&name=&profile=`. Fatal error when the API returns nothing (this happened before the reorg too). |
-| Melon War | `games/hypixel/collections/melon-war/index.php` | Hypixel API. |
-| Minions | `games/hypixel/minions/index.php` | Hypixel API. |
-| Ghast Tear Calculator | `games/hypixel/ghast-calculator/index.php` | Built with PHP `echo`. Calls `die()` when the API fails. |
-| Regex Builder | `games/hypixel/regex-builder/index.php` | A small JS tool. |
 | Yu-Gi-Oh Guide, Next Packs, Sets, Extra Rules | `games/yugioh/{,next-packs/,sets/,extra-rules/}index.php` | Text guides; one shared style fits all 4. |
 | Skyrim Mods | `games/skyrim/index.php` | A link list. |
 | The Game | `games/the-game/index.php` | Writes `thegame.json`, see above. |

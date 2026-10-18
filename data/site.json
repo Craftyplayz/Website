@@ -107,18 +107,6 @@
                     ]
                 },
                 {
-                    "title": "Hypixel Skyblock",
-                    "url": "/games/hypixel/",
-                    "pages": [
-                        { "title": "Collection Tracker", "url": "/games/hypixel/collections/", "description": "Track Skyblock collections" },
-                        { "title": "Collection", "url": "/games/hypixel/collections/track/", "nav": false, "search": false },
-                        { "title": "Melon War", "url": "/games/hypixel/collections/melon-war/", "description": "The Great Melon War" },
-                        { "title": "Minions", "url": "/games/hypixel/minions/", "description": "Minion calculator" },
-                        { "title": "Ghast Tear Calculator", "url": "/games/hypixel/ghast-calculator/", "description": "Bazaar ghast tear profits" },
-                        { "title": "Regex Builder", "url": "/games/hypixel/regex-builder/", "description": "Build chat filter regexes" }
-                    ]
-                },
-                {
                     "title": "Guides",
                     "pages": [
                         { "title": "Yu-Gi-Oh Deck Guide", "url": "/games/yugioh/", "description": "Progression series setup for EDOPro", "keywords": ["edopro"] },
