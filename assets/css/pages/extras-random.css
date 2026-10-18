@@ -1,4 +1,4 @@
-/* Extras "Random" pages: Trump Quotes, Insults. One card holding one random line. */
+/* Extras "Random" pages: Trump Quotes, Insults, Random Fact, Live Laugh Love. */
 .xr-card { max-width: 760px; }
 .xr-card::after { content: ""; display: block; clear: both; }
 .xr-line { margin: 0; font-size: clamp(18px, 2.6vw, 24px); line-height: 1.4; }
@@ -13,3 +13,7 @@
 }
 @keyframes xr-bob { 50% { transform: translateY(-10px); } }
 @media (prefers-reduced-motion: reduce) { .xr-mug { animation: none; } }
+
+/* Live Laugh Love: letter + three words per row */
+.lll { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; }
+.lll-k { min-width: 2.6em; font-family: var(--mono); }
