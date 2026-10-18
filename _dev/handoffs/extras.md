@@ -22,7 +22,7 @@
 |---|---|---|
 | Trump Quotes | `extras/trump-quotes/index.php` | Calls an external quote API. The bouncing mugshot is `media/memes/trump-mugshot.webp`. |
 | Insults | `extras/insults/index.php` | Calls an external API. |
-| Random Fact | `extras/facts/index.php` | Calls an external API, which may need the API Ninjas key: check for `$apininjakey`, and if it's used add `'config' => true`. |
+| Random Fact | `extras/facts/index.php` | Calls uselessfacts.jsph.pl (no key needed). Its "Random Fact" button reloads the page. |
 | Live Laugh Love | `extras/live-laugh-love/index.php` | Big (about 250 lines, with a table). |
 | Pets | `extras/pets/index.php` | A gallery of `media/pets/*/thumb.webp`. Uses `gallery.css` (shared). |
 | Pet | `extras/pets/pet/index.php` | Needs `?pet=<folder>`, otherwise it redirects to the gallery. `?pet=` goes through `basename()` and is escaped, so keep both. |

@@ -11,7 +11,7 @@
 - `minecraft/tools/nbt-viewer/`: it's the reference design.
 - `minecraft/index.php`: it's already modern (slideshow and card grid).
 - `minecraft/tools/index.php`, `minecraft/projects/index.php`, `minecraft/downloads/`: already modern.
-- **Data files written by the live site:** `minecraft/projects/metro/stations.json`, `minecraft/projects/milestones/milestones.json`, and `minecraft/tools/nbt-viewer/{cache,shares}/`. Testing locally can change them, so discard those changes before committing (they are yours to restore with `git checkout -- <that file>` only).
+- **Data files written by the live site:** `minecraft/projects/metro/stations.json`, `minecraft/projects/milestones/milestones.json`, and `minecraft/tools/nbt-viewer/{cache,shares}/`. Testing locally can change them. Never commit them; if one shows as modified after testing, restore just that file with `git restore <that file>`.
 
 ## Pages, in suggested order
 **Needs rework (old styles, default grey controls, light panels):**

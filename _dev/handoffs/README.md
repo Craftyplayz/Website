@@ -35,7 +35,7 @@ Other sessions are editing other tabs at the same time.
 - **An existing `assets/css/pages/*.css` that only your pages use** (check with `git grep`) counts as yours. **One that pages in other tabs also use** (`gallery.css`, `homepage.css`, `steamnew.css` and so on) is shared: copy what you need into a new `<section>-*.css` instead of editing it.
 
 ## 3. Git, when several sessions share one folder
-- **Never use `git add -A`, `git add .`, `git commit -a`, `git stash`, `git checkout -- <file>` or `git reset`.** They would sweep up or wipe another session's uncommitted work.
+- **Never use `git add -A`, `git add .`, `git commit -a`, `git stash` or `git reset`, and never `git checkout`/`git restore` a file outside your tab.** They would sweep up or wipe another session's uncommitted work.
 - **Stage and commit only your own paths:** `git add <your files>`, then `git commit -m "..." -- <your files>`.
 - **Before committing,** run `git diff --cached --name-only` and make sure every file listed is yours.
 - **If a commit fails because the index is locked,** wait a few seconds and try again. Never delete `.git/index.lock`.
