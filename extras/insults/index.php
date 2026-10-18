@@ -1,6 +1,11 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = ['components' => true, 'css' => ['/assets/css/pages/extras-random.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+
+$response = @file_get_contents('https://evilinsult.com/generate_insult.php?lang=en&type=json', false, stream_context_create(['http' => ['timeout' => 5]]));
+$data = $response ? json_decode($response, true) : null;
+// the API sends HTML entities (&quot;), so decode before escaping
+$insult = isset($data['insult']) ? html_entity_decode($data['insult'], ENT_QUOTES, 'UTF-8') : null;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,35 +16,24 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
 
-    <div class="title">
-        <h1>Random Insult Generator</h1>
-<h2>
-<?php
-// API URL
-$url = "https://evilinsult.com/generate_insult.php?lang=en&type=json";
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Random Insult Generator</h1>
+        <p class="page-lede">A new insult every time you load the page.</p>
 
-// Get the API response
-$response = file_get_contents($url);
+        <div class="card xr-card">
+            <?php if ($insult !== null): ?>
+                <p class="xr-line"><?= h($insult) ?></p>
+            <?php else: ?>
+                <p class="err">No insult found. Try again in a moment.</p>
+            <?php endif; ?>
+        </div>
 
-// Decode JSON into array
-$data = json_decode($response, true);
-
-// Check and echo the insult
-if (isset($data['insult'])) {
-    echo $data['insult'];
-} else {
-    echo "No insult found.";
-}
-?>
-
-</h2>
-    </div>
-
+        <p class="xr-actions"><a class="btn primary" href="/extras/insults/">Another insult</a></p>
     </main>
-    <?php site_footer(); ?>
 
+    <?php site_footer(null, false); ?>
 </body>
 
 </html>
