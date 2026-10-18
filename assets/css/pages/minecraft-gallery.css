@@ -1,0 +1,18 @@
+/* Minecraft image galleries: screenshots (and map art once it's restyled). */
+
+.shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 12px; }
+.page a.shot {
+    display: block; overflow: hidden; background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); color: var(--muted); text-decoration: none; transition: border-color var(--fast);
+}
+.page a.shot:hover { border-color: var(--accent); text-decoration: none; }
+.shot img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: var(--card2); }
+.shot span { display: block; padding: 6px 10px; font-size: 12px; }
+
+.shot-full { margin: 0; }
+.shot-full img {
+    display: block; width: auto; max-width: 100%; height: auto; max-height: calc(100vh - 280px); margin: 0 auto;
+    background: var(--card2); border: 1px solid var(--line); border-radius: var(--radius-lg);
+}
+.shot-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 16px 0 0; }
+.page a.btn { color: var(--text); }
