@@ -1,21 +1,20 @@
+<?php
+$site_page = ['legacy' => true];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book List</title>
+    <?php page_head(); ?>
     <link rel="stylesheet" href="/assets/css/pages/books.css">
     <script src="/books/sort.js"></script>
 </head>
 <!-- add search feature -->
 
 <body>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <?php site_header(); ?>
+    <main class="page page-legacy" id="main">
 
     <body>
         <div class="title">
@@ -89,25 +88,25 @@
                 <img src="/media/books/covers/HungerGames/hg3.webp" class="gallery-image" />
             </div>
             <div class="gallery-item hp bookshelf" title="Harry potter and the Philosophers Stone" data-book="37" data-audio="74">
-                <img src="/media/books/covers/HarryPotter/set1/hp1.webp" class="gallery-image" />
+                <img src="/media/books/covers/HarryPotter/set1/hp1.png" class="gallery-image" />
             </div>
             <div class="gallery-item hp bookshelf" title="Harry potter and the Chamber of Secrets" data-book="37" data-audio="74">
-                <img src="/media/books/covers/HarryPotter/set1/hp2.webp" class="gallery-image" />
+                <img src="/media/books/covers/HarryPotter/set1/hp2.png" class="gallery-image" />
             </div>
             <div class="gallery-item hp bookshelf" title="Harry potter and the Prisoner of Azkaban" data-book="37" data-audio="74">
-                <img src="/media/books/covers/HarryPotter/set1/hp3.webp" class="gallery-image" />
+                <img src="/media/books/covers/HarryPotter/set1/hp3.png" class="gallery-image" />
             </div>
             <div class="gallery-item hp bookshelf" title="Harry potter and the Goblet of Fire" data-book="37" data-audio="74">
-                <img src="/media/books/covers/HarryPotter/set1/hp4.webp" class="gallery-image" />
+                <img src="/media/books/covers/HarryPotter/set1/hp4.png" class="gallery-image" />
             </div>
             <div class="gallery-item hp bookshelf" title="Harry potter and the Order of the pheonix" data-book="37" data-audio="71">
-                <img src="/media/books/covers/HarryPotter/set1/hp5.webp" class="gallery-image" />
+                <img src="/media/books/covers/HarryPotter/set1/hp5.png" class="gallery-image" />
             </div>
             <div class="gallery-item hp bookshelf" title="Harry potter and the Half-Blood prince" data-book="37" data-audio="71">
-                <img src="/media/books/covers/HarryPotter/set1/hp6.webp" class="gallery-image" />
+                <img src="/media/books/covers/HarryPotter/set1/hp6.png" class="gallery-image" />
             </div>
             <div class="gallery-item hp bookshelf" title="Harry potter and the Deathly Hallows" data-book="37" data-audio="71">
-                <img src="/media/books/covers/HarryPotter/set1/hp7.webp" class="gallery-image" />
+                <img src="/media/books/covers/HarryPotter/set1/hp7.png" class="gallery-image" />
             </div>
             <div class="gallery-item mc" title="Minecraft Combat Handbook">
                 <img src="/media/books/covers/Minecraft/mc1.webp" class="gallery-image" />
@@ -161,22 +160,22 @@
                 <img src="/media/books/covers/LordOfTheRings/lr3.webp" class="gallery-image" />
             </div>
             <div class="gallery-item tp bookshelf" title="The Trials of Apollo: The Hidden Oracle" series="trialsofapollo">
-                <img src="/media/books/covers/TrialsOfApollo/tp1.jpeg" class="gallery-image" />
+                <img src="/media/books/covers/TrialsOfApollo/tp1.jpg" class="gallery-image" />
             </div>
             <div class="gallery-item tp bookshelf" title="The Trials of Apollo: The Dark Prophecy" series="trialsofapollo">
-                <img src="/media/books/covers/TrialsOfApollo/tp2.jpeg" class="gallery-image" />
+                <img src="/media/books/covers/TrialsOfApollo/tp2.jpg" class="gallery-image" />
             </div>
             <div class="gallery-item tp bookshelf" title="The Trials of Apollo: The Burning Maze" series="trialsofapollo">
-                <img src="/media/books/covers/TrialsOfApollo/tp3.jpeg" class="gallery-image" />
+                <img src="/media/books/covers/TrialsOfApollo/tp3.jpg" class="gallery-image" />
             </div>
             <div class="gallery-item tp bookshelf" title="The Trials of Apollo: The Tyrant's Tomb" series="trialsofapollo">
-                <img src="/media/books/covers/TrialsOfApollo/tp4.jpeg" class="gallery-image" />
+                <img src="/media/books/covers/TrialsOfApollo/tp4.jpg" class="gallery-image" />
             </div>
             <div class="gallery-item tp bookshelf" title="The Trials of Apollo: The Tower of Nero" series="trialsofapollo">
-                <img src="/media/books/covers/TrialsOfApollo/tp5.jpeg" class="gallery-image" />
+                <img src="/media/books/covers/TrialsOfApollo/tp5.jpg" class="gallery-image" />
             </div>
             <div class="gallery-item" title="Ender's Game">
-                <img src="/media/books/covers/standalone/eg.jpf" class="gallery-image" />
+                <img src="/media/books/covers/Standalone/eg.jpg" class="gallery-image" />
             </div>
             <div class="gallery-item" title="Percy Jackson And Chalice of the Gods">
                 <img src="/media/books/covers/PercyJackson/pj6.webp" class="gallery-image" />
@@ -333,7 +332,7 @@
                 <img src="/media/books/covers/SecretSeven/ss1.webp" class="gallery-image" />
             </div>
             <div class="gallery-item bookshelf" title="Artemis Fowl">
-                <img src="/media/books/covers/ArtemisFowl/af1.jpj" class="gallery-image" />
+                <img src="/media/books/covers/ArtemisFowl/af1.jpg" class="gallery-image" />
             </div>
             <div class="gallery-item bookshelf" title="How To Train Your Dragon" series="httyd">
                 <img src="/media/books/covers/HowtoTrainYourDragon/hd1.webp" class="gallery-image" />
@@ -478,9 +477,8 @@
                 <?php echo date('jS F Y', filemtime(__FILE__)); ?>
             </p>
         </footer>
-        <?php
-        include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-        ?>
+        </main>
+    <?php site_footer(); ?>
     </body>
 
     <script>

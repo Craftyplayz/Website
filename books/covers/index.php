@@ -1,13 +1,13 @@
+<?php
+$site_page = ['legacy' => true];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Cover Search</title>
-        <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <?php page_head(); ?>
+        <?php site_header(); ?>
+    <main class="page page-legacy" id="main">
     <style>
         * {
             margin: 0;
@@ -16,7 +16,7 @@
             text-decoration: none;
         }
 
-        body {
+        main.page.page-legacy {
             font-family: 'Roboto', sans-serif;
             font-size: 16px;
             line-height: 1.5;
@@ -1015,8 +1015,7 @@
             }
         }
     </script>
-        <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+        </main>
+    <?php site_footer(); ?>
 </body>
 </html>

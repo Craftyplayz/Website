@@ -1,20 +1,18 @@
+<?php
+$site_page = ['legacy' => true];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Untitled</title>
-    <meta http-equiv="refresh" content="-1">
+    <?php page_head(); ?>
 </head>
 
 <body>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <?php site_header(); ?>
+    <main class="page page-legacy" id="main">
 
 Whats the name of the pub in little hangleton (hanged Man)<br>
 What is Gregorovitches first name (Mykew)<br>
@@ -46,9 +44,8 @@ What are all the mentioned bertie bots every flavor beans<br>
 What is the full name of nearly headless nick (Sir Nicholas de Mimsy Porpington)<br>
 How many times was nearly headless nick hit on the head before he died (45)<br>
 Members of the advance guard<br>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+    </main>
+    <?php site_footer(); ?>
 
 </body>
 

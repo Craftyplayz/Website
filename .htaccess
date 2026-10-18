@@ -129,6 +129,13 @@ RedirectMatch 301 ^/games/yugioh/sets(\.php)?$ /games/yugioh/sets/
 RedirectMatch 301 ^/games/yugioh/extrarules(\.php)?$ /games/yugioh/extra-rules/
 RedirectMatch 301 ^/extras/thegame(/.*)?$ /games/the-game/
 RedirectMatch 301 ^/Code/skyrim(\.html)?$ /games/skyrim/
+# Phase 6: Books
+RedirectMatch 301 ^/books/cover(\.php)?$ /books/covers/
+RedirectMatch 301 ^/books/bulkcover(\.php)?$ /books/covers/bulk/
+RedirectMatch 301 ^/extras/harrypotter/?$ /books/harry-potter/
+RedirectMatch 301 ^/extras/harrypotter/characters(\.php)?$ /books/harry-potter/
+RedirectMatch 301 ^/extras/harrypotter/(character|info|quiz)(\.php)?$ /books/harry-potter/$1/
+RedirectMatch 301 ^/extras/harrypotter/json/(.*)$ /books/harry-potter/json/$1
 
 <IfModule mod_deflate.c>
          AddOutputFilterByType DEFLATE application/javascript
