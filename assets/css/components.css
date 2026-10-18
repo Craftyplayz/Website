@@ -1,4 +1,4 @@
-/* Shared UI pieces, taken from /minecraft/tools/nbt-viewer. Opt-in: pages load this with
+/* Shared UI pieces, taken from /minecraft/nbtviewer. Opt-in: pages load this with
    $site_page['components'] = true. Everything is a class, so nothing changes on pages that
    don't use these names. Colours come from the tokens in global.css. */
 

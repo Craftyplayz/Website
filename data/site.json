@@ -9,60 +9,57 @@
             "groups": [
                 {
                     "title": "Tools",
-                    "url": "/minecraft/tools/",
                     "pages": [
-                        { "title": "NBT Viewer", "url": "/minecraft/tools/nbt-viewer/", "description": "Explore player .dat files: inventory, stats and raw NBT", "keywords": ["playerdata", "dat", "inventory", "nbt"] },
-                        { "title": "Nether Portal Converter", "url": "/minecraft/tools/nether-portal/", "description": "Convert Overworld and Nether coordinates", "keywords": ["coords", "portal"] },
-                        { "title": "Storage Sorter", "url": "/minecraft/tools/storage-sorter/", "description": "Plan an item sorting system", "keywords": ["sorter", "items"] },
-                        { "title": "Shulker Schematic Calculator", "url": "/minecraft/tools/shulker-calculator/", "description": "How many shulker boxes a schematic needs", "keywords": ["litematica", "schematic"] },
-                        { "title": "Material List to Sheets", "url": "/minecraft/tools/material-list/", "description": "Turn a Litematica material list into a spreadsheet", "keywords": ["litematica"] },
-                        { "title": "Litematica Material Converter", "url": "/minecraft/tools/litematica-converter/", "description": "Convert Litematica material lists for Google Sheets", "keywords": ["litematica"] },
-                        { "title": "Item List", "url": "/minecraft/tools/item-list/", "description": "Every Minecraft item texture", "keywords": ["textures", "icons"] },
-                        { "title": "Day Calculator", "url": "/minecraft/tools/day-calculator/", "description": "Work out the in-game day", "nav": false },
-                        { "title": "Dynmap Marker Creator", "url": "/minecraft/tools/dynmap-marker/", "description": "Build Dynmap marker commands", "nav": false },
-                        { "title": "Book Generator", "url": "/minecraft/tools/book-generator/", "description": "Generate written book commands", "nav": false },
-                        { "title": "Transaction Generator", "url": "/minecraft/tools/transaction-generator/", "description": "Fake Minecraft transaction generator", "nav": false },
-                        { "title": "Stats Editor", "url": "/minecraft/tools/stats-editor/", "description": "Edit Minecraft stats files", "nav": false },
-                        { "title": "JSON Viewer", "url": "/minecraft/tools/json-viewer/", "description": "View chat filter JSON files", "nav": false },
-                        { "title": "TNT Cannon Targeting", "url": "/minecraft/tools/tnt-cannon/", "description": "Aim a TNT cannon for battleships", "nav": false },
-                        { "title": "Instance Playtime", "url": "/minecraft/tools/playtime/", "description": "Playtime across Minecraft instances", "nav": false }
+                        { "title": "NBT Viewer", "url": "/minecraft/nbtviewer/", "description": "Explore player .dat files: inventory, stats and raw NBT", "keywords": ["playerdata", "dat", "inventory"] },
+                        { "title": "Nether Portal Converter", "url": "/minecraft/nether.html", "description": "Convert Overworld and Nether coordinates", "keywords": ["coords", "portal"] },
+                        { "title": "Storage Sorter", "url": "/minecraft/storage/", "description": "Plan an item sorting system", "keywords": ["sorter", "items"] },
+                        { "title": "Shulker Schematic Calculator", "url": "/minecraft/shulker-schematic-calculator.html", "description": "How many shulker boxes a schematic needs", "keywords": ["litematica", "schematic"] },
+                        { "title": "Material List to Sheets", "url": "/minecraft/materiallist.html", "description": "Turn a Litematica material list into a spreadsheet", "keywords": ["litematica"] },
+                        { "title": "Litematica Material Converter", "url": "/minecraft/litematica_material_converter.html", "description": "Convert Litematica material lists", "keywords": ["litematica"] },
+                        { "title": "Item List", "url": "/minecraft/itemlist/", "description": "Every Minecraft item texture", "keywords": ["textures", "icons"] },
+                        { "title": "Day Calculator", "url": "/minecraft/day.php", "description": "Work out the in-game day", "nav": false },
+                        { "title": "Dynmap Marker Creator", "url": "/minecraft/marker.php", "description": "Build Dynmap marker commands", "nav": false },
+                        { "title": "Book Generator", "url": "/minecraft/minecart.html", "description": "Generate written book commands", "nav": false },
+                        { "title": "Transaction Generator", "url": "/minecraft/transactions.html", "description": "Fake Minecraft transaction generator", "nav": false },
+                        { "title": "Stats Editor", "url": "/minecraft/stats.php", "description": "Edit Minecraft stats files", "nav": false },
+                        { "title": "JSON Viewer", "url": "/minecraft/chatfilter.php", "description": "View chat filter JSON files", "nav": false },
+                        { "title": "TNT Cannon Targeting", "url": "/minecraft/minigames/battleships.html", "description": "Aim a TNT cannon for battleships", "nav": false },
+                        { "title": "Instance Playtime", "url": "/minecraft/playtime/", "description": "Playtime across Minecraft instances", "nav": false }
                     ]
                 },
                 {
                     "title": "Projects",
-                    "url": "/minecraft/projects/",
                     "pages": [
-                        { "title": "Metro Network", "url": "/minecraft/projects/metro/", "description": "Metro stations on the server", "keywords": ["rail", "stations"] },
-                        { "title": "Rail Router", "url": "/minecraft/projects/rail-router/", "description": "Find a route across the rail network", "keywords": ["rail", "route"] },
-                        { "title": "Milestones", "url": "/minecraft/projects/milestones/", "description": "Milestone tracker" },
-                        { "title": "Map Art", "url": "/minecraft/projects/map-art/", "description": "Map art I have made" },
-                        { "title": "Frame Extractor", "url": "/minecraft/projects/map-art/frame-extractor/", "description": "Extract frames from a GIF for map art", "nav": false },
-                        { "title": "Stonecrest", "url": "/minecraft/projects/stonecrest/", "description": "Stonecrest world downloads" },
-                        { "title": "Life Series", "url": "/minecraft/projects/life-series/", "description": "Life Series session notes" },
-                        { "title": "Life Series S1 Session 1", "url": "/minecraft/projects/life-series/season-1/session-1/", "nav": false, "hub_skip": true },
-                        { "title": "Life Series S1 Session 2", "url": "/minecraft/projects/life-series/season-1/session-2/", "nav": false, "hub_skip": true },
-                        { "title": "Life Series S1 Session 3", "url": "/minecraft/projects/life-series/season-1/session-3/", "nav": false, "hub_skip": true }
+                        { "title": "Metro Network", "url": "/minecraft/network/", "description": "Metro stations on the server", "keywords": ["rail", "stations"] },
+                        { "title": "Rail Router", "url": "/minecraft/boltnetwork.php", "description": "Find a route across the rail network", "keywords": ["rail", "route"] },
+                        { "title": "Milestones", "url": "/minecraft/milestones.php", "description": "Milestone tracker" },
+                        { "title": "Map Art", "url": "/minecraft/mapart/", "description": "Map art I have made" },
+                        { "title": "Frame Extractor", "url": "/minecraft/mapart/code/", "description": "Extract frames for map art", "nav": false },
+                        { "title": "Stonecrest", "url": "/minecraft/stonecrest.php", "description": "Stonecrest world downloads" },
+                        { "title": "Life Series", "url": "/minecraft/life/", "description": "Life Series session notes" },
+                        { "title": "Life Series S1 Session 1", "url": "/minecraft/life/s1/e1.php", "nav": false },
+                        { "title": "Life Series S1 Session 2", "url": "/minecraft/life/s1/e2.php", "nav": false },
+                        { "title": "Life Series S1 Session 3", "url": "/minecraft/life/s1/e3.php", "nav": false }
                     ]
                 },
                 {
                     "title": "More",
                     "pages": [
-                        { "title": "Screenshots", "url": "/minecraft/screenshots/", "description": "Screenshots from years of playing" },
-                        { "title": "Skins", "url": "/minecraft/skins/", "description": "My Minecraft skins" },
-                        { "title": "Tips", "url": "/minecraft/tips/", "description": "Minecraft tips and mods" },
-                        { "title": "Downloads", "url": "/minecraft/downloads/", "description": "Data packs and other files" }
+                        { "title": "Screenshots", "url": "/minecraft/", "description": "Minecraft overview and screenshots" },
+                        { "title": "Screenshot", "url": "/minecraft/screenshot.php", "nav": false, "search": false },
+                        { "title": "Skins", "url": "/minecraft/skins.php", "description": "My Minecraft skins" },
+                        { "title": "Tips", "url": "/minecraft/tips.php", "description": "Minecraft tips" }
                     ]
                 },
                 {
                     "title": "Captainalism Shop",
-                    "url": "/minecraft/shop/",
                     "subnav": true,
                     "logo": "/assets/img/shoplogo.png",
                     "pages": [
-                        { "title": "Shop", "url": "/minecraft/shop/", "description": "Captainalism price lists" },
-                        { "title": "Enchanted Books", "url": "/minecraft/shop/enchanted-books/", "description": "Enchanted books for sale" },
-                        { "title": "Special Requests", "url": "/minecraft/shop/requests/", "description": "Request something special" },
-                        { "title": "Casino", "url": "/minecraft/shop/casino/", "description": "Coming soon" }
+                        { "title": "Shop", "url": "/shop/", "description": "Captainalism shop" },
+                        { "title": "Enchanted Books", "url": "/shop/books.php", "description": "Enchanted books for sale" },
+                        { "title": "Special Requests", "url": "/shop/requests.php", "description": "Request something special" },
+                        { "title": "Casino", "url": "/shop/casino.php", "description": "Coming soon" }
                     ]
                 }
             ]

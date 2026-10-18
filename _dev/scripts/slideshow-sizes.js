@@ -1,45 +1,47 @@
-// Build the resized copies the homepage slideshow loads, plus media/slideshow/manifest.json.
-// Run it after adding or removing images in media/slideshow/desktop/.
+// Build the WebP copies the slideshow (homepage, /minecraft/, BRB) loads from the raw screenshots,
+// plus media/minecraft/screenshots-sizes/manifest.json. Run it after adding raw screenshots.
 //   usage: npm install sharp   (anywhere, then point NODE_PATH at it)
 //          node _dev/scripts/slideshow-sizes.js
-// Output: media/slideshow/sizes/<width>/<name>.webp for each width below that is smaller than
-// the original. The 640 copy is the low-quality placeholder shown on first paint.
-// Images missing from the manifest still work: the page just serves the original.
+// Output: media/minecraft/screenshots-sizes/<width>/<name>.webp for each width below that fits in
+// the original. The 960 copy is the low-quality placeholder shown on first paint; the rest are the
+// full-quality copies (quality 90 with full-resolution colour, which keeps block edges sharp). The raw PNGs
+// (often 20 MB+) are never sent to the slideshow.
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 
 const root = path.join(__dirname, '..', '..');
-const srcDir = path.join(root, 'media', 'slideshow', 'desktop');
-const outDir = path.join(root, 'media', 'slideshow', 'sizes');
+const srcDir = path.join(root, 'media', 'minecraft', 'screenshots-raw');
+const outDir = path.join(root, 'media', 'minecraft', 'screenshots-sizes');
 const SIZES = [
-    { w: 640, quality: 40 },   // low quality placeholder
-    { w: 1280, quality: 78 },
-    { w: 1920, quality: 80 },
-    { w: 2560, quality: 80 },
+    { w: 960, quality: 60 },   // low quality placeholder, ~25 KB
+    { w: 1280, quality: 90 },
+    { w: 1920, quality: 90 },
+    { w: 2560, quality: 90 },
+    { w: 3840, quality: 90 },
 ];
 
 (async () => {
-    const files = fs.readdirSync(srcDir).filter((f) => /\.(webp|jpe?g|png)$/i.test(f)).sort();
+    const files = fs.readdirSync(srcDir).filter((f) => /\.(png|webp|jpe?g)$/i.test(f)).sort();
     const manifest = {};
     for (const file of files) {
         const src = path.join(srcDir, file);
         const { width, height } = await sharp(src).metadata();
-        const name = file.replace(/\.[^.]+$/, '') + '.webp';
+        const name = file.replace(/\.[^.]+$/, '');
         const entry = { w: width, h: height, sizes: [] };
         for (const { w, quality } of SIZES) {
-            if (w >= width) continue;
+            if (w > width) continue;
             const dir = path.join(outDir, String(w));
-            const out = path.join(dir, name);
+            const out = path.join(dir, name + '.webp');
             fs.mkdirSync(dir, { recursive: true });
             if (!fs.existsSync(out) || fs.statSync(out).mtimeMs < fs.statSync(src).mtimeMs) {
-                await sharp(src).resize({ width: w }).webp({ quality, effort: 6 }).toFile(out);
+                await sharp(src).resize({ width: w }).webp({ quality, smartSubsample: true, effort: 6 }).toFile(out);
             }
             entry.sizes.push(w);
         }
-        manifest[file] = entry;
+        manifest[name] = entry;
         console.log(file, width + 'x' + height, entry.sizes.join(' '));
     }
-    fs.writeFileSync(path.join(root, 'media', 'slideshow', 'manifest.json'), JSON.stringify(manifest, null, 1) + '\n');
+    fs.writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 1) + '\n');
     console.log(files.length + ' images');
 })();

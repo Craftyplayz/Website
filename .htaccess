@@ -18,7 +18,7 @@ RewriteEngine On
 
 # ---- Old URLs from the reorganisation (see plan.html) ----
 # Duplicate folders that were removed
-RedirectMatch 301 ^/(Code/)?minecraft/items_1\.21\.11/(.*)$ /minecraft/tools/item-list/$2
+RedirectMatch 301 ^/(Code/)?minecraft/items_1\.21\.11/(.*)$ /minecraft/itemlist/$2
 RedirectMatch 301 ^/Code/minecraft/(.*)$ /minecraft/$1
 RedirectMatch 301 ^/images/minecraft/skins/download/(.*)$ /media/minecraft/skins/$1
 # images/ split into /assets/img (site graphics) and /media (photos, screenshots, covers)
@@ -41,8 +41,8 @@ RedirectMatch 301 ^/css/fakescreen/win10\.css$ /assets/css/pages/win10.css
 RedirectMatch 301 ^/css/hypixel/collection\.css$ /assets/css/pages/hypixel-collection.css
 RedirectMatch 301 ^/css/(books|dnd|factorio|gallery|homepage|minecraft|speedtest|steam|steamnew|tools)\.css$ /assets/css/pages/$1.css
 # Duplicate or old page versions (archived in /_dev/archive)
-RedirectMatch 301 ^/minecraft/test(\.php)?$ /minecraft/tools/stats-editor/
-RedirectMatch 301 ^/minecraft/schemcalc(\.html)?$ /minecraft/tools/shulker-calculator/
+RedirectMatch 301 ^/minecraft/test(\.php)?$ /minecraft/stats.php
+RedirectMatch 301 ^/minecraft/schemcalc(\.html)?$ /minecraft/shulker-schematic-calculator.html
 RedirectMatch 301 ^/hypixel/hotm(\.php)?$ /hypixel/
 RedirectMatch 301 ^/hypixel/minions2(\.php)?$ /hypixel/minions.php
 RedirectMatch 301 ^/hypixel/collections/melonwar2(\.php)?$ /hypixel/collections/melonwar.php
@@ -60,44 +60,6 @@ RedirectMatch 301 ^/Code/jelly(\.php)?$ /private/jellyfin/
 RedirectMatch 301 ^/Code/(timesince\.php|redirect\.html)$ /private/scripts/$1
 RedirectMatch 301 ^/books/kindlecontrol(\.html)?$ /private/kindle/
 RedirectMatch 301 ^/books/pages(\.php)?$ /private/kindle/pages.php
-# Phase 6: Minecraft pages moved into /minecraft/tools/, /minecraft/projects/ and folders of their own
-RedirectMatch 301 ^/minecraft/nbtviewer(/.*)?$ /minecraft/tools/nbt-viewer$1
-RedirectMatch 301 ^/minecraft/itemlist(/.*)?$ /minecraft/tools/item-list$1
-RedirectMatch 301 ^/minecraft/nether(\.html)?$ /minecraft/tools/nether-portal/
-RedirectMatch 301 ^/minecraft/storage/(index\.html)?$ /minecraft/tools/storage-sorter/
-RedirectMatch 301 ^/minecraft/storage(/.*)?$ /minecraft/tools/storage-sorter$1
-RedirectMatch 301 ^/minecraft/shulker-schematic-calculator(\.html)?$ /minecraft/tools/shulker-calculator/
-RedirectMatch 301 ^/minecraft/materiallist(\.html)?$ /minecraft/tools/material-list/
-RedirectMatch 301 ^/minecraft/litematica_material_converter(\.html)?$ /minecraft/tools/litematica-converter/
-RedirectMatch 301 ^/minecraft/day(\.php)?$ /minecraft/tools/day-calculator/
-RedirectMatch 301 ^/minecraft/marker(\.php)?$ /minecraft/tools/dynmap-marker/
-RedirectMatch 301 ^/minecraft/minecart(\.html)?$ /minecraft/tools/book-generator/
-RedirectMatch 301 ^/minecraft/transactions(\.html)?$ /minecraft/tools/transaction-generator/
-RedirectMatch 301 ^/Code/names\.csv$ /minecraft/tools/transaction-generator/names.csv
-RedirectMatch 301 ^/minecraft/stats(\.php)?$ /minecraft/tools/stats-editor/
-RedirectMatch 301 ^/minecraft/chatfilter(\.php)?$ /minecraft/tools/json-viewer/
-RedirectMatch 301 ^/minecraft/minigames(/battleships(\.html)?)?/?$ /minecraft/tools/tnt-cannon/
-RedirectMatch 301 ^/minecraft/playtime/(index\.html)?$ /minecraft/tools/playtime/
-RedirectMatch 301 ^/minecraft/playtime(/.*)?$ /minecraft/tools/playtime$1
-RedirectMatch 301 ^/minecraft/network/(index\.php)?$ /minecraft/projects/metro/
-RedirectMatch 301 ^/minecraft/network(/.*)?$ /minecraft/projects/metro$1
-RedirectMatch 301 ^/minecraft/boltnetwork(\.php)?$ /minecraft/projects/rail-router/
-RedirectMatch 301 ^/minecraft/milestones(\.php)?$ /minecraft/projects/milestones/
-RedirectMatch 301 ^/minecraft/stonecrest(\.php)?$ /minecraft/projects/stonecrest/
-RedirectMatch 301 ^/minecraft/mapart/code(/.*)?$ /minecraft/projects/map-art/frame-extractor/
-RedirectMatch 301 ^/minecraft/mapart(/.*)?$ /minecraft/projects/map-art/
-RedirectMatch 301 ^/minecraft/life/s1/e([1-3])(\.php)?$ /minecraft/projects/life-series/season-1/session-$1/
-RedirectMatch 301 ^/minecraft/life(/.*)?$ /minecraft/projects/life-series/
-RedirectMatch 301 ^/minecraft/screenshot(\.php)?$ /minecraft/screenshots/
-RedirectMatch 301 ^/minecraft/(skins|tips)(\.php)?$ /minecraft/$1/
-RedirectMatch 301 "^/minecraft/Invisible Bossbar \(all\)\.zip$" "/minecraft/downloads/Invisible Bossbar (all).zip"
-# the Captainalism shop moved under Minecraft
-RedirectMatch 301 ^/shop/?$ /minecraft/shop/
-RedirectMatch 301 ^/shop/index(\.php)?$ /minecraft/shop/
-RedirectMatch 301 ^/shop/books(\.php)?$ /minecraft/shop/enchanted-books/
-RedirectMatch 301 ^/shop/(requests|casino)(\.php)?$ /minecraft/shop/$1/
-RedirectMatch 301 ^/shop/upcoming(\.php)?$ /minecraft/shop/
-RedirectMatch 301 ^/shop/styles\.css$ /minecraft/shop/styles.css
 
 <IfModule mod_deflate.c>
          AddOutputFilterByType DEFLATE application/javascript
