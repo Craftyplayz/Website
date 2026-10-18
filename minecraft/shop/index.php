@@ -6,7 +6,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 $products = [
     ['iron_block', 'Block of Iron', '2 diamonds for 32 blocks'],
     ['gold_block', 'Block of Gold', '2 diamonds per 32'],
-    ['enchanted_book', 'Enchanted Books', 'All books 1 diamond, except Swift Sneak'],
+    ['enchanted_book', 'Enchanted Books', '1 diamond each, or 5 books for 3 diamonds'],
     ['golden_carrot', 'Golden Carrot', '1 diamond per stack'],
     ['prismarine', 'Prismarine', '1 diamond per stack'],
     ['prismarine_bricks', 'Prismarine Bricks', '2 diamonds per stack'],
