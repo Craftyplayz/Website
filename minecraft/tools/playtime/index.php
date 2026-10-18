@@ -1,35 +1,20 @@
 <?php
-$site_page = [];
+$site_page = ['components' => true, 'css' => ['/assets/css/pages/minecraft-playtime.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!doctype html>
 <html lang="en">
 <head>
     <?php page_head(); ?>
-  <style>
-    :root { color-scheme: dark; font-family: system-ui, sans-serif; }
-    .tool-wrap { margin: 0; padding: 2rem; background: #111827; color: #e5e7eb; }
-    main { max-width: 1100px; margin: auto; }
-    h1 { margin-top: 0; }
-    .hint { color: #9ca3af; }
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
-    article { background: #1f2937; border: 1px solid #374151; border-radius: 12px; padding: 1rem; }
-    h2 { font-size: 1.1rem; overflow-wrap: anywhere; margin: 0 0 1rem; }
-    dl { display: grid; grid-template-columns: 1fr; gap: .35rem; margin: 0; }
-    dt { color: #9ca3af; font-size: .85rem; }
-    dd { margin: 0 0 .65rem; overflow-wrap: anywhere; }
-    .error { color: #fca5a5; }
-  </style>
 </head>
 <body>
     <?php site_header(); ?>
-    <div class="tool-wrap">
-<main>
-  <h1>Minecraft Instance Stats</h1>
-  <p class="hint">Data loaded from <code>stats.json</code>. Run <code>collect_stats.py</code> again to refresh it.</p>
-  <div id="status" class="hint">Loading stats…</div>
-  <section id="instances" class="cards"></section>
-</main>
+    <main class="page" id="main">
+  <?= site_breadcrumbs(site_current_path()) ?>
+  <h1 class="page-title">Minecraft Instance Stats</h1>
+  <p class="page-lede">Data loaded from <code>stats.json</code>. Run <code>collect_stats.py</code> again to refresh it.</p>
+  <p id="status" class="muted">Loading stats…</p>
+  <section id="instances" class="masonry"></section>
 <script>
 const statusEl = document.querySelector("#status");
 const listEl = document.querySelector("#instances");
@@ -62,10 +47,12 @@ async function loadStats() {
     listEl.replaceChildren();
     for (const item of instances) {
       const card = document.createElement("article");
+      card.className = "card";
       const title = document.createElement("h2");
       title.textContent = item.name || item.folder || "Unnamed instance";
       card.append(title);
       const dl = document.createElement("dl");
+      dl.className = "kv";
       const rows = [
         ["Last launch", formatDate(item.lastlaunchtime)],
         ["Last time played", formatDuration(item.lasttimeplayed)],
@@ -80,13 +67,13 @@ async function loadStats() {
       card.append(dl); listEl.append(card);
     }
   } catch (error) {
-    statusEl.className = "error";
+    statusEl.className = "err";
     statusEl.textContent = `Couldn't load stats.json (${error.message}). Open this page through a local web server, not directly as a file.`;
   }
 }
 loadStats();
 </script>
-    </div>
+    </main>
     <?php site_footer(); ?>
 </body>
 </html>

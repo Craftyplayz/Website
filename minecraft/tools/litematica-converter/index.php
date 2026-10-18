@@ -1,5 +1,9 @@
 <?php
-$site_page = [];
+$site_page = [
+    'components' => true,
+    'ui' => true,
+    'css' => ['/assets/css/pages/minecraft-data.css'],
+];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
@@ -7,49 +11,30 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <head>
     <?php page_head(); ?>
-<style>
-/* this tool was written against a widget theme; map its variables to the site palette */
-:root{--font-sans:var(--font);--font-mono:var(--mono);--border-radius-md:var(--radius);
---color-text-primary:var(--text);--color-text-tertiary:var(--muted);--color-background-primary:var(--bg);--color-background-secondary:var(--card);
---color-border-secondary:var(--line-strong);--color-border-tertiary:var(--line);
---color-background-info:var(--info-bg);--color-text-info:var(--link);--color-background-success:#2d4a24;--color-text-success:var(--accent);
---color-background-warning:#4a3d12;--color-text-warning:var(--highlight)}
-</style>
-<style>
-*{box-sizing:border-box}
-.page{font-family:var(--font-sans);color:var(--color-text-primary)}
-h2{font-size:18px;font-weight:500;margin:0 0 .75rem}
-textarea{width:100%;height:200px;font-family:var(--font-mono);font-size:12px;background:var(--color-background-secondary);color:var(--color-text-primary);border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.6rem;resize:vertical}
-.btns{display:flex;gap:.5rem;margin:.5rem 0}
-button{padding:.45rem 1rem;border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-primary);cursor:pointer;font-size:13px}
-button:hover{background:var(--color-background-primary)}
-button.primary{background:var(--color-text-primary);color:var(--color-background-primary);border-color:transparent}
-button.primary:hover{opacity:.85}
-table{border-collapse:collapse;width:100%;margin-top:.75rem;font-size:13px}
-th,td{border:1px solid var(--color-border-tertiary);padding:5px 8px;text-align:left}
-th{background:var(--color-background-secondary);font-weight:500;font-size:12px}
-td.num{text-align:right;font-variant-numeric:tabular-nums}
-.pill{display:inline-block;padding:1px 7px;border-radius:20px;font-size:11px;font-weight:500}
-.pill-s{background:var(--color-background-info);color:var(--color-text-info)}
-.pill-sh{background:var(--color-background-success);color:var(--color-text-success)}
-.pill-ns{background:var(--color-background-warning);color:var(--color-text-warning)}
-.cb-cell{text-align:center}
-input[type=checkbox]{accent-color:var(--color-text-info);width:14px;height:14px;cursor:pointer}
-.note{font-size:11px;color:var(--color-text-tertiary);margin:.4rem 0 0}
-</style>
 </head>
 
 <body>
     <?php site_header(); ?>
     <main class="page" id="main">
-<h2>Litematica material list → Sheets</h2>
-<textarea id="input" placeholder="Paste Litematica material list here…"></textarea>
-<div class="btns">
-  <button class="primary" onclick="convert()">Convert</button>
-  <button onclick="copyTSV()">Copy for Sheets</button>
-</div>
-<div id="preview"></div>
-<textarea id="output" style="height:0;width:1px;left:0;opacity:0;position:absolute;pointer-events:none"></textarea>
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Litematica Material Converter</h1>
+        <p class="page-lede">Paste a Litematica material list to see stacks and shulker boxes, tick what you have, then copy it to Google Sheets.</p>
+
+        <div class="data-cards">
+            <section class="card">
+                <h2>Material list</h2>
+                <textarea class="field data-text" id="input" placeholder="Paste Litematica material list here…" spellcheck="false"></textarea>
+                <div class="actions">
+                    <button class="btn primary" type="button" onclick="convert()">Convert</button>
+                </div>
+            </section>
+
+            <section class="card hide" id="result">
+                <h2>Rows <span class="muted" id="rowcount"></span> <button class="btn small n-btn" type="button" id="copy" onclick="copyTSV(this)">Copy for Sheets</button></h2>
+                <div class="table-wrap" id="preview"></div>
+                <p class="muted lc-note">Stacks = ×64 (×16 for signs, banners and ender pearls). Shulker boxes = 27 stacks each. "Have it?" copies as TRUE/FALSE.</p>
+            </section>
+        </div>
 
 <script>
 const STACK1 = new Set([
@@ -141,30 +126,30 @@ function convert() {
 
 function renderTable() {
   const el = document.getElementById("preview");
-  if (!parsedRows.length) { el.innerHTML=''; return; }
-  let html = `<table><thead><tr>
-    <th>Item</th><th>Total</th><th>Stacks</th><th>Shulker boxes</th><th>Have it?</th>
+  document.getElementById("result").classList.toggle('hide', !parsedRows.length);
+  if (!parsedRows.length) { el.innerHTML=''; UI.toast('No material rows found in that text.', 'err'); return; }
+  document.getElementById("rowcount").textContent = parsedRows.length.toLocaleString() + ' items';
+  let html = `<table class="data-table"><thead><tr>
+    <th>Item</th><th class="num">Total</th><th class="num">Stacks</th><th class="num">Shulker boxes</th><th class="cb-cell">Have it?</th>
   </tr></thead><tbody>`;
   parsedRows.forEach((r,i) => {
     const stackCell = r.nonStackable
-      ? `<span class="pill pill-ns">not stackable</span>`
-      : `${r.stacks} <span class="pill pill-s">×${r.sz}</span>`;
+      ? `<span class="badge">not stackable</span>`
+      : `${r.stacks} <span class="badge b">×${r.sz}</span>`;
     const shulkerCell = r.nonStackable
       ? `—`
       : r.shulkers > 1
-        ? `${r.shulkers} <span class="pill pill-sh">shulkers</span>`
+        ? `${r.shulkers} <span class="badge g">shulkers</span>`
         : `<1`;
     html += `<tr>
-      <td>${r.name}</td>
+      <td>${UI.esc(r.name)}</td>
       <td class="num">${r.total.toLocaleString()}</td>
       <td class="num">${stackCell}</td>
       <td class="num">${shulkerCell}</td>
-      <td class="cb-cell"><input type="checkbox" data-i="${i}" onchange="updateTSV()"></td>
+      <td class="cb-cell"><input type="checkbox" data-i="${i}" aria-label="Have ${UI.esc(r.name)}"></td>
     </tr>`;
   });
-  html += `</tbody></table>
-  <p class="note">Stacks = ×64 (×16 for signs/banners/ender pearls). Shulker boxes = 27 stacks each. "Have it?" column copies as TRUE/FALSE.</p>`;
-  el.innerHTML = html;
+  el.innerHTML = html + `</tbody></table>`;
 }
 
 function buildTSV() {
@@ -175,17 +160,12 @@ function buildTSV() {
     return [r.name, r.total, stacks, shulkers, checked ? "TRUE" : "FALSE"];
   });
   const header = ["Item","Total","Stacks","Shulker boxes","Have it?"];
-  const tsv = [header, ...sheetData].map(r=>r.join("\t")).join("\n");
-  document.getElementById("output").value = tsv;
+  return [header, ...sheetData].map(r=>r.join("\t")).join("\n");
 }
 
-function updateTSV() { buildTSV(); }
-
-function copyTSV() {
-  buildTSV();
-  const tsv = document.getElementById("output").value;
-  if (!tsv.trim()) { alert("Convert something first."); return; }
-  navigator.clipboard.writeText(tsv).then(()=>alert("Copied! Paste directly into Google Sheets."));
+function copyTSV(btn) {
+  if (!parsedRows.length) { UI.toast("Convert something first.", 'err'); return; }
+  UI.copy(buildTSV(), btn);
 }
 </script>
     </main>

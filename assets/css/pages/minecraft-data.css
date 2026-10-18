@@ -36,3 +36,10 @@ dialog.dlg .code { max-height: 50vh; }
 .raw summary { color: var(--link); cursor: pointer; font-size: 14px; }
 .raw .data-text { margin-top: 8px; }
 .card h2 .muted { font-size: 14px; font-weight: 400; }
+
+/* Litematica converter table */
+.data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table .cb-cell { text-align: center; }
+.data-table input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+.data-table .badge { white-space: nowrap; }
+.lc-note { margin: 8px 0 0; font-size: 13px; }

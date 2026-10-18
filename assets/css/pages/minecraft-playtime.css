@@ -1,0 +1,4 @@
+/* Instance Playtime */
+#instances .kv { margin: 0; }
+#instances .kv dd { margin: 0; overflow-wrap: anywhere; }
+#instances .card h2 { overflow-wrap: anywhere; }
