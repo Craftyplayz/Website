@@ -1,7 +1,7 @@
 <?php
-// Old short links: /?url=melon -> the address in shorten.json (until /go/ replaces them)
+// Old short links: /?url=melon -> the address in data/links.json (same list as /go/<name>)
 if (isset($_GET['url']) && is_string($_GET['url'])) {
-    $links = json_decode((string)@file_get_contents(__DIR__ . '/shorten.json'), true);
+    $links = json_decode((string)@file_get_contents(__DIR__ . '/data/links.json'), true);
     if (is_array($links) && isset($links[$_GET['url']])) {
         header('Location: ' . $links[$_GET['url']], true, 302);
         exit;

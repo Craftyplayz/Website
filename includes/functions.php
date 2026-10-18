@@ -182,6 +182,7 @@ function site_footer($path = null, $crumbs = true)
     echo '<nav class="sf-links" aria-label="Sections">';
     foreach ($data['sections'] as $section) echo '<a href="' . h($section['url']) . '">' . h($section['title']) . '</a>';
     foreach ($data['links'] as $link) echo '<a href="' . h($link['url']) . '">' . h($link['title']) . '</a>';
+    echo '<a href="/sitemap/">Sitemap</a><a href="/go/discord">Discord</a>';
     echo '</nav>';
     echo '<p class="sf-meta">© ' . date('Y') . ' CraftyPlayz<span class="sf-cat" id="catfact"></span></p>';
     echo '</footer>';
