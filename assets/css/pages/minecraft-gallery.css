@@ -27,4 +27,5 @@
 .page a.skin:hover { border-color: var(--accent); text-decoration: none; }
 .page a.skin.skin-hl { border-color: #6c4b8f; } /* the purple skin keeps its purple frame, same tint as .badge.p */
 .skin img { display: block; width: 100%; max-width: 180px; height: auto; }
-.skin span { font-size: 14px; }
+.skin span { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.skin .badge { font-weight: 400; }

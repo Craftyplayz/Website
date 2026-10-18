@@ -26,7 +26,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 $size = @getimagesize($image) ?: [276, 368]; ?>
                 <a class="skin<?= $file === 'purple.png' ? ' skin-hl' : '' ?>" href="/media/minecraft/skins/<?= h(rawurlencode($file)) ?>" download>
                     <img src="/media/minecraft/skins/<?= h(rawurlencode($file)) ?>" width="<?= (int)$size[0] ?>" height="<?= (int)$size[1] ?>" alt="<?= h($name) ?> skin" loading="lazy" decoding="async">
-                    <span><?= h($name) ?></span>
+                    <span><?= h($name) ?><?php if ($file === 'purple.png'): ?> <b class="badge p">Current</b><?php endif; ?></span>
                 </a>
             <?php endforeach; ?>
         </div>
