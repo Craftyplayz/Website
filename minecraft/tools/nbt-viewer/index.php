@@ -414,6 +414,15 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         .fsel > h3 { margin: 0 0 8px; font-size: 15px; }
         .fsel > h3 .n { color: var(--muted); font-weight: 400; font-size: 12px; }
         @media (max-width: 640px) { .fbrowse { grid-template-columns: 1fr; } .ftree { max-height: 200px; } }
+        .drop .srv-about { font-size: 13px; margin-top: 12px; }
+        .srv { max-width: 440px; margin: 12px auto; font-size: 13px; text-align: center; }
+        .srv .progress { height: 4px; margin: 6px 0 0; }
+        .srv .progress i { width: 0; transition: width .15s; }
+        .srv .progress.ind i { width: 30%; animation: srvind 1.1s linear infinite; }
+        @keyframes srvind { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+        @media (prefers-reduced-motion: reduce) { .srv .progress.ind i { width: 100%; opacity: .5; animation: none; } }
+        .srv-act { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+        .srv-act:empty { display: none; }
         .drop details { max-width: 760px; margin: 14px auto 0; text-align: left; font-size: 13px; }
         .drop details summary { cursor: pointer; text-align: center; color: var(--muted); }
         .drop details ul { margin: 8px 0 0; padding-left: 20px; line-height: 1.6; }
@@ -432,7 +441,10 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 <button class="btn primary" id="pick">Choose files</button>
                 <button class="btn" id="pickDir">Choose folder</button>
                 <button class="btn" data-example="Sampledata/playerdata-sample.dat|Sampledata/playerstats-sample.json|Sampledata/playeradvancement-sample.json">Try an example</button>
+                <button class="btn" id="mySrv" data-srv="sync">View my server stats</button>
             </div>
+            <p class="muted srv-about">“View my server stats” opens every player on my Minecraft server and saves a copy in your browser, so next time only changed files are downloaded.</p>
+            <div id="srvSync" class="srv hide" role="status" aria-live="polite"><div class="srv-msg"></div><div class="progress"><i></i></div><div class="srv-act"></div></div>
             <details>
                 <summary>What can I drop?</summary>
                 <ul>
@@ -3055,9 +3067,267 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
         let progEl = null;
         function progress(msg) {
+            // a server sync shows loadEntries' progress on its own bar
+            if (srvJob) { if (msg) { const m = /(\d+) \/ (\d+)/.exec(msg); srvStatus(msg, m ? +m[1] : 0, m ? +m[2] : 0); } return; }
             if (!msg) { if (progEl) progEl.remove(); progEl = null; return; }
             if (!progEl || !progEl.isConnected) { progEl = document.createElement('div'); progEl.className = 'note'; $('#errors').appendChild(progEl); }
             progEl.textContent = msg;
+        }
+
+        /* =====================================================================
+           My server's stats: stats/, advancements/ and playerdata from assets.craftyplayz.com,
+           mirrored into IndexedDB so a later visit only downloads what changed.
+           Nothing here runs until "View my server stats" is pressed.
+           ===================================================================== */
+        const SRV_BASE = 'https://assets.craftyplayz.com/minecraft-players/';
+        // folder on the server -> the folder it is in a world, so ROUTES files it like a dropped world
+        const SRV_DIRS = { stats: 'stats', advancements: 'advancements', data: 'playerdata' };
+        let srvJob = null, srvVia = null, srvLoaded = false;
+
+        // records: {key: 'dir/name', dir, name, bytes, hash, etag, lastModified, fetched}
+        // falls back to memory (no saving between visits) when IndexedDB is unavailable, e.g. some private windows
+        const srvCache = {
+            db: null, mem: null,
+            open() {
+                if (!this.db) this.db = new Promise((res, rej) => {
+                    const r = indexedDB.open('nbt-server', 1);
+                    r.onupgradeneeded = () => r.result.createObjectStore('files', { keyPath: 'key' });
+                    r.onsuccess = () => res(r.result);
+                    r.onerror = () => rej(r.error);
+                    r.onblocked = () => rej(new Error('the cache is open in another tab'));
+                });
+                return this.db;
+            },
+            async tx(mode, fn) {
+                const db = await this.open();
+                return new Promise((res, rej) => {
+                    const t = db.transaction('files', mode), req = fn(t.objectStore('files'));
+                    t.oncomplete = () => res(req && req.result);
+                    t.onerror = t.onabort = () => rej(t.error || new Error('the cache write was aborted'));
+                });
+            },
+            async all() {
+                if (!this.mem) {
+                    try { return await this.tx('readonly', (s) => s.getAll()); } catch (e) { console.warn('Server stats cache unavailable:', e); this.mem = new Map(); }
+                }
+                return [...this.mem.values()];
+            },
+            // one record per transaction: a file is either fully saved or not at all
+            async put(rec) { if (this.mem) this.mem.set(rec.key, rec); else await this.tx('readwrite', (s) => s.put(rec)); },
+            async drop(keys) {
+                if (!keys.length) return;
+                if (this.mem) keys.forEach((k) => this.mem.delete(k));
+                else await this.tx('readwrite', (s) => keys.forEach((k) => s.delete(k)));
+            },
+        };
+        // FNV-1a, to spot a damaged cache entry and to compare downloads that have no ETag / Last-Modified
+        const srvHash = (u) => { let h = 0x811c9dc5; for (let i = 0; i < u.length; i++) h = Math.imul(h ^ u[i], 0x01000193); return (h >>> 0).toString(16) + '-' + u.length; };
+        function srvIntact(name, u) {
+            if (!(u instanceof Uint8Array) || !u.length) return false;
+            if (/\.json$/i.test(name)) { try { JSON.parse(textOf(u)); return true; } catch (e) { return false; } }
+            if (/\.dat$/i.test(name)) return u.length > 18 && u[0] === 0x1f && u[1] === 0x8b;
+            return true;
+        }
+        const srvValid = (r) => !!r && srvIntact(r.name, r.bytes) && r.hash === srvHash(r.bytes);
+
+        const srvUrl = (via, dir, name) => via === 'direct' ? `${SRV_BASE}${dir}/${name ? encodeURIComponent(name) : ''}` : `api.php?srv=${dir}${name ? '&f=' + encodeURIComponent(name) : ''}`;
+        async function srvFetch(dir, name, headers = {}) {
+            const go = (via) => fetch(srvUrl(via, dir, name), { headers, cache: 'no-store', signal: AbortSignal.timeout(30000) });
+            if (srvVia) return go(srvVia);
+            // the asset server only allows some origins (CORS) - api.php fetches it for the rest
+            try { const r = await go('direct'); srvVia = 'direct'; return r; } catch (err) { }
+            const r = await go('proxy');
+            if (r.ok) srvVia = 'proxy';
+            return r;
+        }
+        // an Apache directory listing -> the file names directly inside it
+        async function srvList(dir) {
+            const r = await srvFetch(dir);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+            if (!/index of/i.test(doc.title + ' ' + ($('h1', doc) || {}).textContent)) throw new Error('not a directory listing');
+            const root = new URL(dir + '/', SRV_BASE), names = new Set();
+            for (const a of $$('a[href]', doc)) {
+                const u = new URL(a.getAttribute('href'), root);
+                if (u.origin !== root.origin || u.search || !u.pathname.startsWith(root.pathname)) continue;
+                const rest = u.pathname.slice(root.pathname.length);
+                if (rest && !rest.includes('/')) names.add(decodeURIComponent(rest));
+            }
+            return [...names];
+        }
+        // one file -> {rec, state: 'same' | 'changed' | 'new', unsaved}; throws if it could not be fetched
+        async function srvPull({ dir, name, key, rec }) {
+            const h = {};
+            if (rec && rec.etag) h['If-None-Match'] = rec.etag;
+            if (rec && rec.lastModified) h['If-Modified-Since'] = rec.lastModified;
+            const r = await srvFetch(dir, name, h);
+            if (r.status === 304 && rec) return { rec, state: 'same' };
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const bytes = new Uint8Array(await r.arrayBuffer());
+            if (!srvIntact(name, bytes)) throw new Error('the download was incomplete or damaged');
+            const next = { key, dir, name, bytes, hash: srvHash(bytes), etag: r.headers.get('etag') || '', lastModified: r.headers.get('last-modified') || '', fetched: Date.now() };
+            // without a validator the server sends the file every time - the bytes decide, not the size
+            const same = rec && rec.hash === next.hash;
+            if (same && rec.etag === next.etag && rec.lastModified === next.lastModified) return { rec, state: 'same' };
+            let unsaved = false;
+            try { await srvCache.put(next); } catch (e) { console.warn(e); unsaved = true; }
+            return { rec: next, state: same ? 'same' : rec ? 'changed' : 'new', unsaved };
+        }
+
+        function srvStatus(msg, done, total) {
+            const box = $('#srvSync'), bar = $('.progress', box), drop = $('#drop');
+            // once players are open the drop zone is hidden - show the bar above the viewer instead
+            if (drop.classList.contains('hide')) { if (box.parentElement === drop) $('#app').insertBefore(box, $('#viewer')); }
+            else if (box.parentElement !== drop) drop.insertBefore(box, $('details', drop));
+            box.classList.remove('hide');
+            $('.srv-msg', box).textContent = msg;
+            $('.srv-act', box).innerHTML = '';
+            bar.classList.remove('hide');
+            bar.classList.toggle('ind', !(total > 0));
+            $('i', bar).style.width = total > 0 ? Math.min(100, (done / total) * 100) + '%' : '';
+        }
+        // msg empty -> hide; actions: [[label, data-srv value, primary?]]
+        function srvEnd(msg, actions = []) {
+            const box = $('#srvSync');
+            if (!msg) return box.classList.add('hide');
+            srvStatus(msg);
+            $('.progress', box).classList.add('hide');
+            $('.srv-act', box).innerHTML = actions.map(([l, a, p]) => `<button class="btn small${p ? ' primary' : ''}" data-srv="${a}">${esc(l)}</button>`).join('');
+        }
+        // a warning that stays until dismissed (toasts fade before anyone could press Retry)
+        function srvWarn(msg) {
+            $$('#errors .srv-warn').forEach((x) => x.remove());
+            const el = document.createElement('div');
+            el.className = 'err srv-warn';
+            el.innerHTML = `${esc(msg)} <button class="btn small" data-srv="sync">Retry</button> <button class="btn small" data-srv="dismiss">Dismiss</button>`;
+            $('#errors').appendChild(el);
+        }
+
+        // a second press while one is running just waits for the same sync
+        function srvSync(cachedOnly) {
+            if (!srvJob) {
+                $('#mySrv').disabled = true;
+                $$('#errors .srv-warn').forEach((x) => x.remove());
+                srvJob = srvRun(cachedOnly)
+                    .catch((err) => { console.error(err); srvEnd('Something went wrong: ' + err.message, [['Try again', 'sync', true]]); })
+                    .finally(() => { srvJob = null; $('#mySrv').disabled = false; });
+            }
+            return srvJob;
+        }
+
+        // bots.json next to this page: Carpet bots to leave out - ["<uuid>", ...] or [{"name": ..., "uuid": ...}, ...]
+        // no file = no bots; if it can't be read, the last list seen is used
+        async function srvBots() {
+            try {
+                const r = await fetch('bots.json', { cache: 'no-cache' });
+                if (r.status === 404) { store.set('nbt.srv.bots', []); return new Set(); }
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                const ids = (await r.json()).map((b) => uuidKey(typeof b === 'string' ? b : b && b.uuid)).filter(Boolean);
+                store.set('nbt.srv.bots', ids);
+                return new Set(ids);
+            } catch (err) { console.warn('bots.json:', err); return new Set(store.get('nbt.srv.bots', [])); }
+        }
+
+        async function srvRun(cachedOnly) {
+            srvStatus('Checking saved files…');
+            const bots = await srvBots(), isBot = (name) => bots.has(fileUuid(name));
+            const usable = new Map(), bad = [];
+            // a bot's saved files are dropped like damaged ones, so a bot added to bots.json disappears next time
+            for (const r of await srvCache.all()) (srvValid(r) && !isBot(r.name) ? usable.set(r.key, r) : bad.push(r.key));
+            // a damaged entry is thrown away, so it is downloaded again like a missing one
+            if (bad.length) await srvCache.drop(bad).catch(console.warn);
+            if (cachedOnly && usable.size) return srvOpen([...usable.values()], new Set(usable.keys()), []);
+            const last = store.get('nbt.srv.synced', 0);
+            const fallback = (why) => usable.size
+                ? srvEnd(`${why} You can open the copy saved in this browser (${num(usable.size)} files${last ? ', last updated ' + new Date(last).toLocaleString() : ''}).`, [['Open saved copy', 'cached', true], ['Try again', 'sync']])
+                : srvEnd(`${why} Nothing has been saved in this browser yet.`, [['Try again', 'sync', true]]);
+            if (!navigator.onLine) return fallback('You seem to be offline.');
+
+            // 1. the three listings - the first one also settles direct vs api.php
+            srvStatus('Discovering files…');
+            const settle = (p) => p.then((v) => ({ v }), (e) => ({ e }));
+            const dirs = Object.keys(SRV_DIRS), lists = [await settle(srvList(dirs[0]))];
+            lists.push(...await Promise.all(dirs.slice(1).map((d) => settle(srvList(d)))));
+            if (lists.every((l) => l.e)) return fallback(`Could not reach the server (${lists[0].e.message}).`);
+
+            // 2. compare with the cache
+            const warn = [], jobs = [], keep = [], gone = [];
+            dirs.forEach((dir, i) => {
+                const names = lists[i].v, mine = [...usable.values()].filter((r) => r.dir === dir);
+                if (!names) { warn.push(`could not list ${dir}/ (${lists[i].e.message})`); return keep.push(...mine); }
+                // an empty listing is more likely a server hiccup than every player leaving - keep what is saved
+                if (!names.length) { if (mine.length) warn.push(`the server listed no files in ${dir}/`); return keep.push(...mine); }
+                const live = new Set();
+                for (const name of names) {
+                    // .dat_old is the server's previous save of the .dat next to it
+                    if (/\.dat_old$/i.test(name) || isBot(name) || !kindOf(`${SRV_DIRS[dir]}/${name}`)) continue;
+                    live.add(name);
+                    jobs.push({ dir, name, key: `${dir}/${name}`, rec: usable.get(`${dir}/${name}`) });
+                }
+                // gone from the server: forget only our own copy of that file
+                gone.push(...mine.filter((r) => !live.has(r.name)).map((r) => r.key));
+            });
+            if (gone.length) await srvCache.drop(gone).catch(console.warn);
+            if (!jobs.length && !keep.length) return srvEnd('The server has no player files right now.', [['Try again', 'sync', true]]);
+
+            // 3. fetch what is missing or changed, a few at a time
+            const out = [...keep], changed = new Set(), failed = [];
+            let done = 0, added = 0, updated = 0, unsaved = 0;
+            const tick = () => srvStatus(added + updated ? `Downloading files… ${num(done)} / ${num(jobs.length)} checked · ${num(added + updated)} downloaded` : `Checking for updates… ${num(done)} / ${num(jobs.length)}`, done, jobs.length);
+            tick();
+            let next = 0;
+            await Promise.all(Array.from({ length: Math.min(6, jobs.length) }, async () => {
+                while (next < jobs.length) {
+                    const j = jobs[next++];
+                    try {
+                        const r = await srvPull(j);
+                        out.push(r.rec);
+                        if (r.state !== 'same') changed.add(j.key);
+                        if (r.state === 'new') added++;
+                        if (r.state === 'changed') updated++;
+                        if (r.unsaved) unsaved++;
+                    } catch (err) {
+                        console.warn(`Server stats: ${j.key}:`, err);
+                        j.err = err.name === 'TimeoutError' ? 'timed out' : err instanceof TypeError ? 'network error' : err.message;
+                        failed.push(j);
+                        if (j.rec) out.push(j.rec);   // keep showing the saved copy
+                    }
+                    done++;
+                    tick();
+                }
+            }));
+            if (!out.length) return fallback(`Could not download any of the ${num(jobs.length)} files.`);
+
+            // 4. say exactly what is missing or stale
+            if (failed.length) {
+                const stale = failed.filter((j) => j.rec).length, missing = failed.length - stale;
+                const why = [...new Set(failed.map((j) => j.err))].slice(0, 3).join(', ');
+                warn.unshift(`${num(failed.length)} file${failed.length === 1 ? '' : 's'} could not be downloaded (${why})` + [stale && `${num(stale)} shown from the saved copy`, missing && `${num(missing)} not available yet`].filter(Boolean).map((s) => ' - ' + s).join(''));
+            }
+            if (unsaved) warn.push(`${num(unsaved)} file${unsaved === 1 ? '' : 's'} could not be saved in this browser (storage full?) and will be downloaded again next time`);
+            if (!warn.length) store.set('nbt.srv.synced', Date.now());
+            await srvOpen(out, changed, warn);
+            if (added + updated) toast(`Server stats: ${[added && `${num(added)} new`, updated && `${num(updated)} updated`].filter(Boolean).join(', ')} · ${num(out.length - added - updated)} unchanged`, 'note');
+        }
+
+        // 5. into the normal loading pipeline, then 6. open the viewer
+        async function srvOpen(recs, changed, warn) {
+            // already showing the server's players: only the files that changed need reading again
+            if (srvLoaded && players.length) recs = recs.filter((r) => changed.has(r.key));
+            if (recs.length) {
+                srvStatus('Loading stats…');
+                let n = 0;
+                await loadEntries(recs.map((r) => ({
+                    name: r.name, path: `${SRV_DIRS[r.dir]}/${r.name}`, modified: Date.parse(r.lastModified) || r.fetched,
+                    // let the page paint now and then - JSON files parse without ever yielding
+                    read: async () => { if (++n % 8 === 0) await new Promise((res) => setTimeout(res)); return r.bytes; },
+                })));
+                srvLoaded = true;
+                srvStatus('Opening stats…', 1, 1);
+                if (players.length) scrollTo({ top: $('#viewer').offsetTop - 10, behavior: 'smooth' });
+            } else toast('Server stats are already up to date.', 'note');
+            srvEnd();
+            if (warn.length) srvWarn('Server stats: ' + warn.join('; ') + '.');
         }
 
         // a zip / jar / tar: a mod, a resource pack, or a zipped world / server folder
@@ -3922,6 +4192,12 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
         document.addEventListener('click', async (e) => {
             const t = e.target;
+            const sv = t.closest('[data-srv]');
+            if (sv) {
+                if (sv.dataset.srv === 'dismiss') sv.closest('.srv-warn').remove();
+                else srvSync(sv.dataset.srv === 'cached');
+                return;
+            }
             const ex = t.closest('[data-example]');
             if (ex) {
                 ex.disabled = true;

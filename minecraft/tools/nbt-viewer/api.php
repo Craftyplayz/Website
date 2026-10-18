@@ -112,6 +112,45 @@ if (isset($_GET['item'])) {
     exit;
 }
 
+/* ---------- my server's player files ---------- */
+// GET api.php?srv=stats|advancements|data   -> that folder's directory listing (HTML)
+// GET api.php?srv=<folder>&f=<file>         -> one file. If-None-Match / If-Modified-Since are passed on,
+//                                              so an unchanged file comes back as a bodyless 304.
+// The viewer only comes here when the asset server's CORS rules stop the browser fetching it directly.
+if (isset($_GET['srv'])) {
+    $dir = $_GET['srv'];
+    $f = isset($_GET['f']) ? $_GET['f'] : '';
+    if (!in_array($dir, ['stats', 'advancements', 'data'], true) || ($f !== '' && !preg_match('/^[A-Za-z0-9_-][A-Za-z0-9._-]{0,99}$/', $f))) json_out(400, ['error' => 'bad file']);
+    $send = [];
+    foreach (['HTTP_IF_NONE_MATCH' => 'If-None-Match', 'HTTP_IF_MODIFIED_SINCE' => 'If-Modified-Since'] as $k => $h) {
+        // mod_deflate tags compressed responses' ETags with -gzip / -br; the asset server doesn't know those
+        if (!empty($_SERVER[$k])) $send[] = $h . ': ' . preg_replace('/-(gzip|br|deflate)"/', '"', substr(str_replace(["\r", "\n"], '', $_SERVER[$k]), 0, 200));
+    }
+    $got = [];
+    $ch = curl_init('https://assets.craftyplayz.com/minecraft-players/' . $dir . '/' . rawurlencode($f));
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 20,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_HTTPHEADER => $send,
+        CURLOPT_HEADERFUNCTION => function ($ch, $line) use (&$got) {
+            if (preg_match('/^(etag|last-modified):\s*(.+?)\s*$/i', $line, $m)) $got[strtolower($m[1])] = $m[2];
+            return strlen($line);
+        },
+    ]);
+    $body = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($body === false || !$code) json_out(502, ['error' => 'The server could not be reached']);
+    http_response_code(in_array($code, [200, 304, 404], true) ? $code : 502);
+    header('Cache-Control: no-store');
+    header('Content-Type: ' . ($f === '' ? 'text/html; charset=utf-8' : 'application/octet-stream'));
+    if (isset($got['etag'])) header('ETag: ' . $got['etag']);
+    if (isset($got['last-modified'])) header('Last-Modified: ' . $got['last-modified']);
+    if ($code !== 304) echo $body;
+    exit;
+}
+
 /* ---------- share links ---------- */
 // POST api.php?share=create  (body: gzipped JSON {v, players: [...]})  -> {"id": "..."}
 // GET  api.php?share=<id>                                              -> the gzipped JSON
