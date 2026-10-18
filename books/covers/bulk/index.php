@@ -10,7 +10,6 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 <html lang="en">
 <head>
     <?php page_head(); ?>
-    <link rel="preconnect" href="https://www.googleapis.com">
 </head>
 <body>
     <?php site_header(); ?>
@@ -47,9 +46,8 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
     document.addEventListener('DOMContentLoaded', () => {
         const { esc, toast } = UI;
 
-        // shortcut: this key is visible in the page source; move the calls behind a PHP proxy if it gets abused.
-        const GOOGLE_BOOKS_API_KEY = 'AIzaSyBOk3ZcZ3Em4H2atm6LYo6U54Ut939f2x4';
-        const API_BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
+        // Google Books search goes through api.php, which adds the key server-side and caches for a day
+        const search = (q, max) => `api.php?q=${encodeURIComponent(q)}&max=${max}`;
 
         let debounceTimer;
         let currentSeriesBooks = [];
@@ -106,7 +104,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 message(suggestionsDiv, 'Searching…');
                 suggestionsDiv.hidden = false;
 
-                const url = `${API_BASE_URL}?q=${encodeURIComponent(query)}&maxResults=10&printType=books&key=${GOOGLE_BOOKS_API_KEY}`;
+                const url = search(query, 10);
                 const response = await fetch(url);
                 const data = await response.json();
 
@@ -242,7 +240,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             let allBooks = [];
 
             for (const query of searches) {
-                const url = `${API_BASE_URL}?q=${encodeURIComponent(query)}&maxResults=40&printType=books&key=${GOOGLE_BOOKS_API_KEY}`;
+                const url = search(query, 40);
 
                 try {
                     const response = await fetch(url);
@@ -285,7 +283,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
         // Search by author (fallback)
         async function searchByAuthor(author) {
-            const url = `${API_BASE_URL}?q=inauthor:"${encodeURIComponent(author)}"&maxResults=40&printType=books&key=${GOOGLE_BOOKS_API_KEY}`;
+            const url = search(`inauthor:"${author}"`, 40);
 
             const response = await fetch(url);
             const data = await response.json();
