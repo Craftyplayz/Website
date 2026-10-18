@@ -899,7 +899,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                     <div class="direction-display has-item">
                         <span class="direction-label">Item in Minecart</span>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <img src="/minecraft/tools/item-list/${selectedNode.item}.png" style="width: 32px; height: 32px; image-rendering: pixelated;">
+                            <img src="/minecraft/tools/item-list/minecraft_${selectedNode.item}.png" style="width: 32px; height: 32px; image-rendering: pixelated;">
                             <span style="color: #4a9eff;">${selectedNode.item.replace(/_/g, ' ')}</span>
                         </div>
                     </div>
@@ -940,7 +940,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                         if (i >= 51) {
                             html += `
                                 <div class="item-slot" data-item-name="Minecart" onmouseenter="showTooltip(event, 'Minecart', null)" onmouseleave="hideTooltip()">
-                                    <img src="/minecraft/tools/item-list/minecart.png" alt="minecart">
+                                    <img src="/minecraft/tools/item-list/minecraft_minecart.png" alt="minecart">
                                     <span style="position: absolute; bottom: 2px; right: 2px; font-size: 10px; color: white; text-shadow: 1px 1px 1px black;">1</span>
                                 </div>
                             `;
@@ -949,7 +949,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                         else if (i === 50) {
                             html += `
                                 <div class="item-slot" data-item-name="Iron Nugget" onmouseenter="showTooltip(event, 'Iron Nugget', null)" onmouseleave="hideTooltip()">
-                                    <img src="/minecraft/tools/item-list/iron_nugget.png" alt="iron_nugget">
+                                    <img src="/minecraft/tools/item-list/minecraft_iron_nugget.png" alt="iron_nugget">
                                     <span style="position: absolute; bottom: 2px; right: 2px; font-size: 10px; color: white; text-shadow: 1px 1px 1px black;">${ironNuggetCount}</span>
                                 </div>
                             `;
@@ -961,7 +961,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                             const stationName = station ? station.name : 'Unknown Station';
                             html += `
                                 <div class="item-slot" data-item-name="${itemName}" data-station-name="${stationName}" onmouseenter="showTooltip(event, '${itemName}', '${stationName}')" onmouseleave="hideTooltip()">
-                                    <img src="/minecraft/tools/item-list/${items[i]}.png" alt="${items[i]}">
+                                    <img src="/minecraft/tools/item-list/minecraft_${items[i]}.png" alt="${items[i]}">
                                 </div>
                             `;
                         }
