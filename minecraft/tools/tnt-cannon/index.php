@@ -7,156 +7,83 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 <head>
     <?php page_head(); ?>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  .tool-wrap {
-    background: #202020;
-    color: #fff;
-    font-family: 'Roboto', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 32px 16px;
-  }
-
-  h1 {
-    font-size: 1.2rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #aaa;
-    margin-bottom: 28px;
-  }
+  /* one cell size drives the whole grid, so it fits a 320px phone and stops growing at 42px */
+  .tnt { --s: clamp(24px, calc((100vw - 120px) / 10), 42px); display: flex; flex-direction: column; align-items: center; }
+  .tnt > .crumbs, .tnt > .page-title, .tnt > .page-lede { align-self: stretch; }
 
   .grid-wrapper {
-    background: #272626;
-    border: 1px solid #fff;
-    border-radius: 15px;
-    padding: 20px;
-    display: inline-block;
+    max-width: 100%;
+    padding: 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
   }
 
-  .col-labels {
+  .col-labels, .row {
     display: grid;
-    grid-template-columns: 28px repeat(10, 42px) 28px;
+    grid-template-columns: 20px repeat(10, var(--s)) 20px;
     margin-bottom: 4px;
   }
 
-  .col-labels span {
-    text-align: center;
-    font-size: 0.75rem;
-    color: #888;
-    font-weight: 500;
-  }
+  .col-labels.bottom { margin: 4px 0 0; }
 
-  .row {
-    display: grid;
-    grid-template-columns: 28px repeat(10, 42px) 28px;
-    gap: 0;
-    margin-bottom: 4px;
-  }
-
-  .row-label {
+  .col-labels span, .row-label {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
-    color: #888;
-    font-weight: 500;
+    color: var(--muted);
+    font-size: 12px;
   }
 
   .cell {
-    width: 38px;
-    height: 38px;
+    width: calc(var(--s) - 4px);
+    height: calc(var(--s) - 4px);
     margin: 2px;
-    background: #1a1a1a;
-    border: 1px solid #444;
+    padding: 0;
+    background: var(--sunken);
+    border: 1px solid var(--line);
     border-radius: 6px;
+    color: var(--muted);
+    font: 10px var(--font);
     cursor: pointer;
-    font-size: 0.6rem;
-    color: #666;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.1s, border-color 0.1s, color 0.1s;
+    transition: background var(--fast), border-color var(--fast), color var(--fast);
     user-select: none;
   }
 
-  .cell:hover {
-    background: #2a2a2a;
-    border-color: #888;
-    color: #ccc;
-  }
-
-  .cell.selected {
-    background: #2d4a1e;
-    border-color: #5a9e2f;
-    color: #8fd44f;
-  }
+  .cell:hover { background: var(--card2); border-color: var(--line-strong); color: var(--text); }
+  .cell.selected { background: var(--accent-soft); border-color: var(--btn-line); color: var(--accent); }
 
   .readout {
-    margin-top: 24px;
-    background: #272626;
-    border: 1px solid #fff;
-    border-radius: 15px;
-    padding: 20px 28px;
-    width: 100%;
-    max-width: 620px;
-    min-height: 90px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 14px;
+    width: 100%;
+    max-width: 620px;
+    min-height: 90px;
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
   }
 
-  .readout .placeholder {
-    color: #555;
-    font-size: 0.85rem;
-  }
+  .readout .placeholder { color: var(--muted); font-size: 14px; }
+  .readout .target-label { color: var(--accent); font-size: 22px; font-weight: 700; letter-spacing: .08em; }
 
-  .readout .target-label {
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: #8fd44f;
-  }
-
-  .settings {
-    display: flex;
-    align-items: flex-end;
-    gap: 32px;
-  }
-
-  .setting {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-  }
-
-  .setting .label {
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #888;
-    text-align: center;
-    line-height: 1.3;
-  }
-
-  .setting .value {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #fff;
-  }
+  .settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 12px 24px; width: 100%; }
+  .setting { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .setting .label { color: var(--muted); font-size: 12px; line-height: 1.3; text-align: center; }
+  .setting .value { font-size: 26px; font-weight: 700; }
 </style>
 </head>
 <body>
     <?php site_header(); ?>
-    <div class="tool-wrap">
-
-<h1>TNT Cannon Targeting</h1>
+    <main class="page tnt" id="main">
+    <?= site_breadcrumbs(site_current_path()) ?>
+<h1 class="page-title">TNT Cannon Targeting</h1>
+<p class="page-lede">Pick a target square to get the cannon settings.</p>
 
 <div class="grid-wrapper">
   <div class="col-labels">
@@ -166,7 +93,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
     <span></span>
   </div>
   <div id="grid"></div>
-  <div class="col-labels" style="margin-top:4px;margin-bottom:0;">
+  <div class="col-labels bottom">
     <span></span>
     <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
     <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
@@ -311,7 +238,8 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
     for (let c = 0; c < 10; c++) {
       const label = r + c;
       const idx = labelToIndex[label];
-      const cell = document.createElement('div');
+      const cell = document.createElement('button');
+      cell.type = 'button';
       cell.className = 'cell';
       cell.textContent = label;
       cell.dataset.label = label;
@@ -361,7 +289,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
     `;
   }
 </script>
-    </div>
+    </main>
     <?php site_footer(); ?>
 </body>
 </html>
