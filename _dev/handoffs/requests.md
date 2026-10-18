@@ -26,3 +26,17 @@ RedirectMatch 301 ^/books/harry-potter/character/?$ /books/
 ```
 and change lines 146–147 (`/extras/harrypotter/` and `/extras/harrypotter/characters`) to redirect to `/books/` instead of `/books/harry-potter/`. Line 148 must keep `info` and `quiz` but drop `character`; line 149 (`/json/`) can go, since the JSON is archived.
 **Why:** those URLs now 404.
+
+## Games
+
+**File:** `.htaccess`
+**Change:** every Hypixel Skyblock page (`/games/hypixel/` and everything under it) and `assets/css/pages/hypixel-collection.css` were moved to `_dev/archive/hypixel/` at the owner's request, and the Hypixel group was removed from `data/site.json`. Point the old URLs at the Games page. Replace lines 57–59 and 122–131 (all the `^/hypixel/...` rules) with:
+```
+RedirectMatch 301 ^/(games/)?hypixel(/.*)?$ /games/
+```
+and delete line 52 (`/css/hypixel/collection.css`), whose target no longer exists.
+**Why:** those URLs now 404.
+
+**File:** `data/links.json`
+**Change:** remove the `"melon"` short link (line 2). It points at `/games/hypixel/collections/track/?item=MELON&name=Melon`, which is archived; with the rule above it would land on `/games/`.
+**Why:** a short link to an archived page.
