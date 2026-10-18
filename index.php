@@ -19,7 +19,7 @@ $slides = slideshow_slides();
 <head>
     <?php page_head(); ?>
     <?php slideshow_head($slides); ?>
-    <script src="/konami.js" defer></script>
+    <script src="/assets/js/konami.js" defer></script>
 </head>
 
 <body>

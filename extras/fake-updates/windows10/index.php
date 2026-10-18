@@ -1,11 +1,12 @@
+<?php
+$site_page = ['legacy' => true];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windows 10</title>
+    <?php page_head(); ?>
     <link rel="stylesheet" href="/assets/css/pages/gallery.css">
     <style>
         .gallery-image {
@@ -16,10 +17,8 @@
 </head>
 
 <body>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <?php site_header(); ?>
+    <main class="page page-legacy" id="main">
 
 
     <div class="title">
@@ -28,18 +27,17 @@
 
     <div class="gallery">
         <div class="gallery-item">
-            <a href="/update/windows10/crash.html"><img class="gallery-image"
+            <a href="/extras/fake-updates/windows10/crash.html"><img class="gallery-image"
                     src="/media/fake-updates/win10crash.jpeg"></img></a>
         </div>
         <div class="gallery-item">
-            <a href="/update/windows10/update.html"><img class="gallery-image"
+            <a href="/extras/fake-updates/windows10/update.html"><img class="gallery-image"
                     src="/media/fake-updates/win10update.jpeg"></img></a>
         </div>
     </div>
 
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+    </main>
+    <?php site_footer(); ?>
 
 </body>
 

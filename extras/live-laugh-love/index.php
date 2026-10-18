@@ -1,13 +1,12 @@
+<?php
+$site_page = ['legacy' => true, 'description' => 'Live Laugh Love alternatives'];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Laugh Love alternatives</title>
-    <meta http-equiv="refresh" content="-1">
-    <meta name="description" content="Live Laugh Love alternatives">
+    <?php page_head(); ?>
 </head>
 
 <body>
@@ -17,10 +16,8 @@
             text-align: center;
         }
     </style>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <?php site_header(); ?>
+    <main class="page page-legacy" id="main">
 
     <div class="title">
         <h1>Live Laugh Love alternatives</h1>
@@ -248,9 +245,8 @@
         <h2>Any suggestions feel free to email me at mail@craftyplayz.com</h2>
     </div>
 
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+    </main>
+    <?php site_footer(); ?>
 
 </body>
 
