@@ -1,201 +1,88 @@
 <?php
-$site_page = ['config' => true, 'legacy' => true];
+$site_page = ['config' => true, 'components' => true, 'css' => ['/assets/css/pages/games-steam.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+require __DIR__ . '/steam.php';
+
+$owned = steam_json('http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=' . $steamkey . '&steamid=' . $steamid . '&format=json&include_appinfo=1');
+$recent = steam_json('http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=' . $steamkey . '&steamid=' . $steamid . '&format=json');
+$games = isset($owned['response']['games']) ? $owned['response']['games'] : [];
+
+// recently played games can be missing from the owned list (free weekends, family sharing)
+$have = array_flip(array_column($games, 'appid'));
+foreach (isset($recent['response']['games']) ? $recent['response']['games'] : [] as $g) {
+    if (!isset($have[$g['appid']])) $games[] = $g;
+}
+usort($games, function ($a, $b) {
+    return $b['playtime_forever'] <=> $a['playtime_forever'];
+});
+
+$counts = json_decode(@file_get_contents(__DIR__ . '/data/achieved/count.json'), true);
+$counts = isset($counts['gameid']) ? $counts['gameid'] : [];
+$skip = [730, 682130, 469820, 1085750, 459820, 1463120];
+$shown = array_values(array_filter($games, function ($g) use ($skip) {
+    return $g['playtime_forever'] >= 60 && !in_array($g['appid'], $skip);
+}));
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <?php page_head(); ?>
-    <link rel="stylesheet" href="/assets/css/legacy.css">
-    <link rel="stylesheet" href="/assets/css/pages/steamnew.css">
+    <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com">
 </head>
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
 
-    <?php
-    // Construct the API URL
-    $url = 'http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=' . $steamkey . '&steamid=' . $steamid . '&format=json&include_appinfo=1';
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Steam Stats</h1>
+        <p class="page-lede">My Steam library and achievements<?= $games ? ': ' . number_format(count($games)) . ' owned games, ' . count($shown) . ' played for an hour or more.' : '.' ?></p>
 
-    /*
-    Retrieve the JSON data from the API
-    and decode it into an associative array
-    */
-    $json = file_get_contents($url);
-    $data = json_decode($json, true);
+        <?php if (!$owned): ?>
+            <p class="err">Couldn't load the game list from Steam. Try again in a minute.</p>
+        <?php endif; ?>
 
-    // Get the 'games' array from the response data
-    $games = $data['response']['games'];
-    $totalgames = $data['response']['game_count'];
-
-    // **Fetch and merge recently played data:**
-    $recentlyPlayedUrl = 'http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=' . $steamkey . '&steamid=' . $steamid . '&format=json';
-    $recentlyPlayedJson = file_get_contents($recentlyPlayedUrl);
-    $recentlyPlayedData = json_decode($recentlyPlayedJson, true);
-
-    // Check if recently played data exists
-    if (isset($recentlyPlayedData['response'])) {
-        $recentlyPlayedGames = $recentlyPlayedData['response']['games'];
-    } else {
-        // Handle error: Recently played data might not be available publicly
-        echo 'Error: Unable to retrieve recently played games data.';
-        exit; // Stop script execution
-    }
-
-    // Identify missing games and update data
-    foreach ($recentlyPlayedGames as $recentGame) {
-        $appId = $recentGame['appid'];
-
-        // Check if the game is already in the owned games array
-        $gameExists = false;
-        foreach ($games as $existingGame) {
-            if ($existingGame['appid'] == $appId) {
-                $gameExists = true;
-                // Update playtime_2weeks for the existing game
-                $existingGame['playtime_2weeks'] = $recentGame['playtime_2weeks'];
-                break;
-            }
-        }
-
-        // Add the game if it doesn't already exist
-        if (!$gameExists) {
-            $games[] = $recentGame;
-        }
-    }
-
-    // Update total games count
-    $totalgames = count($games);
-
-    unset($game); // Unset reference for better memory management
-    
-    // Sort the games based on playtime in descending order
-    usort($games, function ($a, $b) {
-        return $b['playtime_forever'] <=> $a['playtime_forever'];
-    });
-    ?>
-
-    <div class="title">
-        <h2>
-            <?php echo $totalgames; ?> Owned Games
-        </h2>
-    </div>
-    <?php
-    // Iterate through each game
-    foreach ($games as $game) {
-        // Skip games with playtime less than 1 hour
-        if ($game['playtime_forever'] < 60) {
-            continue;
-        }
-
-        // Skip games with specific app IDs
-        $skip = [730, 682130, 469820, 1085750, 459820, 1463120];
-        if (in_array($game['appid'], $skip)) {
-            continue;
-        }
-
-
-        $gamenewUrl = "/games/steam/game/?game=" . $game['appid'];
-
-        // Check if playtime_2weeks is available
-        if (isset($game['playtime_2weeks'])) {
-            $totalPlaytime = round($game['playtime_forever'] / 60);
-            $twoWeekPlaytime = round($game['playtime_2weeks'] / 60);
-            $playtimeText = "$totalPlaytime Hours <br> $twoWeekPlaytime Hours Past 2 Weeks";
-        } else {
-            $totalPlaytime = round($game['playtime_forever'] / 60);
-            $playtimeText = "$totalPlaytime Hours";
-        }
-        $lastPlayedTimestamp = $game['rtime_last_played'];
-
-        // Calculate the number of days since the game was last played
-        $daysSinceLastPlayed = round((time() - $lastPlayedTimestamp) / (60 * 60 * 24));
-
-        $currentYear = date("Y");
-
-        // Format the last played time
-        $lastPlayedTime = date("h:i A M jS", $lastPlayedTimestamp);
-        if (date("Y", $lastPlayedTimestamp) != $currentYear) {
-            $lastPlayedTime .= " " . date("Y", $lastPlayedTimestamp);
-        }
-
-        // Determine the string representation of the last played time
-        if ($daysSinceLastPlayed <= 0) {
-            $lastPlayed = 'Today';
-        } elseif ($daysSinceLastPlayed == 1) {
-            $lastPlayed = 'Yesterday';
-        } else {
-            $lastPlayed = $daysSinceLastPlayed . ' days ago';
-        }
-
-        $gamename = $game['name'];
-
-        // Generate the URL for the game's image
-        $imageSrc = 'https://cdn.cloudflare.steamstatic.com/steam/apps/' . $game['appid'] . '/header.jpg';
-
-        // Use a different image URL for mobile devices
-        if (isMobile()) {
-            $imageSrc = 'https://cdn.cloudflare.steamstatic.com/steam/apps/' . $game['appid'] . '/library_600x900.jpg';
-        }
-
-        $achievedAchievements = 0;
-        $totalAchievements = 0;
-        $percentage = 0;
-
-        $jsonFilePath = $_SERVER['DOCUMENT_ROOT'] . '/games/steam/data/achieved/count.json';
-
-        if (file_exists($jsonFilePath)) {
-            $jsonData = file_get_contents($jsonFilePath);
-            $data = json_decode($jsonData, true);
-
-            if ($data) {
-                foreach ($data['gameid'] as $gameId => $achievements) {
-                    if ($gameId == $game['appid']) {
-                        $achievedAchievements = $achievements['achievedAchievements'];
-                        $totalAchievements = $achievements['totalAchievements'];
-                        $percentage = round(($achievedAchievements / $totalAchievements) * 100);
-                    } else {
-                        continue;
-                    }
-                }
-            }
-        } else {
-            echo "JSON file not found at the specified path.";
-        }
-
-
-        echo '<div class="games">' . PHP_EOL;
-        echo '  <a href="/games/steam/game/?game=' . $game['appid'] . '"><img class="banner" src="' . $imageSrc . '"></a>' . PHP_EOL;
-        echo '  <a href="/games/steam/game/?game=' . $game['appid'] . '" style="width: 50%; color: white"><p class="gamename">' . $gamename . '</p></a>' . PHP_EOL;
-        echo '  <div class="info">' . PHP_EOL;
-        echo '    <div class="item">' . PHP_EOL;
-        echo '      <p>Playtime</p>' . PHP_EOL;
-        echo '      <p>' . $playtimeText . '</p>' . PHP_EOL;
-        echo '    </div>' . PHP_EOL;
-        echo '        <div class="item">' . PHP_EOL;
-        echo '            <p>Last Played</p>' . PHP_EOL;
-        echo '            <p title="' . $lastPlayedTime . '">' . $lastPlayed . '</p>' . PHP_EOL;
-        echo '        </div>' . PHP_EOL;
-        echo '        <div class="item">' . PHP_EOL;
-        echo '            <p>Achievements ' . $achievedAchievements . '/' . $totalAchievements . ' (' . $percentage . '%)</p>' . PHP_EOL;
-        echo '            <progress value="' . $percentage . '" max="100"></progress>' . PHP_EOL;
-        echo '        </div>' . PHP_EOL;
-        echo '        <div class="item stats">' . PHP_EOL;
-        echo '            <a href="/games/steam/game/?game=' . $game['appid'] . '"><button>Stats</button></a>' . PHP_EOL;
-        echo '        </div>' . PHP_EOL;
-        echo '    </div>' . PHP_EOL;
-        echo '</div>' . PHP_EOL;
-    }
-
-    function isMobile()
-    {
-        return preg_match('/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i', $_SERVER["HTTP_USER_AGENT"]);
-    }
-
-    ?>
+        <div class="steam-grid">
+            <?php foreach ($shown as $i => $g):
+                $id = (int)$g['appid'];
+                $link = '/games/steam/game/?game=' . $id;
+                $c = isset($counts[$id]) ? $counts[$id] : null;
+                $pct = $c && $c['totalAchievements'] ? round($c['achievedAchievements'] / $c['totalAchievements'] * 100) : 0;
+                $last = isset($g['rtime_last_played']) ? (int)$g['rtime_last_played'] : 0;
+            ?>
+                <article class="card steam-game">
+                    <a class="steam-art" href="<?= $link ?>" tabindex="-1" aria-hidden="true">
+                        <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/<?= $id ?>/header.jpg" alt="" width="460" height="215" <?= $i > 5 ? 'loading="lazy" ' : '' ?>decoding="async">
+                    </a>
+                    <h2><a href="<?= $link ?>"><?= h($g['name']) ?></a></h2>
+                    <div class="kv">
+                        <span>Playtime</span><span><?= number_format(round($g['playtime_forever'] / 60)) ?> hours</span>
+                        <?php if (!empty($g['playtime_2weeks'])): ?>
+                            <span>Past 2 weeks</span><span><?php $h2 = round($g['playtime_2weeks'] / 60); echo $h2 . ($h2 == 1 ? ' hour' : ' hours'); ?></span>
+                        <?php endif; ?>
+                        <?php if ($last): ?>
+                            <span>Last played</span><span title="<?= date('j M Y, H:i', $last) ?>"><?= steam_ago($last) ?></span>
+                        <?php endif; ?>
+                        <?php if ($c && $c['totalAchievements']): ?>
+                            <span>Achievements</span><span><?= $c['achievedAchievements'] ?> / <?= $c['totalAchievements'] ?> (<?= $pct ?>%)</span>
+                        <?php endif; ?>
+                    </div>
+                    <?php if ($c && $c['totalAchievements']): ?>
+                        <div class="progress" role="progressbar" aria-label="Achievements" aria-valuenow="<?= $pct ?>" aria-valuemin="0" aria-valuemax="100"><i style="width: <?= $pct ?>%"></i></div>
+                    <?php endif; ?>
+                </article>
+            <?php endforeach; ?>
+        </div>
     </main>
+
     <?php site_footer(); ?>
+    <script>
+        // a game without Steam art keeps its empty art box instead of a broken-image icon
+        document.addEventListener('error', function (e) {
+            if (e.target.closest && e.target.closest('.steam-art')) e.target.remove();
+        }, true);
+    </script>
 </body>
 
 </html>
