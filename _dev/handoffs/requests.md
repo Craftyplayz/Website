@@ -15,7 +15,7 @@ Line 155 (`/tests/speedtest/(.*)`) can stay; `/tests/speedtest/index.html` redir
 ## Books
 
 **File:** none (no shared-file change needed); this is a note for the owner.
-**Change:** `books/covers/bulk/index.php` calls Google Books from the browser with a key written into the page (`AIzaSyBOk3…`), and the repo is public. `php/config.php` already defines a separate `$googlebookskey`, so the fix fits inside `books/`: add `books/covers/bulk/api.php` that forwards `q` and `maxResults` to Google Books with `$googlebookskey`, caches results on disk for a day, and sends real `Cache-Control` headers. Then remove the key from the page. Owner action: restrict or delete the exposed key in Google Cloud Console, because it stays in git history.
+**Change:** done inside `books/`. The Bulk Cover Downloader now calls `books/covers/bulk/api.php`, which uses `$googlebookskey` from `php/config.php` server-side and caches for a day. The old key (`AIzaSyBOk3…`) is no longer in the page. Owner actions in Google Cloud Console: (1) delete the old key, because it stays in git history; (2) change `$googlebookskey` from a `www.craftyplayz.com` referrer restriction to an IP restriction for the IONOS server, then remove the `CURLOPT_REFERER` line (marked `shortcut:`) from `api.php`.
 **Why:** the design guide says keys never reach the browser.
 
 **File:** `.htaccess`
