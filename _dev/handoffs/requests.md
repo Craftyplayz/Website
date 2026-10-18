@@ -11,3 +11,9 @@ RedirectMatch 301 ^/tools/reading-speed/index\.html$ /tools/reading-speed/
 ```
 Line 155 (`/tests/speedtest/(.*)`) can stay; `/tests/speedtest/index.html` redirects to `/tools/reading-speed/index.html`, which this rule then catches.
 **Why:** commit 3898abc converted the Reading Speed Test from `index.html` to `index.php` and deleted `index.html`, so old links to `/tools/reading-speed/index.html` (and `/tests/speedtest/index.html`, which redirects there) now 404.
+
+## Books
+
+**File:** none (no shared-file change needed); this is a note for the owner.
+**Change:** `books/covers/bulk/index.php` calls Google Books from the browser with a key written into the page (`AIzaSyBOk3…`), and the repo is public. `php/config.php` already defines a separate `$googlebookskey`, so the fix fits inside `books/`: add `books/covers/bulk/api.php` that forwards `q` and `maxResults` to Google Books with `$googlebookskey`, caches results on disk for a day, and sends real `Cache-Control` headers. Then remove the key from the page. Owner action: restrict or delete the exposed key in Google Cloud Console, because it stays in git history.
+**Why:** the design guide says keys never reach the browser.
