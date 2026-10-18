@@ -56,8 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <head>
     <?php page_head(); ?>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -68,11 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: var(--font);
             font-size: 16px;
             line-height: 1.5;
-            color: #ffffff;
-            background-color: #202020;
+            color: var(--text);
+            background-color: var(--bg);
             display: flex;
             flex-direction: column;
             height: 100vh;
@@ -84,15 +82,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: flex;
             align-items: center;
             gap: 16px;
-            padding: 20px 40px;
-            background-color: #2726269a;
-            border-bottom: 1px solid #ffffff;
-            height: 100px;
+            padding: 12px 16px;
+            background-color: var(--bg);
+            border-bottom: 1px solid var(--line);
+            flex-wrap: wrap;
             flex-shrink: 0;
         }
 
         .topbar h1 {
-            font-size: 30px;
+            font-size: clamp(24px, 4vw, 34px);
             font-weight: 700;
             white-space: nowrap;
         }
@@ -113,55 +111,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .search-wrap svg {
             position: absolute;
-            left: 16px;
-            color: #aaa;
+            left: 12px;
+            color: var(--muted);
             pointer-events: none;
         }
 
         #search {
             width: 100%;
-            padding: 10px 20px 10px 44px;
-            background-color: #636262;
-            border: none;
-            border-radius: 15px;
-            font-size: 20px;
-            font-weight: 500;
-            color: #ffffff;
-            font-family: 'Roboto', sans-serif;
-            transition: all 0.2s ease-in-out;
+            padding: 8px 12px 8px 40px;
+            background-color: #161616;
+            border: 1px solid #4a4a4a;
+            border-radius: var(--radius);
+            font-size: 15px;
+            color: var(--text);
+            font-family: var(--font);
+            transition: background-color var(--fast), border-color var(--fast), color var(--fast);
             outline: none;
         }
 
         #search::placeholder {
-            color: #ccc;
+            color: var(--muted);
         }
 
         #search:focus {
-            background-color: #757474;
+            border-color: var(--accent);
         }
 
         button {
-            padding: 10px 20px;
-            background-color: #636262;
-            color: #ffffff;
+            padding: 9px 16px;
+            background-color: var(--btn2);
+            color: var(--text);
             border: none;
-            border-radius: 15px;
-            font-size: 20px;
-            font-weight: 500;
-            font-family: 'Roboto', sans-serif;
-            transition: all 0.2s ease-in-out;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-family: var(--font);
+            transition: background-color var(--fast), border-color var(--fast), color var(--fast);
             cursor: pointer;
         }
 
         button:hover {
-            background-color: #757474;
+            background-color: var(--btn2-hover);
         }
 
         /* FILTER BAR */
         .filter-bar {
-            padding: 10px 40px;
-            background-color: #272626;
-            border-bottom: 1px solid #3a3a3a;
+            padding: 10px 16px;
+            background-color: var(--card);
+            border-bottom: 1px solid var(--line);
             flex-shrink: 0;
             display: flex;
             align-items: center;
@@ -171,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .filter-bar span {
             font-size: 13px;
-            color: #aaa;
+            color: var(--muted);
             margin-right: 4px;
         }
 
@@ -179,27 +175,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 5px 14px;
             font-size: 14px;
             border-radius: 20px;
-            background-color: #3a3a3a;
-            color: #aaa;
+            background-color: var(--card2);
+            color: var(--muted);
         }
 
         .filter-btn:hover {
-            background-color: #484848;
-            color: #fff;
+            background-color: var(--btn2-hover);
+            color: var(--text);
         }
 
         .filter-btn.active {
-            background-color: #636262;
-            color: #fff;
+            background-color: var(--accent-soft);
+            box-shadow: inset 0 0 0 1px var(--btn-line);
+            color: var(--text);
         }
 
         /* COUNT BAR */
         .count-bar {
-            padding: 6px 40px;
+            padding: 6px 16px;
             font-size: 13px;
-            color: #aaa;
-            background-color: #272626;
-            border-bottom: 1px solid #3a3a3a;
+            color: var(--muted);
+            background-color: var(--card);
+            border-bottom: 1px solid var(--line);
             flex-shrink: 0;
         }
 
@@ -207,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         #list {
             flex: 1;
             overflow-y: auto;
-            padding: 10px 40px;
+            padding: 10px 16px;
         }
 
         #list::-webkit-scrollbar {
@@ -219,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         #list::-webkit-scrollbar-thumb {
-            background: #444;
+            background: var(--line-strong);
             border-radius: 3px;
         }
 
@@ -228,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
             gap: 16px;
             padding: 14px 0;
-            border-bottom: 1px solid #3a3a3a;
+            border-bottom: 1px solid var(--line);
             transition: background 0.15s;
         }
 
@@ -237,7 +234,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .milestone-row:hover {
-            background-color: #2a2a2a;
+            background-color: var(--card);
             margin: 0 -10px;
             padding-left: 10px;
             padding-right: 10px;
@@ -272,8 +269,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .cat-other {
-            background-color: #3a3a3a;
-            color: #aaaaaa;
+            background-color: var(--card2);
+            color: var(--muted);
         }
 
         .milestone-icon {
@@ -289,7 +286,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .milestone-name {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 500;
             white-space: nowrap;
             overflow: hidden;
@@ -298,7 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .milestone-meta {
             font-size: 13px;
-            color: #aaa;
+            color: var(--muted);
             margin-top: 2px;
             display: flex;
             gap: 12px;
@@ -306,7 +303,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .milestone-meta .achieved {
-            color: #888;
+            color: var(--muted);
         }
 
         .milestone-meta .elapsed {
@@ -319,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 16px;
             background-color: transparent;
             border-radius: 8px;
-            color: #aaa;
+            color: var(--muted);
             flex-shrink: 0;
         }
 
@@ -331,8 +328,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .empty {
             text-align: center;
             padding: 60px 20px;
-            color: #666;
-            font-size: 18px;
+            color: var(--muted);
+            font-size: 15px;
         }
 
         /* MODAL */
@@ -351,9 +348,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .modal {
-            background-color: #272626;
-            border: 1px solid #ffffff;
-            border-radius: 15px;
+            background-color: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
             padding: 32px;
             width: min(500px, 95vw);
             max-height: 90vh;
@@ -366,7 +363,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .modal::-webkit-scrollbar-thumb {
-            background: #444;
+            background: var(--line-strong);
             border-radius: 3px;
         }
 
@@ -383,39 +380,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .modal h2 {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
 
         .field {
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .field label {
             display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 700;
-            color: #ccc;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
+            margin-bottom: 4px;
+            font-size: 13px;
+            color: var(--muted);
         }
 
         .field input[type="text"],
         .field input[type="datetime-local"],
         .field select {
             width: 100%;
-            padding: 10px 20px;
-            background-color: #636262;
-            border: none;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: 500;
-            color: #ffffff;
-            font-family: 'Roboto', sans-serif;
+            padding: 8px 12px;
+            background-color: #161616;
+            border: 1px solid #4a4a4a;
+            border-radius: var(--radius);
+            font-size: 15px;
+            color: var(--text);
+            font-family: var(--font);
             outline: none;
-            transition: background 0.2s;
+            transition: border-color var(--fast);
             appearance: none;
         }
 
@@ -426,7 +419,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .field input:focus,
         .field select:focus {
-            background-color: #757474;
+            border-color: var(--accent);
         }
 
         /* Category radio buttons */
@@ -437,7 +430,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .cat-option input {
-            display: none;
+            position: absolute;
+            opacity: 0;
+            width: 1px;
+            height: 1px;
         }
 
         .cat-option label {
@@ -445,28 +441,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
             gap: 10px;
             padding: 10px 16px;
-            background-color: #3a3a3a;
-            border-radius: 12px;
+            background-color: var(--card2);
+            border-radius: var(--radius);
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
+            font-size: 14px;
             letter-spacing: normal;
             text-transform: none;
-            color: #ccc;
-            transition: background 0.15s, color 0.15s;
-            border: 2px solid transparent;
+            color: var(--muted);
+            transition: background-color var(--fast), color var(--fast);
+            border: 1px solid transparent;
         }
 
         .cat-option input:checked+label {
-            border-color: #ffffff88;
-            background-color: #636262;
-            color: #fff;
+            border-color: var(--btn-line);
+            background-color: var(--accent-soft);
+            color: var(--text);
         }
 
         .cat-option label:hover {
-            background-color: #484848;
-            color: #fff;
+            background-color: var(--btn2-hover);
+            color: var(--text);
         }
+
+        .cat-option input:focus-visible+label { outline: 2px solid var(--accent); outline-offset: 2px; }
 
         .cat-icon {
             font-size: 20px;
@@ -474,23 +471,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .modal-actions {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             justify-content: flex-end;
-            margin-top: 24px;
+            margin-top: 16px;
         }
 
         .btn-cancel {
-            background-color: #3a3a3a;
-            font-size: 18px;
+            background-color: var(--card2);
+            font-size: 14px;
         }
 
         .btn-save {
-            background-color: #636262;
-            font-size: 18px;
+            background-color: var(--btn);
+            color: #fff;
+            font-size: 14px;
         }
 
         .btn-save:hover {
-            background-color: #757474;
+            background-color: #4a9033;
         }
 
         /* TOAST */
@@ -498,13 +496,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             position: fixed;
             bottom: 24px;
             right: 24px;
-            background-color: #636262;
-            color: #fff;
-            font-family: 'Roboto', sans-serif;
+            background-color: var(--btn2);
+            color: var(--text);
+            font-family: var(--font);
             font-size: 16px;
             font-weight: 500;
             padding: 10px 20px;
-            border-radius: 15px;
+            border-radius: var(--radius);
             opacity: 0;
             transform: translateY(8px);
             transition: opacity 0.2s, transform 0.2s;
@@ -520,6 +518,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             opacity: 1;
             transform: translateY(0);
         }
+        @media (max-width: 600px) { .search-wrap { order: 3; flex-basis: 100%; } }
+        #addBtn { background-color: var(--btn); color: #fff; }
+        #addBtn:hover { background-color: #4a9033; }
+        button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     </style>
 </head>
 
