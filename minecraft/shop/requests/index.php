@@ -1,5 +1,5 @@
 <?php
-$site_page = ['legacy' => true, 'css' => ['/minecraft/shop/styles.css']];
+$site_page = ['components' => true, 'css' => ['/minecraft/shop/styles.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
@@ -11,15 +11,17 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
-    <div class="title">
-        <h1>Captainalism</h1>
-        <h1>Special Requests</h1>
-        <h3>For special requests contact Chewy or Crafty on discord with your request</h3>
-        <h4>For example for bulk purchases or to approach for partnerships or to make a request for a new item to be stocked</h4>
-    </div>
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Captainalism Special Requests</h1>
+        <p class="page-lede">Bulk orders, partnerships or new stock.</p>
 
+        <section class="card shop-card">
+            <p>For special requests, contact <b>Chewy</b> or <b>Crafty</b> on Discord with your request.</p>
+            <p class="muted">For example bulk purchases, partnership offers, or asking for a new item to be stocked.</p>
+        </section>
     </main>
     <?php site_footer(); ?>
 </body>
+
 </html>
