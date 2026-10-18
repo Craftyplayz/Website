@@ -1,21 +1,19 @@
+<?php
+$site_page = ['legacy' => true];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photos</title>
-    <meta http-equiv="refresh" content="-1">
+    <?php page_head(); ?>
     <link rel="stylesheet" href="/assets/css/pages/gallery.css">
     <style>.gallery-image{height: 300px; width: 300px;} </style>
 </head>
 
 <body>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <?php site_header(); ?>
+    <main class="page page-legacy" id="main">
 
     <div class="title">
         <h1>People's Pets</h1>
@@ -35,7 +33,7 @@
             }
 
             echo '<div class="gallery-item" title="' . $folder . '">';
-            echo '<a href="/photos/pet?pet=' . $folder . '"><img src="' . $folderPath . $folder . '/thumb" class="gallery-image" /></a>';
+            echo '<a href="/extras/pets/pet/?pet=' . rawurlencode($folder) . '"><img src="' . $folderPath . $folder . '/thumb.webp" class="gallery-image" /></a>';
             echo '</div>';
         }
         ?>
@@ -43,9 +41,8 @@
     <h1>If you want your pet added send me the photos</h1>
 </div> -->
     </div>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+    </main>
+    <?php site_footer(); ?>
 
 </body>
 

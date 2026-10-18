@@ -1,19 +1,17 @@
+<?php
+$site_page = ['legacy' => true];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Trump Quote</title>
-    <meta http-equiv="refresh" content="-1">
+    <?php page_head(); ?>
 </head>
 
 <body>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <?php site_header(); ?>
+    <main class="page page-legacy" id="main">
     <div class="title">
         <h1>Random Donald Trump Quote</h1>
     </div>
@@ -73,9 +71,8 @@
   <img id="bouncing-image" style="width: 200px; height: 200px; " src="/media/memes/trump-mugshot.webp" alt="Bouncing Image">
 </div>
 
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+    </main>
+    <?php site_footer(); ?>
 
 </body>
 <script></script

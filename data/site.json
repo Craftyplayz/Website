@@ -199,38 +199,38 @@
                 {
                     "title": "Random",
                     "pages": [
-                        { "title": "Trump Quotes", "url": "/extras/trump.php", "description": "A random Donald Trump quote" },
-                        { "title": "Insults", "url": "/extras/insult.php", "description": "Random insult generator" },
-                        { "title": "Random Fact", "url": "/extras/fact.php", "description": "A random fact" },
-                        { "title": "Live Laugh Love", "url": "/extras/livelaughlove.php", "description": "Live Laugh Love alternatives" },
-                        { "title": "Random Quote", "url": "/quote.php", "nav": false }
+                        { "title": "Trump Quotes", "url": "/extras/trump-quotes/", "description": "A random Donald Trump quote" },
+                        { "title": "Insults", "url": "/extras/insults/", "description": "Random insult generator" },
+                        { "title": "Random Fact", "url": "/extras/facts/", "description": "A random fact" },
+                        { "title": "Live Laugh Love", "url": "/extras/live-laugh-love/", "description": "Live Laugh Love alternatives" },
+                        { "title": "Random Quote", "url": "/extras/quotes/", "description": "A random screenshot quote", "nav": false }
                     ]
                 },
                 {
                     "title": "Screens",
                     "pages": [
-                        { "title": "Fake Update Screens", "url": "/update/", "description": "Fake Windows updates and crashes", "keywords": ["prank"] },
-                        { "title": "Windows 10 Screens", "url": "/update/windows10/", "nav": false },
-                        { "title": "Flashing Colours", "url": "/extras/rbg.php", "description": "Epilepsy warning: flashing RGB", "keywords": ["rgb"] },
-                        { "title": "Twitch Chat", "url": "/extras/chaos.html", "description": "Fullscreen Twitch chat" },
-                        { "title": "BRB Screen", "url": "/extras/brb.php", "description": "Be right back screen" }
+                        { "title": "Fake Update Screens", "url": "/extras/fake-updates/", "description": "Fake Windows updates and crashes", "keywords": ["prank"] },
+                        { "title": "Windows 10 Screens", "url": "/extras/fake-updates/windows10/", "nav": false, "hub_skip": true },
+                        { "title": "Flashing Colours", "url": "/extras/flashing-colours/", "description": "Epilepsy warning: flashing RGB", "keywords": ["rgb"] },
+                        { "title": "Twitch Chat", "url": "/extras/twitch-chat/", "description": "Fullscreen Twitch chat" },
+                        { "title": "BRB Screen", "url": "/extras/brb/", "description": "Be right back screen" }
                     ]
                 },
                 {
                     "title": "Media",
                     "pages": [
-                        { "title": "Memes", "url": "/memes/meme.html", "description": "Memes" },
-                        { "title": "Cat", "url": "/memes/cat/", "description": "Cat" },
-                        { "title": "Pets", "url": "/photos/pets.php", "description": "People's pets", "keywords": ["photos"] },
-                        { "title": "Pet", "url": "/photos/pet.php", "nav": false, "search": false }
+                        { "title": "Memes", "url": "/extras/memes/", "description": "Memes" },
+                        { "title": "Cat", "url": "/extras/memes/cat/", "description": "Cat", "nav": false },
+                        { "title": "Pets", "url": "/extras/pets/", "description": "People's pets", "keywords": ["photos"] },
+                        { "title": "Pet", "url": "/extras/pets/pet/", "nav": false, "search": false }
                     ]
                 },
                 {
                     "title": "Other",
                     "pages": [
-                        { "title": "Cyberpunk 2077", "url": "/extras/cyberpunk.php", "description": "A question about Cyberpunk" },
+                        { "title": "Cyberpunk 2077", "url": "/extras/cyberpunk/", "description": "A question about Cyberpunk" },
                         { "title": "D&D Character", "url": "/extras/dnd/", "description": "D&D character sheet" },
-                        { "title": "Bee Movie", "url": "/extras/bee.php", "description": "The whole Bee Movie script", "nav": false }
+                        { "title": "Bee Movie", "url": "/extras/bee-movie/", "description": "The whole Bee Movie script", "nav": false }
                     ]
                 }
             ]

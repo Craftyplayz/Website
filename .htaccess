@@ -146,6 +146,24 @@ RedirectMatch 301 ^/tests/?$ /tools/
 RedirectMatch 301 ^/Code/docker(\.php)?$ /tools/docker-script/
 RedirectMatch 301 ^/Code/install(\.html)?$ /tools/install-script/
 RedirectMatch 301 ^/Code(/|/index\.php)?$ /tools/
+# Phase 6: Extras (pages into folders of their own; update/, memes/, photos/, quote.php joined them)
+RedirectMatch 301 ^/extras/trump(\.php)?$ /extras/trump-quotes/
+RedirectMatch 301 ^/extras/insult(\.php)?$ /extras/insults/
+RedirectMatch 301 ^/extras/fact(\.php)?$ /extras/facts/
+RedirectMatch 301 ^/extras/livelaughlove(\.php)?$ /extras/live-laugh-love/
+RedirectMatch 301 ^/extras/(cyberpunk|brb)\.php$ /extras/$1/
+RedirectMatch 301 ^/extras/bee(\.php)?$ /extras/bee-movie/
+RedirectMatch 301 ^/ext[ra]+s/(rbg|rgb)(\.php)?$ /extras/flashing-colours/
+RedirectMatch 301 ^/ext[ra]+s/chaos(\.html)?$ /extras/twitch-chat/
+RedirectMatch 301 ^/update(/.*)?$ /extras/fake-updates$1
+RedirectMatch 301 ^/memes/?$ /extras/memes/
+RedirectMatch 301 ^/memes/meme(\.html)?$ /extras/memes/
+RedirectMatch 301 ^/memes/(.+)$ /extras/memes/$1
+RedirectMatch 301 ^/photos/?$ /extras/pets/
+RedirectMatch 301 ^/photos/pets(\.php)?$ /extras/pets/
+RedirectMatch 301 ^/photos/pet(\.php)?$ /extras/pets/pet/
+RedirectMatch 301 ^/quote(\.php)?$ /extras/quotes/
+RedirectMatch 301 ^/konami\.js$ /assets/js/konami.js
 
 <IfModule mod_deflate.c>
          AddOutputFilterByType DEFLATE application/javascript
