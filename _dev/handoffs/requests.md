@@ -17,3 +17,12 @@ Line 155 (`/tests/speedtest/(.*)`) can stay; `/tests/speedtest/index.html` redir
 **File:** none (no shared-file change needed); this is a note for the owner.
 **Change:** `books/covers/bulk/index.php` calls Google Books from the browser with a key written into the page (`AIzaSyBOk3…`), and the repo is public. `php/config.php` already defines a separate `$googlebookskey`, so the fix fits inside `books/`: add `books/covers/bulk/api.php` that forwards `q` and `maxResults` to Google Books with `$googlebookskey`, caches results on disk for a day, and sends real `Cache-Control` headers. Then remove the key from the page. Owner action: restrict or delete the exposed key in Google Cloud Console, because it stays in git history.
 **Why:** the design guide says keys never reach the browser.
+
+**File:** `.htaccess`
+**Change:** the Harry Potter Characters page (`/books/harry-potter/`) and its Character stub (`/books/harry-potter/character/`) were moved to `_dev/archive/books/harry-potter/` at the owner's request. Point their old URLs at the Books page:
+```
+RedirectMatch 301 ^/books/harry-potter/?$ /books/
+RedirectMatch 301 ^/books/harry-potter/character/?$ /books/
+```
+and change lines 146–147 (`/extras/harrypotter/` and `/extras/harrypotter/characters`) to redirect to `/books/` instead of `/books/harry-potter/`. Line 148 must keep `info` and `quiz` but drop `character`; line 149 (`/json/`) can go, since the JSON is archived.
+**Why:** those URLs now 404.

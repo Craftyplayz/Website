@@ -146,10 +146,7 @@
                 },
                 {
                     "title": "Harry Potter",
-                    "url": "/books/harry-potter/",
                     "pages": [
-                        { "title": "Harry Potter Characters", "url": "/books/harry-potter/", "description": "Character info", "keywords": ["hp"] },
-                        { "title": "Harry Potter Character", "url": "/books/harry-potter/character/", "nav": false, "search": false },
                         { "title": "Harry Potter Info", "url": "/books/harry-potter/info/", "nav": false },
                         { "title": "Harry Potter Quiz (old)", "url": "/books/harry-potter/quiz/", "nav": false, "search": false }
                     ]
