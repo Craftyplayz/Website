@@ -1,0 +1,13 @@
+# Shared PHP includes - not pages. Only the header fragment (used by plain .html pages) is public.
+<IfModule mod_authz_core.c>
+    Require all denied
+    <Files "header-fragment.php">
+        Require all granted
+    </Files>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Deny from all
+    <Files "header-fragment.php">
+        Allow from all
+    </Files>
+</IfModule>

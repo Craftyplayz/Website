@@ -1,3 +1,7 @@
+<?php
+$site_page = ['legacy' => true];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
     <?php
@@ -8,19 +12,14 @@
     $dnd = json_decode($dnd, true);
 ?>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dnd Character</title>
+    <?php page_head(); ?>
     <meta http-equiv="refresh" content="100000000">
-    <link rel="stylesheet" href="/css/dnd.css">
+    <link rel="stylesheet" href="/assets/css/pages/dnd.css">
 </head>
 
 <body>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/header.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-    ?>
+    <?php site_header(); ?>
+    <main class="page page-legacy" id="main">
 
     <div class="title">
         <h1><?php echo ($dnd["data"]["name"]);?> Work in progress!</h1>
@@ -36,9 +35,8 @@
         <?php echo $dnd['data']['classes'][0]['definition']['description']; ?>
 
     </div>
-    <?php
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/php/footer.php';
-    ?>
+    </main>
+    <?php site_footer(); ?>
 
 <?php
 ?>
