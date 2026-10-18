@@ -1,0 +1,15 @@
+/* Extras "Random" pages: Trump Quotes, Insults. One card holding one random line. */
+.xr-card { max-width: 760px; }
+.xr-card::after { content: ""; display: block; clear: both; }
+.xr-line { margin: 0; font-size: clamp(18px, 2.6vw, 24px); line-height: 1.4; }
+.xr-meta { margin: 10px 0 0; font-size: 13px; }
+.xr-card .badges { margin-bottom: 0; }
+.xr-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
+
+/* the bobbing mugshot on Trump Quotes; transform only, off for reduced motion */
+.xr-mug {
+    float: right; width: clamp(88px, 22vw, 160px); height: auto; margin: 0 0 8px 16px;
+    border-radius: var(--radius-lg); animation: xr-bob 2s ease-in-out infinite;
+}
+@keyframes xr-bob { 50% { transform: translateY(-10px); } }
+@media (prefers-reduced-motion: reduce) { .xr-mug { animation: none; } }
