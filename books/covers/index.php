@@ -1,524 +1,58 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = [
+    'components' => true,
+    'ui' => true,
+    'css' => ['/assets/css/pages/books-covers.css'],
+];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <?php page_head(); ?>
-        <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            text-decoration: none;
-        }
-
-        main.page.page-legacy {
-            font-family: 'Roboto', sans-serif;
-            font-size: 16px;
-            line-height: 1.5;
-            color: #ffffff;
-            background-color: #202020;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .search-section {
-            background-color: #272626;
-            padding: 30px;
-            border-radius: 15px;
-            border: 1px solid #636262;
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            color: #ffffff;
-            margin-bottom: 20px;
-            font-size: 30px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .search-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 10px 20px;
-            background-color: #636262;
-            border: none;
-            border-radius: 15px;
-            font-size: 20px;
-            font-weight: 500;
-            transition: all 0.5s ease-in-out;
-            color: #ffffff;
-        }
-
-        input[type="text"]:hover {
-            background-color: lime;
-            color: #000000;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            background-color: lime;
-            color: #000000;
-        }
-
-        input[type="text"]::placeholder {
-            color: #cccccc;
-        }
-
-        input[type="text"]:hover::placeholder,
-        input[type="text"]:focus::placeholder {
-            color: #000000;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #636262;
-            color: #ffffff;
-            border: none;
-            border-radius: 15px;
-            font-size: 20px;
-            font-weight: 500;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: lime;
-            color: #000000;
-        }
-
-        button:disabled {
-            background-color: #3a3a3a;
-            cursor: not-allowed;
-            color: #666666;
-        }
-
-        .language-toggle {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #ffffff;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-
-        .language-toggle input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .status {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 15px;
-            font-size: 16px;
-        }
-
-        .status.loading {
-            background-color: #3a3a3a;
-            color: #ffffff;
-            border: 1px solid #636262;
-        }
-
-        .status.error {
-            background-color: #4a2020;
-            color: #ff6b6b;
-            border: 1px solid #8b0000;
-        }
-
-        .status.success {
-            background-color: #2a4a2a;
-            color: lime;
-            border: 1px solid #006400;
-        }
-
-        .results {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 25px;
-            margin-top: 20px;
-        }
-
-        .book-card {
-            background-color: #272626;
-            border-radius: 15px;
-            padding: 15px;
-            border: 1px solid #636262;
-            transition: transform 0.3s, border-color 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .book-card:hover {
-            transform: translateY(-5px);
-            border-color: lime;
-        }
-
-        .book-card.selected {
-            border: 3px solid lime;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-        }
-
-        .book-card.selected::after {
-            content: '✓';
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: lime;
-            color: #000000;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .book-cover {
-            width: 100%;
-            height: 280px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            background: #3a3a3a;
-        }
-
-        .book-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #ffffff;
-            text-align: center;
-            margin-bottom: 6px;
-            line-height: 1.4;
-        }
-
-        .book-author {
-            font-size: 12px;
-            color: #cccccc;
-            text-align: center;
-            margin-bottom: 6px;
-        }
-
-        .book-year {
-            font-size: 11px;
-            color: #999999;
-            text-align: center;
-        }
-
-        .no-cover {
-            width: 100%;
-            height: 280px;
-            background: #3a3a3a;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999999;
-            font-size: 12px;
-            margin-bottom: 12px;
-        }
-
-        .selection-controls {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #272626;
-            padding: 20px 30px;
-            border-radius: 15px;
-            border: 1px solid lime;
-            box-shadow: 0 10px 40px rgba(0, 255, 0, 0.3);
-            display: none;
-            gap: 15px;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .selection-controls.visible {
-            display: flex;
-        }
-
-        .selection-count {
-            font-weight: 600;
-            color: #ffffff;
-        }
-
-        .select-btn {
-            background-color: lime;
-            color: #000000;
-            padding: 10px 25px;
-            border: none;
-            border-radius: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .select-btn:hover {
-            background-color: #00ff00;
-            transform: scale(1.05);
-        }
-
-        .clear-btn {
-            background-color: #636262;
-            color: #ffffff;
-            padding: 10px 25px;
-            border: none;
-            border-radius: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .clear-btn:hover {
-            background-color: #8b0000;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.visible {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: #272626;
-            border-radius: 15px;
-            border: 1px solid #636262;
-            padding: 30px;
-            max-width: 90%;
-            max-height: 90%;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #636262;
-        }
-
-        .modal-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #ffffff;
-        }
-
-        .modal-close {
-            background-color: #636262;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .modal-close:hover {
-            background-color: #8b0000;
-        }
-
-        .modal-progress {
-            margin-bottom: 20px;
-            text-align: center;
-            color: #cccccc;
-            font-size: 14px;
-        }
-
-        .modal-filters {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            padding: 12px;
-            background-color: #3a3a3a;
-            border-radius: 15px;
-            color: #ffffff;
-            font-size: 14px;
-        }
-
-        .modal-filters input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .covers-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .cover-item {
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-            padding: 10px;
-            background-color: #3a3a3a;
-            border-radius: 15px;
-            border: 1px solid #636262;
-        }
-
-        .cover-item:hover {
-            transform: scale(1.05);
-            border-color: lime;
-        }
-
-        .cover-item img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-
-        .modal-nav {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .nav-btn {
-            padding: 12px 30px;
-            background-color: #636262;
-            color: #ffffff;
-            border: none;
-            border-radius: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .nav-btn:hover {
-            background-color: lime;
-            color: #000000;
-        }
-
-        .nav-btn:disabled {
-            background-color: #3a3a3a;
-            cursor: not-allowed;
-            color: #666666;
-        }
-
-        .loading-spinner {
-            text-align: center;
-            padding: 40px;
-            color: lime;
-        }
-
-        .attribution {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #272626;
-            border-radius: 15px;
-            border: 1px solid #636262;
-            color: #cccccc;
-            font-size: 14px;
-        }
-
-        .attribution a {
-            color: lime;
-            text-decoration: none;
-            transition: color 0.2s ease-in-out;
-        }
-
-        .attribution a:hover {
-            color: #00ff00;
-        }
-    </style>
+    <link rel="preconnect" href="https://covers.openlibrary.org">
 </head>
 <body>
-    <div class="container">
-        <div class="search-section">
-            <h1>Book Cover Search</h1>
-            <div class="search-box">
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    placeholder="Search"
-                    autocomplete="off"
-                >
-                <button id="searchBtn">Search</button>
+    <?php site_header(); ?>
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Book Cover Search</h1>
+        <p class="page-lede">Find a book, select the ones you want, then pick and download a cover for each.</p>
+
+        <div class="card">
+            <div class="cs-search">
+                <label class="visually-hidden" for="searchInput">Book title</label>
+                <input type="search" class="field" id="searchInput" placeholder="Book title  /" autocomplete="off">
+                <button type="button" class="btn primary" id="searchBtn">Search</button>
             </div>
-            <div class="language-toggle">
-                <input type="checkbox" id="englishOnly" checked>
-                <label for="englishOnly">Show only English editions</label>
-            </div>
-            <div id="status"></div>
+            <label class="cs-opt"><input type="checkbox" id="englishOnly" checked> Show only English editions</label>
+            <div id="status" role="status"></div>
         </div>
 
         <div id="results" class="results"></div>
 
-        <div id="selectionControls" class="selection-controls">
-            <span class="selection-count"><span id="selectedCount">0</span> books selected</span>
-            <button id="clearSelectionBtn" class="clear-btn">Clear</button>
-            <button id="browseCoversBtn" class="select-btn">Browse Covers</button>
+        <div id="selectionControls" class="selection-controls" hidden>
+            <span class="selection-count"><b id="selectedCount">0</b> selected</span>
+            <button type="button" id="clearSelectionBtn" class="btn">Clear</button>
+            <button type="button" id="browseCoversBtn" class="btn primary">Browse covers</button>
         </div>
 
-        <div id="coverModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title" id="modalTitle">Loading...</div>
-                    <button class="modal-close" id="closeModal">×</button>
-                </div>
-                <div class="modal-progress" id="modalProgress"></div>
-                <div class="modal-filters">
-                    <input type="checkbox" id="englishCoversOnly" checked>
-                    <label for="englishCoversOnly">Show only English edition covers</label>
-                </div>
-                <div id="coversContainer"></div>
-                <div class="modal-nav">
-                    <button class="nav-btn" id="prevBookBtn">← Previous Book</button>
-                    <button class="nav-btn" id="nextBookBtn">Next Book →</button>
-                </div>
+        <dialog id="coverModal" class="cover-dialog" aria-labelledby="modalTitle">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Loading…</h2>
+                <button type="button" class="btn small" id="closeModal" aria-label="Close">✕</button>
             </div>
-        </div>
+            <p class="modal-progress" id="modalProgress"></p>
+            <label class="cs-opt modal-filters"><input type="checkbox" id="englishCoversOnly" checked> Show only English edition covers</label>
+            <div id="coversContainer"></div>
+            <div class="modal-nav">
+                <button type="button" class="btn" id="prevBookBtn">← Previous book</button>
+                <button type="button" class="btn" id="nextBookBtn">Next book →</button>
+            </div>
+        </dialog>
 
-        <div class="attribution">
-            Book data and covers provided by <a href="https://openlibrary.org" target="_blank">Open Library</a>
-        </div>
-    </div>
-
+        <p class="attribution">Book data and covers from <a href="https://openlibrary.org" target="_blank" rel="noopener">Open Library</a>.</p>
+    </main>
     <script>
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
@@ -552,9 +86,17 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             }
         });
 
+        // "/" focuses the search (Esc closing the dialog is built in)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/' && !coverModal.open && !/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        });
+
         // English covers filter change
         englishCoversOnly.addEventListener('change', () => {
-            if (coverModal.classList.contains('visible')) {
+            if (coverModal.open) {
                 loadBookCovers();
             }
         });
@@ -565,6 +107,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             updateSelectionUI();
             document.querySelectorAll('.book-card').forEach(card => {
                 card.classList.remove('selected');
+                            card.setAttribute('aria-pressed', 'false');
             });
         });
 
@@ -578,7 +121,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
         // Close modal
         closeModal.addEventListener('click', () => {
-            coverModal.classList.remove('visible');
+            coverModal.close();
         });
 
         // Navigation buttons
@@ -653,8 +196,10 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             resultsDiv.innerHTML = '';
 
             books.forEach((book, index) => {
-                const card = document.createElement('div');
+                const card = document.createElement('button');
+                card.type = 'button';
                 card.className = 'book-card';
+                card.setAttribute('aria-pressed', 'false');
                 card.dataset.index = index;
 
                 const coverUrl = book.cover_i 
@@ -663,7 +208,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
                 let coverElement;
                 if (coverUrl) {
-                    coverElement = `<img src="${coverUrl}" alt="${book.title}" class="book-cover" loading="lazy">`;
+                    coverElement = `<img src="${coverUrl}" alt="" class="book-cover" width="180" height="270" loading="lazy" decoding="async">`;
                 } else {
                     coverElement = `<div class="no-cover">No Cover Available</div>`;
                 }
@@ -676,12 +221,11 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
                 card.innerHTML = `
                     ${coverElement}
-                    <div class="book-title">${book.title}</div>
-                    <div class="book-author">${authors}</div>
-                    ${year ? `<div class="book-year">First published: ${year}</div>` : ''}
+                    <span class="book-title">${UI.esc(book.title)}</span>
+                    <span class="book-author">${UI.esc(authors)}</span>
+                    ${year ? `<span class="book-year">First published: ${UI.esc(year)}</span>` : ''}
                 `;
 
-                card.style.cursor = 'pointer';
                 card.addEventListener('click', (e) => {
                     e.stopPropagation();
                     toggleBookSelection(index, card);
@@ -697,9 +241,11 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             if (bookIndex > -1) {
                 selectedBooks.splice(bookIndex, 1);
                 cardElement.classList.remove('selected');
+                cardElement.setAttribute('aria-pressed', 'false');
             } else {
                 selectedBooks.push(index);
                 cardElement.classList.add('selected');
+                cardElement.setAttribute('aria-pressed', 'true');
             }
             
             updateSelectionUI();
@@ -708,15 +254,11 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         function updateSelectionUI() {
             selectedCountSpan.textContent = selectedBooks.length;
             
-            if (selectedBooks.length > 0) {
-                selectionControls.classList.add('visible');
-            } else {
-                selectionControls.classList.remove('visible');
-            }
+            selectionControls.hidden = selectedBooks.length === 0;
         }
 
         async function openCoverBrowser() {
-            coverModal.classList.add('visible');
+            if (!coverModal.open) coverModal.showModal();
             await loadBookCovers();
         }
 
@@ -726,7 +268,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             
             modalTitle.textContent = book.title;
             modalProgress.textContent = `Book ${currentBookIndex + 1} of ${selectedBooks.length}`;
-            coversContainer.innerHTML = '<div class="loading-spinner">Loading covers...</div>';
+            coversContainer.innerHTML = '<p class="cs-msg">Loading covers…</p>';
             
             // Update navigation buttons
             prevBookBtn.disabled = currentBookIndex === 0;
@@ -821,7 +363,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 }
 
                 if (editionsWithCovers.length === 0) {
-                    coversContainer.innerHTML = '<p style="text-align: center; padding: 40px;">No covers found for this book with the current filters.</p>';
+                    coversContainer.innerHTML = '<p class="cs-msg">No covers found for this book with the current filters.</p>';
                     return;
                 }
 
@@ -857,7 +399,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
             } catch (error) {
                 console.error('Error loading covers:', error);
-                coversContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #c62828;">Error loading covers. Please try again.</p>';
+                coversContainer.innerHTML = '<p class="err">Could not load covers. Please try again.</p>';
             }
         }
         
@@ -898,13 +440,15 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             grid.className = 'covers-grid';
 
             editions.forEach((edition, index) => {
-                const coverItem = document.createElement('div');
+                const coverItem = document.createElement('button');
+                coverItem.type = 'button';
                 coverItem.className = 'cover-item';
+                coverItem.title = 'Download this cover';
                 
                 const coverUrl = `https://covers.openlibrary.org/b/id/${edition.coverId}-L.jpg`;
                 
                 coverItem.innerHTML = `
-                    <img src="${coverUrl}" alt="Cover ${index + 1}" loading="lazy">
+                    <img src="${coverUrl}" alt="Cover ${index + 1}" width="170" height="255" loading="lazy" decoding="async">
                 `;
 
                 coverItem.addEventListener('click', () => {
@@ -958,12 +502,13 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                         loadBookCovers();
                     } else {
                         // If this was the last book, close the modal
-                        coverModal.classList.remove('visible');
+                        coverModal.close();
                         // Clear selection
                         selectedBooks = [];
                         updateSelectionUI();
                         document.querySelectorAll('.book-card').forEach(card => {
                             card.classList.remove('selected');
+                            card.setAttribute('aria-pressed', 'false');
                         });
                     }
                 }, 500);
@@ -992,11 +537,12 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                         currentBookIndex++;
                         loadBookCovers();
                     } else {
-                        coverModal.classList.remove('visible');
+                        coverModal.close();
                         selectedBooks = [];
                         updateSelectionUI();
                         document.querySelectorAll('.book-card').forEach(card => {
                             card.classList.remove('selected');
+                            card.setAttribute('aria-pressed', 'false');
                         });
                     }
                 }, 500);
@@ -1005,17 +551,17 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
         function showStatus(message, type) {
             statusDiv.textContent = message;
-            statusDiv.className = `status ${type}`;
-            statusDiv.style.display = 'block';
+            statusDiv.className = { error: 'err', success: 'ok' }[type] || 'note';
+            statusDiv.hidden = false;
 
+            clearTimeout(showStatus.timer);
             if (type === 'success') {
-                setTimeout(() => {
-                    statusDiv.style.display = 'none';
+                showStatus.timer = setTimeout(() => {
+                    statusDiv.hidden = true;
                 }, 5000);
             }
         }
     </script>
-        </main>
     <?php site_footer(); ?>
 </body>
 </html>
