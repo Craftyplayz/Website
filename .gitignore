@@ -1,5 +1,15 @@
-/php/
+# API keys and passwords - copy php/config.example.php to php/config.php and fill it in
 php/config.php
-php/config.php
-php/404.php
-php/config.php
+# password file for /private/ - see private/.htaccess
+private/.htpasswd
+
+# Python bytecode
+__pycache__/
+
+# data the live site writes at runtime
+games/the-game/thegame.json
+
+# personal recordings and chat exports - kept on the server only, never in the public repo
+private/transcripts/*.ogg
+private/bs/*.html
+private/bs/shroom.php
