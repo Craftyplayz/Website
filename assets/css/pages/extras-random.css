@@ -1,4 +1,4 @@
-/* Extras "Random" pages: Trump Quotes, Insults, Random Fact, Live Laugh Love. */
+/* Extras pages that are one card of text: Trump Quotes, Insults, Random Fact, Live Laugh Love, Cyberpunk, Bee Movie. */
 .xr-card { max-width: 760px; }
 .xr-card::after { content: ""; display: block; clear: both; }
 .xr-line { margin: 0; font-size: clamp(18px, 2.6vw, 24px); line-height: 1.4; }
@@ -17,3 +17,11 @@
 /* Live Laugh Love: letter + three words per row */
 .lll { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; }
 .lll-k { min-width: 2.6em; font-family: var(--mono); }
+
+/* Cyberpunk 2077: one very long sentence */
+.page-title + .xr-card { margin-top: 16px; }
+.xr-cp { margin: 0; overflow-wrap: anywhere; }
+
+/* Bee Movie: the whole script, line breaks kept */
+.xr-script { max-width: 760px; }
+.xr-script p { margin: 0; white-space: pre-line; }
