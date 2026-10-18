@@ -1,0 +1,13 @@
+/* Small Minecraft form tools: Day Calculator, Dynmap Marker Creator */
+.form-card { max-width: 560px; }
+.form { display: grid; gap: 12px; }
+.form label { display: grid; gap: 4px; color: var(--muted); font-size: 13px; }
+.form .field { width: 100%; min-width: 0; }
+.form .row { display: flex; align-items: center; gap: 8px; }
+.form .row .field { flex: 1; }
+.form .icon-preview { width: 32px; height: 32px; flex: none; image-rendering: pixelated; }
+.form .btn { justify-self: start; }
+
+.out { display: grid; gap: 8px; margin-top: 16px; }
+.cmd { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius); }
+.cmd code { flex: 1; min-width: 0; font: 13px/1.5 var(--mono); overflow-wrap: anywhere; }
