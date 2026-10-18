@@ -1,5 +1,5 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = ['components' => true, 'css' => ['/assets/css/pages/extras-fake-updates.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
@@ -7,38 +7,29 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <head>
     <?php page_head(); ?>
-    <link rel="stylesheet" href="/assets/css/pages/gallery.css">
-    <style>
-        .gallery-image {
-            height: 281x;
-            width: 500px;
-        }
-    </style>
 </head>
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
 
+    <main class="page" id="main">
+        <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span class="crumbs-sep">›</span> <a href="/extras/">Extras</a> <span class="crumbs-sep">›</span> <a href="/extras/fake-updates/">Fake Update Screens</a> <span class="crumbs-sep">›</span> <span aria-current="page">Windows 10</span></nav>
+        <h1 class="page-title">Windows 10</h1>
+        <p class="page-lede">Open one, then press F11 to go full screen.</p>
 
-    <div class="title">
-        <h1>Windows 10</h1>
-    </div>
-
-    <div class="gallery">
-        <div class="gallery-item">
-            <a href="/extras/fake-updates/windows10/crash.html"><img class="gallery-image"
-                    src="/media/fake-updates/win10crash.jpeg"></img></a>
+        <div class="fu-grid">
+            <a class="fu-card" href="/extras/fake-updates/windows10/update.html">
+                <img src="/media/fake-updates/win10update.jpeg" width="1280" height="720" alt="" decoding="async">
+                <span>Update screen <small>"Working on updates" with a spinner</small></span>
+            </a>
+            <a class="fu-card" href="/extras/fake-updates/windows10/crash.html">
+                <img src="/media/fake-updates/win10crash.jpeg" width="1280" height="720" alt="" decoding="async">
+                <span>Crash screen <small>A blue screen of death</small></span>
+            </a>
         </div>
-        <div class="gallery-item">
-            <a href="/extras/fake-updates/windows10/update.html"><img class="gallery-image"
-                    src="/media/fake-updates/win10update.jpeg"></img></a>
-        </div>
-    </div>
-
     </main>
-    <?php site_footer(); ?>
 
+    <?php site_footer(null, false); ?>
 </body>
 
 </html>
