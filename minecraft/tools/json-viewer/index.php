@@ -23,19 +23,19 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             position: relative;
         }
         .key {
-            color: #d73a49;
+            color: #9cdcfe;
         }
         .string {
-            color: #032f62;
+            color: #ce9178;
         }
         .number {
-            color: #005cc5;
+            color: #b5cea8;
         }
         .boolean {
-            color: #d73a49;
+            color: #569cd6;
         }
         .null {
-            color: #6a737d;
+            color: #9b9b9b;
         }
         #newSectionForm {
             margin-top: 20px;

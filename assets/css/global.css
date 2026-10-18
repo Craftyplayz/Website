@@ -35,6 +35,7 @@
 }
 
 body {
+    margin: 0;
     background-color: var(--bg);
     font-family: var(--font);
 }
@@ -96,6 +97,8 @@ body {
     margin: 0 0 6px; color: var(--muted); font-size: 11px; font-weight: 600;
     letter-spacing: .06em; text-transform: uppercase;
 }
+.site-header .sh-col h3 a { color: inherit; text-decoration: none; }
+.site-header .sh-col h3 a:hover { color: var(--accent); }
 .site-header .sh-col ul { margin: 0; padding: 0; list-style: none; }
 .site-header .sh-col a { display: block; padding: 4px 0; color: var(--text); font-size: 14px; text-decoration: none; }
 .site-header .sh-col a:hover, .site-header .sh-col a[aria-current] { color: var(--accent); text-decoration: none; }
@@ -183,7 +186,7 @@ body {
 
 /* ---------- footer ---------- */
 .site-footer {
-    display: block; flex: none; align-self: stretch; width: 100%; margin: 32px 0 0; padding: 20px 16px 24px;
+    display: block; flex: none; align-self: stretch; box-sizing: border-box; width: 100%; margin: 32px 0 0; padding: 20px 16px 24px;
     background: var(--sunken); border-top: 1px solid var(--line);
     color: var(--muted); font: 400 14px/1.5 var(--font); text-align: center;
 }
@@ -202,12 +205,34 @@ body {
 .crumbs-sep { margin: 0 2px; opacity: .7; }
 
 /* ---------- new-style pages (see _templates/page.php) ---------- */
+.page, .page *, .page *::before, .page *::after { box-sizing: border-box; }
 .page { flex: 1 0 auto; width: 100%; max-width: 1280px; margin: 0 auto; padding: 16px; color: var(--text); line-height: 1.5; }
 .page > .crumbs { margin-bottom: 14px; }
 .page-title { margin: 0 0 4px; font-size: clamp(24px, 4vw, 34px); line-height: 1.2; }
 .page-lede { margin: 0 0 20px; color: var(--muted); }
 .page a { color: var(--link); text-decoration: none; }
 .page a:hover { text-decoration: underline; }
+/* pages moved but not restyled yet: full width, and old styles (legacy.css) decide the look */
+.page.page-legacy { max-width: none; padding: 0; color: inherit; line-height: inherit; }
+.page.page-legacy a { color: inherit; }
+.page.page-legacy a:hover { text-decoration: none; }
+/* keep the footer at the bottom of short pages */
+body:has(> main.page) { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+
+/* ---------- hub pages: cards built from data/site.json (site_hub() in functions.php) ---------- */
+.hub { display: grid; gap: 24px; }
+.hub-group h2 { margin: 0 0 10px; color: var(--text); font-size: 17px; font-weight: 600; }
+.hub-group h2 a { color: inherit !important; text-decoration: none !important; }
+.hub-group h2 a:hover { color: var(--accent) !important; }
+.hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.hub-card {
+    display: block; padding: 14px 16px; background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); color: var(--text) !important; text-decoration: none !important;
+    transition: border-color var(--fast), background var(--fast);
+}
+.hub-card:hover { border-color: var(--accent); background: #2e2e2e; }
+.hub-card b { display: block; font-size: 15px; font-weight: 600; }
+.hub-card span { display: block; margin-top: 3px; color: var(--muted); font-size: 13px; line-height: 1.4; }
 
 .site-header :focus-visible, .site-footer :focus-visible, .page :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
