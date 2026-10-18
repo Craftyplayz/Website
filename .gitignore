@@ -8,3 +8,8 @@ __pycache__/
 
 # data the live site writes at runtime
 games/the-game/thegame.json
+
+# personal recordings and chat exports - kept on the server only, never in the public repo
+private/transcripts/*.ogg
+private/bs/*.html
+private/bs/shroom.php
