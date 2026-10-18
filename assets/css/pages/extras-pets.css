@@ -1,0 +1,15 @@
+/* Pets gallery and single pet page */
+.pets { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 40%), 1fr)); gap: 12px; }
+.pet-card {
+    display: block; overflow: hidden; background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); color: var(--text) !important; text-decoration: none !important;
+    transition: border-color var(--fast);
+}
+.pet-card:hover { border-color: var(--accent); }
+.pet-card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; background: var(--card2); }
+.pet-card span { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 8px; padding: 10px 12px; font-weight: 600; }
+.pet-card small { color: var(--muted); font-weight: 400; white-space: nowrap; }
+
+.pet-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(150px, 45%), 1fr)); gap: 8px; }
+.pet-photos a { display: block; border-radius: var(--radius); }
+.pet-photos img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); background: var(--card2); }
