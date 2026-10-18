@@ -1,4 +1,4 @@
-/* Steam Stats and Steam Game (/games/steam/) */
+/* Steam Stats, Steam Game (/games/steam/) and Retro Achievements (/games/retro/) */
 
 /* ---------- library grid ---------- */
 .steam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
@@ -22,3 +22,15 @@
 .ach .rowi .grow small { display: block; }
 .ach .rowi > small { flex: none; text-align: right; }
 .ach .locked b { color: var(--muted); }
+
+/* ---------- retro achievements ---------- */
+.retro-h { margin: 24px 0 12px; font-size: 20px; }
+.retro-h .muted { font-size: 14px; font-weight: 400; }
+.retro-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.retro-game { display: flex; gap: 12px; align-items: flex-start; }
+.retro-game > img { flex: none; width: 64px; height: 64px; border-radius: var(--radius); background: var(--card2); }
+.retro-game .grow { flex: 1; min-width: 0; }
+.retro-game h3 { margin: 0; overflow: hidden; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+.retro-game .badges { margin: 6px 0; }
+.retro-game .progress { margin-top: 8px; }
+.retro-game p { margin: 4px 0 0; font-size: 14px; }
