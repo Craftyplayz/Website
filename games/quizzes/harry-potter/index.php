@@ -1,6 +1,13 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = ['components' => true];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+
+$levels = [
+    ['easy', 'Easy', 'Four choices per question.', 'Not working', 'r'],
+    ['medium', 'Normal', 'Six choices per question.', 'Not working', 'r'],
+    ['hard', 'Hard', 'Six choices per question.', 'Not working', 'r'],
+    ['extrahard', 'Extra Hard', 'Type the answers yourself.', 'Work in progress', 'b'],
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,30 +18,24 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
 
-    <div class="title">
-        <h1>Harry Potter Quizes</h1>
-    </div>
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Harry Potter Quiz</h1>
+        <p class="page-lede">Four difficulty levels. Pick one to start.</p>
 
-    <div class="title">
-        <a href="/games/quizzes/harry-potter/easy/">
-            <h2>Easy (Not Functional)</h2>
-        </a>
-        <a href="/games/quizzes/harry-potter/medium/">
-            <h2>Normal (Not Functional)</h2>
-        </a>
-        <a href="/games/quizzes/harry-potter/hard/">
-            <h2>Hard (Not Functional)</h2>
-        </a>
-        <a href="/games/quizzes/harry-potter/extrahard/">
-            <h2>Extra Hard (Work in progress)</h2>
-        </a>
-    </div>
-
+        <div class="hub-grid">
+            <?php foreach ($levels as [$dir, $name, $about, $status, $tone]): ?>
+                <a class="hub-card" href="/games/quizzes/harry-potter/<?= $dir ?>/">
+                    <b><?= $name ?></b>
+                    <span><?= $about ?></span>
+                    <div class="badges"><small class="badge <?= $tone ?>"><?= $status ?></small></div>
+                </a>
+            <?php endforeach; ?>
+        </div>
     </main>
-    <?php site_footer(); ?>
 
+    <?php site_footer(); ?>
 </body>
 
 </html>
