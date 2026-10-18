@@ -1,0 +1,32 @@
+/* Minecraft file tools that load a JSON file: Stats Editor, JSON Viewer */
+.page .drop { display: block; margin-bottom: 16px; padding: 32px 20px; cursor: pointer; }
+.page .drop:hover { border-color: var(--accent); }
+.data-cards { display: grid; gap: 16px; }
+.card h2 .n-btn { margin-left: auto; font-weight: 400; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.field { width: 100%; min-width: 0; }
+
+.data-text { display: block; min-height: 160px; font: 13px/1.5 var(--mono); resize: vertical; white-space: pre; }
+.code {
+    max-height: 480px; margin: 0; padding: 10px 12px; overflow: auto; background: var(--sunken);
+    border: 1px solid var(--line); border-radius: var(--radius); color: var(--text); font: 13px/1.5 var(--mono); white-space: pre-wrap;
+}
+dialog.dlg .code { max-height: 50vh; }
+
+/* stats table: scrolls on its own so the page never scrolls sideways */
+.table-wrap { max-height: 600px; overflow: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.data-table th { position: sticky; top: 0; z-index: 1; padding: 8px 10px; background: var(--card2); color: var(--muted); font-size: 13px; font-weight: 600; text-align: left; }
+.data-table td { padding: 4px 10px; border-top: 1px solid var(--line); }
+.data-table td.mono { min-width: 200px; font-size: 13px; overflow-wrap: anywhere; }
+.data-table .field { min-width: 110px; padding: 5px 8px; font-size: 13px; }
+
+/* JSON viewer */
+.add-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 12px; align-items: end; }
+.add-form label { display: grid; gap: 4px; color: var(--muted); font-size: 13px; }
+.add-form .btn { justify-content: center; }
+.code .key { color: #9cdcfe; }
+.code .string { color: #ce9178; }
+.code .number { color: #b5cea8; }
+.code .boolean { color: #569cd6; }
+.code .null { color: var(--muted); }

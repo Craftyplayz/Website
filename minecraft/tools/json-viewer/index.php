@@ -1,189 +1,148 @@
 <?php
-$site_page = [];
+$site_page = [
+    'components' => true,
+    'ui' => true,
+    'css' => ['/assets/css/pages/minecraft-data.css'],
+];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <?php page_head(); ?>
-    <style>
-        .tool-wrap {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        #jsonDisplay {
-            white-space: pre-wrap;
-            background-color: var(--card);
-            border: 1px solid var(--line);
-            padding: 10px;
-            border-radius: 5px;
-            overflow-x: auto;
-            font-family: monospace;
-            color: var(--text);
-            position: relative;
-        }
-        .key {
-            color: #9cdcfe;
-        }
-        .string {
-            color: #ce9178;
-        }
-        .number {
-            color: #b5cea8;
-        }
-        .boolean {
-            color: #569cd6;
-        }
-        .null {
-            color: #9b9b9b;
-        }
-        #newSectionForm {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid var(--line);
-            border-radius: 5px;
-            background-color: var(--card);
-        }
-        #newSectionForm input, #newSectionForm select, #newSectionForm button {
-            margin: 5px 0;
-            padding: 8px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        #downloadButton {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #downloadButton:hover {
-            background-color: #0056b3;
-        }
-    </style>
 </head>
+
 <body>
     <?php site_header(); ?>
-    <div class="tool-wrap">
-    <h1>JSON File Viewer</h1>
-    <input type="file" id="fileInput" accept="application/json">
-    <div id="jsonDisplay">Your JSON content will appear here...</div>
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">JSON File Viewer</h1>
+        <p class="page-lede">View a chat filter JSON file, add sections to it and download the result.</p>
 
-    <div id="newSectionForm">
-        <h2>Add New Section</h2>
-        <label for="nameInput">Name:</label>
-        <input type="text" id="nameInput" placeholder="Enter name" required>
+        <label class="drop" id="drop">
+            <input type="file" id="fileInput" accept="application/json" hidden>
+            <b>Choose a .json file</b> <span class="muted">or drop it here</span>
+        </label>
 
-        <label for="actionSelect">Action:</label>
-        <select id="actionSelect">
-            <option value="SECOND_CHAT">SECOND_CHAT</option>
-            <option value="COPY_SECOND_CHAT">COPY_SECOND_CHAT</option>
-        </select>
+        <div class="data-cards hide" id="loaded">
+            <section class="card">
+                <h2>Add new section</h2>
+                <form class="add-form" id="newSectionForm">
+                    <label>Name
+                        <input class="field" type="text" id="nameInput" required>
+                    </label>
+                    <label>Action
+                        <select class="field" id="actionSelect">
+                            <option value="SECOND_CHAT">SECOND_CHAT</option>
+                            <option value="COPY_SECOND_CHAT">COPY_SECOND_CHAT</option>
+                        </select>
+                    </label>
+                    <button class="btn" id="addSectionButton" type="submit">Add section</button>
+                </form>
+            </section>
 
-        <button id="addSectionButton">Add Section</button>
-    </div>
-
+            <section class="card">
+                <h2>File <button class="btn primary small n-btn" id="downloadButton" type="button">Download JSON</button></h2>
+                <pre class="code" id="jsonDisplay"></pre>
+            </section>
+        </div>
+    </main>
+    <?php site_footer(); ?>
     <script>
         const fileInput = document.getElementById('fileInput');
         const jsonDisplay = document.getElementById('jsonDisplay');
         const nameInput = document.getElementById('nameInput');
         const actionSelect = document.getElementById('actionSelect');
-        const addSectionButton = document.getElementById('addSectionButton');
 
         let currentJson = null;
 
         function syntaxHighlight(json) {
-            return json.replace(/"(\w+)":/g, '<span class="key">"$1"</span>:')
-                       .replace(/"([^\"]*)"/g, '<span class="string">"$1"</span>')
-                       .replace(/\b(true|false)\b/g, '<span class="boolean">$1</span>')
-                       .replace(/\b(null)\b/g, '<span class="null">$1</span>')
-                       .replace(/\b(\d+(\.\d+)?)\b/g, '<span class="number">$1</span>');
+            // escape first so the file can't inject markup (quotes are left alone), then colour
+            // every token in one pass so a replacement is never matched again
+            return json.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/("(?:[^"\\]|\\.)*")(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g, (m, str, colon, word) =>
+                    str ? `<span class="${colon ? 'key' : 'string'}">${str}</span>${colon || ''}`
+                        : `<span class="${word ? (word === 'null' ? 'null' : 'boolean') : 'number'}">${m}</span>`);
         }
 
-        fileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
+        function show() {
+            jsonDisplay.innerHTML = syntaxHighlight(JSON.stringify(currentJson, null, 4));
+        }
 
-            if (file) {
-                const reader = new FileReader();
+        function loadFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
 
-                reader.onload = (e) => {
-                    try {
-                        currentJson = JSON.parse(e.target.result);
-                        const prettyJson = JSON.stringify(currentJson, null, 4);
-                        jsonDisplay.innerHTML = syntaxHighlight(prettyJson);
-                        addDownloadButton();
-                    } catch (error) {
-                        jsonDisplay.textContent = "Error parsing JSON: " + error.message;
-                    }
-                };
-
-                reader.onerror = () => {
-                    jsonDisplay.textContent = "Error reading file.";
-                };
-
-                reader.readAsText(file);
-            }
-        });
-
-        addSectionButton.addEventListener('click', () => {
-            if (currentJson) {
-                const nameValue = nameInput.value;
-
-                if (nameValue.trim() === "") {
-                    alert("Name field cannot be empty.");
-                    return;
+            reader.onload = (e) => {
+                try {
+                    currentJson = JSON.parse(e.target.result);
+                    show();
+                    document.getElementById('loaded').classList.remove('hide');
+                    document.querySelector('#drop b').textContent = file.name;
+                } catch (error) {
+                    UI.toast("Error parsing JSON: " + error.message, 'err');
                 }
+            };
 
-                const newSection = {
-                    name: nameValue,
-                    message: nameValue, // Use the name as the message
-                    except: "",
-                    servers: [],
-                    action: actionSelect.value,
-                    useRegex: false,
-                    autoTextDelay: 0
-                };
+            reader.onerror = () => {
+                UI.toast("Error reading file.", 'err');
+            };
 
-                currentJson.chatMessages.push(newSection);
-                const prettyJson = JSON.stringify(currentJson, null, 4);
-                jsonDisplay.innerHTML = syntaxHighlight(prettyJson);
-                addDownloadButton();
-
-                nameInput.value = "";
-                actionSelect.value = "SECOND_CHAT";
-            } else {
-                alert("Please load a JSON file first.");
-            }
-        });
-
-        function addDownloadButton() {
-            let downloadButton = document.getElementById('downloadButton');
-
-            if (!downloadButton) {
-                downloadButton = document.createElement('button');
-                downloadButton.id = 'downloadButton';
-                downloadButton.textContent = 'Download JSON';
-                jsonDisplay.appendChild(downloadButton);
-
-                downloadButton.addEventListener('click', () => {
-                    const blob = new Blob([JSON.stringify(currentJson, null, 4)], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'chatFilter.json';
-                    a.click();
-
-                    URL.revokeObjectURL(url);
-                });
-            }
+            reader.readAsText(file);
         }
+
+        function addSection() {
+            if (!currentJson) return UI.toast("Please load a JSON file first.", 'err');
+            const nameValue = nameInput.value;
+
+            if (nameValue.trim() === "") {
+                UI.toast("Name field cannot be empty.", 'err');
+                return;
+            }
+
+            const newSection = {
+                name: nameValue,
+                message: nameValue, // Use the name as the message
+                except: "",
+                servers: [],
+                action: actionSelect.value,
+                useRegex: false,
+                autoTextDelay: 0
+            };
+
+            currentJson.chatMessages.push(newSection);
+            show();
+
+            nameInput.value = "";
+            actionSelect.value = "SECOND_CHAT";
+            UI.toast('Added ' + nameValue, 'ok');
+        }
+
+        function download() {
+            const blob = new Blob([JSON.stringify(currentJson, null, 4)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'chatFilter.json';
+            a.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        // ui.js is deferred
+        document.addEventListener('DOMContentLoaded', () => {
+            const { $ } = UI;
+            const drop = $('#drop');
+            fileInput.addEventListener('change', e => loadFile(e.target.files[0]));
+            drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+            drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+            drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); loadFile(e.dataTransfer.files[0]); });
+            $('#newSectionForm').addEventListener('submit', e => { e.preventDefault(); addSection(); });
+            $('#downloadButton').addEventListener('click', download);
+        });
     </script>
-    </div>
-    <?php site_footer(); ?>
 </body>
+
 </html>
