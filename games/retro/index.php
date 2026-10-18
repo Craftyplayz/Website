@@ -6,7 +6,7 @@ require dirname(__DIR__) . '/steam/steam.php'; // steam_json() caches any JSON A
 $ra = 'https://retroachievements.org';
 $profile = steam_json($ra . '/API/API_GetUserProfile.php?u=CraftyPlayz&y=' . $retrokey);
 $progress = steam_json($ra . '/API/API_GetUserCompletionProgress.php?u=CraftyPlayz&y=' . $retrokey);
-$last = !empty($profile['LastGameID']) ? steam_json($ra . '/API/API_GetGame.php?g=' . (int)$profile['LastGameID'] . '&y=' . $retrokey, 86400) : null;
+$last = !empty($profile['LastGameID']) ? steam_json($ra . '/API/API_GetGame.php?i=' . (int)$profile['LastGameID'] . '&y=' . $retrokey, 86400) : null;
 
 $awards = ['beaten-softcore' => 'Beaten', 'beaten-hardcore' => 'Beaten (hardcore)', 'completed' => 'Completed', 'mastered' => 'Mastered'];
 $beaten = $playing = [];
