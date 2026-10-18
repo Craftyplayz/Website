@@ -140,17 +140,18 @@
                     "title": "Books",
                     "pages": [
                         { "title": "Books I've Read", "url": "/books/", "description": "My reading list", "keywords": ["reading"] },
-                        { "title": "Book Cover Search", "url": "/books/cover.php", "description": "Find covers for a book" },
-                        { "title": "Bulk Cover Downloader", "url": "/books/bulkcover.php", "description": "Download covers for a whole series" }
+                        { "title": "Book Cover Search", "url": "/books/covers/", "description": "Find covers for a book" },
+                        { "title": "Bulk Cover Downloader", "url": "/books/covers/bulk/", "description": "Download covers for a whole series" }
                     ]
                 },
                 {
                     "title": "Harry Potter",
+                    "url": "/books/harry-potter/",
                     "pages": [
-                        { "title": "Harry Potter Characters", "url": "/extras/harrypotter/characters.php", "description": "Character info", "keywords": ["hp"] },
-                        { "title": "Harry Potter Character", "url": "/extras/harrypotter/character.php", "nav": false, "search": false },
-                        { "title": "Harry Potter Info", "url": "/extras/harrypotter/info.php", "nav": false },
-                        { "title": "Harry Potter Quiz (old)", "url": "/extras/harrypotter/quiz.php", "nav": false, "search": false }
+                        { "title": "Harry Potter Characters", "url": "/books/harry-potter/", "description": "Character info", "keywords": ["hp"] },
+                        { "title": "Harry Potter Character", "url": "/books/harry-potter/character/", "nav": false, "search": false },
+                        { "title": "Harry Potter Info", "url": "/books/harry-potter/info/", "nav": false },
+                        { "title": "Harry Potter Quiz (old)", "url": "/books/harry-potter/quiz/", "nav": false, "search": false }
                     ]
                 }
             ]

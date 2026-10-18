@@ -1,9 +1,11 @@
+<?php
+$site_page = [];
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Series Cover Downloader</title>
+    <?php page_head(); ?>
     <style>
         * {
             margin: 0;
@@ -11,7 +13,7 @@
             box-sizing: border-box;
         }
 
-        body {
+        .tool-wrap {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -333,6 +335,8 @@
     </style>
 </head>
 <body>
+    <?php site_header(); ?>
+    <div class="tool-wrap">
     <div class="container">
         <header>
             <h1>📚 Book Series Cover Downloader</h1>
@@ -910,5 +914,7 @@
                 .substring(0, 100);
         }
     </script>
+    </div>
+    <?php site_footer(); ?>
 </body>
 </html>
