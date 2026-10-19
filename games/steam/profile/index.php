@@ -6,7 +6,8 @@ require dirname(__DIR__) . '/steam.php';
 
 $profile = steam_profile();
 $games = steam_games();
-$progress = steam_progress(steam_achievements($games));
+$ach = steam_achievements($games);
+$progress = steam_progress($ach);
 $items = steam_items(array_keys($games));
 $badges = steam_api('IPlayerService/GetBadges/v1', ['steamid' => $steamid], 86400);
 $badges = isset($badges['response']['badges']) ? $badges['response'] : null;
@@ -44,35 +45,50 @@ $state = $profile ? (int)$profile['personastate'] : 0;
 
 // one row a day, kept on disk so the history charts grow over time (cron.php also records it hourly)
 $history = steam_history($badges, $games, $progress) ?: steam_history();
+$recorded = $history ? strtotime(array_key_first($history)) : time();
+$series = steam_backfill($history, $ach, $badges, $profile && !empty($profile['timecreated']) ? (int)$profile['timecreated'] : 0);
 
 $top = array_slice($played, 0, 10, true);
 $topMax = $top ? reset($top)['playtime_forever'] : 1;
 
-// Small line chart for one history series: [date => value]
-function steam_spark($series, $label)
+// Small line chart for one steam_backfill() series. Points sit at their real dates; rebuilt and guessed stretches
+// get no dots, and a guessed one is dashed.
+function steam_spark($series, $label, $note)
 {
     $W = 300;
     $H = 80;
-    $vals = array_values($series);
-    $dates = array_keys($series);
+    $vals = array_column($series, 1);
+    $t0 = $series[0][0];
+    $t1 = end($series)[0];
     $lo = min($vals);
-    $hi = max($vals);
-    $span = $hi - $lo ?: 1;
-    $n = count($vals);
+    $span = max($vals) - $lo ?: 1;
     $pts = [];
-    foreach ($vals as $i => $v) $pts[] = [round(4 + $i / ($n - 1) * ($W - 8), 1), round($H - 6 - ($v - $lo) / $span * ($H - 20), 1)];
+    foreach ($series as $s) $pts[] = [round(4 + ($s[0] - $t0) / max(1, $t1 - $t0) * ($W - 8), 1), round($H - 6 - ($s[1] - $lo) / $span * ($H - 20), 1)];
+    // one polyline per run of points of the same kind, each joined to the next run's first point
+    $runs = [];
+    foreach ($series as $i => $s) {
+        $guess = $s[2] === 'guess';
+        if (!$runs || end($runs)['guess'] !== $guess) {
+            if ($runs) $runs[count($runs) - 1]['pts'][] = $pts[$i];
+            $runs[] = ['guess' => $guess, 'pts' => []];
+        }
+        $runs[count($runs) - 1]['pts'][] = $pts[$i];
+    }
     ?>
     <figure class="steam-spark">
         <figcaption><span><?= $label ?></span><b><?= number_format(end($vals)) ?></b></figcaption>
-        <svg viewBox="0 0 <?= $W ?> <?= $H ?>" role="img" aria-label="<?= $label ?>: <?= number_format($vals[0]) ?> on <?= $dates[0] ?> to <?= number_format(end($vals)) ?> on <?= end($dates) ?>">
-            <polyline points="<?= implode(' ', array_map(function ($p) {
-                return $p[0] . ',' . $p[1];
-            }, $pts)) ?>" />
-            <?php foreach ($pts as $i => $p): ?>
-                <g><title><?= date('j M Y', strtotime($dates[$i])) ?>: <?= number_format($vals[$i]) ?></title><circle class="hit" cx="<?= $p[0] ?>" cy="<?= $p[1] ?>" r="10" /><circle cx="<?= $p[0] ?>" cy="<?= $p[1] ?>" r="3" /></g>
+        <svg viewBox="0 0 <?= $W ?> <?= $H ?>" role="img" aria-label="<?= $label ?>: <?= number_format($vals[0]) ?> on <?= date('j M Y', $t0) ?> to <?= number_format(end($vals)) ?> on <?= date('j M Y', $t1) ?>">
+            <?php foreach ($runs as $r): ?>
+                <polyline<?= $r['guess'] ? ' class="guess"' : '' ?> points="<?= implode(' ', array_map(function ($p) {
+                    return $p[0] . ',' . $p[1];
+                }, $r['pts'])) ?>" />
+            <?php endforeach; ?>
+            <?php foreach ($pts as $i => $p): $kind = $series[$i][2]; ?>
+                <g<?= $kind ? ' class="est"' : '' ?>><title><?= date($kind ? 'M Y' : 'j M Y', $series[$i][0]) ?>: <?= number_format($vals[$i]) ?><?= $kind === 'guess' ? ' (guess)' : ($kind ? ' (rebuilt)' : '') ?></title><circle class="hit" cx="<?= $p[0] ?>" cy="<?= $p[1] ?>" r="10" /><circle cx="<?= $p[0] ?>" cy="<?= $p[1] ?>" r="3" /></g>
             <?php endforeach; ?>
         </svg>
-        <small class="muted"><?= date('j M Y', strtotime($dates[0])) ?> – <?= date('j M Y', strtotime(end($dates))) ?></small>
+        <small class="muted"><?= date('M Y', $t0) ?> – <?= date('j M Y', $t1) ?></small>
+        <?php if ($note): ?><small class="steam-spark-note"><?= $note ?></small><?php endif; ?>
     </figure>
     <?php
 }
@@ -203,13 +219,20 @@ function steam_spark($series, $label)
 
         <section class="card section">
             <h2>History</h2>
-            <?php if (count($history) < 2): ?>
-                <p class="muted">Recording started <?= $history ? date('j M Y', strtotime(array_keys($history)[0])) : 'today' ?>. The charts appear once there are two days of data.</p>
+            <?php if (!isset($series['level']) || count($series['level']) < 2): ?>
+                <p class="muted">Recording started <?= date('j M Y', $recorded) ?>. The charts appear once there are two days of data.</p>
             <?php else: ?>
+                <p class="muted">Recorded daily since <?= date('j M Y', $recorded) ?>. Earlier months are worked out from Steam's own dates where it keeps them.</p>
                 <div class="steam-sparks">
-                    <?php foreach (['level' => 'Level', 'hours' => 'Hours played', 'games' => 'Games owned', 'achievements' => 'Achievements', 'badges' => 'Badges', 'xp' => 'XP'] as $k => $label) steam_spark(array_column(array_map(function ($d, $row) use ($k) {
-                        return ['d' => $d, 'v' => $row[$k]];
-                    }, array_keys($history), $history), 'v', 'd'), $label); ?>
+                    <?php
+                    $since = date('j M Y', $recorded);
+                    $guess = "Before $since this is just a guess: a straight line from 0 when the account was made. Steam keeps no history of it, so it can't be estimated.";
+                    $badgeNote = "Before $since: rebuilt from badge dates, so it's approximate. A badge with several levels counts all its XP when it reached its latest one.";
+                    $notes = ['level' => $badgeNote, 'hours' => $guess, 'games' => $guess, 'achievements' => "Before $since: rebuilt from achievement unlock dates.", 'badges' => $badgeNote, 'xp' => $badgeNote];
+                    foreach (['level' => 'Level', 'hours' => 'Hours played', 'games' => 'Games owned', 'achievements' => 'Achievements', 'badges' => 'Badges', 'xp' => 'XP'] as $k => $label) {
+                        if (isset($series[$k]) && count($series[$k]) > 1) steam_spark($series[$k], $label, $series[$k][0][2] ? $notes[$k] : '');
+                    }
+                    ?>
                 </div>
             <?php endif; ?>
         </section>
