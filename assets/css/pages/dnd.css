@@ -126,3 +126,19 @@
 .pips.mark i { border-color: var(--line-strong); }
 .pips.mark i.used { background: var(--accent); border-color: var(--accent); }
 .pips.mark.bad i.used { background: var(--danger-line); border-color: var(--danger-line); }
+
+/* character chooser (no ?id=) */
+.dnd-choose { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 12px; margin-bottom: 20px; }
+.dnd-card {
+    display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); color: var(--text) !important; text-decoration: none !important; transition: border-color var(--fast);
+}
+a.dnd-card:hover { border-color: var(--accent); }
+.dnd-card.off { color: var(--muted) !important; }
+.dnd-card b { display: block; font-size: 17px; }
+.dnd-card small { display: block; color: var(--muted); font-size: 13px; }
+.dnd-av { flex: none; width: 64px; height: 64px; border-radius: var(--radius); object-fit: cover; background: var(--card2); }
+.dnd-other { display: grid; gap: 6px; max-width: 520px; font-size: 14px; color: var(--muted); }
+.dnd-other span { display: flex; gap: 8px; }
+.dnd-other .field { flex: 1; min-width: 0; }
+.dnd-h2 { margin: 20px 0 10px; font-size: 17px; }

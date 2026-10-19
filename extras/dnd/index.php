@@ -75,30 +75,49 @@ function dnd_trim_rules($r)
 $list = json_decode((string)@file_get_contents(__DIR__ . '/characters.json'), true);
 $list = array_values(array_filter(array_map('strval', is_array($list) ? $list : []), 'ctype_digit'));
 
-$id = (string)($_GET['id'] ?? '');
-if (!preg_match('/^\d{1,12}$/', $id)) $id = $list[0] ?? '';
+// ?id= takes a character number or a pasted D&D Beyond link; without one the page shows the character chooser
+$id = preg_match('/(\d{4,12})/', (string)($_GET['id'] ?? ''), $m) ? $m[1] : '';
 
-$char = $id !== '' ? dnd_character($id) : ['data' => null, 'status' => 0, 'time' => 0, 'stale' => false];
-$rules = dnd_get('https://character-service.dndbeyond.com/character/v5/rule-data', 'rules.json', DND_RULES_TTL, 'dnd_trim_rules');
+$char = $id !== '' ? dnd_character($id) : null;
+$d = $char ? $char['data'] : null;
+$rules = $d ? dnd_get('https://character-service.dndbeyond.com/character/v5/rule-data', 'rules.json', DND_RULES_TTL, 'dnd_trim_rules') : null;
 
 $picker = [];
 foreach ($list as $lid) {
     $c = $lid === $id ? $char : dnd_character($lid);
-    if (!$c['data']) continue;
-    $d = $c['data'];
-    $picker[] = [
+    $cd = $c['data'];
+    $picker[] = !$cd ? ['id' => $lid, 'name' => null, 'status' => $c['status']] : [
         'id' => $lid,
-        'name' => $d['name'] ?? 'Unnamed',
-        'avatar' => $d['decorations']['avatarUrl'] ?? null,
-        'summary' => trim(($d['race']['fullName'] ?? '') . ' ' . implode(' / ', array_map(function ($cl) {
+        'name' => $cd['name'] ?? 'Unnamed',
+        'avatar' => $cd['decorations']['avatarUrl'] ?? null,
+        'level' => array_sum(array_map(function ($cl) { return (int)($cl['level'] ?? 0); }, $cd['classes'] ?? [])),
+        'summary' => trim(($cd['race']['fullName'] ?? '') . ' · ' . implode(' / ', array_map(function ($cl) {
             return ($cl['definition']['name'] ?? '') . ' ' . ($cl['level'] ?? '');
-        }, $d['classes'] ?? []))),
+        }, $cd['classes'] ?? [])), ' ·'),
     ];
 }
 
-$d = $char['data'];
 if ($d) $site_page['title'] = ($d['name'] ?? 'Character') . ' · D&D Character';
-$payload = ['character' => $d, 'rules' => $rules['data'], 'fetched' => $char['time'], 'stale' => $char['stale'], 'list' => $picker, 'id' => $id];
+$payload = $d ? ['character' => $d, 'rules' => $rules['data'], 'fetched' => $char['time'], 'stale' => $char['stale'], 'list' => array_values(array_filter($picker, function ($p) { return $p['name'] !== null; })), 'id' => $id] : null;
+
+// the chooser: one card per character in characters.json, plus a box for any other public character
+function dnd_chooser($picker)
+{
+    echo '<div class="dnd-choose">';
+    foreach ($picker as $p) {
+        if ($p['name'] === null) {
+            echo '<div class="dnd-card off"><span class="dnd-av"></span><span><b>Character ' . h($p['id']) . '</b><small>'
+                . ($p['status'] === 403 ? 'Private on D&amp;D Beyond' : 'Couldn\'t load from D&amp;D Beyond') . '</small></span></div>';
+            continue;
+        }
+        echo '<a class="dnd-card" href="?id=' . rawurlencode($p['id']) . '">'
+            . ($p['avatar'] ? '<img class="dnd-av" src="' . h($p['avatar']) . '" width="64" height="64" alt="" referrerpolicy="no-referrer">' : '<span class="dnd-av"></span>')
+            . '<span><b>' . h($p['name']) . '</b><small>' . h($p['summary']) . '</small><small>Level ' . (int)$p['level'] . '</small></span></a>';
+    }
+    echo '</div>';
+    echo '<form class="dnd-other" method="get" action="/extras/dnd/"><label for="dnd-other">Open another public character</label>'
+        . '<span><input id="dnd-other" class="field" name="id" placeholder="D&amp;D Beyond link or ID" required autocomplete="off"><button class="btn" type="submit">Open</button></span></form>';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -106,36 +125,41 @@ $payload = ['character' => $d, 'rules' => $rules['data'], 'fetched' => $char['ti
 <head>
     <?php page_head(); ?>
     <link rel="preconnect" href="https://www.dndbeyond.com">
-    <script src="<?= h(asset('/extras/dnd/dnd.js')) ?>" defer></script>
+    <?php if ($d): ?><script src="<?= h(asset('/extras/dnd/dnd.js')) ?>" defer></script><?php endif; ?>
 </head>
 
 <body>
     <?php site_header(); ?>
 
     <main class="page dnd" id="main">
-        <?= site_breadcrumbs(site_current_path()) ?>
-
-        <?php if (!$d): ?>
-            <h1 class="page-title">D&amp;D Character</h1>
-            <?php if ($char['status'] === 403): ?>
-                <p class="err">That character is private. Set its privacy to Public on D&amp;D Beyond (character settings › Character Privacy) and reload.</p>
-            <?php elseif (in_array($char['status'], [404, 409], true)): ?>
-                <p class="err">No D&amp;D Beyond character has the ID <?= h($id) ?>.</p>
-            <?php else: ?>
-                <p class="err">Couldn't reach D&amp;D Beyond right now. Try again in a minute.</p>
-            <?php endif; ?>
+        <?php if ($id === ''): ?>
+            <?= site_breadcrumbs(site_current_path()) ?>
+            <h1 class="page-title">D&amp;D Characters</h1>
+            <p class="page-lede">Pick a character to open their sheet.</p>
+            <?php dnd_chooser($picker); ?>
         <?php else: ?>
-            <div id="sheet" data-state="loading">
-                <h1 class="page-title"><?= h($d['name'] ?? 'Unnamed') ?></h1>
-                <p class="page-lede"><?= h(trim(($d['race']['fullName'] ?? '') . ' · ' . implode(' / ', array_map(function ($cl) {
-                    return ($cl['definition']['name'] ?? '') . ' ' . ($cl['level'] ?? '');
-                }, $d['classes'] ?? [])), ' ·')) ?></p>
-                <noscript><p class="note">The full character sheet needs JavaScript.</p></noscript>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($picker || $d): ?>
-            <script id="dnd-data" type="application/json"><?= json_encode($payload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR) ?></script>
+            <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span class="crumbs-sep">›</span> <a href="/extras/">Extras</a> <span class="crumbs-sep">›</span> <a href="/extras/dnd/">D&amp;D Characters</a> <span class="crumbs-sep">›</span> <span aria-current="page"><?= h($d ? ($d['name'] ?? 'Unnamed') : $id) ?></span></nav>
+            <?php if (!$d): ?>
+                <h1 class="page-title">D&amp;D Character</h1>
+                <?php if ($char['status'] === 403): ?>
+                    <p class="err">That character is private. Set its privacy to Public on D&amp;D Beyond (character settings › Character Privacy) and reload.</p>
+                <?php elseif (in_array($char['status'], [404, 409], true)): ?>
+                    <p class="err">No D&amp;D Beyond character has the ID <?= h($id) ?>.</p>
+                <?php else: ?>
+                    <p class="err">Couldn't reach D&amp;D Beyond right now. Try again in a minute.</p>
+                <?php endif; ?>
+                <h2 class="dnd-h2">Pick another character</h2>
+                <?php dnd_chooser($picker); ?>
+            <?php else: ?>
+                <div id="sheet" data-state="loading">
+                    <h1 class="page-title"><?= h($d['name'] ?? 'Unnamed') ?></h1>
+                    <p class="page-lede"><?= h(trim(($d['race']['fullName'] ?? '') . ' · ' . implode(' / ', array_map(function ($cl) {
+                        return ($cl['definition']['name'] ?? '') . ' ' . ($cl['level'] ?? '');
+                    }, $d['classes'] ?? [])), ' ·')) ?></p>
+                    <noscript><p class="note">The full character sheet needs JavaScript.</p></noscript>
+                </div>
+                <script id="dnd-data" type="application/json"><?= json_encode($payload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR) ?></script>
+            <?php endif; ?>
         <?php endif; ?>
     </main>
 
