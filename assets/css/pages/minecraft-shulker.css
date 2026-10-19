@@ -1,0 +1,9 @@
+/* Shulker Schematic Calculator (also loads minecraft-data.css for the drop zone and table) */
+.sc-meter { margin-top: 12px; }
+.sc-note { margin: 8px 0 0; font-size: 13px; }
+.sc-item { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sc-item img { flex: none; image-rendering: pixelated; }
+.sc-item span { overflow-wrap: anywhere; }
+/* the name column takes what's left and wraps, so the numbers stay visible on a phone */
+.sc-table td:first-child { width: 100%; max-width: 0; }
+.sc-table .num { white-space: nowrap; }

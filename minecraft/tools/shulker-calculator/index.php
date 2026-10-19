@@ -1,40 +1,155 @@
 <?php
-$site_page = [];
+$site_page = [
+    'components' => true,
+    'ui' => true,
+    'css' => ['/assets/css/pages/minecraft-data.css', '/assets/css/pages/minecraft-shulker.css'],
+];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <?php page_head(); ?>
-<style>
-#app{--panel:var(--card);--panel2:var(--card2);--accentText:#fff;--warn:var(--highlight)}
-#app .wrap{max-width:1050px}.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);font-weight:800}.hero{margin-bottom:20px}.hero h1{font-size:clamp(24px,4vw,34px);line-height:1.2;margin:6px 0 4px}.hero p{max-width:650px;color:var(--muted);margin:0}.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);gap:18px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg);padding:16px;min-width:0}.panel h2{font-size:1.05rem;margin:0 0 14px}.wrap>.crumbs{margin-bottom:14px}.drop{display:block;border:2px dashed var(--line-strong);background:var(--panel2);border-radius:14px;padding:27px 18px;text-align:center;cursor:pointer;transition:border-color var(--fast)}.drop:hover,.drop.drag{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--panel2))}.drop strong{display:block;font-size:1rem}.drop span{display:block;color:var(--muted);font-size:.85rem;margin-top:5px}.drop input{display:none}.fileline{margin-top:12px;color:var(--muted);font-size:.88rem;overflow-wrap:anywhere}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}.stat{padding:13px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}.stat small{display:block;color:var(--muted);font-size:.76rem}.stat b{display:block;font-size:1.45rem;letter-spacing:-.03em}.result{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}.result small{color:var(--muted)}.big{font-size:3.2rem;font-weight:850;letter-spacing:-.06em;line-height:1.1;margin:5px 0}.big em{font-size:1rem;font-style:normal;font-weight:600;letter-spacing:0;color:var(--muted)}.meter{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:13px 0 8px}.meter div{height:100%;width:0;background:var(--accent);transition:width .25s}.muted{color:var(--muted)}.note{font-size:.82rem;color:var(--muted)}.warning{color:var(--warn);font-size:.88rem;margin-top:10px}.tablewrap{max-height:440px;overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:16px}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}th{position:sticky;top:0;background:var(--panel2);z-index:1;color:var(--muted);font-size:.76rem;text-transform:uppercase;letter-spacing:.06em}td:last-child,th:last-child{text-align:right;font-variant-numeric:tabular-nums}.controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:15px 0}.controls label{font-size:.9rem}.controls select,.controls input{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;max-width:60%}.btn{background:var(--btn);color:#fff;font:inherit;font-size:14px;border:1px solid var(--btn-line);border-radius:var(--radius);padding:9px 16px;cursor:pointer;transition:background var(--fast)}.btn:hover{background:#4a9033}.btn:disabled{opacity:.45;cursor:not-allowed}.status{margin-top:12px;font-size:.9rem;color:var(--muted);min-height:1.4em}.footer{margin-top:20px;font-size:.82rem;color:var(--muted)}.hidden{display:none!important}@media(max-width:760px){.layout{grid-template-columns:1fr}.panel{padding:17px}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.stat b{font-size:1.2rem}}
-</style>
 </head>
+
 <body>
-    <?php site_header(); ?><main id="app" class="page"><div class="wrap"><?= site_breadcrumbs(site_current_path()) ?>
-<header class="hero"><h1>Shulker Schematic Calculator</h1><p>Upload a Minecraft schematic to count the blocks needed and calculate how many complete copies fit in one shulker box. Inventory contents and entities are ignored.</p></header>
-<div class="layout"><section class="panel"><h2>01 / Choose schematic</h2><label class="drop" id="drop"><strong>Drop your file here or browse</strong><span>Supports .schem, .schematic and .litematic (NBT formats)</span><input id="file" type="file" accept=".schem,.schematic,.litematic,.nbt,.gz"></label><div class="fileline" id="filename">No file selected</div><div class="stats"><div class="stat"><small>Dimensions</small><b id="dims">—</b></div><div class="stat"><small>Blocks placed</small><b id="blocks">—</b></div><div class="stat"><small>Unique items</small><b id="unique">—</b></div></div><div id="status" class="status" role="status">Select a schematic to begin.</div><div id="warning" class="warning"></div><div class="tablewrap hidden" id="tablewrap"><table><thead><tr><th>Block / item</th><th>Per copy</th><th>Stack</th></tr></thead><tbody id="blockrows"></tbody></table></div></section>
-<section class="panel"><h2>02 / Shulker capacity</h2><div class="result"><small>Complete copies per shulker box</small><div class="big" id="copies">— <em>copies</em></div><div class="meter"><div id="meter"></div></div><div class="note" id="capacitynote">Upload a schematic to calculate capacity.</div></div><div class="controls"><label for="slots">Container size</label><select id="slots"><option value="27" selected>Shulker box · 27 slots</option><option value="36">Inventory · 36 slots</option><option value="54">Double chest · 54 slots</option></select></div><div class="controls"><label for="defaultstack">Default stack size</label><select id="defaultstack"><option value="64" selected>64 items</option><option value="16">16 items</option><option value="1">1 item</option></select></div><div class="controls"><label for="strict">Account for known stack limits</label><input id="strict" type="checkbox" checked></div><button class="btn" id="export" disabled>Export block list (.csv)</button><p class="note" style="margin-top:14px">Calculation packs each block type into its own slots, rounds each type up to full stacks, then divides the available slots by the total required per copy. Partial copies are not counted.</p></section></div>
-<p class="footer">Files are processed locally in this page; they are not uploaded to a server. Block entities' inventories and entity drops are excluded. Some modded or legacy block IDs may need manual verification.</p>
-</div></main>
-<script>
-const $=id=>document.getElementById(id);let parsed=null,lastName='schematic';
-const stack16=new Set(['minecraft:sign','minecraft:hanging_sign','minecraft:ender_pearl','minecraft:snowball','minecraft:egg','minecraft:armor_stand','minecraft:written_book','minecraft:writable_book','minecraft:bucket','minecraft:water_bucket','minecraft:lava_bucket','minecraft:milk_bucket','minecraft:cod_bucket','minecraft:salmon_bucket','minecraft:pufferfish_bucket','minecraft:tropical_fish_bucket','minecraft:axolotl_bucket','minecraft:tadpole_bucket']);
-const stack1=new Set(['minecraft:minecart','minecraft:chest_minecart','minecraft:furnace_minecart','minecraft:tnt_minecart','minecraft:hopper_minecart','minecraft:command_block_minecart','minecraft:oak_boat','minecraft:spruce_boat','minecraft:birch_boat','minecraft:jungle_boat','minecraft:acacia_boat','minecraft:dark_oak_boat','minecraft:mangrove_boat','minecraft:cherry_boat','minecraft:bamboo_raft','minecraft:oak_chest_boat','minecraft:spruce_chest_boat','minecraft:birch_chest_boat','minecraft:jungle_chest_boat','minecraft:acacia_chest_boat','minecraft:dark_oak_chest_boat','minecraft:mangrove_chest_boat','minecraft:cherry_chest_boat','minecraft:bamboo_chest_raft']);
-function stackSize(id){if(!$('strict').checked)return +$('defaultstack').value;if(stack1.has(id)||/(_sword|_pickaxe|_axe|_shovel|_hoe|_helmet|_chestplate|_leggings|_boots|elytra|shield|bow|crossbow|trident|fishing_rod|flint_and_steel|shears|carrot_on_a_stick|warped_fungus_on_a_stick|mace|brush|recovery_compass|compass$)/.test(id))return 1;if(stack16.has(id)||/(_sign|_hanging_sign)$/.test(id))return 16;return 64}
-class NBTReader{constructor(buf){this.v=new DataView(buf);this.p=0;this.decoder=new TextDecoder()}u8(){return this.v.getUint8(this.p++)}i8(){return this.v.getInt8(this.p++)}i16(){let n=this.v.getInt16(this.p);this.p+=2;return n}u16(){let n=this.v.getUint16(this.p);this.p+=2;return n}i32(){let n=this.v.getInt32(this.p);this.p+=4;return n}i64(){let n=this.v.getBigInt64(this.p);this.p+=8;return n}str(){let n=this.u16(),s=this.decoder.decode(new Uint8Array(this.v.buffer,this.p,n));this.p+=n;return s}payload(t){switch(t){case 1:return this.i8();case 2:return this.i16();case 3:return this.i32();case 4:return this.i64();case 5:{let n=this.v.getFloat32(this.p);this.p+=4;return n}case 6:{let n=this.v.getFloat64(this.p);this.p+=8;return n}case 7:{let n=this.i32();if(n<0||n>100000000)throw Error('Invalid byte array');let a=new Uint8Array(this.v.buffer,this.p,n);this.p+=n;return a}case 8:return this.str();case 9:{let et=this.u8(),n=this.i32();if(n<0||n>100000000)throw Error('Invalid list');let a=[];for(let i=0;i<n;i++)a.push(this.payload(et));return a}case 10:{let o={};while(true){let et=this.u8();if(et===0)break;let name=this.str();o[name]=this.payload(et)}return o}case 11:{let n=this.i32();if(n<0||n>100000000)throw Error('Invalid int array');let a=new Int32Array(n);for(let i=0;i<n;i++)a[i]=this.i32();return a}case 12:{let n=this.i32();if(n<0||n>100000000)throw Error('Invalid long array');let a=[];for(let i=0;i<n;i++)a.push(this.i64());return a}default:throw Error('Unknown NBT tag '+t)}}read(){let type=this.u8();if(type!==10)throw Error('File does not contain a root NBT compound');this.str();return this.payload(type)}}
-async function getNBT(file){let b=await file.arrayBuffer(),u=new Uint8Array(b);if(u[0]===0x1f&&u[1]===0x8b){if(!('DecompressionStream'in window))throw Error('This browser cannot decompress gzip NBT files. Try a current version of Chrome or Edge.');b=await new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer()}return new NBTReader(b).read()}
-function blockName(palette,key){if(Array.isArray(palette)){let p=palette[key];return typeof p==='string'?p:(p?.Name||p?.name||'unknown:block')}if(palette&&typeof palette==='object'){for(const [name,val] of Object.entries(palette))if(Number(val)===Number(key))return name}return 'unknown:block'}
-function add(counts,id){if(!id||id==='minecraft:air'||id==='minecraft:cave_air'||id==='minecraft:void_air'||id==='air')return;counts.set(id,(counts.get(id)||0)+1)}
-function parseSponge(root){let s=root.Schematic||root;let w=Number(s.Width??s.width),h=Number(s.Height??s.height),l=Number(s.Length??s.length);if(!w||!h||!l)throw Error('Could not read schematic dimensions.');let pal=s.Palette||s.Blocks?.Palette;let data=s.BlockData||s.Blocks?.Data; if(!pal||!data)throw Error('No Sponge block palette or block data found.');let reverse=new Map(Object.entries(pal).map(([n,v])=>[Number(v),n]));let ids=decodeVarints(data,w*h*l);let counts=new Map();for(let n of ids){let name=reverse.get(n)||'unknown:block';add(counts,name)}return {w,h,l,counts,volume:w*h*l}}
-function decodeVarints(data,total){let bytes=data instanceof Uint8Array?data:new Uint8Array(data);let out=[],value=0,shift=0;for(let b of bytes){value|=(b&127)<<shift;if(b&128){shift+=7;if(shift>28)throw Error('Invalid block palette data')}else{out.push(value>>>0);value=0;shift=0;if(out.length===total)break}}if(out.length<total)throw Error('Block data ended early; file may use an unsupported schematic format.');return out}
-function parseLegacy(root){let s=root.Schematic||root;let w=Number(s.Width),h=Number(s.Height),l=Number(s.Length);if(!w||!h||!l||!s.Blocks)throw Error('Unsupported legacy schematic structure.');let ids=s.Blocks,counts=new Map();const known={0:'minecraft:air',1:'minecraft:stone',2:'minecraft:grass_block',3:'minecraft:dirt',4:'minecraft:cobblestone',5:'minecraft:oak_planks',12:'minecraft:sand',13:'minecraft:gravel',17:'minecraft:oak_log',20:'minecraft:glass',35:'minecraft:white_wool',41:'minecraft:gold_block',42:'minecraft:iron_block',45:'minecraft:bricks',49:'minecraft:obsidian',54:'minecraft:chest',57:'minecraft:diamond_block',58:'minecraft:crafting_table',61:'minecraft:furnace',63:'minecraft:oak_sign',65:'minecraft:ladder',67:'minecraft:cobblestone_stairs',68:'minecraft:oak_wall_sign',76:'minecraft:redstone_torch',stone:'minecraft:stone'};for(let id of ids){let name=known[id]||`legacy:block_${id}`;add(counts,name)}return {w,h,l,counts,volume:w*h*l,legacy:true}}
-function parseLitematic(root){let regions=root.regions||root.Regions;if(!regions)throw Error('No Litematica regions found.');let counts=new Map(),min=[0,0,0],max=[0,0,0],first=true,volume=0;for(let reg of Object.values(regions)){let size=reg.Size||reg.size,pos=reg.Position||reg.position;let sx=Math.abs(Number(size.x??size.X)),sy=Math.abs(Number(size.y??size.Y)),sz=Math.abs(Number(size.z??size.Z));if(!sx||!sy||!sz)continue;volume+=sx*sy*sz;let pal=reg.BlockStatePalette||reg.blockStatePalette,states=reg.BlockStates||reg.blockStates;if(!pal||!states)continue;let names=pal.map(p=>p.Name||p.name||'unknown:block');let bits=Math.max(2,Math.ceil(Math.log2(names.length))),per=Math.floor(64/bits),mask=(1n<<BigInt(bits))-1n,idx=0;for(let word of states){let u=BigInt.asUintN(64,BigInt(word));for(let j=0;j<per&&idx<sx*sy*sz;j++,idx++){let n=Number((u>>BigInt(j*bits))&mask);add(counts,names[n]||'unknown:block')}}}return {w:'multi',h:'region',l:'',counts,volume}}
-function analyze(root){if(root.regions||root.Regions)return parseLitematic(root);let s=root.Schematic||root;if(s.BlockData||s.Blocks?.Data||s.Palette)return parseSponge(root);if(s.Blocks)return parseLegacy(root);throw Error('Unrecognized format. Please use a standard Sponge .schem, legacy .schematic or Litematica .litematic file.')}
-function calculate(){if(!parsed)return;let slots=+$('slots').value,requirements=[...parsed.counts].map(([id,n])=>({id,n,stack:stackSize(id)}));const used=n=>requirements.reduce((a,x)=>a+Math.ceil(x.n*n/x.stack),0);let lo=0,hi=slots+1;while(lo+1<hi){let mid=Math.floor((lo+hi)/2);if(used(mid)<=slots)lo=mid;else hi=mid}let copies=lo,perCopy=used(1),usedSlots=used(copies);$('copies').innerHTML=`${copies} <em>copies</em>`;$('meter').style.width=Math.min(100,usedSlots/slots*100)+'%';$('capacitynote').textContent=`${usedSlots} of ${slots} slots used for ${copies} copies · ${slots-usedSlots} slots left · ${perCopy} slots for one copy`;$('unique').textContent=requirements.length.toLocaleString();$('blocks').textContent=[...parsed.counts.values()].reduce((a,b)=>a+b,0).toLocaleString();$('dims').textContent=typeof parsed.w==='number'?`${parsed.w}×${parsed.h}×${parsed.l}`:'Multiple regions';$('blockrows').innerHTML=requirements.sort((a,b)=>b.n-a.n).map(x=>`<tr><td>${esc(x.id)}</td><td>${x.n.toLocaleString()}</td><td>${x.stack}</td></tr>`).join('');$('tablewrap').classList.remove('hidden');$('export').disabled=false;}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-async function load(file){if(!file)return;parsed=null;$('status').textContent='Reading and counting blocks…';$('warning').textContent='';$('filename').textContent=file.name;$('export').disabled=true;$('tablewrap').classList.add('hidden');try{let root=await getNBT(file);parsed=analyze(root);lastName=file.name.replace(/\.[^.]+$/,'');$('status').textContent='Schematic analysed successfully.';if(parsed.legacy)$('warning').textContent='Legacy numeric block IDs are partly mapped; unknown IDs are kept separate and may not match modern item names.';calculate()}catch(e){$('status').textContent='Could not analyse file: '+e.message;$('warning').textContent='Try exporting as Sponge .schem or Litematica .litematic. The file must be NBT-based.';$('copies').innerHTML='— <em>copies</em>';$('dims').textContent=$('blocks').textContent=$('unique').textContent='—'}}
-$('file').addEventListener('change',e=>load(e.target.files[0]));$('drop').addEventListener('dragover',e=>{e.preventDefault();$('drop').classList.add('drag')});$('drop').addEventListener('dragleave',()=> $('drop').classList.remove('drag'));$('drop').addEventListener('drop',e=>{e.preventDefault();$('drop').classList.remove('drag');load(e.dataTransfer.files[0])});['slots','defaultstack','strict'].forEach(id=>$(id).addEventListener('change',calculate));$('export').addEventListener('click',()=>{if(!parsed)return;let rows=[['Block/item','Quantity per schematic','Stack size'],...[...parsed.counts].sort((a,b)=>b[1]-a[1]).map(([id,n])=>[id,n,stackSize(id)])];let csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=(lastName||'schematic')+'-block-list.csv';a.click();URL.revokeObjectURL(a.href)});
-</script>    <?php site_footer(); ?>
-</body></html>
+    <?php site_header(); ?>
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Shulker Schematic Calculator</h1>
+        <p class="page-lede">Drop a schematic to get its item list and how many copies fit in a shulker box.</p>
+
+        <label class="drop" id="drop">
+            <input type="file" id="file" accept=".litematic,.schem,.schematic,.nbt" hidden>
+            <b>Choose a schematic</b> <span class="muted">or drop it here · .litematic, .schem, .schematic, .nbt</span>
+        </label>
+        <p class="err hide" id="err" role="alert"></p>
+
+        <div class="data-cards hide" id="out">
+            <section class="card">
+                <h2>Fit <span class="n" id="filename"></span></h2>
+                <div class="stabs" id="slots" role="group" aria-label="Container">
+                    <button type="button" class="on" data-slots="27" aria-pressed="true">Shulker box</button>
+                    <button type="button" data-slots="36" aria-pressed="false">Inventory</button>
+                    <button type="button" data-slots="54" aria-pressed="false">Double chest</button>
+                </div>
+                <div class="tiles">
+                    <div class="tile"><b id="copies">0</b><span id="copies-label">copies per shulker box</span></div>
+                    <div class="tile"><b id="boxes">0</b><span>shulker boxes for one copy</span></div>
+                    <div class="tile"><b id="blocks">0</b><span>items in total</span></div>
+                    <div class="tile"><b id="dims">-</b><span>size</span></div>
+                </div>
+                <div class="progress sc-meter"><i id="meter"></i></div>
+                <p class="muted sc-note" id="fitnote"></p>
+            </section>
+
+            <section class="card">
+                <h2>Materials <span class="n" id="types"></span> <button class="btn primary small" id="export" type="button">Export CSV</button></h2>
+                <div class="table-wrap">
+                    <table class="data-table sc-table">
+                        <thead><tr><th>Item</th><th class="num">Count</th><th class="num">Stacks</th></tr></thead>
+                        <tbody id="rows"></tbody>
+                    </table>
+                </div>
+                <p class="muted sc-note">Read in your browser, never uploaded. Chest contents and entities aren't counted.</p>
+            </section>
+        </div>
+    </main>
+    <?php site_footer(); ?>
+    <script src="<?= h(asset('/minecraft/tools/shulker-calculator/schematic.js')) ?>"></script>
+    <script>
+        // ui.js is deferred
+        document.addEventListener('DOMContentLoaded', () => {
+            const { $, esc, num } = UI;
+            const ICONS = '/minecraft/tools/item-list/';
+            let parsed = null, fileBase = 'schematic', slots = 27;
+
+            const label = (id) => id.replace(/^[^:]*:/, '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+            function stacksText(n, size) {
+                const full = Math.floor(n / size), rest = n % size;
+                return (full ? num(full) + ' × ' + size : '') + (full && rest ? ' + ' : '') + (rest ? num(rest) : '');
+            }
+
+            function renderFit() {
+                const f = Schematic.fit(parsed.counts, slots), name = $('#slots .on').textContent.toLowerCase();
+                $('#copies').textContent = num(f.copies);
+                $('#copies-label').textContent = 'copies per ' + name;
+                $('#boxes').textContent = num(Math.ceil(f.perCopy / 27));
+                $('#meter').style.width = (f.copies ? f.used / slots * 100 : Math.min(100, f.perCopy / slots * 100)) + '%';
+                $('#fitnote').textContent = f.copies
+                    ? `${num(f.copies)} ${f.copies === 1 ? 'copy uses' : 'copies use'} ${f.used} of ${slots} slots. One copy needs ${f.perCopy}.`
+                    : `One copy needs ${num(f.perCopy)} slots, more than a ${name} holds.`;
+            }
+
+            function render() {
+                const list = [...parsed.counts].sort((a, b) => b[1] - a[1]);
+                $('#types').textContent = num(list.length) + ' types';
+                $('#blocks').textContent = num(list.reduce((a, [, n]) => a + n, 0));
+                $('#dims').textContent = parsed.dims ? parsed.dims.join('×') : parsed.regions + ' regions';
+                $('#rows').innerHTML = list.map(([id, n]) => {
+                    const mc = id.startsWith('minecraft:'), size = Schematic.stackSize(id);
+                    const icon = `<img src="${ICONS}${mc ? 'minecraft_' + esc(id.slice(10)) : 'canUse_unknown'}.png" width="24" height="24" alt="" loading="lazy" decoding="async">`;
+                    return `<tr><td><span class="sc-item" title="${esc(id)}">${icon}<span>${esc(label(id))}</span></span></td>` +
+                        `<td class="num">${num(n)}</td><td class="num">${stacksText(n, size)}</td></tr>`;
+                }).join('');
+                renderFit();
+                $('#out').classList.remove('hide');
+            }
+
+            function fail(msg) {
+                $('#err').textContent = msg;
+                $('#err').classList.remove('hide');
+                $('#out').classList.add('hide');
+            }
+
+            async function load(file) {
+                if (!file) return;
+                $('#err').classList.add('hide');
+                $('#drop b').textContent = 'Reading ' + file.name + '…';
+                try {
+                    parsed = await Schematic.readFile(await file.arrayBuffer());
+                    if (!parsed.counts.size) throw Error('No blocks found in it.');
+                    fileBase = file.name.replace(/\.[^.]+$/, '');
+                    $('#filename').textContent = file.name;
+                    render();
+                    if (parsed.legacy) UI.toast('Old numeric block IDs: only the common ones are named, the rest show as legacy:block_<id>.', 'note');
+                } catch (e) {
+                    fail(`Couldn't read ${file.name}: ${e.message}`);
+                }
+                $('#drop b').textContent = 'Choose another schematic';
+            }
+
+            const drop = $('#drop');
+            $('#file').addEventListener('change', (e) => load(e.target.files[0]));
+            drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('over'); });
+            drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+            drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('over'); load(e.dataTransfer.files[0]); });
+
+            $('#slots').addEventListener('click', (e) => {
+                const b = e.target.closest('button');
+                if (!b) return;
+                for (const x of $('#slots').children) { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }
+                slots = +b.dataset.slots;
+                renderFit();
+            });
+
+            // missing textures (modded or brand-new items) fall back to the unknown icon
+            $('#rows').addEventListener('error', (e) => {
+                if (e.target.tagName === 'IMG' && !e.target.src.endsWith('canUse_unknown.png')) e.target.src = ICONS + 'canUse_unknown.png';
+            }, true);
+
+            $('#export').addEventListener('click', () => {
+                const rows = [['Item', 'ID', 'Count', 'Stack size'], ...[...parsed.counts].sort((a, b) => b[1] - a[1]).map(([id, n]) => [label(id), id, n, Schematic.stackSize(id)])];
+                const csv = rows.map((r) => r.map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+                a.download = fileBase + '-materials.csv';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            });
+        });
+    </script>
+</body>
+
+</html>

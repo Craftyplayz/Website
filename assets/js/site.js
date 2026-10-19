@@ -168,11 +168,12 @@
         const cat = $('#catfact');
         if (!cat || cat.dataset.ready) return;
         cat.dataset.ready = '1';
-        // a nice-to-have, so it waits until the page has finished loading
+        // the server already printed the last saved fact; fetch a fresh one for the next page,
+        // and only show it here if there was nothing saved (swapping text makes the footer jump)
         idle(() => {
-            fetch('https://meowfacts.herokuapp.com')
+            fetch('/includes/catfact.php')
                 .then((r) => r.json())
-                .then((d) => { cat.textContent = 'Cat fact: ' + d.data.join(' '); })
+                .then((d) => { if (d.fact && !cat.textContent) cat.textContent = 'Cat fact: ' + d.fact; })
                 .catch(() => { });
         });
     }
