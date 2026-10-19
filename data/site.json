@@ -205,7 +205,7 @@
                     "title": "Other",
                     "pages": [
                         { "title": "Cyberpunk 2077", "url": "/extras/cyberpunk/", "description": "A question about Cyberpunk" },
-                        { "title": "D&D Character", "url": "/extras/dnd/", "description": "D&D character sheet" },
+                        { "title": "D&D Characters", "url": "/extras/dnd/", "description": "D&D Beyond character sheets" },
                         { "title": "Bee Movie", "url": "/extras/bee-movie/", "description": "The whole Bee Movie script", "nav": false }
                     ]
                 }
