@@ -50,3 +50,7 @@ RedirectMatch 301 ^/games/bingo(/.*)?$ /games/
 ```
 and on line 53 (`/css/(books|dnd|factorio|gallery|...|steam|steamnew|tools)\.css`) drop `factorio`, `steam` and `steamnew`: those stylesheets are archived or deleted, so the redirect targets 404.
 **Why:** the old Bingo URL now 404s. (Guess Who needs nothing: `games/guesswho/og/` and `atla/` redirect to the new page themselves.)
+
+## Extras
+- **`data/site.json`**, line 232: change the D&D page's title from `"D&D Character"` to `"D&D Characters"` and its description from `"D&D character sheet"` to `"D&D Beyond character sheets"`.
+**Why:** `/extras/dnd/` is now a chooser listing every character in `extras/dnd/characters.json` (each opens as `?id=`), so the plural matches the page heading and the breadcrumbs on the sheet pages.
