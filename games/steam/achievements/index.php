@@ -89,6 +89,7 @@ function steam_ach_row($a, $games, $schema)
     <main class="page steam" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">Steam Achievements</h1>
+        <p class="page-lede">Achievements across all my Steam games, with how rare each one is.</p>
         <?php steam_nav('/games/steam/achievements/'); ?>
 
         <?php if (!$progress): ?>
@@ -187,7 +188,7 @@ function steam_ach_row($a, $games, $schema)
         <?php endif; ?>
     </main>
 
-    <?php site_footer(); ?>
+    <?php site_footer(null, false); ?>
     <script>
         document.addEventListener('error', function (e) {
             if (e.target.closest && e.target.closest('.steam-row')) e.target.style.visibility = 'hidden';

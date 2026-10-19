@@ -1,9 +1,14 @@
 /* Steam pages (/games/steam/) and Retro Achievements (/games/retro/) */
 
 /* Steam blue re-tint; surfaces and text stay the site's */
-.steam { --accent: #66c0f4; --accent-soft: #1d3a50; --btn: #2a6e9e; --btn-line: #4a9ad0; }
-.steam .progress i { background: linear-gradient(90deg, #2a6e9e, var(--accent)); }
-.badge.gold { background: #4a3d16; border-color: #a8862a; }
+.steam {
+    --accent: #66c0f4; --accent-soft: #1d3a50; --btn: #2a6e9e; --btn-line: #4a9ad0;
+    /* chart series, checked with the dataviz validator against the #2a2a2a card */
+    --steam-1: #3987e5; --steam-2: #c98500; --steam-3: #9085e9;
+    --steam-ingame: #a3cf06; --steam-gold-bg: #4a3d16; --steam-gold-line: #a8862a;
+}
+.steam .progress i { background: linear-gradient(90deg, var(--btn), var(--accent)); }
+.steam .badge.gold { background: var(--steam-gold-bg); border-color: var(--steam-gold-line); }
 /* sorting and filtering scripts hide rows with the hidden attribute, which flex/grid display would override */
 .steam [hidden] { display: none !important; }
 
@@ -21,20 +26,19 @@
 .steam-level { display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 6px; border: 2px solid var(--accent); border-radius: 999px; font-size: 14px; }
 .steam-state { margin: 0; color: var(--muted); font-size: 14px; }
 .steam-state.online { color: var(--accent); }
-.steam-state.ingame { color: #a3cf06; }
+.steam-state.ingame { color: var(--steam-ingame); }
 .steam-state.ingame a { color: inherit; }
 
-/* palette checked with the dataviz validator against the #2a2a2a card */
 .steam-split { display: flex; gap: 2px; height: 12px; overflow: hidden; border-radius: 4px; }
 .steam-split i { min-width: 2px; }
 .steam-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 14px; }
 .steam-legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 2px; }
-.steam-split .s0, .steam-legend .s0 { background: #3987e5; }
-.steam-split .s1, .steam-legend .s1 { background: #c98500; }
-.steam-split .s2, .steam-legend .s2 { background: #9085e9; }
+.steam-split .s0, .steam-legend .s0 { background: var(--steam-1); }
+.steam-split .s1, .steam-legend .s1 { background: var(--steam-2); }
+.steam-split .s2, .steam-legend .s2 { background: var(--steam-3); }
 
-.steam-row { color: var(--text) !important; text-decoration: none !important; transition: background var(--fast); }
-.steam-row:hover { background: var(--btn2); }
+.steam a.steam-row { color: var(--text); text-decoration: none; transition: background var(--fast); }
+.steam a.steam-row:hover { background: var(--btn2); }
 .steam-row img { flex: none; width: 115px; height: 43px; border-radius: 4px; object-fit: cover; background: var(--card); }
 .steam-row img.sq { width: 48px; height: 48px; }
 .steam-row b { display: block; overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
@@ -87,8 +91,8 @@
 
 /* ---------- achievements ---------- */
 .steam-chart { display: block; width: 100%; height: auto; }
-.steam-chart path { fill: #3987e5; transition: fill var(--fast); }
-.steam-chart g:hover path { fill: #66c0f4; }
+.steam-chart path { fill: var(--steam-1); transition: fill var(--fast); }
+.steam-chart g:hover path { fill: var(--accent); }
 .steam-chart text { fill: var(--muted); font: 11px var(--font); }
 .steam-chart line { stroke: var(--line); }
 .steam-table { margin-top: 8px; font-size: 13px; }
@@ -99,6 +103,44 @@
 .steam-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start; }
 .steam-cols .rowi .progress { margin-top: 6px; }
 .steam-perfect { grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); }
+
+/* ---------- profile ---------- */
+.steam a.steam-name { color: var(--text); }
+.steam a.steam-name:hover { color: var(--accent); }
+.steam-profile-head { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-bottom: 12px; }
+.steam-profile-head .grow { flex: 1 1 200px; min-width: 0; }
+.steam-profile-head .page-title { margin: 0; }
+.steam-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+.steam-big { margin: 0 0 12px; font-size: 32px; font-weight: 700; line-height: 1.1; }
+.steam-big small { color: var(--muted); font-size: 15px; font-weight: 400; }
+.steam-big .steam-level { min-width: 44px; height: 44px; font-size: 20px; }
+
+.steam-bars { display: grid; gap: 4px; }
+.steam .steam-bars > * { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) 110px; align-items: center; gap: 12px; padding: 4px 6px; border-radius: var(--radius); color: var(--text); font-size: 14px; text-decoration: none; }
+.steam-bars > a:hover { background: var(--card2); }
+.steam-bars .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.steam-bars .track { height: 10px; }
+.steam-bars i { display: block; height: 100%; background: var(--steam-1); border-radius: 0 4px 4px 0; }
+.steam-bars i.other { background: var(--line-strong); }
+.steam-bars .val { text-align: right; white-space: nowrap; }
+.steam-bars .val small { color: var(--muted); }
+@media (max-width: 560px) { .steam-bars > * { grid-template-columns: minmax(0, 1fr) 90px; } .steam-bars .track { grid-column: 1 / -1; order: 3; } }
+
+.steam-badges { grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); }
+.steam-badges img { flex: none; width: 48px; height: 48px; object-fit: contain; }
+.steam-badges b { display: block; font-weight: 600; }
+.steam-badges .grow small { display: block; }
+
+.steam-sparks { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 16px; }
+.steam-spark { margin: 0; padding: 10px 12px; background: var(--card2); border-radius: var(--radius); }
+.steam-spark figcaption { display: flex; justify-content: space-between; font-size: 13px; }
+.steam-spark figcaption span { color: var(--muted); }
+.steam-spark svg { display: block; width: 100%; height: auto; margin: 6px 0 2px; overflow: visible; }
+.steam-spark polyline { fill: none; stroke: var(--steam-1); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.steam-spark circle { fill: var(--steam-1); stroke: var(--card2); stroke-width: 2; }
+.steam-spark circle.hit { fill: transparent; stroke: none; }
+.steam-spark g:hover circle:not(.hit) { fill: var(--accent); }
+.steam-spark small { font-size: 11px; }
 
 /* ---------- wishlist ---------- */
 .steam-price { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

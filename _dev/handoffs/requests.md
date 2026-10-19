@@ -10,3 +10,9 @@ Sessions append here instead of editing shared files (see README.md, section 2).
 - **Minecraft:** `assets/css/components.css` gives `<a class="btn">` the button colour instead of the link colour (`.page a.btn`, `.page a.btn.primary`).
 
 ## Open
+
+### Games
+- **`data/site.json`**, Games › Stats group: add the new Steam Profile page (`games/steam/profile/`, linked from the player name on Steam Stats) after "Steam Wishlist", so it gets search, the breadcrumb and its tab title from site.json. Until then the page sets `title`/`description` in `$site_page`; remove those two keys once this line is in.
+  ```json
+  { "title": "Steam Profile", "url": "/games/steam/profile/", "description": "Level, badges, playtime and library value", "keywords": ["badges", "level", "xp"], "nav": false },
+  ```

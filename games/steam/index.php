@@ -51,6 +51,7 @@ $state = $profile ? (int)$profile['personastate'] : 0;
     <main class="page steam" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">Steam Stats</h1>
+        <p class="page-lede">My Steam profile, playtime and achievements, live from Steam.</p>
         <?php steam_nav('/games/steam/'); ?>
 
         <?php if (!$games): ?>
@@ -61,7 +62,7 @@ $state = $profile ? (int)$profile['personastate'] : 0;
             <section class="card section steam-profile">
                 <img class="steam-avatar" src="<?= h($profile['avatarfull']) ?>" alt="" width="96" height="96">
                 <div class="grow">
-                    <h2><?= h($profile['personaname']) ?>
+                    <h2><a class="steam-name" href="/games/steam/profile/" title="Full profile"><?= h($profile['personaname']) ?></a>
                         <?php if ($badges): ?><span class="steam-level" title="Steam level"><?= (int)$badges['player_level'] ?></span><?php endif; ?>
                     </h2>
                     <p class="steam-state<?= !empty($profile['gameextrainfo']) ? ' ingame' : ($state ? ' online' : '') ?>">
@@ -83,7 +84,7 @@ $state = $profile ? (int)$profile['personastate'] : 0;
                     <?php if ($badges): ?>
                         <span>Badges</span><span><?= count($badges['badges']) ?></span>
                     <?php endif; ?>
-                    <span>Profile</span><span><a href="<?= h($profile['profileurl']) ?>">steamcommunity.com</a></span>
+                    <span>Profile</span><span><a target="_blank" rel="noopener" href="<?= h($profile['profileurl']) ?>">steamcommunity.com</a></span>
                 </div>
             </section>
         <?php endif; ?>
@@ -151,7 +152,7 @@ $state = $profile ? (int)$profile['personastate'] : 0;
                 <h2>Workshop uploads <span class="n"><?= count($workshop) ?></span></h2>
                 <div class="rows">
                     <?php foreach ($workshop as $f): ?>
-                        <a class="rowi steam-row" href="https://steamcommunity.com/sharedfiles/filedetails/?id=<?= h($f['publishedfileid']) ?>">
+                        <a class="rowi steam-row" target="_blank" rel="noopener" href="https://steamcommunity.com/sharedfiles/filedetails/?id=<?= h($f['publishedfileid']) ?>">
                             <?php if (!empty($f['preview_url'])): ?><img class="sq" src="<?= h($f['preview_url']) ?>" alt="" width="48" height="48" loading="lazy" decoding="async"><?php endif; ?>
                             <div class="grow">
                                 <b><?= h($f['title']) ?></b>
@@ -165,7 +166,7 @@ $state = $profile ? (int)$profile['personastate'] : 0;
         <?php endif; ?>
     </main>
 
-    <?php site_footer(); ?>
+    <?php site_footer(null, false); ?>
     <script>
         // a game without Steam art keeps its empty art box instead of a broken-image icon
         document.addEventListener('error', function (e) {

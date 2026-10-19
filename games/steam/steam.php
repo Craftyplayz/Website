@@ -8,6 +8,8 @@ const STEAM_HIDE = [730, 682130, 469820, 1085750, 459820, 1463120];
 const STEAM_STATES = ['Offline', 'Online', 'Busy', 'Away', 'Snooze', 'Looking to trade', 'Looking to play'];
 const STEAM_DECK = [1 => 'Unsupported', 2 => 'Playable', 3 => 'Verified'];
 const STEAM_IMG = 'https://shared.akamai.steamstatic.com/store_item_assets/';
+const STEAM_UA = 'Mozilla/5.0 (compatible; CraftyPlayz Steam stats; +https://craftyplayz.com/games/steam/)';
+const STEAM_IMG_COMMUNITY = 'https://shared.akamai.steamstatic.com/community_assets/images/';
 
 // Fetch many JSON URLs through the disk cache, in parallel. $urls is [key => url]; returns [key => array|null].
 // Fresh copies come from disk. Missing ones are always fetched; at most $refresh stale ones are, so a page
@@ -33,7 +35,7 @@ function steam_fetch($urls, $ttl, $refresh = 1000)
     $handles = [];
     foreach ($todo as $k => $url) {
         $ch = curl_init($url);
-        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_CONNECTTIMEOUT => 5, CURLOPT_TIMEOUT => 12, CURLOPT_ENCODING => '']);
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_CONNECTTIMEOUT => 5, CURLOPT_TIMEOUT => 12, CURLOPT_ENCODING => '', CURLOPT_USERAGENT => STEAM_UA]);
         curl_multi_add_handle($mh, $ch);
         $handles[$k] = $ch;
     }
@@ -174,10 +176,44 @@ function steam_schema($appids)
     foreach (steam_fetch($urls, 7 * 86400) as $id => $r) {
         $out[$id] = [];
         foreach (isset($r['game']['availableGameStats']['achievements']) ? $r['game']['availableGameStats']['achievements'] : [] as $a) {
+            // the schema still points at the old community CDN, which 404s for some games (Factorio); the new one has them all
+            foreach (['icon', 'icongray'] as $k) {
+                if (isset($a[$k])) $a[$k] = preg_replace('~^https?://[^/]+/steamcommunity/public/images/~', STEAM_IMG_COMMUNITY, $a[$k]);
+            }
             $out[$id][$a['name']] = $a;
         }
     }
     return $out;
+}
+
+// Badge names and images. The API only gives badge IDs, so these come from the public badges page,
+// cached a day: ['b13' => [name, img], 'g212910' => ..., 'g212910f' => foil game badge]
+function steam_badge_info()
+{
+    global $steamid;
+    $file = STEAM_CACHE . '/badge-names.json';
+    $cached = is_file($file) ? json_decode((string)@file_get_contents($file), true) : null;
+    if (is_array($cached) && time() - filemtime($file) < 86400) return $cached;
+    if (is_file($file . '.miss') && time() - filemtime($file . '.miss') < 600) return $cached ?: [];
+
+    $ch = curl_init('https://steamcommunity.com/profiles/' . $steamid . '/badges/?l=english');
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_TIMEOUT => 10, CURLOPT_ENCODING => '', CURLOPT_USERAGENT => STEAM_UA]);
+    $html = (string)curl_exec($ch);
+    curl_close($ch);
+    $out = [];
+    foreach (array_slice(explode('class="badge_row ', $html), 1) as $row) {
+        if (!preg_match('~/(badges|gamecards)/(\d+)/?(\?border=1)?"~', $row, $m) || !preg_match('~badge_info_title">([^<]*)<~', $row, $t)) continue;
+        // icons load lazily on Steam, so the real URL is usually in data-delayed-image
+        $img = preg_match('~data-delayed-image="([^"]+)"~', $row, $i) || preg_match('~<img src="([^"]+)"[^>]*class="badge_icon"~', $row, $i) ? $i[1] : '';
+        $out[($m[1] == 'badges' ? 'b' : 'g') . $m[2] . (empty($m[3]) ? '' : 'f')] = [html_entity_decode(trim($t[1]), ENT_QUOTES), $img];
+    }
+    if (!is_dir(STEAM_CACHE)) @mkdir(STEAM_CACHE, 0700, true);
+    if ($out) {
+        @file_put_contents($file, json_encode($out), LOCK_EX);
+        return $out;
+    }
+    @touch($file . '.miss');
+    return $cached ?: [];
 }
 
 // Store data (name, art, price, reviews, release, platforms) for many apps, 100 per request: [appid => item]

@@ -21,6 +21,7 @@ $items = steam_items(array_keys($games));
     <main class="page steam" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">Steam Library</h1>
+        <p class="page-lede">Every game I own on Steam, with playtime and achievement progress.</p>
         <?php steam_nav('/games/steam/library/'); ?>
 
         <?php if (!$games): ?>
@@ -48,7 +49,7 @@ $items = steam_items(array_keys($games));
         <?php endif; ?>
     </main>
 
-    <?php site_footer(); ?>
+    <?php site_footer(null, false); ?>
     <script>
         document.addEventListener('error', function (e) {
             if (e.target.closest && e.target.closest('.steam-art')) e.target.style.visibility = 'hidden';
@@ -86,7 +87,8 @@ $items = steam_items(array_keys($games));
                 [].forEach.call(this.children, function (x) { x.classList.toggle('on', x == b); x.setAttribute('aria-pressed', x == b); });
                 run();
             });
-            q.addEventListener('input', run);
+            var t;
+            q.addEventListener('input', function () { clearTimeout(t); t = setTimeout(run, 80); });
             sort.addEventListener('change', run);
             run();
         })();

@@ -30,10 +30,10 @@ function steam_wish_card($w, $items, $lazy)
     $ends = !empty($p['active_discounts'][0]['discount_end_date']) ? $p['active_discounts'][0]['discount_end_date'] : 0;
     ?>
     <article class="card steam-game">
-        <a class="steam-art" href="https://store.steampowered.com/app/<?= $id ?>" tabindex="-1" aria-hidden="true">
+        <a class="steam-art" target="_blank" rel="noopener" href="https://store.steampowered.com/app/<?= $id ?>" tabindex="-1" aria-hidden="true">
             <img src="<?= h(steam_art($id, $items)) ?>" alt="" width="460" height="215" <?= $lazy ? 'loading="lazy" ' : '' ?>decoding="async">
         </a>
-        <h3><a href="https://store.steampowered.com/app/<?= $id ?>"><?= h($it['name']) ?></a></h3>
+        <h3><a target="_blank" rel="noopener" href="https://store.steampowered.com/app/<?= $id ?>"><?= h($it['name']) ?></a></h3>
         <div class="kv">
             <span>Price</span>
             <span class="steam-price">
@@ -101,7 +101,7 @@ function steam_wish_card($w, $items, $lazy)
         <?php endif; ?>
     </main>
 
-    <?php site_footer(); ?>
+    <?php site_footer(null, false); ?>
     <script>
         document.addEventListener('error', function (e) {
             if (e.target.closest && e.target.closest('.steam-art')) e.target.style.visibility = 'hidden';
