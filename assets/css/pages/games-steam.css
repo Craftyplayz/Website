@@ -1,27 +1,108 @@
-/* Steam Stats, Steam Game (/games/steam/) and Retro Achievements (/games/retro/) */
+/* Steam pages (/games/steam/) and Retro Achievements (/games/retro/) */
 
-/* ---------- library grid ---------- */
+/* Steam blue re-tint; surfaces and text stay the site's */
+.steam { --accent: #66c0f4; --accent-soft: #1d3a50; --btn: #2a6e9e; --btn-line: #4a9ad0; }
+.steam .progress i { background: linear-gradient(90deg, #2a6e9e, var(--accent)); }
+.badge.gold { background: #4a3d16; border-color: #a8862a; }
+/* sorting and filtering scripts hide rows with the hidden attribute, which flex/grid display would override */
+.steam [hidden] { display: none !important; }
+
+.steam-nav a[aria-current] { border-color: var(--accent); background: var(--accent-soft); }
+.steam-h { display: flex; align-items: baseline; gap: 12px; margin: 24px 0 12px; font-size: 20px; }
+.steam-more { margin-left: auto; font-size: 14px; font-weight: 400; }
+
+/* ---------- overview ---------- */
+.steam-profile { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.steam-profile .grow { flex: 1 1 240px; min-width: 0; }
+.steam-profile h2 { margin-bottom: 2px; font-size: 22px; }
+.steam-profile .progress { max-width: 320px; margin: 8px 0 4px; }
+.steam-profile .kv { flex: 0 1 auto; }
+.steam-avatar { flex: none; width: 96px; height: 96px; border-radius: var(--radius); }
+.steam-level { display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 6px; border: 2px solid var(--accent); border-radius: 999px; font-size: 14px; }
+.steam-state { margin: 0; color: var(--muted); font-size: 14px; }
+.steam-state.online { color: var(--accent); }
+.steam-state.ingame { color: #a3cf06; }
+.steam-state.ingame a { color: inherit; }
+
+/* palette checked with the dataviz validator against the #2a2a2a card */
+.steam-split { display: flex; gap: 2px; height: 12px; overflow: hidden; border-radius: 4px; }
+.steam-split i { min-width: 2px; }
+.steam-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 14px; }
+.steam-legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 2px; }
+.steam-split .s0, .steam-legend .s0 { background: #3987e5; }
+.steam-split .s1, .steam-legend .s1 { background: #c98500; }
+.steam-split .s2, .steam-legend .s2 { background: #9085e9; }
+
+.steam-row { color: var(--text) !important; text-decoration: none !important; transition: background var(--fast); }
+.steam-row:hover { background: var(--btn2); }
+.steam-row img { flex: none; width: 115px; height: 43px; border-radius: 4px; object-fit: cover; background: var(--card); }
+.steam-row img.sq { width: 48px; height: 48px; }
+.steam-row b { display: block; overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.steam-row .grow small { display: block; }
+.steam-row > small { flex: none; text-align: right; }
+@media (max-width: 480px) { .steam-row img { width: 80px; height: 30px; } }
+
+/* ---------- game cards (overview, library) ---------- */
 .steam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
 .steam-game { display: flex; flex-direction: column; gap: 10px; padding: 0 0 16px; overflow: hidden; }
 .steam-game > :not(.steam-art) { margin-left: 16px; margin-right: 16px; }
-.steam-game h2 { margin-top: 2px; margin-bottom: 0; font-size: 17px; }
-.steam-game h2 a { overflow: hidden; color: var(--text); text-overflow: ellipsis; white-space: nowrap; }
+.steam-game h3 { margin-top: 2px; margin-bottom: 0; font-size: 17px; }
+.steam-game h3 a { display: block; overflow: hidden; color: var(--text); text-overflow: ellipsis; white-space: nowrap; }
 .steam-game .progress { margin-top: auto; }
 .steam-art { display: block; aspect-ratio: 460 / 215; background: var(--card2); }
 .steam-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- library ---------- */
+.steam-bar .field { flex: 1 1 200px; }
+.steam-bar select.field { flex: 0 1 auto; min-width: 0; }
+.steam-bar .stabs { margin: 0; }
+.steam-count { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
 
 /* ---------- single game ---------- */
 .steam-head { display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: 16px; align-items: start; margin-bottom: 16px; }
 .steam-head .steam-art { border-radius: var(--radius-lg); overflow: hidden; }
 .steam-head .kv { font-size: 14px; }
 @media (max-width: 720px) { .steam-head { grid-template-columns: minmax(0, 1fr); } }
+.steam-was { color: var(--muted); text-decoration: line-through; }
+
+.steam-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+.steam-tools .stabs { margin: 0; }
+.steam-tools select { margin-left: auto; }
 
 .ach { gap: 6px; }
 .ach .rowi img { flex: none; width: 40px; height: 40px; border-radius: 4px; }
 .ach .rowi b { display: block; font-weight: 600; }
 .ach .rowi .grow small { display: block; }
-.ach .rowi > small { flex: none; text-align: right; }
+.ach .rowi .grow a { color: var(--muted); }
+.ach .rowi > small, .ach .rowi > .badge { flex: none; text-align: right; }
 .ach .locked b { color: var(--muted); }
+.ach details { color: var(--muted); font-size: 12px; }
+.ach summary { cursor: pointer; }
+
+.steam-news details { padding: 8px 0; border-top: 1px solid var(--line); }
+.steam-news details:first-of-type { border-top: 0; }
+.steam-news summary { display: flex; gap: 12px; cursor: pointer; font-weight: 600; }
+.steam-news summary small { margin-left: auto; color: var(--muted); font-weight: 400; white-space: nowrap; }
+.steam-news p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+
+/* ---------- achievements ---------- */
+.steam-chart { display: block; width: 100%; height: auto; }
+.steam-chart path { fill: #3987e5; transition: fill var(--fast); }
+.steam-chart g:hover path { fill: #66c0f4; }
+.steam-chart text { fill: var(--muted); font: 11px var(--font); }
+.steam-chart line { stroke: var(--line); }
+.steam-table { margin-top: 8px; font-size: 13px; }
+.steam-table summary { color: var(--muted); cursor: pointer; }
+.steam-table table { margin-top: 8px; border-collapse: collapse; }
+.steam-table td, .steam-table th { padding: 2px 16px 2px 0; text-align: left; }
+.steam-table td + td { text-align: right; }
+.steam-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start; }
+.steam-cols .rowi .progress { margin-top: 6px; }
+.steam-perfect { grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); }
+
+/* ---------- wishlist ---------- */
+.steam-price { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.steam-price .badge { font-weight: 600; }
 
 /* ---------- retro achievements ---------- */
 .retro-h { margin: 24px 0 12px; font-size: 20px; }

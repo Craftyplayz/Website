@@ -96,7 +96,10 @@
                 {
                     "title": "Stats",
                     "pages": [
-                        { "title": "Steam Stats", "url": "/games/steam/", "description": "My Steam library and achievements", "keywords": ["achievements"] },
+                        { "title": "Steam Stats", "url": "/games/steam/", "description": "My Steam profile, playtime and achievements", "keywords": ["achievements", "level", "playtime"] },
+                        { "title": "Steam Library", "url": "/games/steam/library/", "description": "Every game I own on Steam, sortable", "keywords": ["games", "playtime"], "nav": false },
+                        { "title": "Steam Achievements", "url": "/games/steam/achievements/", "description": "Recent, rarest and perfect-game achievements", "keywords": ["rare", "100%", "perfect"], "nav": false },
+                        { "title": "Steam Wishlist", "url": "/games/steam/wishlist/", "description": "Games on my Steam wishlist and what's on sale", "keywords": ["sale", "price", "discount"], "nav": false },
                         { "title": "Steam Game", "url": "/games/steam/game/", "nav": false, "search": false },
                         { "title": "Retro Achievements", "url": "/games/retro/", "description": "Retro game achievements" },
                         { "title": "Factorio Saves", "url": "/games/factorio/", "description": "Maps of my Factorio saves" },

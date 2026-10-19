@@ -19,8 +19,8 @@
 ## Pages, in suggested order
 | Page | File | Notes |
 |---|---|---|
-| Steam Stats | `games/steam/index.php` | Big (about 200 lines). `.gamename { left: 352px }` in `steamnew.css` scrolls the page sideways. Reads `games/steam/data/`. Needs `'config' => true`. |
-| Steam Game | `games/steam/game/index.php` | The achievements table and info box. `?game=` is digits only, so keep that check. |
+| Steam Stats | `games/steam/index.php` | Reworked 2026-10-19: profile overview. Library, Achievements and Wishlist are sibling folders. All Steam calls go through `games/steam/steam.php` (parallel curl, temp-dir cache, `STEAM_HIDE`). `games/steam/data/` is deleted. Never show `GetPlayerBans` data. |
+| Steam Game | `games/steam/game/index.php` | Store info from `IStoreBrowseService/GetItems`, rarity, news. `?game=` is digits only, so keep that check. |
 | Retro Achievements | `games/retro/index.php` | Uses `steamnew.css`. It links `/retro/game?game=`, a page that has never existed: drop the link or ask. |
 | Factorio Saves | `games/factorio/index.php` | A thumbnail gallery from `assets.craftyplayz.com`. |
 | Factorio Command Generator | `games/factorio/commands/index.php` | A plain text tool. |
