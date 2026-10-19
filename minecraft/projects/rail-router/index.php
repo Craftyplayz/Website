@@ -14,31 +14,35 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1a1a;
-            color: #e0e0e0;
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
 
         .container {
             display: flex;
-            height: 100vh;
+            flex: 1;
+            min-height: 0;
         }
 
         .sidebar {
             width: 300px;
-            background: #252525;
-            border-right: 2px solid #333;
+            background: var(--card);
+            border-right: 1px solid var(--line);
             display: flex;
             flex-direction: column;
             overflow-y: auto;
         }
 
         .sidebar h2 {
-            padding: 20px;
-            background: #2a2a2a;
-            border-bottom: 2px solid #333;
-            font-size: 18px;
+            padding: 14px 16px;
+            background: var(--card2);
+            border-bottom: 1px solid var(--line);
+            font-size: 17px;
         }
 
         .controls {
@@ -53,52 +57,55 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             display: block;
             margin-bottom: 8px;
             font-size: 14px;
-            color: #aaa;
+            color: var(--muted);
         }
 
-        input[type="text"] {
+        input[type="text"], #stationItem {
             width: 100%;
-            padding: 10px;
-            background: #1a1a1a;
-            border: 1px solid #444;
-            color: #e0e0e0;
-            border-radius: 4px;
+            padding: 8px 12px;
+            background: #161616;
+            border: 1px solid #4a4a4a;
+            color: var(--text);
+            font-family: var(--font);
+            border-radius: var(--radius);
             font-size: 14px;
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus, #stationItem:focus {
             outline: none;
-            border-color: #4a9eff;
+            border-color: var(--accent);
         }
 
         .btn {
             width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 4px;
+            padding: 9px 16px;
+            border: 1px solid transparent;
+            border-radius: var(--radius);
             font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
+            transition: background var(--fast), box-shadow var(--fast);
+            font-family: var(--font);
         }
 
         .btn-primary {
-            background: #4a9eff;
-            color: white;
+            background: var(--btn);
+            border-color: var(--btn-line);
+            color: #fff;
         }
 
         .btn-primary:hover {
-            background: #3a8eef;
+            background: #4a9033;
         }
 
         .btn-secondary {
-            background: #666;
-            color: white;
+            background: var(--btn2);
+            border-color: var(--line-strong);
+            color: var(--text);
             margin-top: 8px;
         }
 
         .btn-secondary:hover {
-            background: #555;
+            background: var(--btn2-hover);
         }
 
         .node-list {
@@ -107,15 +114,15 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
         .node-item {
             padding: 12px;
-            background: #1a1a1a;
+            background: var(--card2);
             margin-bottom: 8px;
-            border-radius: 4px;
+            border-radius: var(--radius);
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-left: 4px solid #4a9eff;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background var(--fast), box-shadow var(--fast);
         }
 
         .node-item.intersection {
@@ -123,12 +130,12 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         }
 
         .node-item:hover {
-            background: #2a2a2a;
+            background: var(--btn2-hover);
         }
 
         .node-item.selected {
-            background: #2a2a2a;
-            box-shadow: 0 0 0 2px #4a9eff;
+            background: var(--btn2-hover);
+            box-shadow: 0 0 0 2px var(--accent);
         }
 
         .node-item-name {
@@ -137,9 +144,9 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         }
 
         .btn-delete {
-            background: #d32f2f;
-            color: white;
-            border: none;
+            background: var(--danger-bg);
+            color: var(--text);
+            border: 1px solid var(--danger-line);
             padding: 6px 12px;
             border-radius: 3px;
             cursor: pointer;
@@ -147,14 +154,14 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         }
 
         .btn-delete:hover {
-            background: #b71c1c;
+            background: #5c2c2c;
         }
 
         .canvas-container {
             flex: 1;
             position: relative;
             overflow: hidden;
-            background: #1a1a1a;
+            background: var(--sunken);
         }
 
         canvas {
@@ -172,10 +179,10 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 4```````````````````````````````````````````50px;
-            background: #252525;
-            border: 2px solid #333;
-            border-radius: 8px;
+            width: min(450px, calc(100% - 40px));
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
             padding: 20px;
             max-height: calc(100vh - 40px);
             overflow-y: auto;
@@ -184,15 +191,15 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
         .config-panel h3 {
             margin-bottom: 20px;
-            font-size: 18px;
-            color: #4a9eff;
+            font-size: 17px;
+            color: var(--text);
         }
 
         .direction-display {
             margin-bottom: 15px;
             padding: 12px;
-            background: #1a1a1a;
-            border-radius: 4px;
+            background: var(--sunken);
+            border-radius: var(--radius);
             border-left: 3px solid #666;
         }
 
@@ -205,7 +212,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             margin-bottom: 8px;
             font-size: 14px;
             font-weight: 600;
-            color: #aaa;
+            color: var(--muted);
         }
 
         .item-grid {
@@ -218,8 +225,8 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         .item-slot {
             width: 32px;
             height: 32px;
-            background: #1a1a1a;
-            border: 1px solid #444;
+            background: var(--sunken);
+            border: 1px solid var(--line);
             border-radius: 2px;
             display: flex;
             align-items: center;
@@ -265,11 +272,11 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         .validation-panel {
             position: absolute;
             bottom: 20px;
-            left: 320px;
+            left: 20px;
             right: 20px;
-            background: #252525;
-            border: 2px solid #333;
-            border-radius: 8px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
             padding: 15px;
             max-height: 200px;
             overflow-y: auto;
@@ -279,13 +286,13 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 10px;
-            color: #4a9eff;
+            color: var(--text);
         }
 
         .validation-item {
             padding: 8px;
             margin-bottom: 6px;
-            border-radius: 4px;
+            border-radius: var(--radius);
             font-size: 13px;
         }
 
@@ -307,10 +314,10 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         .toolbar {
             position: absolute;
             top: 20px;
-            left: 320px;
-            background: #252525;
-            border: 2px solid #333;
-            border-radius: 8px;
+            left: 20px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
             padding: 10px;
             display: flex;
             gap: 10px;
@@ -318,25 +325,25 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
         .toolbar button {
             padding: 8px 16px;
-            background: #1a1a1a;
-            border: 1px solid #444;
-            color: #e0e0e0;
-            border-radius: 4px;
+            background: var(--btn2);
+            border: 1px solid var(--line-strong);
+            color: var(--text);
+            border-radius: var(--radius);
             cursor: pointer;
             font-size: 13px;
         }
 
         .toolbar button:hover {
-            background: #2a2a2a;
+            background: var(--btn2-hover);
         }
 
         .legend {
             position: absolute;
             top: 80px;
-            left: 320px;
-            background: #252525;
-            border: 2px solid #333;
-            border-radius: 8px;
+            left: 20px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
             padding: 15px;
         }
 
@@ -358,8 +365,8 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             position: absolute;
             top: 10px;
             right: 10px;
-            background: #d32f2f;
-            color: white;
+            background: var(--btn2);
+            color: var(--text);
             border: none;
             width: 24px;
             height: 24px;
@@ -370,8 +377,9 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         }
 
         .close-btn:hover {
-            background: #b71c1c;
+            background: var(--btn2-hover);
         }
+        .btn:focus-visible, .toolbar button:focus-visible, .node-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     </style>
 </head>
 <body>
@@ -386,7 +394,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 </div>
                 <div class="control-group">
                     <label>Station Item</label>
-                    <select id="stationItem" style="width: 100%; padding: 10px; background: #1a1a1a; border: 1px solid #444; color: #e0e0e0; border-radius: 4px; font-size: 14px;">
+                    <select id="stationItem">
                         <option value="">Select an item...</option>
                     </select>
                 </div>
