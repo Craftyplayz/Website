@@ -30,14 +30,14 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 <h2 id="resultsTitle">Series books</h2>
                 <label class="visually-hidden" for="sizeSelect">Cover size</label>
                 <select class="field" id="sizeSelect">
-                    <option value="1">Thumbnail</option>
-                    <option value="3" selected>Medium</option>
-                    <option value="5">Large</option>
+                    <option value="S">Small</option>
+                    <option value="M">Medium</option>
+                    <option value="L" selected>Large</option>
                 </select>
                 <button type="button" class="btn" id="openTabsBtn">Open in tabs <span id="tabsCount">0</span></button>
                 <button type="button" class="btn primary" id="downloadBtn">Download ZIP <span id="selectedCount">0</span></button>
             </div>
-            <p class="note bulk-tip">Google may block automated downloads. If the ZIP fails, use "Open in tabs" and save each cover from its tab.</p>
+            <p class="note bulk-tip">Covers come from Open Library. If the ZIP fails, use "Open in tabs" and save each cover from its tab.</p>
             <div id="booksGrid" class="covers"></div>
         </section>
     </main>
@@ -46,7 +46,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
     document.addEventListener('DOMContentLoaded', () => {
         const { esc, toast } = UI;
 
-        // Google Books search goes through api.php, which adds the key server-side and caches for a day
+        // Open Library search goes through api.php, which caches each answer for a day
         const search = (q, max) => `api.php?q=${encodeURIComponent(q)}&max=${max}`;
 
         let debounceTimer;
@@ -104,68 +104,52 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 message(suggestionsDiv, 'Searching…');
                 suggestionsDiv.hidden = false;
 
-                const url = search(query, 40);
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (!data.items || data.items.length === 0) {
-                    message(suggestionsDiv, 'No results found');
-                    return;
-                }
-
+                const docs = await olSearch(query);
                 // Only show books with covers
-                const filteredBooks = data.items.filter(item => item.volumeInfo.imageLinks?.thumbnail);
+                const withCovers = docs.filter(d => d.cover_i);
 
-                if (filteredBooks.length === 0) {
-                    message(suggestionsDiv, 'No books with covers found');
+                if (withCovers.length === 0) {
+                    message(suggestionsDiv, docs.length ? 'No books with covers found' : 'No results found');
                     return;
                 }
 
-                displaySuggestions(rankByTitle(filteredBooks, query).slice(0, 10));
+                displaySuggestions(withCovers.slice(0, 10));
             } catch (error) {
                 console.error('Error fetching suggestions:', error);
-                message(suggestionsDiv, 'Could not load suggestions');
+                message(suggestionsDiv, 'Could not load suggestions. Open Library may be busy; try again in a moment.');
             }
         }
 
-        // Google ranks loosely ("Dune" finds "Coastal Dune Management" before Herbert), so put
-        // exact title matches first, then titles starting with the query, then the rest;
-        // within each, books with a known author first. Ties keep Google's order.
-        function rankByTitle(books, query) {
-            const norm = s => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-            const q = norm(query);
-            const score = b => {
-                const t = norm(b.volumeInfo.title);
-                return (t === q ? 0 : t.startsWith(q + ' ') ? 2 : (' ' + t + ' ').includes(' ' + q + ' ') ? 4 : 6)
-                    + (b.volumeInfo.authors ? 0 : 1);
-            };
-            return books.map((b, i) => [score(b), i, b]).sort((x, y) => x[0] - y[0] || x[1] - y[1]).map(x => x[2]);
+        // Open Library search through api.php (cached for a day); throws if Open Library is down
+        async function olSearch(q) {
+            const response = await fetch(search(q, 40));
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return (await response.json()).docs || [];
         }
 
         // Display autocomplete suggestions
-        function displaySuggestions(books) {
+        function displaySuggestions(docs) {
             suggestionsDiv.innerHTML = '';
 
-            books.forEach(book => {
-                const info = book.volumeInfo;
+            docs.forEach(doc => {
                 const item = document.createElement('button');
                 item.type = 'button';
                 item.className = 'sug';
                 item.setAttribute('role', 'option');
 
-                const thumbnail = (info.imageLinks?.thumbnail || '').replace('http://', 'https://');
-                const title = info.title || 'Unknown Title';
-                const authors = info.authors?.join(', ') || 'Unknown Author';
+                const title = doc.title || 'Unknown Title';
+                const authors = doc.author_name?.join(', ') || 'Unknown Author';
+                const series = doc.series_name?.[0] ? ` · ${doc.series_name[0]}${doc.series_position?.[0] ? ' #' + doc.series_position[0] : ''}` : '';
 
                 item.innerHTML = `
-                    ${thumbnail ? `<img src="${esc(thumbnail)}" alt="" width="40" height="60">` : '<span class="ph"></span>'}
-                    <span><b>${esc(title)}</b><small>${esc(authors)}</small></span>
+                    <img src="${esc(getCoverUrl(coverBase(doc.cover_i), 'S'))}" alt="" width="40" height="60">
+                    <span><b>${esc(title)}</b><small>${esc(authors + series)}</small></span>
                 `;
 
                 item.addEventListener('click', () => {
                     suggestionsDiv.hidden = true;
                     searchInput.value = title;
-                    findSeriesBooks(book);
+                    findSeriesBooks(doc);
                 });
 
                 suggestionsDiv.appendChild(item);
@@ -174,26 +158,27 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             suggestionsDiv.hidden = false;
         }
 
-        // Find all books in the series
-        async function findSeriesBooks(selectedBook) {
+        // Find all books in the series: Open Library's own series data when the book has it,
+        // otherwise other books by the same author
+        async function findSeriesBooks(doc) {
             try {
                 message(booksGrid, 'Finding the rest of the series…');
                 resultsSection.hidden = false;
 
-                const info = selectedBook.volumeInfo;
-                const title = info.title;
-                const authors = info.authors?.[0] || '';
-
-                const seriesName = extractSeriesName(title);
-
+                const seriesName = doc.series_name?.[0];
+                const author = doc.author_name?.[0] || '';
                 let books = [];
 
                 if (seriesName) {
                     resultsTitle.textContent = `Series: ${seriesName}`;
-                    books = await searchBySeriesName(seriesName, authors);
-                } else {
-                    resultsTitle.textContent = 'Books by ' + authors;
-                    books = await searchByAuthor(authors);
+                    books = seriesBooks(await olSearch(`series_name:"${seriesName}"`), seriesName);
+                }
+                if (books.length < 2 && author) {
+                    resultsTitle.textContent = 'Books by ' + author;
+                    books = (await olSearch(`author:"${author}"`))
+                        .filter(d => d.cover_i)
+                        .map(d => formatBookData(d, null))
+                        .sort((a, b) => (a.year || 9999) - (b.year || 9999));
                 }
 
                 if (books.length === 0) {
@@ -203,152 +188,39 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                     return;
                 }
 
-                books = sortSeriesBooks(books);
                 currentSeriesBooks = books;
-
                 displaySeriesBooks(books);
             } catch (error) {
                 console.error('Error finding series:', error);
-                message(booksGrid, 'Could not load the series. Please try again.');
+                message(booksGrid, 'Could not load the series. Open Library may be busy; please try again.');
             }
         }
 
-        // Extract series name from title
-        function extractSeriesName(title) {
-            // Remove subtitle after colon first for cleaner matching
-            const mainTitle = title.split(':')[0];
-
-            // Pattern 1: "Series Name (Book 1)" or "Series Name #1" or "Series Name, Book 1"
-            let match = mainTitle.match(/^(.+?)\s*[\(,#]\s*(?:Book|Vol|Volume|#)?\s*\d+/i);
-            if (match) return match[1].trim();
-
-            // Pattern 2: "Series Name Number" (e.g., "Dune 1", "Foundation 3")
-            match = mainTitle.match(/^(.+?)\s+\d+$/);
-            if (match) return match[1].trim();
-
-            // Pattern 3: "The Series Name Series" (e.g., "The Hunger Games Series")
-            match = mainTitle.match(/^(.+?)\s+Series$/i);
-            if (match) return match[1].trim();
-
-            // Pattern 4: "Series Name: Subtitle" (assume everything before colon is series)
-            if (title.includes(':')) {
-                const beforeColon = title.split(':')[0].trim();
-                // Only use this if it's not too long (likely not just a title)
-                if (beforeColon.length < 50) {
-                    return beforeColon;
-                }
+        // One book per numbered position (box sets like "1-7" are skipped), in series order
+        function seriesBooks(docs, seriesName) {
+            const byPosition = new Map();
+            for (const d of docs) {
+                const i = (d.series_name || []).indexOf(seriesName);
+                const pos = Number(d.series_position?.[i]);
+                if (i < 0 || !d.cover_i || !Number.isFinite(pos) || byPosition.has(pos)) continue;
+                byPosition.set(pos, formatBookData(d, pos));
             }
-
-            return null;
+            return [...byPosition.values()].sort((a, b) => a.bookNumber - b.bookNumber);
         }
 
-        // Search for books by series name
-        async function searchBySeriesName(seriesName, author) {
-            // Try multiple search strategies for best results
-            const searches = [
-                `subject:"${seriesName}" inauthor:"${author}"`,
-                `"${seriesName}" inauthor:"${author}"`,
-                `${seriesName} ${author}`
-            ];
-
-            let allBooks = [];
-
-            for (const query of searches) {
-                const url = search(query, 40);
-
-                try {
-                    const response = await fetch(url);
-                    const data = await response.json();
-
-                    if (data.items) {
-                        allBooks = allBooks.concat(data.items);
-                    }
-
-                    // If we found good results, don't try other strategies
-                    if (allBooks.length >= 5) break;
-                } catch (error) {
-                    console.error('Search error:', error);
-                }
-            }
-
-            if (allBooks.length === 0) return [];
-
-            // Remove duplicates by ID
-            const uniqueBooks = [];
-            const seenIds = new Set();
-
-            for (const item of allBooks) {
-                if (!seenIds.has(item.id)) {
-                    seenIds.add(item.id);
-                    uniqueBooks.push(item);
-                }
-            }
-
-            // Filter books that likely belong to the series and have covers
-            return uniqueBooks
-                .filter(item => {
-                    const title = item.volumeInfo.title?.toLowerCase() || '';
-                    const hasSeriesName = title.includes(seriesName.toLowerCase());
-                    const hasCover = item.volumeInfo.imageLinks?.thumbnail;
-                    return hasSeriesName && hasCover;
-                })
-                .map(item => formatBookData(item));
-        }
-
-        // Search by author (fallback)
-        async function searchByAuthor(author) {
-            const url = search(`inauthor:"${author}"`, 40);
-
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (!data.items) return [];
-
-            return data.items
-                .filter(item => item.volumeInfo.imageLinks?.thumbnail)
-                .map(item => formatBookData(item));
-        }
+        const coverBase = (coverId) => `https://covers.openlibrary.org/b/id/${coverId}`;
 
         // Format book data
-        function formatBookData(item) {
-            const info = item.volumeInfo;
+        function formatBookData(doc, bookNumber) {
             return {
-                id: item.id,
-                title: info.title || 'Unknown Title',
-                authors: info.authors || [],
-                publishedDate: info.publishedDate || '',
-                bookNumber: extractBookNumber(info.title || ''),
-                coverUrl: info.imageLinks?.thumbnail || '',
-                isbn: info.industryIdentifiers?.[0]?.identifier || '',
+                id: doc.key,
+                title: doc.title || 'Unknown Title',
+                authors: doc.author_name || [],
+                year: doc.first_publish_year || null,
+                bookNumber,
+                coverUrl: coverBase(doc.cover_i),
                 selected: true
             };
-        }
-
-        // Extract book number from title
-        function extractBookNumber(title) {
-            const patterns = [
-                /(?:Book|Vol|Volume)\s*(\d+)/i,
-                /#(\d+)/,
-                /\((\d+)\)/,
-                /:\s*(\d+)$/
-            ];
-
-            for (const pattern of patterns) {
-                const match = title.match(pattern);
-                if (match) return parseInt(match[1]);
-            }
-
-            return null;
-        }
-
-        // Sort series books
-        function sortSeriesBooks(books) {
-            return books.sort((a, b) => {
-                if (a.bookNumber !== null && b.bookNumber !== null) {
-                    return a.bookNumber - b.bookNumber;
-                }
-                return (a.publishedDate || '').localeCompare(b.publishedDate || '');
-            });
         }
 
         // Display series books
@@ -358,7 +230,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                     <input type="checkbox" checked data-index="${index}" aria-label="Include ${esc(book.title)}">
                     ${book.bookNumber ? `<span class="badge">Book ${book.bookNumber}</span>` : ''}
                     ${book.coverUrl
-                        ? `<img src="${esc(getCoverUrl(book.coverUrl, 1))}" alt="" width="128" height="192" loading="lazy" decoding="async">`
+                        ? `<img src="${esc(getCoverUrl(book.coverUrl, 'M'))}" alt="" width="128" height="192" loading="lazy" decoding="async">`
                         : '<span class="no-cover">No cover</span>'}
                     <span class="t">${esc(book.title)}</span>
                 </label>
@@ -442,7 +314,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 }
             } catch (error) {
                 console.error('Download error:', error);
-                toast('Could not download the covers. Google may be blocking automated downloads. Try fewer books, or one at a time.', 'err');
+                toast('Could not download the covers. Try fewer books, or use Open in tabs.', 'err');
             }
 
             setTimeout(() => {
@@ -523,7 +395,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             }
 
             if (successCount === 0) {
-                toast('No covers downloaded: Google is blocking the requests. Try fewer books, one at a time, or wait a few minutes.', 'err');
+                toast('No covers downloaded. Open Library may be busy; try fewer books, or use Open in tabs.', 'err');
                 return;
             }
 
@@ -538,28 +410,15 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             URL.revokeObjectURL(link.href);
 
             if (failCount > 0) {
-                toast(`Downloaded ${successCount} of ${books.length} covers. ${failCount} failed (blocked by Google or unavailable).`, 'err');
+                toast(`Downloaded ${successCount} of ${books.length} covers. ${failCount} failed (unavailable on Open Library).`, 'err');
             } else {
                 downloadBtn.textContent = `Downloaded ${successCount} covers`;
             }
         }
 
-        // Get cover URL with size modification
+        // Open Library cover sizes: S, M or L
         function getCoverUrl(baseUrl, size) {
-            if (!baseUrl) return null;
-
-            let url = baseUrl.replace('http://', 'https://');
-
-            if (url.includes('zoom=')) {
-                url = url.replace(/zoom=\d+/, `zoom=${size}`);
-            } else {
-                url = url.includes('?') ? `${url}&zoom=${size}` : `${url}?zoom=${size}`;
-            }
-
-            // Remove edge=curl parameter which can reduce quality
-            url = url.replace(/&?edge=curl/g, '');
-
-            return url;
+            return baseUrl ? `${baseUrl}-${size}.jpg` : null;
         }
 
         // Sanitize filename
