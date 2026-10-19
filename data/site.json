@@ -145,6 +145,7 @@
                 {
                     "title": "Tools",
                     "pages": [
+                        { "title": "Unit Converter", "url": "/tools/convert/", "description": "Convert length, weight, temperature, data, speed and more, or do a quick sum", "keywords": ["convert", "units", "calculator", "metric", "imperial", "mbps", "celsius", "fahrenheit", "kg", "lbs", "miles"] },
                         { "title": "QR Code Generator", "url": "/tools/qr-code/", "description": "Make a QR code", "keywords": ["qr"] },
                         { "title": "Reading Speed Test", "url": "/tools/reading-speed/", "description": "How fast do you read?", "keywords": ["wpm", "speedtest"] },
                         { "title": "Secret Santa", "url": "/tools/secret-santa/", "description": "Encrypted Secret Santa pairings", "keywords": ["christmas"] },
