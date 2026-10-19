@@ -175,6 +175,39 @@ function steam_history($badges = null, $games = null, $progress = null)
     return @file_put_contents(STEAM_HISTORY, json_encode($history), LOCK_EX) === false ? false : $history;
 }
 
+// Minutes played per game per day, for the profile page: ['days' => ['Y-m-d' => [appid => minutes]], 'gaps' => ['Y-m-d' => 'Y-m-d of
+// the reading before, when that wasn't the day before'], 'day', 'base' => totals at the start of 'day', 'totals' => latest totals].
+// A day is today's totals minus the last reading of the previous recorded day, so missed days pile onto the next one (see 'gaps').
+// Both the page and cron.php call this. Pass null to only read. Returns false if the file can't be written.
+const STEAM_PLAYTIME = __DIR__ . '/profile/cache/playtime.json';
+
+function steam_playtime($games = null)
+{
+    $log = is_file(STEAM_PLAYTIME) ? json_decode((string)file_get_contents(STEAM_PLAYTIME), true) ?: [] : [];
+    $log += ['days' => [], 'gaps' => [], 'day' => null, 'base' => [], 'totals' => []];
+    if (!$games) return $log;
+    $totals = [];
+    foreach ($games as $id => $g) if ($g['playtime_forever'] > 0) $totals[$id] = (int)$g['playtime_forever'];
+    $today = date('Y-m-d');
+    if ($log['day'] !== $today) {
+        // first reading ever: no base yet, so today starts from now
+        $log['base'] = $log['day'] ? $log['totals'] : $totals;
+        if ($log['day'] && $log['day'] !== date('Y-m-d', strtotime('-1 day'))) $log['gaps'][$today] = $log['day'];
+        $log['day'] = $today;
+    } elseif ($log['totals'] == $totals) {
+        return $log;
+    }
+    $played = [];
+    foreach ($totals as $id => $min) {
+        $d = $min - (isset($log['base'][$id]) ? $log['base'][$id] : 0);
+        if ($d > 0) $played[$id] = $d;
+    }
+    arsort($played);
+    $log['days'][$today] = $played;
+    $log['totals'] = $totals;
+    return @file_put_contents(STEAM_PLAYTIME, json_encode($log), LOCK_EX) === false ? false : $log;
+}
+
 // Steam level for a total XP: levels 1-10 cost 100 XP each, 11-20 cost 200, and so on
 function steam_level($xp)
 {
@@ -192,8 +225,34 @@ function steam_level($xp)
 // first recorded day. Achievements come exactly from unlock times. Badges, XP and level come from each badge's
 // completion time, which is only its latest level, so a levelled badge counts all its XP late. Steam keeps no
 // history of hours played or games owned, so those two are the guesses.
+// When games/steam/backfill.php has built profile/cache/backfill.json, that daily estimate is used instead: kind 'est' for
+// every line except achievements, which stay 'rebuilt' (they're exact).
+const STEAM_BACKFILL = __DIR__ . '/profile/cache/backfill.json';
+
+function steam_backfill_file()
+{
+    static $b = false;
+    if ($b === false) $b = is_file(STEAM_BACKFILL) ? json_decode((string)file_get_contents(STEAM_BACKFILL), true) : null;
+    return $b;
+}
+
 function steam_backfill($history, $ach, $badges, $start)
 {
+    $file = steam_backfill_file();
+    if ($file && !empty($file['series'])) {
+        $out = [];
+        $t0 = strtotime($file['start']);
+        $first = $history ? array_key_first($history) : null;
+        foreach ($file['series'] as $k => $vals) {
+            foreach ($vals as $i => $v) {
+                $t = strtotime('+' . $i . ' days', $t0);
+                if ($first && date('Y-m-d', $t) >= $first) break;
+                $out[$k][] = [$t, $v, $k === 'achievements' ? 'rebuilt' : 'est'];
+            }
+        }
+        foreach ($history as $day => $row) foreach ($row as $k => $v) $out[$k][] = [strtotime($day), $v, null];
+        return $out;
+    }
     $out = [];
     $first = $history ? strtotime(array_key_first($history)) : time();
     if ($start && $start < $first) {
@@ -317,13 +376,14 @@ function steam_items($appids, $ttl = 86400)
     return $out;
 }
 
-// Store art URL. $which is an asset name from GetItems: header, main_capsule, small_capsule, library_capsule...
-// Newer games keep art under hashed paths, so the plain /header.jpg guess is only the fallback.
+// Store art URL. $which is an asset name from GetItems: header, small_capsule, library_capsule (portrait), library_hero (wide)...
+// Newer games keep art under hashed paths, so the plain guess is only the fallback.
 function steam_art($id, $items, $which = 'header')
 {
     $a = isset($items[$id]['assets']) ? $items[$id]['assets'] : null;
     if ($a && !empty($a[$which]) && !empty($a['asset_url_format'])) return STEAM_IMG . str_replace('${FILENAME}', $a[$which], $a['asset_url_format']);
-    return STEAM_IMG . 'steam/apps/' . (int)$id . '/header.jpg';
+    $guess = ['library_capsule' => 'library_600x900.jpg', 'library_hero' => 'library_hero.jpg'];
+    return STEAM_IMG . 'steam/apps/' . (int)$id . '/' . (isset($guess[$which]) ? $guess[$which] : 'header.jpg');
 }
 
 // Rarity tier for a global unlock percentage: [label, badge class]
@@ -368,44 +428,111 @@ function steam_time($ts)
     return '<time datetime="' . date('c', $ts) . '" title="' . date('j M Y, H:i', $ts) . '">' . steam_ago($ts) . '</time>';
 }
 
-// Tabs between the Steam pages
-function steam_nav($current)
+// Items on my profile (background, avatar frame...), cached a day: ['profile_background' => [...], ...], empty ones removed
+function steam_equipped()
 {
-    $pages = ['/games/steam/' => 'Overview', '/games/steam/library/' => 'Library', '/games/steam/achievements/' => 'Achievements', '/games/steam/wishlist/' => 'Wishlist'];
-    echo '<nav class="jump steam-nav" aria-label="Steam pages">';
-    foreach ($pages as $url => $label) echo '<a href="' . $url . '"' . ($url === $current ? ' aria-current="page"' : '') . '>' . $label . '</a>';
-    echo '</nav>';
+    global $steamid;
+    $r = steam_api('IPlayerService/GetProfileItemsEquipped/v1', ['steamid' => $steamid], 86400);
+    return isset($r['response']) ? array_filter($r['response']) : [];
 }
 
-// Game card used by the overview and the library. $p is the game's steam_progress() entry or null.
+// Completion ring for a percentage, drawn by CSS from --p
+function steam_ring($pct, $label = '')
+{
+    $pct = max(0, min(100, (int)round($pct)));
+    return '<span class="steam-ring' . ($pct == 100 ? ' full' : '') . '" style="--p: ' . $pct . '" role="img" aria-label="' . h($label ?: $pct . '% complete') . '"><b>' . $pct . '<small>%</small></b></span>';
+}
+
+// Banner at the top of every Steam page: art behind, the page title, me (avatar, frame, level, status) and the tabs.
+// $o: title, lede (HTML, already escaped), bg (image URL; my profile background when left out), current (tab URL).
+function steam_hero($o)
+{
+    global $steamid;
+    $profile = steam_profile();
+    $equipped = steam_equipped();
+    $badges = steam_api('IPlayerService/GetBadges/v1', ['steamid' => $steamid], 86400);
+    $level = isset($badges['response']['player_level']) ? (int)$badges['response']['player_level'] : null;
+    $bg = !empty($o['bg']) ? $o['bg'] : (!empty($equipped['profile_background']['image_large']) ? STEAM_IMG_COMMUNITY . $equipped['profile_background']['image_large'] : '');
+    $frame = !empty($equipped['avatar_frame']['image_small']) ? STEAM_IMG_COMMUNITY . $equipped['avatar_frame']['image_small'] : '';
+    $state = $profile ? (int)$profile['personastate'] : 0;
+    $playing = $profile && !empty($profile['gameextrainfo']);
+    $current = isset($o['current']) ? $o['current'] : '';
+    $tabs = ['/games/steam/' => 'Overview', '/games/steam/library/' => 'Library', '/games/steam/achievements/' => 'Achievements', '/games/steam/wishlist/' => 'Wishlist', '/games/steam/profile/' => 'Profile'];
+    ?>
+    <header class="steam-hero">
+        <?php if ($bg): ?><img class="steam-hero-bg" src="<?= h($bg) ?>" alt="" fetchpriority="high" decoding="async" onerror="this.remove()"><?php endif; ?>
+        <div class="steam-hero-body">
+            <div class="grow">
+                <h1 class="page-title"><?= h($o['title']) ?></h1>
+                <?php if (!empty($o['lede'])): ?><p class="page-lede"><?= $o['lede'] ?></p><?php endif; ?>
+            </div>
+            <?php if ($profile): ?>
+                <a class="steam-me" href="/games/steam/profile/" title="My Steam profile">
+                    <span class="steam-me-pic">
+                        <img src="<?= h($profile['avatarmedium']) ?>" alt="" width="64" height="64">
+                        <?php if ($frame): ?><img class="steam-me-frame" src="<?= h($frame) ?>" alt="" width="84" height="84" onerror="this.remove()"><?php endif; ?>
+                    </span>
+                    <span class="steam-me-text">
+                        <b><?= h($profile['personaname']) ?><?php if ($level !== null): ?> <span class="steam-level" title="Steam level"><?= $level ?></span><?php endif; ?></b>
+                        <small class="steam-dot<?= $playing ? ' ingame' : ($state ? ' online' : '') ?>"><?= $playing ? 'Playing ' . h($profile['gameextrainfo']) : (isset(STEAM_STATES[$state]) ? STEAM_STATES[$state] : 'Online') ?></small>
+                    </span>
+                </a>
+            <?php endif; ?>
+        </div>
+        <nav class="steam-tabs" aria-label="Steam pages">
+            <?php foreach ($tabs as $url => $label): ?><a href="<?= $url ?>"<?= $url === $current ? ' aria-current="page"' : '' ?>><?= $label ?></a><?php endforeach; ?>
+        </nav>
+    </header>
+    <?php
+}
+
+// Portrait cover like the Steam library, used by the overview and the library. $p is the game's steam_progress() entry or null.
+// Name and hours always show on the cover; hovering lifts it and adds the last-played line.
 function steam_card($g, $items, $p, $lazy)
 {
     $id = (int)$g['appid'];
-    $link = '/games/steam/game/?game=' . $id;
     $last = isset($g['rtime_last_played']) ? (int)$g['rtime_last_played'] : 0;
-    $pct = $p ? round($p['pct']) : -1;
     $attrs = ' data-name="' . h(mb_strtolower($g['name'])) . '" data-min="' . (int)$g['playtime_forever'] . '" data-last="' . $last . '" data-pct="' . ($p ? round($p['pct'], 2) : -1) . '"';
     ?>
-    <article class="card steam-game"<?= $attrs ?>>
-        <a class="steam-art" href="<?= $link ?>" tabindex="-1" aria-hidden="true">
-            <img src="<?= h(steam_art($id, $items)) ?>" alt="" width="460" height="215" <?= $lazy ? 'loading="lazy" ' : '' ?>decoding="async">
-        </a>
-        <h3><a href="<?= $link ?>"><?= h($g['name']) ?></a></h3>
-        <div class="kv">
-            <span>Playtime</span><span><?= $g['playtime_forever'] ? steam_hours($g['playtime_forever']) : 'Never played' ?></span>
-            <?php if (!empty($g['playtime_2weeks'])): ?>
-                <span>Past 2 weeks</span><span><?= steam_hours($g['playtime_2weeks']) ?></span>
+    <a class="steam-cap" href="/games/steam/game/?game=<?= $id ?>"<?= $attrs ?>>
+        <img src="<?= h(steam_art($id, $items, 'library_capsule')) ?>" data-alt="<?= h(steam_art($id, $items)) ?>" alt="" width="300" height="450" <?= $lazy ? 'loading="lazy" ' : '' ?>decoding="async">
+        <?php if ($p): ?><?= steam_ring($p['pct'], $p['done'] . ' of ' . $p['total'] . ' achievements') ?><?php endif; ?>
+        <?php if (!empty($g['playtime_2weeks'])): ?><span class="steam-cap-new">Recent</span><?php endif; ?>
+        <span class="steam-cap-info">
+            <b><?= h($g['name']) ?></b>
+            <small><?= $g['playtime_forever'] ? steam_hours($g['playtime_forever']) : 'Never played' ?><?= $p ? ' · ' . $p['done'] . '/' . $p['total'] : '' ?></small>
+            <?php if ($last): ?><small class="steam-cap-more">Last played <?= mb_strtolower(steam_ago($last)) ?></small><?php endif; ?>
+        </span>
+    </a>
+    <?php
+}
+
+// Achievement tile: icon, name, description and a global rarity bar. $a has name, description, achieved, unlocktime;
+// $meta is its schema entry (icon, icongray, hidden); $game is [appid, name] when the tile should say which game it's from.
+function steam_ach_card($a, $meta, $pct, $game = null, $attrs = '')
+{
+    $got = !empty($a['achieved']);
+    $icon = $meta ? ($got ? (isset($meta['icon']) ? $meta['icon'] : '') : (isset($meta['icongray']) ? $meta['icongray'] : '')) : '';
+    $hidden = !$got && !empty($meta['hidden']);
+    $t = steam_tier($pct);
+    $desc = isset($a['description']) ? $a['description'] : '';
+    ?>
+    <div class="steam-ach<?= $got ? '' : ' locked' ?><?= $t[1] ? ' t-' . $t[1] : '' ?>"<?= $attrs ?>>
+        <?php if ($icon): ?><img src="<?= h($icon) ?>" alt="" width="64" height="64" loading="lazy" decoding="async"><?php else: ?><span class="steam-ach-noicon"></span><?php endif; ?>
+        <div class="grow">
+            <b><?= h($a['name']) ?></b>
+            <?php if ($game): ?><small><a href="/games/steam/game/?game=<?= (int)$game[0] ?>"><?= h($game[1]) ?></a></small><?php endif; ?>
+            <?php if ($hidden && $desc !== ''): ?>
+                <details><summary>Hidden achievement</summary><?= h($desc) ?></details>
+            <?php elseif ($desc !== ''): ?>
+                <small class="steam-ach-desc"><?= h($desc) ?></small>
             <?php endif; ?>
-            <?php if ($last): ?>
-                <span>Last played</span><span><?= steam_time($last) ?></span>
-            <?php endif; ?>
-            <?php if ($p): ?>
-                <span>Achievements</span><span><?= $p['done'] ?> / <?= $p['total'] ?> (<?= $pct ?>%)</span>
+            <?php if ($pct !== null): ?>
+                <span class="steam-rare" title="<?= $t[0] ?>: <?= $pct ?>% of players have this"><i style="width: <?= max(2, min(100, $pct)) ?>%"></i></span>
+                <small class="steam-rare-n"><?= $pct < 10 ? round($pct, 1) : round($pct) ?>% of players · <?= $t[0] ?></small>
             <?php endif; ?>
         </div>
-        <?php if ($p): ?>
-            <div class="progress" role="progressbar" aria-label="Achievements" aria-valuenow="<?= $pct ?>" aria-valuemin="0" aria-valuemax="100"><i style="width: <?= $pct ?>%"></i></div>
-        <?php endif; ?>
-    </article>
+        <small class="steam-ach-when"><?= $got ? steam_time($a['unlocktime']) : 'Locked' ?></small>
+    </div>
     <?php
 }

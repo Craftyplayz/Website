@@ -20,9 +20,7 @@ $items = steam_items(array_keys($games));
 
     <main class="page steam" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
-        <h1 class="page-title">Steam Library</h1>
-        <p class="page-lede">Every game I own on Steam, with playtime and achievement progress.</p>
-        <?php steam_nav('/games/steam/library/'); ?>
+        <?php steam_hero(['title' => 'Steam Library', 'lede' => 'Every game I own on Steam, with playtime and achievement progress.', 'current' => '/games/steam/library/']); ?>
 
         <?php if (!$games): ?>
             <p class="err">Couldn't load the game list from Steam. Try again in a minute.</p>
@@ -43,18 +41,15 @@ $items = steam_items(array_keys($games));
                 </select>
             </div>
             <p class="steam-count" id="count" aria-live="polite"><?= count($games) ?> games</p>
-            <div class="steam-grid" id="grid">
+            <div class="steam-caps" id="grid">
                 <?php $i = 0; foreach ($games as $id => $g) steam_card($g, $items, isset($progress[$id]) ? $progress[$id] : null, $i++ > 5); ?>
             </div>
         <?php endif; ?>
     </main>
 
     <?php site_footer(null, false); ?>
+    <script src="<?= h(asset('/games/steam/steam.js')) ?>" defer></script>
     <script>
-        document.addEventListener('error', function (e) {
-            if (e.target.closest && e.target.closest('.steam-art')) e.target.style.visibility = 'hidden';
-        }, true);
-
         (function () {
             var grid = document.getElementById('grid');
             if (!grid) return;

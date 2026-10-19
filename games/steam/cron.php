@@ -50,4 +50,5 @@ if (!$games) steam_cron_fail('GetOwnedGames returned nothing');
 if (!$progress) steam_cron_fail('No achievement data');
 if (!$badges) steam_cron_fail('GetBadges returned nothing');
 if (steam_history($badges, $games, $progress) === false) steam_cron_fail('Could not write ' . STEAM_HISTORY);
+if (steam_playtime($games) === false) steam_cron_fail('Could not write ' . STEAM_PLAYTIME);
 if ($web) echo 'OK' . PHP_EOL;
