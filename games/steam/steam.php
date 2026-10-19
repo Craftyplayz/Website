@@ -175,6 +175,59 @@ function steam_history($badges = null, $games = null, $progress = null)
     return @file_put_contents(STEAM_HISTORY, json_encode($history), LOCK_EX) === false ? false : $history;
 }
 
+// Steam level for a total XP: levels 1-10 cost 100 XP each, 11-20 cost 200, and so on
+function steam_level($xp)
+{
+    $level = 0;
+    while ($xp >= ($cost = 100 * (intdiv($level, 10) + 1))) {
+        $xp -= $cost;
+        $level++;
+    }
+    return $level;
+}
+
+// The History series from steam_history() with the time before recording began filled in, one point a month from $start
+// (account creation). Returns [key => [[unix time, value, kind], ...]], where kind is null for a recorded day,
+// 'rebuilt' for one worked out from Steam's own dates, and 'guess' for a straight line from 0 at $start up to the
+// first recorded day. Achievements come exactly from unlock times. Badges, XP and level come from each badge's
+// completion time, which is only its latest level, so a levelled badge counts all its XP late. Steam keeps no
+// history of hours played or games owned, so those two are the guesses.
+function steam_backfill($history, $ach, $badges, $start)
+{
+    $out = [];
+    $first = $history ? strtotime(array_key_first($history)) : time();
+    if ($start && $start < $first) {
+        $unlocks = [];
+        foreach ($ach as $list) foreach ($list as $a) if ($a['achieved']) $unlocks[] = (int)$a['unlocktime'];
+        $earned = [];
+        foreach ($badges ? $badges['badges'] : [] as $b) $earned[] = [max((int)$b['completion_time'], $start), (int)$b['xp']];
+        sort($unlocks);
+        usort($earned, function ($a, $b) {
+            return $a[0] <=> $b[0];
+        });
+        $ends = $history ? reset($history) : null;
+        $u = $e = $count = $xp = 0;
+        for ($t = $start; $t < $first; $t = strtotime('first day of next month 00:00', $t)) {
+            while ($u < count($unlocks) && $unlocks[$u] <= $t) $u++;
+            for (; $e < count($earned) && $earned[$e][0] <= $t; $e++) {
+                $count++;
+                $xp += $earned[$e][1];
+            }
+            $f = ($t - $start) / ($first - $start);
+            $out['achievements'][] = [$t, $u, 'rebuilt'];
+            $out['badges'][] = [$t, $count, 'rebuilt'];
+            $out['xp'][] = [$t, $xp, 'rebuilt'];
+            $out['level'][] = [$t, steam_level($xp), 'rebuilt'];
+            if ($ends) {
+                $out['hours'][] = [$t, $ends['hours'] * $f, 'guess'];
+                $out['games'][] = [$t, $ends['games'] * $f, 'guess'];
+            }
+        }
+    }
+    foreach ($history as $day => $row) foreach ($row as $k => $v) $out[$k][] = [strtotime($day), $v, null];
+    return $out;
+}
+
 // Global unlock rates: [appid => [apiname => percent]]
 function steam_rarity($appids, $refresh = 20)
 {
