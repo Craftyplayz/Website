@@ -14,7 +14,7 @@
 ## Pages, in suggested order
 | Page | File | Notes |
 |---|---|---|
-| QR Code Generator | `tools/qr-code/index.php` | Shows `media/fake-updates/rickroll.png` as its placeholder image. |
+| QR Code Generator | `tools/qr-code/index.php` | Made in the browser with the vendored `tools/qr-code/qrcode.js` (qrcode-generator 1.4.4, MIT). No network requests. Page CSS: `assets/css/pages/tools-qr-code.css`. |
 | Random Number | `tools/random/number/index.php` | Uses `tools.css`. |
 | Random Image | `tools/random/image/index.php` | Has a 2000px × 500px button, now capped with `max-width: 100%`. |
 | Reading Speed Test | `tools/reading-speed/index.html` | **Plain HTML**, not PHP. The header and footer come from `<div id="site-header">` / `<div id="site-footer">` placeholders filled in by `/assets/js/site.js`. It still links `/assets/css/legacy.css` and `speedtest.css`. Texts load from `texts/` through relative paths. You may convert it to `index.php` with the normal skeleton; if you do, delete `index.html` in the same commit. |
