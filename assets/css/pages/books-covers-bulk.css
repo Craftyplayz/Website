@@ -54,11 +54,11 @@
 }
 .setrow:hover { border-color: var(--line-strong); }
 .setrow.on { border-color: var(--btn-line); background: var(--accent-soft); }
-.setname { flex: 1 1 160px; min-width: 0; }
+.setname { flex: 1 1 140px; min-width: 0; }
 .setname b, .setname small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .setname small { color: var(--muted); font-size: 13px; }
-.strip { display: flex; flex-wrap: wrap; gap: 3px; }
-.strip img, .strip .gap { display: block; width: 28px; height: 42px; object-fit: cover; border-radius: 3px; background: var(--sunken); }
+.strip { display: flex; flex-wrap: wrap; gap: 4px; }
+.strip img, .strip .gap { display: block; width: clamp(36px, 10vw, 52px); height: auto; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 4px; background: var(--sunken); }
 .strip .gap { border: 1px dashed var(--line-strong); }
 
 .bc .off { color: var(--highlight); font-size: 12px; }
@@ -83,3 +83,7 @@
 .pc.on { border-color: var(--btn-line); box-shadow: inset 0 0 0 1px var(--btn-line); }
 .pc img { display: block; width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: cover; background: var(--sunken); border-radius: 4px; }
 .pc small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.own-set { justify-self: start; margin-top: 4px; }
+.picker-foot { position: sticky; bottom: -16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px -16px -16px; padding: 12px 16px; background: var(--card); border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+.picker-foot[hidden] { display: none; }
+.picker-foot .btn { margin-left: auto; }

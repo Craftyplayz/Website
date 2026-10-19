@@ -49,6 +49,10 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 <button type="button" class="btn small" id="pickerClose" aria-label="Close">✕</button>
             </div>
             <div id="pickerGrid" class="picker-grid"></div>
+            <div class="picker-foot" id="pickerFoot" hidden>
+                <span id="pickerStep"></span>
+                <button type="button" class="btn" id="pickerSkip">Keep current cover</button>
+            </div>
         </dialog>
     </main>
 
@@ -370,18 +374,20 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
             foundSets = groupIntoSets(books);
             setsPanel.hidden = false;
-            setsPanel.innerHTML = !foundSets.length
-                ? '<p class="msg">No matching sets found. Use "Change cover" on each book to pick covers by hand.</p>'
+            setsPanel.innerHTML = (!foundSets.length
+                ? '<p class="msg">No matching sets found for this series.</p>'
                 : `<h3>Matching sets <span class="n">${foundSets.length} found · click one to use it</span></h3>` + foundSets.map((s, k) => `
                     <button type="button" class="setrow" data-set="${k}">
                         <span class="setname"><b>${esc(s.label)}</b><small>${s.covers.filter(Boolean).length} of ${books.length} books</small></span>
                         <span class="strip">${s.covers.map(c => c
-                            ? `<img src="${esc(getCoverUrl(coverBase(c), 'S'))}" alt="" width="28" height="42" loading="lazy" decoding="async">`
+                            ? `<img src="${esc(getCoverUrl(coverBase(c), 'M'))}" alt="" width="52" height="78" loading="lazy" decoding="async">`
                             : '<span class="gap" title="Not in this set"></span>').join('')}</span>
-                    </button>`).join('');
+                    </button>`).join(''))
+                + `<button type="button" class="btn own-set" id="ownSetBtn">${foundSets.length ? 'No matching set? Make your own' : 'Make your own set'}: pick a cover for each book</button>`;
         });
 
         setsPanel.addEventListener('click', (e) => {
+            if (e.target.closest('#ownSetBtn')) return startOwnSet();
             const row = e.target.closest('.setrow');
             if (!row) return;
             const set = foundSets[+row.dataset.set];
@@ -403,12 +409,45 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             openPicker(+btn.dataset.index);
         });
 
+        /* "Make your own set": open the picker for each book in turn. Picking a cover (or
+           keeping the current one) moves to the next book; closing the dialog stops early. */
+        let walking = false;
+        const pickerFoot = document.getElementById('pickerFoot');
+
+        function startOwnSet() {
+            walking = true;
+            setsPanel.querySelectorAll('.setrow').forEach(r => r.classList.remove('on'));
+            openPicker(0);
+        }
+
+        function nextInOwnSet() {
+            const next = +picker.dataset.index + 1;
+            if (next < currentSeriesBooks.length) return openPicker(next);
+            walking = false;
+            picker.close();
+            displaySeriesBooks(currentSeriesBooks);
+            booksGrid.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+            toast('Your set is ready. Use "Change cover" on any book to swap it.', 'ok');
+        }
+
+        picker.addEventListener('close', () => {
+            if (!walking) return;
+            walking = false; // closed early: keep what was picked so far
+            displaySeriesBooks(currentSeriesBooks);
+        });
+        document.getElementById('pickerSkip').addEventListener('click', nextInOwnSet);
+
         async function openPicker(index) {
             const book = currentSeriesBooks[index];
+            const step = walking ? `Book ${index + 1} of ${currentSeriesBooks.length}: ` : 'Covers for ';
             picker.dataset.index = index;
-            pickerTitle.textContent = `Covers for ${book.title}`;
+            pickerFoot.hidden = !walking;
+            document.getElementById('pickerStep').textContent = walking ? `Pick a cover for book ${index + 1} of ${currentSeriesBooks.length}` : '';
+            pickerTitle.textContent = step + book.title;
             message(pickerGrid, 'Loading every edition…');
             if (!picker.open) picker.showModal();
+            pickerGrid.scrollTop = 0;
+            picker.scrollTop = 0;
             try {
                 const editions = await loadEditions(book);
                 // newest first, front cover of each edition, one tile per distinct cover
@@ -417,7 +456,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                     if (!covers.has(ed.c[0])) covers.set(ed.c[0], [ed.p, ed.y, ed.f].filter(Boolean).join(' · '));
                 });
                 if (picker.dataset.index !== String(index)) return;
-                pickerTitle.textContent = `Covers for ${book.title} (${covers.size})`;
+                pickerTitle.textContent = `${step}${book.title} (${covers.size})`;
                 pickerGrid.innerHTML = covers.size ? [...covers].map(([id, label]) => `
                     <button type="button" class="pc${coverBase(id) === book.coverUrl ? ' on' : ''}" data-cover="${id}">
                         <img src="${esc(getCoverUrl(coverBase(id), 'M'))}" alt="" width="120" height="180" loading="lazy" decoding="async">
@@ -434,6 +473,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             const book = currentSeriesBooks[+picker.dataset.index];
             book.coverUrl = coverBase(tile.dataset.cover);
             book.offSet = false;
+            if (walking) return nextInOwnSet();
             picker.close();
             displaySeriesBooks(currentSeriesBooks);
         });
