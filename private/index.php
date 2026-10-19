@@ -1,6 +1,17 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = ['components' => true];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+
+// folder => description; folders missing on this server are left out
+$sections = [
+    'bs' => 'Discord exports',
+    'transcripts' => 'Transcripts and recordings',
+    'booru' => 'Booru',
+    'jellyfin' => 'Jellyfin API testing',
+    'kindle' => 'KOReader control panel',
+    'downloads' => 'Files for download',
+    'scripts' => 'Small test scripts',
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,34 +22,20 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 </head>
 
 <body>
-    <?php
-    site_header(); echo '<main class="page page-legacy" id="main">';
+    <?php site_header(); ?>
 
-    // folder => description
-    $sections = [
-        'bs' => 'Discord exports',
-        'transcripts' => 'Transcripts and recordings',
-        'booru' => 'Booru',
-        'jellyfin' => 'Jellyfin API testing',
-        'kindle' => 'KOReader control panel',
-        'downloads' => 'Files for download',
-        'scripts' => 'Small test scripts',
-    ];
-    ?>
+    <main class="page" id="main">
+        <h1 class="page-title">Private</h1>
+        <p class="page-lede">Password-protected pages.</p>
 
-    <div class="title">
-        <h1>Private</h1>
-        <h2>Password-protected pages</h2>
-    </div>
-    <div class="title">
-        <?php foreach ($sections as $dir => $label): ?>
-            <?php if (is_dir(__DIR__ . '/' . $dir)): ?>
-                <p><a href="/private/<?= $dir ?>/"><?= htmlspecialchars($label) ?></a></p><br>
-            <?php endif; ?>
-        <?php endforeach; ?>
-    </div>
+        <div class="hub-grid">
+            <?php foreach ($sections as $dir => $label): if (!is_dir(__DIR__ . '/' . $dir)) continue; ?>
+                <a class="hub-card" href="/private/<?= $dir ?>/"><b><?= h($label) ?></b><span>/private/<?= $dir ?>/</span></a>
+            <?php endforeach; ?>
+        </div>
+    </main>
 
-    <?php echo '</main>'; site_footer(); ?>
+    <?php site_footer(null, false); ?>
 </body>
 
 </html>
