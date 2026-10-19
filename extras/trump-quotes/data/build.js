@@ -16,7 +16,7 @@ const tweets = JSON.parse(fs.readFileSync(src, 'utf8'))
     .sort((a, b) => a.date.localeCompare(b.date));
 
 const lines = tweets.map((t) => [t.date, t.favorites | 0, t.retweets | 0, t.device || '', decode(t.text)]
-    .map((v) => String(v).replace(/[\t\r]/g, ' ').replace(/\n/g, '\n')).join('\t') + '\n');
+    .map((v) => String(v).replace(/[\t\r]/g, ' ').replace(/\n/g, '\\n')).join('\t') + '\n');
 
 const idx = Buffer.alloc(lines.length * 4);
 let offset = 0;
