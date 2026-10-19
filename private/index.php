@@ -7,7 +7,6 @@ $sections = [
     'bs' => 'Discord exports',
     'transcripts' => 'Transcripts and recordings',
     'booru' => 'Booru',
-    'jellyfin' => 'Jellyfin API testing',
     'kindle' => 'KOReader control panel',
     'downloads' => 'Files for download',
     'scripts' => 'Small test scripts',

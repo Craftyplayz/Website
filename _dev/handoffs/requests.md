@@ -67,3 +67,10 @@ and on line 53 (`/css/(books|dnd|factorio|gallery|...|steam|steamnew|tools)\.css
 **File:** `.htaccess`
 **Change:** on line 53 (`/css/(books|dnd|factorio|gallery|homepage|minecraft|...)\.css`) drop `minecraft`.
 **Why:** `assets/css/pages/minecraft.css` was deleted (no live page used it after the Minecraft restyle), so that redirect target now 404s.
+
+**File:** `.htaccess` (Games session, 2026-10-19)
+**Change:** the Jellyfin API test page was moved to `_dev/archive/private/jellyfin/` at the owner's request. Delete line 70:
+```
+RedirectMatch 301 ^/Code/jelly(\.php)?$ /private/jellyfin/
+```
+**Why:** its target no longer exists.
