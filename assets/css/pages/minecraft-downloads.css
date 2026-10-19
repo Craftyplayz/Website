@@ -1,0 +1,5 @@
+/* Stonecrest downloads */
+.dl-card { max-width: 640px; }
+.dl-card p { margin: 12px 0 0; font-size: 14px; }
+.page a.rowi { color: var(--text); }
+.page a.rowi:hover { background: var(--btn2-hover); text-decoration: none; }

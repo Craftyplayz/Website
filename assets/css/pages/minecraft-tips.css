@@ -1,0 +1,9 @@
+/* Minecraft Tips */
+.grid { align-items: start; }
+.card p { margin: 0 0 12px; }
+.jvm {
+    display: block; margin: 0 0 12px; padding: 10px 12px; background: var(--sunken); border: 1px solid var(--line);
+    border-radius: var(--radius); font: 13px/1.5 var(--mono); white-space: pre-wrap; line-break: anywhere;
+}
+.page a.rowi { color: var(--text); }
+.page a.rowi:hover { background: var(--btn2-hover); text-decoration: none; }

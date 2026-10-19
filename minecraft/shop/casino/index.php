@@ -1,5 +1,5 @@
 <?php
-$site_page = ['legacy' => true, 'css' => ['/minecraft/shop/styles.css']];
+$site_page = ['components' => true, 'css' => ['/minecraft/shop/styles.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
@@ -11,13 +11,12 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
-    <div class="title">
-        <h1>Captainalism Casino</h1>
-        <h1>Coming soon!</h1>
-    </div>
-
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Captainalism Casino</h1>
+        <p class="page-lede">Coming soon!</p>
     </main>
     <?php site_footer(); ?>
 </body>
+
 </html>

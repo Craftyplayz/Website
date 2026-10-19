@@ -1,19 +1,20 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = ['components' => true, 'css' => ['/assets/css/pages/games-the-game.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 // File path to the JSON file
 $jsonFilePath = __DIR__ . '/thegame.json';
 
 // Load data from the JSON file
 if (!file_exists($jsonFilePath)) {
-    $data = [
+    $data = [[
         'last_loss_time' => time(), // Initialize with current time
         'best_time' => 0 // Default best time
-    ];
-    file_put_contents($jsonFilePath, json_encode([$data], JSON_PRETTY_PRINT));
+    ]];
+    file_put_contents($jsonFilePath, json_encode($data, JSON_PRETTY_PRINT));
 } else {
     $data = json_decode(file_get_contents($jsonFilePath), true);
 }
+if (!isset($data[1])) $data[1] = []; // a new file has no previous times yet
 
 // Handle POST request
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -67,30 +68,37 @@ function formatTime($seconds)
 <head>
     <?php page_head(); ?>
 </head>
+
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
 
-    <div class="title">
-        <h1>The Game</h1><br>
-        <h1>Time Since Last Loss: <?= formatTime($currentTime); ?></h1>
-        <h1>Best Time: <?= formatTime($data[0]['best_time']); ?></h1>
-        <form method="POST">
-            <button type="submit" id="myButton">I Lost!</button>
-        </form>
-    </div>
+    <main class="page thegame" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">The Game</h1>
+        <p class="page-lede">You just lost it. Press the button every time you do.</p>
 
+        <section class="card section">
+            <div class="tiles">
+                <div class="tile"><b><?= formatTime($currentTime); ?></b><span>Since last loss</span></div>
+                <div class="tile"><b><?= formatTime($data[0]['best_time']); ?></b><span>Best time</span></div>
+            </div>
+            <form method="POST">
+                <button class="btn primary" type="submit" id="myButton">I lost!</button>
+            </form>
+        </section>
 
-    <div class="title">
-        <h1>Previous Times</h1>
-        <?php foreach ($data[1] as $key => $time) : ?>
-            <p><?= formatTime($time); ?></p>
-        <?php endforeach; ?>
-    </div>
-
-
-
+        <?php if ($data[1]): ?>
+            <section class="card">
+                <h2>Previous times <span class="n"><?= count($data[1]) ?> losses</span></h2>
+                <ol class="rows" reversed>
+                    <?php foreach (array_reverse($data[1]) as $time) : ?>
+                        <li class="rowi"><?= formatTime($time); ?></li>
+                    <?php endforeach; ?>
+                </ol>
+            </section>
+        <?php endif; ?>
     </main>
+
     <?php site_footer(); ?>
 </body>
 </html>

@@ -1,0 +1,28 @@
+/* Small Minecraft form tools: Day Calculator, Dynmap Marker Creator */
+.form-card { max-width: 560px; }
+.form { display: grid; gap: 12px; }
+.form label { display: grid; gap: 4px; color: var(--muted); font-size: 13px; }
+.form .field { width: 100%; min-width: 0; }
+.form .row { display: flex; align-items: center; gap: 8px; }
+.form .row .field { flex: 1; }
+.form .icon-preview { width: 32px; height: 32px; flex: none; image-rendering: pixelated; }
+.form .btn { justify-self: start; }
+
+.out { display: grid; gap: 8px; margin-top: 16px; }
+.cmd { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius); }
+.cmd code { flex: 1; min-width: 0; font: 13px/1.5 var(--mono); overflow-wrap: anywhere; }
+
+/* bigger forms: Book Generator, Transaction Generator */
+.form-card.wide { max-width: 760px; }
+.form-card .form + .form { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+.form h2 { margin: 0; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 12px; }
+.pair.add { grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); align-items: end; }
+.pair.add .btn { justify-self: stretch; justify-content: center; }
+.lines { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(160px, 100%), 1fr)); gap: 8px; margin: 0; padding: 0; border: 0; }
+.lines legend { margin-bottom: 4px; padding: 0; color: var(--muted); font-size: 13px; }
+.cmd-text { display: block; min-height: 180px; font: 13px/1.5 var(--mono); resize: vertical; }
+.out > .btn { justify-self: start; }
+.out summary { color: var(--link); cursor: pointer; font-size: 14px; }
+.receipts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 8px; margin-top: 10px; }
+.receipt { display: grid; gap: 4px; padding: 10px; background: var(--card2); border-radius: var(--radius); font-size: 14px; }

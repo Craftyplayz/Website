@@ -1,5 +1,9 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = [
+    'components' => true,
+    'ui' => true,
+    'css' => ['/assets/css/pages/minecraft-forms.css'],
+];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
@@ -11,37 +15,38 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Day Calculator</h1>
+        <p class="page-lede">Turn a day number into a <span class="mono">/time set</span> command. It's copied for you.</p>
 
-    <div class="title">
-        <h1>Day calculator</h1>
-    </div>
-
-    <h2>Enter a number:</h2>
-<input type="number" id="inputNumber">
-<button onclick="calculate()">Calculate</button>
-<p id="result"></p>
-
-<script>
-function calculate() {
-    var input = document.getElementById("inputNumber").value;
-    var result = (parseFloat(input) * 24000) + 1000;
-    var formattedResult = "/time set " + result.toFixed(2);
-    document.getElementById("result").innerText = formattedResult;
-    
-    // Copy result to clipboard
-    var dummyElement = document.createElement("textarea");
-    dummyElement.value = formattedResult;
-    document.body.appendChild(dummyElement);
-    dummyElement.select();
-    document.execCommand("copy");
-    document.body.removeChild(dummyElement);
-}
-</script>
-
+        <div class="card form-card">
+            <form class="form" id="dayform">
+                <label>Day
+                    <input class="field" type="number" id="inputNumber" step="any" required autofocus>
+                </label>
+                <button class="btn primary" type="submit">Calculate</button>
+            </form>
+            <div class="out hide" id="out">
+                <div class="cmd"><code id="result"></code><button class="btn small" type="button" id="copy">Copy</button></div>
+            </div>
+        </div>
     </main>
     <?php site_footer(); ?>
-
+    <script>
+        // ui.js is deferred
+        document.addEventListener('DOMContentLoaded', () => {
+            const { $, copy } = UI;
+            $('#dayform').addEventListener('submit', e => {
+                e.preventDefault();
+                const result = (parseFloat($('#inputNumber').value) * 24000) + 1000;
+                $('#result').textContent = '/time set ' + result.toFixed(2);
+                $('#out').classList.remove('hide');
+                copy($('#result').textContent, $('#copy'));
+            });
+            $('#copy').addEventListener('click', e => copy($('#result').textContent, e.currentTarget));
+        });
+    </script>
 </body>
 
 </html>

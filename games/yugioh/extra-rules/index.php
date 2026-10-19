@@ -1,7 +1,4 @@
-<?php
-$site_page = ['legacy' => true];
-require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
-?>
+<?php require dirname(__DIR__) . '/guide.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,29 +8,32 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
 
-    <div class="title">
-        <h1>Extra Rules</h1>
-        <h2>Match Rules (Decide at start and are always in effect)</h2>
-        <p>You can only pick your winning card from cards that the loser played during that match</p>
-        <p>You can pick 1 Monster card and 1 Spell or Trap card</p>
-        <p>You pick one starter deck (yugi, joey, kaiba or pegasus</p>
-        <h1>Player Rules</h1>
-        <h2>These can be used at any time and are optional (You can only use one of these)</h2>
-        <p>Instead of taking a card you can open an additional 2 packs next round instead</p>
-        <p>You can take 2 cards from the losers deck BUT the loser can take one from yours (They cant take the same card you took)</p>
-        <p>You can pick 10 cards then roll a d10 3 times and take the cards that the numbers land on</p>
+    <main class="page ygo" id="main">
+        <?php ygo_top('Optional house rules to make the series more interesting.'); ?>
 
-</div>
+        <section class="card section">
+            <h2>Match rules</h2>
+            <p class="muted">Decide these at the start. They're always in effect.</p>
+            <ul>
+                <li>You can only pick your winning card from cards the loser played during that match.</li>
+                <li>You can pick 1 Monster card and 1 Spell or Trap card.</li>
+                <li>You pick one starter deck (Yugi, Joey, Kaiba or Pegasus).</li>
+            </ul>
+        </section>
 
-<p><br><a href="/games/yugioh/next-packs/">Next</a></p>
-
-    </div>
-
+        <section class="card section">
+            <h2>Player rules</h2>
+            <p class="muted">Optional, usable at any time. You can only use one of these.</p>
+            <ul>
+                <li>Instead of taking a card, open 2 extra packs next round.</li>
+                <li>Take 2 cards from the loser's deck, but the loser can take one from yours (not the same card you took).</li>
+                <li>Pick 10 cards, then roll a d10 three times and take the cards the numbers land on.</li>
+            </ul>
+        </section>
     </main>
-    <?php site_footer(); ?>
 
+    <?php site_footer(); ?>
 </body>
 
 </html>

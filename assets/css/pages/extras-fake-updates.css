@@ -1,0 +1,11 @@
+/* Fake Update Screens index pages: preview cards that open the full-screen pranks */
+.fu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 16px; }
+.fu-card {
+    display: block; overflow: hidden; background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); color: var(--text) !important; text-decoration: none !important;
+    transition: border-color var(--fast);
+}
+.fu-card:hover { border-color: var(--accent); }
+.fu-card img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: var(--card2); }
+.fu-card span { display: block; padding: 10px 12px; font-weight: 600; }
+.fu-card small { display: block; color: var(--muted); font-size: 13px; font-weight: 400; }

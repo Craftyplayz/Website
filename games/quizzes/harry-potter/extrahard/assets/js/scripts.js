@@ -100,19 +100,13 @@ $(document).ready(function () {
       type: "POST",
       url: "./assets/php/check_quiz.php",
       data: { all_answers: result.answers },
-      success: function (data) {
-        try {
-          const item = JSON.parse(data);
-          $("#quiz, .question").hide();
-          $("#percent").text(`${item.percentage}%`);
-          $("#score").text(`${item.correct}/${item.total}`);
-          $("#message").text(item.message);
-          $(".results").show();
-        } catch (error) {
-          submitted = false;
-          $(".submit").prop("disabled", false);
-          notify("Something went wrong", "white");
-        }
+      dataType: "json",
+      success: function (item) {
+        $("#quiz, .question").hide();
+        $("#percent").text(`${item.percentage}%`);
+        $("#score").text(`${item.correct}/${item.total}`);
+        $("#message").text(item.message);
+        $(".results").show();
       },
       error: function () {
         submitted = false;
