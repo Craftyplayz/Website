@@ -92,7 +92,7 @@ function steam_news_text($s)
                     <?php if (!empty($now['response']['player_count'])): ?>
                         <span>Playing now</span><span><?= number_format($now['response']['player_count']) ?></span>
                     <?php endif; ?>
-                    <span>Steam</span><span><a href="https://store.steampowered.com/app/<?= $id ?>">Store page</a></span>
+                    <span>Steam</span><span><a target="_blank" rel="noopener" href="https://store.steampowered.com/app/<?= $id ?>">Store page</a></span>
                 </div>
             </section>
         <?php endif; ?>
@@ -169,14 +169,14 @@ function steam_news_text($s)
                 <?php foreach ($news as $n): ?>
                     <details>
                         <summary><?= h($n['title']) ?><small><?= date('j M Y', $n['date']) ?></small></summary>
-                        <p><?= h(steam_news_text($n['contents'])) ?> <a href="<?= h($n['url']) ?>">Read more</a></p>
+                        <p><?= h(steam_news_text($n['contents'])) ?> <a target="_blank" rel="noopener" href="<?= h($n['url']) ?>">Read more</a></p>
                     </details>
                 <?php endforeach; ?>
             </section>
         <?php endif; ?>
     </main>
 
-    <?php site_footer(); ?>
+    <?php site_footer(null, false); ?>
     <script>
         (function () {
             var list = document.getElementById('ach');
