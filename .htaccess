@@ -49,14 +49,10 @@ RedirectMatch 301 ^/images/trump-mugshot\.webp$ /media/memes/trump-mugshot.webp
 # css/ moved to /assets/css
 RedirectMatch 301 ^/css/global\.css$ /assets/css/legacy.css
 RedirectMatch 301 ^/css/fakescreen/win10\.css$ /assets/css/pages/win10.css
-RedirectMatch 301 ^/css/hypixel/collection\.css$ /assets/css/pages/hypixel-collection.css
-RedirectMatch 301 ^/css/(books|dnd|factorio|gallery|homepage|minecraft|speedtest|steam|steamnew|tools)\.css$ /assets/css/pages/$1.css
+RedirectMatch 301 ^/css/(books|dnd|gallery|homepage|speedtest|tools)\.css$ /assets/css/pages/$1.css
 # Duplicate or old page versions (archived in /_dev/archive)
 RedirectMatch 301 ^/minecraft/test(\.php)?$ /minecraft/tools/stats-editor/
 RedirectMatch 301 ^/minecraft/schemcalc(\.html)?$ /minecraft/tools/shulker-calculator/
-RedirectMatch 301 ^/hypixel/hotm(\.php)?$ /games/hypixel/
-RedirectMatch 301 ^/hypixel/minions2(\.php)?$ /games/hypixel/minions/
-RedirectMatch 301 ^/hypixel/collections/melonwar2(\.php)?$ /games/hypixel/collections/melon-war/
 RedirectMatch 301 ^/books/index2(\.php)?$ /books/
 RedirectMatch 301 ^/steam/(steam2|newgame)(\.php)?(/.*)?$ /games/steam/
 RedirectMatch 301 ^/steam/gamer(/.*)?$ /games/steam/
@@ -67,7 +63,6 @@ RedirectMatch 301 ^/books/hannah(\.php)?$ /books/
 # Personal pages moved to the password-protected /private/
 RedirectMatch 301 ^/Code/(bs|transcripts|downloads)(/.*)?$ /private/$1$2
 RedirectMatch 301 ^/Code/booru(\.php)?$ /private/booru/
-RedirectMatch 301 ^/Code/jelly(\.php)?$ /private/jellyfin/
 RedirectMatch 301 ^/Code/(timesince\.php|redirect\.html)$ /private/scripts/$1
 RedirectMatch 301 ^/books/kindlecontrol(\.html)?$ /private/kindle/
 RedirectMatch 301 ^/books/pages(\.php)?$ /private/kindle/pages.php
@@ -119,16 +114,8 @@ RedirectMatch 301 ^/retro(/.*)?$ /games/retro/
 RedirectMatch 301 ^/factorio/map(\.php)?/?$ /games/factorio/map/
 RedirectMatch 301 ^/factorio(/.*)?$ /games/factorio/
 RedirectMatch 301 ^/Code/factorio(\.html)?$ /games/factorio/commands/
-RedirectMatch 301 ^/hypixel/?$ /games/hypixel/
-RedirectMatch 301 ^/hypixel/index(\.php)?$ /games/hypixel/
-RedirectMatch 301 ^/hypixel/minions(\.php)?$ /games/hypixel/minions/
-RedirectMatch 301 ^/hypixel/calculators/ghast(\.php)?$ /games/hypixel/ghast-calculator/
-RedirectMatch 301 ^/hypixel/calculators/bazaar\.json$ /games/hypixel/ghast-calculator/bazaar.json
-RedirectMatch 301 ^/hypixel/collections/?$ /games/hypixel/collections/
-RedirectMatch 301 ^/hypixel/collections/index(\.php)?$ /games/hypixel/collections/
-RedirectMatch 301 ^/hypixel/collections/track(\.php)?$ /games/hypixel/collections/track/
-RedirectMatch 301 ^/hypixel/collections/melonwar(\.php)?$ /games/hypixel/collections/melon-war/
-RedirectMatch 301 ^/hypixel/filter(\.html)?$ /games/hypixel/regex-builder/
+RedirectMatch 301 ^/(games/)?hypixel(/.*)?$ /games/
+RedirectMatch 301 ^/games/bingo(/.*)?$ /games/
 # quiz URLs were linked with mixed case (/quiz/harrypotter/normal), so match any case
 RedirectMatch 301 (?i)^/quiz/?$ /games/quizzes/
 RedirectMatch 301 (?i)^/quiz/harrypotter/?$ /games/quizzes/harry-potter/
@@ -143,16 +130,15 @@ RedirectMatch 301 ^/Code/skyrim(\.html)?$ /games/skyrim/
 # Phase 6: Books
 RedirectMatch 301 ^/books/cover(\.php)?$ /books/covers/
 RedirectMatch 301 ^/books/bulkcover(\.php)?$ /books/covers/bulk/
-RedirectMatch 301 ^/extras/harrypotter/?$ /books/harry-potter/
-RedirectMatch 301 ^/extras/harrypotter/characters(\.php)?$ /books/harry-potter/
-RedirectMatch 301 ^/extras/harrypotter/(character|info|quiz)(\.php)?$ /books/harry-potter/$1/
-RedirectMatch 301 ^/extras/harrypotter/json/(.*)$ /books/harry-potter/json/$1
+RedirectMatch 301 ^/extras/harrypotter(/.*)?$ /books/
+RedirectMatch 301 ^/books/harry-potter(/.*)?$ /books/
 # Phase 6: Tools
 RedirectMatch 301 ^/tools/random/(number|image)(\.php)?$ /tools/random/$1/
 RedirectMatch 301 ^/extras/qr(\.php)?$ /tools/qr-code/
 RedirectMatch 301 ^/extras/santa(/.*)?$ /tools/secret-santa$1
 RedirectMatch 301 ^/tests/speedtest(\.php)?$ /tools/reading-speed/
 RedirectMatch 301 ^/tests/speedtest/(.*)$ /tools/reading-speed/$1
+RedirectMatch 301 ^/tools/reading-speed/index\.html$ /tools/reading-speed/
 RedirectMatch 301 ^/tests/?$ /tools/
 RedirectMatch 301 ^/Code/docker(\.php)?$ /tools/docker-script/
 RedirectMatch 301 ^/Code/install(\.html)?$ /tools/install-script/
