@@ -28,6 +28,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         <section class="card" id="resultsSection" hidden>
             <div class="bulk-head">
                 <h2 id="resultsTitle">Series books</h2>
+                <button type="button" class="btn" id="setsBtn">Find matching sets</button>
                 <label class="visually-hidden" for="sizeSelect">Cover size</label>
                 <select class="field" id="sizeSelect">
                     <option value="S">Small</option>
@@ -38,8 +39,17 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 <button type="button" class="btn primary" id="downloadBtn">Download ZIP <span id="selectedCount">0</span></button>
             </div>
             <p class="note bulk-tip">Covers come from Open Library. If the ZIP fails, use "Open in tabs" and save each cover from its tab.</p>
+            <div id="setsPanel" class="sets" hidden></div>
             <div id="booksGrid" class="covers"></div>
         </section>
+
+        <dialog id="coverPicker" class="picker" aria-labelledby="pickerTitle">
+            <div class="picker-head">
+                <h2 id="pickerTitle">Covers</h2>
+                <button type="button" class="btn small" id="pickerClose" aria-label="Close">✕</button>
+            </div>
+            <div id="pickerGrid" class="picker-grid"></div>
+        </dialog>
     </main>
 
     <script>
@@ -89,7 +99,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
         // "/" focuses the search, Esc closes the suggestions
         document.addEventListener('keydown', (e) => {
-            if (e.key === '/' && !/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) {
+            if (e.key === '/' && !picker.open && !/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) {
                 e.preventDefault();
                 searchInput.focus();
             } else if (e.key === 'Escape' && !suggestionsDiv.hidden) {
@@ -164,6 +174,9 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             try {
                 message(booksGrid, 'Finding the rest of the series…');
                 resultsSection.hidden = false;
+                setsPanel.hidden = true;
+                setsBtn.disabled = false;
+                setsBtn.textContent = 'Find matching sets';
 
                 const seriesName = doc.series_name?.[0];
                 const author = doc.author_name?.[0] || '';
@@ -227,25 +240,37 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         function displaySeriesBooks(books) {
             booksGrid.innerHTML = books.map((book, index) => `
                 <label class="bc">
-                    <input type="checkbox" checked data-index="${index}" aria-label="Include ${esc(book.title)}">
+                    <input type="checkbox" ${book.selected ? 'checked' : ''} data-index="${index}" aria-label="Include ${esc(book.title)}">
                     ${book.bookNumber ? `<span class="badge">Book ${book.bookNumber}</span>` : ''}
                     ${book.coverUrl
                         ? `<img src="${esc(getCoverUrl(book.coverUrl, 'M'))}" alt="" width="128" height="192" loading="lazy" decoding="async">`
                         : '<span class="no-cover">No cover</span>'}
                     <span class="t">${esc(book.title)}</span>
+                    ${book.offSet ? '<span class="off">Not in this set: pick a cover</span>' : ''}
+                    <button type="button" class="btn small pick" data-index="${index}">Change cover</button>
                 </label>
             `).join('');
 
             updateSelectedCount();
         }
 
-        // A cover that fails to load becomes a "No cover" box
+        // Open Library's cover server drops the odd request when many load at once, so a failed
+        // image is retried once after 2s; if that fails too, giveUp() runs
+        function retryImage(img, giveUp) {
+            if (img.dataset.retried) return giveUp();
+            img.dataset.retried = '1';
+            setTimeout(() => { img.src = img.src.split('?')[0] + '?retry=1'; }, 2000);
+        }
+
+        // A cover that still fails becomes a "No cover" box
         booksGrid.addEventListener('error', (e) => {
             if (e.target.tagName !== 'IMG') return;
-            const ph = document.createElement('span');
-            ph.className = 'no-cover';
-            ph.textContent = 'No cover';
-            e.target.replaceWith(ph);
+            retryImage(e.target, () => {
+                const ph = document.createElement('span');
+                ph.className = 'no-cover';
+                ph.textContent = 'No cover';
+                e.target.replaceWith(ph);
+            });
         }, true);
 
         booksGrid.addEventListener('change', (e) => {
@@ -254,6 +279,172 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             currentSeriesBooks[index].selected = e.target.checked;
             updateSelectedCount();
         });
+
+        /* ---------- set finder and cover picker ---------- */
+        const setsBtn = document.getElementById('setsBtn');
+        const setsPanel = document.getElementById('setsPanel');
+        const picker = document.getElementById('coverPicker');
+        const pickerTitle = document.getElementById('pickerTitle');
+        const pickerGrid = document.getElementById('pickerGrid');
+        let foundSets = [];
+
+        // Every English edition of a book that has a cover (api.php, cached a week); fetched once per book
+        function loadEditions(book) {
+            // v= changes whenever api.php's editions format changes, so browsers don't reuse week-old answers
+            return book.editionsLoading ??= fetch(`api.php?work=${encodeURIComponent(book.id)}&v=2`)
+                .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+                .then(d => (book.editions = d.editions.filter(ed => sameBook(ed.t, book.title))))
+                .catch(err => { book.editionsLoading = null; throw err; });
+        }
+
+        // Open Library often leaves an edition's language blank, so translations slip through
+        // ("Harry Potter y la piedra filosofal"). Keep editions whose title shares more than half
+        // of the book's longer words; UK/US variants ("Sorcerer's Stone") still pass.
+        function sameBook(editionTitle, bookTitle) {
+            const words = s => (s || '').toLowerCase().normalize('NFD').replace(/[^a-z0-9 ]/g, '').split(/\s+/).filter(w => w.length > 3);
+            const want = words(bookTitle);
+            if (!want.length || !editionTitle) return true;
+            const have = new Set(words(editionTitle));
+            return want.filter(w => have.has(w)).length > want.length / 2;
+        }
+
+        // Run fn over items, n at a time, so Open Library isn't hit with a whole series at once
+        async function pool(items, n, fn) {
+            let next = 0;
+            await Promise.all(Array.from({ length: n }, async () => {
+                while (next < items.length) await fn(items[next++]);
+            }));
+        }
+
+        // "Bloomsbury Publishing", "Bloomsbury Children's Books" and "BLOOMSBURY" are one publisher
+        function publisherKey(name) {
+            const letters = s => s.replace(/[^a-z]/g, '');
+            const lower = name.toLowerCase();
+            return letters(lower.replace(/\b(publishing|publishers?|plc|ltd|limited|inc|llc|co|company|books?|children'?s|press|group|uk|usa?|the)\b/g, '')) || letters(lower);
+        }
+
+        // A matching set is one publisher's printing run: group every edition by publisher + year,
+        // then keep the groups that cover at least half the books (and at least 2).
+        function groupIntoSets(books) {
+            const groups = new Map();
+            books.forEach((book, i) => (book.editions || []).forEach(ed => {
+                if (!ed.p || !ed.y || /audio|cd|mp3/i.test(ed.f)) return; // audiobook art is square
+                const key = publisherKey(ed.p) + '|' + ed.y;
+                if (!groups.has(key)) groups.set(key, { names: {}, year: ed.y, books: new Map() });
+                const g = groups.get(key);
+                g.names[ed.p] = (g.names[ed.p] || 0) + 1;
+                if (!g.books.has(i)) g.books.set(i, new Map());
+                const counts = g.books.get(i);
+                counts.set(ed.c[0], (counts.get(ed.c[0]) || 0) + 1);
+            }));
+
+            const need = Math.max(2, Math.ceil(books.length / 2));
+            const seen = new Set();
+            return [...groups.values()]
+                .filter(g => g.books.size >= need)
+                .map(g => ({
+                    label: Object.entries(g.names).sort((a, b) => b[1] - a[1])[0][0] + ' · ' + g.year,
+                    year: g.year,
+                    // per book, the cover most printings in this run used
+                    covers: books.map((_, i) => g.books.has(i) ? [...g.books.get(i)].sort((a, b) => b[1] - a[1])[0][0] : null),
+                }))
+                .filter(s => !seen.has(s.covers.join()) && seen.add(s.covers.join()))
+                .sort((a, b) => b.covers.filter(Boolean).length - a.covers.filter(Boolean).length || b.year - a.year)
+                .slice(0, 12);
+        }
+
+        setsBtn.addEventListener('click', async () => {
+            const books = currentSeriesBooks;
+            if (books.length < 2) return toast('The set finder needs at least 2 books', 'err');
+            setsBtn.disabled = true;
+            let done = 0, failed = 0;
+            setsBtn.textContent = `Reading editions 0/${books.length}…`;
+            await pool(books, 3, async (book) => {
+                try { await loadEditions(book); } catch { failed++; }
+                setsBtn.textContent = `Reading editions ${++done}/${books.length}…`;
+            });
+            if (books !== currentSeriesBooks) return; // another series was loaded meanwhile
+            setsBtn.disabled = false;
+            setsBtn.textContent = 'Find matching sets';
+            if (failed) toast(`Could not read the editions of ${failed} book${failed > 1 ? 's' : ''}; Open Library may be busy.`, 'err');
+
+            foundSets = groupIntoSets(books);
+            setsPanel.hidden = false;
+            setsPanel.innerHTML = !foundSets.length
+                ? '<p class="msg">No matching sets found. Use "Change cover" on each book to pick covers by hand.</p>'
+                : `<h3>Matching sets <span class="n">${foundSets.length} found · click one to use it</span></h3>` + foundSets.map((s, k) => `
+                    <button type="button" class="setrow" data-set="${k}">
+                        <span class="setname"><b>${esc(s.label)}</b><small>${s.covers.filter(Boolean).length} of ${books.length} books</small></span>
+                        <span class="strip">${s.covers.map(c => c
+                            ? `<img src="${esc(getCoverUrl(coverBase(c), 'S'))}" alt="" width="28" height="42" loading="lazy" decoding="async">`
+                            : '<span class="gap" title="Not in this set"></span>').join('')}</span>
+                    </button>`).join('');
+        });
+
+        setsPanel.addEventListener('click', (e) => {
+            const row = e.target.closest('.setrow');
+            if (!row) return;
+            const set = foundSets[+row.dataset.set];
+            currentSeriesBooks.forEach((book, i) => {
+                book.offSet = !set.covers[i];
+                if (set.covers[i]) book.coverUrl = coverBase(set.covers[i]);
+            });
+            setsPanel.querySelectorAll('.setrow').forEach(r => r.classList.toggle('on', r === row));
+            displaySeriesBooks(currentSeriesBooks);
+            const missing = set.covers.filter(c => !c).length;
+            toast(missing ? `Set applied. ${missing} book${missing > 1 ? 's are' : ' is'} not in it: use "Change cover" on ${missing > 1 ? 'them' : 'it'}.` : 'Set applied', missing ? 'note' : 'ok');
+        });
+
+        // "Change cover" on a card: every cover Open Library has for that book
+        booksGrid.addEventListener('click', (e) => {
+            const btn = e.target.closest('.pick');
+            if (!btn) return;
+            e.preventDefault(); // don't toggle the card's checkbox
+            openPicker(+btn.dataset.index);
+        });
+
+        async function openPicker(index) {
+            const book = currentSeriesBooks[index];
+            picker.dataset.index = index;
+            pickerTitle.textContent = `Covers for ${book.title}`;
+            message(pickerGrid, 'Loading every edition…');
+            if (!picker.open) picker.showModal();
+            try {
+                const editions = await loadEditions(book);
+                // newest first, front cover of each edition, one tile per distinct cover
+                const covers = new Map();
+                [...editions].sort((a, b) => (b.y || 0) - (a.y || 0)).forEach(ed => {
+                    if (!covers.has(ed.c[0])) covers.set(ed.c[0], [ed.p, ed.y, ed.f].filter(Boolean).join(' · '));
+                });
+                if (picker.dataset.index !== String(index)) return;
+                pickerTitle.textContent = `Covers for ${book.title} (${covers.size})`;
+                pickerGrid.innerHTML = covers.size ? [...covers].map(([id, label]) => `
+                    <button type="button" class="pc${coverBase(id) === book.coverUrl ? ' on' : ''}" data-cover="${id}">
+                        <img src="${esc(getCoverUrl(coverBase(id), 'M'))}" alt="" width="120" height="180" loading="lazy" decoding="async">
+                        <small>${esc(label || 'Unknown edition')}</small>
+                    </button>`).join('') : '<p class="msg">Open Library has no other English covers for this book.</p>';
+            } catch {
+                message(pickerGrid, 'Could not load the editions. Open Library may be busy; please try again.');
+            }
+        }
+
+        pickerGrid.addEventListener('click', (e) => {
+            const tile = e.target.closest('.pc');
+            if (!tile) return;
+            const book = currentSeriesBooks[+picker.dataset.index];
+            book.coverUrl = coverBase(tile.dataset.cover);
+            book.offSet = false;
+            picker.close();
+            displaySeriesBooks(currentSeriesBooks);
+        });
+        // covers Open Library lists but can't serve are dropped from the picker; in set strips they become gaps
+        pickerGrid.addEventListener('error', (e) => {
+            if (e.target.tagName === 'IMG') retryImage(e.target, () => e.target.closest('.pc')?.remove());
+        }, true);
+        setsPanel.addEventListener('error', (e) => {
+            if (e.target.tagName === 'IMG') retryImage(e.target, () => e.target.replaceWith(Object.assign(document.createElement('span'), { className: 'gap' })));
+        }, true);
+        document.getElementById('pickerClose').addEventListener('click', () => picker.close());
 
         // Update selected count
         function updateSelectedCount() {
