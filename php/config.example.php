@@ -14,6 +14,9 @@ global $steamkey;
 global $steamid;
 $steamkey = '';
 $steamid = '';
+// lets an online cron service run /games/steam/cron.php; any long random string (blank turns it off)
+global $steamcronkey;
+$steamcronkey = '';
 ?>
 
 <?php
