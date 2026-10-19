@@ -6,7 +6,6 @@ RewriteEngine On
 # Phase 7: short links (/go/<name> -> data/links.json), XML sitemap, and the files they replace
 RewriteRule ^go/([A-Za-z0-9_-]+)/?$ /go/index.php?k=$1 [L,QSA]
 RewriteRule ^sitemap\.xml$ /sitemap-xml.php [L]
-RedirectMatch 301 ^/invite(\.php)?$ /go/discord
 RedirectMatch 301 ^/spotify(\.html)?$ /go/spotify
 RedirectMatch 301 ^/php/404(\.php)?$ /404.php
 RedirectMatch 301 ^/php/layout\.js$ /assets/js/site.js

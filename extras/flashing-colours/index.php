@@ -32,6 +32,7 @@
       }
     }
   </style>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="60bfdde6-b1fd-4fd3-b929-b7e14e2191c7"></script>
 </head>
 <body>
   <div class="warning">

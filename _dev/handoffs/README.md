@@ -14,7 +14,7 @@ Several sessions run at the same time in the same folder, so the rules below mat
 
 ## 1. Work rules
 - **Rework one or two pages per session turn, no more.** Finish them, test them, commit them, then stop and report back. Don't start the next page until the user says so.
-- **Follow the design guide in `/plan.html`** (the **Design guide** tab): colour tokens, type sizes, spacing, layout, motion limits, components, page anatomy and the per-page checklist. Every page must pass that checklist.
+- **Follow `building-pages.md`** (next to this file): design philosophy, `site.json`/header rules, colour tokens, type sizes, spacing, layout, API caching, components, motion and the per-page checklist. Every page must pass that checklist. (`/plan.html` > Design guide is the original version with live demos.)
 - **Reference design:** `/minecraft/tools/nbt-viewer/` is the page every other page should look and feel like.
 - **Change the look, not the behaviour.** Keep features, URLs, query parameters and data files as they are.
 
