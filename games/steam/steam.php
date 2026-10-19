@@ -152,6 +152,29 @@ function steam_progress($ach)
     return $out;
 }
 
+// Daily totals behind the History charts on /games/steam/profile/: ['Y-m-d' => [level, xp, games, hours, achievements, badges]].
+// Both the page and cron.php call this. Today's row is rewritten whenever the totals change, so each day keeps
+// its last reading. Pass nulls to only read. Returns false instead of the history if the file can't be written.
+const STEAM_HISTORY = __DIR__ . '/profile/cache/history.json';
+
+function steam_history($badges = null, $games = null, $progress = null)
+{
+    $history = is_file(STEAM_HISTORY) ? json_decode((string)file_get_contents(STEAM_HISTORY), true) ?: [] : [];
+    if (!$badges || !$games || !$progress) return $history;
+    $row = [
+        'level' => $badges['player_level'],
+        'xp' => $badges['player_xp'],
+        'games' => count($games),
+        'hours' => round(array_sum(array_column($games, 'playtime_forever')) / 60),
+        'achievements' => array_sum(array_column($progress, 'done')),
+        'badges' => count($badges['badges']),
+    ];
+    $day = date('Y-m-d');
+    if (isset($history[$day]) && $history[$day] == $row) return $history;
+    $history[$day] = $row;
+    return @file_put_contents(STEAM_HISTORY, json_encode($history), LOCK_EX) === false ? false : $history;
+}
+
 // Global unlock rates: [appid => [apiname => percent]]
 function steam_rarity($appids, $refresh = 20)
 {

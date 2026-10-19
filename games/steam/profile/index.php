@@ -42,14 +42,8 @@ $years = $profile && !empty($profile['timecreated']) ? (int)floor((time() - $pro
 $vanity = $profile && preg_match('~/id/([^/]+)~', $profile['profileurl'], $m) ? $m[1] : '';
 $state = $profile ? (int)$profile['personastate'] : 0;
 
-// one snapshot a day, kept on disk so the history charts grow over time
-$history = [];
-$histFile = __DIR__ . '/cache/history.json';
-if (is_file($histFile)) $history = json_decode((string)file_get_contents($histFile), true) ?: [];
-if ($badges && $games && $progress && !isset($history[date('Y-m-d')])) {
-    $history[date('Y-m-d')] = ['level' => $badges['player_level'], 'xp' => $badges['player_xp'], 'games' => count($games), 'hours' => round($minutes / 60), 'achievements' => $unlocked, 'badges' => count($badges['badges'])];
-    @file_put_contents($histFile, json_encode($history), LOCK_EX);
-}
+// one row a day, kept on disk so the history charts grow over time (cron.php also records it hourly)
+$history = steam_history($badges, $games, $progress) ?: steam_history();
 
 $top = array_slice($played, 0, 10, true);
 $topMax = $top ? reset($top)['playtime_forever'] : 1;

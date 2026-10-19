@@ -19,7 +19,7 @@
 ## Pages, in suggested order
 | Page | File | Notes |
 |---|---|---|
-| Steam Stats | `games/steam/index.php` | Reworked 2026-10-19: profile overview. Library, Achievements and Wishlist are sibling folders. All Steam calls go through `games/steam/steam.php` (parallel curl, temp-dir cache, `STEAM_HIDE`). `games/steam/data/` is deleted. Never show `GetPlayerBans` data. |
+| Steam Stats | `games/steam/index.php` | Reworked 2026-10-19: profile overview. Library, Achievements and Wishlist are sibling folders. All Steam calls go through `games/steam/steam.php` (parallel curl, temp-dir cache, `STEAM_HIDE`). `games/steam/data/` is deleted. Never show `GetPlayerBans` data. `games/steam/cron.php` (command line only) runs hourly from the server crontab: it refreshes the cache and records today's row of the profile History charts in `profile/cache/history.json` via `steam_history()`. |
 | Steam Game | `games/steam/game/index.php` | Store info from `IStoreBrowseService/GetItems`, rarity, news. `?game=` is digits only, so keep that check. |
 | Retro Achievements | `games/retro/index.php` | Uses `steamnew.css`. It links `/retro/game?game=`, a page that has never existed: drop the link or ask. |
 | Factorio Saves | `games/factorio/index.php` | A thumbnail gallery from `assets.craftyplayz.com`. |
