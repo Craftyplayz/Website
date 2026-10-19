@@ -1,0 +1,23 @@
+/* /private/gifs/ - meme GIF editor */
+.gif-layout { display: grid; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 760px) { .gif-layout { grid-template-columns: minmax(0, 1fr); } }
+.gif-side .rows { margin-bottom: 12px; }
+.gif-side .rowi { color: var(--text); text-decoration: none; }
+.gif-drop { padding: 24px 12px; }
+.gif-main { display: grid; gap: 12px; min-width: 0; }
+.gif-main h2 { margin: 8px 0 0; }
+.gif-names, .gif-form, .gif-actions, .gif-save, .gif-play { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.gif-names label, .gif-form label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.gif-names .field { min-width: 0; width: 160px; }
+.gif-form .field { min-width: 0; width: 120px; }
+.gif-form select.field { width: auto; max-width: 100%; }
+.gif-form .gif-wide { flex-basis: 100%; }
+.gif-form .gif-wide .field { width: 100%; }
+.gif-main p { margin: 0; font-size: 13px; }
+.gif-form input[type="color"] { width: 48px; height: 36px; padding: 2px; background: var(--card2); border: 1px solid var(--line-strong); border-radius: var(--radius); }
+.gif-canvas { display: block; width: 100%; height: auto; max-height: 70vh; object-fit: contain; background: var(--sunken); border-radius: var(--radius); cursor: crosshair; touch-action: none; }
+.gif-play input[type="range"] { flex: 1 1 160px; accent-color: var(--accent); }
+.gif-main .rowi.gif-on { background: var(--accent-soft); }
+.gif-main .gif-try { min-width: 0; width: 160px; padding: 6px 10px; }
+.gif-main .rowi label { display: flex; gap: 4px; align-items: center; font-size: 13px; }
+.gif-link { flex: 1 1 200px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--link); }
