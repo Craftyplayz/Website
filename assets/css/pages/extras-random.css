@@ -5,6 +5,8 @@
 .xr-meta { margin: 10px 0 0; font-size: 13px; }
 .xr-card .badges { margin-bottom: 0; }
 .xr-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
+.xr-actions .btn { color: var(--text); text-decoration: none; }
+.xr-actions .btn.primary { color: #fff; }
 
 /* the bobbing mugshot on Trump Quotes; transform only, off for reduced motion */
 .xr-mug {
