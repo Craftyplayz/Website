@@ -41,6 +41,8 @@ curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT => 15,
     CURLOPT_CONNECTTIMEOUT => 5,
+    // The key is IP-restricted to the server's IPv4 address; over IPv6 Google sees a different, unlisted address.
+    CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
 ]);
 $body = curl_exec($ch);
 $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
