@@ -54,3 +54,16 @@ and on line 53 (`/css/(books|dnd|factorio|gallery|...|steam|steamnew|tools)\.css
 ## Extras
 - **`data/site.json`**, line 232: change the D&D page's title from `"D&D Character"` to `"D&D Characters"` and its description from `"D&D character sheet"` to `"D&D Beyond character sheets"`.
 **Why:** `/extras/dnd/` is now a chooser listing every character in `extras/dnd/characters.json` (each opens as `?id=`), so the plural matches the page heading and the breadcrumbs on the sheet pages.
+
+## Minecraft
+**File:** `assets/css/components.css`
+**Change:** after the `.btn.primary:hover` rule (line 21), add:
+```
+.page a.btn { color: var(--text); text-decoration: none; }
+.page a.btn.primary { color: #fff; }
+```
+**Why:** `global.css` line 213 (`.page a { color: var(--link); }`) is more specific than `.btn`, so every `<a class="btn">` on a restyled page gets blue link text instead of the button colour. Minecraft works around it in its own page stylesheets (`minecraft-gallery.css`); this fixes it for every section.
+
+**File:** `.htaccess`
+**Change:** on line 53 (`/css/(books|dnd|factorio|gallery|homepage|minecraft|...)\.css`) drop `minecraft`.
+**Why:** `assets/css/pages/minecraft.css` was deleted (no live page used it after the Minecraft restyle), so that redirect target now 404s.
