@@ -141,6 +141,10 @@
 .steam-spark circle.hit { fill: transparent; stroke: none; }
 .steam-spark g:hover circle:not(.hit) { fill: var(--accent); }
 .steam-spark small { font-size: 11px; }
+.steam-spark polyline.guess { stroke-dasharray: 4 4; opacity: .7; }
+.steam-spark g.est circle:not(.hit) { opacity: 0; }
+.steam-spark g.est:hover circle:not(.hit) { opacity: 1; }
+.steam-spark-note { display: block; margin-top: 4px; color: var(--muted); font-style: italic; }
 
 /* ---------- wishlist ---------- */
 .steam-price { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
