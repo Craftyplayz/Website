@@ -118,10 +118,17 @@
             const prof = lvlOver != null ? lvlOver >= 3 : has('proficiency', nm + '-saving-throws');
             let total = S.mod[id] + (prof ? S.prof : 0) + bonus('saving-throws') + bonus(nm + '-saving-throws') + (cvNum(39, id) || 0) + (cvNum(40, id) || 0);
             const ov = cvNum(38, id); if (ov != null) total = ov;
-            const notes = [...mods('advantage', [nm + '-saving-throws', 'saving-throws']).map((m) => 'Advantage' + (m.restriction ? ' ' + m.restriction : '')),
-                ...mods('disadvantage', [nm + '-saving-throws', 'saving-throws']).map((m) => 'Disadvantage' + (m.restriction ? ' ' + m.restriction : ''))];
+            const notes = [...mods('advantage', nm + '-saving-throws').map((m) => 'Advantage' + (m.restriction ? ' ' + m.restriction : '')),
+                ...mods('disadvantage', nm + '-saving-throws').map((m) => 'Disadvantage' + (m.restriction ? ' ' + m.restriction : ''))];
             return { id, key, name: nm, prof, total, notes };
         });
+        S.saveNotes = [...mods('advantage', 'saving-throws').map((m) => 'Advantage on saves' + (m.restriction ? ' ' + m.restriction : '')), ...mods('disadvantage', 'saving-throws').map((m) => 'Disadvantage on saves' + (m.restriction ? ' ' + m.restriction : ''))];
+        // plain ability checks: half proficiency (Jack of All Trades, Remarkable Athlete) and check bonuses
+        S.check = {};
+        for (const [id, nm] of STATS) {
+            const subs = ['ability-checks', nm + '-ability-checks'];
+            S.check[id] = S.mod[id] + (has('half-proficiency-round-up', subs) ? halfUp() : has('half-proficiency', subs) ? half() : 0) + bonus('ability-checks') + bonus(nm + '-ability-checks');
+        }
 
         // skills (plus custom ones from customProficiencies type 1)
         S.skills = arr(R.abilitySkills).map((sk) => {
@@ -149,7 +156,7 @@
         };
 
         // initiative
-        S.init = S.mod[2] + bonus('initiative') + (has('proficiency', 'initiative') ? S.prof : has('half-proficiency', ['initiative', 'ability-checks', 'dexterity-ability-checks']) ? half() : 0) + bonus('ability-checks') + bonus('dexterity-ability-checks');
+        S.init = S.mod[2] + bonus('initiative') + (has('proficiency', 'initiative') ? S.prof : has('half-proficiency-round-up', ['initiative', 'ability-checks', 'dexterity-ability-checks']) ? halfUp() : has('half-proficiency', ['initiative', 'ability-checks', 'dexterity-ability-checks']) ? half() : 0) + bonus('ability-checks') + bonus('dexterity-ability-checks');
         S.initNotes = [...mods('advantage', 'initiative').map((m) => 'Advantage' + (m.restriction ? ' ' + m.restriction : '')), ...mods('disadvantage', 'initiative').map(() => 'Disadvantage')];
 
         // armour class
@@ -480,12 +487,12 @@
             const k = detail(R.stats && byId(R.stats, id) ? byId(R.stats, id).name : nm, 'Score ' + S.score[id], clean((byId(R.stats, id) || {}).compendiumText));
             return `<div class="abil" data-s="${esc(nm + ' ' + key)}">
                 <button class="abil-key" data-detail="${k}">${key}</button>
-                <b>${d20(S.mod[id], nm[0].toUpperCase() + nm.slice(1) + ' check')}</b>
+                <b>${rollBtn('1d20' + (S.check[id] ? signed(S.check[id]).replace('−', '-') : ''), nm[0].toUpperCase() + nm.slice(1) + ' check', signed(S.mod[id]), true)}</b>
                 <span class="muted" title="${esc(why)}">${S.score[id]}</span>
                 <span class="save${sv.prof ? ' prof' : ''}" title="${esc(sv.notes.join('; '))}"><i class="dot${sv.prof ? ' on' : ''}" aria-label="${sv.prof ? 'Proficient' : 'Not proficient'}"></i>Save ${d20(sv.total, key + ' save')}${sv.notes.length ? ' <em>' + (sv.notes.some((n) => /^Adv/.test(n)) ? 'A' : '') + (sv.notes.some((n) => /^Dis/.test(n)) ? 'D' : '') + '</em>' : ''}</span>
             </div>`;
         }).join('');
-        const notes = S.saves.flatMap((s) => s.notes.map((n) => `${s.key}: ${n}`));
+        const notes = [...S.saves.flatMap((s) => s.notes.map((n) => `${s.key}: ${n}`)), ...S.saveNotes];
         return card('abilities', 'Abilities and saves', `<div class="abils">${tiles}</div>${notes.length ? `<p class="small muted">${esc(notes.join(' · '))}</p>` : ''}`);
     }
 
@@ -494,7 +501,7 @@
         const rows = S.skills.map((s) => {
             const k = detail(s.name, statKey(s.stat) + ' · ' + signed(s.total) + (s.lvl ? ' · ' + (lvlName[Math.ceil(s.lvl)] || '') : ''), clean(s.description) + (s.notes.length ? `<p class="note">${esc(s.notes.join('; '))}</p>` : ''));
             return `<div class="rowi" data-s="${esc(s.name + ' ' + statKey(s.stat))}">
-                <i class="dot l${Math.ceil(s.lvl)}" title="${esc(lvlName[Math.ceil(s.lvl)] || 'Not proficient')}"></i>
+                <i class="dot l${Math.floor(s.lvl)}" title="${esc(lvlName[Math.floor(s.lvl)] || 'Not proficient')}"></i>
                 <button class="grow link" data-detail="${k}">${esc(s.name)}${s.custom ? ' <small>custom</small>' : ''}</button>
                 <small>${statKey(s.stat)}</small>
                 ${s.notes.length ? `<small title="${esc(s.notes.join('; '))}">${s.notes.some((n) => /^Adv/.test(n)) ? 'A' : ''}${s.notes.some((n) => /^Dis/.test(n)) ? 'D' : ''}</small>` : ''}
@@ -535,18 +542,22 @@
             const k = detail(name, [d.type, d.rarity, props.join(', ')].filter(Boolean).join(' · '), clean(d.description) + (prof ? '' : '<p class="note">Not proficient: no proficiency bonus on the attack.</p>'));
             out.push({ name, k, range, hit: d20(hit, name + ' to hit'), dmg: dmg(d.damage && d.damage.diceString, dmgBonus, name + ' damage') + ' ' + esc(d.damageType || '') + (versatile && versatile.notes ? ' · two-handed ' + dmg(versatile.notes, dmgBonus, name + ' two-handed damage') : ''), notes: [it.quantity > 1 ? '×' + it.quantity : '', props.join(', '), prof ? '' : 'not proficient'].filter(Boolean).join(' · ') });
         }
+        const maFeat = Object.values(featureById).find((f) => f.name === 'Martial Arts' && featureLevel[f.id].req <= featureLevel[f.id].have);
+        const maDie = maFeat && scaleById[maFeat.id] && scaleById[maFeat.id].dice ? scaleById[maFeat.id].dice.diceString : null;
         for (const [src, list] of Object.entries(C.actions || {})) for (const a of arr(list)) {
             if (!a.displayAsAttack) continue;
-            const stat = a.abilityModifierStatId;
+            const ma = a.isMartialArts && maDie;
+            const stat = ma && (!a.abilityModifierStatId || a.abilityModifierStatId <= 2) ? (S.mod[2] > S.mod[1] ? 2 : 1) : a.abilityModifierStatId;
             const mod = stat ? S.mod[stat] : 0;
             const ctx = ctxFor(a);
             const hit = a.fixedToHit ?? (mod + (a.isProficient ? S.prof : 0));
             const save = a.saveStatId ? `DC ${a.fixedSaveDc || 8 + S.prof + mod} ${statKey(a.saveStatId)}` : '';
             const k = detail(a.name, source(ctx.sources), clean(tokensIn(a.description, ctx)));
-            const dice = a.dice ? (a.dice.diceString || (a.dice.fixedValue != null ? String(a.dice.fixedValue) : '')) : '';
-            out.push({ name: a.name, k, range: a.range && a.range.range ? ft(a.range.range) + (a.range.longRange ? '/' + a.range.longRange : '') : a.attackTypeRange === 2 ? 'Ranged' : '5 ft.', hit: save ? esc(save) : d20(hit, a.name + ' to hit'), dmg: dice ? dmg(dice, a.value != null ? +a.value : mod, a.name + ' damage') + ' ' + esc(nameOf(R.damageTypes, a.damageTypeId)) : '', notes: activation(a.activation) });
+            const dice = a.dice ? (a.dice.diceString || (a.dice.fixedValue != null ? String(a.dice.fixedValue) : '')) : ma && a.actionType === 1 ? maDie : '';
+            const isAttack = a.actionType === 1 || a.saveStatId;
+            out.push({ name: a.name, k, range: a.range && a.range.range ? ft(a.range.range) + (a.range.longRange ? '/' + a.range.longRange : '') : a.attackTypeRange === 2 ? 'Ranged' : '5 ft.', hit: save ? esc(save) : isAttack ? d20(hit, a.name + ' to hit') : '', dmg: !isAttack && dice ? rollBtn(dice.replace(/s+/g, ''), a.name, dice) : dice ? dmg(dice, ma && !a.dice ? mod : a.value != null ? +a.value : mod, a.name + ' damage') + ' ' + esc(nameOf(R.damageTypes, a.damageTypeId)) : '', notes: activation(a.activation) });
         }
-        if (C.preferences && C.preferences.showUnarmedStrike) {
+        if (C.preferences && C.preferences.showUnarmedStrike && !Object.values(C.actions || {}).flat().some((a) => a && /^Unarmed Strike/.test(a.name))) {
             const ua = arr(R.naturalActions)[0];
             const k = detail('Unarmed Strike', '', clean(ua && ua.description));
             out.push({ name: 'Unarmed Strike', k, range: '5 ft.', hit: d20(S.mod[1] + S.prof, 'Unarmed strike to hit'), dmg: rollBtn(String(Math.max(1, 1 + S.mod[1])), 'Unarmed strike damage', String(Math.max(1, 1 + S.mod[1]))) + ' Bludgeoning', notes: '' });
@@ -618,7 +629,7 @@
             const tags = [sp.alwaysPrepared ? 'always prepared' : sp.prepared ? 'prepared' : '', d.concentration ? 'concentration' : '', d.ritual ? 'ritual' : '', sp.limitedUse ? `${limitedMax(sp.limitedUse)}/${resetName(sp.limitedUse.resetType) || 'rest'}` : ''].filter(Boolean);
             const sub = [d.school, activation(sp.activation || d.activation), rng(sp.range || d.range), comp(d.components), dur(d.duration), from].filter(Boolean).join(' · ');
             const k = detail(d.name, (l ? 'Level ' + l + ' ' : 'Cantrip · ') + sub, clean(d.description) + (d.componentsDescription ? `<p class="muted">Material: ${esc(d.componentsDescription)}</p>` : '') + (d.atHigherLevels && d.atHigherLevels.higherLevelDefinitions ? '' : ''));
-            return `<div class="rowi feat${!l || sp.prepared || sp.alwaysPrepared || !sp.countsAsKnownSpell ? '' : ' dim'}" data-s="${esc(d.name + ' ' + sub + ' ' + tags.join(' '))}"><div class="grow"><button class="link" data-detail="${k}">${esc(d.name)}</button> ${tags.map((t) => badge(t)).join(' ')}<div class="snip muted">${esc(sub)}</div></div>${effect ? `<span>${effect}</span>` : ''}</div>`;
+            return `<div class="rowi feat${!l || sp.prepared || sp.alwaysPrepared || !(casting && casting.cls.definition.spellPrepareType) ? '' : ' dim'}" data-s="${esc(d.name + ' ' + sub + ' ' + tags.join(' '))}"><div class="grow"><button class="link" data-detail="${k}">${esc(d.name)}</button> ${tags.map((t) => badge(t)).join(' ')}<div class="snip muted">${esc(sub)}</div></div>${effect ? `<span>${effect}</span>` : ''}</div>`;
         }).join('')}</div>`).join('');
         return card('spells', 'Spells', (head ? `<div class="tiles">${head}</div>` : '') + (slots ? `<p class="slots">${slots}</p>` : '') + body, all.length);
     }
@@ -626,9 +637,9 @@
     function features() {
         const parts = [];
         let total = 0;
-        const choiceLabel = (componentId) => {
+        const choiceLabel = (componentId, group) => {
             const out = [];
-            for (const k of ['race', 'class', 'background', 'feat', 'item']) for (const ch of arr(C.choices && C.choices[k])) {
+            for (const k of group ? [group] : ['race', 'class', 'background', 'feat', 'item']) for (const ch of arr(C.choices && C.choices[k])) {
                 if (ch.componentId !== componentId || ch.optionValue == null) continue;
                 const def = arr(C.choices.choiceDefinitions).find((cd) => cd.id === `${ch.componentTypeId}-${ch.type}`);
                 const opt = def && arr(def.options).find((o) => o.id === ch.optionValue);
@@ -637,9 +648,9 @@
             }
             return out;
         };
-        const featRow = (name, sub, desc, snip, ctx, id) => {
+        const featRow = (name, sub, desc, snip, ctx, id, group) => {
             total++;
-            const chosen = id ? choiceLabel(id) : [];
+            const chosen = id ? choiceLabel(id, group).filter((c) => c !== name) : [];
             const k = detail(name, sub, clean(tokensIn(desc, ctx)) + (chosen.length ? `<p class="note">${esc(chosen.join(' · '))}</p>` : ''));
             const s = snip ? clean(tokensIn(snip, ctx)) : '';
             return `<div class="rowi feat" data-s="${esc(name + ' ' + text(snip || '') + ' ' + chosen.join(' '))}"><div class="grow"><button class="link" data-detail="${k}">${esc(name)}</button>${chosen.length ? ' ' + chosen.map((c) => badge(c)).join(' ') : ''}${s ? `<div class="snip">${s}</div>` : ''}</div>${/^Level \d/.test(sub || '') ? `<small>${esc(sub.split(' · ')[0])}</small>` : ''}</div>`;
@@ -647,19 +658,19 @@
         for (const cl of arr(C.classes)) {
             const owned = arr(cl.classFeatures).filter((f) => (f.definition.requiredLevel || 1) <= cl.level && !f.definition.hideInSheet)
                 .sort((a, b) => (a.definition.requiredLevel || 0) - (b.definition.requiredLevel || 0) || (a.definition.displayOrder || 0) - (b.definition.displayOrder || 0));
-            const rows = owned.map((f) => featRow(f.definition.name, 'Level ' + (f.definition.requiredLevel || 1) + ' · ' + (source(f.definition.sources) || ''), f.definition.description, f.definition.snippet, { cls: cl, scale: f.levelScale, sources: f.definition.sources }, f.definition.id)).join('');
+            const rows = owned.map((f) => featRow(f.definition.name, 'Level ' + (f.definition.requiredLevel || 1) + ' · ' + (source(f.definition.sources) || ''), f.definition.description, f.definition.snippet, { cls: cl, scale: f.levelScale, sources: f.definition.sources }, f.definition.id, 'class')).join('');
             const opt = arr(C.optionalClassFeatures).length ? `<p class="small muted">Optional class features: ${esc(arr(C.optionalClassFeatures).map((o) => o.classFeatureId).join(', '))}</p>` : '';
             parts.push(`<h3>${esc(cl.definition.name)} ${cl.level}${cl.subclassDefinition ? ' · ' + esc(cl.subclassDefinition.name) : ''}</h3><div class="rows">${rows}</div>${opt}`);
         }
         const race = C.race || {};
         const traits = arr(race.racialTraits).filter((t) => t.definition && !t.definition.hideInSheet);
-        if (traits.length) parts.push(`<h3>${esc(race.fullName || 'Species')} traits</h3><div class="rows">${traits.map((t) => featRow(t.definition.name, source(t.definition.sources), t.definition.description, t.definition.snippet, { sources: t.definition.sources }, t.definition.id)).join('')}</div>`);
+        if (traits.length) parts.push(`<h3>${esc(race.fullName || 'Species')} traits</h3><div class="rows">${traits.map((t) => featRow(t.definition.name, source(t.definition.sources), t.definition.description, t.definition.snippet, { sources: t.definition.sources }, t.definition.id, 'race')).join('')}</div>`);
         const bg = C.background && (C.background.definition || C.background.customBackground);
-        if (bg && (bg.featureName || bg.featureDescription)) parts.push(`<h3>Background: ${esc(bg.name || '')}</h3><div class="rows">${featRow(bg.featureName || 'Feature', source(bg.sources), bg.featureDescription, '', {}, bg.id)}</div>`);
+        if (bg && (bg.featureName || bg.featureDescription)) parts.push(`<h3>Background: ${esc(bg.name || '')}</h3><div class="rows">${featRow(bg.featureName || 'Feature', source(bg.sources), bg.featureDescription, '', {}, bg.id, 'background')}</div>`);
         const feats = arr(C.feats).filter((f) => f.definition);
-        if (feats.length) parts.push(`<h3>Feats</h3><div class="rows">${feats.map((f) => featRow(f.definition.name, (arr(f.definition.prerequisites).map((p) => p.description).join(', ') || 'Feat') + ' · ' + source(f.definition.sources), f.definition.description, f.definition.snippet, { sources: f.definition.sources }, f.definition.id)).join('')}</div>`);
+        if (feats.length) parts.push(`<h3>Feats</h3><div class="rows">${feats.map((f) => featRow(f.definition.name, (arr(f.definition.prerequisites).map((p) => p.description).join(', ') || 'Feat') + ' · ' + source(f.definition.sources), f.definition.description, f.definition.snippet, { sources: f.definition.sources }, f.definition.id, 'feat')).join('')}</div>`);
         const options = [];
-        for (const [k, list] of Object.entries(C.options || {})) for (const o of arr(list)) if (o && o.definition) options.push(featRow(o.definition.name, { race: 'Species option', class: 'Class option', background: 'Background option', item: 'Item option', feat: 'Feat option' }[k] || 'Option', o.definition.description, o.definition.snippet, {}, o.componentId));
+        for (const [k, list] of Object.entries(C.options || {})) for (const o of arr(list)) if (o && o.definition) options.push(featRow(o.definition.name, { race: 'Species option', class: 'Class option', background: 'Background option', item: 'Item option', feat: 'Feat option' }[k] || 'Option', o.definition.description, o.definition.snippet, {}, o.componentId, k));
         if (options.length) parts.push(`<h3>Chosen options</h3><div class="rows">${options.join('')}</div>`);
         return card('features', 'Features and traits', parts.join(''), total);
     }
