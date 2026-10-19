@@ -104,7 +104,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 message(suggestionsDiv, 'Searching…');
                 suggestionsDiv.hidden = false;
 
-                const url = search(query, 10);
+                const url = search(query, 40);
                 const response = await fetch(url);
                 const data = await response.json();
 
@@ -121,11 +121,25 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                     return;
                 }
 
-                displaySuggestions(filteredBooks);
+                displaySuggestions(rankByTitle(filteredBooks, query).slice(0, 10));
             } catch (error) {
                 console.error('Error fetching suggestions:', error);
                 message(suggestionsDiv, 'Could not load suggestions');
             }
+        }
+
+        // Google ranks loosely ("Dune" finds "Coastal Dune Management" before Herbert), so put
+        // exact title matches first, then titles starting with the query, then the rest;
+        // within each, books with a known author first. Ties keep Google's order.
+        function rankByTitle(books, query) {
+            const norm = s => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+            const q = norm(query);
+            const score = b => {
+                const t = norm(b.volumeInfo.title);
+                return (t === q ? 0 : t.startsWith(q + ' ') ? 2 : (' ' + t + ' ').includes(' ' + q + ' ') ? 4 : 6)
+                    + (b.volumeInfo.authors ? 0 : 1);
+            };
+            return books.map((b, i) => [score(b), i, b]).sort((x, y) => x[0] - y[0] || x[1] - y[1]).map(x => x[2]);
         }
 
         // Display autocomplete suggestions

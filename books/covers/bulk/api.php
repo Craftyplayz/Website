@@ -27,13 +27,14 @@ $max = (int)($_GET['max'] ?? 10) === 40 ? 40 : 10;
 if ($q === '' || strlen($q) > 300) json_out(400, '{"error":"q must be 1-300 characters"}', false);
 
 $cacheDir = __DIR__ . '/cache';
-$cacheFile = $cacheDir . '/' . md5($max . '|' . strtolower($q)) . '.json';
+$cacheFile = $cacheDir . '/' . md5('en|' . $max . '|' . strtolower($q)) . '.json';
 if (is_file($cacheFile) && filemtime($cacheFile) > time() - 86400) json_out(200, file_get_contents($cacheFile), true);
 
 $url = 'https://www.googleapis.com/books/v1/volumes?' . http_build_query([
     'q' => $q,
     'maxResults' => $max,
     'printType' => 'books',
+    'langRestrict' => 'en',
     'key' => isset($googlebookskey) ? $googlebookskey : '',
 ]);
 $ch = curl_init($url);
