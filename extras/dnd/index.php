@@ -90,7 +90,6 @@ foreach ($list as $lid) {
         'id' => $lid,
         'name' => $cd['name'] ?? 'Unnamed',
         'avatar' => $cd['decorations']['avatarUrl'] ?? null,
-        'level' => array_sum(array_map(function ($cl) { return (int)($cl['level'] ?? 0); }, $cd['classes'] ?? [])),
         'summary' => trim(($cd['race']['fullName'] ?? '') . ' · ' . implode(' / ', array_map(function ($cl) {
             return ($cl['definition']['name'] ?? '') . ' ' . ($cl['level'] ?? '');
         }, $cd['classes'] ?? [])), ' ·'),
@@ -106,17 +105,19 @@ function dnd_chooser($picker)
     echo '<div class="dnd-choose">';
     foreach ($picker as $p) {
         if ($p['name'] === null) {
-            echo '<div class="dnd-card off"><span class="dnd-av"></span><span><b>Character ' . h($p['id']) . '</b><small>'
-                . ($p['status'] === 403 ? 'Private on D&amp;D Beyond' : 'Couldn\'t load from D&amp;D Beyond') . '</small></span></div>';
+            echo '<div class="dnd-card off"><span class="dnd-av">?</span><b>Character ' . h($p['id']) . '</b><small>'
+                . ($p['status'] === 403 ? 'Private on D&amp;D Beyond' : 'Couldn\'t load from D&amp;D Beyond') . '</small></div>';
             continue;
         }
+        // D&D Beyond resizes on request; 300px keeps the portrait sharp at card width
+        $av = $p['avatar'] ? str_replace(['width=150', 'height=150'], ['width=300', 'height=300'], $p['avatar']) : null;
         echo '<a class="dnd-card" href="?id=' . rawurlencode($p['id']) . '">'
-            . ($p['avatar'] ? '<img class="dnd-av" src="' . h($p['avatar']) . '" width="64" height="64" alt="" referrerpolicy="no-referrer">' : '<span class="dnd-av"></span>')
-            . '<span><b>' . h($p['name']) . '</b><small>' . h($p['summary']) . '</small><small>Level ' . (int)$p['level'] . '</small></span></a>';
+            . ($av ? '<img class="dnd-av" src="' . h($av) . '" width="300" height="300" alt="" loading="lazy" referrerpolicy="no-referrer">' : '<span class="dnd-av">' . h(mb_substr($p['name'], 0, 1)) . '</span>')
+            . '<b>' . h($p['name']) . '</b><small>' . h($p['summary']) . '</small></a>';
     }
+    echo '<form class="dnd-card dnd-other" method="get" action="/extras/dnd/"><label for="dnd-other"><b>Another character</b><small>Any public D&amp;D Beyond character</small></label>'
+        . '<input id="dnd-other" class="field" name="id" placeholder="Link or ID" required autocomplete="off"><button class="btn" type="submit">Open</button></form>';
     echo '</div>';
-    echo '<form class="dnd-other" method="get" action="/extras/dnd/"><label for="dnd-other">Open another public character</label>'
-        . '<span><input id="dnd-other" class="field" name="id" placeholder="D&amp;D Beyond link or ID" required autocomplete="off"><button class="btn" type="submit">Open</button></span></form>';
 }
 ?>
 <!DOCTYPE html>

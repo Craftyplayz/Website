@@ -47,6 +47,7 @@
                 {
                     "title": "More",
                     "pages": [
+                        { "title": "Server Status", "url": "/minecraft/servers/", "description": "Live status of my Minecraft servers", "keywords": ["server", "status", "online", "players", "play.craftyplayz.com"] },
                         { "title": "Screenshots", "url": "/minecraft/screenshots/", "description": "Screenshots from years of playing" },
                         { "title": "Skins", "url": "/minecraft/skins/", "description": "My Minecraft skins" },
                         { "title": "Tips", "url": "/minecraft/tips/", "description": "Minecraft tips and mods" },
@@ -78,6 +79,7 @@
                     "pages": [
                         { "title": "Chapter Oracle", "url": "/games/chapterguesser/", "description": "Guess the book chapter from a passage", "keywords": ["harry potter", "quiz", "chapter guesser"] },
                         { "title": "Guess Who", "url": "/games/guesswho/", "description": "Guess Who boards: Classic, Avatar and more", "keywords": ["atla", "avatar"] },
+                        { "title": "Free Games", "url": "/games/free/", "description": "Browse free-to-play PC and browser games", "keywords": ["freetogame", "f2p", "free to play"] },
                         { "title": "A Dark Room", "url": "/games/adarkroom/", "description": "A minimalist text adventure" },
                         { "title": "The Game", "url": "/games/the-game/", "description": "You just lost it" }
                     ]
