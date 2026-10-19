@@ -26,7 +26,7 @@
 | Transaction Generator | `minecraft/tools/transaction-generator/index.php` | Loads `names.csv` next to it. |
 | Stats Editor | `minecraft/tools/stats-editor/index.php` | Its own textarea scrolls the page sideways by 2px. |
 | JSON Viewer | `minecraft/tools/json-viewer/index.php` | Syntax colours already darkened. |
-| Material List to Sheets | `minecraft/tools/material-list/index.php` | |
+| Litematica Material Converter | `minecraft/tools/litematica-converter/index.php` | Material List was merged into it (archived in `_dev/archive/minecraft/material-list/`). Stack sizes come from `shulker-calculator/schematic.js`. |
 | Item List | `minecraft/tools/item-list/index.php` | 1,507 lazy-loaded icons. Keep `loading="lazy"`. |
 | Map Art | `minecraft/projects/map-art/index.php` | A gallery from `media/minecraft/mapart/`. |
 | Stonecrest | `minecraft/projects/stonecrest/index.php` | Download links. |

@@ -82,7 +82,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                     <td class="num">${num(r.missing)}</td>
                     <td class="num">${num(r.available)}</td>
                     <td class="num">${stacksText(r.total, r.size)}</td>
-                    <td class="num">${r.shulkers.toFixed(1)}</td>
+                    <td class="num">${num(r.shulkers, 2)}</td>
                     <td class="cb-cell"><input type="checkbox" data-i="${i}" aria-label="Have ${esc(r.name)}"></td>
                 </tr>`).join('');
             }
@@ -90,7 +90,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             function tsv() {
                 const have = new Set($$('#rows input:checked').map((c) => +c.dataset.i));
                 const head = ['Item', 'Total', 'Missing', 'Available', 'Stacks', 'Shulker boxes', 'Have it?'];
-                return [head, ...rows.map((r, i) => [r.name, r.total, r.missing, r.available, r.stacks, r.shulkers.toFixed(1), have.has(i) ? 'TRUE' : 'FALSE'])]
+                return [head, ...rows.map((r, i) => [r.name, r.total, r.missing, r.available, r.stacks, r.shulkers.toFixed(2), have.has(i) ? 'TRUE' : 'FALSE'])]
                     .map((r) => r.join('\t')).join('\n');
             }
 

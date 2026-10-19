@@ -24,10 +24,9 @@ function shot_date($name)
     <?php page_head(); ?>
 </head>
 
-<body>
+<body<?= $id !== '' ? ' class="shot-view"' : '' ?>>
     <?php site_header(); ?>
     <main class="page" id="main">
-        <?= site_breadcrumbs(site_current_path()) ?>
         <?php if ($id !== ''): ?>
             <?php
             $name = pathinfo($id, PATHINFO_FILENAME);
@@ -37,8 +36,7 @@ function shot_date($name)
             $info = is_array($manifest) && isset($manifest[$name]) ? $manifest[$name] : null;
             $date = shot_date($name);
             ?>
-            <h1 class="page-title">Screenshot</h1>
-            <p class="page-lede"><?= h($date !== '' ? $date : $name) ?></p>
+            <h1 class="page-title shot-sr">Screenshot <?= h($date) ?></h1>
             <figure class="shot-full">
                 <?php if ($info): ?>
                     <?php
@@ -46,18 +44,20 @@ function shot_date($name)
                     foreach ($info['sizes'] as $w) $srcset[] = $dir . 'screenshots-sizes/' . $w . '/' . rawurlencode($name) . '.webp ' . $w . 'w';
                     ?>
                     <img src="<?= h($dir . 'screenshots-sizes/' . $info['sizes'][0] . '/' . rawurlencode($name) . '.webp') ?>"
-                        srcset="<?= h(implode(', ', $srcset)) ?>" sizes="(max-width: 1280px) 100vw, 1248px"
+                        srcset="<?= h(implode(', ', $srcset)) ?>" sizes="max(100vw, 178vh)"
                         width="<?= (int)$info['w'] ?>" height="<?= (int)$info['h'] ?>" alt="Screenshot <?= h($date) ?>">
                 <?php else: ?>
                     <img src="<?= h($raw) ?>" alt="Screenshot <?= h($date) ?>">
                 <?php endif; ?>
             </figure>
-            <p class="shot-actions">
+            <p class="shot-bar">
+                <span><?= h($date !== '' ? $date : $name) ?></span>
                 <a class="btn" href="/minecraft/screenshots/">&larr; All screenshots</a>
                 <a class="btn" href="<?= h($raw) ?>">Open original PNG</a>
             </p>
         <?php else: ?>
-            <?php $images = array_reverse(array_values(array_diff(scandir(SITE_ROOT . $dir . 'screenshots') ?: [], ['.', '..']))); ?>
+            <?php $images = array_reverse(array_values(preg_grep('/\.png$/i', scandir(SITE_ROOT . $dir . 'screenshots-raw') ?: []))); ?>
+            <?= site_breadcrumbs(site_current_path()) ?>
             <h1 class="page-title">Minecraft Screenshots</h1>
             <p class="page-lede">Screenshots from my years of playing Minecraft. <?= count($images) ?> so far, newest first. Click one for full quality.</p>
 
@@ -65,7 +65,7 @@ function shot_date($name)
                 <?php foreach ($images as $image):
                     $date = shot_date($image); ?>
                     <a class="shot" href="/minecraft/screenshots/?id=<?= h(rawurlencode($image)) ?>">
-                        <img src="<?= h($dir . 'screenshots/' . rawurlencode($image)) ?>" width="600" height="338" alt="Screenshot <?= h($date) ?>" loading="lazy" decoding="async">
+                        <img src="<?= h($dir . 'screenshots-sizes/960/' . rawurlencode(pathinfo($image, PATHINFO_FILENAME)) . '.webp') ?>" width="600" height="338" alt="Screenshot <?= h($date) ?>" loading="lazy" decoding="async">
                         <?php if ($date !== ''): ?><span><?= h($date) ?></span><?php endif; ?>
                     </a>
                 <?php endforeach; ?>

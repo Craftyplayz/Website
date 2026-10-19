@@ -247,7 +247,7 @@ foreach ($series as $k => $pts) {
     $chartSeries[$k] = $lead > 60 ? ['t0' => $pts[0][0], 'kind' => $pts[0][2], 'vals' => array_column(array_slice($pts, 0, $lead), 1), 'pts' => array_slice($pts, $lead)] : $pts;
 }
 
-$chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names' => $playNames, 'estTo' => $estTo], 'labels' => $metrics, 'history' => $history, 'recorded' => $first ? strtotime($first) : null, 'since' => $first ? date('j M Y', strtotime($first)) : ''];
+$chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names' => $playNames, 'estTo' => $estTo], 'hourly' => array_intersect_key(steam_hourly(), ['rows' => 1, 'play' => 1]), 'labels' => $metrics, 'history' => $history, 'recorded' => $first ? strtotime($first) : null, 'since' => $first ? date('j M Y', strtotime($first)) : ''];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -380,7 +380,7 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
                 <div class="steam-days-axis muted" id="played-axis"></div>
                 <h3 id="played-top-h">Most played</h3>
                 <div class="steam-ranks" id="played-top"></div>
-                <p class="muted steam-foot">Recorded days come from the change in each game's total playtime between daily readings; a day after a missed reading also holds the missed days.<?= $estTo ? ' Days before ' . date('j M Y', strtotime($estTo)) . ' (paler) are estimated from purchase dates, achievement unlocks and last-played dates; the day-to-day detail is simulated.' : '' ?></p>
+                <p class="muted steam-foot">The 7-day view shows each hour, from the hourly readings. Recorded days come from the change in each game's total playtime between daily readings; a day after a missed reading also holds the missed days.<?= $estTo ? ' Days before ' . date('j M Y', strtotime($estTo)) . ' (paler) are estimated from purchase dates, achievement unlocks and last-played dates; the day-to-day detail is simulated.' : '' ?></p>
             </section>
         <?php endif; ?>
 
