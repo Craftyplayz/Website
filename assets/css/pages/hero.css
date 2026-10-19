@@ -38,3 +38,9 @@
 @media (prefers-reduced-motion: reduce) {
     .hero-stage img { transition: none; }
 }
+
+/* homepage: the slideshow fills the window between header and footer, no scroll; cover + bottom anchor crops the top */
+body.home { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+.home .hero { flex: 1 1 0; min-height: 0; }
+.home .hero-stage img { object-position: center bottom; }
+.home .site-footer { margin-top: 0; }

@@ -9,12 +9,17 @@
 .shot img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: var(--card2); }
 .shot span { display: block; padding: 6px 10px; font-size: 12px; }
 
-.shot-full { margin: 0; }
-.shot-full img {
-    display: block; width: auto; max-width: 100%; height: auto; max-height: calc(100vh - 280px); margin: 0 auto;
-    background: var(--card2); border: 1px solid var(--line); border-radius: var(--radius-lg);
+/* one screenshot: fills the window between header and footer; cover + bottom anchor crops the top if it doesn't fit */
+body.shot-view { height: 100vh; height: 100dvh; overflow: hidden; }
+.shot-view .page { position: relative; flex: 1 1 0; min-height: 0; max-width: none; padding: 0; }
+.shot-view .site-footer { margin-top: 0; }
+.shot-full { position: absolute; inset: 0; margin: 0; background: var(--sunken); }
+.shot-full img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center bottom; }
+.shot-bar {
+    position: absolute; left: 16px; bottom: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: calc(100% - 32px);
+    margin: 0; padding: 8px 8px 8px 12px; background: rgba(27, 27, 27, .85); border-radius: var(--radius-lg); font-size: 14px;
 }
-.shot-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 16px 0 0; }
+.shot-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .page a.btn { color: var(--text); }
 
 /* skins: rendered player models, downloaded on click */

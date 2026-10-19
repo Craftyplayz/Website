@@ -17,6 +17,11 @@
         const s = data.series[k];
         series[k] = Array.isArray(s) ? s : s.vals.map((v, i) => [s.t0 + i * 86400, v, s.kind]).concat(s.pts);
     });
+    // the past 8 days hour by hour (cron.php runs hourly); the 7-day views use these instead of the daily points
+    const hRows = data.hourly && !Array.isArray(data.hourly.rows) ? data.hourly.rows : {};
+    const hPlay = data.hourly && !Array.isArray(data.hourly.play) ? data.hourly.play : {};
+    const hTimes = Object.keys(hRows).map(Number).sort((a, b) => a - b);
+    const when = (t) => new Date(t * 1000).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
     const ESTIMATED = 'Estimated from purchase dates, achievement unlocks and last-played dates. Day-to-day detail is simulated.';
     const metricSel = document.getElementById('metric');
     const rangeSel = document.getElementById('range');
@@ -34,7 +39,11 @@
         if (!box || !metric) return;
         const all = series[metric] || [];
         const cut = range ? Date.now() / 1000 - range * 86400 : 0;
-        const pts = all.filter((p) => p[0] >= cut);
+        let pts = all.filter((p) => p[0] >= cut);
+        if (range === 7) {
+            const h = hTimes.filter((t) => t >= cut && hRows[t][metric] != null).map((t) => [t, hRows[t][metric], null, 'hour']);
+            if (h.length) pts = pts.filter((p) => p[0] < h[0][0]).concat(h);
+        }
         if (pts.length < 2) {
             box.innerHTML = '<p class="note">Not enough readings in this range yet. Try a longer time range.</p>';
             note.textContent = '';
@@ -102,7 +111,7 @@
             const p = pts[i], px = x(p[0]), py = y(p[1]);
             cross.setAttribute('x1', px); cross.setAttribute('x2', px); cross.removeAttribute('hidden');
             dot.setAttribute('cx', px); dot.setAttribute('cy', py); dot.removeAttribute('hidden');
-            tip.innerHTML = `<b>${fmt(p[1])}</b> ${UIesc(label)}<br><span>${day(p[0], p[2] !== 'guess')}${{ guess: ' · guess', est: ' · estimated', rebuilt: ' · from unlock dates' }[p[2]] || ''}</span>`;
+            tip.innerHTML = `<b>${fmt(p[1])}</b> ${UIesc(label)}<br><span>${p[3] ? when(p[0]) : day(p[0], p[2] !== 'guess')}${{ guess: ' · guess', est: ' · estimated', rebuilt: ' · from unlock dates' }[p[2]] || ''}</span>`;
             tip.hidden = false;
             const scale = s.getBoundingClientRect().width / W;
             tip.style.left = Math.min(px * scale + 12, box.clientWidth - tip.offsetWidth) + 'px';
@@ -148,7 +157,8 @@
         end.setHours(12, 0, 0, 0);
         const first = [...pDays.keys()].sort()[0];
         const start = days ? new Date(end.getTime() - (days - 1) * 864e5) : new Date(first + 'T12:00:00');
-        const unit = !days ? 'month' : days > 90 ? 'week' : 'day';
+        const pHours = Object.keys(hPlay).map(Number).sort((a, b) => a - b);
+        const unit = !days ? 'month' : days > 90 ? 'week' : days === 7 && pHours.length ? 'hour' : 'day';
         // one bucket per day / Monday-week / month from start to today
         const buckets = [];
         const keyOf = (d) => {
@@ -159,7 +169,13 @@
             return iso(m);
         };
         const byKey = new Map();
-        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        // the last 168 hours, starting at the first hourly reading when that's more recent
+        if (unit === 'hour') for (let t = Math.max(pHours[0], Math.floor(Date.now() / 36e5 - 167) * 3600); t * 1000 <= Date.now(); t += 3600) {
+            const b = { k: t, from: t, min: 0, games: new Map(), est: false };
+            Object.entries(hPlay[t] || {}).forEach(([id, m]) => { b.min += m; b.games.set(id, m); });
+            buckets.push(b);
+        }
+        else for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
             const k = keyOf(d);
             if (!byKey.has(k)) {
                 const b = { k, from: iso(d), min: 0, games: new Map(), est: true, any: false };
@@ -175,7 +191,8 @@
         const max = Math.max(60, ...buckets.map((b) => b.min));
         pBars.style.gap = buckets.length > 60 ? '1px' : '';
         const name = (id) => (data.played.names[id] || ['App ' + id])[0];
-        const label = (b) => unit === 'day' ? new Date(b.from + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+        const label = (b) => unit === 'hour' ? when(b.k)
+            : unit === 'day' ? new Date(b.from + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
             : unit === 'week' ? 'Week of ' + new Date(b.k + 'T12:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
             : new Date(b.k + '-01T12:00:00').toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
         pBars.innerHTML = buckets.map((b) => {
@@ -183,7 +200,7 @@
             const tip = UIesc(label(b) + ': ' + (b.min ? hours(b.min) : 'nothing played') + (b.est ? ' (estimated)' : '') + top);
             return `<div role="listitem" class="${b.est ? 'est' : ''}" title="${tip}" aria-label="${tip}"><i style="height: ${b.min / max * 100}%"></i></div>`;
         }).join('');
-        document.getElementById('played-axis').innerHTML = `<span>${UIesc(label(buckets[0]))}</span><span>${unit === 'day' ? 'Today' : UIesc(label(buckets[buckets.length - 1]))}</span>`;
+        document.getElementById('played-axis').innerHTML = `<span>${UIesc(label(buckets[0]))}</span><span>${unit === 'day' ? 'Today' : unit === 'hour' ? 'Now' : UIesc(label(buckets[buckets.length - 1]))}</span>`;
 
         // totals and the top games for the range
         const games = new Map(), seen = new Map();

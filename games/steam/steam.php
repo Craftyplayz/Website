@@ -169,10 +169,46 @@ function steam_history($badges = null, $games = null, $progress = null)
         'achievements' => array_sum(array_column($progress, 'done')),
         'badges' => count($badges['badges']),
     ];
+    $totals = [];
+    foreach ($games as $id => $g) if ($g['playtime_forever'] > 0) $totals[$id] = (int)$g['playtime_forever'];
+    if (steam_hourly($row, $totals) === false) return false;
     $day = date('Y-m-d');
     if (isset($history[$day]) && $history[$day] == $row) return $history;
     $history[$day] = $row;
     return @file_put_contents(STEAM_HISTORY, json_encode($history), LOCK_EX) === false ? false : $history;
+}
+
+// The past 8 days hour by hour, for the 7-day views on the profile page: ['rows' => [hour start => History row],
+// 'play' => [hour start => [appid => minutes]], 'hour', 'base' => totals at the start of 'hour', 'totals' => latest totals].
+// Same rules as steam_playtime(), per hour: missed hours pile onto the next reading. Pass nothing to only read.
+const STEAM_HOURLY = __DIR__ . '/profile/cache/hourly.json';
+
+function steam_hourly($row = null, $totals = null)
+{
+    $log = is_file(STEAM_HOURLY) ? json_decode((string)file_get_contents(STEAM_HOURLY), true) ?: [] : [];
+    $log += ['rows' => [], 'play' => [], 'hour' => null, 'base' => [], 'totals' => []];
+    if (!$row) return $log;
+    $hour = (int)(floor(time() / 3600) * 3600);
+    if ($log['hour'] !== $hour) {
+        $log['base'] = $log['hour'] ? $log['totals'] : $totals;
+        $log['hour'] = $hour;
+    } elseif ($log['totals'] == $totals && $log['rows'][$hour] == $row) {
+        return $log;
+    }
+    $played = [];
+    foreach ($totals as $id => $min) {
+        $d = $min - (isset($log['base'][$id]) ? $log['base'][$id] : 0);
+        if ($d > 0) $played[$id] = $d;
+    }
+    arsort($played);
+    $log['rows'][$hour] = $row;
+    $log['play'][$hour] = $played;
+    $log['totals'] = $totals;
+    $cut = $hour - 8 * 86400;
+    foreach (['rows', 'play'] as $k) $log[$k] = array_filter($log[$k], function ($t) use ($cut) {
+        return $t > $cut;
+    }, ARRAY_FILTER_USE_KEY);
+    return @file_put_contents(STEAM_HOURLY, json_encode($log), LOCK_EX) === false ? false : $log;
 }
 
 // Minutes played per game per day, for the profile page: ['days' => ['Y-m-d' => [appid => minutes]], 'gaps' => ['Y-m-d' => 'Y-m-d of

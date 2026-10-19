@@ -74,7 +74,8 @@ RedirectMatch 301 ^/minecraft/nether(\.html)?$ /minecraft/tools/nether-portal/
 RedirectMatch 301 ^/minecraft/storage/(index\.html)?$ /minecraft/tools/storage-sorter/
 RedirectMatch 301 ^/minecraft/storage(/.*)?$ /minecraft/tools/storage-sorter$1
 RedirectMatch 301 ^/minecraft/shulker-schematic-calculator(\.html)?$ /minecraft/tools/shulker-calculator/
-RedirectMatch 301 ^/minecraft/materiallist(\.html)?$ /minecraft/tools/material-list/
+RedirectMatch 301 ^/minecraft/materiallist(\.html)?$ /minecraft/tools/litematica-converter/
+RedirectMatch 301 ^/minecraft/tools/material-list(/.*)?$ /minecraft/tools/litematica-converter/
 RedirectMatch 301 ^/minecraft/litematica_material_converter(\.html)?$ /minecraft/tools/litematica-converter/
 RedirectMatch 301 ^/minecraft/day(\.php)?$ /minecraft/tools/day-calculator/
 RedirectMatch 301 ^/minecraft/marker(\.php)?$ /minecraft/tools/dynmap-marker/
