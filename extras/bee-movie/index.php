@@ -1,5 +1,5 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = ['components' => true, 'css' => ['/assets/css/pages/extras-random.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
@@ -11,13 +11,14 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
 
-    <div class="title">
-        <h1>Template</h1>
-    </div>
-<p>
-Bee Movie
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Bee Movie Script</h1>
+        <p class="page-lede">The whole script, start to finish.</p>
+
+        <div class="card xr-script">
+<p>Bee Movie
 By Jerry Seinfeld
 
 NARRATOR:
@@ -4085,12 +4086,11 @@ SINGER:
 All right. Take ten, everybody.
 Wrap it up, guys.
 BARRY:
-I had virtually no rehearsal for that.
+I had virtually no rehearsal for that.</p>
+        </div>
+    </main>
 
-</p>
-</main>
-    <?php site_footer(); ?>
-
+    <?php site_footer(null, false); ?>
 </body>
 
 </html>

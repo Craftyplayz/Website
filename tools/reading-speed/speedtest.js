@@ -117,12 +117,12 @@ function update() {
     const elapsed = performance.now() - startTime;
     const minutes = elapsed / 60000;
     $id('time').textContent = formatTime(elapsed);
-    $id('speed').textContent = (minutes > 0 ? (current.wordCount / minutes).toFixed(0) : 0) + ' Words Per Minute';
+    $id('speed').textContent = (minutes > 0 ? (current.wordCount / minutes).toFixed(0) : 0);
 }
 
 function reset() {
     $id('time').textContent = formatTime(0);
-    $id('speed').textContent = '0 Words Per Minute';
+    $id('speed').textContent = '0';
 }
 
 function timer() {

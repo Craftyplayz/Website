@@ -7,148 +7,71 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 <head>
     <?php page_head(); ?>
 <style>
-  * { box-sizing: border-box; }
-  .tool-wrap {
-    margin: 0;
-    padding: 40px 16px 80px;
-    background: #202020;
-    color: #eaeaea;
-    font-family: 'Roboto', Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  .fx .container { max-width: 640px; }
+  .fx .card {
+    margin-bottom: 16px; padding: 16px;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg);
   }
-  h1 {
-    font-size: 1.6rem;
-    font-weight: 500;
-    margin: 0 0 4px;
-    text-align: center;
+  .fx .card h2 { margin: 0 0 12px; font-size: 17px; }
+  .fx #dropzone {
+    padding: 32px 20px; text-align: center; cursor: pointer;
+    background: repeating-linear-gradient(45deg, #262626 0 14px, var(--card) 14px 28px);
+    border: 2px dashed var(--line-strong); transition: border-color var(--fast);
   }
-  .subtitle {
-    color: #9a9a9a;
-    font-size: 0.9rem;
-    margin: 0 0 28px;
-    text-align: center;
+  .fx #dropzone.dragover, .fx #dropzone:hover { border-color: var(--accent); }
+  .fx .upload-label {
+    display: inline-block; padding: 9px 16px; margin: 0;
+    background: var(--btn); border: 1px solid var(--btn-line); border-radius: var(--radius);
+    color: #fff; font-size: 14px; cursor: pointer; transition: background var(--fast);
   }
-  .container { width: 100%; max-width: 640px; }
-  .card {
-    background: #272626;
-    border: 1px solid #ffffff;
-    border-radius: 15px;
-    padding: 24px;
-    margin-bottom: 20px;
+  .fx .upload-label:hover { background: #4a9033; }
+  .fx #fileName { margin-top: 10px; color: var(--muted); font-size: 13px; word-break: break-all; }
+  .fx .field { margin-bottom: 12px; }
+  .fx label { display: block; margin-bottom: 4px; color: var(--muted); font-size: 13px; }
+  .fx select, .fx input[type="number"] {
+    width: 100%; padding: 8px 12px;
+    background: #161616; border: 1px solid #4a4a4a; border-radius: var(--radius);
+    color: var(--text); font: 14px var(--font); outline: none; transition: border-color var(--fast);
   }
-  .card h2 {
-    font-size: 1rem;
-    font-weight: 500;
-    margin: 0 0 16px;
-    color: #eaeaea;
+  .fx select:focus, .fx input[type="number"]:focus { border-color: var(--accent); }
+  .fx .checkbox-row { display: flex; align-items: center; gap: 8px; }
+  .fx .checkbox-row label { margin: 0; color: var(--text); font-size: 14px; }
+  .fx input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
+  .fx button {
+    width: 100%; padding: 10px 16px;
+    background: var(--btn2); border: 1px solid var(--line-strong); border-radius: var(--radius);
+    color: var(--text); font: 14px var(--font); cursor: pointer; transition: background var(--fast), transform .06s;
   }
-  #dropzone {
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.15s ease;
+  .fx button:hover:not(:disabled) { background: var(--btn2-hover); }
+  .fx button:active:not(:disabled) { transform: translateY(1px); }
+  .fx button:disabled { opacity: .5; cursor: default; }
+  .fx button + button { margin-top: 8px; }
+  .fx #processBtn { background: var(--btn); border-color: var(--btn-line); color: #fff; }
+  .fx #processBtn:hover:not(:disabled) { background: #4a9033; }
+  .fx #progressText { margin-bottom: 8px; color: var(--muted); font-size: 13px; }
+  .fx progress { width: 100%; height: 6px; overflow: hidden; border: 0; border-radius: 3px; appearance: none; }
+  .fx progress::-webkit-progress-bar { background: var(--btn2); border-radius: 3px; }
+  .fx progress::-webkit-progress-value { background: var(--accent); border-radius: 3px; }
+  .fx progress::-moz-progress-bar { background: var(--accent); }
+  .fx #thumbGrid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 6px;
+    max-height: 260px; margin-top: 10px; overflow-y: auto;
   }
-  #dropzone.dragover { border-color: #6fbf73; }
-  .upload-label {
-    display: inline-block;
-    padding: 12px 22px;
-    background: #202020;
-    border: 1px solid #ffffff;
-    border-radius: 15px;
-    cursor: pointer;
-    font-size: 0.95rem;
-  }
-  .upload-label:hover { background: #2f2f2f; }
-  #fileName {
-    margin-top: 14px;
-    font-size: 0.85rem;
-    color: #9a9a9a;
-    word-break: break-all;
-  }
-  .field { margin-bottom: 16px; }
-  .field:last-child { margin-bottom: 0; }
-  label {
-    display: block;
-    font-size: 0.85rem;
-    color: #cfcfcf;
-    margin-bottom: 6px;
-  }
-  select, input[type="number"] {
-    width: 100%;
-    padding: 10px 12px;
-    background: #202020;
-    color: #eaeaea;
-    border: 1px solid #ffffff;
-    border-radius: 15px;
-    font-family: inherit;
-    font-size: 0.9rem;
-  }
-  .checkbox-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .checkbox-row label { margin: 0; }
-  button {
-    width: 100%;
-    padding: 12px 20px;
-    background: #202020;
-    color: #eaeaea;
-    border: 1px solid #ffffff;
-    border-radius: 15px;
-    font-family: inherit;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: background 0.15s ease;
-  }
-  button:hover:not(:disabled) { background: #2f2f2f; }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-  button + button { margin-top: 12px; }
-  #progressText {
-    font-size: 0.85rem;
-    color: #9a9a9a;
-    margin-bottom: 10px;
-  }
-  progress {
-    width: 100%;
-    height: 10px;
-    border-radius: 15px;
-    overflow: hidden;
-    appearance: none;
-  }
-  progress::-webkit-progress-bar { background: #202020; border-radius: 15px; }
-  progress::-webkit-progress-value { background: #6fbf73; border-radius: 15px; }
-  #thumbGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
-    gap: 6px;
-    margin-top: 12px;
-    max-height: 260px;
-    overflow-y: auto;
-  }
-  #thumbGrid img {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    border: 1px solid #ffffff;
-    border-radius: 6px;
-    image-rendering: pixelated;
-  }
-  #frameCount { font-size: 0.9rem; color: #cfcfcf; }
-  .hidden { display: none !important; }
-  .error {
-    color: #e07a7a;
-    font-size: 0.85rem;
-    margin-top: 12px;
+  .fx #thumbGrid img { width: 100%; aspect-ratio: 1 / 1; border: 1px solid var(--line); border-radius: 6px; image-rendering: pixelated; }
+  .fx #frameCount { color: var(--muted); font-size: 14px; }
+  .fx .hidden { display: none !important; }
+  .fx .error {
+    margin-top: 12px; padding: 10px 14px; font-size: 14px;
+    background: var(--danger-bg); border: 1px solid var(--danger-line); border-radius: var(--radius);
   }
 </style>
 </head>
 <body>
     <?php site_header(); ?>
-    <div class="tool-wrap">
-
-<h1>Frame Extractor</h1>
-<p class="subtitle">Upload a GIF or MP4, split it into 128×128 frames, download frames or 6×4 collage sheets</p>
+    <main class="page fx" id="main">
+    <?= site_breadcrumbs(site_current_path()) ?>
+<h1 class="page-title">Frame Extractor</h1>
+<p class="page-lede">Upload a GIF or MP4, split it into 128×128 frames, download frames or 6×4 collage sheets.</p>
 
 <div class="container">
 
@@ -176,7 +99,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
     </div>
     <div class="field checkbox-row">
       <input type="checkbox" id="smoothingInput">
-      <label for="smoothingInput" style="margin:0">Smooth resize (unchecked = crisp pixel-art resize)</label>
+      <label for="smoothingInput">Smooth resize (unchecked = crisp pixel-art resize)</label>
     </div>
     <button id="processBtn">Process</button>
     <div id="errorBox" class="error hidden"></div>
@@ -553,7 +476,7 @@ import { parseGIF, decompressFrames } from "https://esm.sh/gifuct-js@2.1.2";
   });
 })();
 </script>
-    </div>
+    </main>
 
     <?php site_footer(); ?>
 </body>

@@ -1,0 +1,29 @@
+/* Extras pages that are one card of text: Trump Quotes, Insults, Random Fact, Live Laugh Love, Cyberpunk, Bee Movie. */
+.xr-card { max-width: 760px; }
+.xr-card::after { content: ""; display: block; clear: both; }
+.xr-line { margin: 0; font-size: clamp(18px, 2.6vw, 24px); line-height: 1.4; }
+.xr-meta { margin: 10px 0 0; font-size: 13px; }
+.xr-card .badges { margin-bottom: 0; }
+.xr-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
+.xr-actions .btn { color: var(--text); text-decoration: none; }
+.xr-actions .btn.primary { color: #fff; }
+
+/* the bobbing mugshot on Trump Quotes; transform only, off for reduced motion */
+.xr-mug {
+    float: right; width: clamp(88px, 22vw, 160px); height: auto; margin: 0 0 8px 16px;
+    border-radius: var(--radius-lg); animation: xr-bob 2s ease-in-out infinite;
+}
+@keyframes xr-bob { 50% { transform: translateY(-10px); } }
+@media (prefers-reduced-motion: reduce) { .xr-mug { animation: none; } }
+
+/* Live Laugh Love: letter + three words per row */
+.lll { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; }
+.lll-k { min-width: 2.6em; font-family: var(--mono); }
+
+/* Cyberpunk 2077: one very long sentence */
+.page-title + .xr-card { margin-top: 16px; }
+.xr-cp { margin: 0; overflow-wrap: anywhere; }
+
+/* Bee Movie: the whole script, line breaks kept */
+.xr-script { max-width: 760px; }
+.xr-script p { margin: 0; white-space: pre-line; }

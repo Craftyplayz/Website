@@ -1,0 +1,20 @@
+/* Factorio Saves and Factorio Command Generator (/games/factorio/) */
+
+/* ---------- saves gallery ---------- */
+.fmaps { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 40vw, 260px), 1fr)); gap: clamp(10px, 2vw, 16px); }
+.fmap { display: block; padding: 0; overflow: hidden; color: var(--text) !important; text-decoration: none !important; transition: border-color var(--fast); }
+.fmap:hover { border-color: var(--accent); }
+.fmap img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; background: var(--card2); }
+.fmap span { display: block; padding: 10px 14px; font-size: 15px; font-weight: 600; }
+
+/* ---------- command generator ---------- */
+.fcmd { display: grid; gap: 10px; margin-bottom: 16px; }
+.fcmd-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 12px; }
+.fcmd-fields label { display: grid; gap: 4px; color: var(--muted); font-size: 13px; }
+.fcmd-check { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; background: var(--card2); border-radius: var(--radius); font-size: 14px; cursor: pointer; }
+.fcmd-check input { flex: none; width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--accent); }
+.fcmd-check small { display: block; color: var(--muted); font-size: 13px; }
+.n-btn { margin-left: auto; }
+.fcmd-out { margin: 0 0 10px; padding: 12px; overflow-x: auto; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius); font: 13px/1.5 var(--mono); white-space: pre-wrap; word-break: break-all; }
+.fcmd code, .fcmd-out + p code { font-family: var(--mono); font-size: 13px; }
+.fcmd-out + p { margin: 0; font-size: 14px; overflow-wrap: anywhere; }

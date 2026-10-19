@@ -1,0 +1,50 @@
+/* Harry Potter Quiz levels (/games/quizzes/harry-potter/<level>/).
+   Each level's assets/js/scripts.js builds the question cards with these class names:
+   .card.question > .card-content > .content > h3 + .control, with .radio labels and .answer-input fields. */
+
+.quiz { max-width: 860px; }
+
+/* ---------- questions ---------- */
+#content { display: grid; gap: 12px; margin-bottom: 16px; }
+.quiz .question h3 { margin: 0 0 10px; color: var(--text) !important; font-size: 17px; line-height: 1.35; }
+.quiz .control { display: grid; gap: 6px; }
+.quiz .control br { display: none; }
+.quiz .control fieldset { display: grid; gap: 6px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.quiz .control legend { margin-bottom: 6px; padding: 0; color: var(--muted); font-size: 13px; }
+.quiz .radio {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px; min-height: 40px;
+    background: var(--card2); border: 1px solid transparent; border-radius: var(--radius);
+    font-size: 15px; cursor: pointer; transition: border-color var(--fast);
+}
+.quiz .radio:hover { border-color: var(--line-strong); }
+.quiz .radio:has(input:checked) { background: var(--accent-soft); border-color: var(--btn-line); }
+.quiz .radio input { flex: none; width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+
+/* typed answers (Extra Hard) */
+.quiz .control > label:not(.radio) { margin-top: 4px; color: var(--muted); font-size: 13px; }
+.quiz input.input, .quiz select.input {
+    width: 100%; max-width: 420px; padding: 8px 12px; background: var(--sunken); border: 1px solid var(--line-strong);
+    border-radius: var(--radius); color: var(--text); font: inherit; font-size: 15px; outline: none; transition: border-color var(--fast);
+}
+.quiz input.input:focus, .quiz select.input:focus { border-color: var(--accent); }
+
+.quiz .submit { justify-content: center; width: 100%; padding: 12px 16px; font-size: 15px; }
+
+/* ---------- results ---------- */
+.quiz .results { display: none; }
+.quiz .results h2 { margin-bottom: 12px; }
+.quiz .results .tiles { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.quiz .results .tile b { font-size: 28px; }
+.quiz .results p { margin: 12px 0 0; }
+
+/* ---------- toast the scripts append to <body> ---------- */
+.notification {
+    position: fixed; right: 16px; bottom: 16px; z-index: 1800; max-width: calc(100vw - 32px); padding: 10px 14px;
+    background: var(--info-bg); border: 1px solid var(--info-line); border-radius: var(--radius);
+    color: var(--text); font: 14px/1.45 var(--font);
+}
+@keyframes quizIn { from { opacity: 0; transform: translateY(8px); } }
+@keyframes quizOut { to { opacity: 0; visibility: hidden; } }
+.slideInRight { animation: quizIn var(--base) ease-out both; }
+.slideOutRight { animation: quizOut var(--fast) both; }
+@media (prefers-reduced-motion: reduce) { .slideInRight { animation: none; } }

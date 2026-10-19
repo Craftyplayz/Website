@@ -1,0 +1,15 @@
+/* Free Games (/games/free/) */
+.bar .grow { flex: 1; }
+.ftg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.ftg-game { display: flex; flex-direction: column; gap: 8px; padding: 0 0 14px; overflow: hidden; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.ftg-game:hover { border-color: var(--accent); }
+.ftg-game > :not(img) { margin: 0 14px; }
+.ftg-game img { display: block; width: 100%; height: auto; aspect-ratio: 365 / 206; background: var(--card2); }
+.ftg-game b { font-size: 16px; }
+.ftg-game .muted { font-size: 13px; }
+.ftg-game .badges { margin-top: auto; margin-bottom: 0; }
+.ftg-hero { display: block; width: 100%; height: auto; border-radius: var(--radius); }
+#detail h3 { margin: 18px 0 8px; font-size: 15px; }
+#detail p { font-size: 14px; }
+.ftg-shots { display: grid; gap: 8px; }
+.ftg-shots img { display: block; width: 100%; height: auto; border-radius: var(--radius); }

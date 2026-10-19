@@ -47,6 +47,7 @@
                 {
                     "title": "More",
                     "pages": [
+                        { "title": "Server Status", "url": "/minecraft/servers/", "description": "Live status of my Minecraft servers", "keywords": ["server", "status", "online", "players", "play.craftyplayz.com"] },
                         { "title": "Screenshots", "url": "/minecraft/screenshots/", "description": "Screenshots from years of playing" },
                         { "title": "Skins", "url": "/minecraft/skins/", "description": "My Minecraft skins" },
                         { "title": "Tips", "url": "/minecraft/tips/", "description": "Minecraft tips and mods" },
@@ -77,10 +78,9 @@
                     "title": "Play",
                     "pages": [
                         { "title": "Chapter Oracle", "url": "/games/chapterguesser/", "description": "Guess the book chapter from a passage", "keywords": ["harry potter", "quiz", "chapter guesser"] },
-                        { "title": "Guess Who", "url": "/games/guesswho/og/", "description": "Classic Guess Who" },
-                        { "title": "Guess Who: Avatar", "url": "/games/guesswho/atla/", "description": "Guess Who with Avatar characters", "keywords": ["atla"] },
+                        { "title": "Guess Who", "url": "/games/guesswho/", "description": "Guess Who boards: Classic, Avatar and more", "keywords": ["atla", "avatar"] },
+                        { "title": "Free Games", "url": "/games/free/", "description": "Browse free-to-play PC and browser games", "keywords": ["freetogame", "f2p", "free to play"] },
                         { "title": "A Dark Room", "url": "/games/adarkroom/", "description": "A minimalist text adventure" },
-                        { "title": "Geriant Bingo", "url": "/games/bingo/geriant/", "description": "Bingo card" },
                         { "title": "The Game", "url": "/games/the-game/", "description": "You just lost it" }
                     ]
                 },
@@ -98,24 +98,15 @@
                 {
                     "title": "Stats",
                     "pages": [
-                        { "title": "Steam Stats", "url": "/games/steam/", "description": "My Steam library and achievements", "keywords": ["achievements"] },
+                        { "title": "Steam Stats", "url": "/games/steam/", "description": "My Steam profile, playtime and achievements", "keywords": ["achievements", "level", "playtime"] },
+                        { "title": "Steam Library", "url": "/games/steam/library/", "description": "Every game I own on Steam, sortable", "keywords": ["games", "playtime"], "nav": false },
+                        { "title": "Steam Achievements", "url": "/games/steam/achievements/", "description": "Recent, rarest and perfect-game achievements", "keywords": ["rare", "100%", "perfect"], "nav": false },
+                        { "title": "Steam Wishlist", "url": "/games/steam/wishlist/", "description": "Games on my Steam wishlist and what's on sale", "keywords": ["sale", "price", "discount"], "nav": false },
                         { "title": "Steam Game", "url": "/games/steam/game/", "nav": false, "search": false },
                         { "title": "Retro Achievements", "url": "/games/retro/", "description": "Retro game achievements" },
                         { "title": "Factorio Saves", "url": "/games/factorio/", "description": "Maps of my Factorio saves" },
                         { "title": "Factorio Map", "url": "/games/factorio/map/", "nav": false, "search": false },
                         { "title": "Factorio Command Generator", "url": "/games/factorio/commands/", "description": "Generate Factorio map render commands", "nav": false }
-                    ]
-                },
-                {
-                    "title": "Hypixel Skyblock",
-                    "url": "/games/hypixel/",
-                    "pages": [
-                        { "title": "Collection Tracker", "url": "/games/hypixel/collections/", "description": "Track Skyblock collections" },
-                        { "title": "Collection", "url": "/games/hypixel/collections/track/", "nav": false, "search": false },
-                        { "title": "Melon War", "url": "/games/hypixel/collections/melon-war/", "description": "The Great Melon War" },
-                        { "title": "Minions", "url": "/games/hypixel/minions/", "description": "Minion calculator" },
-                        { "title": "Ghast Tear Calculator", "url": "/games/hypixel/ghast-calculator/", "description": "Bazaar ghast tear profits" },
-                        { "title": "Regex Builder", "url": "/games/hypixel/regex-builder/", "description": "Build chat filter regexes" }
                     ]
                 },
                 {
@@ -142,16 +133,6 @@
                         { "title": "Books I've Read", "url": "/books/", "description": "My reading list", "keywords": ["reading"] },
                         { "title": "Book Cover Search", "url": "/books/covers/", "description": "Find covers for a book" },
                         { "title": "Bulk Cover Downloader", "url": "/books/covers/bulk/", "description": "Download covers for a whole series" }
-                    ]
-                },
-                {
-                    "title": "Harry Potter",
-                    "url": "/books/harry-potter/",
-                    "pages": [
-                        { "title": "Harry Potter Characters", "url": "/books/harry-potter/", "description": "Character info", "keywords": ["hp"] },
-                        { "title": "Harry Potter Character", "url": "/books/harry-potter/character/", "nav": false, "search": false },
-                        { "title": "Harry Potter Info", "url": "/books/harry-potter/info/", "nav": false },
-                        { "title": "Harry Potter Quiz (old)", "url": "/books/harry-potter/quiz/", "nav": false, "search": false }
                     ]
                 }
             ]
@@ -229,7 +210,7 @@
                     "title": "Other",
                     "pages": [
                         { "title": "Cyberpunk 2077", "url": "/extras/cyberpunk/", "description": "A question about Cyberpunk" },
-                        { "title": "D&D Character", "url": "/extras/dnd/", "description": "D&D character sheet" },
+                        { "title": "D&D Characters", "url": "/extras/dnd/", "description": "D&D Beyond character sheets" },
                         { "title": "Bee Movie", "url": "/extras/bee-movie/", "description": "The whole Bee Movie script", "nav": false }
                     ]
                 }

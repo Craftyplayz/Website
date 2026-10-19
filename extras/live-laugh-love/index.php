@@ -1,6 +1,52 @@
 <?php
-$site_page = ['legacy' => true, 'description' => 'Live Laugh Love alternatives'];
+$site_page = ['components' => true, 'description' => 'Live Laugh Love alternatives', 'css' => ['/assets/css/pages/extras-random.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+
+$letters = [
+    'A' => ['Alienate', 'Aggravate', 'Assert'],
+    'B' => ['Bed', 'Bath', 'Breakfast'],
+    'B-2' => ['Bed', 'Bath', 'Beyond'],
+    'C' => ['Catcall', 'Catcreep', 'Catalog'],
+    'D' => ['Defend', 'Demand', 'Depend'],
+    'D-2' => ['Destroy', 'Dick', 'December'],
+    'E' => ['Expunge', 'Extract', 'Explain'],
+    'F' => ['Fight', 'Flight', 'Fear'],
+    'F-2' => ['Flake', 'Fake', 'Fabricate'],
+    'G' => ['Gaslight', 'Gatekeep', 'Girlboss'],
+    'H' => ['Hero', 'Himbo', 'Whore'],
+    'I' => ['Isolate', 'Irritate', 'Ignore'],
+    'J' => ['Juke', 'Jebait', 'Justify'],
+    'K' => ['Kick', 'Knock', 'Kidnap'],
+    'L' => ['Live', 'Laugh', 'Love'],
+    'M' => ['Manipulate', 'Mansplain', 'Malewife'],
+    'N' => ['No', 'Nut', 'November'],
+    'O' => ['Outwit', 'Outplay', 'Outlast'],
+    'P' => ['Plaigerize', 'Popularize', 'Profit'],
+    'Q' => ['Queer', 'Quote', 'Queen'],
+    'R' => ['Reduce', 'Reuse', 'Recycle'],
+    'S' => ['Slay', 'Serve', 'Survive'],
+    'T' => ['Transpose', 'Transcend', 'Transgender'],
+    'U' => ['Unify', 'Update', 'Upgrade'],
+    'U-2' => ['Ungovernable', 'Unmarkable', 'Unapologetic'],
+    'V' => ['Veni', 'Vidi', 'Vici'],
+    'W' => ['Weep', 'Whine', 'Weaponize'],
+    'X' => ['Xenophobe', 'Xenosexual', 'Xenophile'],
+    'Y' => ['Yikes', 'Yoink', 'Yeet'],
+    'Z' => ['Zen', 'Zine', 'Zuck'],
+];
+$mentions = [
+    '1' => ['Stop', 'Drop', 'Roll'],
+    '2' => ['Fuck', 'Marry', 'Kill'],
+    '3' => ['Improvise', 'Adapt', 'Overcome'],
+    // '4' => ['Help', 'Help', 'Help'],
+];
+
+function lll_rows($rows)
+{
+    foreach ($rows as $key => $words) {
+        echo '<div class="rowi"><b class="lll-k">' . h($key) . '</b><span class="grow">' . h(implode(' · ', $words)) . '</span></div>';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,244 +56,25 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 </head>
 
 <body>
-    <style>
-        td {
-            border: 1px solid white;
-            text-align: center;
-        }
-    </style>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
 
-    <div class="title">
-        <h1>Live Laugh Love alternatives</h1>
-    </div>
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Live Laugh Love alternatives</h1>
+        <p class="page-lede">Three words for every letter. Suggestions: <a href="mailto:mail@craftyplayz.com">mail@craftyplayz.com</a></p>
 
-    <table>
-        <tbody>
-            <tr>
-                <td>Letter</td>
-                <td>First</td>
-                <td>Second</td>
-                <td>Third</td>
-            </tr>
-            <tr>
-                <td>A</td>
-                <td>Alienate</td>
-                <td>Aggravate</td>
-                <td>Assert</td>
-            </tr>
-            <tr>
-                <td>B</td>
-                <td>Bed</td>
-                <td>Bath</td>
-                <td>Breakfast</td>
-            </tr>
-            <tr>
-                <td>B-2</td>
-                <td>Bed</td>
-                <td>Bath</td>
-                <td>Beyond</td>
-            </tr>
-            <tr>
-                <td>C</td>
-                <td>Catcall</td>
-                <td>Catcreep</td>
-                <td>Catalog</td>
-            </tr>
-            <tr>
-                <td>D</td>
-                <td>Defend</td>
-                <td>Demand</td>
-                <td>Depend</td>
-            </tr>
-            <tr>
-                <td>D-2</td>
-                <td>Destroy</td>
-                <td>Dick</td>
-                <td>December</td>
-            </tr>
-            <tr>
-                <td>E</td>
-                <td>Expunge</td>
-                <td>Extract</td>
-                <td>Explain</td>
-            </tr>
-            <tr>
-                <td>F</td>
-                <td>Fight</td>
-                <td>Flight</td>
-                <td>Fear</td>
-            </tr>
-            <tr>
-                <td>F-2</td>
-                <td>Flake</td>
-                <td>Fake</td>
-                <td>Fabricate</td>
-            </tr>
-            <tr>
-                <td>G</td>
-                <td>Gaslight</td>
-                <td>Gatekeep</td>
-                <td>Girlboss</td>
-            </tr>
-            <tr>
-                <td>H</td>
-                <td>Hero</td>
-                <td>Himbo</td>
-                <td>Whore</td>
-            </tr>
-            <tr>
-                <td>I</td>
-                <td>Isolate</td>
-                <td>Irritate</td>
-                <td>Ignore</td>
-            </tr>
-            <tr>
-                <td>J</td>
-                <td>Juke</td>
-                <td>Jebait</td>
-                <td>Justify</td>
-            </tr>
-            <tr>
-                <td>K</td>
-                <td>Kick</td>
-                <td>Knock</td>
-                <td>Kidnap</td>
-            </tr>
-            <tr>
-                <td>L</td>
-                <td>Live</td>
-                <td>Laugh</td>
-                <td>Love</td>
-            </tr>
-            <tr>
-                <td>M</td>
-                <td>Manipulate</td>
-                <td>Mansplain</td>
-                <td>Malewife</td>
-            </tr>
-            <tr>
-                <td>N</td>
-                <td>No</td>
-                <td>Nut</td>
-                <td>November</td>
-            </tr>
-            <tr>
-                <td>O</td>
-                <td>Outwit</td>
-                <td>Outplay</td>
-                <td>Outlast</td>
-            </tr>
-            <tr>
-                <td>P</td>
-                <td>Plaigerize</td>
-                <td>Popularize</td>
-                <td>Profit</td>
-            </tr>
-            <tr>
-                <td>Q</td>
-                <td>Queer</td>
-                <td>Quote</td>
-                <td>Queen</td>
-            </tr>
-            <tr>
-                <td>R</td>
-                <td>Reduce</td>
-                <td>Reuse</td>
-                <td>Recycle</td>
-            </tr>
-            <tr>
-                <td>S</td>
-                <td>Slay</td>
-                <td>Serve</td>
-                <td>Survive</td>
-            </tr>
-            <tr>
-                <td>T</td>
-                <td>Transpose</td>
-                <td>Transcend</td>
-                <td>Transgender</td>
-            </tr>
-            <tr>
-                <td>U</td>
-                <td>Unify</td>
-                <td>Update</td>
-                <td>Upgrade</td>
-            </tr>
-            <tr>
-                <td>U-2</td>
-                <td>Ungovernable</td>
-                <td>Unmarkable</td>
-                <td>Unapologetic</td>
-            </tr>
-            <tr>
-                <td>V</td>
-                <td>Veni</td>
-                <td>Vidi</td>
-                <td>Vici</td>
-            </tr>
-            <tr>
-                <td>W</td>
-                <td>Weep</td>
-                <td>Whine</td>
-                <td>Weaponize</td>
-            </tr>
-            <tr>
-                <td>X</td>
-                <td>Xenophobe</td>
-                <td>Xenosexual</td>
-                <td>Xenophile</td>
-            </tr>
-            <tr>
-                <td>Y</td>
-                <td>Yikes</td>
-                <td>Yoink</td>
-                <td>Yeet</td>
-            </tr>
-            <tr>
-                <td>Z</td>
-                <td>Zen</td>
-                <td>Zine</td>
-                <td>Zuck</td>
-            </tr>
-            <tr>
-                <td colspan="4">Honorable Mentions</td>
-            </tr>
-            <tr>
-                <td>1</td>
-                <td>Stop</td>
-                <td>Drop</td>
-                <td>Roll</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>Fuck</td>
-                <td>Marry</td>
-                <td>Kill</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>Improvise</td>
-                <td>Adapt</td>
-                <td>Overcome</td>
-            </tr>
-<!--             <tr>
-                <td>4</td>
-                <td>Help</td>
-                <td>Help</td>
-                <td>Help</td>
-            </tr> -->
-        </tbody>
-    </table>
+        <div class="card section">
+            <h2>A to Z <span class="n"><?= count($letters) ?></span></h2>
+            <div class="lll"><?php lll_rows($letters); ?></div>
+        </div>
 
-    <div class="title">
-        <h2>Any suggestions feel free to email me at mail@craftyplayz.com</h2>
-    </div>
-
+        <div class="card">
+            <h2>Honorable mentions <span class="n"><?= count($mentions) ?></span></h2>
+            <div class="lll"><?php lll_rows($mentions); ?></div>
+        </div>
     </main>
-    <?php site_footer(); ?>
 
+    <?php site_footer(null, false); ?>
 </body>
 
 </html>

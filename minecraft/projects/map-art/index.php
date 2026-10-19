@@ -1,38 +1,30 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = [
+    'components' => true,
+    'css' => ['/assets/css/pages/minecraft-gallery.css'],
+];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+$images = array_values(array_diff(scandir(SITE_ROOT . '/media/minecraft/mapart') ?: [], ['.', '..']));
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <?php page_head(); ?>
-    <link rel="stylesheet" href="/assets/css/pages/minecraft.css">
 </head>
-
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Map Art</h1>
+        <p class="page-lede">Map art I've made on my Minecraft server. <?= count($images) ?> maps.</p>
 
-    <div class="title" id="screenshots">
-        <h1>Maparts</h1>
-        <h2>Some mapart i have made in my minecraft server</h2>
-    </div>
-
-    <div class="screenshots">
-        <?php
-        $images = scandir($_SERVER['DOCUMENT_ROOT'] . '/media/minecraft/mapart');
-        foreach ($images as $image) {
-            if ($image !== '.' && $image !== '..') {
-                echo '<div class="screenshot"><img src="/media/minecraft/mapart/' . $image . '" alt="Screenshot" class="mapart-image"></div></a>' . PHP_EOL;
-            }
-        }
-        ?>
-    </div>
-
-
-
+        <div class="maps">
+            <?php foreach ($images as $image): ?>
+                <img src="/media/minecraft/mapart/<?= h(rawurlencode($image)) ?>" width="128" height="128" alt="Map art <?= h(pathinfo($image, PATHINFO_FILENAME)) ?>" loading="lazy" decoding="async">
+            <?php endforeach; ?>
+        </div>
     </main>
     <?php site_footer(); ?>
 </body>

@@ -1,0 +1,8 @@
+/* Life Series: season index and session transcripts */
+.page a.rowi { color: var(--text); }
+.page a.rowi:hover { background: var(--btn2-hover); text-decoration: none; }
+
+.transcript {
+    margin: 0; padding: 14px 16px; overflow-x: auto; background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); color: var(--text); font: 13px/1.6 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 4;
+}

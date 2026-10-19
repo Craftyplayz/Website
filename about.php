@@ -1,5 +1,5 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = ['components' => true];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
@@ -7,63 +7,42 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <head>
     <?php page_head(); ?>
-    <link rel="stylesheet" href="/assets/css/pages/homepage.css">
-    <!-- <meta http-equiv="refresh" content="3"> -->
 </head>
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
 
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">About Me</h1>
+        <p class="page-lede">Who runs this site.</p>
 
-    <div class="title">
-        <h1>About Me</h1>
-    </div>
-
-    <div class="about-me">
-        <div class="item">
-            <h1>Hobbies</h1>
-            <p>Programming - Mostly creating websites such as this one</p><br>
+        <div class="grid">
+            <section class="card">
+                <h2>Hobbies</h2>
+                <p>Programming, mostly creating websites like this one.</p>
+            </section>
+            <section class="card">
+                <h2>Background</h2>
+                <div class="kv">
+                    <span>Age</span><span>22</span>
+                    <span>Born</span><span>NSW, Australia (lived there for 16 years)</span>
+                    <span>Now</span><span>Living in the UK since 2019</span>
+                </div>
+            </section>
+            <section class="card">
+                <h2>Interests</h2>
+                <p><b>Gaming.</b> My main games are Minecraft, Rocket League and Factorio. See my <a href="/games/steam/">Steam Stats</a>.</p>
+                <p><b>Books.</b> I'm currently reading the Heroes of Olympus series, and I've read Harry Potter over 135 times. See <a href="/books/">Books I've Read</a>.</p>
+            </section>
+            <section class="card">
+                <h2>Contact me</h2>
+                <p>Please don't. I don't like people.</p>
+            </section>
         </div>
-        <div class="item">
-            <h1>Background</h1>
-            <p>22 Years old</p><br>
-            <p>Born in NSW Australia and lived there for 16 years</p><br>
-            <p>Now living in the UK since 2019</p><br>
-        </div>
-        <div class="item">
-            <h1>Intrests</h1>
-            <p><a href="/games/steam/">Gaming</a> - My main games are Minecraft, Rocket League & Factorio<br>You can see my steam stats here -<a href="/games/steam/"> Steam Stats</a></p><br>
-            <p>Books - Im currently reading the Heroes of Olympus series<br>I have read Harry Potter over 135 times now - <a href="/books">Books Ive read</a></p><br>
-        </div>
-        <div class="item">
-            <h1>Contact me</h1>
-            <p>Please dont. I dont like people</p><br>
-        </div>
-    </div>
-
-    <script>
-        const items = document.querySelectorAll('.about-me .item');
-        const isDesktop = window.innerWidth > 768;
-
-        if (isDesktop) {
-            let maxHeight = 0;
-            items.forEach(item => {
-                const height = item.offsetHeight;
-                if (height > maxHeight) {
-                    maxHeight = height;
-                }
-            });
-
-            items.forEach(item => {
-                item.style.height = `${maxHeight}px`;
-            });
-        }
-    </script>
-
     </main>
-    <?php site_footer(); ?>
 
+    <?php site_footer(); ?>
 </body>
 
 </html>

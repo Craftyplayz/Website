@@ -1,5 +1,5 @@
 <?php
-$site_page = ['legacy' => true];
+$site_page = ['components' => true, 'ui' => true, 'css' => ['/assets/css/pages/tools.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
@@ -11,42 +11,54 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <body>
     <?php site_header(); ?>
-    <main class="page page-legacy" id="main">
 
-    <div class="title">
-        <h1>Docker Install script maker</h1>
+    <main class="page" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
+        <h1 class="page-title">Docker Install Script Maker</h1>
+        <p class="page-lede">Turn a docker pull command into a docker run command with a volume. It's copied for you.</p>
 
-        <div>
-        <label for="command">Docker Pull Command:</label>
-        <input type="text" id="command" placeholder="Enter docker pull command">
-    </div>
-    <div>
-        <label for="volumeName">Volume Name:</label>
-        <input type="text" id="volumeName" placeholder="Enter volume name">
-    </div>
-    <button onclick="generateDockerCommand()">Generate Command</button>
+        <div class="card tl-card">
+            <form class="tl-form" id="dockerForm">
+                <label>Docker pull command
+                    <input class="field" type="text" id="command" placeholder="docker pull nginx">
+                </label>
+                <label>Volume name
+                    <input class="field" type="text" id="volumeName" placeholder="data">
+                </label>
+                <button class="btn primary" type="submit">Generate Command</button>
+            </form>
+            <p class="tl-status err" id="status" hidden></p>
+            <div class="tl-step tl-out" id="result" hidden>
+                <h2>Command <button class="btn small" type="button" id="copy">Copy</button></h2>
+                <pre class="tl-code" id="output"></pre>
+            </div>
+        </div>
+    </main>
+
+    <?php site_footer(null, false); ?>
 
     <script>
-        function generateDockerCommand() {
+        document.getElementById('dockerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
             const command = document.getElementById('command').value.trim();
             const volumeName = document.getElementById('volumeName').value.trim();
+            const status = document.getElementById('status');
 
-            if (command === '' || volumeName === '') {
-                alert('Please enter both Docker pull command and volume name.');
+            status.hidden = command !== '' && volumeName !== '';
+            if (!status.hidden) {
+                status.textContent = 'Please enter both Docker pull command and volume name.';
                 return;
             }
 
-            const imageName = command.split(" ").pop(); // Extracting just the image name
-            const imageNameWithoutPrefix = imageName.split("/").pop(); // Extracting just the image name without prefix
+            const imageName = command.split(" ").pop(); // just the image name
 
             const dockerCommand = `sudo docker run -v ${volumeName}:/${volumeName} ${imageName}`;
-            navigator.clipboard.writeText(dockerCommand);
-            document.getElementById('output').value = dockerCommand;
-        }
+            navigator.clipboard.writeText(dockerCommand).catch(() => {});
+            document.getElementById('output').textContent = dockerCommand;
+            document.getElementById('result').hidden = false;
+        });
+        document.getElementById('copy').addEventListener('click', e => UI.copy(document.getElementById('output').textContent, e.currentTarget));
     </script>
-    </main>
-    <?php site_footer(); ?>
-
 </body>
 
 </html>

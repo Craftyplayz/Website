@@ -1,27 +1,17 @@
-.tool {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    margin: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    background-color: red;
-    width: 75%;
-    margin: 0 auto;
-}
-
-input {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    margin: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    background-color: rgb(21, 8, 216);
-    width: 75%;
-    margin: 0 auto;
-}
+/* Small Tools pages: QR Code, Random Number, Random Image, Docker Script, Install Script. */
+.tl-card { max-width: 760px; }
+.tl-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.tl-form label { display: grid; gap: 6px; flex: 1 1 160px; min-width: 0; font-size: 13px; color: var(--muted); }
+.tl-form .field { min-width: 0; width: 100%; }
+.tl-out { margin: 16px 0 0; }
+.tl-qr { display: block; width: min(100%, 240px); height: auto; border-radius: var(--radius); image-rendering: pixelated; }
+.tl-num { margin: 16px 0 0; font: 700 clamp(32px, 8vw, 56px) / 1.1 var(--mono); color: var(--accent); }
+.tl-num:empty { display: none; }
+.tl-big { justify-content: center; width: 100%; min-height: clamp(160px, 40vh, 500px); margin-top: 16px; font-size: clamp(18px, 3vw, 28px); }
+.tl-status { margin: 10px 0 0; font-size: 13px; }
+.tl-status:empty { display: none; }
+.tl-code { margin: 0; padding: 10px 12px; overflow-x: auto; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius); font: 13px/1.6 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.tl-step { display: grid; gap: 10px; }
+.tl-step + .tl-step { margin-top: 16px; }
+.tl-step h2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0; }
+.tl-step[hidden] { display: none; }

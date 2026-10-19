@@ -182,7 +182,7 @@ function site_footer($path = null, $crumbs = true)
     echo '<nav class="sf-links" aria-label="Sections">';
     foreach ($data['sections'] as $section) echo '<a href="' . h($section['url']) . '">' . h($section['title']) . '</a>';
     foreach ($data['links'] as $link) echo '<a href="' . h($link['url']) . '">' . h($link['title']) . '</a>';
-    echo '<a href="/sitemap/">Sitemap</a><a href="/go/discord">Discord</a>';
+    echo '<a href="/sitemap/">Sitemap</a>';
     echo '</nav>';
     echo '<p class="sf-meta">© ' . date('Y') . ' CraftyPlayz<span class="sf-cat" id="catfact"></span></p>';
     echo '</footer>';
@@ -213,6 +213,7 @@ function page_head()
     foreach (isset($p['css']) ? (array)$p['css'] : [] as $css) echo '<link rel="stylesheet" href="' . h(asset($css)) . '">' . "\n";
     echo '<script src="' . h(asset('/assets/js/site.js')) . '" defer></script>' . "\n";
     if (!empty($p['ui'])) echo '<script src="' . h(asset('/assets/js/ui.js')) . '" defer></script>' . "\n";
+    echo '<script defer src="https://cloud.umami.is/script.js" data-website-id="60bfdde6-b1fd-4fd3-b929-b7e14e2191c7"></script>' . "\n";
     $GLOBALS['site_head_done'] = true;
 }
 

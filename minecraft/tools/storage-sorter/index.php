@@ -1,266 +1,18 @@
 <?php
-$site_page = [];
+$site_page = ['css' => ['/assets/css/pages/minecraft-storage-sorter.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <?php page_head(); ?>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    .tool-wrap {
-      background: #202020;
-      color: #fff;
-      font-family: 'Roboto', sans-serif;
-      min-height: 100vh;
-      padding: 32px 24px;
-    }
-
-    h1 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      font-size: 0.85rem;
-      color: #888;
-      margin-bottom: 28px;
-    }
-
-    .card {
-      background: #272626;
-      border: 1px solid #fff;
-      border-radius: 15px;
-      padding: 20px;
-      margin-bottom: 20px;
-      max-width: 900px;
-    }
-
-    .card label {
-      display: block;
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: #aaa;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 10px;
-    }
-
-    textarea {
-      width: 100%;
-      height: 180px;
-      background: #1a1a1a;
-      border: 1px solid #444;
-      border-radius: 10px;
-      color: #fff;
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.85rem;
-      padding: 12px;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    textarea:focus { border-color: #888; }
-    textarea::placeholder { color: #555; }
-
-    .hint {
-      font-size: 0.78rem;
-      color: #666;
-      margin-top: 8px;
-    }
-
-    button {
-      background: #fff;
-      color: #202020;
-      border: none;
-      border-radius: 10px;
-      padding: 10px 24px;
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.15s;
-      margin-top: 14px;
-    }
-
-    button:hover { background: #ddd; }
-    button:disabled { background: #555; color: #888; cursor: not-allowed; }
-
-    #results-card { display: none; }
-
-    .results-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .results-header h2 { font-size: 1rem; font-weight: 700; }
-
-    .count-badge { font-size: 0.78rem; color: #aaa; }
-
-    .copy-btn {
-      margin-left: auto;
-      margin-top: 0;
-      padding: 6px 16px;
-      font-size: 0.78rem;
-      font-weight: 500;
-      border-radius: 8px;
-    }
-
-    .item-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 6px;
-      max-height: 500px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .item-grid::-webkit-scrollbar { width: 6px; }
-    .item-grid::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 3px; }
-    .item-grid::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-
-    .item {
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 8px;
-      padding: 7px 12px;
-      font-size: 0.82rem;
-      color: #ddd;
-    }
-
-    #error-msg {
-      display: none;
-      background: #2a1a1a;
-      border: 1px solid #8b3333;
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 0.85rem;
-      color: #e08080;
-      margin-top: 14px;
-    }
-
-    .status-row {
-      font-size: 0.8rem;
-      color: #666;
-      margin-top: 14px;
-    }
-
-    .status-row span { color: #aaa; }
-
-    #search-input {
-      width: 100%;
-      background: #1a1a1a;
-      border: 1px solid #444;
-      border-radius: 10px;
-      color: #fff;
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.85rem;
-      padding: 9px 12px;
-      outline: none;
-      transition: border-color 0.15s;
-      margin-bottom: 12px;
-    }
-
-    #search-input:focus { border-color: #888; }
-    #search-input::placeholder { color: #555; }
-
-    #duplicates-card { display: none; }
-
-    #duplicates-card h2 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
-
-    .dup-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #1a1a1a;
-      border: 1px solid #444;
-      border-radius: 8px;
-      padding: 8px 14px;
-      margin-bottom: 6px;
-      font-size: 0.85rem;
-    }
-
-    .dup-row .dup-count {
-      color: #d4a843;
-      font-weight: 700;
-      font-size: 0.78rem;
-    }
-
-    #command-card { display: none; }
-
-    #command-card h2 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    #command-card .hint { margin-bottom: 14px; }
-
-    .command-block {
-      background: #1a1a1a;
-      border: 1px solid #444;
-      border-radius: 10px;
-      padding: 12px 14px;
-      margin-bottom: 10px;
-      position: relative;
-    }
-
-    .command-block-label {
-      font-size: 0.75rem;
-      color: #888;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .command-text {
-      font-family: 'Courier New', monospace;
-      font-size: 0.78rem;
-      color: #ddd;
-      word-break: break-all;
-      white-space: pre-wrap;
-      max-height: 140px;
-      overflow-y: auto;
-      margin-bottom: 10px;
-    }
-
-    .command-copy-btn {
-      padding: 6px 16px;
-      font-size: 0.78rem;
-      font-weight: 500;
-      border-radius: 8px;
-      margin-top: 0;
-    }
-
-    .generate-cmd-btn {
-      background: transparent;
-      color: #fff;
-      border: 1px solid #fff;
-    }
-
-    .generate-cmd-btn:hover {
-      background: #fff;
-      color: #202020;
-    }
-  </style>
 </head>
 <body>
     <?php site_header(); ?>
-    <div class="tool-wrap">
-
-  <h1>Storage Sorter</h1>
-  <p class="subtitle">Find which Minecraft items haven't been categorised yet</p>
+    <main class="page ss" id="main">
+    <?= site_breadcrumbs(site_current_path()) ?>
+  <h1 class="page-title">Storage Sorter</h1>
+  <p class="page-lede">Find which Minecraft items haven't been categorised yet.</p>
 
   <div class="card">
     <label>Your sorted items (paste from Google Sheets)</label>
@@ -406,7 +158,12 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
       duplicates.forEach(([name, count]) => {
         const row = document.createElement('div');
         row.className = 'dup-row';
-        row.innerHTML = '<span>' + name + '</span><span class="dup-count">&times;' + count + '</span>';
+        const label = document.createElement('span');
+        label.textContent = name;
+        const n = document.createElement('span');
+        n.className = 'dup-count';
+        n.textContent = '×' + count;
+        row.append(label, n);
         list.appendChild(row);
       });
       card.style.display = 'block';
@@ -546,7 +303,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
       document.getElementById('error-msg').style.display = 'none';
     }
   </script>
-    </div>
+    </main>
     <?php site_footer(); ?>
 </body>
 </html>

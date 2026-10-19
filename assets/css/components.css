@@ -18,6 +18,8 @@
 .btn:disabled { opacity: .5; cursor: default; transform: none; }
 .btn.primary { background: var(--btn); border-color: var(--btn-line); color: #fff; }
 .btn.primary:hover { background: #4a9033; }
+.page a.btn { color: var(--text); text-decoration: none; }
+.page a.btn.primary { color: #fff; }
 .btn.small { padding: 5px 10px; font-size: 13px; }
 
 /* ---------- cards and layout ---------- */
