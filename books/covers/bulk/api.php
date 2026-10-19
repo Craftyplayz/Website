@@ -47,7 +47,9 @@ $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 // Only good answers are cached; errors (quota, outages) are passed through and retried next time.
 if ($code !== 200 || $body === false || json_decode($body) === null) {
-    json_out($code >= 400 ? $code : 502, '{"error":"Google Books is unavailable right now"}', false);
+    // Google's reason code (e.g. API_KEY_IP_ADDRESS_BLOCKED) says what to fix; it never contains the key.
+    $reason = json_decode((string)$body, true)['error']['details'][0]['reason'] ?? null;
+    json_out($code >= 400 ? $code : 502, json_encode(['error' => 'Google Books is unavailable right now', 'reason' => $reason]), false);
 }
 if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
 @file_put_contents($cacheFile, $body);
