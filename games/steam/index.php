@@ -58,7 +58,7 @@ $platformTotal = array_sum($platforms);
         <?php if ($games): ?>
             <div class="steam-stats-row">
                 <a class="steam-stat" href="/games/steam/library/"><b><?= number_format(count($games)) ?></b><span>Games owned</span><small><?= number_format($played) ?> played</small></a>
-                <a class="steam-stat" href="/games/steam/library/"><b><?= number_format(round($minutes / 60)) ?></b><span>Hours played</span><small><?= steam_hours(array_sum(array_column($recent, 'playtime_2weeks'))) ?> in 2 weeks</small></a>
+                <a class="steam-stat" href="/games/steam/library/"><b title="<?= steam_hm($minutes) ?>"><?= number_format(round($minutes / 60)) ?></b><span>Hours played</span><small><?= steam_hours(array_sum(array_column($recent, 'playtime_2weeks'))) ?> in 2 weeks</small></a>
                 <?php if ($progress): ?>
                     <a class="steam-stat" href="/games/steam/achievements/"><b><?= number_format($unlocked) ?></b><span>Achievements</span><small><?= $perfect ?> perfect games</small></a>
                     <a class="steam-stat steam-stat-ring" href="/games/steam/achievements/"><?= steam_ring($avg, 'Average completion ' . $avg . '%') ?><span>Average completion</span></a>
@@ -101,7 +101,7 @@ $platformTotal = array_sum($platforms);
                     return $k . ' ' . round($v / $platformTotal * 100) . '%';
                 }, array_keys($platforms), $platforms))) ?>">
                     <?php $i = 0; foreach ($platforms as $name => $min): if ($min): ?>
-                        <i class="s<?= $i ?>" style="width: <?= $min / $platformTotal * 100 ?>%" title="<?= $name ?>: <?= steam_hours($min) ?>"></i>
+                        <i class="s<?= $i ?>" style="width: <?= $min / $platformTotal * 100 ?>%" title="<?= $name ?>: <?= steam_hm($min) ?>"></i>
                     <?php endif; $i++; endforeach; ?>
                 </div>
                 <div class="steam-legend">

@@ -146,6 +146,11 @@
     const pBars = document.getElementById('played-bars');
     const pRange = document.getElementById('played-range');
     const hours = (m) => (m < 60 ? Math.round(m) + ' min' : Math.round(m / 60).toLocaleString() + ' h');
+    // exact time for hover text, like steam_hm() (Steam reports whole minutes, no seconds)
+    const hm = (m) => {
+        const h = Math.floor(Math.round(m) / 60), r = Math.round(m) % 60;
+        return [h && h.toLocaleString() + (h === 1 ? ' hour' : ' hours'), (r || !h) && r + (r === 1 ? ' minute' : ' minutes')].filter(Boolean).join(' ');
+    };
     const iso = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     const pDays = new Map((data.played ? data.played.days : []).map((r) => [r[0], r[1]]));
     const estTo = data.played ? data.played.estTo : null;
@@ -196,8 +201,10 @@
             : unit === 'week' ? 'Week of ' + new Date(b.k + 'T12:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
             : new Date(b.k + '-01T12:00:00').toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
         pBars.innerHTML = buckets.map((b) => {
-            const top = [...b.games].sort((a, c) => c[1] - a[1]).slice(0, 8).map(([id, m]) => '\n' + name(id) + ' ' + hours(m)).join('');
-            const tip = UIesc(label(b) + ': ' + (b.min ? hours(b.min) : 'nothing played') + (b.est ? ' (estimated)' : '') + top);
+            // estimated minutes are simulated, so they stay rounded
+            const fmt = b.est ? hours : hm;
+            const top = [...b.games].sort((a, c) => c[1] - a[1]).slice(0, 8).map(([id, m]) => '\n' + name(id) + ' ' + fmt(m)).join('');
+            const tip = UIesc(label(b) + ': ' + (b.min ? fmt(b.min) : 'nothing played') + (b.est ? ' (estimated)' : '') + top);
             return `<div role="listitem" class="${b.est ? 'est' : ''}" title="${tip}" aria-label="${tip}"><i style="height: ${b.min / max * 100}%"></i></div>`;
         }).join('');
         document.getElementById('played-axis').innerHTML = `<span>${UIesc(label(buckets[0]))}</span><span>${unit === 'day' ? 'Today' : unit === 'hour' ? 'Now' : UIesc(label(buckets[buckets.length - 1]))}</span>`;
@@ -213,14 +220,17 @@
                 seen.set(id, (seen.get(id) || 0) + 1);
             });
         });
-        document.getElementById('played-total').textContent = hours(total) + (days ? ' in the last ' + (days === 365 ? 'year' : days + ' days') : ' since ' + new Date(first + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', year: 'numeric' }));
+        const exact = !estTo || iso(start) >= estTo;
+        const tEl = document.getElementById('played-total');
+        tEl.title = exact && total >= 60 ? hm(total) : '';
+        tEl.textContent = hours(total) + (days ? ' in the last ' + (days === 365 ? 'year' : days + ' days') : ' since ' + new Date(first + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', year: 'numeric' }));
         const top = [...games].sort((a, c) => c[1] - a[1]).slice(0, 8);
         document.getElementById('played-top-h').hidden = !top.length;
         document.getElementById('played-top').innerHTML = top.map(([id, m], i) => `<a class="steam-rank" href="/games/steam/game/?game=${+id}">
             <span class="steam-rank-n">${i + 1}</span>
             <img src="${UIesc((data.played.names[id] || [, ''])[1])}" alt="" width="231" height="87" loading="lazy" decoding="async">
             <span class="grow"><b>${UIesc(name(id))}</b><span class="steam-rank-bar"><i style="width: ${m / top[0][1] * 100}%"></i></span></span>
-            <span class="steam-rank-val">${hours(m)}<small>${seen.get(id)} day${seen.get(id) === 1 ? '' : 's'}</small></span></a>`).join('');
+            <span class="steam-rank-val"${exact && m >= 60 ? ` title="${hm(m)}"` : ''}>${hours(m)}<small>${seen.get(id)} day${seen.get(id) === 1 ? '' : 's'}</small></span></a>`).join('');
     }
     if (pRange) pRange.addEventListener('change', drawPlayed);
     drawPlayed();

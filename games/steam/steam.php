@@ -452,11 +452,22 @@ function steam_ago($ts)
     return floor($d / 365) . ' years ago';
 }
 
-// Playtime minutes as "45 min" or "1,234 h"
+// Playtime minutes as "45 min" or "1,234 h"; rounded hours show the exact time on hover
 function steam_hours($min)
 {
     if ($min < 60) return $min . ' min';
-    return number_format(round($min / 60)) . ' h';
+    return '<span title="' . steam_hm($min) . '">' . number_format(round($min / 60)) . ' h</span>';
+}
+
+// Exact playtime as "1,234 hours 5 minutes". Steam only reports whole minutes, so there are no seconds.
+function steam_hm($min)
+{
+    $h = intdiv((int)$min, 60);
+    $m = (int)$min % 60;
+    $parts = [];
+    if ($h) $parts[] = number_format($h) . ($h == 1 ? ' hour' : ' hours');
+    if ($m || !$h) $parts[] = $m . ($m == 1 ? ' minute' : ' minutes');
+    return implode(' ', $parts);
 }
 
 function steam_time($ts)
