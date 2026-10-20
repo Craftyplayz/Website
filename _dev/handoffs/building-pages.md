@@ -1,7 +1,7 @@
 # Building pages: the complete guide
 
 This is the single source of truth for building or restyling any page on craftyplayz.com.
-It replaces "read plan.html > Design guide" for day-to-day work (plan.html still holds the history and live demos).
+The same design rules, with live component samples, are at `/design/` (`design/index.php`), the page to point other models at. When a rule changes, change it in both.
 Session rules (ports, git, staying inside your tab) are in `README.md` next to this file.
 
 **Reference pages** — when in doubt, open these and copy what they do:
@@ -153,7 +153,7 @@ All colours are CSS variables in `assets/css/global.css`. **Pages use variables 
 Rules:
 - **Three surface levels only:** `--bg` → `--card` → `--card2`. Depth comes from these steps, never from shadows. Shadows are only for things that float (drawer, menus, dialogs).
 - **Green means act or done.** Never decoration. Status uses tinted backgrounds with a matching border (`.badge.g`, `.ok`, `.err`, `.note`), never bright fills.
-- A section may re-tint `--accent` inside its own pages (`.my-page { --accent: ... }`), but surfaces and text never change.
+- **Green is the accent on every page.** Pages and sections never re-tint it or any other token.
 - `color-scheme: dark` is already set, so scrollbars, inputs and date pickers are dark. Don't fight it.
 - No gradients, glows or borders-inside-borders. (Exceptions already in components: the progress bar fill, the drop-zone stripes.)
 
@@ -161,7 +161,7 @@ Rules:
 
 ## 6. Font, sizes and spacing
 
-**Font:** `var(--font)` = `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`. **Code/IDs:** `var(--mono)` = `ui-monospace, Consolas, monospace`. No web fonts, no icon fonts, no Font Awesome — they delay text and cost bytes. Icons are inline SVG or images from `/assets/img/icons/`.
+**Font:** `var(--font)` = `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`. **Code/IDs:** `var(--mono)` = `ui-monospace, Consolas, monospace`. No web fonts, no icon fonts, no Font Awesome — they delay text and cost bytes. Icons: see §8 Icons.
 
 | Text | Size / weight | Where it's set |
 |---|---|---|
@@ -270,9 +270,44 @@ Build with these before writing any CSS. If a page needs something new that othe
 
 <!-- raw JSON/NBT -->
 <div class="tree">...</div>
+
+<!-- table: always in .table-wrap; .num right-aligns numbers; .table-wrap.tall caps the height with a sticky header -->
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Item</th><th class="num">Count</th></tr></thead>
+  <tbody><tr><td>Glass</td><td class="num">3,456</td></tr></tbody>
+</table></div>
+
+<!-- form: each label wraps its text and field; .cols = side by side, stacks on phones -->
+<form class="form form-card">
+  <label>Player name <input class="field" name="player"></label>
+  <div class="cols">
+    <label>Dimension <select class="field"><option>Overworld</option></select></label>
+    <label>Amount <input class="field" type="number" inputmode="numeric" min="1" max="64" aria-invalid="true"><small>Enter a number from 1 to 64.</small></label>
+  </div>
+  <fieldset><legend>Show</legend><label class="check"><input type="radio" name="show" checked> All items</label></fieldset>
+  <label class="check"><input type="checkbox"> Remember these settings</label>
+  <div class="actions"><button class="btn primary">Save settings</button><button class="btn" type="reset">Reset</button></div>
+</form>
 ```
 
 Helpers: `.muted`, `.mono`, `.hide`. `global.css` also gives `.hub`/`.hub-card` (via `site_hub()`), `.crumbs`, `.page-title`, `.page-lede`.
+
+**Forms**
+- Every field sits inside its `<label>`, label text first (no `id` needed). A placeholder is only an example value, never the label.
+- One field per row by default; `.cols` only for short fields that belong together. Forms sit in `.form-card` (max 560px).
+- Mark optional fields "(optional)"; never asterisks on required ones.
+- `type="number"` + `inputmode`/`min`/`max` for numbers, `<select>` for more than 4 fixed choices, radios in a `<fieldset>` for 2 to 4, a `.check` checkbox for yes/no.
+- Errors: `aria-invalid="true"` on the field (red border) and what to fix in the label's `<small>`. Check on blur or send, not every key press. A failed send shows one `.err` above the buttons.
+- Tools that calculate update as you type (debounced) with no button. A button is for actions that send, save or take a while: the view's one `.primary`, a verb ("Save settings", not "Submit"), disabled with "Saving..." while working.
+- Buttons go last, in an `.actions` row, primary first.
+
+**Icons**
+- Only where they help people recognise something faster: outside services (GitHub, Discord, Steam), game items, and well-known controls (close, search, copy, menu). Never decoration on headings or buttons that already have clear text.
+- UI icons: inline SVG in `currentColor`; add new ones to `site_icon()` in `includes/functions.php` rather than pasting the same SVG into several pages.
+- Service logos: `/assets/img/icons/` (white 24×24 SVGs) as an `<img>` beside the name. Minecraft items: `/minecraft/tools/item-list/`, `image-rendering: pixelated` above 16px.
+- Sizes: 16px beside text and in buttons, 22px in card headings (automatic), 24px in row lists.
+- Icon-only buttons need `aria-label` and `title`; decorative icons get `alt=""` or `aria-hidden="true"`.
+- No icon fonts, no Font Awesome, no emoji as icons or in titles, headings, menus or buttons.
 
 **Page stylesheets** (`assets/css/pages/<section>-<name>.css`):
 - Start with a one-line comment naming the page.
@@ -378,7 +413,18 @@ Never: entrance/scroll-reveal animations, staggered cards, animating width/heigh
 
 ---
 
-## 13. No clutter
+## 13. Writing and clutter
+
+**Writing: British English, plain words**
+- British spelling: colour, centre, organise, favourite, grey, licence (noun), metres.
+- Plain words, short sentences. No hype, jokes or exclamation marks in interface text (titles, ledes, labels, buttons, messages). A joke page's content can be silly; the interface around it stays plain.
+- Title Case for page titles and menu items (from `site.json`); sentence case for everything else (card headings, buttons, labels, tabs).
+- Buttons start with a verb and say what happens ("Copy link"). Never "OK", "Submit" or "Click here". Link text says where it goes.
+- No full stop on titles, headings, labels, buttons or `site.json` descriptions. Ledes, help text and messages are sentences and get one.
+- Digits with thousands commas (1,204), a space before units (64 MB, 5 min), dates as day month year (20 Oct 2026).
+- Talk to the reader as "you"; contractions are fine. Messages say what happened and what to do, without blame or error codes.
+
+**Clutter**
 
 - One job per page. One `.btn.primary` per view; everything else is a secondary button or a link.
 - One muted line under the title, not a paragraph. Help text is one muted line where it's needed.
@@ -426,6 +472,8 @@ Full procedure: README §5 (portable PHP, your own port and Chrome debug port). 
 - [ ] Only components + a prefixed page stylesheet; only `var(--…)` colours; no `font-family`/body size
 - [ ] Sizes and spacing from §6; radius 8/12/999
 - [ ] One primary button; no empty sections; details behind a click
+- [ ] Tables in `.table-wrap`; every form field inside its label; icons only where they help
+- [ ] British spelling, plain words, sentence-case buttons and headings
 
 **Screens**
 - [ ] No sideways scroll at 320 / 390 / 1366 / 2560
@@ -448,4 +496,3 @@ Full procedure: README §5 (portable PHP, your own port and Chrome debug port). 
 
 - `.htaccess` has no long-cache rule for `/assets` yet; it caches CSS/JS for a day. `asset()` already versions URLs, so `Cache-Control: public, max-age=31536000, immutable` on `/assets/` is safe to add.
 - `extras/dnd/cache/` (and `books/covers/bulk/cache/`) are not ignored as folders; `.gitignore` only lists three `char-*.json` names, so a new character's cache file can be committed by accident. Either ignore the folder or move the cache to `sys_get_temp_dir()` like Steam.
-- `plan.html` says body text is 15px; the live pages render the browser default 16px. This guide documents what's live — don't add per-page font sizes to "fix" it.

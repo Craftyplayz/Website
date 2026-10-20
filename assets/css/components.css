@@ -82,6 +82,34 @@
     color: var(--text); font: inherit; font-size: 14px; outline: none; transition: border-color var(--fast);
 }
 .field:focus { border-color: var(--accent); }
+.field:disabled { opacity: .5; }
+.field[aria-invalid="true"] { border-color: var(--danger-line); }
+textarea.field { min-height: 96px; line-height: 1.5; resize: vertical; }
+
+/* ---------- forms: each label wraps its text and its field, so no ids are needed ---------- */
+.form { display: grid; gap: 12px; }
+.form-card { max-width: 560px; }
+.form label { display: grid; align-content: start; gap: 4px; min-width: 0; color: var(--muted); font-size: 13px; }
+.form label small { font-size: 12px; }
+.form .field { width: 100%; min-width: 0; }
+.form .btn { justify-self: start; }
+.form fieldset { display: grid; gap: 4px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.form legend { margin-bottom: 4px; padding: 0; color: var(--muted); font-size: 13px; }
+/* fields side by side that stack on narrow screens */
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 12px; }
+.check, .form label.check { display: flex; align-items: center; gap: 8px; min-height: 32px; color: var(--text); font-size: 14px; cursor: pointer; }
+.check input { flex: none; width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+/* ---------- tables: .table-wrap lets a wide table scroll on its own ---------- */
+.table-wrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th { padding: 6px 10px; color: var(--muted); font-size: 13px; font-weight: 600; text-align: left; white-space: nowrap; }
+.table td { padding: 6px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+.table .num { text-align: right; font-variant-numeric: tabular-nums; }
+/* long tables: the header stays in view */
+.table-wrap.tall { max-height: 600px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+.table-wrap.tall th { position: sticky; top: 0; z-index: 1; background: var(--card2); }
 
 /* ---------- drop zone for file tools ---------- */
 .drop {

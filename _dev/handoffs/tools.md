@@ -1,6 +1,6 @@
 # Handoff: restyle the Tools tab
 
-**Read `_dev/handoffs/README.md` first.** It holds the rules shared by every section: one or two pages at a time, the design guide in `/plan.html`, staying inside your tab, safe git commands and testing. Your test port is **8104** and your Chrome debug port is **9404**.
+**Read `_dev/handoffs/README.md` first.** It holds the rules shared by every section: one or two pages at a time, the design guide (`building-pages.md`, and `/design/` for live samples), staying inside your tab, safe git commands and testing. Your test port is **8104** and your Chrome debug port is **9404**.
 
 ## Your files
 - **Folders you may edit:** `tools/` (everything below it).
