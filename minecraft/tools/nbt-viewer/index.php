@@ -1,6 +1,24 @@
 <?php
-$site_page = ['description' => 'Drop Minecraft player .dat files and explore every bit of their NBT data visually.'];
+$site_page = [
+    'components' => true,
+    'css' => ['/assets/css/pages/minecraft-nbt-viewer.css'],
+    'description' => 'Drop Minecraft player .dat files and explore every bit of their NBT data visually.',
+];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+$api = 'api.php';
+$art = function ($w) {
+    return '/media/minecraft/screenshots-sizes/' . $w . '/2025-11-16_03.36.29.webp';
+};
+// "What can I drop?", one card each
+$kinds = [
+    ['player_head', 'Players', '<span class="mono">playerdata/*.dat</span>, <span class="mono">stats/</span>, <span class="mono">advancements/</span>, SNBT from <span class="mono">/data get</span>, singleplayer <span class="mono">level.dat</span>'],
+    ['command_block', 'Server', '<span class="mono">usercache.json</span>, <span class="mono">ops.json</span>, <span class="mono">whitelist.json</span>, <span class="mono">banned-players.json</span>, <span class="mono">banned-ips.json</span>, <span class="mono">server.properties</span>, <span class="mono">logs/</span> (sessions, deaths, chat)'],
+    ['grass_block', 'World', '<span class="mono">level.dat</span>, <span class="mono">data/scoreboard.dat</span>, <span class="mono">data/map_*.dat</span> (maps drawn in the inventory), <span class="mono">data/command_storage_*.dat</span>, <span class="mono">uid.dat</span>, <span class="mono">region/</span> and <span class="mono">entities/</span> (placed backpacks, backpacks in chests and on the ground, owned pets, raw chunk NBT - a big world is only scanned when you press Scan)'],
+    ['paper', 'Paper / Spigot / Bukkit', '<span class="mono">bukkit.yml</span>, <span class="mono">spigot.yml</span>, <span class="mono">config/paper-*.yml</span>, plugin configs, EssentialsX userdata, LuckPerms (YAML/JSON storage or <span class="mono">/lp export</span>), mcMMO, GriefPrevention, WorldGuard, Towny, Multiverse'],
+    ['anvil', 'Fabric / Forge / NeoForge', '<span class="mono">mods/*.jar</span> (names and icons for modded items - saved to the site so nobody has to drop that mod again), Trinkets and Curios slots, <span class="mono">config/</span>, <span class="mono">serverconfig/</span>, FTB Quests / Teams / Chunks, Sophisticated Backpacks'],
+    ['spyglass', 'Client', '<span class="mono">hotbar.nbt</span> (saved creative hotbars), <span class="mono">servers.dat</span>, resource pack <span class="mono">.zip</span>s (local textures)'],
+    ['structure_block', 'Builds', '<span class="mono">.schem</span>, <span class="mono">.litematic</span>, <span class="mono">.schematic</span> and structure <span class="mono">.nbt</span> files - size and material list'],
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -13,514 +31,113 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <body>
     <?php site_header(); ?>
-    <!-- after header.php so these win over /css/global.css -->
-    <style>
-        :root {
-            --bg: #202020;
-            --card: #2a2a2a;
-            --card2: #323232;
-            --line: #3d3d3d;
-            --text: #ececec;
-            --muted: #9b9b9b;
-            --accent: #7ed957;
-            --xp: #80ff20;
-            --gui: #c6c6c6;
-            --s: clamp(30px, 8.6vw, 46px);
-        }
 
-        .nbt {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 16px;
-            color: var(--text);
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        }
-
-        .nbt * { box-sizing: border-box; }
-
-        /* undo the site-wide button / input / label styles from global.css inside the viewer */
-        :where(.nbt, #drawer, dialog) button { padding: 0; background: none; border: 0; border-radius: 0; font: inherit; color: inherit; z-index: auto; transition: none; }
-        :where(.nbt, #drawer, dialog) button:hover { background: none; }
-        :where(.nbt, #drawer, dialog) input { font-size: 14px; font-weight: 400; border-radius: 8px; transition: none; }
-        :where(.nbt, #drawer, dialog) input:hover { background-color: #161616; }
-        :where(.nbt, #drawer, dialog) label { background: none; padding: 0; border-radius: 0; font-size: inherit; font-weight: inherit; }
-        .nbt a { color: #8cc8ff; text-decoration: none; }
-        .nbt button { font: inherit; color: inherit; cursor: pointer; }
-        .muted { color: var(--muted); }
-        .mono { font-family: ui-monospace, Consolas, monospace; }
-        .hide { display: none !important; }
-
-        /* ---------- drop zone ---------- */
-        .drop {
-            border: 2px dashed #555;
-            border-radius: 14px;
-            padding: 56px 20px;
-            text-align: center;
-            background: repeating-linear-gradient(45deg, #262626 0 14px, #2a2a2a 14px 28px);
-            transition: border-color .15s, background .15s;
-        }
-
-        .drop h1 { font-size: clamp(26px, 5vw, 42px); margin: 0 0 6px; }
-        .drop p { margin: 6px 0; }
-        .drop .big-ico { width: 96px; height: 96px; image-rendering: pixelated; }
-        .btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: #3a3a3a; border: 1px solid #555; border-radius: 8px; padding: 9px 16px;
-            transition: background .12s, transform .06s;
-        }
-        .btn:hover { background: #474747; }
-        .btn:active { transform: translateY(1px); }
-        .btn.primary { background: #3d7a2a; border-color: #5aa83f; }
-        .btn.primary:hover { background: #4a9033; }
-        .btn.small { padding: 5px 10px; font-size: 13px; }
-        .drop .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
-
-        #dragOverlay {
-            position: fixed; inset: 0; z-index: 1000; background: rgba(40, 90, 30, .55);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 32px; font-weight: 700; pointer-events: none; border: 4px dashed #9f9;
-        }
-
-        /* ---------- toolbar ---------- */
-        .bar {
-            position: sticky; top: 0; z-index: 50; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
-            background: rgba(32, 32, 32, .94); backdrop-filter: blur(6px);
-            padding: 10px 0; border-bottom: 1px solid var(--line); margin-bottom: 16px;
-        }
-        .tabs { display: flex; gap: 6px; flex-wrap: wrap; flex: 1 1 260px; min-width: 0; }
-        /* player picker: one button + dropdown instead of a tab per player */
-        .tabs { position: relative; }
-        .pick-btn {
-            display: flex !important; align-items: center; gap: 8px; padding: 5px 12px 5px 5px !important; border-radius: 8px !important;
-            background: #35502b !important; border: 1px solid #5aa83f !important; max-width: 100%;
-        }
-        .pick-btn:hover { background: #3f5f33 !important; }
-        .pick-btn img, .pick-row img { width: 26px; height: 26px; border-radius: 4px; image-rendering: pixelated; flex: none; }
-        .pick-btn .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
-        .pick-btn .n { font-size: 12px; color: #b9d8ad; white-space: nowrap; }
-        .pick-btn .car { font-size: 11px; opacity: .8; transition: transform .12s; }
-        .tabs.open .pick-btn .car { transform: rotate(180deg); }
-        .pick-menu {
-            position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; width: min(400px, calc(100vw - 32px));
-            background: #1c1c1c; border: 1px solid #4a4a4a; border-radius: 10px; box-shadow: 0 12px 30px #000a; overflow: hidden;
-        }
-        .pick-menu input { width: 100%; border: 0 !important; border-bottom: 1px solid #3a3a3a !important; border-radius: 0 !important; background: #161616 !important; color: var(--text); padding: 10px 12px !important; outline: none; }
-        .pick-list { max-height: min(60vh, 520px); overflow-y: auto; padding: 4px; }
-        .pick-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
-        .pick-row:hover, .pick-row.kb { background: #2e2e2e; }
-        .pick-row.on { background: #2d4224; }
-        .pick-row .grow { flex: 1; min-width: 0; }
-        .pick-row .grow b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .pick-row small { color: var(--muted); font-size: 12px; }
-        .pick-row .x { opacity: .4; padding: 2px 6px !important; }
-        .pick-row .x:hover { opacity: 1; color: #ff8080; }
-        .pick-foot { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-top: 1px solid #3a3a3a; font-size: 12px; color: var(--muted); }
-        .search {
-            flex: 0 1 300px; min-width: 160px; background: #161616; border: 1px solid #4a4a4a; color: var(--text);
-            border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none;
-        }
-        .search:focus { border-color: var(--accent); }
-
-        .jump { display: flex; gap: 6px; flex-wrap: wrap; margin: -6px 0 16px; }
-        .jump a {
-            font-size: 13px; padding: 3px 10px; border-radius: 999px; background: var(--card);
-            border: 1px solid var(--line); color: var(--text) !important;
-        }
-        .jump a:hover { border-color: var(--accent); }
-
-        /* ---------- layout ---------- */
-        /* masonry - cards stack into columns so short cards don't leave gaps */
-        .masonry { columns: 3 340px; column-gap: 16px; }
-        .masonry > .card { break-inside: avoid; margin-bottom: 16px; width: 100%; display: inline-block; }
-        .card {
-            background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0;
-            scroll-margin-top: 70px;
-        }
-        .card h2 { font-size: 17px; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
-        .card h2 .n { font-weight: 400; color: var(--muted); font-size: 14px; margin-left: auto; }
-        .card h2 img { width: 22px; height: 22px; }
-        .card h2 .btn { font-weight: 400; }
-        .section { margin-bottom: 16px; }
-
-        /* ---------- hero ---------- */
-        .hero { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; }
-        .hero h1 { font-size: clamp(24px, 4vw, 34px); margin: 0; }
-        .hero .uuid { font-size: 12px; cursor: pointer; }
-        .hero .uuid:hover { color: var(--text); }
-        .badges { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
-        .badge { font-size: 12px; padding: 2px 9px; border-radius: 999px; background: #3a3a3a; border: 1px solid #4d4d4d; }
-        .badge.g { background: #2d4a24; border-color: #4f8a3a; }
-        .badge.r { background: #4a2424; border-color: #8a3a3a; }
-        .badge.p { background: #3d2a4f; border-color: #6c4b8f; }
-        .badge.b { background: #24384a; border-color: #3a628a; }
-        .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-top: 10px; }
-        .tile { background: var(--card2); border-radius: 8px; padding: 8px 10px; }
-        .tile b { display: block; font-size: 20px; line-height: 1.2; }
-        .tile span { font-size: 12px; color: var(--muted); }
-        @media (max-width: 560px) { .hero { grid-template-columns: 1fr; text-align: center; } .hero .skin3d { margin: 0 auto; } .badges { justify-content: center; } }
-
-        /* ---------- vitals ---------- */
-        .vit { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; margin-top: 14px; }
-        .icons { display: flex; flex-wrap: wrap; gap: 1px; }
-        .icons svg { width: 18px; height: 18px; shape-rendering: crispEdges; }
-        .icons.rtl { flex-direction: row-reverse; justify-content: flex-end; }
-        .vlabel { font-size: 12px; color: var(--muted); }
-        .xp { grid-column: 1 / -1; position: relative; margin-top: 16px; }
-        .xpbar { height: 10px; background: #1a1a1a; border: 2px solid #000; border-radius: 2px; overflow: hidden; }
-        .xpbar i { display: block; height: 100%; background: linear-gradient(#a8ff60, #5ad21c); }
-        .xplvl {
-            position: absolute; left: 50%; top: -15px; transform: translateX(-50%); font-weight: 800; font-size: 18px;
-            color: var(--xp); text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000;
-        }
-
-        /* ---------- Minecraft GUI (dark) ---------- */
-        .gui {
-            background: #262626; border-radius: 4px; padding: 10px; color: #d8d8d8;
-            box-shadow: inset 2px 2px #3c3c3c, inset -2px -2px #141414, 0 0 0 2px #000; display: inline-block; max-width: 100%;
-        }
-        .gui .ttl { font-size: 15px; margin: 0 0 6px 2px; color: #cfcfcf; }
-        .slots { display: grid; grid-template-columns: repeat(9, var(--s)); }
-        .slots + .slots { margin-top: 8px; }
-        .slot {
-            width: var(--s); height: var(--s); position: relative; background: #1c1c1c;
-            box-shadow: inset 2px 2px #111, inset -2px -2px #3a3a3a; cursor: default;
-        }
-        .slot.has { cursor: pointer; }
-        .slot.has:hover { background: #3a3a3a; }
-        .slot.sel { box-shadow: inset 0 0 0 2px #e8e8e8, inset 0 0 0 4px #000; }
-        .slot.pick { outline: 3px solid #ffd84a; outline-offset: -3px; z-index: 2; }
-        /* API renders are 128px - let the browser smooth the downscale; only the 16px local textures stay pixelated */
-        .slot img, .ico img {
-            position: absolute; inset: 9%; width: 82%; height: 82%; object-fit: contain;
-            pointer-events: none;
-        }
-        img[data-f] { image-rendering: pixelated; }
-        .slot .ph { position: absolute; inset: 16%; opacity: .5; filter: brightness(.22); image-rendering: pixelated; background-size: contain; background-repeat: no-repeat; background-position: center; }
-        .craft { display: grid; grid-template-columns: repeat(2, var(--s)) auto var(--s); align-items: center; gap: 0; align-self: start; }
-        .craft .ttl { grid-column: 1 / -1; }
-        .craft .arrow { padding: 0 8px; color: #6a6a6a; font-size: calc(var(--s) * .55); align-self: center; }
-        .craft .out { align-self: center; }
-        .cnt {
-            position: absolute; right: 2px; bottom: 0; font-weight: 700; font-size: calc(var(--s) * .34); color: #fff;
-            text-shadow: 2px 2px #000; pointer-events: none; line-height: 1; font-family: ui-monospace, Consolas, monospace;
-        }
-        .dur { position: absolute; left: 14%; right: 14%; bottom: 10%; height: 3px; background: #000; pointer-events: none; }
-        .dur i { display: block; height: 2px; }
-        .glint::after {
-            content: ""; position: absolute; inset: 9%; pointer-events: none;
-            -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat;
-            background: linear-gradient(115deg, transparent 20%, rgba(200, 120, 255, .65) 35%, transparent 50%, rgba(170, 90, 255, .5) 70%, transparent 85%);
-            background-size: 300% 300%; animation: glint 3s linear infinite; mix-blend-mode: screen;
-        }
-        @keyframes glint { from { background-position: 100% 100%; } to { background-position: 0 0; } }
-        .searching .slot.has:not(.hit) { opacity: .25; }
-        .searching .slot.hit { outline: 3px solid #ffd84a; outline-offset: -3px; }
-        .container-dot { position: absolute; left: 3px; top: 3px; width: 6px; height: 6px; border-radius: 50%; background: #ffd84a; box-shadow: 0 0 0 1px #000; pointer-events: none; }
-
-        .inv { display: grid; grid-template-columns: var(--s) calc(var(--s) * 3) var(--s) 1fr; gap: 6px; align-items: end; margin-bottom: 10px; }
-        .inv .col { display: grid; gap: 0; }
-        .inv .model { background: #000; height: calc(var(--s) * 4); position: relative; box-shadow: inset 2px 2px #111, inset -2px -2px #3a3a3a; overflow: hidden; }
-        .inv .craft { justify-self: end; }
-        @media (max-width: 520px) { .inv .craft { display: none; } }
-
-        /* 3D skin (skinview3d) - the 2D render shows until the model has loaded */
-        .skin3d { position: relative; cursor: grab; touch-action: none; user-select: none; }
-        .skin3d:active { cursor: grabbing; }
-        .skin3d canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
-        .skin3d > img { position: absolute; inset: 6% 0; height: 88%; width: 100%; object-fit: contain; image-rendering: pixelated; }
-        .hero .skin3d { width: 170px; height: 270px; filter: drop-shadow(0 8px 12px #0009); }
-        .guis { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
-
-        /* ---------- tooltip ---------- */
-        #tip {
-            position: fixed; z-index: 2000; pointer-events: none; max-width: 380px; padding: 6px 8px;
-            background: rgba(16, 0, 16, .94); border: 2px solid #25005a; border-radius: 4px; outline: 2px solid #100010;
-            font-family: ui-monospace, Consolas, monospace; font-size: 14px; line-height: 1.35; color: #aaa;
-            text-shadow: 2px 2px #2a2a2a;
-        }
-        #tip .nm { font-size: 15px; margin-bottom: 2px; }
-        #tip .id { color: #555; font-size: 12px; margin-top: 3px; }
-        .mc-text .l { white-space: pre-wrap; }
-
-        /* ---------- item drawer ---------- */
-        #drawer {
-            position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100vw); box-sizing: border-box; z-index: 1500; overflow-y: auto;
-            background: #1b1b1b; border-left: 1px solid #444; padding: 16px; transform: translateX(105%);
-            transition: transform .18s ease-out; box-shadow: -12px 0 30px #0009; color: var(--text);
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        }
-        #drawer.open { transform: none; }
-        #drawer .close { position: absolute; right: 12px; top: 10px; background: none; border: 0; font-size: 26px; color: #bbb; }
-        #drawer .crumbs { font-size: 12px; color: var(--muted); margin-right: 30px; }
-        #drawer .crumbs a { cursor: pointer; }
-        #drawer .head { display: flex; gap: 14px; align-items: center; margin: 10px 0; }
-        #drawer .head .ico { position: relative; width: 96px; height: 96px; flex: none; background: #2a2a2a; border-radius: 10px; }
-        #drawer .tipbox { background: rgba(16, 0, 16, .94); border: 2px solid #25005a; border-radius: 4px; padding: 8px; font-family: ui-monospace, Consolas, monospace; font-size: 14px; color: #aaa; text-shadow: 2px 2px #2a2a2a; margin: 10px 0; }
-        #drawer h3 { font-size: 14px; margin: 16px 0 6px; color: #ccc; }
-        .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 13px; }
-        .kv > :nth-child(odd) { color: var(--muted); }
-
-        /* ---------- lists ---------- */
-        .rows { display: grid; gap: 6px; }
-        .rowi { display: flex; align-items: center; gap: 10px; background: var(--card2); border-radius: 8px; padding: 7px 10px; font-size: 14px; }
-        .rowi .grow { flex: 1; min-width: 0; }
-        .rowi small { color: var(--muted); }
-        .pill { border-radius: 6px; padding: 1px 7px; font-size: 12px; background: #444; }
-        .effdot { width: 30px; height: 30px; border-radius: 6px; flex: none; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; text-shadow: 1px 1px #000; box-shadow: inset 0 0 0 2px #0004; }
-        .timebar { height: 4px; background: #444; border-radius: 2px; margin-top: 4px; overflow: hidden; }
-        .timebar i { display: block; height: 100%; }
-        .attr .bar { height: 5px; background: #444; border-radius: 3px; overflow: hidden; margin-top: 4px; }
-        .attr .bar i { display: block; height: 100%; background: #5aa8ff; }
-        .chg { color: #ffd84a; }
-
-        .owned { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; }
-        .own { position: relative; background: var(--card2); border-radius: 8px; padding: 6px 4px 4px; text-align: center; cursor: pointer; border: 1px solid transparent; }
-        .own:hover { border-color: #666; }
-        .own .ico { position: relative; width: 40px; height: 40px; margin: 0 auto; }
-        .own b { display: block; font-size: 13px; }
-        .searching .own:not(.hit) { display: none; }
-
-        .map svg { width: 100%; height: auto; background: #1a1a1a; border-radius: 8px; }
-        .map text { font-size: 11px; fill: #ddd; paint-order: stroke; stroke: #000; stroke-width: 3px; }
-
-        .chips { display: flex; flex-wrap: wrap; gap: 4px; max-height: 420px; overflow-y: auto; }
-        .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; background: var(--card2); border-radius: 6px; padding: 2px 7px 2px 3px; }
-        .chip.new { box-shadow: inset 0 0 0 1px #ffd84a; }
-        .chip .ico { position: relative; width: 20px; height: 20px; flex: none; }
-        .searching .chip:not(.hit) { display: none; }
-
-        /* ---------- statistics ---------- */
-        .stabs { display: flex; gap: 4px; flex-wrap: wrap; margin: 14px 0 10px; }
-        .stabs button { padding: 5px 12px !important; border-radius: 999px !important; background: var(--card2) !important; border: 1px solid var(--line) !important; font-size: 13px; }
-        .stabs button.on { background: #35502b !important; border-color: #5aa83f !important; }
-        .stabs button small { color: var(--muted); margin-left: 4px; }
-        .stgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
-        .sti { display: flex; align-items: center; gap: 8px; background: var(--card2); border-radius: 8px; padding: 5px 8px; font-size: 13px; min-width: 0; }
-        .sti .ico { position: relative; width: 30px; height: 30px; flex: none; }
-        .sti div { min-width: 0; }
-        .sti span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-size: 12px; }
-        .sti b { font-size: 14px; }
-        .searching .sti:not(.hit) { display: none; }
-        .travel { display: flex; height: 16px; border-radius: 4px; overflow: hidden; margin: 6px 0; }
-        .travel i { display: block; height: 100%; min-width: 2px; }
-        .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
-        .legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; background: var(--c); }
-
-        /* ---------- advancements ---------- */
-        .adv-cat { margin-top: 14px; }
-        .adv-cat h3 { font-size: 14px; margin: 0 0 6px; display: flex; gap: 8px; align-items: center; }
-        .adv-cat h3 .n { margin-left: auto; color: var(--muted); font-weight: 400; font-size: 13px; }
-        .progress { height: 6px; background: #3a3a3a; border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
-        .progress i { display: block; height: 100%; background: linear-gradient(90deg, #4f8a3a, #7ed957); }
-        .advs { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 6px; }
-        .adv { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px 6px; background: var(--card2); border-radius: 8px; text-align: center; font-size: 12px; line-height: 1.2; border: 1px solid transparent; }
-        .adv .ico { position: relative; display: block; width: 34px; height: 34px; }
-        .adv .frame { display: block; padding: 5px; border-radius: 6px; background: #1c1c1c; box-shadow: inset 0 0 0 2px #444; }
-        .adv.done .frame { background: #4a3d12; box-shadow: inset 0 0 0 2px #c9a227; }
-        .adv.chal.done .frame { background: #3d2a4f; box-shadow: inset 0 0 0 2px #b77cff; }
-        .adv:not(.done):not(.part) { opacity: .45; }
-        .adv.part { border-color: #5a5a2a; }
-        .adv small { color: var(--muted); }
-        .searching .adv:not(.hit) { display: none; }
-        .extra-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 10px 14px; border: 1px dashed #4a4a4a; border-radius: 12px; font-size: 14px; }
-        .extra-bar .muted { flex: 1; min-width: 200px; font-size: 13px; }
-        .note { background: #24384a; border: 1px solid #3a628a; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; }
-        /* toasts: small stack in the bottom right */
-        #errors { position: fixed; right: 16px; bottom: 16px; z-index: 1000; width: min(340px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-        #errors > div { margin: 0; padding: 8px 12px; font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; box-shadow: 0 4px 14px rgba(0, 0, 0, .4); pointer-events: auto; cursor: pointer; }
-
-        /* ---------- tree ---------- */
-        .tree { font-family: ui-monospace, Consolas, monospace; font-size: 13px; line-height: 1.55; overflow-x: auto; }
-        .tree details { padding-left: 16px; }
-        .tree > details { padding-left: 0; }
-        .tree details { padding-left: 22px; }
-        .tree summary { cursor: pointer; list-style: none; margin-left: -22px; padding-left: 22px; position: relative; border-radius: 4px; }
-        .tree summary::-webkit-details-marker { display: none; }
-        /* checkbox: empty = collapsed, ticked = expanded */
-        .tree summary::before {
-            content: ""; position: absolute; left: 3px; top: 50%; width: 12px; height: 12px; margin-top: -7px;
-            border: 1.5px solid #777; border-radius: 3px; background: #1a1a1a;
-        }
-        .tree details[open] > summary::before { background: #4f8a3a; border-color: #7ed957; }
-        .tree details[open] > summary::after {
-            content: ""; position: absolute; left: 7px; top: 50%; width: 4px; height: 7px; margin-top: -6px;
-            border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
-        }
-        .tree summary:hover::before { border-color: #bbb; }
-        .tree summary:hover { background: #333; }
-        .tree .tl { padding-left: 22px; white-space: nowrap; }
-        .tree .tl:hover { background: #2e2e2e; }
-        .tree .k { color: #9cdcfe; }
-        .tree .v.number { color: #b5cea8; }
-        .tree .v.string { color: #ce9178; }
-        .tree .v.arr { color: #b5cea8; }
-        .tree .ty { color: #777; }
-        .tree .hint { color: #6a9955; margin-left: 8px; }
-        .tree .more { margin: 2px 0 2px 16px; }
-        .hits .tl { padding-left: 0; white-space: normal; word-break: break-all; }
-        .hits mark { background: #6b5a00; color: inherit; }
-
-        /* margin:auto because global.css zeroes every margin, which breaks dialog centering */
-        dialog { margin: auto; background: #222; color: var(--text); border: 1px solid #555; border-radius: 12px; padding: 20px; width: min(520px, 92vw); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-        dialog h2 { font-size: 20px; margin-bottom: 6px; }
-        dialog a { color: #8cc8ff; text-decoration: none; }
-        dialog .btn { font-size: 14px; }
-        dialog::backdrop { background: #000a; }
-        dialog input { width: 100%; background: #161616; border: 1px solid #4a4a4a; color: var(--text); border-radius: 8px; padding: 8px 10px; margin: 4px 0 10px; }
-        .err { background: #4a2424; border: 1px solid #8a3a3a; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; }
-
-        /* ---------- world / server files ---------- */
-        .sub { font-size: 12px; color: var(--muted); font-weight: 400; margin: 14px 0 6px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
-        .scroll { max-height: 420px; overflow-y: auto; }
-        .searching .srow:not(.hit) { display: none; }
-        .srow { flex-wrap: wrap; }
-        .kv > * { min-width: 0; overflow-wrap: anywhere; }
-        .rowi .ico { position: relative; width: 30px; height: 30px; flex: none; }
-        .mapimg { display: block; width: 100%; max-width: 256px; image-rendering: pixelated; border-radius: 4px; box-shadow: 0 0 0 2px #000; background: #1a1a1a; }
-        img[data-map] { image-rendering: pixelated; }
-        .maps { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-        .maps figure { margin: 0; font-size: 12px; color: var(--muted); }
-        .maps figcaption { margin-top: 4px; }
-        .modslots { display: flex; flex-wrap: wrap; gap: 6px 12px; max-width: calc(var(--s) * 9 + 4px); }
-        .modslots .ms > span { display: block; font-size: 11px; color: #9a9a9a; margin: 0 0 2px 2px; }
-        .modrow img { width: 32px; height: 32px; image-rendering: pixelated; flex: none; border-radius: 4px; }
-        .modrow .desc { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        pre.cfg { white-space: pre-wrap; word-break: break-all; font-size: 12px; max-height: 420px; overflow: auto; background: #1c1c1c; padding: 8px; border-radius: 8px; margin: 6px 0 0; }
-        .fileblk { margin-top: 6px; }
-        .fileblk > summary { cursor: pointer; font-size: 13px; padding: 4px 8px; border-radius: 6px; background: var(--card2); overflow-wrap: anywhere; }
-        .fileblk > .tree { margin-top: 6px; }
-
-        /* ---------- schematic folder browser ---------- */
-        .fbrowse { display: grid; grid-template-columns: minmax(160px, 240px) 1fr; gap: 12px; align-items: start; }
-        .bpbrowse { display: grid; grid-template-columns: minmax(220px, 340px) 1fr; gap: 14px; align-items: start; }
-        .bpbrowse button { text-align: left; }
-        .bprows { max-height: 75vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-        .bpsel { min-width: 0; }
-        .bphead { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-        .bphead .grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-        .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; border: 1px solid #0008; margin-right: 4px; }
-        .bploc { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .linkish { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; font: inherit; text-decoration: underline; }
-        @media (max-width: 700px) { .bpbrowse { grid-template-columns: 1fr; } .bprows { max-height: 300px; } .bpsel { --s: clamp(26px, 7.4vw, 46px); } }
-        .ftree, .fpane .rows { max-height: 420px; overflow-y: auto; }
-        .ftree { display: flex; flex-direction: column; gap: 2px; background: #1c1c1c; border-radius: 8px; padding: 4px; }
-        .fbrowse button { text-align: left; }
-        .fnode { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 6px; font-size: 13px; min-width: 0; }
-        .fnode .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .fnode img { width: 16px; height: 16px; image-rendering: pixelated; flex: none; }
-        .fnode small { color: var(--muted); }
-        .fnode:hover, .fitem:hover { background: #2a2a2a; }
-        .fnode.on { background: var(--card2); box-shadow: inset 2px 0 var(--accent); }
-        .fitem { width: 100%; border: 1px solid transparent; }
-        .fitem.on { border-color: var(--accent); }
-        .fitem .grow { overflow-wrap: anywhere; }
-        .fpane { min-width: 0; }
-        .fcrumbs { display: flex; flex-wrap: wrap; gap: 4px; font-size: 13px; margin-bottom: 8px; color: var(--muted); }
-        .fcrumbs button { color: var(--accent); }
-        .fcrumbs button:hover { text-decoration: underline; }
-        #player:not(.searching) .fitem[data-off], #player.searching .fitem:not(.srow) { display: none; }
-        .fsel { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
-        .fsel > h3 { margin: 0 0 8px; font-size: 15px; }
-        .fsel > h3 .n { color: var(--muted); font-weight: 400; font-size: 12px; }
-        @media (max-width: 640px) { .fbrowse { grid-template-columns: 1fr; } .ftree { max-height: 200px; } }
-        .drop .srv-about { font-size: 13px; margin-top: 12px; }
-        .srv { max-width: 440px; margin: 12px auto; font-size: 13px; text-align: center; }
-        .srv .progress { height: 4px; margin: 6px 0 0; }
-        .srv .progress i { width: 0; transition: width .15s; }
-        .srv .progress.ind i { width: 30%; animation: srvind 1.1s linear infinite; }
-        @keyframes srvind { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
-        @media (prefers-reduced-motion: reduce) { .srv .progress.ind i { width: 100%; opacity: .5; animation: none; } }
-        .srv-act { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
-        .srv-act:empty { display: none; }
-        .drop details { max-width: 760px; margin: 14px auto 0; text-align: left; font-size: 13px; }
-        .drop details summary { cursor: pointer; text-align: center; color: var(--muted); }
-        .drop details ul { margin: 8px 0 0; padding-left: 20px; line-height: 1.6; }
-    </style>
-
-    <div class="nbt" id="app">
+    <main class="page nbt" id="main">
+        <?= site_breadcrumbs(site_current_path()) ?>
         <div id="errors"></div>
 
-        <section class="drop" id="drop">
-            <img class="big-ico" src="api.php?item=chest" alt="" onerror="this.src='/minecraft/tools/item-list/minecraft_chest.png'">
-            <h1>NBT Viewer</h1>
-            <p>Drop one or more Minecraft player files here to explore their inventory, ender chest, stats and every last bit of NBT data.</p>
-            <p class="muted">Files are read in your browser and only leave it if you press Share. Private details like IP addresses, chat and passwords are never shown or put in share links.<br>
-                Player files live in <span class="mono">world/playerdata/&lt;uuid&gt;.dat</span> (<span class="mono">world/players/data/</span> since 26.1). Drop a whole world or server folder, or a <span class="mono">.zip</span> / <span class="mono">.tar.gz</span> backup, to pick up everything below at once.</p>
-            <div class="row">
-                <button class="btn primary" id="pick">Choose files</button>
-                <button class="btn" id="pickDir">Choose folder</button>
-                <button class="btn" data-example="Sampledata/playerdata-sample.dat|Sampledata/playerstats-sample.json|Sampledata/playeradvancement-sample.json">Try an example</button>
-                <button class="btn" id="mySrv" data-srv="sync">View my server stats</button>
-                <button class="btn" id="pickJar" title="Save a mod's item textures and names to this site">Upload mod jars</button>
+        <div id="app">
+            <section id="drop">
+                <header class="nbt-hero">
+                    <img class="nbt-hero-bg" src="<?= $art(1280) ?>" srcset="<?= $art(960) ?> 960w, <?= $art(1280) ?> 1280w, <?= $art(1920) ?> 1920w" sizes="(max-width: 1312px) 100vw, 1280px" alt="" fetchpriority="high" decoding="async">
+                    <div class="nbt-hero-body">
+                        <div class="grow">
+                            <h1 class="page-title">NBT Viewer</h1>
+                            <p class="page-lede">Drop one or more Minecraft player files here to explore their inventory, ender chest, stats and every last bit of NBT data.</p>
+                            <div class="actions">
+                                <button class="btn primary" id="pick">Choose files</button>
+                                <button class="btn" id="pickDir">Choose folder</button>
+                                <button class="btn" data-example="Sampledata/playerdata-sample.dat|Sampledata/playerstats-sample.json|Sampledata/playeradvancement-sample.json">Try an example</button>
+                                <button class="btn" id="mySrv" data-srv="sync">View my server stats</button>
+                                <button class="btn" id="pickJar" title="Save a mod's item textures and names to this site">Upload mod jars</button>
+                            </div>
+                        </div>
+                        <img class="nbt-hero-ico" src="<?= $api ?>?item=chest" alt="" width="128" height="128" onerror="this.onerror=null;this.src='/minecraft/tools/item-list/minecraft_chest.png'">
+                    </div>
+                </header>
+
+                <div id="srvSync" class="srv hide" role="status" aria-live="polite"><div class="srv-msg"></div><div class="progress"><i></i></div><div class="srv-act"></div></div>
+                <div class="nbt-acts">
+                    <div class="nbt-act">
+                        <img src="<?= $api ?>?item=command_block" alt="" width="40" height="40" onerror="this.onerror=null;this.src='/minecraft/tools/item-list/minecraft_command_block.png'">
+                        <span><b>View my server stats</b><small>Opens every player on my Minecraft server and saves a copy in your browser, so next time only changed files are downloaded.</small></span>
+                    </div>
+                    <div class="nbt-act">
+                        <img src="<?= $api ?>?item=anvil" alt="" width="40" height="40" onerror="this.onerror=null;this.src='/minecraft/tools/item-list/minecraft_anvil.png'">
+                        <span><b>Upload mod jars</b><small>Saves a mod's item textures and names to this site, so modded items show properly for everyone without the jar. Each mod only ever needs uploading once.</small></span>
+                    </div>
+                    <div class="nbt-act nbt-act-drop">
+                        <img src="<?= $api ?>?item=hopper" alt="" width="40" height="40" onerror="this.onerror=null;this.src='/minecraft/tools/item-list/minecraft_hopper.png'">
+                        <span><b>Drop files anywhere on this page</b><small>Player files live in <span class="mono">world/playerdata/&lt;uuid&gt;.dat</span> (<span class="mono">world/players/data/</span> since 26.1). Drop a whole world or server folder, or a <span class="mono">.zip</span> / <span class="mono">.tar.gz</span> backup, to pick up everything below at once.</small></span>
+                    </div>
+                </div>
+                <p class="muted nbt-about">Files are read in your browser and only leave it if you press Share. Private details like IP addresses, chat and passwords are never shown or put in share links.</p>
+
+                <h2 class="nbt-h">What can I drop?</h2>
+                <div class="nbt-kinds">
+                    <?php foreach ($kinds as $k): ?>
+                        <div class="nbt-kind">
+                            <img src="<?= $api ?>?item=<?= $k[0] ?>" alt="" width="32" height="32" loading="lazy" onerror="this.onerror=null;this.src='/minecraft/tools/item-list/minecraft_<?= $k[0] ?>.png'">
+                            <div><b><?= $k[1] ?></b><p><?= $k[2] ?></p></div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+
+            <div id="viewer" class="hide">
+                <div class="bar nbt-bar">
+                    <div class="tabs" id="tabs"></div>
+                    <input class="field nbt-q" id="q" type="search" placeholder="Search items, enchants, keys…  ( / )" autocomplete="off" aria-label="Search">
+                    <button class="btn small" id="add" title="Add more files">Add files</button>
+                    <button class="btn small hide" id="srvBtn" title="World, server, plugin and mod files">World &amp; server</button>
+                    <button class="btn small hide" id="bpBtn" title="Every backpack found in the world, player files and backpack storage">Backpacks</button>
+                    <button class="btn small" id="rpBtn" title="Render items with custom resource packs">Resource packs</button>
+                    <button class="btn small primary" id="shareBtn" title="Create a link to this player">Share</button>
+                </div>
+                <div id="player"></div>
             </div>
-            <p class="muted srv-about">“View my server stats” opens every player on my Minecraft server and saves a copy in your browser, so next time only changed files are downloaded.</p>
-            <p class="muted srv-about">“Upload mod jars” saves a mod's item textures and names to this site, so modded items show properly for everyone without the jar. Each mod only ever needs uploading once.</p>
-            <div id="srvSync" class="srv hide" role="status" aria-live="polite"><div class="srv-msg"></div><div class="progress"><i></i></div><div class="srv-act"></div></div>
-            <details>
-                <summary>What can I drop?</summary>
-                <ul>
-                    <li><b>Players:</b> <span class="mono">playerdata/*.dat</span>, <span class="mono">stats/</span>, <span class="mono">advancements/</span>, SNBT from <span class="mono">/data get</span>, singleplayer <span class="mono">level.dat</span></li>
-                    <li><b>Server:</b> <span class="mono">usercache.json</span>, <span class="mono">ops.json</span>, <span class="mono">whitelist.json</span>, <span class="mono">banned-players.json</span>, <span class="mono">banned-ips.json</span>, <span class="mono">server.properties</span>, <span class="mono">logs/</span> (sessions, deaths, chat)</li>
-                    <li><b>World:</b> <span class="mono">level.dat</span>, <span class="mono">data/scoreboard.dat</span>, <span class="mono">data/map_*.dat</span> (maps drawn in the inventory), <span class="mono">data/command_storage_*.dat</span>, <span class="mono">uid.dat</span>, <span class="mono">region/</span> and <span class="mono">entities/</span> (placed backpacks, backpacks in chests and on the ground, owned pets, raw chunk NBT - a big world is only scanned when you press Scan)</li>
-                    <li><b>Paper / Spigot / Bukkit:</b> <span class="mono">bukkit.yml</span>, <span class="mono">spigot.yml</span>, <span class="mono">config/paper-*.yml</span>, plugin configs, EssentialsX userdata, LuckPerms (YAML/JSON storage or <span class="mono">/lp export</span>), mcMMO, GriefPrevention, WorldGuard, Towny, Multiverse</li>
-                    <li><b>Fabric / Forge / NeoForge:</b> <span class="mono">mods/*.jar</span> (names and icons for modded items - saved to the site so nobody has to drop that mod again), Trinkets and Curios slots, <span class="mono">config/</span>, <span class="mono">serverconfig/</span>, FTB Quests / Teams / Chunks, Sophisticated Backpacks</li>
-                    <li><b>Client:</b> <span class="mono">hotbar.nbt</span> (saved creative hotbars), <span class="mono">servers.dat</span>, resource pack <span class="mono">.zip</span>s (local textures)</li>
-                    <li><b>Builds:</b> <span class="mono">.schem</span>, <span class="mono">.litematic</span>, <span class="mono">.schematic</span> and structure <span class="mono">.nbt</span> files - size and material list</li>
-                </ul>
-            </details>
-        </section>
 
-        <div id="viewer" class="hide">
-            <div class="bar">
-                <div class="tabs" id="tabs"></div>
-                <input class="search" id="q" type="search" placeholder="Search items, enchants, keys…  ( / )" autocomplete="off">
-                <button class="btn small" id="add" title="Add more files">+ Add</button>
-                <button class="btn small hide" id="srvBtn" title="World, server, plugin and mod files">World &amp; server</button>
-                <button class="btn small hide" id="bpBtn" title="Every backpack found in the world, player files and backpack storage">Backpacks</button>
-                <button class="btn small" id="rpBtn" title="Render items with custom resource packs">Resource packs</button>
-                <button class="btn small primary" id="shareBtn" title="Create a link to this player">Share</button>
+            <input type="file" id="file" multiple hidden>
+            <input type="file" id="dirFile" webkitdirectory multiple hidden>
+            <input type="file" id="extraFile" multiple accept=".json" hidden>
+            <input type="file" id="jarFile" multiple accept=".jar" hidden>
+        </div>
+
+        <div id="tip" class="hide"></div>
+        <aside id="drawer" class="drawer" aria-hidden="true"></aside>
+        <div id="dragOverlay" class="hide">Drop files to load them</div>
+
+        <dialog class="dlg" id="rpDlg">
+            <h2>Resource packs</h2>
+            <p class="muted nbt-dlg-text">Item icons are rendered by <a href="https://www.minecraftitems.xyz/" target="_blank" rel="noopener">minecraftitems.xyz</a>. Tick any number of packs; like in game, packs higher in the list win when two change the same item. Custom model data is supported.</p>
+            <div id="rpList" class="rows"></div>
+            <div class="form">
+                <label>Pack name <input class="field" id="rpName" maxlength="60" placeholder="My pack"></label>
+                <label>Direct download link to the .zip <input class="field" id="rpUrl" placeholder="https://example.com/pack.zip"></label>
             </div>
-            <div id="player"></div>
-        </div>
+            <div id="rpMsg" class="muted nbt-dlg-msg"></div>
+            <div class="actions">
+                <button class="btn primary" id="rpAdd">Upload pack</button>
+                <button class="btn" id="rpClose" autofocus>Close</button>
+            </div>
+        </dialog>
 
-        <input type="file" id="file" multiple hidden>
-        <input type="file" id="dirFile" webkitdirectory multiple hidden>
-        <input type="file" id="extraFile" multiple accept=".json" hidden>
-        <input type="file" id="jarFile" multiple accept=".jar" hidden>
-    </div>
+        <dialog class="dlg" id="shareDlg">
+            <h2 id="shareTitle">Share player</h2>
+            <div id="shareScope" class="hide nbt-scope">
+                <label class="check"><input type="radio" name="shareScope" value="one" checked><span id="shareOneLbl">Just this player</span></label>
+                <label class="check"><input type="radio" name="shareScope" value="all"><span id="shareAllLbl">All players</span></label>
+            </div>
+            <p id="shareMsg" class="muted nbt-dlg-text"></p>
+            <input class="field nbt-share-url" id="shareUrl" readonly aria-label="Share link">
+            <div class="actions">
+                <button class="btn primary" id="shareCopy" autofocus>Copy link</button>
+                <button class="btn" id="shareClose">Close</button>
+            </div>
+        </dialog>
+    </main>
 
-    <div id="tip" class="hide"></div>
-    <aside id="drawer" aria-hidden="true"></aside>
-    <div id="dragOverlay" class="hide">Drop NBT files to load them</div>
-
-    <dialog id="rpDlg">
-        <h2 style="margin-top:0">Resource packs</h2>
-        <p class="muted" style="font-size:14px">Item icons are rendered by <a href="https://www.minecraftitems.xyz/" target="_blank" rel="noopener">minecraftitems.xyz</a>. Tick any number of packs - like in game, packs higher in the list win when two change the same item. Custom model data is supported.</p>
-        <div id="rpList" class="rows" style="margin-bottom:14px"></div>
-        <label>Pack name<input id="rpName" maxlength="60" placeholder="My pack"></label>
-        <label>Direct download link to the .zip<input id="rpUrl" placeholder="https://example.com/pack.zip"></label>
-        <div id="rpMsg" class="muted" style="font-size:13px;min-height:1.4em"></div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
-            <button class="btn" id="rpClose" autofocus>Close</button>
-            <button class="btn primary" id="rpAdd">Upload pack</button>
-        </div>
-    </dialog>
-
-    <dialog id="shareDlg">
-        <h2 style="margin-top:0" id="shareTitle">Share player</h2>
-        <div id="shareScope" class="hide" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;font-size:14px">
-            <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="radio" name="shareScope" value="one" checked style="width:auto;margin:0"><span id="shareOneLbl">Just this player</span></label>
-            <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="radio" name="shareScope" value="all" style="width:auto;margin:0"><span id="shareAllLbl">All players</span></label>
-        </div>
-        <p id="shareMsg" class="muted" style="font-size:14px"></p>
-        <input id="shareUrl" readonly>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
-            <button class="btn" id="shareClose">Close</button>
-            <button class="btn primary" id="shareCopy" autofocus>Copy link</button>
-        </div>
-    </dialog>
-
+    <?php site_footer(null, false); ?>
     <script>
     (() => {
         'use strict';
@@ -1388,6 +1005,8 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             }
             return u;
         }
+        // glint masks: a url() in a custom property resolves against the stylesheet that uses it, so it gets the full address
+        const maskURL = (it) => new URL(iconURL(it), location.href).href;
         const imgTag = (it, lazy = true) => {
             const id = typeof it === 'string' ? it : it.base;
             const url = iconURL(it), obj = typeof it !== 'string';
@@ -1466,7 +1085,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         function slotHTML(item, where, extra = '') {
             if (!item) return `<div class="slot ${extra}"></div>`;
             const k = reg(item, where);
-            const url = iconURL(item);
+            const url = maskURL(item);
             const pct = item.maxDamage && item.damage ? Math.max(0, 1 - item.damage / item.maxDamage) : null;
             return `<div class="slot has ${extra}${item.glint ? ' glint' : ''}" data-k="${k}" style="--m:url(&quot;${url}&quot;)">` +
                 imgTag(item) +
@@ -1645,8 +1264,8 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             try { L = linkFor(pl); } catch (e) { console.error(e); L = { pub: {}, points: [] }; }
             const sections = [];
 
-            sections.push(heroHTML(pl, L));
-            sections.push(`<div class="section card" id="s-inv"><h2>${imgTag('chest', false)} Inventory <span class="n">${P.stats.stacks} stacks · ${num(P.stats.items)} items</span></h2><div class="guis">${invHTML(P)}${enderHTML(P)}${modInvHTML(P)}</div></div>`);
+            ADVSUM = null;
+            sections.push(`<section class="nbt-sec" id="s-inv"><h2 class="nbt-h">Inventory <span class="n">${P.stats.stacks} stacks · ${num(P.stats.items)} items</span></h2><div class="guis">${invHTML(P)}${enderHTML(P)}${modInvHTML(P)}</div></section>`);
             if (pl.extras.stats) sections.push(statsHTML(pl.extras.stats));
             if (pl.extras.advancements) sections.push(advHTML(pl.extras.advancements));
             if (P.owned.size) sections.push(ownedHTML(P));
@@ -1667,17 +1286,42 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             if (isObj(d.warden_spawn_tracker)) cards.push(wardenHTML(d.warden_spawn_tracker));
             const other = Object.keys(d).filter((k) => !HANDLED.has(k));
             if (other.length) cards.push(otherHTML(d, other));
-            sections.push(`<div class="masonry">${cards.join('')}</div>`);
+            // the hero tabs go to the big sections; these pills go to each card under "Player data"
+            const cardJumps = [['s-server', 'Server'], ['s-loc', 'Locations'], ['s-ess', 'Essentials'], ['s-perm', 'Permissions'], ['s-towny', 'Towny'], ['s-mcmmo', 'mcMMO'], ['s-claims', 'Claims'], ['s-sess', 'Sessions'], ['s-pets', 'Pets'], ['s-quests', 'Quests'], ['s-eff', 'Effects'], ['s-attr', 'Attributes'], ['s-abil', 'Abilities'], ['s-vit', 'Vitals'], ['s-pearl', 'Pearls'], ['s-warden', 'Warden'], ['s-other', 'Other data']];
+            const cardHTML = cards.join('');
+            sections.push(`<section class="nbt-sec" id="s-data"><h2 class="nbt-h">Player data <span class="n">${cards.length} cards</span></h2>${jumpNav(cardJumps, cardHTML, 'jump')}<div class="masonry">${cardHTML}</div></section>`);
             if (isObj(d.recipeBook)) sections.push(recipesHTML(d.recipeBook));
             if (!pl.extras.stats || !pl.extras.advancements) sections.push(extraBarHTML(pl));
             sections.push(rawHTML(d));
 
-            const jumps = [['s-inv', 'Inventory'], ['s-stats', 'Statistics'], ['s-adv', 'Advancements'], ['s-owned', 'All items'], ['s-server', 'Server'], ['s-loc', 'Locations'], ['s-ess', 'Essentials'], ['s-perm', 'Permissions'], ['s-towny', 'Towny'], ['s-mcmmo', 'mcMMO'], ['s-claims', 'Claims'], ['s-sess', 'Sessions'], ['s-pets', 'Pets'], ['s-quests', 'Quests'], ['s-eff', 'Effects'], ['s-attr', 'Attributes'], ['s-abil', 'Abilities'], ['s-vit', 'Vitals'], ['s-pearl', 'Pearls'], ['s-warden', 'Warden'], ['s-other', 'Other data'], ['s-recipe', 'Recipes'], ['s-raw', 'Raw NBT']];
+            const jumps = [['s-inv', 'Inventory'], ['s-stats', 'Statistics'], ['s-adv', 'Advancements'], ['s-owned', 'All items'], ['s-data', 'Player data'], ['s-recipe', 'Recipes'], ['s-raw', 'Raw NBT']];
             const html = sections.join('');
-            const jumpHTML = '<nav class="jump">' + jumps.filter(([id]) => html.includes(`id="${id}"`)).map(([id, t]) => `<a href="#${id}">${t}</a>`).join('') + '</nav>';
-            $('#player').innerHTML = jumpHTML + html;
+            $('#player').innerHTML = heroHTML(pl, L, jumpNav(jumps, html, 'nbt-tabs')) + statRowHTML(pl) + html;
             applySearch();
             mountSkins();
+        }
+
+        /* ---------- new design: hero art, tabs, headline numbers ---------- */
+        // hero art: my own screenshots, picked by the player's dimension
+        const ART = { 'minecraft:overworld': '2025-11-15_23.01.43', 'minecraft:the_nether': '2025-12-03_22.12.21', 'minecraft:the_end': '2025-09-18_02.00.41_4K', world: '2025-11-16_03.36.29' };
+        const artImg = (name) => {
+            const u = (w) => `/media/minecraft/screenshots-sizes/${w}/${name}.webp`;
+            return `<img class="nbt-hero-bg" src="${u(1280)}" srcset="${u(960)} 960w, ${u(1280)} 1280w, ${u(1920)} 1920w" sizes="(max-width: 1312px) 100vw, 1280px" alt="" decoding="async">`;
+        };
+        const jumpNav = (jumps, html, cls) => `<nav class="${cls}" aria-label="Sections">${jumps.filter(([id]) => html.includes(`id="${id}"`)).map(([id, t]) => `<a href="#${id}">${t}</a>`).join('')}</nav>`;
+        const ring = (pct, label) => { const p = Math.max(0, Math.min(100, Math.round(pct))); return `<span class="nbt-ring${p === 100 ? ' full' : ''}" style="--p:${p}" role="img" aria-label="${esc(label)}"><b>${p}<small>%</small></b></span>`; };
+        let ADVSUM = null;      // {done, total} from advHTML, for the headline ring
+
+        function statRowHTML(pl) {
+            const P = pl.P, d = P.d;
+            const stat = (href, v, label, sub) => `<a class="nbt-stat" href="#${href}"><b>${v}</b><span>${label}</span>${sub ? `<small>${sub}</small>` : ''}</a>`;
+            const out = [stat('s-owned', num(P.stats.items), 'Items owned', `${num(P.owned.size)} unique · ${P.stats.stacks} stacks`), stat('s-inv', num(P.stats.enchanted), 'Enchanted items', `${num(P.stats.containers)} filled containers`)];
+            const play = playTicksOf(pl);
+            if (play !== null) out.push(stat('s-stats', esc(fmtStat('play_time', play)), 'Play time', activityOf(pl) ? 'active ' + esc(ago(activityOf(pl))) : ''));
+            if (ADVSUM && ADVSUM.total) out.push(`<a class="nbt-stat nbt-stat-ring" href="#s-adv">${ring((ADVSUM.done / ADVSUM.total) * 100, `${ADVSUM.done} of ${ADVSUM.total} advancements`)}<span>Advancements<small>${ADVSUM.done} of ${ADVSUM.total} done</small></span></a>`);
+            out.push(stat('s-vit', num(d.XpTotal ?? 0), 'Total XP', 'score ' + num(d.Score ?? 0)));
+            if (isObj(d.recipeBook) && Array.isArray(d.recipeBook.recipes)) out.push(stat('s-recipe', num(d.recipeBook.recipes.length), 'Recipes unlocked', ''));
+            return `<div class="nbt-stats">${out.join('')}</div>`;
         }
 
         // shown only while stats or advancements are missing - no empty sections
@@ -1859,7 +1503,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             }
         }
 
-        function heroHTML(pl, L) {
+        function heroHTML(pl, L, tabs) {
             const P = pl.P, d = P.d, X = L.pub;
             const gm = GAMEMODES[d.playerGameType] ?? null;
             const ver = versionOf(d.DataVersion);
@@ -1884,19 +1528,16 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             if (X.sess && X.sess.online) badges.push('<span class="badge g">Online when the log ended</span>');
             if (X.ess && Array.isArray(X.ess.flags)) for (const f of X.ess.flags) badges.push(`<span class="badge${/muted|jailed/.test(f) ? ' r' : ''}">${esc(ESS_FLAG[f] || f)}</span>`);
             const hp = d.Health ?? 0;
-            const tiles = [
-                [num(d.XpLevel ?? 0), 'XP level'], [num(d.XpTotal ?? 0), 'Total XP'], [num(d.Score ?? 0), 'Score'],
-                [num(P.stats.items), 'Items owned'], [num(P.owned.size), 'Unique items'], [num(P.stats.enchanted), 'Enchanted'],
-                [num(P.stats.containers), 'Filled containers'],
-            ];
-            if (isObj(d.recipeBook) && Array.isArray(d.recipeBook.recipes)) tiles.push([num(d.recipeBook.recipes.length), 'Recipes unlocked']);
             const absorb = d.AbsorptionAmount || 0;
-            return `<div class="section card hero">
-                ${skinHTML(P, 0.85)}
-                <div>
-                    <h1>${esc(pl.name || (P.uuid ? 'Unknown player' : pl.file))}</h1>
-                    ${X.ess && X.ess.nick ? `<div class="muted" style="font-size:14px">Nickname: ${ampHTML(X.ess.nick)}</div>` : ''}
-                    ${P.uuid ? `<div class="uuid muted mono" data-copy="${P.uuid}" title="Click to copy">${P.uuid}</div>` : ''}
+            const seen = activityOf(pl), online = !!(X.sess && X.sess.online);
+            return `<header class="nbt-hero nbt-hero-player">
+                ${artImg(ART[P.dim] || ART['minecraft:overworld'])}
+                <div class="nbt-hero-body">
+                    ${skinHTML(P, 0.85)}
+                    <div class="grow">
+                    <h1 class="page-title">${esc(pl.name || (P.uuid ? 'Unknown player' : pl.file))}</h1>
+                    ${X.ess && X.ess.nick ? `<div class="nbt-nick">Nickname: ${ampHTML(X.ess.nick)}</div>` : ''}
+                    ${P.uuid ? `<div class="nbt-uuid mono" data-copy="${P.uuid}" title="Click to copy">${P.uuid}</div>` : ''}
                     <div class="badges">${badges.join('')}</div>
                     <div class="vit">
                         <div><div class="vlabel">Health ${num(hp, 1)} / ${num(P.maxHealth)}${absorb ? ` + ${num(absorb, 1)}` : ''}</div>
@@ -1909,9 +1550,15 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                             <div class="icons rtl">${iconRow('air', Math.round(((d.Air ?? 300) / 300) * 20), 20, { X: '#3d8cff', W: '#fff', empty: '#1a2a3a' }, true)}</div></div>
                         <div class="xp"><span class="xplvl">${d.XpLevel ?? 0}</span><div class="xpbar"><i style="width:${Math.min(100, (d.XpP || 0) * 100)}%"></i></div></div>
                     </div>
-                    <div class="tiles">${tiles.map(([v, l]) => `<div class="tile"><b>${v}</b><span>${l}</span></div>`).join('')}</div>
+                    </div>
+                    <div class="nbt-me">
+                        <img src="${avatarOf(pl).replace(/\/32$/, '/64')}" alt="" width="48" height="48" onerror="this.src='${MISSING}'">
+                        <span class="nbt-me-text"><b>Level <span class="nbt-lvl">${num(d.XpLevel ?? 0)}</span></b>
+                        <small class="nbt-dot${online ? ' on' : ''}">${online ? 'Online when the log ended' : seen ? 'Active ' + esc(ago(seen)) : esc(GAMEMODES[d.playerGameType] ?? 'No activity date')}</small></span>
+                    </div>
                 </div>
-            </div>`;
+                ${tabs}
+            </header>`;
         }
 
         function invHTML(P) {
@@ -1960,12 +1607,12 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
         function ownedHTML(P) {
             const list = [...P.owned.values()].sort((a, b) => b.total - a.total);
-            return `<div class="card section" id="s-owned"><h2>${imgTag('bundle', false)} Everything they own <span class="n">${list.length} unique · counts include shulkers &amp; bundles</span></h2>
+            return `<section class="nbt-sec" id="s-owned"><h2 class="nbt-h">Everything they own <span class="n">${list.length} unique · counts include shulkers and bundles · click one to find it</span></h2>
                 <div class="owned">${list.map((e) => {
                     const k = reg(e.it, 'All items');
                     const where = [...e.where].map(([w, n]) => `${w}: ${n}`).join('\n');
-                    return `<div class="own" data-own="${esc(e.it.base)}" data-k="${k}" title="${esc(where)}"><div class="ico${e.it.glint ? ' glint' : ''}" style="--m:url(&quot;${iconURL(e.it)}&quot;)">${imgTag(e.it)}</div><b>${num(e.total)}</b></div>`;
-                }).join('')}</div></div>`;
+                    return `<div class="own" data-own="${esc(e.it.base)}" data-k="${k}" title="${esc(where)}"><div class="ico${e.it.glint ? ' glint' : ''}" style="--m:url(&quot;${maskURL(e.it)}&quot;)">${imgTag(e.it)}</div><b>${num(e.total)}</b></div>`;
+                }).join('')}</div></section>`;
         }
 
         function locHTML(P) {
@@ -2035,7 +1682,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 const ratio = a.def ? Math.min(1, a.value / (a.def * 2)) : a.value ? 1 : 0;
                 const mods = a.mods.map((m) => `${m.op === 'add_value' ? (m.amount >= 0 ? '+' : '') + fmt(m.amount) : (m.amount >= 0 ? '+' : '') + fmt(m.amount * 100) + '%'} <span class="muted">${esc(pretty(String(m.id).replace(/^minecraft:/, '')))}</span>`).join('<br>');
                 return `<div class="rowi attr"><div class="grow"><b>${esc(pretty(a.id))}</b> <span class="chg">${fmt(a.value)}</span>${a.value !== a.base ? ` <small>(base ${fmt(a.base)})</small>` : ''}${a.def !== undefined ? ` <small>default ${fmt(a.def)}</small>` : ''}
-                    ${mods ? `<br><small>${mods}</small>` : ''}${a.def !== undefined ? `<div class="bar"><i style="width:${ratio * 100}%;background:#ffd84a"></i></div>` : ''}</div></div>`;
+                    ${mods ? `<br><small>${mods}</small>` : ''}${a.def !== undefined ? `<div class="abar"><i style="width:${ratio * 100}%;background:#ffd84a"></i></div>` : ''}</div></div>`;
             }).join('');
             return `<div class="card" id="s-attr"><h2>${imgTag('golden_apple', false)} Attributes <span class="n">${changed.length} modified · ${normal.length} default</span></h2><div class="rows">${rows}</div>
                 ${normal.length ? `<h3 class="vlabel" style="margin:12px 0 6px;font-weight:400">At vanilla default</h3><div class="kv">${normal.map((a) => `<span>${esc(pretty(a.id))}</span><span>${fmt(a.value)}</span>`).join('')}</div>` : ''}</div>`;
@@ -2136,20 +1783,25 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
             const tabs = STAT_CATS.map(([c, label, icon]) => [c, label, icon, Object.entries(cat(c)).filter(([, v]) => typeof v === 'number' && v > 0).sort((a, b) => b[1] - a[1])]).filter((t) => t[3].length);
             const first = (tabs.find((t) => t[0] === 'mined') || tabs[0] || [])[0];
-            const panel = ([c, , , list]) => `<div class="stgrid${c === first ? '' : ' hide'}" data-spanel="${c}">${list.map(([id, v]) => {
-                const label = langId(id) || pretty(id);
-                if (c === 'custom') return `<div class="sti" data-s="${esc((id + ' ' + label).toLowerCase())}"><div><span title="${esc(id)}">${esc(label)}</span><b>${esc(fmtStat(id, v))}</b></div></div>`;
-                const icon = c === 'killed' || c === 'killed_by' ? mobIcon(id) : blockIcon(id);
-                return `<div class="sti" data-s="${esc((id + ' ' + label).toLowerCase())}" title="${esc(id)}"><span class="ico">${imgTag(icon)}</span><div><span>${esc(label)}</span><b>${num(v)}</b></div></div>`;
-            }).join('')}</div>`;
+            // general stats mix units (cm, ticks, counts), so only the item and mob lists get ranked bars
+            const panel = ([c, , , list]) => {
+                const top = list.length ? list[0][1] : 1;
+                return `<div class="${c === 'custom' ? 'stgrid' : 'nbt-ranks'}${c === first ? '' : ' hide'}" data-spanel="${c}">${list.map(([id, v], i) => {
+                    const label = langId(id) || pretty(id);
+                    if (c === 'custom') return `<div class="sti" data-s="${esc((id + ' ' + label).toLowerCase())}"><div><span title="${esc(id)}">${esc(label)}</span><b>${esc(fmtStat(id, v))}</b></div></div>`;
+                    const icon = c === 'killed' || c === 'killed_by' ? mobIcon(id) : blockIcon(id);
+                    return `<div class="sti nbt-rank" data-s="${esc((id + ' ' + label).toLowerCase())}" title="${esc(id)}"><span class="nbt-rank-n">${i + 1}</span><span class="ico">${imgTag(icon)}</span>` +
+                        `<span class="grow"><b>${esc(label)}</b><span class="nbt-rank-bar"><i style="width:${Math.max(1, (v / top) * 100)}%"></i></span></span><span class="nbt-rank-val">${num(v)}</span></div>`;
+                }).join('')}</div>`;
+            };
 
-            return `<div class="card section" id="s-stats"><h2>${imgTag('writable_book', false)} Statistics <span class="n">${esc(ex.file)}</span></h2>
-                <div class="tiles">${tiles.map(([v, l]) => `<div class="tile"><b>${esc(v)}</b><span>${l}</span></div>`).join('')}</div>
-                ${dist ? `<div style="margin-top:14px"><div class="vlabel">How they travelled · ${esc(fmtStat('walk_one_cm', dist))} total</div>
-                    <div class="travel">${travel.map(([, label, col, v]) => `<i style="width:${(v / dist) * 100}%;background:${col}" title="${label}: ${esc(fmtStat('walk_one_cm', v))}"></i>`).join('')}</div>
-                    <div class="legend">${travel.sort((a, b) => b[3] - a[3]).map(([, label, col, v]) => `<span style="--c:${col}">${label} ${esc(fmtStat('walk_one_cm', v))}</span>`).join('')}</div></div>` : ''}
-                <div class="stabs">${tabs.map(([c, label, icon, list]) => `<button data-stab="${c}" class="${c === first ? 'on' : ''}">${label}<small>${list.length}</small></button>`).join('')}</div>
-                ${tabs.map(panel).join('')}</div>`;
+            return `<section class="nbt-sec" id="s-stats"><h2 class="nbt-h">Statistics <span class="n">${esc(ex.file)}</span></h2>
+                <div class="nbt-stats nbt-stats-sm">${tiles.map(([v, l]) => `<div class="nbt-stat"><b>${esc(v)}</b><span>${l}</span></div>`).join('')}</div>
+                ${dist ? `<div class="card section"><h2>How they travelled <span class="n">${esc(fmtStat('walk_one_cm', dist))} in total</span></h2>
+                    <div class="nbt-travel">${travel.map(([, label, col, v]) => `<i style="width:${(v / dist) * 100}%;background:${col}" title="${label}: ${esc(fmtStat('walk_one_cm', v))}"></i>`).join('')}</div>
+                    <div class="nbt-legend">${travel.sort((a, b) => b[3] - a[3]).map(([, label, col, v]) => `<span style="--c:${col}">${label} <b>${esc(fmtStat('walk_one_cm', v))}</b></span>`).join('')}</div></div>` : ''}
+                <div class="card"><div class="stabs">${tabs.map(([c, label, icon, list]) => `<button data-stab="${c}" class="${c === first ? 'on' : ''}">${label}<small>${list.length}</small></button>`).join('')}</div>
+                ${tabs.map(panel).join('')}</div></section>`;
         }
 
         /* ---------- advancements (world/advancements/<uuid>.json) ---------- */
@@ -2167,27 +1819,46 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 add(cat, k, v);
             }
             let doneAll = 0, totalAll = 0;
-            const cats = [...groups].map(([cat, map]) => {
+            const latest = [], index = [];
+            const cats = [...groups].map(([cat, map], ci) => {
                 const list = [...map];
                 const done = list.filter(([, v]) => v && truthy(v.done)).length;
                 doneAll += done; totalAll += list.length;
+                const name = ADV[cat] ? pretty(cat) : cat;
                 const tiles = list.map(([id, v]) => {
                     const info = ADV_INFO[id] || { title: pretty(id.split('/').pop()), icon: 'book' };
                     const crit = v && isObj(v.criteria) ? Object.entries(v.criteria) : [];
                     const isDone = v && truthy(v.done);
                     const when = crit.map(([, t]) => String(t)).sort().pop();
-                    const cls = ['adv', isDone ? 'done' : crit.length ? 'part' : '', ADV_CHALLENGE.has(id) ? 'chal' : ''].join(' ');
+                    const state = isDone ? 'done' : crit.length ? 'part' : '';
+                    const chal = ADV_CHALLENGE.has(id) ? ' chal' : '';
                     const tip = [info.title, isDone ? `Completed ${when ? when.slice(0, 16) : ''}` : crit.length ? `In progress - ${crit.length} criteria done` : 'Not started', id, crit.length > 1 ? 'Done: ' + crit.map(([c]) => pretty(c)).join(', ') : ''].filter(Boolean).join('\n');
-                    return `<div class="${cls}" data-s="${esc((id + ' ' + info.title).toLowerCase())}" title="${esc(tip)}"><span class="frame"><span class="ico">${imgTag(info.icon)}</span></span>${esc(info.title)}<small>${isDone ? (when ? esc(when.slice(0, 10)) : 'done') : crit.length ? crit.length + ' criteria' : ''}</small></div>`;
+                    const frame = `<span class="frame"><span class="ico">${imgTag(info.icon)}</span></span>`;
+                    if (isDone && when) latest.push([when, `<div class="nbt-ach nbt-trophy nbt-tilt done${chal}" title="${esc(tip)}">${frame}<b>${esc(info.title)}</b><small>${esc(advDate(when))} · ${esc(name)}</small></div>`]);
+                    return `<div class="adv nbt-ach ${state}${chal}" data-s="${esc((id + ' ' + info.title).toLowerCase())}" title="${esc(tip)}">${frame}` +
+                        `<span class="grow"><b>${esc(info.title)}</b><small>${isDone ? (when ? esc(advDate(when)) : 'Done') : crit.length ? crit.length + ' criteria done' : 'Not started'}${chal ? ' · challenge' : ''}</small></span></div>`;
                 }).join('');
-                const name = ADV[cat] ? pretty(cat) : cat;
-                return `<div class="adv-cat"><h3>${ADV_CAT_ICON[cat] ? imgTag(ADV_CAT_ICON[cat], false).replace('<img', '<img style="width:20px;height:20px"') : ''}${esc(name)}<span class="n">${done} / ${list.length}</span></h3>
-                    <div class="progress"><i style="width:${list.length ? (done / list.length) * 100 : 0}%"></i></div><div class="advs">${tiles}</div></div>`;
+                const icon = ADV_CAT_ICON[cat] ? imgTag(ADV_CAT_ICON[cat], false) : '';
+                // the index has one card per vanilla tab and one per datapack or mod (they often have dozens of one-item tabs)
+                const key = ADV[cat] ? cat : cat.split(':')[0];
+                const ix = index.find((x) => x.key === key) || index[index.push({ key, name: ADV[cat] ? name : key, ci, done: 0, total: 0, tabs: 0 }) - 1];
+                ix.done += done; ix.total += list.length; ix.tabs++;
+                return `<div class="nbt-advcat" id="adv-${ci}"><h3>${icon}${esc(name)}<span class="n">${done} / ${list.length}</span></h3>
+                    <div class="progress"><i style="width:${list.length ? (done / list.length) * 100 : 0}%"></i></div><div class="nbt-achs">${tiles}</div></div>`;
             });
             const recDone = recipes.filter(([, v]) => truthy(v.done)).length;
-            return `<div class="card section" id="s-adv"><h2>${imgTag('knowledge_book', false)} Advancements <span class="n">${doneAll} / ${totalAll} done · ${num(recDone)} recipe unlocks · ${esc(ex.file)}</span></h2>
-                <div class="progress" style="height:10px"><i style="width:${totalAll ? (doneAll / totalAll) * 100 : 0}%"></i></div>${cats.join('')}</div>`;
+            ADVSUM = { done: doneAll, total: totalAll };
+            latest.sort((a, b) => (a[0] < b[0] ? 1 : -1));
+            return `<section class="nbt-sec" id="s-adv"><h2 class="nbt-h">Advancements <span class="n">${doneAll} / ${totalAll} done · ${num(recDone)} recipe unlocks · ${esc(ex.file)}</span></h2>
+                <div class="progress nbt-advall"><i style="width:${totalAll ? (doneAll / totalAll) * 100 : 0}%"></i></div>
+                ${latest.length ? `<h3 class="nbt-sub">Latest</h3><div class="nbt-trophies">${latest.slice(0, 6).map((x) => x[1]).join('')}</div>` : ''}
+                <h3 class="nbt-sub">By tab</h3><div class="nbt-advcards">${index.map((x) => `<a class="nbt-advcard" href="#adv-${x.ci}">${ring(x.total ? (x.done / x.total) * 100 : 0, `${x.done} of ${x.total} done`)}<span class="grow"><b>${esc(x.name)}</b><small>${x.done} / ${x.total}${x.tabs > 1 ? ` · ${x.tabs} tabs` : ''}</small></span></a>`).join('')}</div>${cats.join('')}</section>`;
         }
+        // "2025-11-12 20:31:22 +0000" -> "12 Nov 2025"
+        const advDate = (s) => {
+            const t = Date.parse(String(s).replace(' ', 'T').replace(/ ?([+-]\d\d)(\d\d)$/, '$1:$2'));
+            return Number.isFinite(t) ? new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : String(s).slice(0, 10);
+        };
 
         function otherHTML(d, keys) {
             return `<div class="card" id="s-other"><h2>${imgTag('book', false)} Other data <span class="n">${keys.length} keys</span></h2>
@@ -2526,9 +2197,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             const S = [], cards = [];
             const groups = new Map();
             CTX.files.forEach((f) => groups.set(f.kind, (groups.get(f.kind) || 0) + 1));
-            S.push(`<div class="section card"><h2>${imgTag('command_block', false)} World &amp; server <span class="n">${num(CTX.files.length)} file${CTX.files.length === 1 ? '' : 's'}</span><button class="btn small" data-act="clearctx" title="Forget all world and server files">Clear</button></h2>
-                <p class="muted" style="font-size:13px;margin:0 0 8px">Read in your browser only. Private values - IP addresses, chat, passwords, seeds - are never shown, and nothing on this page goes into share links. Player pages show what applies to each player.</p>
-                <div class="badges">${[...groups].map(([k, n]) => `<span class="badge">${esc(k)}${n > 1 ? ' × ' + num(n) : ''}</span>`).join('')}</div></div>`);
+            const levelName = CTX.level && isObj(CTX.level.data) && typeof CTX.level.data.LevelName === 'string' ? CTX.level.data.LevelName : '';
             if (CTX.level) cards.push(worldHTML());
             if (CTX.props) cards.push(propsHTML());
             if (CTX.bans.size) cards.push(bansHTML());
@@ -2551,7 +2220,20 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             if (rawList.length) S.push(filesHTML('w-data', 'World data <small class="muted">raw NBT</small>', 'structure_block', rawList, true));
             const html = S.join('');
             const jumps = [['w-region', 'Region files'],['w-world', 'World'], ['w-props', 'server.properties'], ['w-bans', 'Bans'], ['w-score', 'Scoreboard'], ['w-servers', 'Server list'], ['w-plugins', 'Plugins'], ['w-packs', 'Resource packs'], ['w-players', 'Players'], ['w-logs', 'Logs'], ['w-maps', 'Maps'], ['w-hotbar', 'Hotbars'], ['w-mods', 'Mods'], ['w-quests', 'Quests'], ['w-schem', 'Schematics'], ['w-config', 'Configs'], ['w-data', 'Raw world data']];
-            return '<nav class="jump">' + jumps.filter(([id]) => html.includes(`id="${id}"`)).map(([id, t]) => `<a href="#${id}">${t}</a>`).join('') + '</nav>' + html;
+            return `<header class="nbt-hero">${artImg(ART.world)}
+                <div class="nbt-hero-body">
+                    <div class="grow">
+                        <h1 class="page-title">World &amp; server</h1>
+                        <p class="page-lede">Read in your browser only. Private values (IP addresses, chat, passwords, seeds) are never shown, and nothing on this page goes into share links.</p>
+                        <div class="badges">${[...groups].map(([k, n]) => `<span class="badge">${esc(k)}${n > 1 ? ' × ' + num(n) : ''}</span>`).join('')}</div>
+                    </div>
+                    <div class="nbt-me">
+                        <img src="${iconURL('grass_block')}" data-id="grass_block" alt="" width="48" height="48">
+                        <span class="nbt-me-text"><b>${esc(levelName || 'Loaded files')}</b><small>${num(CTX.files.length)} file${CTX.files.length === 1 ? '' : 's'} · <button class="linkish" data-act="clearctx" title="Forget all world and server files">Clear</button></small></span>
+                    </div>
+                </div>
+                ${jumpNav(jumps, html, 'nbt-tabs')}
+            </header>` + html;
         }
 
         function worldHTML() {
@@ -3147,8 +2829,8 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             const giveCmd = '/give @s ' + it.full + (Object.keys(it.c).length ? '[' + Object.entries(it.c).map(([kk, v]) => `${kk}=${toSNBT(v)}`).join(',') + ']' : '') + (it.count > 1 ? ' ' + it.count : '');
             const n0 = NODES.length;
             drawer.innerHTML = `<button class="close" data-act="close" title="Close (Esc)">×</button>
-                <div class="crumbs">${crumbs}</div>
-                <div class="head"><div class="ico${it.glint ? ' glint' : ''}" style="--m:url(&quot;${iconURL(it)}&quot;)">${imgTag(it, false)}</div>
+                <div class="dcrumbs">${crumbs}</div>
+                <div class="head"><div class="ico${it.glint ? ' glint' : ''}" style="--m:url(&quot;${maskURL(it)}&quot;)">${imgTag(it, false)}</div>
                     <div><div style="font-size:20px;font-weight:700;text-shadow:2px 2px #000">${it.nameHTML}</div><div class="muted">${esc(pretty(it.base))}${it.count > 1 ? ' × ' + it.count : ''}</div></div></div>
                 <div class="tipbox">${tipLines(it, true)}</div>
                 ${contents}
@@ -3477,7 +3159,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             const box = $('#srvSync'), bar = $('.progress', box), drop = $('#drop');
             // once players are open the drop zone is hidden - show the bar above the viewer instead
             if (drop.classList.contains('hide')) { if (box.parentElement === drop) $('#app').insertBefore(box, $('#viewer')); }
-            else if (box.parentElement !== drop) drop.insertBefore(box, $('details', drop));
+            else if (box.parentElement !== drop) $('.nbt-hero', drop).after(box);
             box.classList.remove('hide');
             $('.srv-msg', box).textContent = msg;
             $('.srv-act', box).innerHTML = '';
@@ -4769,13 +4451,38 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             } catch (err) { msg.textContent = 'Error: ' + err.message; }
         };
 
+        // hero tabs: underline the section in view
+        addEventListener('scroll', () => {
+            if (scrollSpy) return;
+            scrollSpy = requestAnimationFrame(() => {
+                scrollSpy = 0;
+                const tabs = $$('#player .nbt-tabs a');
+                let cur = null;
+                for (const a of tabs) { const s = document.getElementById(a.hash.slice(1)); if (s && s.getBoundingClientRect().top < 120) cur = a; }
+                tabs.forEach((a) => (a === cur ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+            });
+        }, { passive: true });
+        let scrollSpy = 0;
+        // trophies tilt a little towards the pointer, like the Steam covers
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(hover: hover)').matches) {
+            document.addEventListener('pointermove', (e) => {
+                const c = e.target.closest && e.target.closest('.nbt-tilt');
+                if (!c) return;
+                const r = c.getBoundingClientRect();
+                c.style.setProperty('--rx', ((e.clientY - r.top) / r.height - 0.5) * -10 + 'deg');
+                c.style.setProperty('--ry', ((e.clientX - r.left) / r.width - 0.5) * 10 + 'deg');
+            });
+            document.addEventListener('pointerout', (e) => {
+                const c = e.target.closest && e.target.closest('.nbt-tilt');
+                if (c && !c.contains(e.relatedTarget)) { c.style.removeProperty('--rx'); c.style.removeProperty('--ry'); }
+            });
+        }
+
         const shareId = new URLSearchParams(location.search).get('s');
         if (shareId) loadShare(shareId);
         loadDefaultPacks();
     })();
     </script>
-
-    <?php site_footer(); ?>
 </body>
 
 </html>
