@@ -279,7 +279,7 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
                 ];
                 foreach ($tiles as $k => $t): if ($t[0] === null) continue; $d = isset($stats[$k]) ? $stats[$k]['d30'] : null; $chart = isset($series[$k]) && count($series[$k]) > 1; ?>
                     <<?= $chart ? 'button type="button" data-k="' . $k . '" title="Show ' . strtolower($t[1]) . ' in the History chart"' : 'div' ?> class="steam-stat">
-                        <b><?= number_format($t[0]) ?></b><span><?= $t[1] ?></span>
+                        <b<?= $k === 'hours' ? ' title="' . steam_hm($minutes) . '"' : '' ?>><?= number_format($t[0]) ?></b><span><?= $t[1] ?></span>
                         <small><?= $d ? steam_delta($d) . ' in 30 days' : '&nbsp;' ?></small>
                         <?= $chart ? steam_mini($series[$k]) : '' ?>
                     </<?= $chart ? 'button' : 'div' ?>>
@@ -559,13 +559,13 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
         <!-- ---------- playtime ---------- -->
         <?php if ($games): ?>
             <section class="card section" id="playtime">
-                <h2>Playtime <span class="n"><?= number_format(round($minutes / 60)) ?> h<?= $accountDays ? ' · ' . steam_hours(round($minutes / $accountDays)) . ' a day since joining' : '' ?></span></h2>
+                <h2>Playtime <span class="n"><?= steam_hours($minutes) ?><?=$accountDays ? ' · ' . steam_hours(round($minutes / $accountDays)) . ' a day since joining' : '' ?></span></h2>
                 <?php $split = array_filter(['Windows' => $platforms['Windows'], 'Linux / SteamOS' => $platforms['Linux (incl. Steam Deck)'], 'macOS' => $platforms['macOS']]); $splitTotal = array_sum($split); ?>
                 <?php if ($splitTotal): ?>
                     <div class="steam-split" role="img" aria-label="<?= h(implode(', ', array_map(function ($k, $v) use ($splitTotal) {
                         return $k . ' ' . round($v / $splitTotal * 100) . '%';
                     }, array_keys($split), $split))) ?>">
-                        <?php $i = 0; foreach ($split as $name => $min): ?><i class="s<?= $i++ ?>" style="width: <?= $min / $splitTotal * 100 ?>%" title="<?= $name ?>: <?= steam_hours($min) ?>"></i><?php endforeach; ?>
+                        <?php $i = 0; foreach ($split as $name => $min): ?><i class="s<?= $i++ ?>" style="width: <?= $min / $splitTotal * 100 ?>%" title="<?= $name ?>: <?= steam_hm($min) ?>"></i><?php endforeach; ?>
                     </div>
                     <div class="steam-legend">
                         <?php $i = 0; foreach ($split as $name => $min): ?><span><i class="s<?= $i++ ?>"></i><?= $name ?> <b><?= steam_hours($min) ?></b></span><?php endforeach; ?>
@@ -610,7 +610,7 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
                 <?php endif; ?>
 
                 <?php if ($top): ?>
-                    <h3>Most played <span class="muted">share of <?= number_format(round($minutes / 60)) ?> h</span></h3>
+                    <h3>Most played <span class="muted">share of <?= steam_hours($minutes) ?></span></h3>
                     <div class="steam-ranks">
                         <?php $r = 0; foreach ($top as $id => $g): ?>
                             <a class="steam-rank" href="/games/steam/game/?game=<?= $id ?>">
