@@ -66,27 +66,27 @@ function steam_news_text($s)
 
         <?php if ($info || $mine): ?>
             <div class="steam-game-top section">
-                <div class="steam-cap steam-cap-static">
+                <div class="cover-card steam-cap-static">
                     <img src="<?= h(steam_art($id, $items, 'library_capsule')) ?>" data-alt="<?= h(steam_art($id, $items)) ?>" alt="" width="300" height="450" decoding="async">
                     <?php if ($achievements): ?><?= steam_ring($done / count($achievements) * 100, $done . ' of ' . count($achievements) . ' achievements') ?><?php endif; ?>
                 </div>
 
                 <div class="steam-game-info">
                     <?php if ($mine): ?>
-                        <div class="steam-stats-row">
-                            <div class="steam-stat"><b><?= $mine['playtime_forever'] ? steam_hours($mine['playtime_forever']) : '0 h' ?></b><span>Played</span><?php if (!empty($mine['playtime_2weeks'])): ?><small><?= steam_hours($mine['playtime_2weeks']) ?> in 2 weeks</small><?php endif; ?></div>
+                        <div class="stat-row">
+                            <div class="stat-card"><b><?= $mine['playtime_forever'] ? steam_hours($mine['playtime_forever']) : '0 h' ?></b><span>Played</span><?php if (!empty($mine['playtime_2weeks'])): ?><small><?= steam_hours($mine['playtime_2weeks']) ?> in 2 weeks</small><?php endif; ?></div>
                             <?php if (!empty($mine['rtime_last_played'])): ?>
-                                <div class="steam-stat"><b><?= steam_time($mine['rtime_last_played']) ?></b><span>Last played</span></div>
+                                <div class="stat-card"><b><?= steam_time($mine['rtime_last_played']) ?></b><span>Last played</span></div>
                             <?php endif; ?>
                             <?php if ($achievements): ?>
-                                <div class="steam-stat"><b><?= $done ?> / <?= count($achievements) ?></b><span>Achievements</span><?php if ($latest): ?><small>latest <?= mb_strtolower(steam_ago($latest)) ?></small><?php endif; ?></div>
+                                <div class="stat-card"><b><?= $done ?> / <?= count($achievements) ?></b><span>Achievements</span><?php if ($latest): ?><small>latest <?= mb_strtolower(steam_ago($latest)) ?></small><?php endif; ?></div>
                             <?php endif; ?>
                             <?php if ($first): ?>
-                                <div class="steam-stat"><b><?= date('M Y', $first) ?></b><span>First achievement</span></div>
+                                <div class="stat-card"><b><?= date('M Y', $first) ?></b><span>First achievement</span></div>
                             <?php endif; ?>
                             <?php foreach (['windows' => 'Windows', 'linux' => 'Linux', 'deck' => 'Steam Deck', 'mac' => 'macOS'] as $k => $label):
                                 if (!empty($mine['playtime_' . $k . '_forever']) && $mine['playtime_' . $k . '_forever'] != $mine['playtime_forever']): ?>
-                                <div class="steam-stat"><b><?= steam_hours($mine['playtime_' . $k . '_forever']) ?></b><span>on <?= $label ?></span></div>
+                                <div class="stat-card"><b><?= steam_hours($mine['playtime_' . $k . '_forever']) ?></b><span>on <?= $label ?></span></div>
                             <?php endif; endforeach; ?>
                         </div>
                     <?php endif; ?>
@@ -116,7 +116,7 @@ function steam_news_text($s)
                                 <span>Steam Deck</span><span><?= STEAM_DECK[$deck] ?></span>
                             <?php endif; ?>
                             <?php if (!empty($now['response']['player_count'])): ?>
-                                <span>Playing now</span><span><span class="steam-dot online"></span><?= number_format($now['response']['player_count']) ?></span>
+                                <span>Playing now</span><span><span class="status-dot online"></span><?= number_format($now['response']['player_count']) ?></span>
                             <?php endif; ?>
                         </div>
                         <?php if ($reviews && !empty($reviews['review_count'])): ?>
@@ -129,7 +129,7 @@ function steam_news_text($s)
         <?php endif; ?>
 
         <?php if ($achievements): ?>
-            <h2 class="steam-h">Achievements <span class="n"><?= $done ?> of <?= count($achievements) ?> unlocked</span></h2>
+            <h2 class="sec-h">Achievements <span class="n"><?= $done ?> of <?= count($achievements) ?> unlocked</span></h2>
             <div class="bar steam-bar">
                 <input class="field" id="q" type="search" placeholder="Search <?= count($achievements) ?> achievements" aria-label="Search achievements">
                 <div class="stabs" id="show" role="group" aria-label="Show">
@@ -144,7 +144,7 @@ function steam_news_text($s)
                     <option value="t">Recently unlocked</option>
                 </select>
             </div>
-            <div class="steam-achs section" id="ach">
+            <div class="ach-grid section" id="ach">
                 <?php foreach ($achievements as $i => $a):
                     $pct = isset($rarity[$a['apiname']]) ? $rarity[$a['apiname']] : null;
                     $meta = isset($schema[$a['apiname']]) ? $schema[$a['apiname']] : [];

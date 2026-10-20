@@ -41,7 +41,7 @@ $items = steam_items(array_keys($games));
                 </select>
             </div>
             <p class="steam-count" id="count" aria-live="polite"><?= count($games) ?> games</p>
-            <div class="steam-caps" id="grid">
+            <div class="cover-grid" id="grid">
                 <?php $i = 0; foreach ($games as $id => $g) steam_card($g, $items, isset($progress[$id]) ? $progress[$id] : null, $i++ > 5); ?>
             </div>
         <?php endif; ?>

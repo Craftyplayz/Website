@@ -487,7 +487,7 @@ function steam_equipped()
 function steam_ring($pct, $label = '')
 {
     $pct = max(0, min(100, (int)round($pct)));
-    return '<span class="steam-ring' . ($pct == 100 ? ' full' : '') . '" style="--p: ' . $pct . '" role="img" aria-label="' . h($label ?: $pct . '% complete') . '"><b>' . $pct . '<small>%</small></b></span>';
+    return '<span class="ring' . ($pct == 100 ? ' full' : '') . '" style="--p: ' . $pct . '" role="img" aria-label="' . h($label ?: $pct . '% complete') . '"><b>' . $pct . '<small>%</small></b></span>';
 }
 
 // Banner at the top of every Steam page: art behind, the page title, me (avatar, frame, level, status) and the tabs.
@@ -506,27 +506,27 @@ function steam_hero($o)
     $current = isset($o['current']) ? $o['current'] : '';
     $tabs = ['/games/steam/' => 'Overview', '/games/steam/library/' => 'Library', '/games/steam/achievements/' => 'Achievements', '/games/steam/wishlist/' => 'Wishlist', '/games/steam/profile/' => 'Profile'];
     ?>
-    <header class="steam-hero">
-        <?php if ($bg): ?><img class="steam-hero-bg" src="<?= h($bg) ?>" alt="" fetchpriority="high" decoding="async" onerror="this.remove()"><?php endif; ?>
-        <div class="steam-hero-body">
+    <header class="page-hero">
+        <?php if ($bg): ?><img class="page-hero-bg" src="<?= h($bg) ?>" alt="" fetchpriority="high" decoding="async" onerror="this.remove()"><?php endif; ?>
+        <div class="page-hero-body">
             <div class="grow">
                 <h1 class="page-title"><?= h($o['title']) ?></h1>
                 <?php if (!empty($o['lede'])): ?><p class="page-lede"><?= $o['lede'] ?></p><?php endif; ?>
             </div>
             <?php if ($profile): ?>
-                <a class="steam-me" href="/games/steam/profile/" title="My Steam profile">
-                    <span class="steam-me-pic">
+                <a class="id-chip" href="/games/steam/profile/" title="My Steam profile">
+                    <span class="id-chip-pic">
                         <img src="<?= h($profile['avatarmedium']) ?>" alt="" width="64" height="64">
-                        <?php if ($frame): ?><img class="steam-me-frame" src="<?= h($frame) ?>" alt="" width="84" height="84" onerror="this.remove()"><?php endif; ?>
+                        <?php if ($frame): ?><img class="id-chip-frame" src="<?= h($frame) ?>" alt="" width="84" height="84" onerror="this.remove()"><?php endif; ?>
                     </span>
-                    <span class="steam-me-text">
-                        <b><?= h($profile['personaname']) ?><?php if ($level !== null): ?> <span class="steam-level" title="Steam level"><?= $level ?></span><?php endif; ?></b>
-                        <small class="steam-dot<?= $playing ? ' ingame' : ($state ? ' online' : '') ?>"><?= $playing ? 'Playing ' . h($profile['gameextrainfo']) : (isset(STEAM_STATES[$state]) ? STEAM_STATES[$state] : 'Online') ?></small>
+                    <span class="id-chip-text">
+                        <b><?= h($profile['personaname']) ?><?php if ($level !== null): ?> <span class="level" title="Steam level"><?= $level ?></span><?php endif; ?></b>
+                        <small class="status-dot<?= $playing ? ' ingame' : ($state ? ' online' : '') ?>"><?= $playing ? 'Playing ' . h($profile['gameextrainfo']) : (isset(STEAM_STATES[$state]) ? STEAM_STATES[$state] : 'Online') ?></small>
                     </span>
                 </a>
             <?php endif; ?>
         </div>
-        <nav class="steam-tabs" aria-label="Steam pages">
+        <nav class="page-tabs" aria-label="Steam pages">
             <?php foreach ($tabs as $url => $label): ?><a href="<?= $url ?>"<?= $url === $current ? ' aria-current="page"' : '' ?>><?= $label ?></a><?php endforeach; ?>
         </nav>
     </header>
@@ -541,14 +541,14 @@ function steam_card($g, $items, $p, $lazy)
     $last = isset($g['rtime_last_played']) ? (int)$g['rtime_last_played'] : 0;
     $attrs = ' data-name="' . h(mb_strtolower($g['name'])) . '" data-min="' . (int)$g['playtime_forever'] . '" data-last="' . $last . '" data-pct="' . ($p ? round($p['pct'], 2) : -1) . '"';
     ?>
-    <a class="steam-cap" href="/games/steam/game/?game=<?= $id ?>"<?= $attrs ?>>
+    <a class="cover-card" href="/games/steam/game/?game=<?= $id ?>"<?= $attrs ?>>
         <img src="<?= h(steam_art($id, $items, 'library_capsule')) ?>" data-alt="<?= h(steam_art($id, $items)) ?>" alt="" width="300" height="450" <?= $lazy ? 'loading="lazy" ' : '' ?>decoding="async">
         <?php if ($p): ?><?= steam_ring($p['pct'], $p['done'] . ' of ' . $p['total'] . ' achievements') ?><?php endif; ?>
-        <?php if (!empty($g['playtime_2weeks'])): ?><span class="steam-cap-new">Recent</span><?php endif; ?>
-        <span class="steam-cap-info">
+        <?php if (!empty($g['playtime_2weeks'])): ?><span class="cover-tag">Recent</span><?php endif; ?>
+        <span class="cover-info">
             <b><?= h($g['name']) ?></b>
             <small><?= $g['playtime_forever'] ? steam_hours($g['playtime_forever']) : 'Never played' ?><?= $p ? ' · ' . $p['done'] . '/' . $p['total'] : '' ?></small>
-            <?php if ($last): ?><small class="steam-cap-more">Last played <?= mb_strtolower(steam_ago($last)) ?></small><?php endif; ?>
+            <?php if ($last): ?><small class="cover-more">Last played <?= mb_strtolower(steam_ago($last)) ?></small><?php endif; ?>
         </span>
     </a>
     <?php
@@ -564,22 +564,22 @@ function steam_ach_card($a, $meta, $pct, $game = null, $attrs = '')
     $t = steam_tier($pct);
     $desc = isset($a['description']) ? $a['description'] : '';
     ?>
-    <div class="steam-ach<?= $got ? '' : ' locked' ?><?= $t[1] ? ' t-' . $t[1] : '' ?>"<?= $attrs ?>>
-        <?php if ($icon): ?><img src="<?= h($icon) ?>" alt="" width="64" height="64" loading="lazy" decoding="async"><?php else: ?><span class="steam-ach-noicon"></span><?php endif; ?>
+    <div class="ach-tile<?= $got ? '' : ' locked' ?><?= $t[1] ? ' t-' . $t[1] : '' ?>"<?= $attrs ?>>
+        <?php if ($icon): ?><img src="<?= h($icon) ?>" alt="" width="64" height="64" loading="lazy" decoding="async"><?php else: ?><span class="ach-noicon"></span><?php endif; ?>
         <div class="grow">
             <b><?= h($a['name']) ?></b>
             <?php if ($game): ?><small><a href="/games/steam/game/?game=<?= (int)$game[0] ?>"><?= h($game[1]) ?></a></small><?php endif; ?>
             <?php if ($hidden && $desc !== ''): ?>
                 <details><summary>Hidden achievement</summary><?= h($desc) ?></details>
             <?php elseif ($desc !== ''): ?>
-                <small class="steam-ach-desc"><?= h($desc) ?></small>
+                <small class="ach-desc"><?= h($desc) ?></small>
             <?php endif; ?>
             <?php if ($pct !== null): ?>
-                <span class="steam-rare" title="<?= $t[0] ?>: <?= $pct ?>% of players have this"><i style="width: <?= max(2, min(100, $pct)) ?>%"></i></span>
-                <small class="steam-rare-n"><?= $pct < 10 ? round($pct, 1) : round($pct) ?>% of players · <?= $t[0] ?></small>
+                <span class="rarity-bar" title="<?= $t[0] ?>: <?= $pct ?>% of players have this"><i style="width: <?= max(2, min(100, $pct)) ?>%"></i></span>
+                <small class="rarity-n"><?= $pct < 10 ? round($pct, 1) : round($pct) ?>% of players · <?= $t[0] ?></small>
             <?php endif; ?>
         </div>
-        <small class="steam-ach-when"><?= $got ? steam_time($a['unlocktime']) : 'Locked' ?></small>
+        <small class="ach-when"><?= $got ? steam_time($a['unlocktime']) : 'Locked' ?></small>
     </div>
     <?php
 }

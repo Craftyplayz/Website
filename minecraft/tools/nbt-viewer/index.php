@@ -38,9 +38,9 @@ $kinds = [
 
         <div id="app">
             <section id="drop">
-                <header class="nbt-hero">
-                    <img class="nbt-hero-bg" src="<?= $art(1280) ?>" srcset="<?= $art(960) ?> 960w, <?= $art(1280) ?> 1280w, <?= $art(1920) ?> 1920w" sizes="(max-width: 1312px) 100vw, 1280px" alt="" fetchpriority="high" decoding="async">
-                    <div class="nbt-hero-body">
+                <header class="page-hero">
+                    <img class="page-hero-bg" src="<?= $art(1280) ?>" srcset="<?= $art(960) ?> 960w, <?= $art(1280) ?> 1280w, <?= $art(1920) ?> 1920w" sizes="(max-width: 1312px) 100vw, 1280px" alt="" fetchpriority="high" decoding="async">
+                    <div class="page-hero-body">
                         <div class="grow">
                             <h1 class="page-title">NBT Viewer</h1>
                             <p class="page-lede">Drop one or more Minecraft player files here to explore their inventory, ender chest, stats and every last bit of NBT data.</p>
@@ -73,7 +73,7 @@ $kinds = [
                 </div>
                 <p class="muted nbt-about">Files are read in your browser and only leave it if you press Share. Private details like IP addresses, chat and passwords are never shown or put in share links.</p>
 
-                <h2 class="nbt-h">What can I drop?</h2>
+                <h2 class="sec-h">What can I drop?</h2>
                 <div class="nbt-kinds">
                     <?php foreach ($kinds as $k): ?>
                         <div class="nbt-kind">
@@ -1265,7 +1265,7 @@ $kinds = [
             const sections = [];
 
             ADVSUM = null;
-            sections.push(`<section class="nbt-sec" id="s-inv"><h2 class="nbt-h">Inventory <span class="n">${P.stats.stacks} stacks · ${num(P.stats.items)} items</span></h2><div class="guis">${invHTML(P)}${enderHTML(P)}${modInvHTML(P)}</div></section>`);
+            sections.push(`<section class="nbt-sec" id="s-inv"><h2 class="sec-h">Inventory <span class="n">${P.stats.stacks} stacks · ${num(P.stats.items)} items</span></h2><div class="guis">${invHTML(P)}${enderHTML(P)}${modInvHTML(P)}</div></section>`);
             if (pl.extras.stats) sections.push(statsHTML(pl.extras.stats));
             if (pl.extras.advancements) sections.push(advHTML(pl.extras.advancements));
             if (P.owned.size) sections.push(ownedHTML(P));
@@ -1289,14 +1289,14 @@ $kinds = [
             // the hero tabs go to the big sections; these pills go to each card under "Player data"
             const cardJumps = [['s-server', 'Server'], ['s-loc', 'Locations'], ['s-ess', 'Essentials'], ['s-perm', 'Permissions'], ['s-towny', 'Towny'], ['s-mcmmo', 'mcMMO'], ['s-claims', 'Claims'], ['s-sess', 'Sessions'], ['s-pets', 'Pets'], ['s-quests', 'Quests'], ['s-eff', 'Effects'], ['s-attr', 'Attributes'], ['s-abil', 'Abilities'], ['s-vit', 'Vitals'], ['s-pearl', 'Pearls'], ['s-warden', 'Warden'], ['s-other', 'Other data']];
             const cardHTML = cards.join('');
-            sections.push(`<section class="nbt-sec" id="s-data"><h2 class="nbt-h">Player data <span class="n">${cards.length} cards</span></h2>${jumpNav(cardJumps, cardHTML, 'jump')}<div class="masonry">${cardHTML}</div></section>`);
+            sections.push(`<section class="nbt-sec" id="s-data"><h2 class="sec-h">Player data <span class="n">${cards.length} cards</span></h2>${jumpNav(cardJumps, cardHTML, 'jump')}<div class="masonry">${cardHTML}</div></section>`);
             if (isObj(d.recipeBook)) sections.push(recipesHTML(d.recipeBook));
             if (!pl.extras.stats || !pl.extras.advancements) sections.push(extraBarHTML(pl));
             sections.push(rawHTML(d));
 
             const jumps = [['s-inv', 'Inventory'], ['s-stats', 'Statistics'], ['s-adv', 'Advancements'], ['s-owned', 'All items'], ['s-data', 'Player data'], ['s-recipe', 'Recipes'], ['s-raw', 'Raw NBT']];
             const html = sections.join('');
-            $('#player').innerHTML = heroHTML(pl, L, jumpNav(jumps, html, 'nbt-tabs')) + statRowHTML(pl) + html;
+            $('#player').innerHTML = heroHTML(pl, L, jumpNav(jumps, html, 'page-tabs')) + statRowHTML(pl) + html;
             applySearch();
             mountSkins();
         }
@@ -1306,22 +1306,22 @@ $kinds = [
         const ART = { 'minecraft:overworld': '2025-11-15_23.01.43', 'minecraft:the_nether': '2025-12-03_22.12.21', 'minecraft:the_end': '2025-09-18_02.00.41_4K', world: '2025-11-16_03.36.29' };
         const artImg = (name) => {
             const u = (w) => `/media/minecraft/screenshots-sizes/${w}/${name}.webp`;
-            return `<img class="nbt-hero-bg" src="${u(1280)}" srcset="${u(960)} 960w, ${u(1280)} 1280w, ${u(1920)} 1920w" sizes="(max-width: 1312px) 100vw, 1280px" alt="" decoding="async">`;
+            return `<img class="page-hero-bg" src="${u(1280)}" srcset="${u(960)} 960w, ${u(1280)} 1280w, ${u(1920)} 1920w" sizes="(max-width: 1312px) 100vw, 1280px" alt="" decoding="async">`;
         };
         const jumpNav = (jumps, html, cls) => `<nav class="${cls}" aria-label="Sections">${jumps.filter(([id]) => html.includes(`id="${id}"`)).map(([id, t]) => `<a href="#${id}">${t}</a>`).join('')}</nav>`;
-        const ring = (pct, label) => { const p = Math.max(0, Math.min(100, Math.round(pct))); return `<span class="nbt-ring${p === 100 ? ' full' : ''}" style="--p:${p}" role="img" aria-label="${esc(label)}"><b>${p}<small>%</small></b></span>`; };
+        const ring = (pct, label) => { const p = Math.max(0, Math.min(100, Math.round(pct))); return `<span class="ring${p === 100 ? ' full' : ''}" style="--p:${p}" role="img" aria-label="${esc(label)}"><b>${p}<small>%</small></b></span>`; };
         let ADVSUM = null;      // {done, total} from advHTML, for the headline ring
 
         function statRowHTML(pl) {
             const P = pl.P, d = P.d;
-            const stat = (href, v, label, sub) => `<a class="nbt-stat" href="#${href}"><b>${v}</b><span>${label}</span>${sub ? `<small>${sub}</small>` : ''}</a>`;
+            const stat = (href, v, label, sub) => `<a class="stat-card" href="#${href}"><b>${v}</b><span>${label}</span>${sub ? `<small>${sub}</small>` : ''}</a>`;
             const out = [stat('s-owned', num(P.stats.items), 'Items owned', `${num(P.owned.size)} unique · ${P.stats.stacks} stacks`), stat('s-inv', num(P.stats.enchanted), 'Enchanted items', `${num(P.stats.containers)} filled containers`)];
             const play = playTicksOf(pl);
             if (play !== null) out.push(stat('s-stats', esc(fmtStat('play_time', play)), 'Play time', activityOf(pl) ? 'active ' + esc(ago(activityOf(pl))) : ''));
-            if (ADVSUM && ADVSUM.total) out.push(`<a class="nbt-stat nbt-stat-ring" href="#s-adv">${ring((ADVSUM.done / ADVSUM.total) * 100, `${ADVSUM.done} of ${ADVSUM.total} advancements`)}<span>Advancements<small>${ADVSUM.done} of ${ADVSUM.total} done</small></span></a>`);
+            if (ADVSUM && ADVSUM.total) out.push(`<a class="stat-card stat-ring" href="#s-adv">${ring((ADVSUM.done / ADVSUM.total) * 100, `${ADVSUM.done} of ${ADVSUM.total} advancements`)}<span>Advancements<small>${ADVSUM.done} of ${ADVSUM.total} done</small></span></a>`);
             out.push(stat('s-vit', num(d.XpTotal ?? 0), 'Total XP', 'score ' + num(d.Score ?? 0)));
             if (isObj(d.recipeBook) && Array.isArray(d.recipeBook.recipes)) out.push(stat('s-recipe', num(d.recipeBook.recipes.length), 'Recipes unlocked', ''));
-            return `<div class="nbt-stats">${out.join('')}</div>`;
+            return `<div class="stat-row">${out.join('')}</div>`;
         }
 
         // shown only while stats or advancements are missing - no empty sections
@@ -1530,9 +1530,9 @@ $kinds = [
             const hp = d.Health ?? 0;
             const absorb = d.AbsorptionAmount || 0;
             const seen = activityOf(pl), online = !!(X.sess && X.sess.online);
-            return `<header class="nbt-hero nbt-hero-player">
+            return `<header class="page-hero nbt-hero-player">
                 ${artImg(ART[P.dim] || ART['minecraft:overworld'])}
-                <div class="nbt-hero-body">
+                <div class="page-hero-body">
                     ${skinHTML(P, 0.85)}
                     <div class="grow">
                     <h1 class="page-title">${esc(pl.name || (P.uuid ? 'Unknown player' : pl.file))}</h1>
@@ -1551,10 +1551,10 @@ $kinds = [
                         <div class="xp"><span class="xplvl">${d.XpLevel ?? 0}</span><div class="xpbar"><i style="width:${Math.min(100, (d.XpP || 0) * 100)}%"></i></div></div>
                     </div>
                     </div>
-                    <div class="nbt-me">
+                    <div class="id-chip">
                         <img src="${avatarOf(pl).replace(/\/32$/, '/64')}" alt="" width="48" height="48" onerror="this.src='${MISSING}'">
-                        <span class="nbt-me-text"><b>Level <span class="nbt-lvl">${num(d.XpLevel ?? 0)}</span></b>
-                        <small class="nbt-dot${online ? ' on' : ''}">${online ? 'Online when the log ended' : seen ? 'Active ' + esc(ago(seen)) : esc(GAMEMODES[d.playerGameType] ?? 'No activity date')}</small></span>
+                        <span class="id-chip-text"><b>Level <span class="level">${num(d.XpLevel ?? 0)}</span></b>
+                        <small class="status-dot${online ? ' online' : ''}">${online ? 'Online when the log ended' : seen ? 'Active ' + esc(ago(seen)) : esc(GAMEMODES[d.playerGameType] ?? 'No activity date')}</small></span>
                     </div>
                 </div>
                 ${tabs}
@@ -1607,7 +1607,7 @@ $kinds = [
 
         function ownedHTML(P) {
             const list = [...P.owned.values()].sort((a, b) => b.total - a.total);
-            return `<section class="nbt-sec" id="s-owned"><h2 class="nbt-h">Everything they own <span class="n">${list.length} unique · counts include shulkers and bundles · click one to find it</span></h2>
+            return `<section class="nbt-sec" id="s-owned"><h2 class="sec-h">Everything they own <span class="n">${list.length} unique · counts include shulkers and bundles · click one to find it</span></h2>
                 <div class="owned">${list.map((e) => {
                     const k = reg(e.it, 'All items');
                     const where = [...e.where].map(([w, n]) => `${w}: ${n}`).join('\n');
@@ -1786,17 +1786,17 @@ $kinds = [
             // general stats mix units (cm, ticks, counts), so only the item and mob lists get ranked bars
             const panel = ([c, , , list]) => {
                 const top = list.length ? list[0][1] : 1;
-                return `<div class="${c === 'custom' ? 'stgrid' : 'nbt-ranks'}${c === first ? '' : ' hide'}" data-spanel="${c}">${list.map(([id, v], i) => {
+                return `<div class="${c === 'custom' ? 'stgrid' : 'rank-list'}${c === first ? '' : ' hide'}" data-spanel="${c}">${list.map(([id, v], i) => {
                     const label = langId(id) || pretty(id);
                     if (c === 'custom') return `<div class="sti" data-s="${esc((id + ' ' + label).toLowerCase())}"><div><span title="${esc(id)}">${esc(label)}</span><b>${esc(fmtStat(id, v))}</b></div></div>`;
                     const icon = c === 'killed' || c === 'killed_by' ? mobIcon(id) : blockIcon(id);
-                    return `<div class="sti nbt-rank" data-s="${esc((id + ' ' + label).toLowerCase())}" title="${esc(id)}"><span class="nbt-rank-n">${i + 1}</span><span class="ico">${imgTag(icon)}</span>` +
-                        `<span class="grow"><b>${esc(label)}</b><span class="nbt-rank-bar"><i style="width:${Math.max(1, (v / top) * 100)}%"></i></span></span><span class="nbt-rank-val">${num(v)}</span></div>`;
+                    return `<div class="sti rank-row" data-s="${esc((id + ' ' + label).toLowerCase())}" title="${esc(id)}"><span class="rank-n">${i + 1}</span><span class="ico">${imgTag(icon)}</span>` +
+                        `<span class="grow"><b>${esc(label)}</b><span class="rank-bar"><i style="width:${Math.max(1, (v / top) * 100)}%"></i></span></span><span class="rank-val">${num(v)}</span></div>`;
                 }).join('')}</div>`;
             };
 
-            return `<section class="nbt-sec" id="s-stats"><h2 class="nbt-h">Statistics <span class="n">${esc(ex.file)}</span></h2>
-                <div class="nbt-stats nbt-stats-sm">${tiles.map(([v, l]) => `<div class="nbt-stat"><b>${esc(v)}</b><span>${l}</span></div>`).join('')}</div>
+            return `<section class="nbt-sec" id="s-stats"><h2 class="sec-h">Statistics <span class="n">${esc(ex.file)}</span></h2>
+                <div class="stat-row nbt-stats-sm">${tiles.map(([v, l]) => `<div class="stat-card"><b>${esc(v)}</b><span>${l}</span></div>`).join('')}</div>
                 ${dist ? `<div class="card section"><h2>How they travelled <span class="n">${esc(fmtStat('walk_one_cm', dist))} in total</span></h2>
                     <div class="nbt-travel">${travel.map(([, label, col, v]) => `<i style="width:${(v / dist) * 100}%;background:${col}" title="${label}: ${esc(fmtStat('walk_one_cm', v))}"></i>`).join('')}</div>
                     <div class="nbt-legend">${travel.sort((a, b) => b[3] - a[3]).map(([, label, col, v]) => `<span style="--c:${col}">${label} <b>${esc(fmtStat('walk_one_cm', v))}</b></span>`).join('')}</div></div>` : ''}
@@ -1834,8 +1834,8 @@ $kinds = [
                     const chal = ADV_CHALLENGE.has(id) ? ' chal' : '';
                     const tip = [info.title, isDone ? `Completed ${when ? when.slice(0, 16) : ''}` : crit.length ? `In progress - ${crit.length} criteria done` : 'Not started', id, crit.length > 1 ? 'Done: ' + crit.map(([c]) => pretty(c)).join(', ') : ''].filter(Boolean).join('\n');
                     const frame = `<span class="frame"><span class="ico">${imgTag(info.icon)}</span></span>`;
-                    if (isDone && when) latest.push([when, `<div class="nbt-ach nbt-trophy nbt-tilt done${chal}" title="${esc(tip)}">${frame}<b>${esc(info.title)}</b><small>${esc(advDate(when))} · ${esc(name)}</small></div>`]);
-                    return `<div class="adv nbt-ach ${state}${chal}" data-s="${esc((id + ' ' + info.title).toLowerCase())}" title="${esc(tip)}">${frame}` +
+                    if (isDone && when) latest.push([when, `<div class="ach-tile nbt-trophy nbt-tilt done${chal}" title="${esc(tip)}">${frame}<b>${esc(info.title)}</b><small>${esc(advDate(when))} · ${esc(name)}</small></div>`]);
+                    return `<div class="adv ach-tile ${state}${chal}" data-s="${esc((id + ' ' + info.title).toLowerCase())}" title="${esc(tip)}">${frame}` +
                         `<span class="grow"><b>${esc(info.title)}</b><small>${isDone ? (when ? esc(advDate(when)) : 'Done') : crit.length ? crit.length + ' criteria done' : 'Not started'}${chal ? ' · challenge' : ''}</small></span></div>`;
                 }).join('');
                 const icon = ADV_CAT_ICON[cat] ? imgTag(ADV_CAT_ICON[cat], false) : '';
@@ -1844,12 +1844,12 @@ $kinds = [
                 const ix = index.find((x) => x.key === key) || index[index.push({ key, name: ADV[cat] ? name : key, ci, done: 0, total: 0, tabs: 0 }) - 1];
                 ix.done += done; ix.total += list.length; ix.tabs++;
                 return `<div class="nbt-advcat" id="adv-${ci}"><h3>${icon}${esc(name)}<span class="n">${done} / ${list.length}</span></h3>
-                    <div class="progress"><i style="width:${list.length ? (done / list.length) * 100 : 0}%"></i></div><div class="nbt-achs">${tiles}</div></div>`;
+                    <div class="progress"><i style="width:${list.length ? (done / list.length) * 100 : 0}%"></i></div><div class="ach-grid">${tiles}</div></div>`;
             });
             const recDone = recipes.filter(([, v]) => truthy(v.done)).length;
             ADVSUM = { done: doneAll, total: totalAll };
             latest.sort((a, b) => (a[0] < b[0] ? 1 : -1));
-            return `<section class="nbt-sec" id="s-adv"><h2 class="nbt-h">Advancements <span class="n">${doneAll} / ${totalAll} done · ${num(recDone)} recipe unlocks · ${esc(ex.file)}</span></h2>
+            return `<section class="nbt-sec" id="s-adv"><h2 class="sec-h">Advancements <span class="n">${doneAll} / ${totalAll} done · ${num(recDone)} recipe unlocks · ${esc(ex.file)}</span></h2>
                 <div class="progress nbt-advall"><i style="width:${totalAll ? (doneAll / totalAll) * 100 : 0}%"></i></div>
                 ${latest.length ? `<h3 class="nbt-sub">Latest</h3><div class="nbt-trophies">${latest.slice(0, 6).map((x) => x[1]).join('')}</div>` : ''}
                 <h3 class="nbt-sub">By tab</h3><div class="nbt-advcards">${index.map((x) => `<a class="nbt-advcard" href="#adv-${x.ci}">${ring(x.total ? (x.done / x.total) * 100 : 0, `${x.done} of ${x.total} done`)}<span class="grow"><b>${esc(x.name)}</b><small>${x.done} / ${x.total}${x.tabs > 1 ? ` · ${x.tabs} tabs` : ''}</small></span></a>`).join('')}</div>${cats.join('')}</section>`;
@@ -2220,19 +2220,19 @@ $kinds = [
             if (rawList.length) S.push(filesHTML('w-data', 'World data <small class="muted">raw NBT</small>', 'structure_block', rawList, true));
             const html = S.join('');
             const jumps = [['w-region', 'Region files'],['w-world', 'World'], ['w-props', 'server.properties'], ['w-bans', 'Bans'], ['w-score', 'Scoreboard'], ['w-servers', 'Server list'], ['w-plugins', 'Plugins'], ['w-packs', 'Resource packs'], ['w-players', 'Players'], ['w-logs', 'Logs'], ['w-maps', 'Maps'], ['w-hotbar', 'Hotbars'], ['w-mods', 'Mods'], ['w-quests', 'Quests'], ['w-schem', 'Schematics'], ['w-config', 'Configs'], ['w-data', 'Raw world data']];
-            return `<header class="nbt-hero">${artImg(ART.world)}
-                <div class="nbt-hero-body">
+            return `<header class="page-hero">${artImg(ART.world)}
+                <div class="page-hero-body">
                     <div class="grow">
                         <h1 class="page-title">World &amp; server</h1>
                         <p class="page-lede">Read in your browser only. Private values (IP addresses, chat, passwords, seeds) are never shown, and nothing on this page goes into share links.</p>
                         <div class="badges">${[...groups].map(([k, n]) => `<span class="badge">${esc(k)}${n > 1 ? ' × ' + num(n) : ''}</span>`).join('')}</div>
                     </div>
-                    <div class="nbt-me">
+                    <div class="id-chip">
                         <img src="${iconURL('grass_block')}" data-id="grass_block" alt="" width="48" height="48">
-                        <span class="nbt-me-text"><b>${esc(levelName || 'Loaded files')}</b><small>${num(CTX.files.length)} file${CTX.files.length === 1 ? '' : 's'} · <button class="linkish" data-act="clearctx" title="Forget all world and server files">Clear</button></small></span>
+                        <span class="id-chip-text"><b>${esc(levelName || 'Loaded files')}</b><small>${num(CTX.files.length)} file${CTX.files.length === 1 ? '' : 's'} · <button class="linkish" data-act="clearctx" title="Forget all world and server files">Clear</button></small></span>
                     </div>
                 </div>
-                ${jumpNav(jumps, html, 'nbt-tabs')}
+                ${jumpNav(jumps, html, 'page-tabs')}
             </header>` + html;
         }
 
@@ -3159,7 +3159,7 @@ $kinds = [
             const box = $('#srvSync'), bar = $('.progress', box), drop = $('#drop');
             // once players are open the drop zone is hidden - show the bar above the viewer instead
             if (drop.classList.contains('hide')) { if (box.parentElement === drop) $('#app').insertBefore(box, $('#viewer')); }
-            else if (box.parentElement !== drop) $('.nbt-hero', drop).after(box);
+            else if (box.parentElement !== drop) $('.page-hero', drop).after(box);
             box.classList.remove('hide');
             $('.srv-msg', box).textContent = msg;
             $('.srv-act', box).innerHTML = '';
@@ -4456,7 +4456,7 @@ $kinds = [
             if (scrollSpy) return;
             scrollSpy = requestAnimationFrame(() => {
                 scrollSpy = 0;
-                const tabs = $$('#player .nbt-tabs a');
+                const tabs = $$('#player .page-tabs a');
                 let cur = null;
                 for (const a of tabs) { const s = document.getElementById(a.hash.slice(1)); if (s && s.getBoundingClientRect().top < 120) cur = a; }
                 tabs.forEach((a) => (a === cur ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));

@@ -267,7 +267,7 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
 
         <?php if ($badges || $games): ?>
             <!-- each number is also a button that shows its history in the chart below -->
-            <div class="steam-stats-row steam-metrics">
+            <div class="stat-row steam-metrics">
                 <?php
                 $tiles = [
                     'level' => [$badges ? $badges['player_level'] : null, 'Level'],
@@ -278,7 +278,7 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
                     'achievements' => [$progress ? $unlocked : null, 'Achievements'],
                 ];
                 foreach ($tiles as $k => $t): if ($t[0] === null) continue; $d = isset($stats[$k]) ? $stats[$k]['d30'] : null; $chart = isset($series[$k]) && count($series[$k]) > 1; ?>
-                    <<?= $chart ? 'button type="button" data-k="' . $k . '" title="Show ' . strtolower($t[1]) . ' in the History chart"' : 'div' ?> class="steam-stat">
+                    <<?= $chart ? 'button type="button" data-k="' . $k . '" title="Show ' . strtolower($t[1]) . ' in the History chart"' : 'div' ?> class="stat-card">
                         <b<?= $k === 'hours' ? ' title="' . steam_hm($minutes) . '"' : '' ?>><?= number_format($t[0]) ?></b><span><?= $t[1] ?></span>
                         <small><?= $d ? steam_delta($d) . ' in 30 days' : '&nbsp;' ?></small>
                         <?= $chart ? steam_mini($series[$k]) : '' ?>
@@ -379,7 +379,7 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
                 <div class="steam-days" id="played-bars" role="list" aria-label="Hours played per day"><p class="note">Drawing the chart…</p></div>
                 <div class="steam-days-axis muted" id="played-axis"></div>
                 <h3 id="played-top-h">Most played</h3>
-                <div class="steam-ranks" id="played-top"></div>
+                <div class="rank-list" id="played-top"></div>
                 <p class="muted steam-foot">The 7-day view shows each hour, from the hourly readings. Recorded days come from the change in each game's total playtime between daily readings; a day after a missed reading also holds the missed days.<?= $estTo ? ' Days before ' . date('j M Y', strtotime($estTo)) . ' (paler) are estimated from purchase dates, achievement unlocks and last-played dates; the day-to-day detail is simulated.' : '' ?></p>
             </section>
         <?php endif; ?>
@@ -453,7 +453,7 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
                             <img src="<?= h($profile['avatarfull']) ?>" alt="" width="72" height="72" loading="lazy">
                             <div>
                                 <h2><?= h($profile['personaname']) ?></h2>
-                                <small class="steam-dot<?= !empty($profile['gameextrainfo']) ? ' ingame' : ($state ? ' online' : '') ?>"><?= !empty($profile['gameextrainfo']) ? 'Playing ' . h($profile['gameextrainfo']) : (isset(STEAM_STATES[$state]) ? STEAM_STATES[$state] : 'Online') ?></small>
+                                <small class="status-dot<?= !empty($profile['gameextrainfo']) ? ' ingame' : ($state ? ' online' : '') ?>"><?= !empty($profile['gameextrainfo']) ? 'Playing ' . h($profile['gameextrainfo']) : (isset(STEAM_STATES[$state]) ? STEAM_STATES[$state] : 'Online') ?></small>
                             </div>
                         </div>
                         <div class="kv">
@@ -509,7 +509,7 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
                     <?php foreach ($milestones as $i => $m): ?>
                         <li class="k-<?= $m[5] ?>"<?= $i >= 12 ? ' hidden' : '' ?>>
                             <span class="steam-tl-icon">
-                                <?php if ($m[5] === 'level'): ?><span class="steam-level"><?= (int)$m[6] ?></span>
+                                <?php if ($m[5] === 'level'): ?><span class="level"><?= (int)$m[6] ?></span>
                                 <?php elseif ($m[4]): ?><img src="<?= h($m[4]) ?>" alt="" width="<?= $m[5] === 'perfect' ? 92 : 40 ?>" height="<?= $m[5] === 'perfect' ? 35 : 40 ?>" loading="lazy" decoding="async"><?php endif; ?>
                             </span>
                             <span class="steam-tl-text">
@@ -580,7 +580,7 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
                         <?php $bmax = max(1, max($buckets)); ?>
                         <div class="steam-hist">
                             <?php foreach ($buckets as $label => $n): ?>
-                                <div><span><?= $label ?></span><span class="steam-rank-bar"><i style="width: <?= $n / $bmax * 100 ?>%"></i></span><b><?= $n ?></b></div>
+                                <div><span><?= $label ?></span><span class="rank-bar"><i style="width: <?= $n / $bmax * 100 ?>%"></i></span><b><?= $n ?></b></div>
                             <?php endforeach; ?>
                         </div>
                     </div>
@@ -599,11 +599,11 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
 
                 <?php if ($fortnight): ?>
                     <h3>Past 2 weeks <span class="muted"><?= steam_hours(array_sum(array_column($fortnight, 'playtime_2weeks'))) ?></span></h3>
-                    <div class="steam-banners steam-banners-sm">
+                    <div class="banner-grid steam-banners-sm">
                         <?php foreach ($fortnight as $id => $g): ?>
-                            <a class="steam-banner" href="/games/steam/game/?game=<?= $id ?>">
+                            <a class="banner-card" href="/games/steam/game/?game=<?= $id ?>">
                                 <img src="<?= h(steam_art($id, $items, 'library_hero')) ?>" data-alt="<?= h(steam_art($id, $items)) ?>" alt="" width="1920" height="620" loading="lazy" decoding="async">
-                                <span class="steam-banner-text"><b><?= h($g['name']) ?></b><small><?= steam_hours($g['playtime_2weeks']) ?> in 2 weeks</small></span>
+                                <span class="banner-text"><b><?= h($g['name']) ?></b><small><?= steam_hours($g['playtime_2weeks']) ?> in 2 weeks</small></span>
                             </a>
                         <?php endforeach; ?>
                     </div>
@@ -611,21 +611,21 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
 
                 <?php if ($top): ?>
                     <h3>Most played <span class="muted">share of <?= steam_hours($minutes) ?></span></h3>
-                    <div class="steam-ranks">
+                    <div class="rank-list">
                         <?php $r = 0; foreach ($top as $id => $g): ?>
-                            <a class="steam-rank" href="/games/steam/game/?game=<?= $id ?>">
-                                <span class="steam-rank-n"><?= ++$r ?></span>
+                            <a class="rank-row" href="/games/steam/game/?game=<?= $id ?>">
+                                <span class="rank-n"><?= ++$r ?></span>
                                 <img src="<?= h(steam_art($id, $items, 'small_capsule')) ?>" alt="" width="231" height="87" loading="lazy" decoding="async">
-                                <span class="grow"><b><?= h($g['name']) ?></b><span class="steam-rank-bar"><i style="width: <?= $g['playtime_forever'] / $topMax * 100 ?>%"></i></span></span>
-                                <span class="steam-rank-val"><?= steam_hours($g['playtime_forever']) ?><small><?= round($g['playtime_forever'] / $minutes * 100, 1) ?>%</small></span>
+                                <span class="grow"><b><?= h($g['name']) ?></b><span class="rank-bar"><i style="width: <?= $g['playtime_forever'] / $topMax * 100 ?>%"></i></span></span>
+                                <span class="rank-val"><?= steam_hours($g['playtime_forever']) ?><small><?= round($g['playtime_forever'] / $minutes * 100, 1) ?>%</small></span>
                             </a>
                         <?php endforeach; ?>
                         <?php $rest = $minutes - array_sum(array_column($top, 'playtime_forever')); if ($rest > 0): ?>
-                            <div class="steam-rank muted">
-                                <span class="steam-rank-n"></span>
+                            <div class="rank-row muted">
+                                <span class="rank-n"></span>
                                 <span></span>
-                                <span class="grow"><b>Other <?= count($played) - count($top) ?> games</b><span class="steam-rank-bar"><i class="other" style="width: <?= min(100, $rest / $topMax * 100) ?>%"></i></span></span>
-                                <span class="steam-rank-val"><?= steam_hours($rest) ?><small><?= round($rest / $minutes * 100, 1) ?>%</small></span>
+                                <span class="grow"><b>Other <?= count($played) - count($top) ?> games</b><span class="rank-bar"><i class="other" style="width: <?= min(100, $rest / $topMax * 100) ?>%"></i></span></span>
+                                <span class="rank-val"><?= steam_hours($rest) ?><small><?= round($rest / $minutes * 100, 1) ?>%</small></span>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -635,7 +635,7 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
 
         <!-- ---------- badges ---------- -->
         <?php if ($list): ?>
-            <h2 class="steam-h" id="badges">Badges <span class="n"><?= count($list) ?> · <?= number_format(array_sum(array_column($list, 'xp'))) ?> XP</span></h2>
+            <h2 class="sec-h" id="badges">Badges <span class="n"><?= count($list) ?> · <?= number_format(array_sum(array_column($list, 'xp'))) ?> XP</span></h2>
             <div class="steam-badgegrid section">
                 <?php foreach ($list as $b):
                     $key = isset($b['appid']) ? 'g' . $b['appid'] . (!empty($b['border_color']) ? 'f' : '') : 'b' . $b['badgeid'];
@@ -645,7 +645,7 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
                 ?>
                     <div class="steam-badge<?= !empty($b['border_color']) ? ' foil' : '' ?><?= $fav ? ' fav' : '' ?>">
                         <?php if ($fav): ?><span class="steam-badge-fav">Favourite</span><?php endif; ?>
-                        <?php if ($info && $info[1]): ?><img src="<?= h($info[1]) ?>" alt="" width="80" height="80" loading="lazy" decoding="async"><?php else: ?><span class="steam-ach-noicon"></span><?php endif; ?>
+                        <?php if ($info && $info[1]): ?><img src="<?= h($info[1]) ?>" alt="" width="80" height="80" loading="lazy" decoding="async"><?php else: ?><span class="ach-noicon"></span><?php endif; ?>
                         <b><?= h($info ? $info[0] : ($game ?: 'Badge ' . $b['badgeid'])) ?></b>
                         <?php if ($game): ?><small class="muted"><?= h($game) ?><?= !empty($b['border_color']) ? ' · foil' : '' ?></small><?php endif; ?>
                         <span class="steam-badge-stats"><span>Lv <?= number_format($b['level']) ?></span><span><?= number_format($b['xp']) ?> XP</span></span>
@@ -657,12 +657,12 @@ $chartData = ['series' => $chartSeries, 'played' => ['days' => $playDays, 'names
 
         <!-- ---------- items & showcases ---------- -->
         <?php if ($equipped): ?>
-            <h2 class="steam-h" id="items">Equipped items <span class="n"><?= count($equipped) ?></span></h2>
-            <div class="steam-shots section">
+            <h2 class="sec-h" id="items">Equipped items <span class="n"><?= count($equipped) ?></span></h2>
+            <div class="shot-grid section">
                 <?php foreach ($equipped as $k => $it): $img = !empty($it['image_large']) ? $it['image_large'] : (isset($it['image_small']) ? $it['image_small'] : ''); $small = in_array($k, ['avatar_frame', 'steam_deck_keyboard_skin', 'animated_avatar']); ?>
-                    <a class="steam-shot<?= $small ? ' contain' : '' ?>" href="<?= h($img ? STEAM_IMG_COMMUNITY . $img : '#') ?>" target="_blank" rel="noopener">
+                    <a class="shot-card<?= $small ? ' contain' : '' ?>" href="<?= h($img ? STEAM_IMG_COMMUNITY . $img : '#') ?>" target="_blank" rel="noopener">
                         <?php if ($img): ?><img src="<?= h(STEAM_IMG_COMMUNITY . $img) ?>" alt="" width="320" height="200" loading="lazy" decoding="async"><?php endif; ?>
-                        <span class="steam-banner-text">
+                        <span class="banner-text">
                             <b><?= h(isset($it['item_title']) ? $it['item_title'] : (isset($it['name']) ? $it['name'] : '')) ?></b>
                             <small><?= isset($itemLabels[$k]) ? $itemLabels[$k] : h($k) ?><?= !empty($it['appid']) && $gameName($it['appid']) ? ' · ' . h($gameName($it['appid'])) : '' ?><?= !empty($it['movie_mp4']) ? ' · animated' : '' ?></small>
                         </span>

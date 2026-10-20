@@ -226,11 +226,11 @@
         tEl.textContent = hours(total) + (days ? ' in the last ' + (days === 365 ? 'year' : days + ' days') : ' since ' + new Date(first + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', year: 'numeric' }));
         const top = [...games].sort((a, c) => c[1] - a[1]).slice(0, 8);
         document.getElementById('played-top-h').hidden = !top.length;
-        document.getElementById('played-top').innerHTML = top.map(([id, m], i) => `<a class="steam-rank" href="/games/steam/game/?game=${+id}">
-            <span class="steam-rank-n">${i + 1}</span>
+        document.getElementById('played-top').innerHTML = top.map(([id, m], i) => `<a class="rank-row" href="/games/steam/game/?game=${+id}">
+            <span class="rank-n">${i + 1}</span>
             <img src="${UIesc((data.played.names[id] || [, ''])[1])}" alt="" width="231" height="87" loading="lazy" decoding="async">
-            <span class="grow"><b>${UIesc(name(id))}</b><span class="steam-rank-bar"><i style="width: ${m / top[0][1] * 100}%"></i></span></span>
-            <span class="steam-rank-val"${exact && m >= 60 ? ` title="${hm(m)}"` : ''}>${hours(m)}<small>${seen.get(id)} day${seen.get(id) === 1 ? '' : 's'}</small></span></a>`).join('');
+            <span class="grow"><b>${UIesc(name(id))}</b><span class="rank-bar"><i style="width: ${m / top[0][1] * 100}%"></i></span></span>
+            <span class="rank-val"${exact && m >= 60 ? ` title="${hm(m)}"` : ''}>${hours(m)}<small>${seen.get(id)} day${seen.get(id) === 1 ? '' : 's'}</small></span></a>`).join('');
     }
     if (pRange) pRange.addEventListener('change', drawPlayed);
     drawPlayed();

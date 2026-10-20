@@ -8,7 +8,7 @@
 - **Shared, don't edit:** `assets/css/pages/gallery.css` (Extras uses it too) and `assets/css/pages/hero.css` (home page and BRB). Copy what you need into a `minecraft-*.css`.
 
 ## Don't touch
-- `minecraft/tools/nbt-viewer/`: it's the reference design.
+- `minecraft/tools/nbt-viewer/`: it's the second reference design (after `/games/steam/`).
 - `minecraft/index.php`: it's already modern (slideshow and card grid).
 - `minecraft/tools/index.php`, `minecraft/projects/index.php`, `minecraft/downloads/`: already modern.
 - **Data files written by the live site:** `minecraft/projects/metro/stations.json`, `minecraft/projects/milestones/milestones.json`, and `minecraft/tools/nbt-viewer/{cache,shares}/`. Testing locally can change them. Never commit them; if one shows as modified after testing, restore just that file with `git restore <that file>`.
