@@ -87,6 +87,9 @@ const files = {
     }]),
 };
 
+// page_head() would link global.css, components.css and the page's own stylesheets; the stripped page gets them here
+const withCss = (src) => src.replace(/<\?php[\s\S]*?\?>/g, '').replace('</head>', ['/assets/css/global.css', '/assets/css/components.css', ...(src.match(/\/assets\/css\/pages\/[\w.-]+\.css/g) || [])].map((h) => `<link rel="stylesheet" href="${h}">`).join('') + '</head>');
+
 /* ---------- static server ---------- */
 const TYPES = { '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.webp': 'image/webp' };
 const server = http.createServer((req, res) => {
@@ -100,7 +103,7 @@ const server = http.createServer((req, res) => {
     if (file.endsWith('.php')) {
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
         const hook = 'window.__t = { get players() { return players; }, get view() { return view; }, CTX, addFiles, bpList, scanRegions };';
-        return res.end(fs.readFileSync(file, 'utf8').replace(/<\?php[\s\S]*?\?>/g, '').replace(/\n    \}\)\(\);\r?\n/, `\n        ${hook}\n    })();\n`));
+        return res.end(withCss(fs.readFileSync(file, 'utf8')).replace(/\n    \}\)\(\);\r?\n/, `\n        ${hook}\n    })();\n`));
     }
     res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream' });
     fs.createReadStream(file).pipe(res);

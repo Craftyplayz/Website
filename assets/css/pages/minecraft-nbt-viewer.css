@@ -1,0 +1,367 @@
+/* NBT Viewer (/minecraft/tools/nbt-viewer/), laid out like the Steam pages.
+   Like Steam, the heroes are art-led (my own screenshots) with black scrims (rgb(0 0 0 / x)) to keep text readable.
+   The Minecraft GUI, tooltip, HUD icons and advancement frames use Minecraft's own colours, kept as hex. */
+.nbt {
+    --s: clamp(30px, 8.6vw, 46px);
+    --xp: #80ff20;
+    --nbt-lift: 0 12px 28px rgb(0 0 0 / .55);
+    --nbt-blue: #3987e5;
+    --nbt-gold-bg: #4a3d16; --nbt-gold-line: #a8862a;
+    --nbt-chal: #b77cff;
+}
+/* the script's own bare buttons (player picker, file tree, tabs) start unstyled */
+.nbt :where(button:not(.btn)) { padding: 0; background: none; border: 0; border-radius: 0; color: inherit; font: inherit; cursor: pointer; }
+.nbt .card, .nbt .nbt-sec { scroll-margin-top: 76px; }
+.nbt .card h2 .btn { font-weight: 400; }
+.nbt .linkish { color: var(--accent); text-decoration: underline; }
+
+/* ---------- hero (landing, player, world) ---------- */
+.nbt-hero { position: relative; isolation: isolate; overflow: hidden; margin-bottom: 20px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.nbt-hero-bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+.nbt-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(0 0 0 / .85), rgb(0 0 0 / .45) 65%, rgb(0 0 0 / .25)), linear-gradient(0deg, rgb(0 0 0 / .65), transparent 55%); }
+.nbt-hero-body { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 24px; min-height: clamp(170px, 22vw, 260px); padding: clamp(24px, 5vw, 48px) 20px 16px; }
+.nbt-hero-body > .grow { flex: 1 1 280px; min-width: 0; }
+.nbt-hero .page-title { margin: 0; text-shadow: 0 2px 12px rgb(0 0 0 / .6); overflow-wrap: anywhere; }
+.nbt-hero .page-lede { max-width: 62ch; margin: 6px 0 0; color: var(--text); opacity: .85; }
+.nbt-hero .actions { margin-top: 16px; }
+.nbt-hero .badges { margin: 10px 0 0; }
+.nbt-hero .badge { backdrop-filter: blur(6px); }
+.nbt-hero .badge:not(.g, .r, .p, .b) { background: rgb(0 0 0 / .5); border-color: rgb(255 255 255 / .2); }
+.nbt-hero-ico { flex: none; width: clamp(72px, 12vw, 128px); height: auto; image-rendering: pixelated; filter: drop-shadow(0 8px 16px rgb(0 0 0 / .7)); }
+.nbt-nick { margin-top: 2px; font-size: 14px; }
+.nbt-uuid { display: inline-block; margin-top: 4px; font-size: 12px; opacity: .7; cursor: pointer; overflow-wrap: anywhere; }
+.nbt-uuid:hover { opacity: 1; }
+
+/* the 3D skin stands on the bottom edge of the hero, like a character */
+.nbt-hero .skin3d { flex: none; width: clamp(110px, 15vw, 170px); height: clamp(180px, 24vw, 270px); margin-bottom: -16px; filter: drop-shadow(0 8px 12px rgb(0 0 0 / .6)); }
+
+/* identity chip, like the Steam avatar chip */
+.nbt-me { display: flex; flex: none; align-items: center; gap: 12px; max-width: 100%; padding: 8px 16px 8px 8px; background: rgb(0 0 0 / .5); border: 1px solid rgb(255 255 255 / .1); border-radius: var(--radius-lg); backdrop-filter: blur(8px); }
+.nbt-me > img { flex: none; width: 48px; height: 48px; border-radius: 4px; image-rendering: pixelated; }
+.nbt-me-text { min-width: 0; }
+.nbt-me-text b { display: block; font-weight: 600; white-space: nowrap; }
+.nbt-me-text small { display: block; overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.nbt-lvl { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; border: 2px solid var(--accent); border-radius: 999px; color: var(--xp); font-size: 13px; font-weight: 700; vertical-align: middle; }
+.nbt-dot { color: var(--muted); }
+.nbt-dot::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; background: currentColor; border-radius: 50%; }
+.nbt-dot.on { color: var(--accent); }
+
+/* section tabs along the bottom of the hero */
+.nbt-tabs { display: flex; gap: 4px; padding: 0 12px; overflow-x: auto; background: rgb(0 0 0 / .45); border-top: 1px solid rgb(255 255 255 / .08); scrollbar-width: none; }
+.page .nbt-tabs a { padding: 12px 12px 10px; border-bottom: 2px solid transparent; color: var(--muted); font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: color var(--fast), border-color var(--fast); }
+.page .nbt-tabs a:hover { color: var(--text); }
+.page .nbt-tabs a[aria-current] { border-color: var(--accent); color: var(--text); }
+
+/* ---------- Minecraft HUD in the player hero ---------- */
+.nbt .vit { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; max-width: 480px; margin-top: 14px; }
+.nbt .icons { display: flex; flex-wrap: wrap; gap: 1px; }
+.nbt .icons svg { width: 18px; height: 18px; shape-rendering: crispEdges; }
+.nbt .icons.rtl { flex-direction: row-reverse; justify-content: flex-end; }
+.nbt .vlabel { color: var(--muted); font-size: 12px; }
+.nbt-hero .vlabel { color: var(--text); opacity: .75; }
+.nbt .xp { position: relative; grid-column: 1 / -1; margin-top: 16px; }
+.nbt .xpbar { height: 10px; overflow: hidden; background: #1a1a1a; border: 2px solid #000; border-radius: 2px; }
+.nbt .xpbar i { display: block; height: 100%; background: linear-gradient(#a8ff60, #5ad21c); }
+@media (max-width: 480px) { .nbt .vit { grid-template-columns: 1fr; } .nbt-hero-ico { display: none; } }
+.nbt .xplvl { position: absolute; top: -15px; left: 50%; color: var(--xp); font-size: 18px; font-weight: 800; text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000; transform: translateX(-50%); }
+
+/* ---------- headline numbers ---------- */
+.nbt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); gap: 12px; margin-bottom: 20px; }
+.nbt-stat { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); transition: border-color var(--fast), transform var(--fast); }
+.page a.nbt-stat, .page a.nbt-advcard { color: var(--text); text-decoration: none; }
+a.nbt-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
+.nbt-stat > b { font-size: clamp(22px, 3vw, 28px); font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; }
+.nbt-stat > span { color: var(--muted); font-size: 13px; }
+.nbt-stat > small { color: var(--accent); font-size: 12px; }
+.nbt-stat-ring { flex-direction: row; align-items: center; gap: 12px; }
+.nbt-stat-ring .nbt-ring { --size: 56px; }
+.nbt-stat-ring .nbt-ring b { font-size: 15px; }
+.nbt-stat-ring > span:not(.nbt-ring) small { display: block; color: var(--accent); font-size: 12px; }
+.nbt-stats-sm { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 10px; margin-bottom: 16px; }
+.nbt-stats-sm .nbt-stat { padding: 10px 14px; }
+.nbt-stats-sm .nbt-stat > b { font-size: 20px; }
+
+/* completion ring; --p is 0-100 */
+.nbt-ring { --size: 40px; display: inline-grid; flex: none; place-items: center; width: var(--size); height: var(--size); border-radius: 50%; background: radial-gradient(closest-side, var(--sunken) 74%, transparent 76%), conic-gradient(var(--accent) calc(var(--p) * 1%), rgb(255 255 255 / .15) 0); }
+.nbt-ring b { color: var(--text); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.nbt-ring small { font-size: 9px; }
+.nbt-ring.full { background: radial-gradient(closest-side, var(--nbt-gold-bg) 74%, transparent 76%), conic-gradient(var(--nbt-gold-line) 100%, transparent 0); }
+
+/* section headings outside cards, like the Steam pages */
+.nbt-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 28px 0 12px; font-size: 20px; }
+.nbt-h .n { color: var(--muted); font-size: 14px; font-weight: 400; }
+.nbt-sub { margin: 16px 0 10px; color: var(--muted); font-size: 15px; font-weight: 600; }
+.nbt-sec { margin-bottom: 16px; }
+
+/* ---------- landing ---------- */
+.nbt-acts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; margin-bottom: 16px; }
+.nbt .nbt-act { display: flex; align-items: flex-start; gap: 14px; min-width: 0; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.nbt-act > img { flex: none; width: 40px; height: 40px; image-rendering: pixelated; }
+.nbt-act b { display: block; font-weight: 600; }
+.nbt-act small { display: block; margin-top: 2px; color: var(--muted); font-size: 13px; }
+.nbt .nbt-act-drop { background: repeating-linear-gradient(45deg, #262626 0 14px, var(--card) 14px 28px); border: 2px dashed var(--line-strong); }
+.nbt-kinds { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.nbt-kind { display: flex; align-items: flex-start; gap: 12px; min-width: 0; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.nbt-kind > img { flex: none; width: 32px; height: 32px; image-rendering: pixelated; }
+.nbt-kind > div { min-width: 0; }
+.nbt-kind b { display: block; margin-bottom: 2px; font-size: 14px; }
+.nbt-kind p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.nbt-kind .mono { color: var(--text); font-size: 12px; }
+.nbt-about { margin: 0; font-size: 13px; }
+
+#dragOverlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgb(40 90 30 / .55); border: 4px dashed var(--accent); font-size: 32px; font-weight: 700; pointer-events: none; }
+
+/* server sync status */
+.nbt .srv { max-width: 440px; margin: 0 auto 16px; font-size: 13px; text-align: center; }
+.nbt .srv .progress { height: 4px; margin: 6px 0 0; }
+.nbt .srv .progress i { width: 0; transition: width .15s; }
+.nbt .srv .progress.ind i { width: 30%; animation: srvind 1.1s linear infinite; }
+@keyframes srvind { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+@media (prefers-reduced-motion: reduce) { .nbt .srv .progress.ind i { width: 100%; opacity: .5; animation: none; } }
+.nbt .srv-act { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 8px; }
+.nbt .srv-act:empty { display: none; }
+
+/* ---------- toolbar and player picker ---------- */
+.nbt .tabs { position: relative; display: flex; flex: 1 1 260px; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.nbt-q { flex: 0 1 300px; }
+.nbt .pick-btn { display: flex; align-items: center; gap: 10px; max-width: 100%; padding: 4px 12px 4px 4px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); transition: border-color var(--fast); }
+.nbt .pick-btn:hover, .nbt .tabs.open .pick-btn { border-color: var(--accent); }
+.nbt .pick-btn img, .nbt .pick-row img { flex: none; width: 30px; height: 30px; border-radius: 4px; image-rendering: pixelated; }
+.nbt .pick-btn .nm { overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.nbt .pick-btn .n { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.nbt .pick-btn .car { font-size: 11px; opacity: .8; transition: transform var(--fast); }
+.nbt .tabs.open .pick-btn .car { transform: rotate(180deg); }
+.nbt .pick-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; width: min(400px, calc(100vw - 32px)); overflow: hidden; background: var(--sunken); border: 1px solid var(--line-strong); border-radius: var(--radius-lg); box-shadow: var(--nbt-lift); }
+.nbt .pick-menu input { width: 100%; padding: 10px 12px; background: #161616; border: 0; border-bottom: 1px solid var(--line); color: var(--text); font: inherit; font-size: 14px; outline: none; }
+.nbt .pick-list { max-height: min(60vh, 520px); overflow-y: auto; padding: 4px; }
+.nbt .pick-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.nbt .pick-row:hover, .nbt .pick-row.kb { background: var(--card2); }
+.nbt .pick-row.on { background: var(--accent-soft); }
+.nbt .pick-row .grow { flex: 1; min-width: 0; }
+.nbt .pick-row .grow b { display: block; overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.nbt .pick-row small { color: var(--muted); font-size: 12px; }
+.nbt .pick-row .x { padding: 2px 6px; opacity: .4; }
+.nbt .pick-row .x:hover { color: #ff8080; opacity: 1; }
+.nbt .pick-foot { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+
+/* ---------- Minecraft GUI (dark) ---------- */
+.nbt .guis { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px; }
+.nbt .gui { display: inline-block; max-width: 100%; padding: 10px; background: #262626; border-radius: 4px; box-shadow: inset 2px 2px #3c3c3c, inset -2px -2px #141414, 0 0 0 2px #000, var(--nbt-lift); color: #d8d8d8; }
+.nbt .gui .ttl { margin: 0 0 6px 2px; color: #cfcfcf; font-size: 15px; }
+.nbt .slots { display: grid; grid-template-columns: repeat(9, var(--s)); }
+.nbt .slots + .slots { margin-top: 8px; }
+.nbt .slot { position: relative; width: var(--s); height: var(--s); background: #1c1c1c; box-shadow: inset 2px 2px #111, inset -2px -2px #3a3a3a; cursor: default; }
+.nbt .slot.has { cursor: pointer; }
+.nbt .slot.has:hover { background: #3a3a3a; }
+.nbt .slot.sel { box-shadow: inset 0 0 0 2px #e8e8e8, inset 0 0 0 4px #000; }
+.nbt .slot.pick { z-index: 2; outline: 3px solid var(--highlight); outline-offset: -3px; }
+/* API renders are 128px - let the browser smooth the downscale; only the 16px local textures stay pixelated */
+.nbt .slot img, .nbt .ico img { position: absolute; inset: 9%; width: 82%; height: 82%; object-fit: contain; pointer-events: none; }
+.nbt img[data-f] { image-rendering: pixelated; }
+.nbt .slot .ph { position: absolute; inset: 16%; background-position: center; background-repeat: no-repeat; background-size: contain; opacity: .5; filter: brightness(.22); image-rendering: pixelated; }
+.nbt .craft { display: grid; grid-template-columns: repeat(2, var(--s)) auto var(--s); align-items: center; align-self: start; gap: 0; }
+.nbt .craft .ttl { grid-column: 1 / -1; }
+.nbt .craft .arrow { align-self: center; padding: 0 8px; color: #6a6a6a; font-size: calc(var(--s) * .55); }
+.nbt .craft .out { align-self: center; }
+.nbt .cnt { position: absolute; right: 2px; bottom: 0; color: #fff; font-family: var(--mono); font-size: calc(var(--s) * .34); font-weight: 700; line-height: 1; text-shadow: 2px 2px #000; pointer-events: none; }
+.nbt .dur { position: absolute; right: 14%; bottom: 10%; left: 14%; height: 3px; background: #000; pointer-events: none; }
+.nbt .dur i { display: block; height: 2px; }
+.nbt .glint::after, #drawer .glint::after {
+    content: ""; position: absolute; inset: 9%; pointer-events: none;
+    -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat;
+    background: linear-gradient(115deg, transparent 20%, rgba(200, 120, 255, .65) 35%, transparent 50%, rgba(170, 90, 255, .5) 70%, transparent 85%);
+    background-size: 300% 300%; animation: glint 3s linear infinite; mix-blend-mode: screen;
+}
+@keyframes glint { from { background-position: 100% 100%; } to { background-position: 0 0; } }
+.nbt .searching .slot.has:not(.hit) { opacity: .25; }
+.nbt .searching .slot.hit { outline: 3px solid var(--highlight); outline-offset: -3px; }
+.nbt .container-dot { position: absolute; top: 3px; left: 3px; width: 6px; height: 6px; background: var(--highlight); border-radius: 50%; box-shadow: 0 0 0 1px #000; pointer-events: none; }
+.nbt .inv { display: grid; grid-template-columns: var(--s) calc(var(--s) * 3) var(--s) 1fr; align-items: end; gap: 6px; margin-bottom: 10px; }
+.nbt .inv .col { display: grid; gap: 0; }
+.nbt .inv .model { position: relative; height: calc(var(--s) * 4); overflow: hidden; background: #000; box-shadow: inset 2px 2px #111, inset -2px -2px #3a3a3a; }
+.nbt .inv .craft { justify-self: end; }
+@media (max-width: 520px) { .nbt .inv .craft { display: none; } }
+
+/* 3D skin (skinview3d) - the 2D render shows until the model has loaded */
+.nbt .skin3d { position: relative; cursor: grab; touch-action: none; user-select: none; }
+.nbt .skin3d:active { cursor: grabbing; }
+.nbt .skin3d canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+.nbt .skin3d > img { position: absolute; inset: 6% 0; width: 100%; height: 88%; object-fit: contain; image-rendering: pixelated; }
+
+/* ---------- tooltip (Minecraft's own look) ---------- */
+#tip { position: fixed; z-index: 2000; max-width: 380px; padding: 6px 8px; background: rgba(16, 0, 16, .94); border: 2px solid #25005a; border-radius: 4px; outline: 2px solid #100010; color: #aaa; font: 14px/1.35 var(--mono); text-shadow: 2px 2px #2a2a2a; pointer-events: none; }
+#tip .nm { margin-bottom: 2px; font-size: 15px; }
+#tip .id { margin-top: 3px; color: #555; font-size: 12px; }
+.nbt .mc-text .l { white-space: pre-wrap; }
+
+/* ---------- item drawer ---------- */
+#drawer .dcrumbs { margin-right: 30px; color: var(--muted); font-size: 12px; }
+#drawer .dcrumbs a { cursor: pointer; }
+#drawer .head { display: flex; align-items: center; gap: 14px; margin: 10px 0; }
+#drawer .head .ico { position: relative; flex: none; width: 96px; height: 96px; background: var(--card); border-radius: var(--radius-lg); }
+#drawer .tipbox { margin: 10px 0; padding: 8px; background: rgba(16, 0, 16, .94); border: 2px solid #25005a; border-radius: 4px; color: #aaa; font: 14px var(--mono); text-shadow: 2px 2px #2a2a2a; }
+#drawer h3 { display: flex; align-items: center; gap: 8px; margin: 16px 0 6px; font-size: 14px; }
+
+/* ---------- lists ---------- */
+.nbt .effdot { display: flex; flex: none; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 6px; box-shadow: inset 0 0 0 2px #0004; color: #fff; font-weight: 800; text-shadow: 1px 1px #000; }
+.nbt .timebar { height: 4px; margin-top: 4px; overflow: hidden; background: #444; border-radius: 2px; }
+.nbt .timebar i, .nbt .abar i { display: block; height: 100%; }
+.nbt .abar { height: 5px; margin-top: 4px; overflow: hidden; background: #444; border-radius: 3px; }
+.nbt .chg { color: var(--highlight); }
+.nbt .rowi .ico { position: relative; flex: none; width: 30px; height: 30px; }
+
+.nbt .owned { display: grid; grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: 8px; }
+.nbt .own { position: relative; padding: 8px 4px 6px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); text-align: center; cursor: pointer; transition: transform var(--fast), border-color var(--fast), box-shadow var(--fast); }
+.nbt .own:hover { border-color: var(--accent); box-shadow: var(--nbt-lift); transform: translateY(-3px); }
+.nbt .own .ico { position: relative; width: 40px; height: 40px; margin: 0 auto; }
+.nbt .own b { display: block; font-size: 13px; }
+.nbt .searching .own:not(.hit) { display: none; }
+
+.nbt .map svg { width: 100%; height: auto; background: #1a1a1a; border-radius: var(--radius); }
+.nbt .map text { fill: #ddd; font-size: 11px; paint-order: stroke; stroke: #000; stroke-width: 3px; }
+
+.nbt .chips { display: flex; flex-wrap: wrap; gap: 4px; max-height: 420px; overflow-y: auto; }
+.nbt .chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px 2px 3px; background: var(--card2); border-radius: 6px; font-size: 12px; }
+.nbt .chip.new { box-shadow: inset 0 0 0 1px var(--highlight); }
+.nbt .chip .ico { position: relative; flex: none; width: 20px; height: 20px; }
+.nbt .searching .chip:not(.hit) { display: none; }
+
+/* ---------- statistics ---------- */
+.nbt .stabs button small { margin-left: 4px; color: var(--muted); }
+.nbt .stgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; }
+.nbt .stgrid .sti { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 6px 10px; background: var(--card2); border-radius: var(--radius); font-size: 13px; }
+.nbt .stgrid .sti div { min-width: 0; }
+.nbt .stgrid .sti span { display: block; overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.nbt .stgrid .sti b { font-size: 14px; }
+.nbt .searching .sti:not(.hit) { display: none; }
+.nbt-travel { display: flex; gap: 2px; height: 14px; overflow: hidden; border-radius: 4px; }
+.nbt-travel i { min-width: 2px; transition: opacity var(--fast); }
+.nbt-travel:hover i:not(:hover) { opacity: .5; }
+.nbt-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 13px; }
+.nbt-legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 6px; background: var(--c); border-radius: 2px; }
+.nbt-legend b { font-weight: 600; }
+
+/* ranked lists with icon and bar, like Steam's most played */
+.nbt-ranks { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 6px 12px; }
+.nbt-rank { display: grid; grid-template-columns: 28px 30px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-width: 0; padding: 6px 12px 6px 6px; background: var(--card2); border-radius: var(--radius); transition: background var(--fast), transform var(--fast); }
+.nbt-rank:hover { background: var(--btn2-hover); transform: translateX(4px); }
+.nbt-rank-n { color: var(--muted); font-size: 12px; font-weight: 700; text-align: center; }
+.nbt-rank .ico { position: relative; width: 30px; height: 30px; }
+.nbt-rank .grow { min-width: 0; }
+.nbt-rank b { display: block; overflow: hidden; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.nbt-rank-bar { display: block; height: 6px; margin-top: 4px; overflow: hidden; background: rgb(255 255 255 / .06); border-radius: 999px; }
+.nbt-rank-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--btn), var(--accent)); border-radius: 999px; }
+.nbt-rank-val { font-size: 14px; font-weight: 600; white-space: nowrap; }
+
+/* ---------- advancements, like Steam achievements ---------- */
+.nbt-advall { height: 10px; }
+.nbt-advcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 10px; }
+.nbt-advcard { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 10px 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); transition: border-color var(--fast), transform var(--fast); }
+.nbt-advcard:hover { border-color: var(--accent); transform: translateY(-2px); }
+.nbt-advcard .grow { min-width: 0; }
+.nbt-advcard b { display: block; overflow: hidden; font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.nbt-advcard small { color: var(--muted); font-size: 12px; }
+.nbt-advcat { margin-top: 24px; scroll-margin-top: 76px; }
+.nbt-advcat h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 15px; }
+.nbt-advcat h3 img { width: 20px; height: 20px; }
+.nbt-advcat h3 .n { margin-left: auto; color: var(--muted); font-size: 13px; font-weight: 400; }
+.nbt-advcat .progress { margin-bottom: 10px; }
+.nbt-achs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 8px; }
+.nbt-ach { --tier: var(--line-strong); display: flex; align-items: center; gap: 10px; min-width: 0; padding: 8px 10px; background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--tier); border-radius: var(--radius); transition: border-color var(--fast), transform var(--fast); }
+.nbt-ach:hover { border-color: var(--tier); transform: translateY(-2px); }
+.nbt-ach.done { --tier: var(--accent); }
+.nbt-ach.part { --tier: var(--nbt-blue); }
+.nbt-ach.chal.done { --tier: var(--nbt-chal); }
+.nbt-ach .frame { display: block; flex: none; padding: 5px; background: var(--sunken); border-radius: 6px; box-shadow: inset 0 0 0 2px #444; }
+.nbt-ach.done .frame { background: #4a3d12; box-shadow: inset 0 0 0 2px #c9a227; }
+.nbt-ach.chal.done .frame { background: #3d2a4f; box-shadow: inset 0 0 0 2px var(--nbt-chal), 0 0 14px rgb(183 124 255 / .6); }
+.nbt-ach .ico { position: relative; display: block; width: 30px; height: 30px; }
+.nbt-ach .grow { flex: 1; min-width: 0; }
+.nbt-ach b { display: block; overflow: hidden; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.nbt-ach small { display: block; color: var(--muted); font-size: 12px; }
+.nbt-ach:not(.done, .part) .ico img { filter: grayscale(1); opacity: .5; }
+.nbt-ach:not(.done, .part) b { color: var(--muted); }
+.nbt .searching .adv:not(.hit) { display: none; }
+/* latest unlocks, large and tilting like Steam covers */
+.nbt-trophies { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr)); gap: 10px; }
+.nbt-trophy { flex-direction: column; justify-content: flex-start; gap: 6px; padding: 18px 12px 14px; border-top: 3px solid var(--tier); border-left-width: 1px; border-radius: var(--radius-lg); text-align: center; transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform var(--base) ease-out, box-shadow var(--base) ease-out, border-color var(--fast); }
+.nbt-trophy:hover { box-shadow: var(--nbt-lift), 0 0 0 2px var(--tier); transform: perspective(800px) translateY(-3px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+.nbt-trophy .frame { padding: 8px; }
+.nbt-trophy .ico { width: 48px; height: 48px; }
+.nbt-trophy b { max-width: 100%; font-size: 14px; }
+
+.nbt .extra-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 14px; border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); font-size: 14px; }
+.nbt .extra-bar .muted { flex: 1; min-width: 200px; font-size: 13px; }
+#errors { position: fixed; right: 16px; bottom: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; width: min(340px, calc(100vw - 32px)); pointer-events: none; }
+#errors > div { margin: 0; padding: 8px 12px; font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; box-shadow: 0 4px 14px rgb(0 0 0 / .4); pointer-events: auto; cursor: pointer; }
+
+/* ---------- raw tree: what components.css doesn't have ---------- */
+.nbt .tree details[open] > summary::after { content: ""; position: absolute; top: 50%; left: 7px; width: 4px; height: 7px; margin-top: -6px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.nbt .tree summary:hover::before { border-color: #bbb; }
+.nbt .tree .tl:hover { background: #2e2e2e; }
+.nbt .tree .v.arr { color: #b5cea8; }
+.nbt .tree .hint { margin-left: 8px; color: #6a9955; }
+.nbt .tree .more { margin: 2px 0 2px 16px; }
+.nbt .hits .tl { padding-left: 0; white-space: normal; word-break: break-all; }
+.nbt .hits mark { background: #6b5a00; color: inherit; }
+
+/* ---------- dialogs ---------- */
+.nbt-dlg-text { font-size: 14px; }
+.nbt-dlg-msg { min-height: 1.4em; margin-top: 8px; font-size: 13px; }
+#rpList { margin-bottom: 14px; }
+.nbt-scope { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.nbt-share-url { width: 100%; }
+
+/* ---------- world / server files ---------- */
+.nbt .sub { margin: 14px 0 6px; color: var(--muted); font-size: 12px; font-weight: 400; }
+.nbt .dot { flex: none; width: 12px; height: 12px; border-radius: 50%; }
+.nbt .scroll { max-height: 420px; overflow-y: auto; }
+.nbt .searching .srow:not(.hit) { display: none; }
+.nbt .srow { flex-wrap: wrap; }
+.nbt .kv > * { min-width: 0; overflow-wrap: anywhere; }
+.nbt .mapimg { display: block; width: 100%; max-width: 256px; background: #1a1a1a; border-radius: 4px; box-shadow: 0 0 0 2px #000; image-rendering: pixelated; }
+.nbt img[data-map] { image-rendering: pixelated; }
+.nbt .maps { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.nbt .maps figure { margin: 0; color: var(--muted); font-size: 12px; }
+.nbt .maps figcaption { margin-top: 4px; }
+.nbt .modslots { display: flex; flex-wrap: wrap; gap: 6px 12px; max-width: calc(var(--s) * 9 + 4px); }
+.nbt .modslots .ms > span { display: block; margin: 0 0 2px 2px; color: #9a9a9a; font-size: 11px; }
+.nbt .modrow img { flex: none; width: 32px; height: 32px; border-radius: 4px; image-rendering: pixelated; }
+.nbt .modrow .desc { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
+.nbt pre.cfg { max-height: 420px; margin: 6px 0 0; padding: 8px; overflow: auto; background: var(--sunken); border-radius: var(--radius); font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+.nbt .fileblk { margin-top: 6px; }
+.nbt .fileblk > summary { padding: 4px 8px; background: var(--card2); border-radius: 6px; font-size: 13px; overflow-wrap: anywhere; cursor: pointer; }
+.nbt .fileblk > .tree { margin-top: 6px; }
+.nbt .pill { padding: 1px 7px; background: #444; border-radius: 6px; font-size: 12px; }
+
+/* ---------- schematic folder browser and backpacks ---------- */
+.nbt .fbrowse { display: grid; grid-template-columns: minmax(160px, 240px) 1fr; align-items: start; gap: 12px; }
+.nbt .bpbrowse { display: grid; grid-template-columns: minmax(220px, 340px) 1fr; align-items: start; gap: 14px; }
+.nbt .bpbrowse button, .nbt .fbrowse button { text-align: left; }
+.nbt .bprows { display: flex; flex-direction: column; gap: 4px; max-height: 75vh; overflow-y: auto; }
+.nbt .bpsel { min-width: 0; }
+.nbt .bphead { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.nbt .bphead .grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.nbt .swatch { display: inline-block; width: 14px; height: 14px; margin-right: 4px; border: 1px solid #0008; border-radius: 3px; vertical-align: -2px; }
+.nbt .bploc { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+@media (max-width: 700px) { .nbt .bpbrowse { grid-template-columns: 1fr; } .nbt .bprows { max-height: 300px; } .nbt .bpsel { --s: clamp(26px, 7.4vw, 46px); } }
+.nbt .ftree, .nbt .fpane .rows { max-height: 420px; overflow-y: auto; }
+.nbt .ftree { display: flex; flex-direction: column; gap: 2px; padding: 4px; background: var(--sunken); border-radius: var(--radius); }
+.nbt .fnode { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 4px 8px; border-radius: 6px; font-size: 13px; }
+.nbt .fnode .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nbt .fnode img { flex: none; width: 16px; height: 16px; image-rendering: pixelated; }
+.nbt .fnode small { color: var(--muted); }
+.nbt .fnode:hover, .nbt .fitem:hover { background: var(--card); }
+.nbt .fnode.on { background: var(--card2); box-shadow: inset 2px 0 var(--accent); }
+.nbt .fitem { width: 100%; border: 1px solid transparent; }
+.nbt .fitem.on { border-color: var(--accent); }
+.nbt .fitem .grow { overflow-wrap: anywhere; }
+.nbt .fpane { min-width: 0; }
+.nbt .fcrumbs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; color: var(--muted); font-size: 13px; }
+.nbt .fcrumbs button { color: var(--accent); }
+.nbt .fcrumbs button:hover { text-decoration: underline; }
+#player:not(.searching) .fitem[data-off], #player.searching .fitem:not(.srow) { display: none; }
+.nbt .fsel { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.nbt .fsel > h3 { margin: 0 0 8px; font-size: 15px; }
+.nbt .fsel > h3 .n { color: var(--muted); font-size: 12px; font-weight: 400; }
+@media (max-width: 640px) { .nbt .fbrowse { grid-template-columns: 1fr; } .nbt .ftree { max-height: 200px; } }
