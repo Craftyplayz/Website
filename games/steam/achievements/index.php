@@ -82,13 +82,13 @@ function steam_ach_row($a, $games, $schema)
         <?php if (!$progress): ?>
             <p class="err">Couldn't load achievements from Steam. Try again in a minute.</p>
         <?php else: ?>
-            <div class="steam-stats-row">
-                <div class="steam-stat"><b><?= number_format(count($unlocks)) ?></b><span>Unlocked</span></div>
-                <div class="steam-stat"><b><?= number_format($year) ?></b><span>Unlocked in <?= date('Y') ?></span></div>
-                <div class="steam-stat"><b><?= count($perfect) ?></b><span>Perfect games</span></div>
-                <div class="steam-stat"><b><?= $started ? round(array_sum(array_column($started, 'pct')) / count($started)) : 0 ?>%</b><span>Average completion</span></div>
+            <div class="stat-row">
+                <div class="stat-card"><b><?= number_format(count($unlocks)) ?></b><span>Unlocked</span></div>
+                <div class="stat-card"><b><?= number_format($year) ?></b><span>Unlocked in <?= date('Y') ?></span></div>
+                <div class="stat-card"><b><?= count($perfect) ?></b><span>Perfect games</span></div>
+                <div class="stat-card"><b><?= $started ? round(array_sum(array_column($started, 'pct')) / count($started)) : 0 ?>%</b><span>Average completion</span></div>
                 <?php if ($rarest): ?>
-                    <div class="steam-stat"><b><?= round($rarest[0]['pct'], 1) ?>%</b><span>Rarest unlock</span></div>
+                    <div class="stat-card"><b><?= round($rarest[0]['pct'], 1) ?>%</b><span>Rarest unlock</span></div>
                 <?php endif; ?>
             </div>
 
@@ -124,23 +124,23 @@ function steam_ach_row($a, $games, $schema)
             </section>
 
             <?php if ($rarest): ?>
-                <h2 class="steam-h">Rarest unlocks</h2>
-                <div class="steam-achs steam-trophies section"><?php foreach ($rarest as $a) steam_ach_row($a, $games, $schema); ?></div>
+                <h2 class="sec-h">Rarest unlocks</h2>
+                <div class="ach-grid trophies section"><?php foreach ($rarest as $a) steam_ach_row($a, $games, $schema); ?></div>
             <?php endif; ?>
 
-            <h2 class="steam-h">Recently unlocked</h2>
-            <div class="steam-achs section"><?php foreach ($recent as $a) steam_ach_row($a, $games, $schema); ?></div>
+            <h2 class="sec-h">Recently unlocked</h2>
+            <div class="ach-grid section"><?php foreach ($recent as $a) steam_ach_row($a, $games, $schema); ?></div>
 
             <?php if ($almost): ?>
-                <h2 class="steam-h">Almost there <span class="n">80% or more</span></h2>
-                <div class="steam-caps section">
+                <h2 class="sec-h">Almost there <span class="n">80% or more</span></h2>
+                <div class="cover-grid section">
                     <?php foreach ($almost as $id => $p) steam_card($games[$id], $items, $p, true); ?>
                 </div>
             <?php endif; ?>
 
             <?php if ($perfect): ?>
-                <h2 class="steam-h">Perfect games <span class="n"><?= count($perfect) ?></span></h2>
-                <div class="steam-caps section">
+                <h2 class="sec-h">Perfect games <span class="n"><?= count($perfect) ?></span></h2>
+                <div class="cover-grid section">
                     <?php foreach ($perfect as $id => $p) steam_card($games[$id], $items, $p, true); ?>
                 </div>
             <?php endif; ?>

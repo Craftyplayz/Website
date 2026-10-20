@@ -56,15 +56,15 @@ $platformTotal = array_sum($platforms);
         <?php endif; ?>
 
         <?php if ($games): ?>
-            <div class="steam-stats-row">
-                <a class="steam-stat" href="/games/steam/library/"><b><?= number_format(count($games)) ?></b><span>Games owned</span><small><?= number_format($played) ?> played</small></a>
-                <a class="steam-stat" href="/games/steam/library/"><b title="<?= steam_hm($minutes) ?>"><?= number_format(round($minutes / 60)) ?></b><span>Hours played</span><small><?= steam_hours(array_sum(array_column($recent, 'playtime_2weeks'))) ?> in 2 weeks</small></a>
+            <div class="stat-row">
+                <a class="stat-card" href="/games/steam/library/"><b><?= number_format(count($games)) ?></b><span>Games owned</span><small><?= number_format($played) ?> played</small></a>
+                <a class="stat-card" href="/games/steam/library/"><b title="<?= steam_hm($minutes) ?>"><?= number_format(round($minutes / 60)) ?></b><span>Hours played</span><small><?= steam_hours(array_sum(array_column($recent, 'playtime_2weeks'))) ?> in 2 weeks</small></a>
                 <?php if ($progress): ?>
-                    <a class="steam-stat" href="/games/steam/achievements/"><b><?= number_format($unlocked) ?></b><span>Achievements</span><small><?= $perfect ?> perfect games</small></a>
-                    <a class="steam-stat steam-stat-ring" href="/games/steam/achievements/"><?= steam_ring($avg, 'Average completion ' . $avg . '%') ?><span>Average completion</span></a>
+                    <a class="stat-card" href="/games/steam/achievements/"><b><?= number_format($unlocked) ?></b><span>Achievements</span><small><?= $perfect ?> perfect games</small></a>
+                    <a class="stat-card stat-ring" href="/games/steam/achievements/"><?= steam_ring($avg, 'Average completion ' . $avg . '%') ?><span>Average completion</span></a>
                 <?php endif; ?>
                 <?php if ($badges): $into = $badges['player_xp'] - $badges['player_xp_needed_current_level']; $span = $into + $badges['player_xp_needed_to_level_up']; ?>
-                    <a class="steam-stat" href="/games/steam/profile/"><b><span class="steam-level"><?= (int)$badges['player_level'] ?></span></b><span>Steam level</span>
+                    <a class="stat-card" href="/games/steam/profile/"><b><span class="level"><?= (int)$badges['player_level'] ?></span></b><span>Steam level</span>
                         <span class="progress" role="progressbar" aria-label="XP to next level" aria-valuenow="<?= $into ?>" aria-valuemin="0" aria-valuemax="<?= $span ?>"><i style="width: <?= $span ? round($into / $span * 100) : 0 ?>%"></i></span>
                         <small><?= number_format($badges['player_xp_needed_to_level_up']) ?> XP to <?= $badges['player_level'] + 1 ?></small></a>
                 <?php endif; ?>
@@ -72,12 +72,12 @@ $platformTotal = array_sum($platforms);
         <?php endif; ?>
 
         <?php if ($recent): ?>
-            <h2 class="steam-h">Played recently <span class="n"><?= steam_hours(array_sum(array_column($recent, 'playtime_2weeks'))) ?> in the past 2 weeks</span></h2>
-            <div class="steam-banners section">
+            <h2 class="sec-h">Played recently <span class="n"><?= steam_hours(array_sum(array_column($recent, 'playtime_2weeks'))) ?> in the past 2 weeks</span></h2>
+            <div class="banner-grid section">
                 <?php foreach ($recent as $i => $g): $id = (int)$g['appid']; $p = isset($progress[$id]) ? $progress[$id] : null; ?>
-                    <a class="steam-banner" href="/games/steam/game/?game=<?= $id ?>">
+                    <a class="banner-card" href="/games/steam/game/?game=<?= $id ?>">
                         <img src="<?= h(steam_art($id, $items, 'library_hero')) ?>" data-alt="<?= h(steam_art($id, $items)) ?>" alt="" width="1920" height="620" <?= $i > 2 ? 'loading="lazy" ' : '' ?>decoding="async">
-                        <span class="steam-banner-text">
+                        <span class="banner-text">
                             <b><?= h($g['name']) ?></b>
                             <small><?= steam_hours($g['playtime_2weeks']) ?> this fortnight · <?= steam_hours($g['playtime_forever']) ?> total</small>
                         </span>
@@ -88,8 +88,8 @@ $platformTotal = array_sum($platforms);
         <?php endif; ?>
 
         <?php if ($games): ?>
-            <h2 class="steam-h">Most played <a class="steam-more" href="/games/steam/library/">Full library →</a></h2>
-            <div class="steam-caps section">
+            <h2 class="sec-h">Most played <a class="sec-more" href="/games/steam/library/">Full library →</a></h2>
+            <div class="cover-grid section">
                 <?php $i = 0; foreach (array_slice($games, 0, 12, true) as $id => $g) steam_card($g, $items, isset($progress[$id]) ? $progress[$id] : null, $i++ > 5); ?>
             </div>
         <?php endif; ?>
@@ -115,12 +115,12 @@ $platformTotal = array_sum($platforms);
         <?php endif; ?>
 
         <?php if ($workshop): ?>
-            <h2 class="steam-h">Workshop uploads <span class="n"><?= count($workshop) ?></span></h2>
-            <div class="steam-shots section">
+            <h2 class="sec-h">Workshop uploads <span class="n"><?= count($workshop) ?></span></h2>
+            <div class="shot-grid section">
                 <?php foreach ($workshop as $f): ?>
-                    <a class="steam-shot" target="_blank" rel="noopener" href="https://steamcommunity.com/sharedfiles/filedetails/?id=<?= h($f['publishedfileid']) ?>">
+                    <a class="shot-card" target="_blank" rel="noopener" href="https://steamcommunity.com/sharedfiles/filedetails/?id=<?= h($f['publishedfileid']) ?>">
                         <?php if (!empty($f['preview_url'])): ?><img src="<?= h($f['preview_url']) ?>" alt="" width="320" height="180" loading="lazy" decoding="async"><?php endif; ?>
-                        <span class="steam-banner-text">
+                        <span class="banner-text">
                             <b><?= h($f['title']) ?></b>
                             <small><?= h(isset($f['app_name']) ? $f['app_name'] : '') ?> · <?= number_format($f['subscriptions']) ?> subscribers</small>
                         </span>

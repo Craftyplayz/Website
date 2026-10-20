@@ -4,9 +4,6 @@
 .nbt {
     --s: clamp(30px, 8.6vw, 46px);
     --xp: #80ff20;
-    --nbt-lift: 0 12px 28px rgb(0 0 0 / .55);
-    --nbt-blue: #3987e5;
-    --nbt-gold-bg: #4a3d16; --nbt-gold-line: #a8862a;
     --nbt-chal: #b77cff;
 }
 /* the script's own bare buttons (player picker, file tree, tabs) start unstyled */
@@ -15,42 +12,24 @@
 .nbt .card h2 .btn { font-weight: 400; }
 .nbt .linkish { color: var(--accent); text-decoration: underline; }
 
-/* ---------- hero (landing, player, world) ---------- */
-.nbt-hero { position: relative; isolation: isolate; overflow: hidden; margin-bottom: 20px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-lg); }
-.nbt-hero-bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
-.nbt-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(0 0 0 / .85), rgb(0 0 0 / .45) 65%, rgb(0 0 0 / .25)), linear-gradient(0deg, rgb(0 0 0 / .65), transparent 55%); }
-.nbt-hero-body { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 24px; min-height: clamp(170px, 22vw, 260px); padding: clamp(24px, 5vw, 48px) 20px 16px; }
-.nbt-hero-body > .grow { flex: 1 1 280px; min-width: 0; }
-.nbt-hero .page-title { margin: 0; text-shadow: 0 2px 12px rgb(0 0 0 / .6); overflow-wrap: anywhere; }
-.nbt-hero .page-lede { max-width: 62ch; margin: 6px 0 0; color: var(--text); opacity: .85; }
-.nbt-hero .actions { margin-top: 16px; }
-.nbt-hero .badges { margin: 10px 0 0; }
-.nbt-hero .badge { backdrop-filter: blur(6px); }
-.nbt-hero .badge:not(.g, .r, .p, .b) { background: rgb(0 0 0 / .5); border-color: rgb(255 255 255 / .2); }
+/* ---------- hero (landing, player, world): the shared .page-hero, taller and darker for bright screenshots ---------- */
+.nbt .page-hero::before { background: linear-gradient(90deg, rgb(0 0 0 / .85), rgb(0 0 0 / .45) 65%, rgb(0 0 0 / .25)), linear-gradient(0deg, rgb(0 0 0 / .65), transparent 55%); }
+.nbt .page-hero-body { min-height: clamp(170px, 22vw, 260px); }
+.nbt .page-hero .actions { margin-top: 16px; }
+.nbt .page-hero .badges { margin: 10px 0 0; }
+.nbt .page-hero .badge { backdrop-filter: blur(6px); }
+.nbt .page-hero .badge:not(.g, .r, .p, .b) { background: rgb(0 0 0 / .5); border-color: rgb(255 255 255 / .2); }
 .nbt-hero-ico { flex: none; width: clamp(72px, 12vw, 128px); height: auto; image-rendering: pixelated; filter: drop-shadow(0 8px 16px rgb(0 0 0 / .7)); }
 .nbt-nick { margin-top: 2px; font-size: 14px; }
 .nbt-uuid { display: inline-block; margin-top: 4px; font-size: 12px; opacity: .7; cursor: pointer; overflow-wrap: anywhere; }
 .nbt-uuid:hover { opacity: 1; }
 
 /* the 3D skin stands on the bottom edge of the hero, like a character */
-.nbt-hero .skin3d { flex: none; width: clamp(110px, 15vw, 170px); height: clamp(180px, 24vw, 270px); margin-bottom: -16px; filter: drop-shadow(0 8px 12px rgb(0 0 0 / .6)); }
+.nbt .page-hero .skin3d { flex: none; width: clamp(110px, 15vw, 170px); height: clamp(180px, 24vw, 270px); margin-bottom: -16px; filter: drop-shadow(0 8px 12px rgb(0 0 0 / .6)); }
 
-/* identity chip, like the Steam avatar chip */
-.nbt-me { display: flex; flex: none; align-items: center; gap: 12px; max-width: 100%; padding: 8px 16px 8px 8px; background: rgb(0 0 0 / .5); border: 1px solid rgb(255 255 255 / .1); border-radius: var(--radius-lg); backdrop-filter: blur(8px); }
-.nbt-me > img { flex: none; width: 48px; height: 48px; border-radius: 4px; image-rendering: pixelated; }
-.nbt-me-text { min-width: 0; }
-.nbt-me-text b { display: block; font-weight: 600; white-space: nowrap; }
-.nbt-me-text small { display: block; overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
-.nbt-lvl { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; border: 2px solid var(--accent); border-radius: 999px; color: var(--xp); font-size: 13px; font-weight: 700; vertical-align: middle; }
-.nbt-dot { color: var(--muted); }
-.nbt-dot::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; background: currentColor; border-radius: 50%; }
-.nbt-dot.on { color: var(--accent); }
-
-/* section tabs along the bottom of the hero */
-.nbt-tabs { display: flex; gap: 4px; padding: 0 12px; overflow-x: auto; background: rgb(0 0 0 / .45); border-top: 1px solid rgb(255 255 255 / .08); scrollbar-width: none; }
-.page .nbt-tabs a { padding: 12px 12px 10px; border-bottom: 2px solid transparent; color: var(--muted); font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: color var(--fast), border-color var(--fast); }
-.page .nbt-tabs a:hover { color: var(--text); }
-.page .nbt-tabs a[aria-current] { border-color: var(--accent); color: var(--text); }
+/* identity chip: the player's face instead of an avatar, XP-green level */
+.nbt .id-chip > img { flex: none; width: 48px; height: 48px; border-radius: 4px; image-rendering: pixelated; }
+.nbt .level { color: var(--xp); }
 
 /* ---------- Minecraft HUD in the player hero ---------- */
 .nbt .vit { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; max-width: 480px; margin-top: 14px; }
@@ -58,38 +37,19 @@
 .nbt .icons svg { width: 18px; height: 18px; shape-rendering: crispEdges; }
 .nbt .icons.rtl { flex-direction: row-reverse; justify-content: flex-end; }
 .nbt .vlabel { color: var(--muted); font-size: 12px; }
-.nbt-hero .vlabel { color: var(--text); opacity: .75; }
+.nbt .page-hero .vlabel { color: var(--text); opacity: .75; }
 .nbt .xp { position: relative; grid-column: 1 / -1; margin-top: 16px; }
 .nbt .xpbar { height: 10px; overflow: hidden; background: #1a1a1a; border: 2px solid #000; border-radius: 2px; }
 .nbt .xpbar i { display: block; height: 100%; background: linear-gradient(#a8ff60, #5ad21c); }
 @media (max-width: 480px) { .nbt .vit { grid-template-columns: 1fr; } .nbt-hero-ico { display: none; } }
 .nbt .xplvl { position: absolute; top: -15px; left: 50%; color: var(--xp); font-size: 18px; font-weight: 800; text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000; transform: translateX(-50%); }
 
-/* ---------- headline numbers ---------- */
-.nbt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); gap: 12px; margin-bottom: 20px; }
-.nbt-stat { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); transition: border-color var(--fast), transform var(--fast); }
-.page a.nbt-stat, .page a.nbt-advcard { color: var(--text); text-decoration: none; }
-a.nbt-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
-.nbt-stat > b { font-size: clamp(22px, 3vw, 28px); font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; }
-.nbt-stat > span { color: var(--muted); font-size: 13px; }
-.nbt-stat > small { color: var(--accent); font-size: 12px; }
-.nbt-stat-ring { flex-direction: row; align-items: center; gap: 12px; }
-.nbt-stat-ring .nbt-ring { --size: 56px; }
-.nbt-stat-ring .nbt-ring b { font-size: 15px; }
-.nbt-stat-ring > span:not(.nbt-ring) small { display: block; color: var(--accent); font-size: 12px; }
+/* ---------- headline numbers: the shared .stat-row, plus a smaller row for statistics ---------- */
+.page a.nbt-advcard { color: var(--text); text-decoration: none; }
 .nbt-stats-sm { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 10px; margin-bottom: 16px; }
-.nbt-stats-sm .nbt-stat { padding: 10px 14px; }
-.nbt-stats-sm .nbt-stat > b { font-size: 20px; }
+.nbt-stats-sm .stat-card { padding: 10px 14px; }
+.nbt-stats-sm .stat-card > b { font-size: 20px; }
 
-/* completion ring; --p is 0-100 */
-.nbt-ring { --size: 40px; display: inline-grid; flex: none; place-items: center; width: var(--size); height: var(--size); border-radius: 50%; background: radial-gradient(closest-side, var(--sunken) 74%, transparent 76%), conic-gradient(var(--accent) calc(var(--p) * 1%), rgb(255 255 255 / .15) 0); }
-.nbt-ring b { color: var(--text); font-size: 12px; font-weight: 700; white-space: nowrap; }
-.nbt-ring small { font-size: 9px; }
-.nbt-ring.full { background: radial-gradient(closest-side, var(--nbt-gold-bg) 74%, transparent 76%), conic-gradient(var(--nbt-gold-line) 100%, transparent 0); }
-
-/* section headings outside cards, like the Steam pages */
-.nbt-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 28px 0 12px; font-size: 20px; }
-.nbt-h .n { color: var(--muted); font-size: 14px; font-weight: 400; }
 .nbt-sub { margin: 16px 0 10px; color: var(--muted); font-size: 15px; font-weight: 600; }
 .nbt-sec { margin-bottom: 16px; }
 
@@ -109,7 +69,7 @@ a.nbt-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .nbt-kind .mono { color: var(--text); font-size: 12px; }
 .nbt-about { margin: 0; font-size: 13px; }
 
-#dragOverlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgb(40 90 30 / .55); border: 4px dashed var(--accent); font-size: 32px; font-weight: 700; pointer-events: none; }
+#dragOverlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgb(20 60 90 / .55); border: 4px dashed var(--accent); font-size: 32px; font-weight: 700; pointer-events: none; }
 
 /* server sync status */
 .nbt .srv { max-width: 440px; margin: 0 auto 16px; font-size: 13px; text-align: center; }
@@ -131,7 +91,7 @@ a.nbt-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .nbt .pick-btn .n { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .nbt .pick-btn .car { font-size: 11px; opacity: .8; transition: transform var(--fast); }
 .nbt .tabs.open .pick-btn .car { transform: rotate(180deg); }
-.nbt .pick-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; width: min(400px, calc(100vw - 32px)); overflow: hidden; background: var(--sunken); border: 1px solid var(--line-strong); border-radius: var(--radius-lg); box-shadow: var(--nbt-lift); }
+.nbt .pick-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; width: min(400px, calc(100vw - 32px)); overflow: hidden; background: var(--sunken); border: 1px solid var(--line-strong); border-radius: var(--radius-lg); box-shadow: var(--lift); }
 .nbt .pick-menu input { width: 100%; padding: 10px 12px; background: #161616; border: 0; border-bottom: 1px solid var(--line); color: var(--text); font: inherit; font-size: 14px; outline: none; }
 .nbt .pick-list { max-height: min(60vh, 520px); overflow-y: auto; padding: 4px; }
 .nbt .pick-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
@@ -146,7 +106,7 @@ a.nbt-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 
 /* ---------- Minecraft GUI (dark) ---------- */
 .nbt .guis { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px; }
-.nbt .gui { display: inline-block; max-width: 100%; padding: 10px; background: #262626; border-radius: 4px; box-shadow: inset 2px 2px #3c3c3c, inset -2px -2px #141414, 0 0 0 2px #000, var(--nbt-lift); color: #d8d8d8; }
+.nbt .gui { display: inline-block; max-width: 100%; padding: 10px; background: #262626; border-radius: 4px; box-shadow: inset 2px 2px #3c3c3c, inset -2px -2px #141414, 0 0 0 2px #000, var(--lift); color: #d8d8d8; }
 .nbt .gui .ttl { margin: 0 0 6px 2px; color: #cfcfcf; font-size: 15px; }
 .nbt .slots { display: grid; grid-template-columns: repeat(9, var(--s)); }
 .nbt .slots + .slots { margin-top: 8px; }
@@ -212,7 +172,7 @@ a.nbt-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 
 .nbt .owned { display: grid; grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: 8px; }
 .nbt .own { position: relative; padding: 8px 4px 6px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); text-align: center; cursor: pointer; transition: transform var(--fast), border-color var(--fast), box-shadow var(--fast); }
-.nbt .own:hover { border-color: var(--accent); box-shadow: var(--nbt-lift); transform: translateY(-3px); }
+.nbt .own:hover { border-color: var(--accent); box-shadow: var(--lift); transform: translateY(-3px); }
 .nbt .own .ico { position: relative; width: 40px; height: 40px; margin: 0 auto; }
 .nbt .own b { display: block; font-size: 13px; }
 .nbt .searching .own:not(.hit) { display: none; }
@@ -241,17 +201,15 @@ a.nbt-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .nbt-legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 6px; background: var(--c); border-radius: 2px; }
 .nbt-legend b { font-weight: 600; }
 
-/* ranked lists with icon and bar, like Steam's most played */
-.nbt-ranks { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 6px 12px; }
-.nbt-rank { display: grid; grid-template-columns: 28px 30px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-width: 0; padding: 6px 12px 6px 6px; background: var(--card2); border-radius: var(--radius); transition: background var(--fast), transform var(--fast); }
-.nbt-rank:hover { background: var(--btn2-hover); transform: translateX(4px); }
-.nbt-rank-n { color: var(--muted); font-size: 12px; font-weight: 700; text-align: center; }
-.nbt-rank .ico { position: relative; width: 30px; height: 30px; }
-.nbt-rank .grow { min-width: 0; }
-.nbt-rank b { display: block; overflow: hidden; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-.nbt-rank-bar { display: block; height: 6px; margin-top: 4px; overflow: hidden; background: rgb(255 255 255 / .06); border-radius: 999px; }
-.nbt-rank-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--btn), var(--accent)); border-radius: 999px; }
-.nbt-rank-val { font-size: 14px; font-weight: 600; white-space: nowrap; }
+/* ranked lists: the shared .rank-row with an item icon instead of art, in two columns */
+.nbt .rank-list { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 6px 12px; }
+.nbt .rank-row { grid-template-columns: 28px 30px minmax(0, 1fr) auto; gap: 10px; min-width: 0; padding: 6px 12px 6px 6px; }
+.nbt .rank-row:hover { background: var(--btn2-hover); transform: translateX(4px); }
+.nbt .rank-n { display: block; font-size: 12px; }
+.nbt .rank-row .ico { position: relative; width: 30px; height: 30px; }
+.nbt .rank-row .grow { min-width: 0; }
+.nbt .rank-row b { font-size: 13px; }
+.nbt .rank-bar { margin-top: 4px; }
 
 /* ---------- advancements, like Steam achievements ---------- */
 .nbt-advall { height: 10px; }
@@ -266,29 +224,28 @@ a.nbt-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .nbt-advcat h3 img { width: 20px; height: 20px; }
 .nbt-advcat h3 .n { margin-left: auto; color: var(--muted); font-size: 13px; font-weight: 400; }
 .nbt-advcat .progress { margin-bottom: 10px; }
-.nbt-achs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 8px; }
-.nbt-ach { --tier: var(--line-strong); display: flex; align-items: center; gap: 10px; min-width: 0; padding: 8px 10px; background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--tier); border-radius: var(--radius); transition: border-color var(--fast), transform var(--fast); }
-.nbt-ach:hover { border-color: var(--tier); transform: translateY(-2px); }
-.nbt-ach.done { --tier: var(--accent); }
-.nbt-ach.part { --tier: var(--nbt-blue); }
-.nbt-ach.chal.done { --tier: var(--nbt-chal); }
-.nbt-ach .frame { display: block; flex: none; padding: 5px; background: var(--sunken); border-radius: 6px; box-shadow: inset 0 0 0 2px #444; }
-.nbt-ach.done .frame { background: #4a3d12; box-shadow: inset 0 0 0 2px #c9a227; }
-.nbt-ach.chal.done .frame { background: #3d2a4f; box-shadow: inset 0 0 0 2px var(--nbt-chal), 0 0 14px rgb(183 124 255 / .6); }
-.nbt-ach .ico { position: relative; display: block; width: 30px; height: 30px; }
-.nbt-ach .grow { flex: 1; min-width: 0; }
-.nbt-ach b { display: block; overflow: hidden; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-.nbt-ach small { display: block; color: var(--muted); font-size: 12px; }
-.nbt-ach:not(.done, .part) .ico img { filter: grayscale(1); opacity: .5; }
-.nbt-ach:not(.done, .part) b { color: var(--muted); }
+/* advancement tiles: the shared .ach-tile, compact, with Minecraft's frame; done is success green */
+.nbt .ach-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 8px; }
+.nbt .ach-tile { align-items: center; gap: 10px; padding: 8px 10px; }
+.nbt .ach-tile.done { --tier: var(--ok-line); }
+.nbt .ach-tile.part { --tier: var(--series-1); }
+.nbt .ach-tile.chal.done { --tier: var(--nbt-chal); }
+.nbt .ach-tile .frame { display: block; flex: none; padding: 5px; background: var(--sunken); border-radius: 6px; box-shadow: inset 0 0 0 2px #444; }
+.nbt .ach-tile.done .frame { background: #4a3d12; box-shadow: inset 0 0 0 2px #c9a227; }
+.nbt .ach-tile.chal.done .frame { background: #3d2a4f; box-shadow: inset 0 0 0 2px var(--nbt-chal), 0 0 14px rgb(183 124 255 / .6); }
+.nbt .ach-tile .ico { position: relative; display: block; width: 30px; height: 30px; }
+.nbt .ach-tile b { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.nbt .ach-tile small { display: block; color: var(--muted); font-size: 12px; }
+.nbt .ach-tile:not(.done, .part) .ico img { filter: grayscale(1); opacity: .5; }
+.nbt .ach-tile:not(.done, .part) b { color: var(--muted); }
 .nbt .searching .adv:not(.hit) { display: none; }
 /* latest unlocks, large and tilting like Steam covers */
 .nbt-trophies { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr)); gap: 10px; }
-.nbt-trophy { flex-direction: column; justify-content: flex-start; gap: 6px; padding: 18px 12px 14px; border-top: 3px solid var(--tier); border-left-width: 1px; border-radius: var(--radius-lg); text-align: center; transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform var(--base) ease-out, box-shadow var(--base) ease-out, border-color var(--fast); }
-.nbt-trophy:hover { box-shadow: var(--nbt-lift), 0 0 0 2px var(--tier); transform: perspective(800px) translateY(-3px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
-.nbt-trophy .frame { padding: 8px; }
-.nbt-trophy .ico { width: 48px; height: 48px; }
-.nbt-trophy b { max-width: 100%; font-size: 14px; }
+.nbt .ach-tile.nbt-trophy { flex-direction: column; justify-content: flex-start; gap: 6px; padding: 18px 12px 14px; border-top: 3px solid var(--tier); border-left-width: 1px; border-radius: var(--radius-lg); text-align: center; transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform var(--base) ease-out, box-shadow var(--base) ease-out, border-color var(--fast); }
+.nbt .ach-tile.nbt-trophy:hover { box-shadow: var(--lift), 0 0 0 2px var(--tier); transform: perspective(800px) translateY(-3px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+.nbt .nbt-trophy .frame { padding: 8px; }
+.nbt .nbt-trophy .ico { width: 48px; height: 48px; }
+.nbt .nbt-trophy b { max-width: 100%; font-size: 14px; }
 
 .nbt .extra-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 14px; border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); font-size: 14px; }
 .nbt .extra-bar .muted { flex: 1; min-width: 200px; font-size: 13px; }

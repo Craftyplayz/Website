@@ -13,10 +13,11 @@
     --line-strong: #555;
     --text: #ececec;
     --muted: #9b9b9b;
-    --accent: #7ed957;
-    --accent-soft: #2d4224;
-    --btn: #3d7a2a;
-    --btn-line: #5aa83f;
+    --accent: #66c0f4;
+    --accent-soft: #1d3a50;
+    --btn: #2a6e9e;
+    --btn-line: #4a9ad0;
+    --btn-hover: #327bb0;
     --btn2: #3a3a3a;
     --btn2-hover: #474747;
     --link: #8cc8ff;
@@ -25,6 +26,15 @@
     --danger-line: #8a3a3a;
     --info-bg: #24384a;
     --info-line: #3a628a;
+    --ok-bg: #2d4a24;
+    --ok-line: #4f8a3a;
+    --gold-bg: #4a3d16;
+    --gold-line: #a8862a;
+    /* chart series, checked with the dataviz validator against --card */
+    --series-1: #3987e5;
+    --series-2: #c98500;
+    --series-3: #9085e9;
+    --lift: 0 12px 28px rgb(0 0 0 / .55);
     --radius: 8px;
     --radius-lg: 12px;
     --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;

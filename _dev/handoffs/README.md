@@ -15,7 +15,7 @@ Several sessions run at the same time in the same folder, so the rules below mat
 ## 1. Work rules
 - **Rework one or two pages per session turn, no more.** Finish them, test them, commit them, then stop and report back. Don't start the next page until the user says so.
 - **Follow `building-pages.md`** (next to this file): design philosophy, `site.json`/header rules, colour tokens, type sizes, spacing, layout, API caching, components, motion and the per-page checklist. Every page must pass that checklist. (`/design/` shows the same rules with live samples.)
-- **Reference design:** `/minecraft/tools/nbt-viewer/` is the page every other page should look and feel like.
+- **Reference design:** `/games/steam/` is the gold standard every other page should look and feel like; `/minecraft/tools/nbt-viewer/` is the second reference (the same look on a heavy tool).
 - **Change the look, not the behaviour.** Keep features, URLs, query parameters and data files as they are.
 
 ## 2. Stay inside your tab
