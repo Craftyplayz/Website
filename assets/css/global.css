@@ -1,7 +1,7 @@
 /* Crafty Playz - site-wide styles.
    Design tokens, the header, the footer and the new-page wrapper. Nothing here styles bare
    elements like button/input/table, so pages never have to undo it. Shared UI pieces
-   (buttons, cards, drawer...) are opt-in in components.css. See plan.html > Design guide. */
+   (buttons, cards, drawer...) are opt-in in components.css. See /design/ for the rules and live samples. */
 
 :root {
     color-scheme: dark;

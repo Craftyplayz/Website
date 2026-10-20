@@ -2,6 +2,5 @@ User-agent: *
 Disallow: /private/
 Disallow: /_dev/
 Disallow: /includes/
-Disallow: /plan.html
 
 Sitemap: https://www.craftyplayz.com/sitemap.xml
