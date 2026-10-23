@@ -31,6 +31,7 @@ RedirectMatch 301 ^/php/layout\.js$ /assets/js/site.js
 # ---- Old URLs from the reorganisation ----
 # The reorg plan became the design guide
 RedirectMatch 301 ^/plan(\.html)?$ /design/
+RedirectMatch 301 ^/games/kelly-pool(/.*)?$ /games/pub-games/kelly-pool$1
 # Duplicate folders that were removed
 RedirectMatch 301 ^/(Code/)?minecraft/items_1\.21\.11/(.*)$ /minecraft/tools/item-list/$2
 RedirectMatch 301 ^/Code/minecraft/(.*)$ /minecraft/$1

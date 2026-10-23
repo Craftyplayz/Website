@@ -15,7 +15,7 @@ $kp_balls = range(1, 5);
 
 <head>
     <?php page_head(); ?>
-    <script src="<?= h(asset('/games/kelly-pool/kelly-pool.js')) ?>" defer></script>
+    <script src="<?= h(asset('/games/pub-games/kelly-pool/kelly-pool.js')) ?>" defer></script>
 </head>
 
 <body>
