@@ -92,6 +92,7 @@
                         { "title": "Around the Clock", "url": "/games/pub-games/around-the-clock/", "description": "Darts tracker for hitting 1 to 20 then the bull, with rules", "keywords": ["darts", "round the clock", "clock", "practice"] },
                         { "title": "Killer Darts", "url": "/games/pub-games/killer-darts/", "description": "Killer darts tracker with numbers, lives and killers, with rules", "keywords": ["killer", "darts", "lives"] },
                         { "title": "9-Ball Pool", "url": "/games/pub-games/9-ball/", "description": "9-ball rules and rack tracker with fouls and push-outs", "keywords": ["9 ball", "nine ball", "pool", "billiards", "push out"] },
+                        { "title": "Snooker", "url": "/games/pub-games/snooker/", "description": "Snooker scoreboard with breaks, fouls, points remaining and rules", "keywords": ["snooker", "break", "frame", "scoreboard", "147"] },
                         { "title": "Kelly Pool", "url": "/games/kelly-pool/", "description": "Pass-and-play Kelly Pool with secret numbers, lives and a public board", "keywords": ["kelly pool", "pool", "billiards", "pub game", "last man standing", "pea pool"] }
                     ]
                 },
