@@ -118,6 +118,10 @@ $kp_balls = range(1, 5);
 
         <!-- Board -->
         <section class="kp-view kp-board" data-view="play" hidden>
+            <div class="bar kp-turn" hidden>
+                <p class="kp-turn-line" aria-live="polite"><b class="kp-turn-name"></b> to shoot</p>
+                <button class="btn primary" type="button" data-act="kp-next">Next player</button>
+            </div>
             <div class="stat-row">
                 <div class="stat-card"><b class="kp-st-in"></b><span>Players in</span><small class="kp-st-of"></small></div>
                 <div class="stat-card"><b class="kp-st-table"></b><span>Balls on the table</span><small class="kp-st-potted"></small></div>
@@ -211,6 +215,10 @@ $kp_balls = range(1, 5);
                     </select>
                 </label>
                 <label class="check"><input type="checkbox" name="vibrate"> Vibrate when a ball is potted</label>
+                <div>
+                    <label class="check"><input type="checkbox" name="turns"> Show whose turn it is</label>
+                    <small class="muted">Adds a "to shoot" line and a Next player button to the board.</small>
+                </div>
                 <div><button class="btn small" type="button" data-act="kp-clear-names">Clear recent names</button></div>
             </form>
         </aside>

@@ -6,7 +6,7 @@
     /* engine:start (no DOM in here) */
     const RACK = 15;
     const MODES = { sink: 'Sink balls you win', lms: 'Last man standing' };
-    const DEFAULT_SETTINGS = { othersPotYourBall: 'out', pin: false, hideAfter: 15, vibrate: true };
+    const DEFAULT_SETTINGS = { othersPotYourBall: 'out', pin: false, hideAfter: 15, vibrate: true, turns: false };
 
     const maxBalls = (players) => Math.min(5, Math.floor(RACK / players));
     const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
@@ -41,7 +41,7 @@
             p.balls = rack.slice(i * n, (i + 1) * n).sort((a, b) => a - b);
             p.lost = []; p.out = false; p.pin = null;
         });
-        Object.assign(g, { phase: 'deal', deal: { index: 0, stage: 'pass' }, potted: {}, winner: null, endReason: null, history: [], undo: [], startedAt: Date.now() });
+        Object.assign(g, { phase: 'deal', deal: { index: 0, stage: 'pass' }, turn: g.players[0].id, potted: {}, winner: null, endReason: null, history: [], undo: [], startedAt: Date.now() });
         return g;
     }
 
@@ -84,7 +84,24 @@
             g.phase = 'over'; g.endReason = 'no-winner';
             o = Object.assign({}, o, { kind: 'no-winner', before: o.kind });
         }
+        fixTurn(g);
         return o;
+    }
+
+    // Whose turn it is (the "Show whose turn it is" setting). Only the Next player button moves it on,
+    // apart from skipping anyone who is out.
+    function nextTurn(g) {
+        const n = g.players.length;
+        const i = g.players.findIndex((p) => p.id === g.turn);
+        for (let k = 1; k <= n; k++) {
+            const p = g.players[(i + k + n) % n];
+            if (!p.out) { g.turn = p.id; return p; }
+        }
+        return null;
+    }
+    function fixTurn(g) {
+        const p = byId(g, g.turn);
+        if (!p || p.out) nextTurn(g);
     }
 
     function loseBall(g, owner, ball, by) {
@@ -108,6 +125,9 @@
         if (!step) return null;
         const back = JSON.parse(step.state);
         back.undo = g.undo;
+        // undo puts the ball back; whose turn it is stays where the Next player button left it
+        back.turn = g.turn;
+        fixTurn(back);
         return { game: back, ball: step.ball };
     }
 
@@ -158,6 +178,8 @@
             if (g.phase !== 'deal' && g.phase !== 'play' && g.phase !== 'over') return null;
             g.deal = { index: g.deal && g.deal.index < g.players.length ? g.deal.index : 0, stage: 'pass' };
             g.undo = Array.isArray(g.undo) ? g.undo : [];
+            g.settings = Object.assign({}, DEFAULT_SETTINGS, g.settings);
+            fixTurn(g);
             return g;
         }
 
@@ -412,12 +434,15 @@
             $('.kp-balls-n', root).textContent = onTable + ' left';
 
             const playing = G.phase === 'play';
+            const turns = playing && G.settings.turns;
+            $('.kp-turn', root).hidden = !turns;
+            if (turns) $('.kp-turn-name', root).textContent = byId(G, G.turn).name;
             $('.kp-players', root).innerHTML = G.players.map((p) => {
                 const pips = '<span class="kp-pips" aria-hidden="true">' + p.balls.map((_, i) => '<i' + (i < ballsLeft(p) ? ' class="on"' : '') + '></i>').join('') + '</span>';
                 const inner = '<b title="' + esc(p.name) + '">' + esc(p.name) + '</b>' + badgeFor(p) + pips;
-                const status = G.winner === p.id ? 'winner' : p.out ? 'out' : plural(ballsLeft(p), 'ball', 'balls') + ' left';
+                const status = (G.winner === p.id ? 'winner' : p.out ? 'out' : plural(ballsLeft(p), 'ball', 'balls') + ' left') + (turns && G.turn === p.id ? ', to shoot' : '');
                 if (p.out || !playing) return '<div class="kp-player' + (p.out ? ' is-out' : '') + '" aria-label="' + esc(p.name) + ', ' + status + '">' + inner + '</div>';
-                return '<button class="kp-player" type="button" data-act="kp-player" data-id="' + p.id + '" aria-label="' + esc(p.name) + ', ' + status + '. Check numbers">' + inner + '</button>';
+                return '<button class="kp-player' + (turns && G.turn === p.id ? ' is-turn' : '') + '" type="button" data-act="kp-player" data-id="' + p.id + '" aria-label="' + esc(p.name) + ', ' + status + '. Check numbers">' + inner + '</button>';
             }).join('');
 
             let rack = '';
@@ -435,10 +460,12 @@
             const owner = ownerOf(G, n);
             if (owner && G.mode === 'sink') {
                 pending = n;
-                openDialog('Who potted the ' + n + '?', 'Ball ' + n + ' is ' + owner.name + "'s.", [
-                    { label: owner.name + ' potted it', act: 'kp-who', id: 'owner', primary: true },
-                    { label: 'Someone else', act: 'kp-who', id: 'other' },
-                ]);
+                const shooter = G.settings.turns ? byId(G, G.turn) : null;
+                // with turns on, whoever is shooting is the likely answer, so it comes first
+                const buttons = shooter && shooter !== owner
+                    ? [{ label: shooter.name + ' potted it', act: 'kp-who', id: 'other', primary: true }, { label: owner.name + ' potted it', act: 'kp-who', id: 'owner' }]
+                    : [{ label: owner.name + ' potted it', act: 'kp-who', id: 'owner', primary: true }, { label: 'Someone else', act: 'kp-who', id: 'other' }];
+                openDialog('Who potted the ' + n + '?', 'Ball ' + n + ' is ' + owner.name + "'s.", buttons);
                 return;
             }
             finishPot(n, null);
@@ -531,6 +558,7 @@
             form.pin.checked = !!s.pin;
             form.hideAfter.value = String(s.hideAfter);
             form.vibrate.checked = !!s.vibrate;
+            form.turns.checked = !!s.turns;
             form.othersPotYourBall.disabled = locked;
             form.pin.disabled = locked;
             $('.kp-locked', root).hidden = !locked;
@@ -540,8 +568,9 @@
             if (!locked) { settings.othersPotYourBall = form.othersPotYourBall.value; settings.pin = form.pin.checked; }
             settings.hideAfter = [10, 15, 30].includes(+form.hideAfter.value) ? +form.hideAfter.value : 15;
             settings.vibrate = form.vibrate.checked;
+            settings.turns = form.turns.checked;
             UI.store.set(SETTINGS_KEY, settings);
-            if (G) { G.settings.hideAfter = settings.hideAfter; G.settings.vibrate = settings.vibrate; save(); }
+            if (G) { Object.assign(G.settings, { hideAfter: settings.hideAfter, vibrate: settings.vibrate, turns: settings.turns }); save(); }
             // one toast per burst of changes, not a stack of them
             if (!$$('.toasts > div').some((t) => t.textContent === 'Settings saved.')) toast('Settings saved.', 'ok');
         });
@@ -627,6 +656,7 @@
                 case 'kp-hide': if (check && privStage() !== 'reveal') { check = null; show('play'); } else hideNumbers(); break;
                 case 'kp-player': check = { id, stage: 'pass' }; show('private'); break;
                 case 'kp-ball': tapBall(+id); break;
+                case 'kp-next': if (G.phase === 'play') { nextTurn(G); save(); renderBoard(); } break;
                 case 'kp-who': { const n = pending; pending = null; outcomeDlg.close(); finishPot(n, id); break; }
                 case 'kp-outcome-ok': outcomeDlg.close(); break;
                 case 'kp-undo': undoLast(); break;
