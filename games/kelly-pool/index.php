@@ -55,14 +55,14 @@ $kp_balls = range(1, 5);
             </section>
             <div class="grid">
                 <section class="card">
-                    <h2>Sink balls you win</h2>
-                    <p class="muted">Pot one of your own balls to win straight away.</p>
-                    <div class="actions"><button class="btn primary" type="button" data-act="kp-mode" data-id="sink">Start sink balls you win</button></div>
-                </section>
-                <section class="card">
                     <h2>Last man standing</h2>
                     <p class="muted">Lose a ball every time one of yours goes down. Last player left wins.</p>
-                    <div class="actions"><button class="btn" type="button" data-act="kp-mode" data-id="lms">Start last man standing</button></div>
+                    <div class="actions"><button class="btn primary" type="button" data-act="kp-mode" data-id="lms">Start last man standing</button></div>
+                </section>
+                <section class="card">
+                    <h2>Sink balls you win</h2>
+                    <p class="muted">Pot one of your own balls to win straight away.</p>
+                    <div class="actions"><button class="btn" type="button" data-act="kp-mode" data-id="sink">Start sink balls you win</button></div>
                 </section>
             </div>
             <div class="actions kp-home-more">
@@ -175,17 +175,17 @@ $kp_balls = range(1, 5);
             <button class="close" type="button" data-act="drawer-close" aria-label="Close">&times;</button>
             <h2>Rules</h2>
             <div class="stabs" role="group" aria-label="Game mode">
-                <button type="button" class="on" data-act="kp-rules-tab" data-id="sink" aria-pressed="true">Sink balls you win</button>
-                <button type="button" data-act="kp-rules-tab" data-id="lms" aria-pressed="false">Last man standing</button>
+                <button type="button" class="on" data-act="kp-rules-tab" data-id="lms" aria-pressed="true">Last man standing</button>
+                <button type="button" data-act="kp-rules-tab" data-id="sink" aria-pressed="false">Sink balls you win</button>
             </div>
-            <ol class="kp-rules-list" data-rules="sink">
+            <ol class="kp-rules-list" data-rules="sink" hidden>
                 <li>Everyone is dealt secret numbers. Keep them to yourself.</li>
                 <li>Take turns. Hit the lowest-numbered ball on the table first.</li>
                 <li>Pot one of your own numbers and you win straight away.</li>
                 <li>If someone else pots one of your numbers, you lose it (unless the table plays "Nothing happens"). Lose them all and you're out.</li>
                 <li>A ball potted on a foul goes back on the table. Don't tap it.</li>
             </ol>
-            <ol class="kp-rules-list" data-rules="lms" hidden>
+            <ol class="kp-rules-list" data-rules="lms">
                 <li>Everyone is dealt secret numbers. Each one is a life.</li>
                 <li>Take turns. Hit the lowest-numbered ball on the table first.</li>
                 <li>Whenever one of your numbers goes down, whoever potted it, you lose a life.</li>
