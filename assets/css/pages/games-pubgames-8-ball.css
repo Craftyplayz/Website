@@ -1,0 +1,81 @@
+/* 8-Ball Pool: UK pub frame tracker (games/pub-games/8-ball) */
+/* cloth and ball colours are the only literal colours: they have real meaning */
+.eb { --eb-cloth: #1f5a3c; --eb-cloth-edge: #163f2b; --eb-red: #c8281e; --eb-yellow: #f2c418; --eb-black: #151515; --eb-ivory: #f7f3e8; }
+.eb [hidden] { display: none !important; }
+.eb :where(button:not(.btn)) { margin: 0; padding: 0; background: none; border: 0; color: inherit; font: inherit; cursor: pointer; }
+
+/* setup */
+.eb-setup h2 { margin: 0; }
+.eb-setup fieldset { display: grid; gap: 8px; }
+
+/* board */
+.eb-board { display: grid; gap: 12px; max-width: 760px; margin-bottom: 16px; }
+.eb-board > p { margin: 0; }
+.eb-msg { font-weight: 600; }
+.eb-msg:focus { outline: none; }
+.eb-warn { padding: 10px 14px; background: var(--gold-bg); border: 1px solid var(--gold-line); border-radius: var(--radius); }
+.eb-win { padding: 10px 14px; background: var(--ok-bg); border: 1px solid var(--ok-line); border-radius: var(--radius); }
+.eb-over { border-color: var(--ok-line); }
+.eb-over h2 { margin: 0 0 4px; font-size: 20px; }
+.eb-over p { margin: 0 0 12px; }
+
+.eb-score { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.eb-player { display: grid; gap: 6px; min-width: 0; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.eb-player.is-turn { background: var(--accent-soft); border-color: var(--accent); }
+.eb-name { overflow: hidden; font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.eb-frames { font-size: clamp(22px, 3vw, 28px); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.eb-tag { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.eb-race { font-size: 13px; }
+
+.eb-turn { margin: 0; }
+.eb-status { flex: 1 1 200px; min-width: 0; margin: 0; font-weight: 600; }
+
+.eb-table { display: grid; gap: 10px; padding: 12px; background: var(--eb-cloth); border: 6px solid var(--eb-cloth-edge); border-radius: var(--radius-lg); }
+.eb-row { display: grid; gap: 4px; }
+.eb-lbl { color: var(--eb-ivory); font-size: 13px; opacity: .85; }
+.eb-balls { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.eb-slot { --d: 56px; display: grid; place-items: center; min-width: 0; min-height: 40px; padding: 4px 0; border-radius: var(--radius); transition: background var(--fast); }
+.eb-slot:hover:not([aria-disabled="true"]) { background: rgb(255 255 255 / .08); }
+.eb-slot[aria-disabled="true"] { cursor: default; }
+
+.eb-actions .btn { flex: 1 1 140px; justify-content: center; min-height: 44px; }
+.eb-black-btn .eb-ball { --d: 16px; }
+.eb-hint { margin: 0; font-size: 13px; }
+
+/* balls, drawn in CSS like Kelly Pool's */
+.eb-ball {
+    --ball: var(--eb-black); position: relative; display: block; flex: none; width: min(var(--d, 56px), 100%); aspect-ratio: 1;
+    border-radius: 50%; background: var(--ball); box-shadow: inset 0 -5px 10px rgb(0 0 0 / .35); transition: opacity var(--fast);
+}
+.eb-ball::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 32% 28%, rgb(255 255 255 / .5), transparent 42%); pointer-events: none; }
+.eb-ball.red { --ball: var(--eb-red); }
+.eb-ball.yellow { --ball: var(--eb-yellow); }
+.eb-ball.black { box-shadow: inset 0 -5px 10px rgb(0 0 0 / .35), 0 0 0 1px rgb(255 255 255 / .5); }
+.eb-ball.potted { opacity: .25; filter: grayscale(.6); }
+.eb-ball.mini { --d: 14px; box-shadow: none; }
+.eb-row-black .eb-balls { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+
+/* log and rules */
+.eb-more summary, .eb-rules summary { font-weight: 600; cursor: pointer; }
+.eb-log { max-height: 320px; margin: 12px 0; padding: 0; overflow-y: auto; list-style: none; }
+.eb-log .rowi { align-items: flex-start; }
+.eb-log .rowi span { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+.eb-log small { flex: none; color: var(--muted); }
+.eb-rules { max-width: 760px; }
+.eb-rules h3 { margin: 16px 0 6px; font-size: 15px; }
+.eb-rules ul { margin: 0; padding-left: 20px; }
+.eb-rules li { margin: 4px 0; }
+.eb-your-rules { margin-top: 12px; padding: 12px 14px; background: var(--card2); border-radius: var(--radius); }
+.eb-your-rules h3 { margin-top: 0; }
+
+/* dialogs */
+.eb-picks { display: grid; gap: 8px; margin: 12px 0; }
+.eb-picks .btn { justify-content: flex-start; min-height: 44px; }
+.dlg .eb-black-lead { margin: 0; }
+
+@media (min-width: 720px) {
+    .eb-slot { --d: 64px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .eb-ball { transition: none; }
+}
