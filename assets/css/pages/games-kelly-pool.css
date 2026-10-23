@@ -61,11 +61,16 @@
 .kp-reveal-balls { --d: clamp(64px, 26vw, 96px); display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 8px 0; }
 
 /* ---------- board ---------- */
+/* whose turn: the site's sticky .bar, so it stays in view while scrolling to the rack */
+.kp-turn { justify-content: space-between; flex-wrap: nowrap; margin-bottom: 0; }
+.kp-turn-line { min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kp-turn .btn { flex: none; }
 .kp-board .card h2 .n { font-variant-numeric: tabular-nums; }
 .kp-board .stat-row { margin-bottom: 0; }
 .kp-players { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .kp-player { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 8px; min-height: 56px; padding: 8px 12px; background: var(--card2); border: 1px solid transparent; border-radius: var(--radius); text-align: left; transition: border-color var(--fast); }
 button.kp-player:hover { border-color: var(--accent); }
+.kp-player.is-turn { background: var(--accent-soft); border-color: var(--accent); }
 .kp-player b { overflow: hidden; font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .kp-player .badge { grid-row: span 2; white-space: nowrap; }
 .kp-player.is-out b { color: var(--muted); text-decoration: line-through; }
