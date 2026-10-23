@@ -1,4 +1,4 @@
-/* Kelly Pool: pass-and-play tracker (games/kelly-pool) */
+/* Kelly Pool: pass-and-play tracker (games/pub-games/kelly-pool) */
 /* pool cloth and ball colours are the only literal colours: they have real meaning */
 .kp { --kp-cloth: #1f5a3c; --kp-cloth-edge: #163f2b; --kp-ivory: #f7f3e8; --kp-ink: #151515; }
 .kp [hidden] { display: none !important; }

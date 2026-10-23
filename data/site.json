@@ -94,7 +94,7 @@
                         { "title": "8-Ball Pool", "url": "/games/pub-games/8-ball/", "description": "Pub 8-ball pool (reds and yellows) rules and frame tracker", "keywords": ["8 ball", "eight ball", "pool", "reds", "yellows", "billiards"] },
                         { "title": "9-Ball Pool", "url": "/games/pub-games/9-ball/", "description": "9-ball rules and rack tracker with fouls and push-outs", "keywords": ["9 ball", "nine ball", "pool", "billiards", "push out"] },
                         { "title": "Snooker", "url": "/games/pub-games/snooker/", "description": "Snooker scoreboard with breaks, fouls, points remaining and rules", "keywords": ["snooker", "break", "frame", "scoreboard", "147"] },
-                        { "title": "Kelly Pool", "url": "/games/kelly-pool/", "description": "Pass-and-play Kelly Pool with secret numbers, lives and a public board", "keywords": ["kelly pool", "pool", "billiards", "pub game", "last man standing", "pea pool"] }
+                        { "title": "Kelly Pool", "url": "/games/pub-games/kelly-pool/", "description": "Pass-and-play Kelly Pool with secret numbers, lives and a public board", "keywords": ["kelly pool", "pool", "billiards", "pub game", "last man standing", "pea pool"] }
                     ]
                 },
                 {
