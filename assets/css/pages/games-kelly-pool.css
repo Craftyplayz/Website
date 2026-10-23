@@ -62,8 +62,8 @@
 
 /* ---------- board ---------- */
 /* whose turn: the site's sticky .bar, so it stays in view while scrolling to the rack */
-.kp-turn { justify-content: space-between; flex-wrap: nowrap; margin-bottom: 0; }
-.kp-turn-line { min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kp-turn { justify-content: space-between; margin-bottom: 0; }
+.kp-turn-line { flex: 1 1 140px; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .kp-turn .btn { flex: none; }
 .kp-board .card h2 .n { font-variant-numeric: tabular-nums; }
 .kp-board .stat-row { margin-bottom: 0; }

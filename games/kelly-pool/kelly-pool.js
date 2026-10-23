@@ -90,11 +90,12 @@
 
     // Whose turn it is (the "Show whose turn it is" setting). Only the Next player button moves it on,
     // apart from skipping anyone who is out.
-    function nextTurn(g) {
+    // step 1 for the Next player button, -1 for Previous player
+    function nextTurn(g, step = 1) {
         const n = g.players.length;
         const i = g.players.findIndex((p) => p.id === g.turn);
         for (let k = 1; k <= n; k++) {
-            const p = g.players[(i + k + n) % n];
+            const p = g.players[(((i + k * step) % n) + n) % n];
             if (!p.out) { g.turn = p.id; return p; }
         }
         return null;
@@ -656,7 +657,7 @@
                 case 'kp-hide': if (check && privStage() !== 'reveal') { check = null; show('play'); } else hideNumbers(); break;
                 case 'kp-player': check = { id, stage: 'pass' }; show('private'); break;
                 case 'kp-ball': tapBall(+id); break;
-                case 'kp-next': if (G.phase === 'play') { nextTurn(G); save(); renderBoard(); } break;
+                case 'kp-next': if (G.phase === 'play') { nextTurn(G, id === 'back' ? -1 : 1); save(); renderBoard(); } break;
                 case 'kp-who': { const n = pending; pending = null; outcomeDlg.close(); finishPot(n, id); break; }
                 case 'kp-outcome-ok': outcomeDlg.close(); break;
                 case 'kp-undo': undoLast(); break;

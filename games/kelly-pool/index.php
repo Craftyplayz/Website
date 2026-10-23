@@ -120,7 +120,10 @@ $kp_balls = range(1, 5);
         <section class="kp-view kp-board" data-view="play" hidden>
             <div class="bar kp-turn" hidden>
                 <p class="kp-turn-line" aria-live="polite"><b class="kp-turn-name"></b> to shoot</p>
-                <button class="btn primary" type="button" data-act="kp-next">Next player</button>
+                <div class="actions">
+                    <button class="btn primary" type="button" data-act="kp-next">Next player</button>
+                    <button class="btn" type="button" data-act="kp-next" data-id="back">Previous player</button>
+                </div>
             </div>
             <div class="stat-row">
                 <div class="stat-card"><b class="kp-st-in"></b><span>Players in</span><small class="kp-st-of"></small></div>
