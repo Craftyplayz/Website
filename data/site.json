@@ -90,6 +90,7 @@
                         { "title": "Pub Games", "url": "/games/pub-games/", "description": "Rules and scorekeepers for darts, pool and snooker", "keywords": ["pub", "bar", "darts", "pool", "snooker", "scoreboard"] },
                         { "title": "501 / 301 Darts", "url": "/games/pub-games/501/", "description": "Darts scorer for 501 and 301 with checkouts, busts and full rules", "keywords": ["501", "301", "darts", "x01", "checkout", "double out", "scoreboard"] },
                         { "title": "Around the Clock", "url": "/games/pub-games/around-the-clock/", "description": "Darts tracker for hitting 1 to 20 then the bull, with rules", "keywords": ["darts", "round the clock", "clock", "practice"] },
+                        { "title": "9-Ball Pool", "url": "/games/pub-games/9-ball/", "description": "9-ball rules and rack tracker with fouls and push-outs", "keywords": ["9 ball", "nine ball", "pool", "billiards", "push out"] },
                         { "title": "Kelly Pool", "url": "/games/kelly-pool/", "description": "Pass-and-play Kelly Pool with secret numbers, lives and a public board", "keywords": ["kelly pool", "pool", "billiards", "pub game", "last man standing", "pea pool"] }
                     ]
                 },
