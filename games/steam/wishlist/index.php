@@ -16,11 +16,8 @@ $wl = array_values(array_filter($wl, function ($w) use ($items) {
 $sale = array_values(array_filter($wl, function ($w) use ($items) {
     return !empty($items[$w['appid']]['best_purchase_option']['discount_pct']);
 }));
-usort($sale, function ($a, $b) use ($items) {
-    return $items[$b['appid']]['best_purchase_option']['discount_pct'] <=> $items[$a['appid']]['best_purchase_option']['discount_pct'];
-});
 
-function steam_wish_card($w, $items, $lazy)
+function steam_wish_card($w, $items, $rank, $lazy)
 {
     $id = (int)$w['appid'];
     $it = $items[$id];
@@ -28,38 +25,41 @@ function steam_wish_card($w, $items, $lazy)
     $rv = isset($it['reviews']['summary_filtered']) ? $it['reviews']['summary_filtered'] : null;
     $rel = isset($it['release']) ? $it['release'] : [];
     $ends = !empty($p['active_discounts'][0]['discount_end_date']) ? $p['active_discounts'][0]['discount_end_date'] : 0;
+    $disc = !empty($p['discount_pct']) ? (int)$p['discount_pct'] : 0;
+    $cents = $p && isset($p['final_price_in_cents']) ? (int)$p['final_price_in_cents'] : -1;
+    $attrs = ' data-rank="' . $rank . '" data-name="' . h(mb_strtolower($it['name'])) . '" data-disc="' . $disc . '" data-price="' . $cents . '" data-rev="' . ($rv && !empty($rv['review_count']) ? (int)$rv['percent_positive'] : -1) . '" data-added="' . (int)$w['date_added'] . '" data-rel="' . (!empty($rel['steam_release_date']) ? (int)$rel['steam_release_date'] : 0) . '"';
     ?>
-    <article class="card steam-game">
-        <a class="steam-art" target="_blank" rel="noopener" href="https://store.steampowered.com/app/<?= $id ?>" tabindex="-1" aria-hidden="true">
+    <a class="steam-wish" target="_blank" rel="noopener" href="https://store.steampowered.com/app/<?= $id ?>"<?= $attrs ?>>
+        <span class="steam-wish-art">
             <img src="<?= h(steam_art($id, $items)) ?>" alt="" width="460" height="215" <?= $lazy ? 'loading="lazy" ' : '' ?>decoding="async">
-        </a>
-        <h3><a target="_blank" rel="noopener" href="https://store.steampowered.com/app/<?= $id ?>"><?= h($it['name']) ?></a></h3>
-        <div class="kv">
-            <span>Price</span>
-            <span class="steam-price">
-                <?php if ($p): ?>
-                    <?php if (!empty($p['discount_pct'])): ?><span class="badge g">-<?= (int)$p['discount_pct'] ?>%</span><span class="steam-was"><?= h($p['formatted_original_price']) ?></span><?php endif; ?>
-                    <?= h(isset($p['formatted_final_price']) ? $p['formatted_final_price'] : '') ?>
-                <?php elseif (!empty($rel['is_coming_soon'])): ?>
-                    Not out yet
-                <?php else: ?>
-                    Not for sale
+            <span class="steam-wish-rank" title="My ranking">#<?= $rank ?></span>
+            <?php if ($disc): ?><span class="steam-wish-off">-<?= $disc ?>%</span><?php endif; ?>
+        </span>
+        <span class="steam-wish-body">
+            <b><?= h($it['name']) ?></b>
+            <span class="steam-wish-meta">
+                <?php if (!empty($rel['is_coming_soon'])): ?>
+                    <span class="badge b"><?= !empty($rel['steam_release_date']) && isset($rel['coming_soon_display']) && $rel['coming_soon_display'] == 'date_full' ? date('j M Y', $rel['steam_release_date']) : h(isset($rel['custom_release_date_message']) ? $rel['custom_release_date_message'] : 'Coming soon') ?></span>
+                <?php elseif (!empty($rel['steam_release_date'])): ?>
+                    <span class="badge"><?= date('Y', $rel['steam_release_date']) ?><?= !empty($rel['is_early_access']) ? ' · early access' : '' ?></span>
+                <?php endif; ?>
+                <?php if ($rv && !empty($rv['review_count'])): ?>
+                    <span class="badge<?= $rv['percent_positive'] >= 80 ? ' g' : ($rv['percent_positive'] < 50 ? ' r' : '') ?>" title="<?= h($rv['review_score_label']) ?>, <?= number_format($rv['review_count']) ?> reviews"><?= (int)$rv['percent_positive'] ?>% positive</span>
                 <?php endif; ?>
             </span>
-            <?php if ($ends): ?>
-                <span>Sale ends</span><span><?= date('D j M', $ends) ?></span>
-            <?php endif; ?>
-            <?php if (!empty($rel['is_coming_soon'])): ?>
-                <span>Release</span><span><?= !empty($rel['steam_release_date']) && isset($rel['coming_soon_display']) && $rel['coming_soon_display'] == 'date_full' ? date('j M Y', $rel['steam_release_date']) : h(isset($rel['custom_release_date_message']) ? $rel['custom_release_date_message'] : 'Coming soon') ?></span>
-            <?php elseif (!empty($rel['steam_release_date'])): ?>
-                <span>Released</span><span><?= date('Y', $rel['steam_release_date']) ?><?= !empty($rel['is_early_access']) ? ' (early access)' : '' ?></span>
-            <?php endif; ?>
-            <?php if ($rv && !empty($rv['review_count'])): ?>
-                <span>Reviews</span><span><?= h($rv['review_score_label']) ?> (<?= (int)$rv['percent_positive'] ?>%)</span>
-            <?php endif; ?>
-            <span>Added</span><span><?= date('M Y', $w['date_added']) ?></span>
-        </div>
-    </article>
+            <span class="steam-wish-foot">
+                <small class="muted">Added <?= date('M Y', $w['date_added']) ?><?= $ends ? ' · sale ends ' . date('D j M', $ends) : '' ?></small>
+                <span class="steam-wish-price">
+                    <?php if ($p): ?>
+                        <?php if ($disc): ?><s class="steam-was"><?= h($p['formatted_original_price']) ?></s><?php endif; ?>
+                        <b><?= h(isset($p['formatted_final_price']) ? $p['formatted_final_price'] : '') ?></b>
+                    <?php else: ?>
+                        <small class="muted"><?= !empty($rel['is_coming_soon']) ? 'Not out yet' : 'Not for sale' ?></small>
+                    <?php endif; ?>
+                </span>
+            </span>
+        </span>
+    </a>
     <?php
 }
 ?>
@@ -76,36 +76,73 @@ function steam_wish_card($w, $items, $lazy)
 
     <main class="page steam" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
-        <h1 class="page-title">Steam Wishlist</h1>
-        <?php if ($wl): ?>
-            <p class="page-lede"><?= count($wl) ?> games I'd like to play<?= $sale ? ', ' . count($sale) . ' on sale right now' : '' ?>. Prices in GBP.</p>
-        <?php endif; ?>
-        <?php steam_nav('/games/steam/wishlist/'); ?>
+        <?php steam_hero(['title' => 'Steam Wishlist', 'lede' => $wl ? count($wl) . ' games I\'d like to play' . ($sale ? ', ' . count($sale) . ' on sale right now' : '') . '. Prices in GBP.' : '', 'current' => '/games/steam/wishlist/']); ?>
 
         <?php if (!$wl): ?>
             <p class="err">Couldn't load the wishlist from Steam. Try again in a minute.</p>
-        <?php endif; ?>
-
-        <?php if ($sale): ?>
-            <h2 class="steam-h">On sale</h2>
-            <div class="steam-grid section">
-                <?php foreach ($sale as $i => $w) steam_wish_card($w, $items, $i > 5); ?>
+        <?php else: ?>
+            <div class="bar steam-bar">
+                <input class="field" id="q" type="search" placeholder="Search <?= count($wl) ?> games" aria-label="Search the wishlist">
+                <div class="stabs" id="show" role="group" aria-label="Show">
+                    <button type="button" data-f="all" class="on" aria-pressed="true">All</button>
+                    <?php if ($sale): ?><button type="button" data-f="sale" aria-pressed="false">On sale <span class="n"><?= count($sale) ?></span></button><?php endif; ?>
+                </div>
+                <select class="field" id="sort" aria-label="Sort by">
+                    <option value="rank">My order</option>
+                    <option value="disc">Biggest discount</option>
+                    <option value="price">Cheapest</option>
+                    <option value="rev">Best reviewed</option>
+                    <option value="rel">Newest release</option>
+                    <option value="added">Recently added</option>
+                    <option value="name">Name</option>
+                </select>
             </div>
-        <?php endif; ?>
-
-        <?php if ($wl): ?>
-            <h2 class="steam-h">Everything, in my order</h2>
-            <div class="steam-grid section">
-                <?php foreach ($wl as $w) steam_wish_card($w, $items, true); ?>
+            <p class="steam-count" id="count" aria-live="polite"><?= count($wl) ?> games</p>
+            <div class="steam-wishes" id="grid">
+                <?php foreach ($wl as $i => $w) steam_wish_card($w, $items, $i + 1, $i > 5); ?>
             </div>
         <?php endif; ?>
     </main>
 
     <?php site_footer(null, false); ?>
+    <script src="<?= h(asset('/games/steam/steam.js')) ?>" defer></script>
     <script>
-        document.addEventListener('error', function (e) {
-            if (e.target.closest && e.target.closest('.steam-art')) e.target.style.visibility = 'hidden';
-        }, true);
+        (function () {
+            var grid = document.getElementById('grid');
+            if (!grid) return;
+            var cards = [].slice.call(grid.children), q = document.getElementById('q'), sort = document.getElementById('sort'),
+                count = document.getElementById('count'), show = 'all';
+            // games without a price (unreleased, delisted) go last when sorting by price
+            var by = {
+                rank: function (a, b) { return a.dataset.rank - b.dataset.rank; },
+                disc: function (a, b) { return b.dataset.disc - a.dataset.disc || a.dataset.rank - b.dataset.rank; },
+                price: function (a, b) { return (a.dataset.price < 0) - (b.dataset.price < 0) || a.dataset.price - b.dataset.price; },
+                rev: function (a, b) { return b.dataset.rev - a.dataset.rev; },
+                rel: function (a, b) { return b.dataset.rel - a.dataset.rel; },
+                added: function (a, b) { return b.dataset.added - a.dataset.added; },
+                name: function (a, b) { return a.dataset.name.localeCompare(b.dataset.name); }
+            };
+            function run() {
+                var term = q.value.trim().toLowerCase(), n = 0;
+                cards.sort(by[sort.value]).forEach(function (c) {
+                    c.hidden = (show == 'sale' && c.dataset.disc == 0) || (term && c.dataset.name.indexOf(term) < 0);
+                    if (!c.hidden) n++;
+                    grid.appendChild(c);
+                });
+                count.textContent = n + (n == 1 ? ' game' : ' games');
+            }
+            var tabs = document.getElementById('show');
+            tabs.addEventListener('click', function (e) {
+                var b = e.target.closest('button');
+                if (!b) return;
+                show = b.dataset.f;
+                [].forEach.call(tabs.children, function (x) { x.classList.toggle('on', x == b); x.setAttribute('aria-pressed', x == b); });
+                run();
+            });
+            var t;
+            q.addEventListener('input', function () { clearTimeout(t); t = setTimeout(run, 80); });
+            sort.addEventListener('change', run);
+        })();
     </script>
 </body>
 

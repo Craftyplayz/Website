@@ -1,28 +1,11 @@
 <?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/php/config.php';
-if (session_status() !== PHP_SESSION_ACTIVE) session_start();
-
-// Password lives in php/config.php (gitignored): $boorupassword = 'something';
-$password = isset($boorupassword) ? (string)$boorupassword : '';
-$self = strtok($_SERVER['REQUEST_URI'], '?');
 header('X-Robots-Tag: noindex, nofollow');
-
-if (isset($_GET['logout'])) {
-    unset($_SESSION['booru_ok']);
-    header('Location: ' . $self);
-    exit;
-}
 
 // Saved groups and presets (php/ is gitignored, so this never reaches GitHub)
 $dataFile = $_SERVER['DOCUMENT_ROOT'] . '/php/booru_data.json';
 
 if (isset($_GET['save'])) {
     header('Content-Type: application/json');
-    if (empty($_SESSION['booru_ok'])) {
-        http_response_code(401);
-        echo '{"ok":false}';
-        exit;
-    }
     $raw = $_SERVER['REQUEST_METHOD'] === 'POST' ? file_get_contents('php://input') : '';
     // Decode as objects (not arrays) so {} and numeric group names survive the round trip
     $data = json_decode($raw);
@@ -34,52 +17,6 @@ if (isset($_GET['save'])) {
     }
     $out = json_encode(['groups' => $data->groups, 'presets' => $data->presets]);
     echo json_encode(['ok' => @file_put_contents($dataFile, $out, LOCK_EX) !== false]);
-    exit;
-}
-
-if (empty($_SESSION['booru_ok'])) {
-    $error = '';
-    if ($password === '') {
-        $error = 'No password is set. Add $boorupassword = \'your password\'; to php/config.php.';
-    } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (hash_equals($password, (string)($_POST['password'] ?? ''))) {
-            session_regenerate_id(true);
-            $_SESSION['booru_ok'] = true;
-            header('Location: ' . $self);
-            exit;
-        }
-        sleep(1);
-        $error = 'Wrong password.';
-    }
-    ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex, nofollow">
-    <title>Locked</title>
-    <style>
-        :root { --bg: #f4f5f7; --panel: #fff; --text: #1d2025; --border: #d6d9de; --accent: #2563eb; --exc: #dc2626; }
-        @media (prefers-color-scheme: dark) { :root { --bg: #111317; --panel: #1b1e24; --text: #e5e7eb; --border: #2f343c; --accent: #3b82f6; } }
-        body { margin: 0; min-height: 100vh; display: grid; place-items: center; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 16px; box-sizing: border-box; }
-        form { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 24px; width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; }
-        h1 { margin: 0; font-size: 1.2rem; }
-        input { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 10px; }
-        button { font: inherit; background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: 9px; cursor: pointer; }
-        .err { color: var(--exc); font-size: .85rem; margin: 0; }
-    </style>
-</head>
-<body>
-    <form method="post">
-        <h1>Password required</h1>
-        <?php if ($error) echo '<p class="err">' . htmlspecialchars($error) . '</p>'; ?>
-        <input type="password" name="password" placeholder="Password" autofocus required>
-        <button type="submit">Unlock</button>
-    </form>
-</body>
-</html>
-    <?php
     exit;
 }
 
@@ -118,7 +55,6 @@ if (is_file($dataFile)) {
         .sub { color: var(--muted); margin: 0; font-size: .9rem; max-width: 560px; }
         .site { display: flex; align-items: center; gap: 8px; font-size: .9rem; }
         .site select { width: auto; font-weight: 600; }
-        .logout { font-size: .8rem; color: var(--muted); }
         .head-tools { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
         .presets { display: flex; gap: 6px; align-items: center; }
         .presets select { width: auto; max-width: 200px; }
@@ -201,7 +137,6 @@ if (is_file($dataFile)) {
                     <option value="danbooru">Danbooru</option>
                 </select>
             </label>
-            <a class="logout" href="?logout=1">Log out</a>
         </div>
     </header>
 

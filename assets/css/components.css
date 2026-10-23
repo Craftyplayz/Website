@@ -1,4 +1,4 @@
-/* Shared UI pieces, taken from /minecraft/tools/nbt-viewer. Opt-in: pages load this with
+/* Shared UI pieces, taken from /games/steam and /minecraft/tools/nbt-viewer. Opt-in: pages load this with
    $site_page['components'] = true. Everything is a class, so nothing changes on pages that
    don't use these names. Colours come from the tokens in global.css. */
 
@@ -17,7 +17,7 @@
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: .5; cursor: default; transform: none; }
 .btn.primary { background: var(--btn); border-color: var(--btn-line); color: #fff; }
-.btn.primary:hover { background: #4a9033; }
+.btn.primary:hover { background: var(--btn-hover); }
 .page a.btn { color: var(--text); text-decoration: none; }
 .page a.btn.primary { color: #fff; }
 .btn.small { padding: 5px 10px; font-size: 13px; }
@@ -39,7 +39,7 @@
 /* ---------- small pieces ---------- */
 .badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 .badge { padding: 2px 9px; background: var(--btn2); border: 1px solid #4d4d4d; border-radius: 999px; font-size: 12px; }
-.badge.g { background: #2d4a24; border-color: #4f8a3a; }
+.badge.g { background: var(--ok-bg); border-color: var(--ok-line); }
 .badge.r { background: var(--danger-bg); border-color: var(--danger-line); }
 .badge.p { background: #3d2a4f; border-color: #6c4b8f; }
 .badge.b { background: var(--info-bg); border-color: var(--info-line); }
@@ -59,7 +59,7 @@
 .kv > :nth-child(odd) { color: var(--muted); }
 
 .progress { height: 6px; overflow: hidden; background: var(--btn2); border-radius: 3px; }
-.progress i { display: block; height: 100%; background: linear-gradient(90deg, #4f8a3a, var(--accent)); }
+.progress i { display: block; height: 100%; background: linear-gradient(90deg, var(--btn), var(--accent)); }
 
 /* jump links for long pages */
 .jump { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
@@ -82,6 +82,34 @@
     color: var(--text); font: inherit; font-size: 14px; outline: none; transition: border-color var(--fast);
 }
 .field:focus { border-color: var(--accent); }
+.field:disabled { opacity: .5; }
+.field[aria-invalid="true"] { border-color: var(--danger-line); }
+textarea.field { min-height: 96px; line-height: 1.5; resize: vertical; }
+
+/* ---------- forms: each label wraps its text and its field, so no ids are needed ---------- */
+.form { display: grid; gap: 12px; }
+.form-card { max-width: 560px; }
+.form label { display: grid; align-content: start; gap: 4px; min-width: 0; color: var(--muted); font-size: 13px; }
+.form label small { font-size: 12px; }
+.form .field { width: 100%; min-width: 0; }
+.form .btn { justify-self: start; }
+.form fieldset { display: grid; gap: 4px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.form legend { margin-bottom: 4px; padding: 0; color: var(--muted); font-size: 13px; }
+/* fields side by side that stack on narrow screens */
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 12px; }
+.check, .form label.check { display: flex; align-items: center; gap: 8px; min-height: 32px; color: var(--text); font-size: 14px; cursor: pointer; }
+.check input { flex: none; width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+/* ---------- tables: .table-wrap lets a wide table scroll on its own ---------- */
+.table-wrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th { padding: 6px 10px; color: var(--muted); font-size: 13px; font-weight: 600; text-align: left; white-space: nowrap; }
+.table td { padding: 6px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+.table .num { text-align: right; font-variant-numeric: tabular-nums; }
+/* long tables: the header stays in view */
+.table-wrap.tall { max-height: 600px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+.table-wrap.tall th { position: sticky; top: 0; z-index: 1; background: var(--card2); }
 
 /* ---------- drop zone for file tools ---------- */
 .drop {
@@ -96,7 +124,7 @@
 .err, .note, .ok { padding: 10px 14px; border-radius: var(--radius); font-size: 14px; }
 .err { background: var(--danger-bg); border: 1px solid var(--danger-line); }
 .note { background: var(--info-bg); border: 1px solid var(--info-line); }
-.ok { background: #2d4a24; border: 1px solid #4f8a3a; }
+.ok { background: var(--ok-bg); border: 1px solid var(--ok-line); }
 
 /* ---------- drawer (details panel) ---------- */
 .drawer {
@@ -127,7 +155,7 @@ dialog.dlg .actions { display: flex; justify-content: flex-end; gap: 8px; margin
     content: ""; position: absolute; top: 50%; left: 3px; width: 12px; height: 12px; margin-top: -7px;
     background: #1a1a1a; border: 1.5px solid #777; border-radius: 3px;
 }
-.tree details[open] > summary::before { background: #4f8a3a; border-color: var(--accent); }
+.tree details[open] > summary::before { background: var(--btn); border-color: var(--accent); }
 .tree summary:hover { background: #333; }
 .tree .tl { padding-left: 22px; white-space: nowrap; }
 .tree .k { color: #9cdcfe; }
@@ -135,3 +163,146 @@ dialog.dlg .actions { display: flex; justify-content: flex-end; gap: 8px; margin
 .tree .v.string { color: #ce9178; }
 .tree .ty { color: #777; }
 .tree mark { background: #6b5a00; color: inherit; }
+
+/* ==========================================================================================================
+   Page pieces from /games/steam, the reference design (live samples: /design/#anatomy). Art-led pages
+   use them top to bottom: hero, stat cards, section headings over cover/banner grids, ranked lists,
+   achievement tiles. Black scrims (rgb(0 0 0 / x)) keep text readable on art.
+   ========================================================================================================== */
+/* card links: .page a would paint all their text link-blue */
+.page :is(a.id-chip, a.stat-card, a.cover-card, a.banner-card, a.shot-card, a.rank-row) { color: var(--text); text-decoration: none; }
+.badge.gold { background: var(--gold-bg); border-color: var(--gold-line); }
+
+/* ---------- hero: art behind, title and lede, identity chip, tabs along the bottom ---------- */
+.page-hero { position: relative; isolation: isolate; overflow: hidden; margin-bottom: 20px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.page-hero-bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+.page-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(0 0 0 / .85), rgb(0 0 0 / .4) 65%, rgb(0 0 0 / .2)), linear-gradient(0deg, rgb(0 0 0 / .6), transparent 50%); }
+.page-hero-body { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 24px; min-height: clamp(150px, 20vw, 240px); padding: clamp(24px, 5vw, 48px) 20px 16px; }
+.page-hero-body > .grow { flex: 1 1 280px; min-width: 0; }
+.page-hero .page-title { margin: 0; text-shadow: 0 2px 12px rgb(0 0 0 / .6); overflow-wrap: anywhere; }
+.page-hero .page-lede { max-width: 62ch; margin: 6px 0 0; color: var(--text); opacity: .85; }
+
+.id-chip { display: flex; flex: none; align-items: center; gap: 12px; max-width: 100%; padding: 8px 16px 8px 8px; background: rgb(0 0 0 / .5); border: 1px solid rgb(255 255 255 / .1); border-radius: var(--radius-lg); color: var(--text); backdrop-filter: blur(8px); transition: border-color var(--fast); }
+a.id-chip:hover { border-color: var(--accent); }
+.id-chip-pic { position: relative; flex: none; width: 48px; height: 48px; }
+.id-chip-pic img { display: block; width: 48px; height: 48px; border-radius: 4px; }
+.id-chip-pic .id-chip-frame { position: absolute; inset: -6px; width: 60px; height: 60px; border-radius: 0; }
+.id-chip-text { min-width: 0; }
+.id-chip-text b { display: block; font-weight: 600; white-space: nowrap; }
+.id-chip-text small { display: block; overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.level { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; border: 2px solid var(--accent); border-radius: 999px; font-size: 13px; font-weight: 700; vertical-align: middle; }
+.status-dot { color: var(--muted); }
+.status-dot::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; background: currentColor; border-radius: 50%; }
+.status-dot.online { color: var(--accent); }
+
+.page-tabs { display: flex; gap: 4px; padding: 0 12px; overflow-x: auto; background: rgb(0 0 0 / .45); border-top: 1px solid rgb(255 255 255 / .08); scrollbar-width: none; }
+.page .page-tabs a { padding: 12px 12px 10px; border-bottom: 2px solid transparent; color: var(--muted); font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: color var(--fast), border-color var(--fast); }
+.page .page-tabs a:hover { color: var(--text); }
+.page .page-tabs a[aria-current] { border-color: var(--accent); color: var(--text); }
+
+/* ---------- stat cards: the page's headline numbers ---------- */
+.stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); color: var(--text); transition: border-color var(--fast), transform var(--fast); }
+a.stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.stat-card > b { font-size: clamp(22px, 3vw, 28px); font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; }
+.stat-card > span { color: var(--muted); font-size: 13px; }
+.stat-card > small { color: var(--accent); font-size: 12px; }
+.stat-card .progress { margin: 6px 0 2px; }
+.stat-ring { flex-direction: row; align-items: center; gap: 12px; }
+.stat-ring .ring { --size: 56px; }
+.stat-ring .ring b { font-size: 15px; }
+.stat-ring > span:not(.ring) small { display: block; color: var(--accent); font-size: 12px; }
+
+/* completion ring; --p is 0-100, .full (100%) turns gold */
+.ring { --size: 40px; display: inline-grid; flex: none; place-items: center; width: var(--size); height: var(--size); border-radius: 50%; background: radial-gradient(closest-side, var(--sunken) 74%, transparent 76%), conic-gradient(var(--accent) calc(var(--p) * 1%), rgb(255 255 255 / .15) 0); }
+.ring b { color: var(--text); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.ring small { font-size: 9px; }
+.ring.full { background: radial-gradient(closest-side, var(--gold-bg) 74%, transparent 76%), conic-gradient(var(--gold-line) 100%, transparent 0); }
+
+/* ---------- section heading outside cards ---------- */
+.sec-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 28px 0 12px; font-size: 20px; }
+.sec-h .n { color: var(--muted); font-size: 14px; font-weight: 400; }
+.sec-more { margin-left: auto; font-size: 14px; font-weight: 400; }
+
+/* ---------- covers: 2:3 art, name on a scrim; --rx/--ry tilt them (games/steam/steam.js) ---------- */
+.cover-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 28vw, 168px), 1fr)); gap: 16px; }
+.cover-card { position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; background: var(--card2); border-radius: var(--radius); box-shadow: 0 2px 6px rgb(0 0 0 / .4); color: var(--text); transform: perspective(800px) translateY(0) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform var(--base) ease-out, box-shadow var(--base) ease-out; }
+.cover-card img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform var(--base) ease-out; }
+a.cover-card:hover, a.cover-card:focus-visible { box-shadow: var(--lift), 0 0 0 2px var(--accent); transform: perspective(800px) translateY(-3px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+a.cover-card:hover img { transform: scale(1.03); }
+.cover-card .ring { position: absolute; top: 8px; right: 8px; --size: 38px; box-shadow: 0 2px 6px rgb(0 0 0 / .5); }
+.cover-tag { position: absolute; top: 8px; left: 8px; padding: 2px 8px; background: var(--accent); border-radius: 999px; color: var(--sunken); font-size: 12px; font-weight: 700; }
+.cover-info { position: absolute; right: -1px; bottom: -1px; left: -1px; display: flex; flex-direction: column; padding: 32px 10px 8px; background: linear-gradient(transparent, rgb(0 0 0 / .92)); }
+.cover-info b { overflow: hidden; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.cover-info small { color: var(--text); font-size: 12px; opacity: .75; }
+.cover-more { display: none; }
+a.cover-card:hover .cover-more, a.cover-card:focus-visible .cover-more { display: block; }
+/* no portrait art: the landscape fallback fills the cover and the name stays readable over it */
+.cover-card.noart .cover-info { top: 0; justify-content: flex-end; }
+
+/* ---------- banners (16:7, recent things) and shots (16:10, screenshots) ---------- */
+.banner-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+.shot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 16px; }
+.banner-card, .shot-card { position: relative; display: flex; align-items: flex-end; overflow: hidden; background: var(--card2); border-radius: var(--radius-lg); box-shadow: 0 2px 6px rgb(0 0 0 / .4); color: var(--text); transition: transform var(--base) ease-out, box-shadow var(--base) ease-out; }
+.banner-card { aspect-ratio: 16 / 7; transform: perspective(800px) translateY(0) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+.shot-card { aspect-ratio: 16 / 10; }
+.banner-card img, .shot-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform var(--base) ease-out; }
+.banner-card:hover, .banner-card:focus-visible, .shot-card:hover, .shot-card:focus-visible { box-shadow: var(--lift), 0 0 0 2px var(--accent); }
+.banner-card:hover { transform: perspective(800px) translateY(-3px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+.shot-card:hover { transform: translateY(-3px); }
+.banner-card:hover img, .shot-card:hover img { transform: scale(1.03); }
+.banner-text { position: relative; display: flex; flex-direction: column; width: 100%; min-width: 0; padding: 40px 14px 12px; background: linear-gradient(transparent, rgb(0 0 0 / .9)); }
+.banner-text b { overflow: hidden; font-size: 17px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgb(0 0 0 / .8); }
+.shot-card .banner-text b { font-size: 14px; }
+.banner-text small { color: var(--text); font-size: 13px; opacity: .8; }
+.banner-card .ring { position: absolute; top: 10px; right: 10px; --size: 44px; }
+
+/* ---------- ranked list: rank, small art, name over a bar, value ---------- */
+.rank-list { display: grid; gap: 6px; }
+.rank-row { display: grid; grid-template-columns: 24px 92px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 6px 10px 6px 6px; background: var(--card2); border-radius: var(--radius); color: var(--text); transition: background var(--fast), transform var(--fast); }
+a.rank-row:hover { background: var(--btn2-hover); transform: translateX(4px); }
+.rank-n { color: var(--muted); font-size: 13px; font-weight: 700; text-align: center; }
+.rank-row > img { width: 92px; height: 35px; object-fit: cover; border-radius: 4px; }
+.rank-row b { display: block; overflow: hidden; font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.rank-bar { display: block; height: 6px; margin-top: 6px; overflow: hidden; background: rgb(255 255 255 / .06); border-radius: 999px; }
+.rank-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--btn), var(--accent)); border-radius: 999px; }
+.rank-bar i.other { background: var(--line-strong); }
+.rank-val { font-size: 14px; font-weight: 600; text-align: right; white-space: nowrap; }
+.rank-val small { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
+.rank-row.muted b { color: var(--muted); }
+@media (max-width: 480px) {
+    .rank-row { grid-template-columns: 64px minmax(0, 1fr) auto; }
+    .rank-n { display: none; }
+    .rank-row > img { width: 64px; height: 24px; }
+}
+
+/* ---------- achievement tiles: the left border is the tier ---------- */
+.ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+.ach-tile { --tier: var(--line-strong); display: flex; align-items: flex-start; gap: 12px; min-width: 0; padding: 12px; background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--tier); border-radius: var(--radius); transition: border-color var(--fast), transform var(--fast); }
+.ach-tile:hover { border-color: var(--tier); transform: translateY(-2px); }
+.ach-tile.t-g { --tier: var(--accent); }
+.ach-tile.t-b { --tier: var(--series-1); }
+.ach-tile.t-p { --tier: var(--series-3); }
+.ach-tile.t-gold { --tier: var(--gold-line); }
+.ach-tile > img, .ach-noicon { flex: none; width: 56px; height: 56px; background: var(--card2); border-radius: 6px; }
+.ach-tile.t-gold:not(.locked) > img { box-shadow: 0 0 0 2px var(--gold-line), 0 0 16px var(--gold-line); }
+.ach-tile .grow { flex: 1; min-width: 0; }
+.ach-tile b { display: block; font-size: 14px; font-weight: 600; }
+.ach-tile .grow small { display: block; color: var(--muted); font-size: 13px; }
+.ach-tile .grow small a { color: var(--muted); }
+.ach-tile .grow .ach-desc { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.ach-tile:hover .ach-desc { -webkit-line-clamp: unset; }
+.rarity-bar { display: block; height: 4px; margin-top: 8px; overflow: hidden; background: rgb(255 255 255 / .08); border-radius: 999px; }
+.rarity-bar i { display: block; height: 100%; background: var(--tier); }
+.ach-tile .rarity-n { margin-top: 2px; font-size: 12px; }
+.ach-when { flex: none; color: var(--muted); font-size: 12px; text-align: right; white-space: nowrap; }
+.ach-tile.locked > img { filter: grayscale(1); opacity: .6; }
+.ach-tile.locked b { color: var(--muted); }
+.ach-tile details { color: var(--muted); font-size: 12px; }
+.ach-tile summary { cursor: pointer; }
+/* big centred tiles for the latest or rarest few */
+.trophies { grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); }
+.trophies .ach-tile { flex-direction: column; align-items: center; padding: 20px 14px 14px; border-top: 3px solid var(--tier); border-left-width: 1px; text-align: center; }
+.trophies .ach-tile > img { width: 80px; height: 80px; }
+.trophies .ach-tile .grow { width: 100%; }
+.trophies .ach-when { text-align: center; }

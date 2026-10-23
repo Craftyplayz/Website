@@ -22,7 +22,7 @@ $slides = slideshow_slides();
     <script src="/assets/js/konami.js" defer></script>
 </head>
 
-<body>
+<body class="home">
     <?php site_header(); ?>
 
     <main class="hero" id="main">
