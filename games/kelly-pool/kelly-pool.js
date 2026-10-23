@@ -236,7 +236,7 @@
                     (G.phase === 'deal' ? 'dealing to ' + G.players[G.deal.index].name : plural(onTable, 'ball', 'balls') + ' on the table');
             }
             // one primary per view: with a game to resume, the mode buttons step down
-            $('[data-act="kp-mode"][data-id="sink"]', root).classList.toggle('primary', !live);
+            $('[data-act="kp-mode"][data-id="lms"]', root).classList.toggle('primary', !live);
             renderSettings();
         }
 
