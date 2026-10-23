@@ -6,3 +6,11 @@
 - New pages start from `_templates/page.php`.
 - `data/site.json` is the only source of the header menus, search, breadcrumbs and titles; every new or moved page goes there.
 - When several sessions share this folder, also follow `_dev/handoffs/README.md` (ports, staying in your tab, git rules).
+
+## After every edit: commit, push, deploy
+
+The owner wants every change live without asking. Once a change is finished and checked:
+
+1. Commit it on `main`.
+2. Push to GitHub: `git -c pack.useSparse=false push origin main`.
+3. Upload to the live server: `bash _dev/deploy.sh` (SSH key `~/.ssh/ionos`, uploads only changed files; `--dry-run` previews).
