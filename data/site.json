@@ -81,7 +81,8 @@
                         { "title": "Guess Who", "url": "/games/guesswho/", "description": "Guess Who boards: Classic, Avatar and more", "keywords": ["atla", "avatar"] },
                         { "title": "Free Games", "url": "/games/free/", "description": "Browse free-to-play PC and browser games", "keywords": ["freetogame", "f2p", "free to play"] },
                         { "title": "A Dark Room", "url": "/games/adarkroom/", "description": "A minimalist text adventure" },
-                        { "title": "The Game", "url": "/games/the-game/", "description": "You just lost it" }
+                        { "title": "The Game", "url": "/games/the-game/", "description": "You just lost it" },
+                        { "title": "Kelly Pool", "url": "/games/kelly-pool/", "description": "Pass-and-play Kelly Pool with secret numbers, lives and a public board", "keywords": ["kelly pool", "pool", "billiards", "pub game", "last man standing", "pea pool"] }
                     ]
                 },
                 {
