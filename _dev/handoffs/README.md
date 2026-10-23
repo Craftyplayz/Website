@@ -40,7 +40,7 @@ Other sessions are editing other tabs at the same time.
 - **Before committing,** run `git diff --cached --name-only` and make sure every file listed is yours.
 - **If a commit fails because the index is locked,** wait a few seconds and try again. Never delete `.git/index.lock`.
 - **End commit messages with** `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
-- **Don't push, merge or rebase** unless the user asks.
+- **After committing, push and deploy** (see "After every edit" in `CLAUDE.md`). `_dev/deploy.sh` refuses to run while another session has uncommitted work; if so, say so instead of waiting. **Don't merge or rebase** unless the user asks.
 - **Before each page,** run `git log --oneline -5` and `git diff HEAD~5 -- .htaccess data/site.json includes assets/css/global.css` and look for surprises. On 2026-10-18 a sync from the server put old copies of shared files back. If it happens again, stop and tell the user.
 
 ## 4. How a page is built now
