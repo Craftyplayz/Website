@@ -1,0 +1,13 @@
+/* Text Tools (/tools/text/). */
+.tx-main { margin-bottom: 16px; }
+.tx-main .field, .tx-f .field { display: block; width: 100%; min-width: 0; resize: vertical; }
+/* 16px stops iOS zooming into the main box */
+.tx-in { font-size: 16px; line-height: 1.5; }
+.tx-case { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.tx-case [data-case="clear"] { margin-left: auto; }
+.tx-note { margin: 12px 0 0; font-size: 13px; }
+
+.tx-f h2 .btn { margin-left: auto; }
+.tx-f .field { font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
+.tx-f .err { margin: 8px 0 0; padding: 6px 10px; font-size: 13px; }
+.tx-f .err[hidden] { display: none; }

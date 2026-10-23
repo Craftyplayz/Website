@@ -1,34 +1,53 @@
 # Building pages: the complete guide
 
 This is the single source of truth for building or restyling any page on craftyplayz.com.
-It replaces "read plan.html > Design guide" for day-to-day work (plan.html still holds the history and live demos).
+The same design rules, with live component samples, are at `/design/` (`design/index.php`), the page to point other models at. When a rule changes, change it in both.
 Session rules (ports, git, staying inside your tab) are in `README.md` next to this file.
 
-**Reference pages** — when in doubt, open these and copy what they do:
+**Reference pages** — when in doubt, open these and copy what they do. `/games/steam/` is the gold standard: when this guide doesn't answer a question, do what Steam does.
 
 | Kind of page | Reference | What to copy |
 |---|---|---|
+| **Gold standard** | `/games/steam/` (5 pages) + `games-steam.css` | everything: hero, stat cards, section headings, art grids, ranked lists, achievement tiles, charts, the cached API |
+| Heavy tool | `/minecraft/tools/nbt-viewer/` | the Steam look on a tool: buttons in the hero, drop zone, drawer details, raw tree, libraries loaded on use, privacy |
 | Plain text / info | `/about.php` | template + `.grid` of `.card`s, `.kv` facts |
 | Long text / transcript | `/minecraft/projects/life-series/season-1/session-1/` | one `<pre>` in a page stylesheet, link back in the lede |
 | Hub (section landing) | `/minecraft/index.php` | hero + `site_hub()` cards straight from `site.json` |
 | Server-fetched API, one value | `/extras/facts/` | PHP fetches, renders, shows `.err` on failure |
 | Server-fetched API, cached | `/games/steam/` + `steam.php`, `/extras/dnd/` | disk cache, stale fallback, parallel `curl_multi`, keys server-side |
 | Browser-fetched API | `/games/free/`, `/minecraft/servers/` | loading note → grid, sticky `.bar` filters, drawer details, polling |
-| Heavy tool | `/minecraft/tools/nbt-viewer/` | the gold standard for everything below |
 
 ---
 
 ## 1. Design philosophy
 
-Five rules, in priority order. When two clash, the higher one wins.
+Six rules, in priority order. When two clash, the higher one wins.
 
 1. **Fast.** Content is visible and usable in under 1 second on a phone. The first view is HTML from PHP; JS only improves it. Nothing heavy loads until it's needed.
 2. **Fits every screen.** One layout that flows from 320px to 2560px. Grids pick their own column count, sizes use `clamp()`, and breakpoints exist only where content actually breaks.
-3. **Uncluttered.** One job per page. One green button per view. Empty things are hidden, details live behind a click (drawer, `<details>`, dialog), raw data comes last.
-4. **One dark theme.** Every page uses the same tokens from `global.css`. No page invents a colour, a font, or a light mode.
-5. **Calm motion.** Animation only explains a change (opened, pressed, state moved), lasts under 200ms, and uses `transform`/`opacity` only.
+3. **Uncluttered.** One job per page. One primary button per view. Empty things are hidden, details live behind a click (drawer, `<details>`, dialog), raw data comes last.
+4. **Show it, don't list it.** When a page has pictures (game art, screenshots, item icons, skins), lead with them: an art hero, covers, icons beside names. Headline numbers are big stat cards and rings, not table rows. Tables and raw data still exist, further down.
+5. **One dark theme, one blue accent.** Every page uses the same tokens from `global.css`, and the accent is Steam blue everywhere. No page invents a colour, a font, or a light mode.
+6. **Quick, calm motion.** Things under the pointer answer it (a small lift, zoom or tilt); anything else moves only to explain a change. Under 200ms, `transform`/`opacity` only.
 
-A good page reads like this: header → breadcrumbs → title → one muted line → the content, in cards, in a grid that fills the width → footer. Nothing else.
+A page with art reads: header → breadcrumbs → hero (title, one line, chip, tabs) → a row of stat cards → sections, each a heading and then a grid of art or a card of text → footer. A plain tool or text page skips the hero and the stat row: breadcrumbs → title → one muted line → cards.
+
+### Page anatomy: the Steam pieces
+
+These are in `components.css` (taken from `/games/steam/`); Steam and the NBT viewer both use them. Live samples with copyable markup are at `/design/#anatomy`. Use the classes as they are. A page that needs a variant overrides them in its own stylesheet under its page tag (NBT: `.nbt .rank-row` for item-icon rows, `.nbt .ach-tile` for compact advancement tiles). The cover tilt and art fallback are in `games/steam/steam.js`; load it on any page that wants them.
+
+| Piece | Classes | Use |
+|---|---|---|
+| Hero | `.page-hero` > `.page-hero-bg` img, `.page-hero-body` (`.grow` with `h1.page-title` + `.page-lede`, then `.id-chip` chip), `.page-tabs` | Opens every page of an art-led section. Art behind with `fetchpriority="high"`, black scrim, tabs for the section's pages with `aria-current="page"`. Falls back to `--sunken` without art. |
+| Stat cards | `.stat-row` > `a.stat-card` (`b` number, `span` label, `small` accent line), `.stat-ring` | The 3–6 headline numbers under the hero. Each links to its source. Rounded numbers keep the exact value in `title`. |
+| Ring | `.ring` with `style="--p: 64"`, `.full` at 100% (gold) | Percentages. `role="img"` + `aria-label`. |
+| Section heading | `h2.sec-h` with `.n` count or `a.sec-more` "See all" link | Sections of art sit on the page, not in a card. |
+| Covers | `.cover-grid` > `a.cover-card` (img 2:3, ring, `.cover-tag`, `.cover-info`, `.cover-more` on hover) | Things with portrait art. `.banner-grid`/`.banner-card` (16:7) for recent things, `.shot-grid`/`.shot-card` (16:10) for screenshots. |
+| Ranked list | `.rank-list` > `a.rank-row` (`.rank-n`, img, `.grow` name + `.rank-bar`, `.rank-val`) | Top-N lists, bar scaled to the first item. |
+| Achievement tiles | `.ach-grid` > `.ach-tile` + tier `t-g`/`t-b`/`t-p`/`t-gold`, `.locked` | Unlockable things. Left border = tier; rarity bar + muted line; locked goes grey. |
+| Charts (Steam only, `games-steam.css`) | `.steam-split`, `.steam-line`, `.steam-days`, `.steam-cols-chart` | Plain SVG/CSS. `--series-1/2/3` in order, hover fades the rest to 50%, always a legend, exact values in a tooltip or `title`, and the numbers in a `<details>` table. |
+
+Toolbars on art pages (library, wishlist): one `.bar` under the hero with a search field, a sort `<select>` and `.stabs` filters with counts. `steam.js` (32 lines) adds the cover tilt and image fallbacks; everything else is rendered by PHP.
 
 ---
 
@@ -38,7 +57,7 @@ A good page reads like this: header → breadcrumbs → title → one muted line
 2. **Copy `_templates/page.php`** to `<folder>/index.php`.
 3. **Set `$site_page`** at the top (see §3). Usually `['components' => true]`, plus `'ui' => true` if you use `UI.*`, `'css' => [...]` for a page stylesheet, `'config' => true` if you need an API key.
 4. **Add the page to `data/site.json`** (see §4). Without this it has no menu entry, no search result, no title and no breadcrumb. This is a shared file: if you're in a parallel session, request it in `requests.md` instead.
-5. **Build the content** with components (§8). Page-only CSS goes in `assets/css/pages/<section>-<name>.css`.
+5. **Build the content** with components (§8), and the Steam pieces (§1) if the page has art; then the hero replaces the plain title and lede. Page-only CSS goes in `assets/css/pages/<section>-<name>.css`.
 6. **Run the checklist** (§16) and the tests (§15).
 7. **Commit only your paths** (README §3).
 
@@ -97,7 +116,7 @@ Never write your own `<title>`, `<meta charset>`, viewport, favicon, or `<link>`
 
 ## 4. Keeping the header up to date (`data/site.json`)
 
-`data/site.json` is the **only** place navigation lives. The PHP header, mega-menus, mobile menu, site search (`/` key), breadcrumbs, tab titles, meta descriptions, hub cards and the sitemap all read it. Never hard-code a nav link anywhere else.
+`data/site.json` is the **only** place navigation lives. The PHP header, mega-menus, mobile menu, site search (`/` key), breadcrumbs, tab titles, meta descriptions, hub cards and the sitemap all read it. Never hard-code a nav link anywhere else. The one exception is hero tabs (`.page-tabs`): a section may list them in its own hero helper (`steam_hero()`), but every page they link to must also be in `site.json`.
 
 Structure: `sections[] → groups[] → pages[]`, plus top-level `links[]` (About).
 
@@ -129,67 +148,74 @@ Check after editing: the JSON parses (`php -r "json_decode(file_get_contents('da
 
 ## 5. Colours (dark theme)
 
-All colours are CSS variables in `assets/css/global.css`. **Pages use variables only — never a hex value** (the only exceptions are content colours with real meaning, like Minecraft `§` formatting codes or syntax highlighting).
+All colours are CSS variables in `assets/css/global.css`. **Pages use variables only — never a hex value.** The exceptions are colours with real meaning (Minecraft `§` codes and GUI, syntax highlighting, a brand colour like Steam's in-game green, kept as a prefixed page token such as `--steam-ingame`) and black or white overlays on art: `rgb(0 0 0 / x)` scrims and chips, `rgb(255 255 255 / x)` tracks.
 
 | Token | Value | Use |
 |---|---|---|
 | `--bg` | `#202020` | Page background |
 | `--card` | `#2a2a2a` | Cards |
 | `--card2` | `#323232` | Rows, tiles and nested cards inside a card |
-| `--sunken` | `#1b1b1b` | Drawer, footer, code/raw blocks |
+| `--sunken` | `#1b1b1b` | Drawer, footer, code/raw blocks, hero without art |
 | `--line` | `#3d3d3d` | Borders |
 | `--line-strong` | `#555` | Button borders, drop-zone dashes |
 | `--text` | `#ececec` | Body text |
 | `--muted` | `#9b9b9b` | Secondary text, meta, counts. Nothing darker than this is ever text. |
-| `--accent` | `#7ed957` | Focus ring, active tab, progress, hover border. "Act" or "done" only. |
-| `--accent-soft` | `#2d4224` | Selected/active background (pill tab on, picked row) |
-| `--btn` / `--btn-line` | `#3d7a2a` / `#5aa83f` | Primary button |
+| `--accent` | `#66c0f4` | Steam blue. Focus ring, current tab, progress, hover border. "Act" or "you are here" only. |
+| `--accent-soft` | `#1d3a50` | Selected background (pill tab on, pressed stat card, picked row) |
+| `--btn` / `--btn-line` / `--btn-hover` | `#2a6e9e` / `#4a9ad0` / `#327bb0` | Primary button; `--btn` also starts bar and ring fills |
 | `--btn2` / `--btn2-hover` | `#3a3a3a` / `#474747` | Secondary button |
 | `--link` | `#8cc8ff` | Links in content |
 | `--highlight` | `#ffd84a` | Search hits, "new" |
 | `--danger-bg` / `--danger-line` | `#4a2424` / `#8a3a3a` | Errors |
 | `--info-bg` / `--info-line` | `#24384a` / `#3a628a` | Notes |
+| `--ok-bg` / `--ok-line` | `#2d4a24` / `#4f8a3a` | Success and online (`.ok`, `.badge.g`) |
+| `--gold-bg` / `--gold-line` | `#4a3d16` / `#a8862a` | Rare or perfect: 100% rings, ultra-rare unlocks, foil badges |
+| `--series-1` / `-2` / `-3` | `#3987e5` / `#c98500` / `#9085e9` | Chart series in this order (checked against `--card`); also the "rare" and "very rare" tiers |
+| `--lift` | `0 12px 28px rgb(0 0 0 / .55)` | Shadow for art lifted on hover, and floating tooltips |
 
 Rules:
-- **Three surface levels only:** `--bg` → `--card` → `--card2`. Depth comes from these steps, never from shadows. Shadows are only for things that float (drawer, menus, dialogs).
-- **Green means act or done.** Never decoration. Status uses tinted backgrounds with a matching border (`.badge.g`, `.ok`, `.err`, `.note`), never bright fills.
-- A section may re-tint `--accent` inside its own pages (`.my-page { --accent: ... }`), but surfaces and text never change.
+- **Three surface levels:** `--bg` → `--card` → `--card2`. Text cards get depth from these steps, never from shadows. Shadows are for floating things (drawer, menus, dialogs, tooltips) and art: a cover or banner has a small resting shadow and `var(--lift)` on hover.
+- **Blue means act or "you are here".** Focus ring, current tab, progress, hover border, the primary button. Never decoration. The accent is the same on every page; pages and sections never re-tint it or any other token.
+- **Status colours are tinted backgrounds with a matching border:** green for success and online (`.ok`, `.badge.g`), red for errors, `--info-*` for notes, gold for rare or perfect. Small labels on top of art ("Recent", a discount) may be solid so they read over any picture.
 - `color-scheme: dark` is already set, so scrollbars, inputs and date pickers are dark. Don't fight it.
-- No gradients, glows or borders-inside-borders. (Exceptions already in components: the progress bar fill, the drop-zone stripes.)
+- **Gradients only where they do a job:** scrims over art, bar and ring fills (`--btn` → `--accent`), gold foil, the drop-zone stripes. The only glow is gold, on ultra-rare unlocks. No borders inside borders.
 
 ---
 
 ## 6. Font, sizes and spacing
 
-**Font:** `var(--font)` = `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`. **Code/IDs:** `var(--mono)` = `ui-monospace, Consolas, monospace`. No web fonts, no icon fonts, no Font Awesome — they delay text and cost bytes. Icons are inline SVG or images from `/assets/img/icons/`.
+**Font:** `var(--font)` = `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`. **Code/IDs:** `var(--mono)` = `ui-monospace, Consolas, monospace`. No web fonts, no icon fonts, no Font Awesome — they delay text and cost bytes. Icons: see §8 Icons.
 
 | Text | Size / weight | Where it's set |
 |---|---|---|
-| Page title `h1.page-title` | `clamp(24px, 4vw, 34px)`, bold, line-height 1.2 | `global.css` |
+| Page title `h1.page-title` | `clamp(24px, 4vw, 34px)`, bold, line-height 1.2; on art add `text-shadow: 0 2px 12px rgb(0 0 0 / .6)` | `global.css` |
 | Hero / landing title | `clamp(26px, 5vw, 42px)` | `hero.css` |
+| Headline number (stat card) | `clamp(22px, 3vw, 28px)`, 700 | `.stat-card b` |
+| Section heading outside cards | 20px, bold; its count 14px `--muted` | `.sec-h` |
 | Card heading `.card h2` | 17px, 600, icon 22px | `components.css` |
-| Sub-heading inside a card `h3` | 15px | page CSS |
+| Sub-heading inside a card `h3` | 15px (name on a banner 17px) | page CSS |
 | Body text in `.page` | browser default (16px), line-height 1.5 | inherited — don't set it |
-| Lede `.page-lede` | body size, `--muted` | `global.css` |
-| Controls, rows, buttons, fields | 14px | `.btn`, `.rowi`, `.field` |
-| Small button, meta, breadcrumbs, counts | 13px, `--muted` | `.btn.small`, `.crumbs` |
-| Badges, pills, tile labels | 12px | `.badge`, `.tile span` |
+| Lede `.page-lede` | body size, `--muted` (`--text` at .85 opacity in a hero) | `global.css` |
+| Controls, rows, buttons, fields, tile names | 14px, names 600 | `.btn`, `.rowi`, `.field` |
+| Small button, meta, breadcrumbs, counts, stat labels | 13px, `--muted` | `.btn.small`, `.crumbs` |
+| Badges, pills, tile labels, cover meta | 12px | `.badge`, `.tile span` |
 | Code, IDs, raw data | `var(--mono)` 12–13px | `.mono`, `.tree` |
 
 Never set `font-family` or a body `font-size` in a page stylesheet. Use these sizes; don't invent 15.5px or 18px.
 
-**Spacing scale:** 4 · 6 · 8 · 10 · 12 · 16 · 20 · 24px. Nothing else.
+**Spacing scale:** 4 · 6 · 8 · 10 · 12 · 14 · 16 · 20 · 24 · 28px. Nothing else.
 
 | Thing | Value |
 |---|---|
-| Card padding | 16px |
-| Gap between cards | 16px (`.grid`, `.masonry`) |
-| Gap inside lists | 6px (`.rows`); 8px (`.tiles`, `.badges` 6px) |
+| Card padding | 16px (stat cards 14px 16px) |
+| Gap between cards and art | 16px (`.grid`, `.masonry`, covers) · stat cards 12px · achievement tiles 10px |
+| Gap inside lists | 6px (`.rows`, ranked lists); 8px (`.tiles`, `.badges` 6px) |
 | Title → lede → content | 4px → 20px (already set) |
-| Radius | `var(--radius)` 8px controls · `var(--radius-lg)` 12px cards · 999px pills |
+| Above / below a section heading | 28px / 12px |
+| Radius | 4px small art and avatars · `var(--radius)` 8px controls and covers · `var(--radius-lg)` 12px cards, banners, hero · 999px pills |
 | Content width | max 1280px, 16px side padding (`.page` does this) |
 
-**Numbers and dates:** `UI.num(n)` / `toLocaleString()` for numbers, `UI.ago(ms)` for "3 days ago" with the exact date in `title=""`, IDs in `.mono`. Counts go in the card heading: `<h2>Inventory <span class="n">36 stacks · 1,204 items</span></h2>`.
+**Numbers and dates:** `UI.num(n)` / `toLocaleString()` for numbers, `UI.ago(ms)` for "3 days ago" with the exact date in `title=""`, IDs in `.mono`. A rounded number ("2,140 hours") keeps the exact value in `title` ("2,140 h 12 min"). Counts go in the card heading: `<h2>Inventory <span class="n">36 stacks · 1,204 items</span></h2>`.
 
 ---
 
@@ -197,10 +223,12 @@ Never set `font-family` or a body `font-size` in a page stylesheet. Use these si
 
 **Do**
 - Build mobile-first at 320px, then let it grow.
-- Grids that choose their own columns: `grid-template-columns: repeat(auto-fill, minmax(260px, 1fr))` (`.grid`), `minmax(120px, 1fr)` for tiles, `columns: 3 340px` (`.masonry`) for mixed-height cards.
-- `auto-fit` instead of `auto-fill` when few items should stretch to fill the row (server detail columns).
-- `flex-wrap: wrap` on every toolbar and button row.
-- `clamp()` for headings and repeated UI sizes (the NBT viewer's `--s: clamp(30px, 8.6vw, 46px)` for slots).
+- Grids that choose their own columns: `grid-template-columns: repeat(auto-fill, minmax(260px, 1fr))` (`.grid`), `minmax(120px, 1fr)` for tiles, `columns: 3 340px` (`.masonry`) for mixed-height cards. Wrap wide minimums in `min(100%, …)` (`minmax(min(100%, 340px), 1fr)`) so one column never overflows at 320px.
+- Covers: `minmax(clamp(120px, 28vw, 168px), 1fr)`, so phones get 2 or 3 across.
+- `aspect-ratio` on every art card (2 / 3 covers, 16 / 7 banners, 16 / 10 shots) so the grid never jumps.
+- `auto-fit` instead of `auto-fill` when few items should stretch to fill the row (stat cards, server detail columns).
+- `flex-wrap: wrap` on every toolbar, button row and hero body. Hero tabs scroll sideways on their own (`overflow-x: auto`).
+- `clamp()` for headings, hero height and repeated UI sizes (the NBT viewer's `--s: clamp(30px, 8.6vw, 46px)` for slots).
 - `min-width: 0` on grid/flex children that hold text, plus `overflow: hidden; text-overflow: ellipsis; white-space: nowrap` on long names.
 - Panels sized `width: min(460px, 100vw)` — full-screen on phones for free.
 - Images: `width: 100%; height: auto; aspect-ratio: W / H` plus `width`/`height` attributes, so nothing jumps while loading.
@@ -211,9 +239,9 @@ Never set `font-family` or a body `font-size` in a page stylesheet. Use these si
 - Scroll the page sideways at any width. Ever.
 - Put fixed pixel widths on containers.
 - Make separate mobile and desktop markup, or sniff the user agent.
-- Hide anything essential behind hover.
+- Hide anything essential behind hover. Hover may add detail (last played, the full description), never the only copy of it.
 - Use `body { overflow: hidden }` or `100vh` on content pages.
-- Add a breakpoint "just in case". The header has one (900px); most pages need zero.
+- Add a breakpoint "just in case". The header has one (900px); most pages need zero; Steam needs two (480px, 560px) for its densest rows.
 
 Test widths: **320, 390, 768, 1366, 2560**.
 
@@ -232,10 +260,10 @@ Build with these before writing any CSS. If a page needs something new that othe
   <section class="card"><h2>Stats <span class="n">12</span></h2> ... </section>
 </div>
 
-<!-- headline numbers -->
+<!-- small numbers inside a card (the page's headline numbers are stat cards, §1) -->
 <div class="tiles"><div class="tile"><b>1,204</b><span>items</span></div></div>
 
-<!-- status labels: g=green r=red p=purple b=blue -->
+<!-- status labels: g=green (success, online) r=red p=purple b=blue -->
 <div class="badges"><span class="badge g">Online</span><span class="badge">Survival</span></div>
 
 <!-- row list with icon, text, value -->
@@ -270,14 +298,49 @@ Build with these before writing any CSS. If a page needs something new that othe
 
 <!-- raw JSON/NBT -->
 <div class="tree">...</div>
+
+<!-- table: always in .table-wrap; .num right-aligns numbers; .table-wrap.tall caps the height with a sticky header -->
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Item</th><th class="num">Count</th></tr></thead>
+  <tbody><tr><td>Glass</td><td class="num">3,456</td></tr></tbody>
+</table></div>
+
+<!-- form: each label wraps its text and field; .cols = side by side, stacks on phones -->
+<form class="form form-card">
+  <label>Player name <input class="field" name="player"></label>
+  <div class="cols">
+    <label>Dimension <select class="field"><option>Overworld</option></select></label>
+    <label>Amount <input class="field" type="number" inputmode="numeric" min="1" max="64" aria-invalid="true"><small>Enter a number from 1 to 64.</small></label>
+  </div>
+  <fieldset><legend>Show</legend><label class="check"><input type="radio" name="show" checked> All items</label></fieldset>
+  <label class="check"><input type="checkbox"> Remember these settings</label>
+  <div class="actions"><button class="btn primary">Save settings</button><button class="btn" type="reset">Reset</button></div>
+</form>
 ```
 
 Helpers: `.muted`, `.mono`, `.hide`. `global.css` also gives `.hub`/`.hub-card` (via `site_hub()`), `.crumbs`, `.page-title`, `.page-lede`.
 
+**Forms**
+- Every field sits inside its `<label>`, label text first (no `id` needed). A placeholder is only an example value, never the label.
+- One field per row by default; `.cols` only for short fields that belong together. Forms sit in `.form-card` (max 560px).
+- Mark optional fields "(optional)"; never asterisks on required ones.
+- `type="number"` + `inputmode`/`min`/`max` for numbers, `<select>` for more than 4 fixed choices, radios in a `<fieldset>` for 2 to 4, a `.check` checkbox for yes/no.
+- Errors: `aria-invalid="true"` on the field (red border) and what to fix in the label's `<small>`. Check on blur or send, not every key press. A failed send shows one `.err` above the buttons.
+- Tools that calculate update as you type (debounced) with no button. A button is for actions that send, save or take a while: the view's one `.primary`, a verb ("Save settings", not "Submit"), disabled with "Saving..." while working.
+- Buttons go last, in an `.actions` row, primary first.
+
+**Icons**
+- Only where they help people recognise something faster: outside services (GitHub, Discord, Steam), game items, and well-known controls (close, search, copy, menu). Never decoration on headings or buttons that already have clear text.
+- UI icons: inline SVG in `currentColor`; add new ones to `site_icon()` in `includes/functions.php` rather than pasting the same SVG into several pages.
+- Service logos: `/assets/img/icons/` (white 24×24 SVGs) as an `<img>` beside the name. Minecraft items: `/minecraft/tools/item-list/`, `image-rendering: pixelated` above 16px.
+- Sizes: 16px beside text and in buttons, 22px in card headings (automatic), 24px in row lists.
+- Icon-only buttons need `aria-label` and `title`; decorative icons get `alt=""` or `aria-hidden="true"`.
+- No icon fonts, no Font Awesome, no emoji as icons or in titles, headings, menus or buttons.
+
 **Page stylesheets** (`assets/css/pages/<section>-<name>.css`):
 - Start with a one-line comment naming the page.
-- Prefix every class with a short page tag (`.ftg-`, `.srv-`, `.dnd`) so nothing leaks.
-- Tokens only. No `transition: all`. No `!important` except to beat legacy styles.
+- Prefix every class with a short page tag (`.steam-`, `.nbt-`, `.srv-`) so nothing leaks. Page-only tokens get it too (`--steam-ingame`).
+- Tokens only. No `transition: all`. No `!important` except to beat legacy styles or for the `[hidden]` fix (§18).
 - A stylesheet another tab uses is shared — copy, don't edit (README §2).
 - A few lines of page CSS may sit in a `<style>` in `<head>` (servers page); anything over ~40 lines goes in a file so it caches.
 
@@ -327,7 +390,8 @@ Every PHP call to an external API is cached. Copy `dnd_get()` (`extras/dnd/index
 - **Filtering:** debounce input ~80ms (`UI.debounce`), then filter an in-memory array or toggle classes — don't re-fetch.
 - **State in the URL:** selected item in `location.hash` or a query param via `history.replaceState`, so links are shareable and reload keeps state. Private data (IPs, chat, passwords, seeds) never goes in a share link and stays click-to-reveal.
 - **Event delegation:** one listener on the container routing on `data-id` / `data-act`. No inline `onclick`.
-- **Images from APIs:** `loading="lazy" decoding="async"` past the first screenful (first ~9 eager), set `width`/`height`, and give a fallback (`onerror` → local placeholder) so there's never a broken-image icon.
+- **Images from APIs:** `loading="lazy" decoding="async"` past the first screenful (first ~6 covers eager), set `width`/`height`, and give a fallback so there's never a broken-image icon (Steam: try `data-alt` once, then hide the image so the card's name shows — `steam.js`).
+- **Hero art** is the biggest thing on screen: `fetchpriority="high"`, a `srcset` when there are sizes (NBT viewer), and `<link rel="preconnect">` to its host.
 - **Below-the-fold heavy blocks:** `content-visibility: auto; contain-intrinsic-size: auto 200px;`.
 
 ---
@@ -368,22 +432,40 @@ Every PHP call to an external API is cached. Copy `dnd_get()` (`extras/dnd/index
 | Use | Duration | Property |
 |---|---|---|
 | Hover/focus colour | `var(--fast)` 120ms | background, border-color, color |
+| Card lift on hover (stat cards, tiles, badges) | `var(--fast)` | `translateY(-2px)`, accent border |
+| Art lift on hover (covers, banners, shots) | `var(--base)` ease-out | `translateY(-3px)`, `var(--lift)` + 2px accent ring |
+| Art zoom inside its frame | `var(--base)` ease-out | `scale(1.03)` |
+| Cover tilt towards the pointer | `var(--base)` | up to 3° via `--rx`/`--ry` set by `steam.js`; only with `(hover: hover)` and no reduced motion |
+| Ranked row on hover | `var(--fast)` | `translateX(4px)` |
+| Chart part on hover | `var(--fast)` | the other parts fade to `opacity: .5` |
 | Press | 60ms | `translateY(1px)` |
 | Caret flip | 120ms | rotate |
 | Drawer/panel | `var(--base)` 180ms ease-out | transform |
 | Menu/dropdown | 120–150ms ease-out | opacity + 4px translate |
 | Scroll to section | browser default | `scrollIntoView({behavior: 'smooth'})` |
 
-Never: entrance/scroll-reveal animations, staggered cards, animating width/height/top/margin, `transition: all`, transitions over 200ms, colour flashes on hover. `global.css` already turns motion off for `prefers-reduced-motion`; loops you add in JS must check `matchMedia('(prefers-reduced-motion: reduce)')` too.
+Never: entrance/scroll-reveal animations, staggered cards, animating width/height/top/margin, `transition: all`, transitions over 200ms, colour flashes on hover. The one exception is the light sweep across Steam foil badges (0.7s, on hover only). `global.css` already turns motion off for `prefers-reduced-motion`; loops and tilts you add in JS must check `matchMedia('(prefers-reduced-motion: reduce)')` too.
 
 ---
 
-## 13. No clutter
+## 13. Writing and clutter
+
+**Writing: British English, plain words**
+- British spelling: colour, centre, organise, favourite, grey, licence (noun), metres.
+- Plain words, short sentences. No hype, jokes or exclamation marks in interface text (titles, ledes, labels, buttons, messages). A joke page's content can be silly; the interface around it stays plain.
+- Title Case for page titles and menu items (from `site.json`); sentence case for everything else (card headings, buttons, labels, tabs).
+- Buttons start with a verb and say what happens ("Copy link"). Never "OK", "Submit" or "Click here". Link text says where it goes.
+- No full stop on titles, headings, labels, buttons or `site.json` descriptions. Ledes, help text and messages are sentences and get one.
+- Digits with thousands commas (1,204), a space before units (64 MB, 5 min), dates as day month year (20 Oct 2026).
+- Talk to the reader as "you"; contractions are fine. Messages say what happened and what to do, without blame or error codes.
+
+**Clutter**
 
 - One job per page. One `.btn.primary` per view; everything else is a secondary button or a link.
-- One muted line under the title, not a paragraph. Help text is one muted line where it's needed.
-- Overview first → details on click (drawer, `<details>`, "Show all 312") → raw data last, collapsed.
-- No empty cards, no "0 results" headings, no "coming soon" sections (one compact prompt at most).
+- One line under the title, not a paragraph. Help text is one muted line where it's needed.
+- Text in cards, art on the page: text, tables and forms sit in `.card`s; stat rows and grids of covers, banners or tiles sit straight on the page under a section heading. Never a card around a grid of cards.
+- Overview first → details on click (drawer, `<details>`, "Show all 312", the item's own page) → raw data last, collapsed.
+- No empty cards, no "0 results" headings, no "coming soon" sections (one compact prompt at most). A stat card or section with no data is left out, not shown as 0.
 - No autoplay, no popups, no flashing on load (the flashing-colours page keeps its warning gate).
 - Muted text instead of extra headings or boxes.
 
@@ -392,9 +474,10 @@ Never: entrance/scroll-reveal animations, staggered cards, animating width/heigh
 ## 14. Accessibility and safety
 
 - One `<h1>`, headings in order. `<button>` for actions, `<a>` for navigation, never clickable `<div>`s.
-- Every input has a `<label>` or `aria-label`; every image has `alt` (`alt=""` if decorative).
-- Visible focus: `:focus-visible` ring in `--accent` is global for `.page` — never remove an outline without a replacement.
-- `aria-expanded` on toggles, `aria-hidden`/`tabindex="-1"` + focus on drawers, native `<dialog>` for modals (free focus trap and Esc).
+- Every input has a `<label>` or `aria-label`; every image has `alt` (`alt=""` if decorative, which art behind text always is).
+- Visible focus: `:focus-visible` ring in `--accent` is global for `.page` — never remove an outline without a replacement. Art cards show the same ring on focus as on hover.
+- Rings and charts carry their numbers in words: `role="img"` + `aria-label` ("14 of 40 achievements"), or `role="progressbar"` with values.
+- `aria-current="page"` on the current hero tab, `aria-pressed` on stat cards that switch a chart, `aria-expanded` on toggles, `aria-hidden`/`tabindex="-1"` + focus on drawers, native `<dialog>` for modals (free focus trap and Esc).
 - External links: `target="_blank" rel="noopener"`.
 - Escape all output (`h()`, `UI.esc()`), keys stay server-side, user files are parsed in the browser and only uploaded on an explicit action.
 
@@ -422,30 +505,45 @@ Full procedure: README §5 (portable PHP, your own port and Chrome debug port). 
 - [ ] Old URL redirected in `.htaccess` if it moved
 
 **Look**
-- [ ] `<main class="page">`, `h1.page-title`, one-line `p.page-lede`
-- [ ] Only components + a prefixed page stylesheet; only `var(--…)` colours; no `font-family`/body size
-- [ ] Sizes and spacing from §6; radius 8/12/999
+- [ ] `<main class="page yourtag">`, one `h1.page-title` with a one-line `.page-lede`, in a hero if the page has art
+- [ ] Pages with art: hero with scrim, stat cards, section headings over art grids, like `/games/steam/`
+- [ ] Only components (Steam pieces included) + a prefixed page stylesheet; only `var(--…)` colours apart from overlays on art; no `font-family`/body size
+- [ ] Sizes and spacing from §6; radius 4/8/12/999
 - [ ] One primary button; no empty sections; details behind a click
+- [ ] Tables in `.table-wrap`; every form field inside its label; icons only where they help
+- [ ] British spelling, plain words, sentence-case buttons and headings
 
 **Screens**
 - [ ] No sideways scroll at 320 / 390 / 1366 / 2560
-- [ ] Grids auto-fill; long names ellipsis; images have dimensions
+- [ ] Grids auto-fill; art has an `aspect-ratio`; long names ellipsis; images have dimensions
 
 **Speed**
 - [ ] Scripts deferred or at end of body; libraries loaded on use
 - [ ] External API calls cached server-side (or a public CORS API called from the browser)
-- [ ] Lazy images below the fold; big lists chunked
+- [ ] Hero art high priority; images past the first screen lazy; big lists chunked
 
 **Behaviour**
-- [ ] Loading, empty and error states all render sensibly
+- [ ] Loading, empty and error states all render sensibly; missing art falls back
 - [ ] Esc closes, `/` doesn't clash, keyboard can reach everything
 - [ ] All API/user text escaped; no keys in HTML; no `console.log`
-- [ ] Motion ≤ 200ms, transform/opacity only
+- [ ] Motion ≤ 200ms, transform/opacity only; tilt off for touch and reduced motion
+- [ ] Card links in text colour; `[hidden]` works with your `display` (§18)
 
 ---
 
 ## 17. Known gaps (fix when touching these files)
 
+- Pages that still hard-code the old green (`#4a9033`, `#2d4a24`, `#4f8a3a`) in their own `<style>`: `minecraft/projects/metro/`, `minecraft/projects/milestones/`, `minecraft/projects/rail-router/`, `minecraft/projects/map-art/frame-extractor/`. When you edit one, switch those to the blue tokens (`--btn`, `--btn-hover`, `--accent-soft`) or `--ok-*` where it means success.
 - `.htaccess` has no long-cache rule for `/assets` yet; it caches CSS/JS for a day. `asset()` already versions URLs, so `Cache-Control: public, max-age=31536000, immutable` on `/assets/` is safe to add.
 - `extras/dnd/cache/` (and `books/covers/bulk/cache/`) are not ignored as folders; `.gitignore` only lists three `char-*.json` names, so a new character's cache file can be committed by accident. Either ignore the folder or move the cache to `sys_get_temp_dir()` like Steam.
-- `plan.html` says body text is 15px; the live pages render the browser default 16px. This guide documents what's live — don't add per-page font sizes to "fix" it.
+
+---
+
+## 18. Traps (things the reference pages had to fix)
+
+- **Card links turn blue.** `.page a` colours every link. A whole cover or stat card that is an `<a>` needs `color: var(--text); text-decoration: none`. `components.css` already does this for the shared pieces (`a.cover-card`, `a.stat-card`…); your own card links need it too.
+- **`hidden` loses to your `display`.** An element with `display: flex`/`grid` in your CSS stays visible when a filter script sets `hidden`. Add `.yourtag [hidden] { display: none !important; }`.
+- **Text on art needs a scrim.** Never rely on the picture being dark: put a black gradient between art and text, and a text shadow on big titles.
+- **Art goes missing.** Try a second image once (`data-alt`), then hide the image so the card's name shows (`steam.js`). Never a broken-image icon.
+- **`url()` inside a custom property** resolves against the stylesheet that uses `var()`, not the page. Build absolute URLs in JS (the NBT viewer's `maskURL()`).
+- **A bare `button` in your markup** needs its own reset (`.nbt :where(button:not(.btn))`); `global.css` doesn't style bare elements, but browsers do.

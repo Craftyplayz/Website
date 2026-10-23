@@ -9,7 +9,7 @@
     if (!slides.length) return;
 
     const DWELL = 5000;   // how long a full-quality slide stays up
-    const FADE = 1500;    // matches .hero-stage img in home.css
+    const FADE = 500;     // matches .hero-stage img in hero.css
     const GRACE = 6000;   // first change only: how long past DWELL to wait before using the low copy
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -22,14 +22,8 @@
         : Promise.resolve();
 
     const lowUrl = (s) => s.src[0][1];
-    // smallest copy that covers the screen. Tall screens crop the sides (object-fit: cover), so
-    // their height decides too, but without the pixel ratio, or phones would pull 5K originals.
-    function fullUrl(s) {
-        const need = Math.max(innerWidth * Math.min(devicePixelRatio || 1, 2), innerHeight * s.a);
-        const full = s.src.length > 1 ? s.src.slice(1) : s.src; // never the low-quality placeholder
-        const hit = full.find(([w]) => w >= need);
-        return (hit || full[full.length - 1])[1];
-    }
+    // always the largest copy, whatever the screen size
+    const fullUrl = (s) => s.src[s.src.length - 1][1];
 
     // resolves with a decoded <img>, or null if it failed
     function load(url) {

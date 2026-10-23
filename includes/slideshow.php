@@ -19,15 +19,11 @@ function slideshow_slides()
     foreach (scandir(SITE_ROOT . $dir . 'screenshots-raw') ?: [] as $file) {
         if (!preg_match('/\.(png|webp|jpe?g)$/i', $file)) continue;
         $name = preg_replace('/\.[^.]+$/', '', $file);
-        if (isset($manifest[$name])) {
-            $info = $manifest[$name];
-            $src = [];
-            foreach ($info['sizes'] as $w) $src[] = [$w, $dir . 'screenshots-sizes/' . $w . '/' . rawurlencode($name) . '.webp'];
-            $slides[] = ['a' => round($info['w'] / $info['h'], 3), 'src' => $src];
-        } elseif (is_file(SITE_ROOT . $dir . 'screenshots/' . $name . '.webp')) {
-            // not resized yet: use the gallery's WebP rather than the raw PNG
-            $slides[] = ['a' => 1.78, 'src' => [[1920, $dir . 'screenshots/' . rawurlencode($name) . '.webp']]];
-        }
+        if (!isset($manifest[$name])) continue; // not resized yet: run slideshow-sizes.js
+        $info = $manifest[$name];
+        $src = [];
+        foreach ($info['sizes'] as $w) $src[] = [$w, $dir . 'screenshots-sizes/' . $w . '/' . rawurlencode($name) . '.webp'];
+        $slides[] = ['a' => round($info['w'] / $info['h'], 3), 'src' => $src];
     }
     shuffle($slides);
     return $slides;

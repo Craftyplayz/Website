@@ -14,6 +14,9 @@ const viewerDir = path.join(root, 'minecraft', 'tools', 'nbt-viewer');
 const CHROME = process.env.CHROME || ['C:/Program Files/Google/Chrome/Application/chrome.exe', '/usr/bin/google-chrome', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find((p) => fs.existsSync(p));
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'nbt-sync-'));
 
+// page_head() would link global.css, components.css and the page's own stylesheets; the stripped page gets them here
+const withCss = (src) => src.replace(/<\?php[\s\S]*?\?>/g, '').replace('</head>', ['/assets/css/global.css', '/assets/css/components.css', ...(src.match(/\/assets\/css\/pages\/[\w.-]+\.css/g) || [])].map((h) => `<link rel="stylesheet" href="${h}">`).join('') + '</head>');
+
 /* ---------- the pretend asset server ---------- */
 const sample = (f) => fs.readFileSync(path.join(viewerDir, 'Sampledata', f));
 const UUID = ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', '33333333-3333-4333-8333-333333333333'];
@@ -73,7 +76,7 @@ const server = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
         // the app lives in an IIFE - hand the tests a window into it
         const hook = 'window.__t = { get players() { return players; }, get active() { return active; }, get srvJob() { return srvJob; }, srvCache, srvValid, srvSync, store };';
-        return res.end(fs.readFileSync(file, 'utf8').replace(/<\?php[\s\S]*?\?>/g, '').replace(/\n    \}\)\(\);\r?\n/, `\n        ${hook}\n    })();\n`));
+        return res.end(withCss(fs.readFileSync(file, 'utf8')).replace(/\n    \}\)\(\);\r?\n/, `\n        ${hook}\n    })();\n`));
     }
     res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream' });
     fs.createReadStream(file).pipe(res);

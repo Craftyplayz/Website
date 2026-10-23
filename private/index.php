@@ -10,6 +10,7 @@ $sections = [
     'kindle' => 'KOReader control panel',
     'downloads' => 'Files for download',
     'scripts' => 'Small test scripts',
+    'gifs' => 'Meme GIF maker',
 ];
 ?>
 <!DOCTYPE html>

@@ -1,0 +1,70 @@
+/* Device Check (/tools/device-check/). */
+.dc-tabs { margin-bottom: 16px; }
+.dc-help { margin: 0 0 12px; font-size: 13px; }
+.dc-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.dc-row:has(> .btn:first-child) { justify-content: flex-start; }
+.dc-gap { margin-top: 12px; }
+.dc-gap:empty { display: none; }
+[data-panel] [hidden] { display: none; }
+
+/* shared click / draw area */
+.dc-area {
+    display: block; width: 100%; margin-bottom: 12px; padding: 16px; background: var(--card2); border: 1px dashed var(--line-strong);
+    border-radius: var(--radius); color: var(--text); font: inherit; user-select: none; -webkit-user-select: none;
+}
+.dc-area:focus-visible { border-color: var(--accent); }
+.dc-mouse .tile { background: var(--btn2); }
+.tile.on, .dc-mouse .tile.on { background: var(--accent-soft); outline: 1px solid var(--btn-line); }
+
+/* keyboard: 23 units wide (main 15 + nav 3 + numpad 4 + gaps), 15 when narrow */
+.dc-kb { container-type: inline-size; margin-bottom: 12px; overflow: hidden; }
+.dc-kbi { --u: calc(100cqw / 23); display: flex; gap: calc(var(--u) / 2); }
+.dc-block { display: grid; grid-auto-rows: var(--u); }
+.dc-krow { display: flex; }
+.dc-key, .dc-sp { flex: none; width: calc(var(--u) * var(--w, 1)); }
+.dc-key {
+    display: grid; place-items: center; overflow: hidden; border: calc(var(--u) * .06) solid transparent; background: var(--btn2);
+    background-clip: padding-box; border-radius: calc(var(--u) * .18); color: var(--muted); font-size: max(8px, calc(var(--u) * .3)); line-height: 1; white-space: nowrap;
+}
+.dc-key.hit { background-color: var(--accent-soft); color: var(--text); }
+.dc-key.down { background-color: var(--btn); color: #fff; }
+.dc-row .kv { min-width: 0; }
+@container (max-width: 700px) {
+    .dc-kbi { --u: calc(100cqw / 15); }
+    .dc-kbi .dc-block + .dc-block { display: none; }
+}
+
+/* click speed */
+.dc-cps { display: grid; place-items: center; min-height: 200px; font-size: 16px; cursor: pointer; touch-action: manipulation; }
+.dc-cps:disabled { cursor: default; }
+
+/* microphone */
+.dc-meter { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.dc-meter .progress { flex: 1; height: 12px; }
+.dc-meter .progress i { transition: none; }
+#micPlay { display: block; width: 100%; margin-top: 12px; }
+#micPlay[hidden] { display: none; }
+.dc-row .field { flex: 1 1 220px; min-width: 0; }
+
+/* webcam, mirrored like a mirror */
+.dc-video { display: block; width: 100%; max-height: 70svh; margin-top: 12px; background: var(--sunken); border-radius: var(--radius); transform: scaleX(-1); }
+
+/* touchscreen */
+.dc-touch { aspect-ratio: 4 / 3; max-height: 70svh; padding: 0; touch-action: none; cursor: crosshair; }
+
+/* dead pixels: colours are the content here */
+.dc-full { position: fixed; inset: 0; z-index: 3000; display: grid; place-items: center; cursor: none; }
+.dc-full span { padding: 8px 12px; background: rgba(0, 0, 0, .6); border-radius: var(--radius); color: #fff; font-size: 14px; transition: opacity var(--base); }
+.dc-full span.gone { opacity: 0; }
+
+/* controller */
+.dc-pad + .dc-pad { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.dc-pad h3 { margin: 0 0 8px; font-size: 15px; overflow-wrap: anywhere; }
+.dc-pad .tiles { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
+.dc-pad .tile { position: relative; overflow: hidden; text-align: center; }
+.dc-pad .tile i { position: absolute; inset: auto 0 0 0; height: 3px; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+.dc-sticks { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.dc-stick { position: relative; width: 96px; height: 96px; background: var(--card2); border: 1px solid var(--line); border-radius: 50%; }
+.dc-stick i { position: absolute; top: 50%; left: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; background: var(--accent); border-radius: 50%; }
+.dc-stick span { position: absolute; inset: auto 0 -20px; color: var(--muted); font-size: 12px; text-align: center; }
+.dc-sticks + .dc-row { margin-top: 28px; }

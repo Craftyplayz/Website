@@ -189,8 +189,20 @@ function site_footer($path = null, $crumbs = true)
     foreach ($data['links'] as $link) echo '<a href="' . h($link['url']) . '">' . h($link['title']) . '</a>';
     echo '<a href="/sitemap/">Sitemap</a>';
     echo '</nav>';
-    echo '<p class="sf-meta">© ' . date('Y') . ' CraftyPlayz<span class="sf-cat" id="catfact"></span></p>';
+    $fact = catfact_stored();
+    echo '<p class="sf-meta">© ' . date('Y') . ' CraftyPlayz<span class="sf-cat" id="catfact">' . ($fact !== '' ? h('Cat fact: ' . $fact) : '') . '</span></p>';
     echo '</footer>';
+}
+
+// The footer prints the last saved fact; includes/catfact.php replaces it with a fresh one after load.
+function catfact_file()
+{
+    return sys_get_temp_dir() . '/craftyplayz-catfact.txt';
+}
+
+function catfact_stored()
+{
+    return is_file(catfact_file()) ? (string) file_get_contents(catfact_file()) : '';
 }
 
 // <head> contents for new-style pages (see _templates/page.php)

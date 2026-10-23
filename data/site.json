@@ -15,8 +15,7 @@
                         { "title": "Nether Portal Converter", "url": "/minecraft/tools/nether-portal/", "description": "Convert Overworld and Nether coordinates", "keywords": ["coords", "portal"] },
                         { "title": "Storage Sorter", "url": "/minecraft/tools/storage-sorter/", "description": "Plan an item sorting system", "keywords": ["sorter", "items"] },
                         { "title": "Shulker Schematic Calculator", "url": "/minecraft/tools/shulker-calculator/", "description": "How many shulker boxes a schematic needs", "keywords": ["litematica", "schematic"] },
-                        { "title": "Material List to Sheets", "url": "/minecraft/tools/material-list/", "description": "Turn a Litematica material list into a spreadsheet", "keywords": ["litematica"] },
-                        { "title": "Litematica Material Converter", "url": "/minecraft/tools/litematica-converter/", "description": "Convert Litematica material lists for Google Sheets", "keywords": ["litematica"] },
+                        { "title": "Litematica Material Converter", "url": "/minecraft/tools/litematica-converter/", "description": "Stacks, shulker boxes and a Google Sheets copy of a Litematica material list", "keywords": ["litematica", "material list", "sheets", "spreadsheet"] },
                         { "title": "Item List", "url": "/minecraft/tools/item-list/", "description": "Every Minecraft item texture", "keywords": ["textures", "icons"] },
                         { "title": "Day Calculator", "url": "/minecraft/tools/day-calculator/", "description": "Work out the in-game day", "nav": false },
                         { "title": "Dynmap Marker Creator", "url": "/minecraft/tools/dynmap-marker/", "description": "Build Dynmap marker commands", "nav": false },
@@ -147,6 +146,8 @@
                 {
                     "title": "Tools",
                     "pages": [
+                        { "title": "Unit Converter", "url": "/tools/convert/", "description": "Convert length, weight, temperature, data, speed and more, or do a quick sum", "keywords": ["convert", "units", "calculator", "metric", "imperial", "mbps", "celsius", "fahrenheit", "kg", "lbs", "miles"] },
+                        { "title": "Device Check", "url": "/tools/device-check/", "description": "Test your keyboard, mouse, mic, speakers, webcam, screen and controller", "keywords": ["keyboard test", "mouse test", "mic test", "microphone", "webcam", "camera", "speaker", "dead pixel", "gamepad", "controller", "cps", "click speed", "touchscreen", "hardware"] },
                         { "title": "QR Code Generator", "url": "/tools/qr-code/", "description": "Make a QR code", "keywords": ["qr"] },
                         { "title": "Reading Speed Test", "url": "/tools/reading-speed/", "description": "How fast do you read?", "keywords": ["wpm", "speedtest"] },
                         { "title": "Secret Santa", "url": "/tools/secret-santa/", "description": "Encrypted Secret Santa pairings", "keywords": ["christmas"] },
@@ -203,6 +204,7 @@
                     "pages": [
                         { "title": "Memes", "url": "/extras/memes/", "description": "Memes" },
                         { "title": "Cat", "url": "/extras/memes/cat/", "description": "Cat", "nav": false },
+                        { "title": "6 7", "url": "/extras/67/", "description": "The 6 7 meme", "keywords": ["67", "six seven", "doot doot"] },
                         { "title": "Pets", "url": "/extras/pets/", "description": "People's pets", "keywords": ["photos"] },
                         { "title": "Pet", "url": "/extras/pets/pet/", "nav": false, "search": false }
                     ]
