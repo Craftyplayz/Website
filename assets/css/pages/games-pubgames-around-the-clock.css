@@ -1,0 +1,33 @@
+/* Around the Clock: darts tracker (games/pub-games/around-the-clock) */
+.atc [hidden] { display: none !important; }
+.atc .form-card, .atc-play { max-width: 640px; }
+.atc-play { display: grid; gap: 16px; }
+.atc > .card { margin-top: 16px; }
+.atc-names { display: grid; gap: 12px; }
+.atc-name-row { display: flex; align-items: flex-end; gap: 8px; }
+.atc-name-row label { flex: 1; min-width: 0; }
+.atc-turn h2, .atc-banner h2 { margin: 0 0 4px; }
+.atc-target { font-size: clamp(88px, 28vw, 160px); font-weight: 700; line-height: 1; text-align: center; color: var(--accent); font-variant-numeric: tabular-nums; }
+.atc-sub, .atc-thisturn { margin: 8px 0; text-align: center; }
+.atc-btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0 8px; }
+.atc-btn { justify-content: center; min-height: 56px; font-size: 16px; }
+.atc-miss { width: 100%; }
+.atc-msg { margin: 12px 0 0; }
+.atc-other { margin: 12px 0; }
+.atc-other summary { cursor: pointer; }
+.atc-seg { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 6px; }
+.atc-seg .btn { justify-content: center; min-height: 40px; }
+.atc-player { padding: 12px 0; border-top: 1px solid var(--line); }
+.atc-player:first-child { padding-top: 0; border-top: 0; }
+.atc-prow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.atc-prow .grow { flex: 1; }
+.atc-track { display: grid; grid-template-columns: repeat(auto-fill, minmax(26px, 1fr)); gap: 4px; }
+.atc-track i { display: grid; place-items: center; height: 26px; background: var(--card2); border: 1px solid var(--line); border-radius: 4px; color: var(--muted); font-size: 12px; font-style: normal; }
+.atc-track i.done { background: var(--btn); border-color: var(--btn-line); color: var(--text); }
+.atc-track i.now { background: var(--accent-soft); border-color: var(--accent); color: var(--text); }
+.atc-player.on .atc-prow b { color: var(--accent); }
+.atc-rules summary { cursor: pointer; font-size: 17px; font-weight: 600; }
+.atc-rules h3 { margin: 16px 0 6px; font-size: 15px; }
+.atc-rules ol, .atc-rules ul { padding-left: 20px; }
+.atc-rules-now-wrap { margin: 12px 0 0; }
+.atc-rules-now-wrap:has(.atc-rules-now:empty) { display: none; }
