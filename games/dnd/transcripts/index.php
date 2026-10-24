@@ -31,14 +31,16 @@ if ($s) {
                 <a href="/games/dnd/transcripts/">All sessions</a>
             </p>
 
-            <?php if ($s['audio']): ?>
-                <div class="bar tx-bar">
-                    <audio id="tx-audio" controls preload="metadata" src="data/<?= h($slug) ?>/audio.ogg"></audio>
-                </div>
-                <p class="muted tx-hint">Click a line to play the recording from there.</p>
-            <?php else: ?>
-                <p class="note">This session has no recording.</p>
-            <?php endif; ?>
+            <?php if (!$s['audio']): ?><p class="note">This session has no recording.</p><?php endif; ?>
+            <div class="bar tx-bar">
+                <?php if ($s['audio']): ?><audio id="tx-audio" controls preload="metadata" src="data/<?= h($slug) ?>/audio.ogg"></audio><?php endif; ?>
+                <input class="field tx-q" id="tx-q" type="search" placeholder="Search the transcript" aria-label="Search the transcript">
+                <button class="btn small" type="button" id="tx-prev" title="Previous match (Shift+Enter)">Previous</button>
+                <button class="btn small" type="button" id="tx-next" title="Next match (Enter)">Next</button>
+                <span class="muted tx-count" id="tx-count" role="status"></span>
+                <?php if ($s['audio']): ?><label class="check tx-follow"><input type="checkbox" id="tx-follow" checked> Follow along</label><?php endif; ?>
+            </div>
+            <?php if ($s['audio']): ?><p class="muted tx-hint">Click a line to play from there. Scrolling stops following; click a line or tick Follow along to resume.</p><?php endif; ?>
 
             <?php if ($summary !== ''): ?>
                 <details class="card tx-summary">
@@ -92,6 +94,11 @@ if ($s) {
                 const audio = document.getElementById('tx-audio');
                 const log = document.getElementById('tx-log');
                 const rows = [...log.children];
+                const texts = rows.map(r => r.querySelector('p').textContent);
+                const index = new Map(rows.map((r, i) => [r, i]));
+                const follow = document.getElementById('tx-follow');
+                const q = document.getElementById('tx-q');
+                const count = document.getElementById('tx-count');
                 let on = null;
 
                 function mark(row) {
@@ -111,8 +118,23 @@ if ($s) {
                 log.addEventListener('click', e => {
                     const row = e.target.closest('.tx-msg');
                     // selecting text to copy shouldn't restart the audio
-                    if (row && (e.target.closest('button') || !getSelection().toString())) jump(row, true);
+                    if (!row || (!e.target.closest('button') && getSelection().toString())) return;
+                    if (follow) follow.checked = true;
+                    jump(row, true);
                 });
+
+                // following: keep the line being spoken in the middle of the screen; scrolling by hand stops it
+                function centre() {
+                    if (!follow?.checked || !on) return;
+                    // glide to the next line, but jump straight there after a seek far away
+                    const far = Math.abs(on.getBoundingClientRect().top - innerHeight / 2) > innerHeight;
+                    on.scrollIntoView({ block: 'center', behavior: far ? 'auto' : 'smooth' });
+                }
+                if (follow) {
+                    for (const ev of ['wheel', 'touchmove']) addEventListener(ev, () => { if (!audio.paused) follow.checked = false; }, { passive: true });
+                    audio.addEventListener('play', centre);
+                    follow.addEventListener('change', centre);
+                }
 
                 if (audio) audio.addEventListener('timeupdate', () => {
                     // last row that started at or before the playhead (rows are in time order)
@@ -121,8 +143,62 @@ if ($s) {
                         const mid = (lo + hi + 1) >> 1;
                         if (+rows[mid].dataset.t <= t) lo = mid; else hi = mid - 1;
                     }
-                    if (rows[lo]) mark(rows[lo]);
+                    if (!rows[lo] || rows[lo] === on) return;
+                    mark(rows[lo]);
+                    if (!audio.paused) centre();
                 });
+
+                // search: mark every match, Enter / Next steps through them and moves the audio there too
+                let hits = [], cur = -1;
+
+                function highlight(i, term) {
+                    const p = rows[i].querySelector('p'), text = texts[i], low = text.toLowerCase();
+                    p.replaceChildren();
+                    let at = 0;
+                    for (let k = low.indexOf(term); k !== -1; k = low.indexOf(term, at)) {
+                        p.append(text.slice(at, k), Object.assign(document.createElement('mark'), { textContent: text.slice(k, k + term.length) }));
+                        at = k + term.length;
+                    }
+                    p.append(text.slice(at));
+                }
+
+                function search() {
+                    for (const r of hits) r.querySelector('p').textContent = texts[index.get(r)];
+                    const term = q.value.trim().toLowerCase();
+                    hits = [];
+                    cur = -1;
+                    if (term) texts.forEach((t, i) => {
+                        if (!t.toLowerCase().includes(term)) return;
+                        hits.push(rows[i]);
+                        highlight(i, term);
+                    });
+                    count.textContent = !term ? '' : hits.length ? hits.length + ' found' : 'Not found';
+                }
+
+                function step(dir) {
+                    if (!hits.length) return;
+                    if (cur === -1) {
+                        // first step of a search starts from the current line, not the top
+                        const at = on ? index.get(on) : -1;
+                        cur = dir > 0 ? hits.findIndex(r => index.get(r) > at) : hits.findLastIndex(r => index.get(r) < at);
+                        if (cur === -1) cur = dir > 0 ? 0 : hits.length - 1;
+                    } else cur = (cur + dir + hits.length) % hits.length;
+                    count.textContent = (cur + 1) + ' of ' + hits.length;
+                    hits[cur].scrollIntoView({ block: 'center' });
+                    jump(hits[cur], false);
+                }
+
+                let timer;
+                q.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(search, 150); });
+                q.addEventListener('keydown', e => {
+                    if (e.key !== 'Enter') return;
+                    e.preventDefault();
+                    clearTimeout(timer);
+                    if (!hits.length) search();
+                    step(e.shiftKey ? -1 : 1);
+                });
+                document.getElementById('tx-next').addEventListener('click', () => step(1));
+                document.getElementById('tx-prev').addEventListener('click', () => step(-1));
 
                 const start = location.hash && document.getElementById(location.hash.slice(1));
                 if (start && start.classList.contains('tx-msg')) {
