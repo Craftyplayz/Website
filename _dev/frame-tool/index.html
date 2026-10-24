@@ -145,12 +145,13 @@
                 status(it, 'Reading...');
                 try {
                     const r = await (await fetch('/probe?name=' + encodeURIComponent(it.file.name), { method: 'POST', body: it.file.slice(0, PROBE_BYTES) })).json();
+                    if (r.error) throw new Error(r.error);
                     it.duration = r.duration;
                     it.state = 'ready';
                     status(it, 'Ready');
-                } catch {
+                } catch (e) {
                     it.state = 'error';
-                    status(it, 'Reading failed. Is the tool still running?', 'bad');
+                    status(it, e instanceof TypeError ? 'Reading failed. Is the tool still running?' : e.message, 'bad');
                 }
                 render();
             }

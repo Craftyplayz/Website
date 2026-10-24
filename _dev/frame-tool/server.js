@@ -48,6 +48,15 @@ function grab(file, t, out) {
 const json = (res, code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); };
 const readJson = req => new Promise(r => { let b = ''; req.on('data', d => b += d); req.on('end', () => { try { r(JSON.parse(b)); } catch { r({}); } }); });
 
+// save a request body to a file; the temp folder is recreated if something cleared it while the tool runs
+function receive(req, file) {
+    fs.mkdirSync(TMP, { recursive: true });
+    return new Promise((resolve, reject) => req.pipe(fs.createWriteStream(file)).on('finish', resolve).on('error', e => {
+        req.resume(); // keep reading so the browser gets the error message instead of a dropped connection
+        reject(new Error('Could not save a working copy: ' + e.message));
+    }));
+}
+
 const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost');
     try {
@@ -60,7 +69,7 @@ const server = http.createServer(async (req, res) => {
         // (works for .mkv; an .mp4 that keeps its index at the end answers null until it's copied in full)
         if (req.method === 'POST' && url.pathname === '/probe') {
             const file = path.join(TMP, 'probe-' + Math.random().toString(36).slice(2) + path.extname(url.searchParams.get('name') || '').replace(/[^.\w]/g, ''));
-            await new Promise((resolve, reject) => req.pipe(fs.createWriteStream(file)).on('finish', resolve).on('error', reject));
+            await receive(req, file);
             const duration = await probe(file).catch(() => null);
             fs.unlinkSync(file);
             return json(res, 200, { duration: duration > 0 ? duration : null });
@@ -70,7 +79,7 @@ const server = http.createServer(async (req, res) => {
         if (req.method === 'POST' && url.pathname === '/upload') {
             const id = Math.random().toString(36).slice(2);
             const file = path.join(TMP, id + path.extname(url.searchParams.get('name') || '').replace(/[^.\w]/g, ''));
-            await new Promise((resolve, reject) => req.pipe(fs.createWriteStream(file)).on('finish', resolve).on('error', reject));
+            await receive(req, file);
             const duration = await probe(file).catch(e => { fs.unlinkSync(file); throw e; });
             if (!(duration > 0)) { fs.unlinkSync(file); throw new Error('Could not find the length of this video.'); }
             uploads.set(id, { file, duration });
