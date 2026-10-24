@@ -29,5 +29,5 @@
 | Fake Update Screens index | `extras/fake-updates/index.php` | Links to `windows10/`. |
 | Windows 10 Screens index | `extras/fake-updates/windows10/index.php` | Preview tiles of the 2 screens. |
 | Cyberpunk 2077 | `extras/cyberpunk/index.php` | A small page. |
-| D&D Character | `extras/dnd/index.php` | Uses `dnd.css`. It reads `/extras/examples/dndcharacter.json`, which has never existed; ask the user. |
+| D&D Character | `games/dnd/characters/index.php` | Uses `dnd.css`. It reads `/extras/examples/dndcharacter.json`, which has never existed; ask the user. |
 | Bee Movie | `extras/bee-movie/index.php` | The whole script, about 4,000 lines. Only the surrounding layout needs restyling. |

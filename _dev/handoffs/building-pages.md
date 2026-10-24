@@ -14,7 +14,7 @@ Session rules (ports, git, staying inside your tab) are in `README.md` next to t
 | Long text / transcript | `/minecraft/projects/life-series/season-1/session-1/` | one `<pre>` in a page stylesheet, link back in the lede |
 | Hub (section landing) | `/minecraft/index.php` | hero + `site_hub()` cards straight from `site.json` |
 | Server-fetched API, one value | `/extras/facts/` | PHP fetches, renders, shows `.err` on failure |
-| Server-fetched API, cached | `/games/steam/` + `steam.php`, `/extras/dnd/` | disk cache, stale fallback, parallel `curl_multi`, keys server-side |
+| Server-fetched API, cached | `/games/steam/` + `steam.php`, `/games/dnd/characters/` | disk cache, stale fallback, parallel `curl_multi`, keys server-side |
 | Browser-fetched API | `/games/free/`, `/minecraft/servers/` | loading note → grid, sticky `.bar` filters, drawer details, polling |
 
 ---
@@ -359,7 +359,7 @@ Pick the pattern by where the data can come from:
 
 ### 9a. Server-side fetch with a disk cache
 
-Every PHP call to an external API is cached. Copy `dnd_get()` (`extras/dnd/index.php`) or `steam_fetch()` (`games/steam/steam.php`); they already do all of this:
+Every PHP call to an external API is cached. Copy `dnd_get()` (`games/dnd/characters/index.php`) or `steam_fetch()` (`games/steam/steam.php`); they already do all of this:
 
 - **Cache file** keyed by `md5($url)` so keys never appear in file names. Store it in `sys_get_temp_dir() . '/craftyplayz-<name>'` (like Steam) so nothing lands in the repo. If it must live in the page folder, add the folder to `.gitignore`.
 - **Lifetime per data type:** live status 5 min · profiles/characters 10 min · libraries 1 h · rules/catalogue data 1 day.
@@ -535,7 +535,7 @@ Full procedure: README §5 (portable PHP, your own port and Chrome debug port). 
 
 - Pages that still hard-code the old green (`#4a9033`, `#2d4a24`, `#4f8a3a`) in their own `<style>`: `minecraft/projects/metro/`, `minecraft/projects/milestones/`, `minecraft/projects/rail-router/`, `minecraft/projects/map-art/frame-extractor/`. When you edit one, switch those to the blue tokens (`--btn`, `--btn-hover`, `--accent-soft`) or `--ok-*` where it means success.
 - `.htaccess` has no long-cache rule for `/assets` yet; it caches CSS/JS for a day. `asset()` already versions URLs, so `Cache-Control: public, max-age=31536000, immutable` on `/assets/` is safe to add.
-- `extras/dnd/cache/` (and `books/covers/bulk/cache/`) are not ignored as folders; `.gitignore` only lists three `char-*.json` names, so a new character's cache file can be committed by accident. Either ignore the folder or move the cache to `sys_get_temp_dir()` like Steam.
+- `games/dnd/characters/cache/` (and `books/covers/bulk/cache/`) are not ignored as folders; `.gitignore` only lists three `char-*.json` names, so a new character's cache file can be committed by accident. Either ignore the folder or move the cache to `sys_get_temp_dir()` like Steam.
 
 ---
 

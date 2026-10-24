@@ -63,6 +63,7 @@ RedirectMatch 301 ^/steam/gamer(/.*)?$ /games/steam/
 RedirectMatch 301 ^/tools/random/image2(\.php)?$ /tools/random/image/
 RedirectMatch 301 ^/Code/transcripts/index2(\.php)?$ /private/transcripts/
 RedirectMatch 301 ^/extras/thegame/temp(/.*)?$ /games/the-game/
+RedirectMatch 301 ^/extras/dnd(/.*)?$ /games/dnd/characters$1
 RedirectMatch 301 ^/books/hannah(\.php)?$ /books/
 # Personal pages moved to the password-protected /private/
 RedirectMatch 301 ^/Code/(bs|transcripts|downloads)(/.*)?$ /private/$1$2
