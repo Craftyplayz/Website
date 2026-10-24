@@ -860,7 +860,7 @@ async function checkVpn() {
     }
     setOpenLabel();
 }
-setInterval(() => { if (!document.hidden) checkVpn(); }, 10000);
+setInterval(() => { if (!document.hidden) checkVpn(); }, 3000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) checkVpn(); });
 $('open').addEventListener('click', e => {
     if (onVpn) return;
