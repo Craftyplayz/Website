@@ -68,13 +68,21 @@
             </div>
         </section>
 
+        <form class="card" id="pathform">
+            <label>Folder or video on this PC
+                <input class="field" id="path" placeholder="E:\media\tv\Game of Thrones" spellcheck="false">
+                <small>Fastest: videos are read where they are, nothing is copied. In Explorer, Shift + right-click a folder › Copy as path.</small>
+            </label>
+            <div class="actions" style="margin-top:10px"><button class="btn">Add</button><span class="total" id="pathmsg" role="status"></span></div>
+        </form>
+
         <div class="drop" id="drop">
-            <span>Drop video files or folders here</span>
+            <span>Or drop video files or folders here (each video is copied while its frames are taken)</span>
             <div class="actions">
                 <label class="btn small" style="display:inline-block;color:var(--text)">Choose videos <input id="files" type="file" accept="video/*,.mkv,.avi,.m4v" multiple hidden></label>
                 <label class="btn small" style="display:inline-block;color:var(--text)">Choose folder <input id="folder" type="file" webkitdirectory multiple hidden></label>
             </div>
-            <small>Videos from a folder keep their folders: output\Game of Thrones\Season 1\Episode 5\</small>
+            <small>Videos from a folder keep their folders: Z:\web\videoframegame\Game of Thrones\Season 1\Episode 5\</small>
         </div>
         <p class="total" id="skipped" hidden></p>
 
@@ -178,7 +186,8 @@
 
             const VIDEO = /\.(mp4|mkv|avi|mov|m4v|webm|wmv|flv|ts|m2ts|mpg|mpeg|3gp)$/i;
 
-            // entries: [File, folder path relative to what was picked ('' for loose files)]; anything not a video is skipped
+            // entries: [File (or {name}), folder path relative to what was picked ('' for loose files), known?]
+            // known = { id, duration } for videos the tool reads from disk itself; anything not a video is skipped
             function add(entries) {
                 // in folder and episode order (Season 2 after Season 1, E10 after E9), whatever order the browser lists them
                 const key = ([f, folder]) => folder + '/' + f.name;
@@ -186,8 +195,8 @@
                 const skipped = entries.length - videos.length;
                 $('skipped').hidden = !skipped;
                 $('skipped').textContent = `Skipped ${skipped} file${skipped === 1 ? '' : 's'} that ${skipped === 1 ? "isn't a video" : "aren't videos"}.`;
-                for (const [file, folder] of videos) {
-                    const it = { file, folder, state: 'probing' };
+                for (const [file, folder, known] of videos) {
+                    const it = { file, folder, state: known ? 'ready' : 'probing', ...known };
                     const row = document.createElement('div');
                     row.className = 'row';
                     row.innerHTML = '<div class="name"><small hidden></small><input class="field" aria-label="Episode name (folder name)" title="Episode name, used as the folder name"></div><span class="meta"></span><span class="status"></span><button class="close" type="button" aria-label="Remove" title="Remove">&times;</button><div class="bar" hidden><i></i></div>';
@@ -204,10 +213,30 @@
                     it.row = row;
                     items.push(it);
                     $('list').append(row);
-                    probing = probing.then(() => items.includes(it) ? probe(it) : null);
+                    if (known) status(it, 'Ready');
+                    else probing = probing.then(() => items.includes(it) ? probe(it) : null);
                 }
                 render();
             }
+
+            $('pathform').addEventListener('submit', async e => {
+                e.preventDefault();
+                const p = $('path').value.trim().replace(/^"|"$/g, ''); // "Copy as path" adds quotes
+                if (!p) return;
+                const btn = e.submitter || $('pathform').querySelector('button');
+                btn.disabled = true;
+                $('pathmsg').textContent = 'Reading the folder...';
+                try {
+                    const r = await (await fetch('/scan', { method: 'POST', body: JSON.stringify({ path: p }) })).json();
+                    if (r.error) throw new Error(r.error);
+                    add([...r.videos.map(v => [{ name: v.file }, v.folder, { id: v.id, duration: v.duration }]), ...r.others.map(n => [{ name: n }, ''])]);
+                    $('pathmsg').textContent = r.videos.length ? `Added ${r.videos.length} video${r.videos.length > 1 ? 's' : ''}.` : 'No videos found there.';
+                    $('path').value = '';
+                } catch (x) {
+                    $('pathmsg').textContent = x instanceof TypeError ? 'Is the tool still running?' : x.message;
+                }
+                btn.disabled = false;
+            });
 
             async function extract(it, s) {
                 if (!it.id && !await upload(it)) return;
