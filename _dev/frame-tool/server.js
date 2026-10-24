@@ -1,6 +1,6 @@
 // Local web UI that turns video files into still frames (1 every N seconds) for the episode guessing game.
 // Run: node _dev/frame-tool/server.js   then open http://localhost:8200
-// Needs ffmpeg + ffprobe (winget install Gyan.FFmpeg). Frames land in _dev/frame-tool/output/<episode>/0001.jpg.
+// Needs ffmpeg + ffprobe (winget install Gyan.FFmpeg). Frames land in Z:\web\videoframegame\<folders>\<episode>\0001.jpg.
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -8,7 +8,7 @@ const os = require('node:os');
 const { spawn, execFile } = require('node:child_process');
 
 const PORT = 8200;
-const OUT = path.join(__dirname, 'output');
+const OUT = String.raw`Z:\web\videoframegame`;
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'frame-tool-'));
 const uploads = new Map(); // id -> { file, duration }
 
@@ -28,6 +28,9 @@ function times(duration, interval, start, end) {
 
 // folder name for an episode: no path separators or characters Windows rejects
 const safe = name => String(name).replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').replace(/^[.\s]+|[.\s]+$/g, '').slice(0, 100) || 'episode';
+
+// same list as the page
+const VIDEO = /\.(mp4|mkv|avi|mov|m4v|webm|wmv|flv|ts|m2ts|mpg|mpeg|3gp)$/i;
 
 function probe(file) {
     return new Promise((resolve, reject) => execFile(FFPROBE, ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', file],
@@ -63,6 +66,42 @@ const server = http.createServer(async (req, res) => {
         if (req.method === 'GET' && url.pathname === '/') {
             res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
             return fs.createReadStream(path.join(__dirname, 'index.html')).pipe(res);
+        }
+
+        // a folder or video path on this PC: list its videos (subfolders too) and read them in place, no copying
+        if (req.method === 'POST' && url.pathname === '/scan') {
+            const given = String((await readJson(req)).path || '').trim();
+            if (!given) return json(res, 400, { error: 'Type a folder or video path.' });
+            const root = path.resolve(given);
+            let stat;
+            try { stat = fs.statSync(root); } catch { return json(res, 400, { error: 'Nothing found at ' + root }); }
+            const found = [], others = [];
+            const walk = (dir, rel) => {
+                for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+                    const full = path.join(dir, e.name);
+                    if (e.isDirectory()) walk(full, rel ? rel + '/' + e.name : e.name);
+                    else if (VIDEO.test(e.name)) found.push({ full, file: e.name, folder: rel });
+                    else others.push(e.name);
+                }
+            };
+            // the picked folder's own name is kept, like the browser folder picker: Game of Thrones/Season 1
+            if (stat.isDirectory()) walk(root, path.basename(root));
+            else if (VIDEO.test(root)) found.push({ full: root, file: path.basename(root), folder: '' });
+            else return json(res, 400, { error: "That file isn't a video." });
+
+            let next = 0;
+            const videos = [];
+            await Promise.all(Array.from({ length: 4 }, async () => {
+                while (next < found.length) {
+                    const v = found[next++];
+                    const duration = await probe(v.full).catch(() => 0);
+                    if (!(duration > 0)) { others.push(v.file); continue; }
+                    const id = Math.random().toString(36).slice(2);
+                    uploads.set(id, { file: v.full, duration, local: true });
+                    videos.push({ id, file: v.file, folder: v.folder, duration });
+                }
+            }));
+            return json(res, 200, { videos, others });
         }
 
         // length of a video from its first few MB, so a whole show can be counted without copying it
@@ -110,8 +149,11 @@ const server = http.createServer(async (req, res) => {
             };
             try {
                 await Promise.all(Array.from({ length: Math.min(4, os.cpus().length) }, worker));
-                fs.unlinkSync(up.file);
-                uploads.delete(id);
+                // only the tool's own copies are deleted, never a video read where it is on disk
+                if (!up.local) {
+                    fs.unlinkSync(up.file);
+                    uploads.delete(id);
+                }
                 res.end(JSON.stringify({ finished: true, folder: dir }) + '\n');
             } catch (e) {
                 res.end(JSON.stringify({ error: e.message }) + '\n');
