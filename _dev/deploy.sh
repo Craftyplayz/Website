@@ -29,7 +29,7 @@ comm -23 "$tmp/local" "$tmp/remote" | cut -f2 > "$tmp/upload"
 
 last=$("${SSH[@]}" "cat $STAMP 2>/dev/null" || true)
 if [ -n "$last" ] && git cat-file -e "$last^{commit}" 2>/dev/null; then
-  git -c core.quotepath=false diff --name-only --diff-filter=D "$last" HEAD | grep -vxFf "$tmp/skip" > "$tmp/delete" || true
+  git -c core.quotepath=false diff --no-renames --name-only --diff-filter=D "$last" HEAD | grep -vxFf "$tmp/skip" > "$tmp/delete" || true
 else
   echo "No deploy record on the server yet: files deleted in git won't be removed this time."
   : > "$tmp/delete"
