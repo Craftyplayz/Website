@@ -47,6 +47,10 @@
         .row .status.bad { color: #f0a0a0; white-space: normal; }
         .row .bar { grid-column: 1 / -1; height: 4px; background: var(--btn2); border-radius: 2px; overflow: hidden; }
         .row .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--btn), var(--accent)); }
+        .dock { position: sticky; bottom: 0; display: grid; gap: 10px; padding: 12px 0 16px; background: rgb(32 32 32 / .96); border-top: 1px solid var(--line); }
+        .overall { display: grid; gap: 6px; }
+        .overall-bar { height: 10px; background: var(--btn2); border-radius: 5px; overflow: hidden; }
+        .overall-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--btn), var(--accent)); transition: width .2s; }
         .close { background: none; border: 0; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 6px; border-radius: 4px; }
         .close:hover { color: var(--text); background: var(--btn2); }
         .err { padding: 10px 14px; border-radius: 8px; background: var(--danger-bg); border: 1px solid var(--danger-line); font-size: 14px; }
@@ -88,13 +92,20 @@
 
         <div class="list" id="list"></div>
 
-        <div class="actions">
-            <span class="total" id="total"></span>
-            <span style="flex:1"></span>
-            <button class="btn" id="open" type="button">Open output folder</button>
-            <button class="btn primary" id="go" type="button" disabled>Extract frames</button>
+        <!-- stays at the bottom of the window, so total progress shows however long the list gets -->
+        <div class="dock">
+            <div class="overall" id="overall" hidden>
+                <div class="overall-bar" role="progressbar" aria-label="Total progress" aria-valuemin="0" aria-valuemax="100"><i></i></div>
+                <span class="total" id="eta" role="status"></span>
+            </div>
+            <div class="actions">
+                <span class="total" id="total"></span>
+                <span style="flex:1"></span>
+                <button class="btn" id="open" type="button">Open output folder</button>
+                <button class="btn primary" id="go" type="button" disabled>Extract frames</button>
+            </div>
+            <p class="err" id="err" hidden></p>
         </div>
-        <p class="err" id="err" hidden></p>
     </main>
 
     <script>
@@ -256,7 +267,11 @@
                         buf = lines.pop();
                         for (const l of lines) {
                             last = JSON.parse(l);
-                            if (last.total) status(it, last.done + ' / ' + last.total, '', last.done / last.total * 100);
+                            if (last.total) {
+                                status(it, last.done + ' / ' + last.total, '', last.done / last.total * 100);
+                                it.done = last.done;
+                                overall();
+                            }
                         }
                     }
                     if (buf.trim()) last = JSON.parse(buf);
@@ -270,6 +285,30 @@
                 }
             }
 
+            // total progress for the current run; the time left uses only the last ~5 seconds of speed
+            let run = null; // { items, s, samples: [[ms, framesDone]], t0 }
+            const dur = sec => { sec = Math.round(sec); return sec < 60 ? sec + ' s' : sec < 3600 ? Math.round(sec / 60) + ' min' : Math.floor(sec / 3600) + ' h ' + Math.round(sec % 3600 / 60) + ' min'; };
+
+            function overall() {
+                if (!run) return;
+                let done = 0, total = 0;
+                for (const it of run.items) {
+                    const n = it.duration ? count(it.duration, run.s) : 0;
+                    total += n;
+                    done += it.state === 'done' ? n : Math.min(it.done || 0, n);
+                }
+                const now = performance.now();
+                run.samples.push([now, done]);
+                while (run.samples.length > 2 && now - run.samples[1][0] >= 5000) run.samples.shift();
+                const [t0, d0] = run.samples[0];
+                const rate = (done - d0) / ((now - t0) / 1000);
+                const pct = total ? done / total * 100 : 0;
+                $('overall').querySelector('i').style.width = pct + '%';
+                $('overall').firstElementChild.setAttribute('aria-valuenow', Math.round(pct));
+                const left = !run.finished && rate > 0 && now - t0 > 1500 ? ' · about ' + dur((total - done) / rate) + ' left' : run.finished ? '' : ' · working out time left...';
+                $('eta').textContent = `${done.toLocaleString()} / ${total.toLocaleString()} frames · ${Math.floor(pct)}%${left}` + (run.finished ? ' · finished in ' + dur((now - run.t0) / 1000) : '');
+            }
+
             $('go').addEventListener('click', async () => {
                 const s = settings();
                 if (!s) return;
@@ -278,7 +317,17 @@
                 $('err').hidden = true;
                 $('go').disabled = true;
                 $('go').textContent = 'Extracting...';
-                for (const it of items) if (it.state === 'ready' && (!it.duration || count(it.duration, s) > 0)) await extract(it, s);
+                // 3 videos at a time keeps the tool's ffmpeg pool busy while one video starts or finishes
+                const todo = items.filter(it => it.state === 'ready' && (!it.duration || count(it.duration, s) > 0));
+                for (const it of todo) it.done = 0;
+                run = { items: [...todo], s, samples: [], t0: performance.now() };
+                $('overall').hidden = false;
+                overall();
+                const tick = setInterval(overall, 1000); // keeps the time left moving between frames
+                await Promise.all(Array.from({ length: 3 }, async () => { while (todo.length) await extract(todo.shift(), s); }));
+                clearInterval(tick);
+                run.finished = true;
+                overall();
                 $('go').textContent = 'Extract frames';
                 render();
             });
