@@ -7,7 +7,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { spawn, execFile } = require('node:child_process');
 
-const PORT = 8200;
+const PORT = +process.env.PORT || 8200;
 const OUT = String.raw`Z:\web\videoframegame`;
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'frame-tool-'));
 const uploads = new Map(); // id -> { file, duration }
@@ -37,7 +37,20 @@ function probe(file) {
         (err, out) => err ? reject(new Error("Couldn't read this file. Is it a video?")) : resolve(parseFloat(out))));
 }
 
-function grab(file, t, out) {
+// one pool of ffmpeg processes shared by every video being extracted, one per CPU thread
+// (measured on a 10-bit HEVC 1080p clip: 16 processes beat 4 by ~35%, and beat fewer multi-threaded ones)
+const JOBS = os.cpus().length;
+let running = 0;
+const waiting = [];
+const slot = () => new Promise(ok => running < JOBS ? (running++, ok()) : waiting.push(ok));
+const release = () => { const next = waiting.shift(); next ? next() : running--; };
+
+async function grab(file, t, out) {
+    await slot();
+    try { await grabNow(file, t, out); } finally { release(); }
+}
+
+function grabNow(file, t, out) {
     return new Promise((resolve, reject) => {
         // -ss before -i seeks fast; ffmpeg then decodes to the exact time
         const p = spawn(FFMPEG, ['-hide_banner', '-loglevel', 'error', '-ss', String(t), '-i', file, '-frames:v', '1', '-vf', 'scale=960:-2', '-q:v', '5', '-y', out]);
@@ -148,7 +161,7 @@ const server = http.createServer(async (req, res) => {
                 }
             };
             try {
-                await Promise.all(Array.from({ length: Math.min(4, os.cpus().length) }, worker));
+                await Promise.all(Array.from({ length: Math.min(JOBS, list.length) }, worker));
                 // only the tool's own copies are deleted, never a video read where it is on disk
                 if (!up.local) {
                     fs.unlinkSync(up.file);
