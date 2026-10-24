@@ -20,6 +20,41 @@ if (isset($_GET['save'])) {
     exit;
 }
 
+// Is this request coming from a PIA server? Same list and cache file as /tools/vpn-check/.
+function booru_on_pia()
+{
+    $path = sys_get_temp_dir() . '/craftyplayz-pia/ips.json';
+    $ips = is_file($path) ? json_decode((string)@file_get_contents($path), true) : null;
+    if (!$ips || time() - filemtime($path) >= 86400) {
+        $ch = curl_init('https://serverlist.piaservers.net/vpninfo/servers/v6');
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_CONNECTTIMEOUT => 5, CURLOPT_TIMEOUT => 10, CURLOPT_ENCODING => '']);
+        // the JSON is the first line; a signature follows it
+        $json = json_decode(strtok((string)curl_exec($ch), "\n"), true);
+        $fresh = [];
+        foreach ($json['regions'] ?? [] as $r) foreach ($r['servers'] ?? [] as $list) foreach ($list as $s) if (!empty($s['ip'])) $fresh[$s['ip']] = $r['name'];
+        if ($fresh) {
+            @mkdir(dirname($path), 0755, true);
+            @file_put_contents($path, json_encode($fresh), LOCK_EX);
+            $ips = $fresh;
+        }
+    }
+    if (!$ips) return null;
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    if (isset($ips[$ip])) return true;
+    if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) return false;
+    // same /24 counts: the list only shows some of PIA's servers at a time
+    $block = substr($ip, 0, strrpos($ip, '.') + 1);
+    foreach ($ips as $k => $_) if (strpos($k, $block) === 0) return true;
+    return false;
+}
+
+if (isset($_GET['vpn'])) {
+    header('Content-Type: application/json');
+    header('Cache-Control: no-store');
+    echo json_encode(['pia' => booru_on_pia()]);
+    exit;
+}
+
 $saved = (object)['groups' => new stdClass(), 'presets' => new stdClass()];
 if (is_file($dataFile)) {
     $d = json_decode((string)file_get_contents($dataFile));
@@ -114,6 +149,12 @@ if (is_file($dataFile)) {
         td { border-top: 1px solid var(--border); padding: 6px 4px; vertical-align: top; }
         td:first-child { white-space: nowrap; }
         .status { font-size: .78rem; color: var(--muted); }
+        .btn.primary.novpn { background: var(--exc); border-color: var(--exc); }
+        dialog { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 20px; max-width: min(400px, calc(100vw - 32px)); }
+        dialog::backdrop { background: rgba(0,0,0,.5); }
+        dialog h2 { margin: 0 0 8px; font-size: 1.1rem; }
+        dialog p { margin: 0 0 16px; color: var(--muted); font-size: .9rem; }
+        dialog .actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
     </style>
 </head>
 <body>
@@ -254,6 +295,15 @@ if (is_file($dataFile)) {
         <div id="warn"></div>
     </div>
 </div>
+
+<dialog id="vpnDlg">
+    <h2>Connect to a VPN first</h2>
+    <p>Your IP isn't one of PIA's servers. Turn on PIA, or search anyway without it.</p>
+    <div class="actions">
+        <button class="btn" id="vpnCancel" type="button">Cancel</button>
+        <button class="btn" id="vpnOverride" type="button">Search without VPN</button>
+    </div>
+</dialog>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -575,7 +625,7 @@ function applySite() {
         : `${site.name} has no artist:/character:/copyright: prefixes, so these are added as normal tags.`;
     $('favLabel').textContent = site.fav.label;
     $('fav').placeholder = site.fav.placeholder;
-    $('open').textContent = 'Search ' + site.name;
+    setOpenLabel();
 
     const current = $('sort').value;
     $('sort').innerHTML = '<option value="">Default order</option>' +
@@ -793,6 +843,34 @@ $('reset').onclick = () => {
     if (!confirm('Clear the whole query?')) return;
     applyState({ site: $('site').value });
     $('presetSel').value = '';
+};
+
+// VPN guard: the Search button only works on a PIA IP (null = couldn't check, treated as off)
+let onVpn = <?= json_encode(booru_on_pia()) ?>;
+function setOpenLabel() {
+    $('open').textContent = onVpn ? 'Search ' + site.name : 'Connect with a VPN first';
+    $('open').classList.toggle('novpn', !onVpn);
+}
+async function checkVpn() {
+    try {
+        const res = await fetch('?vpn=1', { cache: 'no-store' });
+        onVpn = (await res.json()).pia;
+    } catch (e) {
+        onVpn = null;
+    }
+    setOpenLabel();
+}
+setInterval(() => { if (!document.hidden) checkVpn(); }, 10000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkVpn(); });
+$('open').addEventListener('click', e => {
+    if (onVpn) return;
+    e.preventDefault();
+    $('vpnDlg').showModal();
+});
+$('vpnCancel').onclick = () => $('vpnDlg').close();
+$('vpnOverride').onclick = () => {
+    $('vpnDlg').close();
+    window.open($('open').href, '_blank', 'noopener,noreferrer');
 };
 
 renderPresets();
