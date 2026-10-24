@@ -56,7 +56,17 @@ const server = http.createServer(async (req, res) => {
             return fs.createReadStream(path.join(__dirname, 'index.html')).pipe(res);
         }
 
-        // the browser streams a video here; we keep it in a temp folder until its frames are extracted
+        // length of a video from its first few MB, so a whole show can be counted without copying it
+        // (works for .mkv; an .mp4 that keeps its index at the end answers null until it's copied in full)
+        if (req.method === 'POST' && url.pathname === '/probe') {
+            const file = path.join(TMP, 'probe-' + Math.random().toString(36).slice(2) + path.extname(url.searchParams.get('name') || '').replace(/[^.\w]/g, ''));
+            await new Promise((resolve, reject) => req.pipe(fs.createWriteStream(file)).on('finish', resolve).on('error', reject));
+            const duration = await probe(file).catch(() => null);
+            fs.unlinkSync(file);
+            return json(res, 200, { duration: duration > 0 ? duration : null });
+        }
+
+        // the browser streams a whole video here just before extracting it; it's deleted once its frames are out
         if (req.method === 'POST' && url.pathname === '/upload') {
             const id = Math.random().toString(36).slice(2);
             const file = path.join(TMP, id + path.extname(url.searchParams.get('name') || '').replace(/[^.\w]/g, ''));
@@ -69,12 +79,14 @@ const server = http.createServer(async (req, res) => {
 
         // extract one episode; answers with one JSON line per frame so the page can show progress
         if (req.method === 'POST' && url.pathname === '/extract') {
-            const { id, name, interval, start, end } = await readJson(req);
+            const { id, name, folder, interval, start, end } = await readJson(req);
             const up = uploads.get(id);
             if (!up) return json(res, 400, { error: 'That video is no longer uploaded. Add it again.' });
             const list = times(up.duration, +interval, +start, +end);
             if (!list.length) return json(res, 400, { error: 'No frames to extract with these settings.' });
-            const dir = path.join(OUT, safe(name));
+            // "Game of Thrones/Season 1" + "Episode 5" -> output/Game of Thrones/Season 1/Episode 5
+            const parts = String(folder || '').split('/').filter(p => p.trim()).map(safe);
+            const dir = path.join(OUT, ...parts, safe(name));
             fs.mkdirSync(dir, { recursive: true });
             for (const f of fs.readdirSync(dir)) if (f.endsWith('.jpg')) fs.unlinkSync(path.join(dir, f));
 

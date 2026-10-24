@@ -39,6 +39,8 @@
         .total b { color: var(--text); font-size: 20px; }
         .list { display: grid; gap: 6px; margin-bottom: 16px; }
         .row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 12px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+        .row .name { display: grid; gap: 2px; min-width: 0; }
+        .row .name small { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .row .meta { font-size: 13px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
         .row .status { font-size: 13px; min-width: 120px; text-align: right; }
         .row .status.ok { color: #8fd18f; }
@@ -67,9 +69,14 @@
         </section>
 
         <div class="drop" id="drop">
-            <span>Drop video files here</span>
-            <label class="btn small" style="display:inline-block;color:var(--text)">Choose videos <input id="files" type="file" accept="video/*,.mkv,.avi,.m4v" multiple hidden></label>
+            <span>Drop video files or folders here</span>
+            <div class="actions">
+                <label class="btn small" style="display:inline-block;color:var(--text)">Choose videos <input id="files" type="file" accept="video/*,.mkv,.avi,.m4v" multiple hidden></label>
+                <label class="btn small" style="display:inline-block;color:var(--text)">Choose folder <input id="folder" type="file" webkitdirectory multiple hidden></label>
+            </div>
+            <small>Videos from a folder keep their folders: output\Game of Thrones\Season 1\Episode 5\</small>
         </div>
+        <p class="total" id="skipped" hidden></p>
 
         <div class="list" id="list"></div>
 
@@ -85,8 +92,13 @@
     <script>
         (() => {
             const $ = id => document.getElementById(id);
-            const items = []; // { file, name, id, duration, state, row }
-            let uploading = Promise.resolve();
+            // { file, folder, name, duration, id (once copied to the tool), state: probing|ready|copying|extracting|done|error, row }
+            const items = [];
+            let probing = Promise.resolve();
+            const PROBE_BYTES = 8 * 1024 * 1024;
+
+            // "Game.of.Thrones.S01E05.The.Wolf...mkv" -> "Episode 5"; other names keep the file name
+            const episodeName = n => { const m = n.match(/S\d{1,2}\s*E(\d{1,3})/i); return m ? 'Episode ' + +m[1] : n.replace(/\.[^.]+$/, ''); };
 
             // "90", "1:30" or "1:02:03" -> seconds, NaN when it isn't a time
             function secs(v) {
@@ -115,7 +127,9 @@
                     it.row.querySelector('.meta').textContent = it.duration ? clock(it.duration) + ' · ' + (n === null ? '?' : n.toLocaleString() + ' frames') : '';
                 }
                 $('total').innerHTML = items.length ? `<b>${frames.toLocaleString()}</b> frames from ${items.length} video${items.length > 1 ? 's' : ''}` : '';
-                $('go').disabled = !s || !items.some(it => it.state === 'ready' && it.duration && count(it.duration, s) > 0);
+                $('go').disabled = !s || !items.some(it => it.state === 'ready' && (!it.duration || count(it.duration, s) > 0));
+                const unknown = items.filter(it => it.state === 'ready' && !it.duration).length;
+                if (unknown) $('total').innerHTML += ` · ${unknown} not counted yet (length found when copied)`;
             }
 
             function status(it, text, cls, pct) {
@@ -126,49 +140,81 @@
                 if (pct !== undefined) it.row.querySelector('.bar i').style.width = pct + '%';
             }
 
+            // length from the first 8 MB only, so adding a whole show doesn't copy it
+            async function probe(it) {
+                status(it, 'Reading...');
+                try {
+                    const r = await (await fetch('/probe?name=' + encodeURIComponent(it.file.name), { method: 'POST', body: it.file.slice(0, PROBE_BYTES) })).json();
+                    it.duration = r.duration;
+                    it.state = 'ready';
+                    status(it, 'Ready');
+                } catch {
+                    it.state = 'error';
+                    status(it, 'Reading failed. Is the tool still running?', 'bad');
+                }
+                render();
+            }
+
+            // the whole video goes to the tool just before its frames are taken, then the tool deletes its copy
             function upload(it) {
                 return new Promise(resolve => {
                     const x = new XMLHttpRequest();
                     x.open('POST', '/upload?name=' + encodeURIComponent(it.file.name));
-                    x.upload.onprogress = e => status(it, 'Loading ' + Math.floor(e.loaded / e.total * 100) + '%', '', e.loaded / e.total * 100);
+                    x.upload.onprogress = e => status(it, 'Copying ' + Math.floor(e.loaded / e.total * 100) + '%', '', e.loaded / e.total * 100);
                     x.onload = () => {
                         const r = JSON.parse(x.responseText || '{}');
-                        if (r.error) { it.state = 'error'; status(it, r.error, 'bad'); }
-                        else { Object.assign(it, { id: r.id, duration: r.duration, state: 'ready' }); status(it, 'Ready'); }
+                        if (r.error) { it.state = 'error'; status(it, r.error, 'bad'); return resolve(false); }
+                        Object.assign(it, { id: r.id, duration: r.duration });
                         render();
-                        resolve();
+                        resolve(true);
                     };
-                    x.onerror = () => { it.state = 'error'; status(it, 'Loading failed. Is the tool still running?', 'bad'); resolve(); };
-                    status(it, 'Waiting...');
+                    x.onerror = () => { it.state = 'ready'; status(it, 'Copying failed. Is the tool still running?', 'bad'); resolve(false); };
+                    it.state = 'copying';
+                    status(it, 'Copying 0%', '', 0);
                     x.send(it.file);
                 });
             }
 
-            function add(files) {
-                for (const file of files) {
-                    const it = { file, state: 'uploading' };
+            const VIDEO = /\.(mp4|mkv|avi|mov|m4v|webm|wmv|flv|ts|m2ts|mpg|mpeg|3gp)$/i;
+
+            // entries: [File, folder path relative to what was picked ('' for loose files)]; anything not a video is skipped
+            function add(entries) {
+                // in folder and episode order (Season 2 after Season 1, E10 after E9), whatever order the browser lists them
+                const key = ([f, folder]) => folder + '/' + f.name;
+                const videos = entries.filter(([f]) => VIDEO.test(f.name)).sort((a, b) => key(a).localeCompare(key(b), undefined, { numeric: true }));
+                const skipped = entries.length - videos.length;
+                $('skipped').hidden = !skipped;
+                $('skipped').textContent = `Skipped ${skipped} file${skipped === 1 ? '' : 's'} that ${skipped === 1 ? "isn't a video" : "aren't videos"}.`;
+                for (const [file, folder] of videos) {
+                    const it = { file, folder, state: 'probing' };
                     const row = document.createElement('div');
                     row.className = 'row';
-                    row.innerHTML = '<input class="field" aria-label="Episode name (folder name)" title="Episode name, used as the folder name"><span class="meta"></span><span class="status"></span><button class="close" type="button" aria-label="Remove" title="Remove">&times;</button><div class="bar" hidden><i></i></div>';
+                    row.innerHTML = '<div class="name"><small hidden></small><input class="field" aria-label="Episode name (folder name)" title="Episode name, used as the folder name"></div><span class="meta"></span><span class="status"></span><button class="close" type="button" aria-label="Remove" title="Remove">&times;</button><div class="bar" hidden><i></i></div>';
+                    const where = row.querySelector('small');
+                    where.hidden = !folder;
+                    where.textContent = folder.replaceAll('/', ' › ');
+                    where.title = folder;
                     const input = row.querySelector('input');
-                    input.value = file.name.replace(/\.[^.]+$/, '');
+                    input.value = episodeName(file.name);
+                    input.title = file.name;
                     input.addEventListener('input', () => it.name = input.value);
                     it.name = input.value;
-                    row.querySelector('.close').addEventListener('click', () => { if (it.state === 'extracting') return; items.splice(items.indexOf(it), 1); row.remove(); render(); });
+                    row.querySelector('.close').addEventListener('click', () => { if (it.state === 'copying' || it.state === 'extracting') return; items.splice(items.indexOf(it), 1); row.remove(); render(); });
                     it.row = row;
                     items.push(it);
                     $('list').append(row);
-                    // one upload at a time, so the first videos are ready soonest
-                    uploading = uploading.then(() => items.includes(it) ? upload(it) : null);
+                    probing = probing.then(() => items.includes(it) ? probe(it) : null);
                 }
                 render();
             }
 
             async function extract(it, s) {
+                if (!it.id && !await upload(it)) return;
+                if (!count(it.duration, s)) { it.state = 'ready'; status(it, 'No frames with these cut times', 'bad'); return; }
                 it.state = 'extracting';
                 status(it, 'Starting...', '', 0);
                 try {
-                    const r = await fetch('/extract', { method: 'POST', body: JSON.stringify({ id: it.id, name: it.name, ...s }) });
+                    const r = await fetch('/extract', { method: 'POST', body: JSON.stringify({ id: it.id, name: it.name, folder: it.folder, ...s }) });
                     if (!r.ok) throw new Error((await r.json()).error);
                     const reader = r.body.pipeThrough(new TextDecoderStream()).getReader();
                     let buf = '', last = {};
@@ -197,23 +243,41 @@
             $('go').addEventListener('click', async () => {
                 const s = settings();
                 if (!s) return;
-                const names = items.filter(it => it.state === 'ready').map(it => it.name.trim().toLowerCase());
-                if (new Set(names).size !== names.length) { $('err').textContent = 'Two videos have the same name. Rename one so their frames go to different folders.'; $('err').hidden = false; return; }
+                const names = items.filter(it => it.state === 'ready').map(it => (it.folder + '/' + it.name.trim()).toLowerCase());
+                if (new Set(names).size !== names.length) { $('err').textContent = 'Two videos in the same folder have the same name. Rename one so their frames go to different folders.'; $('err').hidden = false; return; }
                 $('err').hidden = true;
                 $('go').disabled = true;
                 $('go').textContent = 'Extracting...';
-                for (const it of items) if (it.state === 'ready' && count(it.duration, s) > 0) await extract(it, s);
+                for (const it of items) if (it.state === 'ready' && (!it.duration || count(it.duration, s) > 0)) await extract(it, s);
                 $('go').textContent = 'Extract frames';
                 render();
             });
 
             $('open').addEventListener('click', () => fetch('/open', { method: 'POST' }));
-            $('files').addEventListener('change', e => { add(e.target.files); e.target.value = ''; });
+            $('files').addEventListener('change', e => { add([...e.target.files].map(f => [f, ''])); e.target.value = ''; });
+            // a picked folder gives "Season 1/S01E01.mkv"; keep the folder part, including the picked folder itself
+            $('folder').addEventListener('change', e => { add([...e.target.files].map(f => [f, f.webkitRelativePath.split('/').slice(0, -1).join('/')])); e.target.value = ''; });
             for (const id of ['interval', 'start', 'end']) $(id).addEventListener('input', render);
+
+            // dropped folders are walked recursively; readEntries returns at most 100 entries per call
+            async function walk(entry, out) {
+                if (entry.isFile) return out.push([await new Promise((ok, no) => entry.file(ok, no)), entry.fullPath.split('/').slice(1, -1).join('/')]);
+                const reader = entry.createReader();
+                for (let batch; (batch = await new Promise((ok, no) => reader.readEntries(ok, no))).length;)
+                    for (const e of batch) await walk(e, out);
+            }
+
             const drop = $('drop');
             drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
             drop.addEventListener('dragleave', () => drop.classList.remove('over'));
-            drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); add(e.dataTransfer.files); });
+            drop.addEventListener('drop', async e => {
+                e.preventDefault();
+                drop.classList.remove('over');
+                const entries = [...e.dataTransfer.items].map(i => i.webkitGetAsEntry()).filter(Boolean);
+                const out = [];
+                for (const entry of entries) await walk(entry, out);
+                add(out);
+            });
         })();
     </script>
 </body>
