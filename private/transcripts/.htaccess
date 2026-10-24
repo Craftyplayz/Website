@@ -1,4 +1,0 @@
-# the NoteCat login cookie is a password: never serve it
-<Files "notecat-cookie.txt">
-    Require all denied
-</Files>
