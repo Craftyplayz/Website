@@ -101,7 +101,7 @@
                     "title": "D&D",
                     "url": "/games/dnd/",
                     "pages": [
-                        { "title": "D&D", "url": "/games/dnd/", "description": "Our D&D campaign: characters and session recordings", "keywords": ["dungeons and dragons", "dnd", "campaign"] },
+                        { "title": "D&D", "url": "/games/dnd/", "nav": false, "description": "Our D&D campaign: characters and session recordings", "keywords": ["dungeons and dragons", "dnd", "campaign"] },
                         { "title": "D&D Characters", "url": "/games/dnd/characters/", "description": "D&D Beyond character sheets", "keywords": ["dnd beyond", "character sheet"] },
                         { "title": "Session Transcripts", "url": "/games/dnd/transcripts/", "description": "D&D session recordings with transcripts you can click to play", "keywords": ["recording", "audio", "transcript", "session"] }
                     ]
