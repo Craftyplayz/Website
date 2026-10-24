@@ -422,7 +422,7 @@ JSON;
                         <tr><td>Plain text / info</td><td><a href="/about.php">About</a></td><td>Template, <code>.grid</code> of <code>.card</code>s, <code>.kv</code> facts</td></tr>
                         <tr><td>Section landing</td><td><a href="/minecraft/">Minecraft</a></td><td>Hero plus <code>site_hub()</code> cards from <code>site.json</code></td></tr>
                         <tr><td>Long text</td><td><a href="/minecraft/projects/life-series/season-1/session-1/">Life Series session</a></td><td>One <code>&lt;pre&gt;</code> in a page stylesheet, a link back in the lede</td></tr>
-                        <tr><td>Server-fetched API</td><td><a href="/games/steam/">Steam</a>, <a href="/extras/dnd/">D&amp;D</a></td><td>Disk cache, stale fallback, parallel <code>curl_multi</code>, keys server-side</td></tr>
+                        <tr><td>Server-fetched API</td><td><a href="/games/steam/">Steam</a>, <a href="/games/dnd/characters/">D&amp;D</a></td><td>Disk cache, stale fallback, parallel <code>curl_multi</code>, keys server-side</td></tr>
                         <tr><td>Browser-fetched API</td><td><a href="/games/free/">Free Games</a>, <a href="/minecraft/servers/">Server Status</a></td><td>Loading note, then grid, sticky <code>.bar</code> filters, drawer details</td></tr>
                     </table>
                 </div>
