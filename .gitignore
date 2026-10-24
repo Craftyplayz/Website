@@ -13,3 +13,6 @@ games/the-game/thegame.json
 private/transcripts/*.ogg
 private/bs/*.html
 private/bs/shroom.php
+
+# frame tool output (local only)
+_dev/frame-tool/output/

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Frame Extractor</title>
+    <style>
+        /* local tool, same tokens as the site's global.css */
+        :root {
+            color-scheme: dark;
+            --bg: #202020; --card: #2a2a2a; --card2: #323232; --sunken: #1b1b1b; --line: #3d3d3d; --line-strong: #555;
+            --text: #ececec; --muted: #9b9b9b; --accent: #66c0f4; --btn: #2a6e9e; --btn-line: #4a9ad0; --btn-hover: #327bb0;
+            --btn2: #3a3a3a; --btn2-hover: #474747; --danger-bg: #4a2424; --danger-line: #8a3a3a; --ok-bg: #2d4a24; --ok-line: #4f8a3a;
+            --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; }
+        main { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+        h1 { margin: 0 0 4px; font-size: clamp(24px, 4vw, 34px); line-height: 1.2; }
+        .lede { margin: 0 0 20px; color: var(--muted); }
+        .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+        .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: start; }
+        label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+        label small { font-size: 12px; }
+        .field { padding: 8px 12px; background: #161616; border: 1px solid #4a4a4a; border-radius: 8px; color: var(--text); font: inherit; font-size: 14px; min-width: 0; }
+        .field:focus { outline: none; border-color: var(--accent); }
+        .field[aria-invalid="true"] { border-color: var(--danger-line); }
+        .btn { padding: 8px 14px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--btn2); color: var(--text); font: inherit; font-size: 14px; cursor: pointer; }
+        .btn:hover { background: var(--btn2-hover); }
+        .btn.primary { background: var(--btn); border-color: var(--btn-line); }
+        .btn.primary:hover { background: var(--btn-hover); }
+        .btn:disabled { opacity: .5; cursor: default; }
+        .btn.small { padding: 4px 10px; font-size: 13px; }
+        .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+        .drop { display: grid; place-items: center; gap: 8px; padding: 28px 16px; border: 2px dashed var(--line-strong); border-radius: 12px; color: var(--muted); text-align: center; margin-bottom: 16px; }
+        .drop.over { border-color: var(--accent); background: var(--sunken); }
+        .total { font-size: 14px; color: var(--muted); }
+        .total b { color: var(--text); font-size: 20px; }
+        .list { display: grid; gap: 6px; margin-bottom: 16px; }
+        .row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 12px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+        .row .meta { font-size: 13px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .row .status { font-size: 13px; min-width: 120px; text-align: right; }
+        .row .status.ok { color: #8fd18f; }
+        .row .status.bad { color: #f0a0a0; white-space: normal; }
+        .row .bar { grid-column: 1 / -1; height: 4px; background: var(--btn2); border-radius: 2px; overflow: hidden; }
+        .row .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--btn), var(--accent)); }
+        .close { background: none; border: 0; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 6px; border-radius: 4px; }
+        .close:hover { color: var(--text); background: var(--btn2); }
+        .err { padding: 10px 14px; border-radius: 8px; background: var(--danger-bg); border: 1px solid var(--danger-line); font-size: 14px; }
+        [hidden] { display: none !important; }
+        @media (max-width: 600px) { .row { grid-template-columns: minmax(0, 1fr) auto; } .row .status { text-align: left; } }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>Frame Extractor</h1>
+        <p class="lede">Turns videos into still frames for the episode guessing game.</p>
+
+        <section class="card">
+            <div class="cols">
+                <label>One frame every (seconds) <input class="field" id="interval" type="number" inputmode="decimal" min="0.5" step="0.5" value="10"></label>
+                <label>Cut from start <input class="field" id="start" value="0:00"><small>Skips the intro. 90 or 1:30</small></label>
+                <label>Cut from end <input class="field" id="end" value="0:00"><small>Skips the credits. 90 or 1:30</small></label>
+            </div>
+        </section>
+
+        <div class="drop" id="drop">
+            <span>Drop video files here</span>
+            <label class="btn small" style="display:inline-block;color:var(--text)">Choose videos <input id="files" type="file" accept="video/*,.mkv,.avi,.m4v" multiple hidden></label>
+        </div>
+
+        <div class="list" id="list"></div>
+
+        <div class="actions">
+            <span class="total" id="total"></span>
+            <span style="flex:1"></span>
+            <button class="btn" id="open" type="button">Open output folder</button>
+            <button class="btn primary" id="go" type="button" disabled>Extract frames</button>
+        </div>
+        <p class="err" id="err" hidden></p>
+    </main>
+
+    <script>
+        (() => {
+            const $ = id => document.getElementById(id);
+            const items = []; // { file, name, id, duration, state, row }
+            let uploading = Promise.resolve();
+
+            // "90", "1:30" or "1:02:03" -> seconds, NaN when it isn't a time
+            function secs(v) {
+                v = String(v).trim();
+                if (!/^\d+(\.\d+)?$|^\d+(:\d{1,2}){1,2}$/.test(v)) return NaN;
+                return v.split(':').reduce((a, p) => a * 60 + +p, 0);
+            }
+            const clock = s => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), r = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(r).padStart(2, '0'); };
+
+            function settings() {
+                const interval = +$('interval').value, start = secs($('start').value), end = secs($('end').value);
+                $('interval').setAttribute('aria-invalid', !(interval > 0));
+                $('start').setAttribute('aria-invalid', isNaN(start));
+                $('end').setAttribute('aria-invalid', isNaN(end));
+                return interval > 0 && !isNaN(start) && !isNaN(end) ? { interval, start, end } : null;
+            }
+            // same as times() in server.js
+            const count = (d, s) => { const len = d - s.start - s.end; return len > 0 ? Math.ceil(len / s.interval) : 0; };
+
+            function render() {
+                const s = settings();
+                let frames = 0;
+                for (const it of items) {
+                    const n = it.duration && s ? count(it.duration, s) : null;
+                    if (n !== null) frames += n;
+                    it.row.querySelector('.meta').textContent = it.duration ? clock(it.duration) + ' · ' + (n === null ? '?' : n.toLocaleString() + ' frames') : '';
+                }
+                $('total').innerHTML = items.length ? `<b>${frames.toLocaleString()}</b> frames from ${items.length} video${items.length > 1 ? 's' : ''}` : '';
+                $('go').disabled = !s || !items.some(it => it.state === 'ready' && it.duration && count(it.duration, s) > 0);
+            }
+
+            function status(it, text, cls, pct) {
+                const st = it.row.querySelector('.status');
+                st.textContent = text;
+                st.className = 'status ' + (cls || '');
+                it.row.querySelector('.bar').hidden = pct === undefined;
+                if (pct !== undefined) it.row.querySelector('.bar i').style.width = pct + '%';
+            }
+
+            function upload(it) {
+                return new Promise(resolve => {
+                    const x = new XMLHttpRequest();
+                    x.open('POST', '/upload?name=' + encodeURIComponent(it.file.name));
+                    x.upload.onprogress = e => status(it, 'Loading ' + Math.floor(e.loaded / e.total * 100) + '%', '', e.loaded / e.total * 100);
+                    x.onload = () => {
+                        const r = JSON.parse(x.responseText || '{}');
+                        if (r.error) { it.state = 'error'; status(it, r.error, 'bad'); }
+                        else { Object.assign(it, { id: r.id, duration: r.duration, state: 'ready' }); status(it, 'Ready'); }
+                        render();
+                        resolve();
+                    };
+                    x.onerror = () => { it.state = 'error'; status(it, 'Loading failed. Is the tool still running?', 'bad'); resolve(); };
+                    status(it, 'Waiting...');
+                    x.send(it.file);
+                });
+            }
+
+            function add(files) {
+                for (const file of files) {
+                    const it = { file, state: 'uploading' };
+                    const row = document.createElement('div');
+                    row.className = 'row';
+                    row.innerHTML = '<input class="field" aria-label="Episode name (folder name)" title="Episode name, used as the folder name"><span class="meta"></span><span class="status"></span><button class="close" type="button" aria-label="Remove" title="Remove">&times;</button><div class="bar" hidden><i></i></div>';
+                    const input = row.querySelector('input');
+                    input.value = file.name.replace(/\.[^.]+$/, '');
+                    input.addEventListener('input', () => it.name = input.value);
+                    it.name = input.value;
+                    row.querySelector('.close').addEventListener('click', () => { if (it.state === 'extracting') return; items.splice(items.indexOf(it), 1); row.remove(); render(); });
+                    it.row = row;
+                    items.push(it);
+                    $('list').append(row);
+                    // one upload at a time, so the first videos are ready soonest
+                    uploading = uploading.then(() => items.includes(it) ? upload(it) : null);
+                }
+                render();
+            }
+
+            async function extract(it, s) {
+                it.state = 'extracting';
+                status(it, 'Starting...', '', 0);
+                try {
+                    const r = await fetch('/extract', { method: 'POST', body: JSON.stringify({ id: it.id, name: it.name, ...s }) });
+                    if (!r.ok) throw new Error((await r.json()).error);
+                    const reader = r.body.pipeThrough(new TextDecoderStream()).getReader();
+                    let buf = '', last = {};
+                    for (;;) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        buf += value;
+                        const lines = buf.split('\n');
+                        buf = lines.pop();
+                        for (const l of lines) {
+                            last = JSON.parse(l);
+                            if (last.total) status(it, last.done + ' / ' + last.total, '', last.done / last.total * 100);
+                        }
+                    }
+                    if (buf.trim()) last = JSON.parse(buf);
+                    if (last.error) throw new Error(last.error);
+                    it.state = 'done';
+                    status(it, 'Done', 'ok');
+                    it.row.querySelector('input').disabled = true;
+                } catch (e) {
+                    it.state = 'ready';
+                    status(it, e.message || 'Extraction failed', 'bad');
+                }
+            }
+
+            $('go').addEventListener('click', async () => {
+                const s = settings();
+                if (!s) return;
+                const names = items.filter(it => it.state === 'ready').map(it => it.name.trim().toLowerCase());
+                if (new Set(names).size !== names.length) { $('err').textContent = 'Two videos have the same name. Rename one so their frames go to different folders.'; $('err').hidden = false; return; }
+                $('err').hidden = true;
+                $('go').disabled = true;
+                $('go').textContent = 'Extracting...';
+                for (const it of items) if (it.state === 'ready' && count(it.duration, s) > 0) await extract(it, s);
+                $('go').textContent = 'Extract frames';
+                render();
+            });
+
+            $('open').addEventListener('click', () => fetch('/open', { method: 'POST' }));
+            $('files').addEventListener('change', e => { add(e.target.files); e.target.value = ''; });
+            for (const id of ['interval', 'start', 'end']) $(id).addEventListener('input', render);
+            const drop = $('drop');
+            drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+            drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+            drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); add(e.dataTransfer.files); });
+        })();
+    </script>
+</body>
+
+</html>
