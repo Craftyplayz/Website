@@ -1,7 +1,7 @@
 <?php
 // Imports a D&D session (Discord recorder .md export + .ogg recording) into /games/dnd/transcripts/.
-// Lives in /private/ so only the password holder can upload. Files arrive in 8 MB chunks because
-// the host caps a request at 64 MB and a 4-hour recording is bigger than that.
+// Lives in /private/ so only the password holder can upload. Files arrive in 4 MB chunks because
+// the host's proxy rejects requests near 8 MB (413), well under PHP's own 64 MB limit.
 require $_SERVER['DOCUMENT_ROOT'] . '/games/dnd/transcripts/transcripts.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -81,7 +81,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             const btn = form.querySelector('button');
             const bar = form.querySelector('.progress');
             const err = form.querySelector('.err');
-            const CHUNK = 8 * 1024 * 1024;
+            const CHUNK = 4 * 1024 * 1024;
 
             // suggest the transcript's own title as the name
             form.md.addEventListener('change', async () => {
