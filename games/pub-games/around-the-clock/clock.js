@@ -190,6 +190,7 @@
                 $$('.atc-btn:not(.atc-miss)').forEach((b) => {
                     const m = +b.dataset.m;
                     b.textContent = bull ? ['', 'Outer bull', 'Bullseye', 'Treble'][m] : ['', 'Single', 'Double', 'Treble'][m];
+                    b.hidden = bull && m === 3; // no treble ring on the bull
                 });
                 $('.atc-thisturn').textContent = g.turn.length ? 'This turn: ' + g.turn.join(' · ') : (g.last ? 'Last turn (' + g.last.name + '): ' + g.last.darts.join(' · ') : '');
             }
