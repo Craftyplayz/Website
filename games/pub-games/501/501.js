@@ -63,7 +63,7 @@
         return true;
     }
     const fail = (g, text) => { g.msg = { k: 'err', text }; return false; };
-    const outName = (o) => (o.out === 'double' ? 'a double' : o.out === 'master' ? 'a double or treble' : 'any dart');
+    const outName = (o) => (o.out === 'double' ? 'a double' : o.out === 'master' ? 'a double or triple' : 'any dart');
 
     function bustWhy(after, o) {
         return after < 0 ? 'that is more than is left' : after === 1 ? "that leaves 1, which can't be finished on " + outName(o) : 'the last dart must be ' + outName(o);
@@ -87,7 +87,7 @@
         snap(g);
         let v = val(d, o), note = '';
         if (!p.in) {
-            if (counts(d, o.in)) p.in = true; else { v = 0; if (d.m) note = ' Not in yet: it needs ' + (o.in === 'double' ? 'a double' : 'a double or treble') + ' to start scoring.'; }
+            if (counts(d, o.in)) p.in = true; else { v = 0; if (d.m) note = ' Not in yet: it needs ' + (o.in === 'double' ? 'a double' : 'a double or triple') + ' to start scoring.'; }
         }
         t.darts.push({ m: d.m, n: d.n, v });
         const after = p.rem - v;
@@ -207,13 +207,13 @@
     // ---- play view
     const routeText = (r, o) => r.map((d) => dname(d, o)).join(' ');
     function modeLine(o) {
-        return o.start + ' · ' + (o.in === 'straight' ? 'straight in' : o.in === 'double' ? 'double in' : 'master in') + ' · ' + (o.out === 'double' ? 'double out' : o.out === 'master' ? 'master out' : 'straight out') + (o.flat ? ' · 50/50 bull' : '') + ' · first to ' + o.legs + (o.legs === 1 ? ' leg' : ' legs');
+        return o.start + ' · ' + (o.in === 'straight' ? 'straight in' : o.in === 'double' ? 'double in' : 'double/triple in') + ' · ' + (o.out === 'double' ? 'double out' : o.out === 'master' ? 'double/triple out' : 'straight out') + (o.flat ? ' · 50/50 bull' : '') + ' · first to ' + o.legs + (o.legs === 1 ? ' leg' : ' legs');
     }
     function playerCard(p, i) {
         const o = g.o, cur = i === g.cur && g.legWinner === null;
         const left = cur ? 3 - g.t.darts.length : 3;
         const r = p.in && p.rem <= 170 && !(cur && g.t.end) ? route(p.rem, Math.max(1, left), o) : null;
-        const hint = cur && g.t.end ? '' : !p.in ? 'Needs ' + (o.in === 'double' ? 'a double' : 'a double or treble') + ' to start'
+        const hint = cur && g.t.end ? '' : !p.in ? 'Needs ' + (o.in === 'double' ? 'a double' : 'a double or triple') + ' to start'
             : r ? 'Finish: ' + routeText(r, o) : p.rem <= 170 && p.rem > 0 ? (cur && left < 3 ? 'No finish with ' + left + (left === 1 ? ' dart' : ' darts') : 'No 3-dart finish') : '';
         return '<div class="x01-player' + (cur ? ' is-turn' : '') + (g.legWinner === i ? ' is-win' : '') + '"' + (cur ? ' aria-current="true"' : '') + '>' +
             '<div class="x01-pname"><b>' + esc(p.name) + '</b>' + (g.o.legs > 1 ? '<span class="badge">' + p.legs + '/' + o.legs + ' legs</span>' : '') + '</div>' +
