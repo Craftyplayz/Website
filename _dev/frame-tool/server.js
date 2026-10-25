@@ -79,7 +79,12 @@ function grabNow(file, t, out, checkBlank) {
         p.stderr.on('data', d => err += d);
         p.on('error', reject);
         p.on('close', code => {
-            if (code !== 0) return reject(new Error(err.trim().split('\n').pop() || 'ffmpeg failed'));
+            // a time in the last split second after the final picture has nothing to save: skip it, don't fail the episode
+            if (code !== 0 && /received no packets|Output file is empty/i.test(err)) {
+                fs.rmSync(out, { force: true });
+                return resolve(true);
+            }
+            if (code !== 0) return reject(new Error(`Frame at ${Math.round(t)} s: ` + (err.trim().split('\n').pop() || 'ffmpeg failed')));
             if (checkBlank && blank(Buffer.concat(px))) {
                 fs.rmSync(out, { force: true });
                 return resolve(true);

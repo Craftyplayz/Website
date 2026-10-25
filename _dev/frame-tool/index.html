@@ -187,7 +187,7 @@
                     it.row.querySelector('.meta').textContent = it.duration ? clock(it.duration) + ' · ' + (n === null ? '?' : n.toLocaleString() + ' frames') : '';
                 }
                 $('total').innerHTML = items.length ? `<b>${frames.toLocaleString()}</b> frames from ${items.length} video${items.length > 1 ? 's' : ''}` : '';
-                $('go').disabled = !s || items.some(it => it.detecting) || !items.some(it => it.state === 'ready' && (!it.duration || count(it, s) > 0));
+                $('go').disabled = !s || !!run && !run.finished || !items.some(it => it.state === 'ready' && (!it.duration || count(it, s) > 0));
                 const unknown = items.filter(it => it.state === 'ready' && !it.duration).length;
                 if (unknown) $('total').innerHTML += ` · ${unknown} not counted yet (length found when copied)`;
             }
@@ -295,6 +295,8 @@
                         for (const it of group) it.detecting = false;
                         render();
                     });
+                    // extraction started early waits on this, so an episode is only extracted once its intro is known
+                    for (const it of group) it.detected = detecting;
                 }
                 render();
             }
@@ -393,7 +395,14 @@
                 $('overall').hidden = false;
                 overall();
                 const tick = setInterval(overall, 1000); // keeps the time left moving between frames
-                await Promise.all(Array.from({ length: 3 }, async () => { while (todo.length) await extract(todo.shift(), s); }));
+                await Promise.all(Array.from({ length: 3 }, async () => {
+                    while (todo.length) {
+                        const it = todo.shift();
+                        // clicked while intros are still being found: start this episode as soon as its season is done
+                        if (it.detecting) await it.detected;
+                        await extract(it, s);
+                    }
+                }));
                 clearInterval(tick);
                 run.finished = true;
                 overall();
