@@ -47,6 +47,7 @@ header('Content-Type: text/html; charset=utf-8');
       </div>
     </div>
     <p class="info-link"><a class="btn-link" href="info/">How to play &amp; what's new</a></p>
+    <p class="info-link"><a class="btn-link" href="/games/chapterguesser/">📖 Try Chapter Oracle: name the book chapter from one passage →</a></p>
   </div>
 
   <!-- ══════════ MODE SELECT SCREEN ══════════ -->
