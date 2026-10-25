@@ -109,6 +109,19 @@
         g.winner = p.id; g.endReason = reason; g.phase = 'over';
     }
 
+    // The winner's last balls went down on the same shot that knocked out the runner-up: nobody wins.
+    // No snapshot of its own, so one Undo goes back to before that shot.
+    function tie(g) {
+        const w = g.phase === 'over' && byId(g, g.winner);
+        if (!w) return null;
+        const balls = w.balls.filter((b) => !g.potted[b]);
+        balls.forEach((b) => { w.lost.push(b); g.potted[b] = { owner: w.id, at: Date.now() }; });
+        w.out = true; g.winner = null; g.endReason = 'tie';
+        const o = { kind: 'tie', ball: balls[0], balls, owner: w.id };
+        g.history.push({ ball: balls[0], owner: w.id, text: outcomeText(g, o).body, at: Date.now() });
+        return o;
+    }
+
     function undo(g) {
         const step = g.undo.pop();
         if (!step) return null;
@@ -133,6 +146,7 @@
                 const w = byId(g, o.winner).name;
                 return { title: w + ' wins', body: 'Ball ' + o.ball + ' knocked out ' + name + '. ' + w + ' is the last player standing.', button: 'See results' };
             }
+            case 'tie': return { title: 'No winner', body: name + "'s last " + (o.balls.length === 1 ? 'ball, the ' + o.ball + ',' : 'balls (' + o.balls.join(', ') + ')') + ' went down on the same shot, so everyone loses.', button: 'See results' };
             case 'no-winner': return { title: 'No winner', body: 'Every ball has been potted.', button: 'See results' };
         }
         return { title: '', body: '', button: 'Carry on' };
@@ -444,7 +458,12 @@
             renderBoard();                 // the board is up to date before the dialog opens
             const t = outcomeText(G, o);
             pendingOutcome = n;
-            openDialog(t.title, t.body, [{ label: t.button, act: 'kp-outcome-ok', primary: true }]);
+            const buttons = [{ label: t.button, act: 'kp-outcome-ok', primary: true }];
+            if (o.kind === 'win-last') {
+                const w = byId(G, o.winner);
+                buttons.push({ label: w.name + "'s last " + (ballsLeft(w) === 1 ? 'ball' : 'balls') + ' went down too', act: 'kp-tie' });
+            }
+            openDialog(t.title, t.body, buttons);
         }
 
         function openDialog(title, body, buttons) {
@@ -498,7 +517,7 @@
             const w = G.winner ? byId(G, G.winner) : null;
             const title = $('.kp-over-title', root);
             title.innerHTML = w ? esc(w.name) + ' wins <span class="badge gold">Winner</span>' : 'No winner';
-            $('.kp-over-reason', root).textContent = G.endReason === 'last-standing' ? 'Last player standing.' : 'Every ball has been potted.';
+            $('.kp-over-reason', root).textContent = G.endReason === 'last-standing' ? 'Last player standing.' : G.endReason === 'tie' ? 'The last balls went down on the same shot, so nobody wins.' : 'Every ball has been potted.';
             $('.kp-over-rows', root).innerHTML = G.players.map((p) => {
                 const res = G.winner === p.id ? '<span class="badge gold">Winner</span>' : p.out ? '<span class="badge r">Out</span>' : '<span class="badge">In</span>';
                 const nums = p.balls.map((n) => ballHtml(n, 'small' + (G.potted[n] ? ' potted' : ''))).join('');
@@ -607,6 +626,7 @@
                 case 'kp-ball': tapBall(+id); break;
                 case 'kp-next': if (G.phase === 'play') { nextTurn(G, id === 'back' ? -1 : 1); save(); renderBoard(); } break;
                 case 'kp-outcome-ok': outcomeDlg.close(); break;
+                case 'kp-tie': if (tie(G)) save(); outcomeDlg.close(); break;
                 case 'kp-undo': undoLast(); break;
                 case 'kp-resume': resume(); break;
                 case 'kp-abandon': $('#kp-end').showModal(); break;
