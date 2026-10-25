@@ -1,4 +1,4 @@
-// 501 / 301 darts scorer (x01): per-dart keypad or turn total, bust and checkout handling, undo, saved in localStorage.
+// 501 / 301 darts scorer (x01): per-dart keypad or turn total, bust and checkout handling, auto next player, back (undo), saved in localStorage.
 (function () {
     'use strict';
 
@@ -59,7 +59,7 @@
         const keep = g.undo;
         Object.assign(g, JSON.parse(s));
         g.undo = keep;
-        g.msg = { k: 'note', text: 'Last action undone.' };
+        g.msg = { k: 'note', text: 'Went back one step.' };
         return true;
     }
     const fail = (g, text) => { g.msg = { k: 'err', text }; return false; };
@@ -93,12 +93,14 @@
         const after = p.rem - v;
         if (after < 0 || (after === 1 && o.out !== 'straight') || (after === 0 && !counts(d, o.out))) {
             bust(g, p, bustWhy(after, o), 3);
+            advance(g);
         } else {
             p.rem = after;
             if (after === 0) checkedOut(g, p, t.darts.length);
             else if (t.darts.length === 3) {
                 t.end = 'done'; p.darts += 3; p.pts += t.start - p.rem;
-                g.msg = { k: 'note', text: p.name + ' scored ' + (t.start - p.rem) + '. Press Next player.' };
+                g.msg = { k: 'ok', text: p.name + ' scored ' + (t.start - p.rem) + '.' };
+                advance(g);
             } else g.msg = { k: 'note', text: dname(d, o) + (v ? ' = ' + v + '.' : '.') + note };
         }
         return true;
@@ -243,7 +245,8 @@
         const chips = [0, 1, 2].map((i) => { const d = t.darts[i]; return '<span class="x01-dart' + (d ? ' on' : '') + '">' + (d ? esc(dname(d, o)) + (d.v ? ' <small>' + d.v + '</small>' : '') : '') + '</span>'; }).join('');
         let acts = '';
         if (over) acts = g.over !== null ? '<button class="btn primary" type="button" data-act="rematch">Rematch</button><button class="btn" type="button" data-act="new">New game</button>' : '<button class="btn primary" type="button" data-act="nextleg">Next leg</button>';
-        else acts = '<button class="btn ' + (t.end ? 'primary' : '') + '" type="button" data-act="next">Next player</button>';
+        // turns move on by themselves; this only shows for a game saved before that
+        else if (t.end) acts = '<button class="btn primary" type="button" data-act="next">Next player</button>';
         const msg = g.msg ? '<p class="x01-msg ' + g.msg.k + '" role="' + (g.msg.k === 'err' || g.msg.k === 'bust' ? 'alert' : 'status') + '">' + esc(g.msg.text) + '</p>' : '';
         playEl.innerHTML =
             '<p class="muted x01-mode">' + esc(modeLine(o)) + (g.players.length > 1 ? ' · leg ' + g.leg : '') + '</p>' + msg +
@@ -252,7 +255,7 @@
             '<div class="x01-darts" aria-label="Darts this turn">' + chips + '</div>' +
             '<div class="stabs x01-modes" role="group" aria-label="Entry mode"><button type="button" data-act="mode" data-id="darts" class="' + (ui.mode === 'darts' ? 'on' : '') + '" aria-pressed="' + (ui.mode === 'darts') + '">Dart by dart</button><button type="button" data-act="mode" data-id="total" class="' + (ui.mode === 'total' ? 'on' : '') + '" aria-pressed="' + (ui.mode === 'total') + '">Turn total</button></div>' +
             (ui.mode === 'darts' ? keypad() : totalPad()) +
-            '<div class="actions x01-actions">' + acts + '<button class="btn" type="button" data-act="undo"' + (g.undo.length ? '' : ' disabled') + '>Undo</button><button class="btn" type="button" data-act="new">New game</button></div></section>';
+            '<div class="actions x01-actions"><button class="btn" type="button" data-act="undo"' + (g.undo.length ? '' : ' disabled') + '>Back</button>' + acts + '<button class="btn" type="button" data-act="new">New game</button></div></section>';
         save();
         if (ui.mode === 'total') { const f = playEl.querySelector('input[name=total]'); if (f && matchMedia('(hover: hover)').matches) f.focus(); }
     }
