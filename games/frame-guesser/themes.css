@@ -286,38 +286,30 @@
 }
 
 
-/* ── Avatar: The Last Airbender: white and airy, sky blue with a warm Air Nomad glow ──
-   A light theme, so the text, the accent and the right/wrong colours are darkened to
-   stay readable on white (accent text #2479aa is 4.8:1 on white). */
+/* ── Avatar: The Last Airbender: airy twilight sky, pale sky blue with a warm Air Nomad glow ── */
 :root[data-series="avatarthelastairbender"] {
-  --bg:        #f7fafd;
-  --bg2:       #eef4f9;
-  --surface:   #ffffff;
-  --surface2:  #f2f7fb;
-  --border:    #dbe6ef;
-  --border2:   #c3d4e2;
-  --gold:      #2479aa;
-  --gold2:     #1d6694;
-  --gold-dim:  rgba(36,121,170,0.12);
-  --gold-glow: rgba(110,180,225,0.16);
-  --gold-line: rgba(36,121,170,0.25);
-  --haze:      rgba(245,170,90,0.12);
-  --text:      #1c2a36;
-  --text-sub:  #3f5263;
-  --text-muted:#5f7386;
-  --green:     #15803d;
-  --green-dim: rgba(21,128,61,0.10);
-  --amber:     #c2410c;
-  --amber-dim: rgba(194,65,12,0.10);
-  --red:       #dc2626;
-  --red-dim:   rgba(220,38,38,0.09);
+  --bg:        #0b1622;
+  --bg2:       #101d2b;
+  --surface:   #152536;
+  --surface2:  #1b2f43;
+  --border:    #263c52;
+  --border2:   #33506b;
+  --gold:      #8ccbf0;
+  --gold2:     #bfe4fa;
+  --gold-dim:  rgba(140,203,240,0.14);
+  --gold-glow: rgba(160,215,248,0.11);
+  --gold-line: rgba(140,203,240,0.28);
+  --haze:      rgba(245,170,90,0.09);
+  --text:      #edf5fb;
+  --text-sub:  #a8bdcf;
+  --text-muted:#6f879d;
 }
+/* soft, cloud-like lift instead of hard edges */
 :root[data-series="avatarthelastairbender"] .card {
-  box-shadow: 0 10px 30px rgba(36,90,130,0.08), 0 1px 2px rgba(36,90,130,0.06);
+  box-shadow: 0 14px 40px rgba(4,12,22,0.45), inset 0 1px 0 rgba(190,228,250,0.08);
 }
-:root[data-series="avatarthelastairbender"] .btn-primary { color: #ffffff; }
 :root[data-series="avatarthelastairbender"] .wordmark-title em {
-  background: linear-gradient(100deg, #2479aa 0%, #5fb2e0 55%, #e8954a 100%);
+  background: linear-gradient(100deg, #8ccbf0 0%, #d4eefc 50%, #f0a868 100%);
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
 }
