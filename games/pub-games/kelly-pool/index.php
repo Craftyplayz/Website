@@ -70,52 +70,37 @@ $kp_balls = range(1, 5);
                     <details open>
                         <summary>The basics</summary>
                         <ul>
-                            <li>Each player draws secret numbered peas from a shake bottle. Here the tracker deals them on the phone. Keep your numbers to yourself.</li>
-                            <li>Play in rotation. The cue ball must first hit the lowest-numbered ball on the table, whoever it belongs to. You don't call shots.</li>
+                            <li>Everyone is dealt secret numbers on the phone, 1 to 5 each. Each number is a life. Keep your numbers to yourself.</li>
+                            <li>Hit any ball you like. It doesn't have to be the lowest number, and you don't call shots.</li>
                             <li>Pot a ball and you shoot again. Miss and the turn passes.</li>
-                            <li>The simple game: the first player to legally pot their own number wins.</li>
-                            <li>Balls nobody drew are dead balls. Potting one changes nothing.</li>
+                            <li>Balls nobody was dealt are dead balls. Potting one changes nothing.</li>
                         </ul>
-                        <p class="muted">The tracker follows this, except that it does not track the shooting order unless you turn on "Show whose turn it is".</p>
+                        <p class="muted">The tracker doesn't track the shooting order unless you turn on "Show whose turn it is".</p>
                     </details>
                     <details>
-                        <summary>When someone pots your ball</summary>
+                        <summary>When a ball goes down</summary>
                         <ul>
-                            <li><b>Last man standing:</b> each number is a life. A potted ball costs its owner a life, whoever pots it. The last player with a life wins. <span class="badge">Tracker default</span></li>
-                            <li><b>Dead players:</b> some tables let a killed player keep shooting but they can't win, and they must announce it before their next shot.</li>
-                            <li><b>Points:</b> the BCA points game gives 1 point for potting someone else's number and 2 from everyone to the winner.</li>
+                            <li>The owner of the ball loses a life, whoever potted it. Pot your own number and you lose that life too, so leave your balls on the table.</li>
+                            <li>Lose all your lives and you're out. You stop shooting for the rest of the game.</li>
+                            <li>The last player with a life left wins.</li>
                         </ul>
                     </details>
                     <details>
-                        <summary>Fouls and penalties</summary>
+                        <summary>Fouls</summary>
                         <ul>
-                            <li>Common fouls: scratching, knocking the cue ball off the table, hitting the wrong ball first, or touching a ball.</li>
-                            <li>After a foul the next player may play the table as it lies. After a scratch they usually get the cue ball in hand behind the head string.</li>
-                            <li>A ball potted on a foul doesn't count. It is spotted on the foot spot, or as near as possible toward the foot rail, and its owner stays alive. <span class="badge">Tracker: don't tap it, or use Undo</span></li>
-                            <li>Some tables fine scratches, a knocked bottle or a forgotten "I'm dead" into the pot.</li>
+                            <li>Fouls: potting the cue ball, knocking it off the table, or touching a ball.</li>
+                            <li>After a foul the next player plays the table as it lies. If the cue ball went down or off the table, they get it in hand.</li>
+                            <li>A ball potted on a foul stays down and counts like any other: its owner loses a life. <span class="badge">Tracker: tap it as normal</span></li>
                         </ul>
-                        <p class="muted">The tracker doesn't record fouls or money.</p>
                     </details>
                     <details>
                         <summary>Edge cases</summary>
                         <ul>
-                            <li><b>Two owners' balls in one shot:</b> both are affected. In last man standing, tap both balls.</li>
-                            <li><b>Your ball potted after you're out:</b> nothing changes. The ball is just removed.</li>
-                            <li><b>You pot your own ball on a foul:</b> it doesn't count and it is spotted.</li>
-                            <li><b>Nobody wins</b> (every ball potted): re-rack, redraw and replay. Many tables double the stake. <span class="badge">Tracker: ends as no winner</span></li>
-                            <li><b>Cheating:</b> don't peek at other players' numbers. The winner shows their pea to prove the win.</li>
+                            <li><b>Several balls in one shot:</b> they all count. Tap each one.</li>
+                            <li><b>Tie:</b> if the last players' final balls go down on the same shot, nobody wins. <span class="badge">Tracker: tap one, then choose "last ball went down too"</span></li>
+                            <li><b>No peeking:</b> don't look at other players' numbers. Everyone's numbers are shown when the game ends.</li>
                         </ul>
-                    </details>
-                    <details>
-                        <summary>House rules and variants</summary>
-                        <ul>
-                            <li><b>Several peas each:</b> two to five numbers per player. <span class="badge">Tracker: 1 to 5</span></li>
-                            <li><b>Cue-ball pea (16):</b> the holder wins by hitting the lowest ball first and then scratching.</li>
-                            <li><b>15 as the end ball:</b> if nobody pots their number, potting the 15 wins.</li>
-                            <li><b>Call-shot or any ball:</b> no lowest-ball rule. Players can go straight for their own number.</li>
-                            <li><b>Money:</b> an ante into one pot, a payment per kill, or both. A game with no winner often plays for double.</li>
-                        </ul>
-                        <p class="muted">The full list, with what each rule changes and the sources, is in the <a href="https://github.com/Craftyplayz/Website/blob/main/docs/kelly-pool.md" target="_blank" rel="noopener">rules document</a>.</p>
+                        <p class="muted">Other tables play other ways. The <a href="https://github.com/Craftyplayz/Website/blob/main/docs/kelly-pool.md" target="_blank" rel="noopener">rules document</a> lists them, with sources.</p>
                     </details>
                 </div>
             </section>
@@ -226,10 +211,11 @@ $kp_balls = range(1, 5);
             <h2>Rules</h2>
             <ol class="kp-rules-list">
                 <li>Everyone is dealt secret numbers. Each one is a life.</li>
-                <li>Take turns. Hit the lowest-numbered ball on the table first.</li>
-                <li>Whenever one of your numbers goes down, whoever potted it, you lose a life.</li>
-                <li>Lose all your lives and you're out.</li>
-                <li>The last player with a life left wins.</li>
+                <li>Take turns. Hit any ball you like.</li>
+                <li>When one of your numbers goes down, you lose a life, whoever potted it. That includes you.</li>
+                <li>A ball potted on a foul still counts.</li>
+                <li>Lose all your lives and you're out for the rest of the game.</li>
+                <li>The last player with a life left wins. If the last balls go down on the same shot, nobody wins.</li>
             </ol>
             <p class="muted">Play on one phone and pass it round. A game can't be shared between devices.</p>
         </aside>

@@ -2,7 +2,19 @@
 
 Kelly Pool (also called pea pool or pill pool) is a rotation game for two or more players. Each player secretly draws a numbered pea. The aim is to pot the ball with your number, or, in the elimination versions, to be the last player whose number is still alive.
 
-There is no single official rule set. The Billiard Congress of America (BCA) lists two variants (a simple one and a points one); pubs and leagues add their own. This document gives the standard rules first, then every common alternative with what it changes. Where sources disagree, both are given. The tracker on `/games/kelly-pool/` follows the choices marked **Tracker**.
+There is no single official rule set. The Billiard Congress of America (BCA) lists two variants (a simple one and a points one); pubs and leagues add their own. This document gives the standard rules first, then every common alternative with what it changes. Where sources disagree, both are given. The tracker on `/games/kelly-pool/` plays the house rules below; sections 1 to 11 describe how other tables play.
+
+## House rules (this site)
+
+1. Everyone is dealt 1 to 5 secret numbers. Each number is a life. Balls nobody was dealt are dead and potting them changes nothing.
+2. Hit any ball you like. There is no lowest-ball rule and no calling shots.
+3. Pot a ball and you shoot again. Miss and the turn passes.
+4. When a ball goes down, its owner loses a life, whoever potted it. Potting your own number costs you that life too.
+5. Lose all your lives and you're out. Out players stop shooting.
+6. Several balls in one shot all count.
+7. Fouls: potting the cue ball, knocking it off the table, or touching a ball. The next player plays the table as it lies, with the cue ball in hand if it went down or off the table. A ball potted on a foul stays down and counts.
+8. The last player with a life left wins. If the last players' final balls go down on the same shot, nobody wins.
+9. No money.
 
 Contents
 
@@ -153,9 +165,8 @@ The tracker on `/games/kelly-pool/` replaces the peas and bottle and keeps count
 
 - **Mode:** last man standing only. Potting your own ball never wins; leave your balls on the table.
 - **Balls:** 2 to 15 players, 1 to 5 balls each, players x balls at most 15. Unused balls belong to no one.
-- **Last man standing:** whoever pots it, the owner loses one life. Last player alive wins.
-- **Not tracked:** fouls, scratches, penalties and money. If a ball is potted on a foul, don't tap it (or use Undo).
-- **No winner:** if every ball is potted with no winner the game ends as no winner.
+- **Last man standing:** whoever pots it, the owner loses one life. Last player alive wins. If the winner's last ball went down on the same shot, the winner dialog has a button for that and the game ends with no winner.
+- **Not tracked:** fouls, scratches and the cue ball. A ball potted on a foul counts, so tap it as normal.
 - **Privacy:** numbers show only after a pass screen, and everyone's numbers are shown once the game ends.
 
 ## 13. Sources
