@@ -59,7 +59,7 @@
   --text:      #eaeaf6;
   --text-sub:  #9090b0;
   --text-muted:#52527a;
-  /* right / wrong / partial answers (same in every theme) */
+  /* right / wrong / partial answers (same in every dark theme; light themes darken them) */
   --green:     #4ade80;
   --green-dim: rgba(74,222,128,0.11);
   --amber:     #fb923c;
@@ -69,7 +69,7 @@
 
   /* Fading: themes change these over 0.9s */
   transition-property: --bg, --bg2, --surface, --surface2, --border, --border2,
-    --gold, --gold2, --gold-dim, --gold-glow, --gold-line, --haze, --text-sub, --text-muted;
+    --gold, --gold2, --gold-dim, --gold-glow, --gold-line, --haze, --text, --text-sub, --text-muted;
   transition-duration: 0.9s;
   transition-timing-function: ease;
 }
@@ -88,6 +88,7 @@
 @property --gold-glow  { syntax: '<color>'; inherits: true; initial-value: rgba(201,168,76,0.07); }
 @property --gold-line  { syntax: '<color>'; inherits: true; initial-value: rgba(201,168,76,0.26); }
 @property --haze       { syntax: '<color>'; inherits: true; initial-value: rgba(90,60,180,0.07); }
+@property --text       { syntax: '<color>'; inherits: true; initial-value: #eaeaf6; }
 @property --text-sub   { syntax: '<color>'; inherits: true; initial-value: #9090b0; }
 @property --text-muted { syntax: '<color>'; inherits: true; initial-value: #52527a; }
 
@@ -255,6 +256,68 @@
 :root[data-series="asongoficeandfire"] .wordmark-title em,
 :root[data-series="gameofthrones"] .wordmark-title em {
   background: linear-gradient(100deg, #8d949e 0%, #eef2f6 45%, #9aa1ab 60%, #d5dae1 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+/* Metal finish: panels are brushed dark steel with a lit top edge, the main button is polished steel */
+:root[data-series="asongoficeandfire"] .card,
+:root[data-series="gameofthrones"] .card {
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 3px),
+    linear-gradient(165deg, #1e2126 0%, #131518 38%, #1a1d21 62%, #0f1114 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.55), 0 12px 32px rgba(0,0,0,0.45);
+}
+:root[data-series="asongoficeandfire"] .card::before,
+:root[data-series="gameofthrones"] .card::before { opacity: 0.7; }
+:root[data-series="asongoficeandfire"] .mode-card,
+:root[data-series="gameofthrones"] .mode-card {
+  background: linear-gradient(165deg, #23262b 0%, #17191d 55%, #1d2024 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+:root[data-series="asongoficeandfire"] .btn-primary,
+:root[data-series="gameofthrones"] .btn-primary {
+  background: linear-gradient(180deg, #f3f6f9 0%, #c3cad3 45%, #959ca6 55%, #cfd5dc 100%);
+  color: #101215;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.65), 0 1px 3px rgba(0,0,0,0.6);
+}
+:root[data-series="asongoficeandfire"] .btn-primary:hover,
+:root[data-series="gameofthrones"] .btn-primary:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #d3d9e0 45%, #a7aeb8 55%, #dde2e8 100%);
+}
+
+
+/* ── Avatar: The Last Airbender: white and airy, sky blue with a warm Air Nomad glow ──
+   A light theme, so the text, the accent and the right/wrong colours are darkened to
+   stay readable on white (accent text #2479aa is 4.8:1 on white). */
+:root[data-series="avatarthelastairbender"] {
+  --bg:        #f7fafd;
+  --bg2:       #eef4f9;
+  --surface:   #ffffff;
+  --surface2:  #f2f7fb;
+  --border:    #dbe6ef;
+  --border2:   #c3d4e2;
+  --gold:      #2479aa;
+  --gold2:     #1d6694;
+  --gold-dim:  rgba(36,121,170,0.12);
+  --gold-glow: rgba(110,180,225,0.16);
+  --gold-line: rgba(36,121,170,0.25);
+  --haze:      rgba(245,170,90,0.12);
+  --text:      #1c2a36;
+  --text-sub:  #3f5263;
+  --text-muted:#5f7386;
+  --green:     #15803d;
+  --green-dim: rgba(21,128,61,0.10);
+  --amber:     #c2410c;
+  --amber-dim: rgba(194,65,12,0.10);
+  --red:       #dc2626;
+  --red-dim:   rgba(220,38,38,0.09);
+}
+:root[data-series="avatarthelastairbender"] .card {
+  box-shadow: 0 10px 30px rgba(36,90,130,0.08), 0 1px 2px rgba(36,90,130,0.06);
+}
+:root[data-series="avatarthelastairbender"] .btn-primary { color: #ffffff; }
+:root[data-series="avatarthelastairbender"] .wordmark-title em {
+  background: linear-gradient(100deg, #2479aa 0%, #5fb2e0 55%, #e8954a 100%);
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
 }
