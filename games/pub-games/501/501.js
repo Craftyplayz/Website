@@ -244,7 +244,7 @@
         const o = g.o, p = g.players[g.cur], t = g.t, over = g.legWinner !== null;
         const chips = [0, 1, 2].map((i) => { const d = t.darts[i]; return '<span class="x01-dart' + (d ? ' on' : '') + '">' + (d ? esc(dname(d, o)) + (d.v ? ' <small>' + d.v + '</small>' : '') : '') + '</span>'; }).join('');
         let acts = '';
-        if (over) acts = g.over !== null ? '<button class="btn primary" type="button" data-act="rematch">Rematch</button><button class="btn" type="button" data-act="new">New game</button>' : '<button class="btn primary" type="button" data-act="nextleg">Next leg</button>';
+        if (over) acts = g.over !== null ? '<button class="btn primary" type="button" data-act="rematch">Rematch</button>' : '<button class="btn primary" type="button" data-act="nextleg">Next leg</button>';
         // turns move on by themselves; this only shows for a game saved before that
         else if (t.end) acts = '<button class="btn primary" type="button" data-act="next">Next player</button>';
         const msg = g.msg ? '<p class="x01-msg ' + g.msg.k + '" role="' + (g.msg.k === 'err' || g.msg.k === 'bust' ? 'alert' : 'status') + '">' + esc(g.msg.text) + '</p>' : '';
