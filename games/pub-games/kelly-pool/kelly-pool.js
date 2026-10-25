@@ -5,8 +5,8 @@
 
     /* engine:start (no DOM in here) */
     const RACK = 15;
-    const MODES = { sink: 'Sink balls you win', lms: 'Last man standing' };
-    const DEFAULT_SETTINGS = { othersPotYourBall: 'out', pin: false, hideAfter: 15, vibrate: true, turns: false };
+    const MODES = { lms: 'Last man standing' };
+    const DEFAULT_SETTINGS = { pin: false, hideAfter: 15, vibrate: true, turns: false };
 
     const maxBalls = (players) => Math.min(5, Math.floor(RACK / players));
     const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
@@ -58,26 +58,14 @@
         if (g.undo.length > 50) g.undo.shift();
     }
 
-    // Pot a ball. by: 'owner' | 'other' | null (who potted it; only asked in sink mode for owned balls).
+    // Pot a ball: whoever potted it, its owner loses a life.
     // Returns the outcome the dialog shows. Order: snapshot for undo, then update the state.
-    function pot(g, ball, by) {
+    function pot(g, ball) {
         if (g.phase !== 'play' || g.potted[ball]) return null;
         snapshot(g, ball);
         const owner = ownerOf(g, ball);
-        let o;
-        if (!owner) {
-            o = { kind: 'none', ball };
-        } else if (g.mode === 'lms') {
-            o = loseBall(g, owner, ball, null);
-        } else if (by === 'owner') {
-            o = { kind: 'win-own', ball, owner: owner.id };
-            win(g, owner, 'own-ball');
-        } else if (g.settings.othersPotYourBall === 'out') {
-            o = loseBall(g, owner, ball, 'other');
-        } else {
-            o = { kind: 'nothing', ball, owner: owner.id };
-        }
-        g.potted[ball] = { owner: owner ? owner.id : null, pottedBy: owner ? by : null, at: Date.now() };
+        let o = owner ? loseBall(g, owner, ball) : { kind: 'none', ball };
+        g.potted[ball] = { owner: owner ? owner.id : null, at: Date.now() };
         const text = outcomeText(g, o).body;
         g.history.push({ ball, owner: owner ? owner.id : null, text, at: Date.now() });
         if (!g.winner && pottedCount(g) === RACK) {
@@ -105,16 +93,16 @@
         if (!p || p.out) nextTurn(g);
     }
 
-    function loseBall(g, owner, ball, by) {
+    function loseBall(g, owner, ball) {
         owner.lost.push(ball);
-        if (ballsLeft(owner) > 0) return { kind: 'lose', ball, owner: owner.id, by };
+        if (ballsLeft(owner) > 0) return { kind: 'lose', ball, owner: owner.id };
         owner.out = true;
         const left = alive(g);
         if (left.length === 1) {
             win(g, left[0], 'last-standing');
-            return { kind: 'win-last', ball, owner: owner.id, winner: left[0].id, by };
+            return { kind: 'win-last', ball, owner: owner.id, winner: left[0].id };
         }
-        return { kind: 'out', ball, owner: owner.id, by };
+        return { kind: 'out', ball, owner: owner.id };
     }
 
     function win(g, p, reason) {
@@ -139,19 +127,12 @@
         const left = owner ? ballsLeft(owner) : 0;
         switch (o.kind) {
             case 'none': return { title: "No one's ball", body: 'Ball ' + o.ball + " isn't anyone's number.", button: 'Carry on' };
-            case 'lose': return o.by === 'other'
-                ? { title: name + ' loses a ball', body: 'Someone else potted the ' + o.ball + '. ' + name + ' has ' + plural(left, 'ball', 'balls') + ' left.', button: 'Carry on' }
-                : { title: name + ' loses a ball', body: 'Ball ' + o.ball + ' was ' + name + "'s. " + name + ' has ' + plural(left, 'ball', 'balls') + ' left.', button: 'Carry on' };
-            case 'out': return o.by === 'other'
-                ? { title: name + ' is out', body: 'Someone else potted ' + name + "'s last ball, the " + o.ball + '.', button: 'Carry on' }
-                : { title: name + ' is out', body: 'Ball ' + o.ball + ' was ' + name + "'s last ball.", button: 'Carry on' };
+            case 'lose': return { title: name + ' loses a ball', body: 'Ball ' + o.ball + ' was ' + name + "'s. " + name + ' has ' + plural(left, 'ball', 'balls') + ' left.', button: 'Carry on' };
+            case 'out': return { title: name + ' is out', body: 'Ball ' + o.ball + ' was ' + name + "'s last ball.", button: 'Carry on' };
             case 'win-last': {
                 const w = byId(g, o.winner).name;
-                const how = o.by === 'other' ? 'Someone else potted ' + name + "'s last ball, the " + o.ball + ', so ' + name + ' is out. ' : 'Ball ' + o.ball + ' knocked out ' + name + '. ';
-                return { title: w + ' wins', body: how + w + ' is the last player standing.', button: 'See results' };
+                return { title: w + ' wins', body: 'Ball ' + o.ball + ' knocked out ' + name + '. ' + w + ' is the last player standing.', button: 'See results' };
             }
-            case 'win-own': return { title: name + ' wins', body: name + ' potted the ' + o.ball + ', one of their own balls.', button: 'See results' };
-            case 'nothing': return { title: 'Ball ' + o.ball + ' was ' + name + "'s", body: 'Someone else potted it, so ' + name + ' stays in.', button: 'Carry on' };
             case 'no-winner': return { title: 'No winner', body: 'Every ball has been potted.', button: 'See results' };
         }
         return { title: '', body: '', button: 'Carry on' };
@@ -189,7 +170,6 @@
         let draft = null;             // setup and names, kept in memory until the deal
         let view = 'home';
         let check = null;             // { id, stage } while a player checks their numbers from the board
-        let pending = null;           // ball waiting on "Who potted it?"
         let pendingOutcome = null;
         let hideTimer = 0;
 
@@ -344,7 +324,7 @@
                 const label = check ? 'Hide my numbers' : G.deal.index === G.players.length - 1 ? 'Hide and start the game' : 'Hide and pass on';
                 mid.innerHTML = '<h2>' + name + '</h2><p>Your numbers</p>' +
                     '<div class="kp-reveal-balls" role="img" aria-label="Your numbers: ' + spoken + '">' + balls.map((n) => ballHtml(n, G.potted[n] ? 'potted' : '')).join('') + '</div>' +
-                    '<p class="muted">' + (G.mode === 'sink' ? 'Pot one of these yourself to win. Keep them secret.' : 'You lose a ball each time one of these goes down. Keep them secret.') + '</p>' +
+                    '<p class="muted">' + 'You lose a ball each time one of these goes down. Keep them secret.' + '</p>' +
                     (needPin ? '<form class="form kp-pin-form" novalidate><label>Set a 4-digit PIN to check your numbers later<input class="field" name="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"><small class="kp-err" hidden></small></label></form>' : '') +
                     '<p class="muted">Your numbers hide after ' + G.settings.hideAfter + ' seconds.</p>';
                 act.innerHTML = '<button class="btn primary" type="button" data-act="kp-hide">' + label + '</button>';
@@ -457,23 +437,7 @@
         }
 
         function tapBall(n) {
-            if (G.phase !== 'play' || G.potted[n]) return;
-            const owner = ownerOf(G, n);
-            if (owner && G.mode === 'sink') {
-                pending = n;
-                const shooter = G.settings.turns ? byId(G, G.turn) : null;
-                // with turns on, whoever is shooting is the likely answer, so it comes first
-                const buttons = shooter && shooter !== owner
-                    ? [{ label: shooter.name + ' potted it', act: 'kp-who', id: 'other', primary: true }, { label: owner.name + ' potted it', act: 'kp-who', id: 'owner' }]
-                    : [{ label: owner.name + ' potted it', act: 'kp-who', id: 'owner', primary: true }, { label: 'Someone else', act: 'kp-who', id: 'other' }];
-                openDialog('Who potted the ' + n + '?', 'Ball ' + n + ' is ' + owner.name + "'s.", buttons);
-                return;
-            }
-            finishPot(n, null);
-        }
-
-        function finishPot(n, by) {
-            const o = pot(G, n, by);
+            const o = pot(G, n);
             if (!o) return;
             if (G.settings.vibrate && navigator.vibrate) navigator.vibrate(30);
             save();
@@ -493,7 +457,6 @@
 
         // closing the outcome (button or Esc) carries on, or shows the results
         outcomeDlg.addEventListener('close', () => {
-            if (pending !== null) { const n = pending; pending = null; focusSlot(n); return; }
             if (pendingOutcome === null) return;
             const n = pendingOutcome;
             pendingOutcome = null;
@@ -535,13 +498,7 @@
             const w = G.winner ? byId(G, G.winner) : null;
             const title = $('.kp-over-title', root);
             title.innerHTML = w ? esc(w.name) + ' wins <span class="badge gold">Winner</span>' : 'No winner';
-            let reason = 'Every ball has been potted.';
-            if (G.endReason === 'last-standing') reason = 'Last player standing.';
-            if (G.endReason === 'own-ball') {
-                const b = Object.keys(G.potted).find((k) => G.potted[k].owner === G.winner && G.potted[k].pottedBy === 'owner');
-                reason = 'Potted their own ball, the ' + b + '.';
-            }
-            $('.kp-over-reason', root).textContent = reason;
+            $('.kp-over-reason', root).textContent = G.endReason === 'last-standing' ? 'Last player standing.' : 'Every ball has been potted.';
             $('.kp-over-rows', root).innerHTML = G.players.map((p) => {
                 const res = G.winner === p.id ? '<span class="badge gold">Winner</span>' : p.out ? '<span class="badge r">Out</span>' : '<span class="badge">In</span>';
                 const nums = p.balls.map((n) => ballHtml(n, 'small' + (G.potted[n] ? ' potted' : ''))).join('');
@@ -554,19 +511,17 @@
         const form = $('.kp-settings-form', root);
         function renderSettings() {
             const locked = !!(G && (G.phase === 'deal' || G.phase === 'play'));
-            const s = locked ? Object.assign({}, settings, { othersPotYourBall: G.settings.othersPotYourBall, pin: G.settings.pin }) : settings;
-            form.othersPotYourBall.value = s.othersPotYourBall;
+            const s = locked ? Object.assign({}, settings, { pin: G.settings.pin }) : settings;
             form.pin.checked = !!s.pin;
             form.hideAfter.value = String(s.hideAfter);
             form.vibrate.checked = !!s.vibrate;
             form.turns.checked = !!s.turns;
-            form.othersPotYourBall.disabled = locked;
             form.pin.disabled = locked;
             $('.kp-locked', root).hidden = !locked;
         }
         form.addEventListener('change', () => {
             const locked = !!(G && (G.phase === 'deal' || G.phase === 'play'));
-            if (!locked) { settings.othersPotYourBall = form.othersPotYourBall.value; settings.pin = form.pin.checked; }
+            if (!locked) settings.pin = form.pin.checked;
             settings.hideAfter = [10, 15, 30].includes(+form.hideAfter.value) ? +form.hideAfter.value : 15;
             settings.vibrate = form.vibrate.checked;
             settings.turns = form.turns.checked;
@@ -583,7 +538,6 @@
             $$('.kp-drawer.open', root).forEach((d) => closeDrawer(d, false));
             const d = $('#' + id);
             if (id === 'kp-history') renderHistory();
-            if (id === 'kp-rules') rulesTab((G && view !== 'home' ? G.mode : draft && view !== 'home' ? draft.mode : null) || currentRulesTab());
             if (id === 'kp-settings') renderSettings();
             drawerOpener = opener || null;
             d.inert = false;
@@ -602,15 +556,9 @@
         }
         const openDrawerEl = () => $('.kp-drawer.open', root);
 
-        const currentRulesTab = () => $('[data-act="kp-rules-tab"].on', root).dataset.id;
-        function rulesTab(mode) {
-            $$('[data-act="kp-rules-tab"]', root).forEach((b) => { const on = b.dataset.id === mode; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
-            $$('.kp-rules-list', root).forEach((l) => (l.hidden = l.dataset.rules !== mode));
-        }
-
         /* ---------- leaving and starting ---------- */
         function startMode(mode) {
-            draft = { mode, players: 3, balls: mode === 'sink' ? 1 : 3, names: [] };
+            draft = { mode, players: 3, balls: 3, names: [] };
             show('setup', 'push');
             focusFirst('.kp-pick.on');
         }
@@ -658,7 +606,6 @@
                 case 'kp-player': check = { id, stage: 'pass' }; show('private'); break;
                 case 'kp-ball': tapBall(+id); break;
                 case 'kp-next': if (G.phase === 'play') { nextTurn(G, id === 'back' ? -1 : 1); save(); renderBoard(); } break;
-                case 'kp-who': { const n = pending; pending = null; outcomeDlg.close(); finishPot(n, id); break; }
                 case 'kp-outcome-ok': outcomeDlg.close(); break;
                 case 'kp-undo': undoLast(); break;
                 case 'kp-resume': resume(); break;
@@ -667,7 +614,6 @@
                 case 'kp-change': draft = { mode: G.mode, players: G.players.length, balls: G.setup.balls, names: G.players.map((p) => p.name) }; show('setup', 'push'); focusFirst('.kp-pick.on'); break;
                 case 'kp-home': goHome(true); break;
                 case 'kp-clear-names': saveNames([]); if (view === 'names') renderChips(); toast('Recent names cleared.', 'ok'); break;
-                case 'kp-rules-tab': rulesTab(id); break;
                 case 'kp-leave': $('#kp-exit').close(); goHome(false); break;
                 case 'kp-end-ask': $('#kp-exit').close(); $('#kp-end').showModal(); break;
                 case 'kp-end': $('#kp-end').close(); goHome(true); toast('Game ended.', 'note'); break;
