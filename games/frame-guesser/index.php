@@ -1,172 +1,269 @@
 <?php
-$site_page = [
-    'components' => true,
-    'ui' => true,
-    'css' => ['/assets/css/pages/games-frame-guesser.css'],
-];
-require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+// Frame Guesser: the Chapter Oracle (games/chapterguesser/index.html) for TV shows.
+// Same screens, styles and themes; a still frame stands in for the passage, seasons
+// for books and episodes for chapters. The server keeps every answer (see lib.php).
 require __DIR__ . '/lib.php';
 
 $index = fg_index(isset($_GET['refresh']));
-$titles = $index['titles'];
-
-// What the page needs to build the pickers: names only, no frame lists
-$client = array_map(fn ($t) => [
+$series = array_map(fn ($t) => [
+    'id' => $t['name'],
     'name' => $t['name'],
-    'groups' => array_map(fn ($g) => ['name' => $g['name'], 'episodes' => array_column($g['episodes'], 'name')], $t['groups']),
-], $titles);
-
-function fg_meta(array $t): string
-{
-    $eps = array_sum(array_map(fn ($g) => count($g['episodes']), $t['groups']));
-    if ($t['groups'][0]['name'] === null) {
-        return $eps . ' to choose from';
-    }
-    $n = count($t['groups']);
-    return $n . ($n === 1 ? ' season' : ' seasons') . ' · ' . $eps . ($eps === 1 ? ' episode' : ' episodes');
-}
-
-// A frame from the middle of the first episode stands for the title on its card
-function fg_cover(array $t): string
-{
-    $g = $t['groups'][0];
-    $e = $g['episodes'][0];
-    return fg_url(fg_frame_parts(['title' => $t['name'], 'season' => $g['name'], 'episode' => $e['name'], 'frame' => $e['frames'][intdiv(count($e['frames']), 2)]]));
-}
+    'seasons' => array_map(fn ($g) => ['name' => $g['name'], 'episodes' => array_column($g['episodes'], 'name')], $t['groups']),
+], $index['titles']);
+$boot = ['series' => $series, 'error' => $index['error'], 'stale' => $index['stale'] ? gmdate('j M Y', $index['built']) : null, 'zooms' => count(FG_ZOOMS)];
+$v = fn ($f) => $f . '?v=' . filemtime(__DIR__ . '/' . $f);
+header('Content-Type: text/html; charset=utf-8');
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <?php page_head(); ?>
-    <link rel="preconnect" href="https://assets.craftyplayz.com">
-    <script src="<?= h(asset('/games/frame-guesser/frame-guesser.js')) ?>" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frame Guesser — TV Quiz</title>
+<meta name="description" content="Guess the episode from a single still frame">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?= htmlspecialchars($v('themes.css')) ?>">
+<link rel="stylesheet" href="<?= htmlspecialchars($v('oracle.css')) ?>">
+<script defer src="https://cloud.umami.is/script.js" data-website-id="60bfdde6-b1fd-4fd3-b929-b7e14e2191c7"></script>
 </head>
-
 <body>
-    <?php site_header(); ?>
+<div class="app-wrap">
 
-    <main class="page fg" id="main">
-        <?= site_breadcrumbs(site_current_path()) ?>
-        <h1 class="page-title">Frame Guesser</h1>
-        <p class="page-lede">See one still frame from a show or film series and name the episode it comes from.</p>
+  <!-- ══════════ SERIES SELECT SCREEN ══════════ -->
+  <div class="screen active" id="seriesScreen">
+    <div class="wordmark">
+      <div class="wordmark-eyebrow">TV Quiz</div>
+      <div class="wordmark-title">Frame <em>Guesser</em></div>
+      <div class="wordmark-divider"></div>
+    </div>
+    <div class="card">
+      <div class="menu-title">Choose a show</div>
+      <p class="menu-sub">Pick the show you want to be quizzed on.</p>
+      <div class="series-grid" id="seriesGrid"></div>
+      <div class="menu-status" id="seriesStatus">Finding shows…</div>
+      <div class="go-btns" id="seriesRetry" hidden>
+        <button class="btn btn-ghost" onclick="location.reload()">Try Again</button>
+      </div>
+    </div>
+    <p class="info-link"><a class="btn-link" href="info/">How to play &amp; what's new</a></p>
+  </div>
 
-        <!-- Pick titles -->
-        <section class="fg-screen" id="seriesScreen">
-            <?php if ($index['error']): ?>
-                <p class="err">Couldn't reach the frame library. Try again in a few minutes.</p>
-            <?php elseif (!$titles): ?>
-                <p class="note">There's nothing to play yet. Each show needs its own folder of frames, laid out as Show / Season 1 / Episode 1 or Series / Film.</p>
-            <?php else: ?>
-                <?php if ($index['stale']): ?><p class="note">Showing the list of titles from <?= h(gmdate('j M Y', $index['built'])) ?>. The frame library couldn't be reached to update it.</p><?php endif; ?>
-                <h2 class="sec-h">Choose what to play <span class="n" id="pickCount"><?= count($titles) === 1 ? '1 title' : count($titles) . ' titles' ?></span></h2>
-                <div class="fg-titles" id="titleGrid">
-                    <?php foreach ($titles as $i => $t): ?>
-                        <button class="fg-title" type="button" aria-pressed="<?= count($titles) === 1 ? 'true' : 'false' ?>" data-name="<?= h($t['name']) ?>">
-                            <img src="<?= h(fg_cover($t)) ?>" alt="" width="320" height="180"<?= $i >= 6 ? ' loading="lazy"' : '' ?> decoding="async">
-                            <span class="fg-title-info"><b><?= h($t['name']) ?></b><small><?= h(fg_meta($t)) ?></small></span>
-                        </button>
-                    <?php endforeach; ?>
-                </div>
-                <div class="actions fg-actions">
-                    <button class="btn primary" type="button" id="toModes"<?= count($titles) === 1 ? '' : ' disabled' ?>>Choose a mode</button>
-                    <?php if (count($titles) > 1): ?><button class="btn" type="button" id="pickAll">Select all</button><?php endif; ?>
-                </div>
-            <?php endif; ?>
-        </section>
+  <!-- ══════════ MODE SELECT SCREEN ══════════ -->
+  <div class="screen" id="menuScreen">
+    <div class="wordmark">
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
+      <div class="wordmark-title">Frame <em>Guesser</em></div>
+      <div class="wordmark-divider"></div>
+    </div>
+    <div class="card">
+      <button class="btn-link card-back" onclick="goToSeries()">← Change show</button>
+      <div class="menu-title">Choose your challenge</div>
+      <p class="menu-sub" id="menuSub">How well do you know the show?</p>
+      <div class="mode-grid">
+        <button class="mode-card" onclick="startGame('normal')">
+          <span class="mode-symbol">✦</span>
+          <span class="mode-name">Normal</span>
+          <span class="mode-desc" id="desc-normal">Name the season, then the episode. One wrong season and it's over.</span>
+          <span class="mode-best">Best <b id="best-normal">0</b></span>
+        </button>
+        <button class="mode-card" onclick="startGame('timed')">
+          <span class="mode-symbol">◷</span>
+          <span class="mode-name">Timed</span>
+          <span class="mode-desc">60 seconds on the clock. Wrong answers don't end the run — they just don't score.</span>
+          <span class="mode-best">Best <b id="best-timed">0</b></span>
+        </button>
+        <button class="mode-card" onclick="startGame('minimum')">
+          <span class="mode-symbol">⌕</span>
+          <span class="mode-name">Minimum Context</span>
+          <span class="mode-desc">Start with a tiny piece of the frame and zoom out one step at a time. Less of the picture, more points.</span>
+          <span class="mode-best">Best <b id="best-minimum">0</b></span>
+        </button>
+        <button class="mode-card" onclick="openSeasonPicker()">
+          <span class="mode-symbol">▤</span>
+          <span class="mode-name">Specific Seasons</span>
+          <span class="mode-desc">Practise on only the seasons you choose. Same rules as Normal.</span>
+          <span class="mode-best">Best <b id="best-specific">0</b></span>
+        </button>
+      </div>
+      <div class="player-row">
+        <label class="player-label" for="playerName">Leaderboard name</label>
+        <input class="name-input" id="playerName" maxlength="20" autocomplete="nickname"
+               placeholder="Enter a name to join" oninput="setPlayerName(this.value)">
+        <button class="btn btn-ghost btn-sm" onclick="openLeaderboard('normal')">🏆 Leaderboards</button>
+      </div>
+    </div>
+  </div>
 
-        <!-- Pick a mode -->
-        <section class="fg-screen" id="menuScreen" hidden>
-            <button class="btn small" type="button" data-go="series">Change titles</button>
-            <h2 class="sec-h">Choose a mode <span class="n" data-set-name></span></h2>
-            <div class="fg-modes">
-                <button class="fg-mode" type="button" data-mode="normal">
-                    <b>Normal</b>
-                    <span>Ten frames. Name the exact episode for 3 points, or just the right season for 1.</span>
-                    <small>Best <span data-best="normal">0</span></small>
-                </button>
-                <button class="fg-mode" type="button" data-mode="survival">
-                    <b>Survival</b>
-                    <span>Keep going until you've missed three times. A miss is any guess that scores nothing.</span>
-                    <small>Best <span data-best="survival">0</span></small>
-                </button>
-                <button class="fg-mode" type="button" data-mode="timed">
-                    <b>Timed</b>
-                    <span>90 seconds on the clock. Guess as many frames as you can; misses just don't score.</span>
-                    <small>Best <span data-best="timed">0</span></small>
-                </button>
-            </div>
-            <div class="fg-player">
-                <label>Leaderboard name (optional)
-                    <input class="field" id="playerName" maxlength="20" autocomplete="nickname" placeholder="Your name">
-                </label>
-                <button class="btn" type="button" data-go="board">Leaderboards</button>
-            </div>
-            <p class="muted fg-rules">Points: the exact episode or film scores 3, the right season but the wrong episode scores 1, anything else scores 0.</p>
-        </section>
+  <!-- ══════════ LEADERBOARD SCREEN ══════════ -->
+  <div class="screen" id="boardScreen">
+    <div class="wordmark">
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
+      <div class="wordmark-title">Frame <em>Guesser</em></div>
+      <div class="wordmark-divider"></div>
+    </div>
+    <div class="card">
+      <button class="btn-link card-back" onclick="goToMenu()">← Modes</button>
+      <div class="menu-title">Leaderboards</div>
+      <p class="menu-sub" id="boardSub">Shared by everyone who plays</p>
+      <div class="board-tabs" id="boardTabs"></div>
+      <ol class="board-list" id="boardList"></ol>
+      <div class="menu-status" id="boardStatus"></div>
+    </div>
+  </div>
 
-        <!-- Play -->
-        <section class="fg-screen" id="quizScreen" hidden>
-            <div class="fg-top">
-                <button class="btn small" type="button" data-go="menu">Quit to modes</button>
-                <span class="badge" id="modeTag"></span>
-            </div>
-            <div class="fg-play">
-                <div class="fg-frame">
-                    <img id="frameImg" alt="A frame from the show. Which episode is it from?" width="1280" height="720" fetchpriority="high">
-                    <p class="err fg-frame-err" id="frameErr" hidden>Couldn't load this frame. <button class="btn small" type="button" id="frameRetry">Try again</button></p>
-                </div>
-                <div class="fg-side">
-                    <div class="tiles fg-stats">
-                        <div class="tile"><b id="scoreNum">0</b><span>Score</span></div>
-                        <div class="tile" id="progressTile"><b id="progressNum">1 / 10</b><span id="progressLbl">Frame</span></div>
-                        <div class="tile"><b id="bestNum">0</b><span>Best</span></div>
-                    </div>
-                    <p class="fg-step" id="stepText" aria-live="polite"></p>
-                    <div class="fg-choices" id="choices"></div>
-                    <div class="fg-result" id="result" aria-live="polite"></div>
-                </div>
-            </div>
-        </section>
+  <!-- ══════════ REPLAY SCREEN (one leaderboard run, frame by frame) ══════════ -->
+  <div class="screen" id="replayScreen">
+    <div class="wordmark">
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
+      <div class="wordmark-title">Frame <em>Guesser</em></div>
+      <div class="wordmark-divider"></div>
+    </div>
+    <div class="card">
+      <button class="btn-link card-back" onclick="backToBoard()">← Leaderboard</button>
+      <div class="menu-title" id="replayTitle">Replay</div>
+      <p class="menu-sub" id="replaySub"></p>
+      <div class="rp-summary" id="replaySummary"></div>
+      <ol class="rp-list" id="replayList"></ol>
+      <div class="menu-status" id="replayStatus"></div>
+    </div>
+  </div>
 
-        <!-- Game over -->
-        <section class="fg-screen" id="gameoverScreen" hidden>
-            <div class="card fg-over">
-                <p class="muted" id="overTitle">Game over</p>
-                <b class="fg-big" id="overScore">0</b>
-                <p class="muted" id="overLbl"></p>
-                <p class="badge g" id="overRecord" hidden>New best score</p>
-                <div id="overBoard"></div>
-                <div class="actions">
-                    <button class="btn primary" type="button" data-go="again">Play again</button>
-                    <button class="btn" type="button" data-go="board">Leaderboard</button>
-                    <button class="btn" type="button" data-go="menu">Change mode</button>
-                </div>
-            </div>
-            <h2 class="sec-h">Your frames</h2>
-            <div class="rows fg-rounds" id="overRounds"></div>
-        </section>
+  <!-- ══════════ SEASON PICKER SCREEN (specific seasons mode) ══════════ -->
+  <div class="screen" id="pickScreen">
+    <div class="wordmark">
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
+      <div class="wordmark-title">Frame <em>Guesser</em></div>
+      <div class="wordmark-divider"></div>
+    </div>
+    <div class="card">
+      <button class="btn-link card-back" onclick="goToMenu()">← Modes</button>
+      <div class="menu-title">Choose your seasons</div>
+      <p class="menu-sub">Frames come only from the seasons you tick.</p>
+      <div class="pick-toolbar">
+        <button class="btn-link" onclick="setPicked(true)">Select all</button>
+        <button class="btn-link" onclick="setPicked(false)">Clear all</button>
+      </div>
+      <div class="pick-list" id="pickList"></div>
+      <div class="go-btns">
+        <button class="btn btn-primary" id="pickStartBtn" onclick="startGame('specific')">Start</button>
+      </div>
+    </div>
+  </div>
 
-        <!-- Leaderboards -->
-        <section class="fg-screen" id="boardScreen" hidden>
-            <button class="btn small" type="button" data-go="menu">Back to modes</button>
-            <h2 class="sec-h">Leaderboards <span class="n" data-set-name></span></h2>
-            <div class="stabs" id="boardTabs" role="group" aria-label="Game mode"></div>
-            <div id="boardBody"></div>
-        </section>
+  <!-- ══════════ LOADING SCREEN ══════════ -->
+  <div class="screen" id="loadingScreen">
+    <div class="wordmark">
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
+      <div class="wordmark-title">Frame <em>Guesser</em></div>
+      <div class="wordmark-divider"></div>
+    </div>
+    <div class="card">
+      <div class="loading-inner">
+        <div class="spinner-wrap"><div class="spinner-ring"></div></div>
+        <div class="loading-title">Rolling the film…</div>
+        <div class="loading-book" id="loadingBook">Picking a frame</div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- One leaderboard run, frame by frame -->
-        <section class="fg-screen" id="replayScreen" hidden>
-            <button class="btn small" type="button" data-go="board">Back to leaderboard</button>
-            <h2 class="sec-h" id="replayTitle">Replay</h2>
-            <div class="rows fg-rounds" id="replayRounds"></div>
-        </section>
+  <!-- ══════════ ERROR SCREEN ══════════ -->
+  <div class="screen" id="errorScreen">
+    <div class="wordmark">
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
+      <div class="wordmark-title">Frame <em>Guesser</em></div>
+      <div class="wordmark-divider"></div>
+    </div>
+    <div class="card">
+      <div class="error-card">
+        <div class="error-icon">🎞️</div>
+        <div class="error-title">Frames not found</div>
+        <div class="error-msg" id="errorMsg">Could not load the frames.</div>
+        <div class="go-btns">
+          <button class="btn btn-primary" onclick="startGame(mode)">Try Again</button>
+          <button class="btn btn-ghost" onclick="goToMenu()">Change Mode</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <noscript><p class="err">This game needs JavaScript.</p></noscript>
-    </main>
+  <!-- ══════════ QUIZ SCREEN ══════════ -->
+  <div class="screen" id="quizScreen">
+    <div class="quiz-topbar">
+      <button class="btn-link" onclick="goToMenu()">← Modes</button>
+      <span class="mode-tag" id="modeTag">Normal</span>
+    </div>
 
-    <script>window.FG = <?= json_encode(['titles' => $client, 'modes' => FG_MODES], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) ?>;</script>
-    <?php site_footer(null, false); ?>
+    <div class="quiz-header">
+      <div class="score-wrap">
+        <span class="score-num" id="scoreDisplay">0</span>
+        <span class="score-lbl">Score</span>
+      </div>
+      <div class="timer-wrap" id="timerWrap" hidden>
+        <span class="timer-num" id="timerDisplay">1:00</span>
+        <span class="timer-lbl">Time left</span>
+      </div>
+      <div class="hs-wrap">
+        <span class="hs-num" id="hsDisplay">0</span>
+        <span class="hs-lbl">Best</span>
+      </div>
+    </div>
+
+    <div class="passage-label">Frame</div>
+    <div class="frame-card" id="frameCard">
+      <img id="frameImg" alt="A still frame from the show" width="960" height="540">
+      <div class="spinner-ring" id="frameSpinner" hidden></div>
+      <div class="frame-msg" id="frameMsg" hidden>
+        <span>Couldn't load this frame.</span>
+        <button class="btn btn-ghost btn-sm" onclick="retryFrame()">Try again</button>
+      </div>
+    </div>
+
+    <div class="context-bar" id="contextBar" hidden>
+      <button class="btn btn-ghost btn-sm" id="zoomBtn" onclick="zoomOut()">− Zoom out</button>
+      <span class="context-info" id="contextInfo"></span>
+    </div>
+
+    <div class="stage-label" id="stageLabel">
+      <span class="stage-badge" id="stageBadge">Step 1</span>
+      <span id="stageText">Which season is this frame from?</span>
+    </div>
+
+    <div id="choicesArea"></div>
+    <div class="feedback-bar" id="feedbackBar"></div>
+  </div>
+
+  <!-- ══════════ GAME OVER SCREEN ══════════ -->
+  <div class="screen" id="gameoverScreen">
+    <div class="wordmark">
+      <div class="wordmark-eyebrow" data-series-name>&nbsp;</div>
+      <div class="wordmark-title">Frame <em>Guesser</em></div>
+      <div class="wordmark-divider"></div>
+    </div>
+    <div class="card">
+      <div class="go-inner">
+        <div class="go-eyebrow" id="goEyebrow">Game Over</div>
+        <span class="go-score" id="goScore">0</span>
+        <div class="go-score-lbl" id="goScoreLbl">episodes correctly identified</div>
+        <div class="go-record" id="goRecord" style="display:none">✦ New High Score</div>
+        <div class="go-context" id="goContext"></div>
+        <div class="lb-panel" id="lbPanel"></div>
+        <div class="go-sep"></div>
+        <div class="go-btns">
+          <button class="btn btn-primary" onclick="startGame(mode)">Play Again</button>
+          <button class="btn btn-ghost" onclick="openLeaderboard(mode)">Leaderboard</button>
+          <button class="btn btn-ghost" onclick="goToMenu()">Change Mode</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.app-wrap -->
+
+<script>window.FG = <?= json_encode($boot, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) ?>;</script>
+<script src="<?= htmlspecialchars($v('frame-guesser.js')) ?>"></script>
 </body>
-
 </html>

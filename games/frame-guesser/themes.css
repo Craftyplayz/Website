@@ -1,0 +1,260 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Frame Guesser colour schemes (a copy of Chapter Oracle's themes.css)
+   ═══════════════════════════════════════════════════════════════════════
+
+   Every colour the page uses is a variable defined here; oracle.css only
+   ever refers to them by name.
+
+   When a show is picked, the page sets data-series on <html> to the
+   show's slug: its folder name in lowercase with only letters and digits
+   kept ("Game of Thrones" → "gameofthrones").
+
+   Two kinds of theme:
+     • Series themes  :root[data-series="<slug>"]  belong to particular
+       series (bottom of this file).
+     • Shared themes  :root[data-theme="<name>"]  go to every series that
+       has no series theme of its own. The page picks one from the slug, so
+       a series always gets the same shared theme.
+   Changes fade smoothly (see "Fading" below).
+
+   Adding a series theme:
+     1. Copy a series theme block and give it the slugs of its series.
+     2. Change the colours. Only list the ones that differ from the default.
+
+   Adding a shared theme: copy a shared theme block with a new name. Note
+   that this reshuffles which shared theme each unthemed series gets, since
+   the pick depends on how many shared themes there are.
+
+   Adding a new colour variable: define it in the default block, then add
+   it to the transition-property list and the @property lines so it fades
+   instead of switching instantly.
+
+   Note: --gold is the accent colour in every theme, whatever its hue.
+
+   index.php adds ?v=<last modified> to this file's address, so Cloudflare
+   fetches a new copy as soon as it changes.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+
+/* ── Default gold, which is also Harry Potter's series theme ── */
+:root,
+:root[data-series="harrypotter"] {
+  /* backgrounds */
+  --bg:        #07070d;
+  --bg2:       #0d0d18;
+  --surface:   #111120;
+  --surface2:  #191928;
+  /* borders */
+  --border:    #222236;
+  --border2:   #2e2e48;
+  /* accent, and its faint tints */
+  --gold:      #c9a84c;
+  --gold2:     #e8cb7a;
+  --gold-dim:  rgba(201,168,76,0.14);
+  --gold-glow: rgba(201,168,76,0.07);
+  --gold-line: rgba(201,168,76,0.26);
+  /* second background glow, bottom right */
+  --haze:      rgba(90,60,180,0.07);
+  /* text */
+  --text:      #eaeaf6;
+  --text-sub:  #9090b0;
+  --text-muted:#52527a;
+  /* right / wrong / partial answers (same in every theme) */
+  --green:     #4ade80;
+  --green-dim: rgba(74,222,128,0.11);
+  --amber:     #fb923c;
+  --amber-dim: rgba(251,146,60,0.11);
+  --red:       #f87171;
+  --red-dim:   rgba(248,113,113,0.11);
+
+  /* Fading: themes change these over 0.9s */
+  transition-property: --bg, --bg2, --surface, --surface2, --border, --border2,
+    --gold, --gold2, --gold-dim, --gold-glow, --gold-line, --haze, --text-sub, --text-muted;
+  transition-duration: 0.9s;
+  transition-timing-function: ease;
+}
+
+/* Browsers can only fade a variable that is registered as a colour.
+   initial-value must match the default above. */
+@property --bg         { syntax: '<color>'; inherits: true; initial-value: #07070d; }
+@property --bg2        { syntax: '<color>'; inherits: true; initial-value: #0d0d18; }
+@property --surface    { syntax: '<color>'; inherits: true; initial-value: #111120; }
+@property --surface2   { syntax: '<color>'; inherits: true; initial-value: #191928; }
+@property --border     { syntax: '<color>'; inherits: true; initial-value: #222236; }
+@property --border2    { syntax: '<color>'; inherits: true; initial-value: #2e2e48; }
+@property --gold       { syntax: '<color>'; inherits: true; initial-value: #c9a84c; }
+@property --gold2      { syntax: '<color>'; inherits: true; initial-value: #e8cb7a; }
+@property --gold-dim   { syntax: '<color>'; inherits: true; initial-value: rgba(201,168,76,0.14); }
+@property --gold-glow  { syntax: '<color>'; inherits: true; initial-value: rgba(201,168,76,0.07); }
+@property --gold-line  { syntax: '<color>'; inherits: true; initial-value: rgba(201,168,76,0.26); }
+@property --haze       { syntax: '<color>'; inherits: true; initial-value: rgba(90,60,180,0.07); }
+@property --text-sub   { syntax: '<color>'; inherits: true; initial-value: #9090b0; }
+@property --text-muted { syntax: '<color>'; inherits: true; initial-value: #52527a; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Shared themes: for any series without a series theme of its own
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Crimson ── */
+:root[data-theme="crimson"] {
+  --bg:        #0b0607;
+  --bg2:       #140a0c;
+  --surface:   #1c0f12;
+  --surface2:  #261418;
+  --border:    #3a1d23;
+  --border2:   #512830;
+  --gold:      #e0566b;
+  --gold2:     #f39aa6;
+  --gold-dim:  rgba(224,86,107,0.14);
+  --gold-glow: rgba(224,86,107,0.07);
+  --gold-line: rgba(224,86,107,0.28);
+  --haze:      rgba(160,30,60,0.09);
+  --text-sub:  #b0949a;
+  --text-muted:#6e4f56;
+}
+
+/* ── Amethyst ── */
+:root[data-theme="amethyst"] {
+  --bg:        #08060d;
+  --bg2:       #100c19;
+  --surface:   #171124;
+  --surface2:  #201831;
+  --border:    #2e2346;
+  --border2:   #3f305f;
+  --gold:      #b58cf0;
+  --gold2:     #d7bdfb;
+  --gold-dim:  rgba(181,140,240,0.14);
+  --gold-glow: rgba(181,140,240,0.07);
+  --gold-line: rgba(181,140,240,0.28);
+  --haze:      rgba(120,70,200,0.10);
+  --text-sub:  #a395bd;
+  --text-muted:#625579;
+}
+
+/* ── Ember ── */
+:root[data-theme="ember"] {
+  --bg:        #0b0805;
+  --bg2:       #150f09;
+  --surface:   #1e150d;
+  --surface2:  #291c11;
+  --border:    #3c2918;
+  --border2:   #543921;
+  --gold:      #f08a3c;
+  --gold2:     #f8b882;
+  --gold-dim:  rgba(240,138,60,0.14);
+  --gold-glow: rgba(240,138,60,0.07);
+  --gold-line: rgba(240,138,60,0.28);
+  --haze:      rgba(200,90,30,0.09);
+  --text-sub:  #b39c88;
+  --text-muted:#6f5a48;
+}
+
+/* ── Lagoon ── */
+:root[data-theme="lagoon"] {
+  --bg:        #050b0b;
+  --bg2:       #091414;
+  --surface:   #0e1c1c;
+  --surface2:  #132626;
+  --border:    #1c3838;
+  --border2:   #284d4d;
+  --gold:      #4fd1c5;
+  --gold2:     #9be8e0;
+  --gold-dim:  rgba(79,209,197,0.13);
+  --gold-glow: rgba(79,209,197,0.06);
+  --gold-line: rgba(79,209,197,0.27);
+  --haze:      rgba(30,150,150,0.09);
+  --text-sub:  #8aa9a6;
+  --text-muted:#4c6a67;
+}
+
+/* ── Rose ── */
+:root[data-theme="rose"] {
+  --bg:        #0c0709;
+  --bg2:       #160d11;
+  --surface:   #1f1218;
+  --surface2:  #2a1821;
+  --border:    #3e2431;
+  --border2:   #563244;
+  --gold:      #f28cb8;
+  --gold2:     #f9c0d9;
+  --gold-dim:  rgba(242,140,184,0.14);
+  --gold-glow: rgba(242,140,184,0.07);
+  --gold-line: rgba(242,140,184,0.28);
+  --haze:      rgba(200,80,140,0.09);
+  --text-sub:  #b496a4;
+  --text-muted:#705463;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Series themes
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── The Lord of the Rings: elven green ── */
+:root[data-series="thelordoftherings"],
+:root[data-series="lordoftherings"] {
+  --bg:        #060a07;
+  --bg2:       #0a120c;
+  --surface:   #0f1a12;
+  --surface2:  #15241a;
+  --border:    #1f3325;
+  --border2:   #2b4633;
+  --gold:      #8fbf6e;
+  --gold2:     #bfe09d;
+  --gold-dim:  rgba(143,191,110,0.14);
+  --gold-glow: rgba(143,191,110,0.07);
+  --gold-line: rgba(143,191,110,0.28);
+  --haze:      rgba(40,110,60,0.09);
+  --text-sub:  #8fa896;
+  --text-muted:#50705a;
+}
+
+
+/* ── Percy Jackson and the Olympians / The Heroes of Olympus: ocean blue ── */
+:root[data-series="percyjacksonandtheolympians"],
+:root[data-series="percyjackson"],
+:root[data-series="theheroesofolympus"],
+:root[data-series="heroesofolympus"] {
+  --bg:        #050911;
+  --bg2:       #09111f;
+  --surface:   #0e1828;
+  --surface2:  #142137;
+  --border:    #1e2e4a;
+  --border2:   #2a4063;
+  --gold:      #5aa6ff;
+  --gold2:     #9ccaff;
+  --gold-dim:  rgba(90,166,255,0.14);
+  --gold-glow: rgba(90,166,255,0.07);
+  --gold-line: rgba(90,166,255,0.28);
+  --haze:      rgba(30,140,200,0.09);
+  --text-sub:  #8ea3c4;
+  --text-muted:#4f6488;
+}
+
+
+/* ── A Song of Ice and Fire / Game of Thrones: steel ── */
+:root[data-series="asongoficeandfire"],
+:root[data-series="gameofthrones"] {
+  --bg:        #08090a;
+  --bg2:       #0e0f11;
+  --surface:   #141518;
+  --surface2:  #1c1e22;
+  --border:    #2a2d33;
+  --border2:   #3b3f47;
+  --gold:      #b9c1cc;
+  --gold2:     #e4e9f0;
+  --gold-dim:  rgba(185,193,204,0.13);
+  --gold-glow: rgba(185,193,204,0.06);
+  --gold-line: rgba(185,193,204,0.26);
+  --haze:      rgba(150,165,190,0.06);
+  --text-sub:  #9a9fa8;
+  --text-muted:#5a5f69;
+}
+/* Brushed-steel accent word in the title */
+:root[data-series="asongoficeandfire"] .wordmark-title em,
+:root[data-series="gameofthrones"] .wordmark-title em {
+  background: linear-gradient(100deg, #8d949e 0%, #eef2f6 45%, #9aa1ab 60%, #d5dae1 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}

@@ -15,13 +15,16 @@ const FG_TTL   = 86400; // the index is rebuilt once a day
 const FG_UA    = 'craftyplayz.com Frame Guesser (+https://craftyplayz.com/games/frame-guesser/)';
 define('FG_CACHE', sys_get_temp_dir() . '/craftyplayz-framegame');
 
+// The Chapter Oracle's modes, with seasons for books and episodes for chapters
 const FG_MODES = [
-    'normal'   => ['title' => 'Normal', 'rounds' => 10],
-    'survival' => ['title' => 'Survival', 'lives' => 3],
-    'timed'    => ['title' => 'Timed', 'seconds' => 90],
+    'normal'   => ['title' => 'Normal'],
+    'timed'    => ['title' => 'Timed', 'seconds' => 60],
+    'minimum'  => ['title' => 'Minimum Context'],
+    'specific' => ['title' => 'Specific Seasons'],
 ];
-const FG_EXACT  = 3; // right episode or film
-const FG_SEASON = 1; // right season, wrong episode
+// Minimum context: how much of the frame's width each zoom step shows. A right
+// episode scores one point per step left unused (7 at the first, 1 at the full frame).
+const FG_ZOOMS = [0.2, 0.28, 0.38, 0.5, 0.65, 0.82, 1];
 
 // Asset host URL for a list of folder/file names
 function fg_url(array $parts, bool $dir = false): string
@@ -196,25 +199,39 @@ function fg_session(bool $readOnly = false): void
     session_start($readOnly ? ['read_and_close' => true] : []);
 }
 
-// A random frame: a random title in play, then a random episode of it, so a
-// long show doesn't crowd out a short film series. Avoids repeating $avoid's episode.
-function fg_pick(array $titles, ?array $avoid = null): array
+// A random frame from the seasons in play ($groups), each episode equally likely.
+// Avoids repeating $avoid's episode when there's another to pick.
+function fg_pick(string $title, array $groups, ?array $avoid = null): array
 {
-    for ($try = 0; $try < 8; $try++) {
-        $t = $titles[array_rand($titles)];
-        $eps = [];
-        foreach ($t['groups'] as $g) {
-            foreach ($g['episodes'] as $e) {
-                $eps[] = [$g['name'], $e];
-            }
+    $eps = [];
+    foreach ($groups as $g) {
+        foreach ($g['episodes'] as $e) {
+            $eps[] = [$g['name'], $e];
         }
+    }
+    for ($try = 0; $try < 8; $try++) {
         [$season, $e] = $eps[array_rand($eps)];
-        $round = ['title' => $t['name'], 'season' => $season, 'episode' => $e['name'], 'frame' => $e['frames'][array_rand($e['frames'])], 'token' => bin2hex(random_bytes(12))];
-        if (!$avoid || [$avoid['title'], $avoid['season'], $avoid['episode']] !== [$round['title'], $round['season'], $round['episode']]) {
+        if (!$avoid || count($eps) === 1 || [$avoid['season'], $avoid['episode']] !== [$season, $e['name']]) {
             break;
         }
     }
-    return $round;
+    return [
+        'title' => $title, 'season' => $season, 'episode' => $e['name'], 'frame' => $e['frames'][array_rand($e['frames'])],
+        'token' => bin2hex(random_bytes(12)), 'zoom' => 0,
+        // centre of the minimum context crop, kept clear of the edges and letterbox bars
+        'cx' => mt_rand(250, 750) / 1000, 'cy' => mt_rand(300, 700) / 1000,
+    ];
+}
+
+// The seasons in play for a run, from the current index; null if the show has gone
+function fg_groups(string $title, array $seasons): ?array
+{
+    foreach (fg_index()['titles'] as $t) {
+        if ($t['name'] === $title) {
+            return array_values(array_filter($t['groups'], fn ($g) => in_array($g['name'], $seasons, true))) ?: null;
+        }
+    }
+    return null;
 }
 
 function fg_frame_parts(array $round): array
@@ -222,32 +239,44 @@ function fg_frame_parts(array $round): array
     return array_values(array_filter([$round['title'], $round['season'], $round['episode'], $round['frame']], fn ($p) => $p !== null));
 }
 
+// frame.php address for a round; minimum context adds the zoom step so each step is a new image
+function fg_frame_url(array $run, array $round, bool $full = false): string
+{
+    return 'frame.php?t=' . $round['token'] . ($run['mode'] === 'minimum' ? '&z=' . ($full ? 'full' : $round['zoom']) : '');
+}
+
 // What the page may see of a run. Answers only appear for rounds already played.
 function fg_state(array $run): array
 {
-    $mode = FG_MODES[$run['mode']];
-    $state = ['mode' => $run['mode'], 'titles' => $run['titles'], 'score' => $run['score'], 'round' => count($run['rounds']), 'over' => $run['over'], 'end' => $run['end']];
-    if (isset($mode['lives'])) {
-        $state['lives'] = $run['lives'];
-    }
-    if (isset($mode['seconds'])) {
+    $state = ['mode' => $run['mode'], 'title' => $run['title'], 'seasons' => $run['seasons'], 'score' => $run['score'],
+              'round' => count($run['rounds']), 'stage' => $run['stage'], 'over' => $run['over'], 'end' => $run['end']];
+    if (isset(FG_MODES[$run['mode']]['seconds'])) {
         $state['timeLeft'] = max(0, (int) round($run['deadline'] * 1000 - microtime(true) * 1000));
     }
     if ($run['over']) {
         $state['rounds'] = fg_public_rounds($run['rounds']);
     } else {
-        $state['frame'] = 'frame.php?t=' . $run['cur']['token'];
-        $state['next'] = 'frame.php?t=' . $run['next']['token'];
+        $state['frame'] = fg_frame_url($run, $run['cur']);
+        $state['next'] = fg_frame_url($run, $run['next']);
+        if ($run['mode'] === 'minimum') {
+            $state['zoom'] = $run['cur']['zoom'];
+        }
     }
     return $state;
 }
 
-// Played rounds for the game-over list and replays, with direct image links
+// Played rounds for the game over screen and replays, with direct image links
 // (the answer is already shown by then)
 function fg_public_rounds(array $rounds): array
 {
-    return array_map(fn ($r) => [
-        'title' => $r['title'], 'season' => $r['season'], 'episode' => $r['episode'],
-        'image' => fg_url(fg_frame_parts($r)), 'guess' => $r['guess'], 'points' => $r['points'],
-    ], $rounds);
+    return array_map(function ($r) {
+        $out = ['season' => $r['season'], 'episode' => $r['episode'], 'image' => fg_url(fg_frame_parts($r)),
+                'pickedSeason' => $r['pickedSeason'], 'pickedEpisode' => $r['pickedEpisode'], 'result' => $r['result'], 'points' => $r['points']];
+        foreach (['timeLeft', 'zoomUsed'] as $k) {
+            if (isset($r[$k])) {
+                $out[$k] = $r[$k];
+            }
+        }
+        return $out;
+    }, $rounds);
 }
