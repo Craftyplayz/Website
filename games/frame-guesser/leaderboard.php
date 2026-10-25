@@ -1,10 +1,10 @@
 <?php
-// Shared leaderboards for Frame Guesser: one board per set of titles and game mode,
-// stored like the Chapter Oracle's (data/, blocked by data/.htaccess). Each name keeps
+// Shared leaderboards for Frame Guesser: one board per show and game mode, stored like
+// the Chapter Oracle's (data/, blocked by data/.htaccess). Each name keeps
 // its best score per board. The score and replay come from the finished run in the
 // session, never from the browser, so they can't be faked.
 //
-//   GET  leaderboard.php?titles=A|B&mode=normal → { entries: [...] }
+//   GET  leaderboard.php?series=Game%20of%20Thrones&mode=normal → { entries: [...] }
 //   GET  leaderboard.php?replay=<id>            → { replay: {...} }
 //   POST leaderboard.php  {name}                → { entries, rank, best, improved }
 require __DIR__ . '/lib.php';
@@ -101,12 +101,12 @@ if ($method === 'GET' && isset($_GET['replay'])) {
 }
 
 if ($method === 'GET') {
-    $titles = $_GET['titles'] ?? null;
+    $series = $_GET['series'] ?? null;
     $mode   = $_GET['mode'] ?? null;
-    if (!is_string($titles) || strlen($titles) > 20000 || !is_string($mode) || !isset(FG_MODES[$mode])) {
-        fail(400, 'Unknown titles or game mode.');
+    if (!is_string($series) || strlen($series) > 300 || !is_string($mode) || !isset(FG_MODES[$mode])) {
+        fail(400, 'Unknown show or game mode.');
     }
-    $board = is_file($store) ? withStore($store, false, fn (array $data) => $data['boards'][$titles][$mode] ?? []) : [];
+    $board = is_file($store) ? withStore($store, false, fn (array $data) => $data['boards'][$series][$mode] ?? []) : [];
     echo json_encode(['entries' => publicEntries($board)], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -133,17 +133,21 @@ if ($run['saved']) {
 if ($run['score'] < 1) {
     fail(400, 'Score at least one point to join the leaderboard.');
 }
-$key     = implode('|', $run['titles']); // shortcut: a title with | in its name could share a board; fine unless that happens
+$key     = $run['title'];
 $mode    = $run['mode'];
 $score   = $run['score'];
-$replay  = ['v' => 1, 'mode' => $mode, 'titles' => $run['titles'], 'end' => $run['end'], 'rounds' => fg_public_rounds($run['rounds'])];
+$seasons = $mode === 'specific' ? count($run['seasons']) : null;
+$replay  = ['v' => 1, 'mode' => $mode, 'title' => $run['title'], 'seasons' => $run['seasons'], 'end' => $run['end'], 'rounds' => fg_public_rounds($run['rounds'])];
+if (FG_MODES[$mode]['seconds'] ?? null) {
+    $replay['duration'] = FG_MODES[$mode]['seconds'];
+}
 $visitor = hash('sha256', $_SERVER['REMOTE_ADDR'] ?? 'unknown');
 $now     = time();
 if (!is_dir($replayDir)) {
     @mkdir($replayDir, 0755, true);
 }
 
-$response = withStore($store, true, function (array &$data) use ($key, $mode, $name, $score, $replay, $replayDir, $visitor, $now) {
+$response = withStore($store, true, function (array &$data) use ($key, $seasons, $mode, $name, $score, $replay, $replayDir, $visitor, $now) {
     // Throttle per visitor; old timestamps are dropped as we go
     foreach ($data['posts'] as $who => $times) {
         $data['posts'][$who] = array_values(array_filter($times, fn ($t) => $t > $now - 60));
@@ -169,6 +173,9 @@ $response = withStore($store, true, function (array &$data) use ($key, $mode, $n
     $improved = $existing === null || $score > $board[$existing]['score'];
     if ($improved) {
         $entry = ['name' => $name, 'score' => $score, 'date' => gmdate('Y-m-d\TH:i:s\Z', $now)];
+        if ($seasons !== null) {
+            $entry['seasons'] = $seasons;
+        }
         $id = bin2hex(random_bytes(8));
         if (@file_put_contents(replayPath($replayDir, $id), json_encode($replay, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX)) {
             $entry['replay'] = $id;
