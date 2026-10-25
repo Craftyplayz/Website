@@ -62,12 +62,30 @@ function fg_parse_listing(string $html): array
 }
 
 // Fetches many folder listings at once. Keys are "a/b/c"; a failed fetch is null.
-function fg_listings(array $paths): array
+// Runs 12 at a time: every open handle holds TLS memory outside PHP's own limit, and
+// the live host kills the process (out of memory) with ~110 handles open at once.
+// From the live host about 1 in 7 listings fails on the first try and loads on a
+// second, so failures are retried once.
+function fg_listings(array $paths, bool $retry = true): array
 {
     $out = [];
-    if (!$paths) {
-        return $out;
+    if (count($paths) > 12) {
+        foreach (array_chunk($paths, 12) as $batch) {
+            $out += fg_listings($batch, false);
+        }
+    } elseif ($paths) {
+        $out = fg_listing_batch($paths);
     }
+    $failed = array_values(array_filter($paths, fn ($p) => $out[implode('/', $p)] === null));
+    if ($retry && $failed) {
+        $out = fg_listings($failed, false) + $out;
+    }
+    return $out;
+}
+
+function fg_listing_batch(array $paths): array
+{
+    $out = [];
     $mh = curl_multi_init();
     curl_multi_setopt($mh, CURLMOPT_MAX_TOTAL_CONNECTIONS, 12);
     $handles = [];
