@@ -116,6 +116,16 @@ function rebuildIndex() {
     return indexing;
 }
 
+// The game honours ?refresh=1 at most once every 10 minutes, so a refused or ignored request is fine. It once
+// answered 500 for a few minutes (cause unknown, the host hides PHP errors), so a failure is retried after 11 min.
+function refreshGame(retries) {
+    const again = why => {
+        console.log('Game refresh failed (' + why + ')' + (retries ? ', trying again in 11 min' : ''));
+        if (retries) setTimeout(() => refreshGame(retries - 1), 11 * 60000);
+    };
+    fetch(GAME_REFRESH, { signal: AbortSignal.timeout(60000) }).then(r => { if (r.status >= 500) again('HTTP ' + r.status); }, e => again(e.message));
+}
+
 const json = (res, code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); };
 const readJson = req => new Promise(r => { let b = ''; req.on('data', d => b += d); req.on('end', () => { try { r(JSON.parse(b)); } catch { r({}); } }); });
 
@@ -249,10 +259,7 @@ const server = http.createServer(async (req, res) => {
         // the page calls this when a whole run ends: one last listing rebuild, then tell the game to reload its list
         if (req.method === 'POST' && url.pathname === '/job-done') {
             json(res, 200, { ok: true });
-            if (await rebuildIndex()) {
-                // the game honours this at most once every 10 minutes; its answer doesn't matter
-                fetch(GAME_REFRESH, { signal: AbortSignal.timeout(20000) }).catch(e => console.log('Game refresh request failed:', e.message));
-            }
+            if (await rebuildIndex()) refreshGame(1);
             return;
         }
 
