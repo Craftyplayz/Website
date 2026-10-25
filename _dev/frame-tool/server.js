@@ -94,6 +94,28 @@ function grabNow(file, t, out, checkBlank) {
     });
 }
 
+// The asset host only lists folders through static index.html pages written by Z:\web\_tools\build-index.js,
+// so new frames stay invisible to the Frame Guesser game until it runs. A run walks the whole share (~95 s),
+// so runs never overlap: requests made during a run are folded into one more run after it.
+// Failures are only logged; they never stop extraction or touch frames.
+const WEB = path.dirname(OUT);
+const GAME_REFRESH = 'https://www.craftyplayz.com/games/frame-guesser/?refresh=1';
+let indexing = null, indexAgain = false;
+function rebuildIndex() {
+    if (indexing) { indexAgain = true; return indexing; }
+    indexing = new Promise(resolve => execFile(process.execPath, [path.join('_tools', 'build-index.js')], { cwd: WEB, timeout: 15 * 60000 }, (err, out, errOut) => {
+        if (err) console.log('Listing rebuild failed:', (errOut || err.message).trim().split('\n').pop());
+        else console.log('Listing rebuilt:', out.trim());
+        resolve(!err);
+    })).then(ok => {
+        indexing = null;
+        if (!indexAgain) return ok;
+        indexAgain = false;
+        return rebuildIndex();
+    });
+    return indexing;
+}
+
 const json = (res, code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); };
 const readJson = req => new Promise(r => { let b = ''; req.on('data', d => b += d); req.on('end', () => { try { r(JSON.parse(b)); } catch { r({}); } }); });
 
@@ -182,26 +204,32 @@ const server = http.createServer(async (req, res) => {
             // "Game of Thrones/Season 1" + "Episode 5" -> output/Game of Thrones/Season 1/Episode 5
             const parts = String(folder || '').split('/').filter(p => p.trim()).map(safe);
             const dir = path.join(OUT, ...parts, safe(name));
-            fs.mkdirSync(dir, { recursive: true });
-            for (const f of fs.readdirSync(dir)) if (f.endsWith('.jpg')) fs.unlinkSync(path.join(dir, f));
+            // frames go into a hidden ".<episode>.partial" folder first (build-index.js skips dot-names), and only a
+            // finished episode is renamed into place, so the asset listing never shows a half-written episode
+            const partial = path.join(path.dirname(dir), '.' + path.basename(dir) + '.partial');
+            fs.rmSync(partial, { recursive: true, force: true });
+            fs.mkdirSync(partial, { recursive: true });
 
             res.writeHead(200, { 'Content-Type': 'application/x-ndjson' });
             let done = 0, next = 0, blanks = 0;
             const worker = async () => {
                 while (next < list.length) {
                     const k = next++;
-                    if (await grab(up.file, list[k], path.join(dir, String(k + 1).padStart(4, '0') + '.jpg'), !!skipBlank)) blanks++;
+                    if (await grab(up.file, list[k], path.join(partial, String(k + 1).padStart(4, '0') + '.jpg'), !!skipBlank)) blanks++;
                     res.write(JSON.stringify({ done: ++done, total: list.length, blanks }) + '\n');
                 }
             };
             try {
                 await Promise.all(Array.from({ length: Math.min(JOBS, list.length) }, worker));
+                fs.rmSync(dir, { recursive: true, force: true }); // an earlier run of this episode
+                fs.renameSync(partial, dir);
                 // only the tool's own copies are deleted, never a video read where it is on disk
                 if (!up.local) {
                     fs.unlinkSync(up.file);
                     uploads.delete(id);
                 }
                 res.end(JSON.stringify({ finished: true, folder: dir, blanks }) + '\n');
+                rebuildIndex();
             } catch (e) {
                 res.end(JSON.stringify({ error: e.message }) + '\n');
             }
@@ -216,6 +244,16 @@ const server = http.createServer(async (req, res) => {
             if (!files.length) return json(res, 400, { error: 'Intro detection only works on videos added by path.' });
             const found = await require('./detect.js').detectSeason(files, { intro: !!intro, credits: !!credits });
             return json(res, 200, { found: Object.fromEntries(found) });
+        }
+
+        // the page calls this when a whole run ends: one last listing rebuild, then tell the game to reload its list
+        if (req.method === 'POST' && url.pathname === '/job-done') {
+            json(res, 200, { ok: true });
+            if (await rebuildIndex()) {
+                // the game honours this at most once every 10 minutes; its answer doesn't matter
+                fetch(GAME_REFRESH, { signal: AbortSignal.timeout(20000) }).catch(e => console.log('Game refresh request failed:', e.message));
+            }
+            return;
         }
 
         if (req.method === 'POST' && url.pathname === '/open') {

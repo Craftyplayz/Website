@@ -427,6 +427,7 @@
                     }
                 }));
                 clearInterval(tick);
+                fetch('/job-done', { method: 'POST' }).catch(() => {}); // final listing rebuild + game refresh, in the background
                 run.finished = true;
                 overall();
                 $('go').textContent = 'Extract frames';
