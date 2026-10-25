@@ -19,11 +19,12 @@ function tool(name) {
 }
 const FFMPEG = tool('ffmpeg'), FFPROBE = tool('ffprobe');
 
-// the same maths as the page: frames at start, start + interval, ... while before (duration - end)
-function times(duration, interval, start, end) {
+// the same maths as the page: frames at start, start + interval, ... while before (duration - end),
+// leaving out any that fall inside a skipped range (intro, recap, credits) [[from, to], ...]
+function times(duration, interval, start, end, skip = []) {
     const len = duration - start - end;
     const n = len > 0 && interval > 0 ? Math.ceil(len / interval) : 0;
-    return Array.from({ length: n }, (_, k) => start + k * interval);
+    return Array.from({ length: n }, (_, k) => start + k * interval).filter(t => !skip.some(([a, b]) => t >= a && t < b));
 }
 
 // folder name for an episode: no path separators or characters Windows rejects
@@ -45,19 +46,46 @@ const waiting = [];
 const slot = () => new Promise(ok => running < JOBS ? (running++, ok()) : waiting.push(ok));
 const release = () => { const next = waiting.shift(); next ? next() : running--; };
 
-async function grab(file, t, out) {
+async function grab(file, t, out, checkBlank) {
     await slot();
-    try { await grabNow(file, t, out); } finally { release(); }
+    try { return await grabNow(file, t, out, checkBlank); } finally { release(); }
 }
 
-function grabNow(file, t, out) {
+// Black or one-colour frames (fades, credits text on black) say nothing about the episode.
+// Judged on a 64x36 grey thumbnail. Average brightness can't tell credits from night scenes (both ~9 on
+// Game of Thrones S01), but credits sit on truly black pixels (~2) while dark scenes have grain (5-15):
+// measured, credits/black frames are 79-100% truly black, dark scenes 15-39%. Grey first, then an area average:
+// shrinking the 10-bit picture before converting it dithers black to 0-6 and the share drops to ~15% for credits.
+// format=yuv420p before split pins the saved jpg to colour; without it ffmpeg turns both branches grey.
+const TRUE_BLACK = 4, BLACK_SHARE = 0.6, FLAT_SD = 4;
+function blank(px) {
+    if (!px.length) return false;
+    const mean = px.reduce((a, b) => a + b, 0) / px.length;
+    const sd = Math.sqrt(px.reduce((a, b) => a + (b - mean) ** 2, 0) / px.length);
+    return px.filter(v => v < TRUE_BLACK).length / px.length >= BLACK_SHARE || sd < FLAT_SD;
+}
+
+// saves the frame at t as a jpg; with checkBlank, also measures it and deletes it when blank (returns true then)
+function grabNow(file, t, out, checkBlank) {
     return new Promise((resolve, reject) => {
         // -ss before -i seeks fast; ffmpeg then decodes to the exact time
-        const p = spawn(FFMPEG, ['-hide_banner', '-loglevel', 'error', '-ss', String(t), '-i', file, '-frames:v', '1', '-vf', 'scale=960:-2', '-q:v', '5', '-y', out]);
+        const args = ['-hide_banner', '-loglevel', 'error', '-ss', String(t), '-i', file, '-frames:v', '1'];
+        const p = spawn(FFMPEG, checkBlank
+            ? [...args, '-filter_complex', '[0:v]scale=960:-2,format=yuv420p,split[a][b];[b]format=gray,scale=64:36:flags=area[c]', '-map', '[a]', '-q:v', '5', '-y', out, '-map', '[c]', '-frames:v', '1', '-f', 'rawvideo', 'pipe:1']
+            : [...args, '-vf', 'scale=960:-2', '-q:v', '5', '-y', out]);
         let err = '';
+        const px = [];
+        p.stdout.on('data', d => px.push(d));
         p.stderr.on('data', d => err += d);
         p.on('error', reject);
-        p.on('close', code => code === 0 ? resolve() : reject(new Error(err.trim().split('\n').pop() || 'ffmpeg failed')));
+        p.on('close', code => {
+            if (code !== 0) return reject(new Error(err.trim().split('\n').pop() || 'ffmpeg failed'));
+            if (checkBlank && blank(Buffer.concat(px))) {
+                fs.rmSync(out, { force: true });
+                return resolve(true);
+            }
+            resolve(false);
+        });
     });
 }
 
@@ -140,10 +168,11 @@ const server = http.createServer(async (req, res) => {
 
         // extract one episode; answers with one JSON line per frame so the page can show progress
         if (req.method === 'POST' && url.pathname === '/extract') {
-            const { id, name, folder, interval, start, end } = await readJson(req);
+            const { id, name, folder, interval, start, end, skip, blank: skipBlank } = await readJson(req);
             const up = uploads.get(id);
             if (!up) return json(res, 400, { error: 'That video is no longer uploaded. Add it again.' });
-            const list = times(up.duration, +interval, +start, +end);
+            const ranges = Array.isArray(skip) ? skip.filter(r => Array.isArray(r) && r.length === 2).map(r => r.map(Number)) : [];
+            const list = times(up.duration, +interval, +start, +end, ranges);
             if (!list.length) return json(res, 400, { error: 'No frames to extract with these settings.' });
             // "Game of Thrones/Season 1" + "Episode 5" -> output/Game of Thrones/Season 1/Episode 5
             const parts = String(folder || '').split('/').filter(p => p.trim()).map(safe);
@@ -152,12 +181,12 @@ const server = http.createServer(async (req, res) => {
             for (const f of fs.readdirSync(dir)) if (f.endsWith('.jpg')) fs.unlinkSync(path.join(dir, f));
 
             res.writeHead(200, { 'Content-Type': 'application/x-ndjson' });
-            let done = 0, next = 0;
+            let done = 0, next = 0, blanks = 0;
             const worker = async () => {
                 while (next < list.length) {
                     const k = next++;
-                    await grab(up.file, list[k], path.join(dir, String(k + 1).padStart(4, '0') + '.jpg'));
-                    res.write(JSON.stringify({ done: ++done, total: list.length }) + '\n');
+                    if (await grab(up.file, list[k], path.join(dir, String(k + 1).padStart(4, '0') + '.jpg'), !!skipBlank)) blanks++;
+                    res.write(JSON.stringify({ done: ++done, total: list.length, blanks }) + '\n');
                 }
             };
             try {
@@ -167,11 +196,21 @@ const server = http.createServer(async (req, res) => {
                     fs.unlinkSync(up.file);
                     uploads.delete(id);
                 }
-                res.end(JSON.stringify({ finished: true, folder: dir }) + '\n');
+                res.end(JSON.stringify({ finished: true, folder: dir, blanks }) + '\n');
             } catch (e) {
                 res.end(JSON.stringify({ error: e.message }) + '\n');
             }
             return;
+        }
+
+        // intros and end credits for one season: audio shared between its episodes (detect.js)
+        if (req.method === 'POST' && url.pathname === '/detect') {
+            const { ids, intro, credits } = await readJson(req);
+            const files = (Array.isArray(ids) ? ids : []).map(id => ({ id, up: uploads.get(id) }))
+                .filter(f => f.up && f.up.local).map(f => ({ id: f.id, file: f.up.file, duration: f.up.duration }));
+            if (!files.length) return json(res, 400, { error: 'Intro detection only works on videos added by path.' });
+            const found = await require('./detect.js').detectSeason(files, { intro: !!intro, credits: !!credits });
+            return json(res, 200, { found: Object.fromEntries(found) });
         }
 
         if (req.method === 'POST' && url.pathname === '/open') {
