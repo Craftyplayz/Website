@@ -129,8 +129,31 @@
             let probing = Promise.resolve();
             const PROBE_BYTES = 8 * 1024 * 1024;
 
-            // "Game.of.Thrones.S01E05.The.Wolf...mkv" -> "Episode 5"; other names keep the file name
-            const episodeName = n => { const m = n.match(/S\d{1,2}\s*E(\d{1,3})/i); return m ? 'Episode ' + +m[1] : n.replace(/\.[^.]+$/, ''); };
+            // Folder name from a release-style file name; the words stop at the first quality / source tag:
+            //   Game.of.Thrones.S01E05.The.Wolf.and.the.Lion.1080p.BluRay.x265-PSA.mkv -> "Episode 5 - The Wolf and the Lion"
+            //   The.Dark.Knight.2008.1080p.BluRay.mkv -> "The Dark Knight (2008)"
+            const NAME_TAG = /^(\d{3,4}[pi]|4k|8k|uhd|hdr\d*|sdr|dv|dovi|\d+bit|blu-?ray|bd|bdrip|brrip|remux|web|web-?dl|web-?rip|webrip|hdtv|hdrip|dvd|dvdrip|x26[45]|h26[45]|hevc|avc|xvid|divx|aac\d*|ac3|eac3|dts|dts-?hd|truehd|ddp?\d*|\d+ch|atmos|proper|repack|extended|unrated|internal|multi|subbed|dubbed)$/i;
+            function words(s) {
+                const out = [];
+                for (const w of s.replace(/\[[^\]]*\]|\([^)]*p\)/g, ' ').split(/[.\s_]+/)) {
+                    if (!w || /^-+$/.test(w)) continue;
+                    if (NAME_TAG.test(w.replace(/-.*$/, ''))) break; // "x265-PSA": the tag, then the release group
+                    out.push(w);
+                }
+                return out;
+            }
+            function episodeName(file) {
+                const base = file.replace(/\.[^.]+$/, '');
+                const ep = base.match(/S\d{1,2}\s*E(\d{1,3})(?:-?E\d{1,3})?(.*)$/i) || base.match(/\b\d{1,2}x(\d{2,3})\b(.*)$/i);
+                if (ep) {
+                    const title = words(ep[2]).join(' ').replace(/^[-\s]+|[-\s]+$/g, '');
+                    return 'Episode ' + +ep[1] + (title ? ' - ' + title : '');
+                }
+                const w = words(base);
+                const y = w.findLastIndex((x, i) => i > 0 && /^(19|20)\d\d$/.test(x.replace(/[()]/g, '')));
+                if (y > 0) return w.slice(0, y).join(' ') + ' (' + w[y].replace(/[()]/g, '') + ')';
+                return w.join(' ') || base;
+            }
 
             // "90", "1:30" or "1:02:03" -> seconds, NaN when it isn't a time
             function secs(v) {
