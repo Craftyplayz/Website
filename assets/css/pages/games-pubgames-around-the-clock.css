@@ -10,6 +10,7 @@
 .atc-target { font-size: clamp(88px, 28vw, 160px); font-weight: 700; line-height: 1; text-align: center; color: var(--accent); font-variant-numeric: tabular-nums; }
 .atc-sub, .atc-thisturn { margin: 8px 0; text-align: center; }
 .atc-btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0 8px; }
+.atc-btns:has(> [hidden]) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .atc-btn { justify-content: center; min-height: 56px; font-size: 16px; }
 .atc-miss { width: 100%; }
 .atc-msg { margin: 12px 0 0; }
