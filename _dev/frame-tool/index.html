@@ -47,6 +47,11 @@
         .row .status.bad { color: #f0a0a0; white-space: normal; }
         .row .bar { grid-column: 1 / -1; height: 4px; background: var(--btn2); border-radius: 2px; overflow: hidden; }
         .row .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--btn), var(--accent)); }
+        .opts { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 14px 0 0; padding: 12px 0 0; border: 0; border-top: 1px solid var(--line); }
+        .opts legend { float: left; width: 100%; padding: 0 0 4px; font-size: 14px; color: var(--muted); }
+        .opts small { width: 100%; font-size: 12px; color: var(--muted); }
+        label.check { display: flex; align-items: center; gap: 8px; color: var(--text); cursor: pointer; }
+        label.check input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
         .dock { position: sticky; bottom: 0; display: grid; gap: 10px; padding: 12px 0 16px; background: rgb(32 32 32 / .96); border-top: 1px solid var(--line); }
         .overall { display: grid; gap: 6px; }
         .overall-bar { height: 10px; background: var(--btn2); border-radius: 5px; overflow: hidden; }
@@ -67,9 +72,17 @@
         <section class="card">
             <div class="cols">
                 <label>One frame every (seconds) <input class="field" id="interval" type="number" inputmode="decimal" min="0.5" step="0.5" value="10"></label>
-                <label>Cut from start <input class="field" id="start" value="0:00"><small>Skips the intro. 90 or 1:30</small></label>
-                <label>Cut from end <input class="field" id="end" value="0:00"><small>Skips the credits. 90 or 1:30</small></label>
+                <label>Cut from start <input class="field" id="start" value="0:00"><small>Always cut, on top of the automatic skips. 90 or 1:30</small></label>
+                <label>Cut from end <input class="field" id="end" value="0:00"><small>Always cut, on top of the automatic skips. 90 or 1:30</small></label>
             </div>
+            <fieldset class="opts">
+                <legend>Skip automatically</legend>
+                <label class="check"><input type="checkbox" id="o-blank" checked> Black and blank frames</label>
+                <label class="check"><input type="checkbox" id="o-intro" checked> Intro</label>
+                <label class="check"><input type="checkbox" id="o-recap" checked> Everything before the intro ("previously on")</label>
+                <label class="check"><input type="checkbox" id="o-credits" checked> End credits</label>
+                <small>The intro and credits are found by matching the audio of episodes in the same folder. Works for videos added by path.</small>
+            </fieldset>
         </section>
 
         <form class="card" id="pathform">
@@ -132,21 +145,49 @@
                 $('interval').setAttribute('aria-invalid', !(interval > 0));
                 $('start').setAttribute('aria-invalid', isNaN(start));
                 $('end').setAttribute('aria-invalid', isNaN(end));
-                return interval > 0 && !isNaN(start) && !isNaN(end) ? { interval, start, end } : null;
+                const opt = id => $('o-' + id).checked;
+                return interval > 0 && !isNaN(start) && !isNaN(end) ? { interval, start, end, blank: opt('blank'), intro: opt('intro'), recap: opt('recap'), credits: opt('credits') } : null;
             }
-            // same as times() in server.js
-            const count = (d, s) => { const len = d - s.start - s.end; return len > 0 ? Math.ceil(len / s.interval) : 0; };
+
+            // time ranges to leave out of one video, from what detection found and the ticked options
+            function skipRanges(it, s) {
+                const f = it.found || {}, out = [];
+                if (f.intro && s.recap) out.push([0, f.intro[0]]);
+                if (f.intro && s.intro) out.push(f.intro);
+                if (f.credits && s.credits) out.push(f.credits);
+                return out;
+            }
+
+            // same as times() in server.js: frames from start every interval until (duration - end), minus skipped ranges
+            function count(it, s) {
+                const len = it.duration - s.start - s.end, skip = skipRanges(it, s);
+                let n = 0;
+                for (let k = 0; len > 0 && k < Math.ceil(len / s.interval); k++) {
+                    const t = s.start + k * s.interval;
+                    if (!skip.some(([a, b]) => t >= a && t < b)) n++;
+                }
+                return n;
+            }
+
+            const span = r => clock(r[0]) + '–' + clock(r[1]);
+            function foundText(it) {
+                if (!it.found) return '';
+                const f = it.found, bits = [];
+                bits.push(f.intro ? 'intro ' + span(f.intro) : 'no intro found');
+                if (f.credits) bits.push('credits ' + span(f.credits));
+                return bits.join(' · ');
+            }
 
             function render() {
                 const s = settings();
                 let frames = 0;
                 for (const it of items) {
-                    const n = it.duration && s ? count(it.duration, s) : null;
+                    const n = it.duration && s ? count(it, s) : null;
                     if (n !== null) frames += n;
                     it.row.querySelector('.meta').textContent = it.duration ? clock(it.duration) + ' · ' + (n === null ? '?' : n.toLocaleString() + ' frames') : '';
                 }
                 $('total').innerHTML = items.length ? `<b>${frames.toLocaleString()}</b> frames from ${items.length} video${items.length > 1 ? 's' : ''}` : '';
-                $('go').disabled = !s || !items.some(it => it.state === 'ready' && (!it.duration || count(it.duration, s) > 0));
+                $('go').disabled = !s || items.some(it => it.detecting) || !items.some(it => it.state === 'ready' && (!it.duration || count(it, s) > 0));
                 const unknown = items.filter(it => it.state === 'ready' && !it.duration).length;
                 if (unknown) $('total').innerHTML += ` · ${unknown} not counted yet (length found when copied)`;
             }
@@ -207,7 +248,7 @@
                 $('skipped').hidden = !skipped;
                 $('skipped').textContent = `Skipped ${skipped} file${skipped === 1 ? '' : 's'} that ${skipped === 1 ? "isn't a video" : "aren't videos"}.`;
                 for (const [file, folder, known] of videos) {
-                    const it = { file, folder, state: known ? 'ready' : 'probing', ...known };
+                    const it = { file, folder, state: known ? 'ready' : 'probing', local: !!known, ...known };
                     const row = document.createElement('div');
                     row.className = 'row';
                     row.innerHTML = '<div class="name"><small hidden></small><input class="field" aria-label="Episode name (folder name)" title="Episode name, used as the folder name"></div><span class="meta"></span><span class="status"></span><button class="close" type="button" aria-label="Remove" title="Remove">&times;</button><div class="bar" hidden><i></i></div>';
@@ -226,6 +267,34 @@
                     $('list').append(row);
                     if (known) status(it, 'Ready');
                     else probing = probing.then(() => items.includes(it) ? probe(it) : null);
+                }
+                render();
+                detectAll();
+            }
+
+            // find intros and credits, one season (folder) at a time; runs once per video, both are always looked for
+            // so ticking an option later doesn't need another pass
+            let detecting = Promise.resolve();
+            function detectAll() {
+                const s = settings();
+                if (!s || !(s.intro || s.recap || s.credits)) return;
+                const todo = items.filter(it => it.local && it.state === 'ready' && !it.found && !it.detecting);
+                const seasons = Map.groupBy(todo, it => it.folder);
+                for (const group of seasons.values()) {
+                    for (const it of group) { it.detecting = true; status(it, 'Waiting to find intro...'); }
+                    detecting = detecting.then(async () => {
+                        const live = group.filter(it => items.includes(it));
+                        for (const it of live) status(it, 'Finding intro and credits...');
+                        try {
+                            const r = await (await fetch('/detect', { method: 'POST', body: JSON.stringify({ ids: live.map(it => it.id), intro: true, credits: true }) })).json();
+                            if (r.error) throw new Error(r.error);
+                            for (const it of live) { it.found = r.found[it.id] || { intro: null, credits: null }; status(it, foundText(it)); }
+                        } catch (e) {
+                            for (const it of live) status(it, 'Intro search failed: ' + (e instanceof TypeError ? 'is the tool still running?' : e.message), 'bad');
+                        }
+                        for (const it of group) it.detecting = false;
+                        render();
+                    });
                 }
                 render();
             }
@@ -251,11 +320,11 @@
 
             async function extract(it, s) {
                 if (!it.id && !await upload(it)) return;
-                if (!count(it.duration, s)) { it.state = 'ready'; status(it, 'No frames with these cut times', 'bad'); return; }
+                if (!count(it, s)) { it.state = 'ready'; status(it, 'No frames with these cut times', 'bad'); return; }
                 it.state = 'extracting';
                 status(it, 'Starting...', '', 0);
                 try {
-                    const r = await fetch('/extract', { method: 'POST', body: JSON.stringify({ id: it.id, name: it.name, folder: it.folder, ...s }) });
+                    const r = await fetch('/extract', { method: 'POST', body: JSON.stringify({ id: it.id, name: it.name, folder: it.folder, ...s, skip: skipRanges(it, s) }) });
                     if (!r.ok) throw new Error((await r.json()).error);
                     const reader = r.body.pipeThrough(new TextDecoderStream()).getReader();
                     let buf = '', last = {};
@@ -277,7 +346,7 @@
                     if (buf.trim()) last = JSON.parse(buf);
                     if (last.error) throw new Error(last.error);
                     it.state = 'done';
-                    status(it, 'Done', 'ok');
+                    status(it, 'Done' + (last.blanks ? ` · ${last.blanks} blank skipped` : ''), 'ok');
                     it.row.querySelector('input').disabled = true;
                 } catch (e) {
                     it.state = 'ready';
@@ -293,7 +362,7 @@
                 if (!run) return;
                 let done = 0, total = 0;
                 for (const it of run.items) {
-                    const n = it.duration ? count(it.duration, run.s) : 0;
+                    const n = it.duration ? count(it, run.s) : 0;
                     total += n;
                     done += it.state === 'done' ? n : Math.min(it.done || 0, n);
                 }
@@ -318,7 +387,7 @@
                 $('go').disabled = true;
                 $('go').textContent = 'Extracting...';
                 // 3 videos at a time keeps the tool's ffmpeg pool busy while one video starts or finishes
-                const todo = items.filter(it => it.state === 'ready' && (!it.duration || count(it.duration, s) > 0));
+                const todo = items.filter(it => it.state === 'ready' && (!it.duration || count(it, s) > 0));
                 for (const it of todo) it.done = 0;
                 run = { items: [...todo], s, samples: [], t0: performance.now() };
                 $('overall').hidden = false;
@@ -337,6 +406,7 @@
             // a picked folder gives "Season 1/S01E01.mkv"; keep the folder part, including the picked folder itself
             $('folder').addEventListener('change', e => { add([...e.target.files].map(f => [f, f.webkitRelativePath.split('/').slice(0, -1).join('/')])); e.target.value = ''; });
             for (const id of ['interval', 'start', 'end']) $(id).addEventListener('input', render);
+            for (const id of ['o-blank', 'o-intro', 'o-recap', 'o-credits']) $(id).addEventListener('change', () => { render(); detectAll(); });
 
             // dropped folders are walked recursively; readEntries returns at most 100 entries per call
             async function walk(entry, out) {
