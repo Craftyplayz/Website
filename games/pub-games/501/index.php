@@ -49,13 +49,13 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                         <select class="field" name="in">
                             <option value="straight">Straight in</option>
                             <option value="double">Double in</option>
-                            <option value="master">Master in</option>
+                            <option value="master">Double/triple in</option>
                         </select>
                     </label>
                     <label>Finishing
                         <select class="field" name="out">
                             <option value="double">Double out</option>
-                            <option value="master">Master out</option>
+                            <option value="master">Double/triple out</option>
                             <option value="straight">Straight out</option>
                         </select>
                     </label>
@@ -100,8 +100,8 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             <details>
                 <summary>Finishing and busts</summary>
                 <ul>
-                    <li>With double out, the dart that reaches zero must be a double (the bull counts). Master out: a double or a treble. Straight out: any dart.</li>
-                    <li>It is a <b>bust</b> if a turn goes below zero, leaves 1 (double or master out), or reaches zero without a valid finishing dart. The whole turn is void, your score goes back to what it was before the turn, and the darts you have not thrown are skipped.</li>
+                    <li>With double out, the dart that reaches zero must be a double (the bull counts). Double/triple out: a double or a triple. Straight out: any dart.</li>
+                    <li>It is a <b>bust</b> if a turn goes below zero, leaves 1 (double or double/triple out), or reaches zero without a valid finishing dart. The whole turn is void, your score goes back to what it was before the turn, and the darts you have not thrown are skipped.</li>
                     <li>Once someone checks out, the remaining darts are not thrown.</li>
                     <li>With double out, you can't finish 169, 168, 166, 165, 163, 162 or 159 in three darts, or anything over 170.</li>
                     <li>No three darts can score 163, 166, 169, 172, 173, 175, 176, 178 or 179, or anything over 180.</li>
@@ -110,8 +110,8 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             <details>
                 <summary>Rule variants on this page</summary>
                 <ul>
-                    <li><b>Straight in</b> (usual): every dart scores. <b>Double in</b>: nothing scores until a double (or bull) lands, often used with 301. <b>Master in</b>: a double or treble opens. Darts before you are in score 0.</li>
-                    <li><b>Double out</b> (PDC, WDF and most leagues), <b>master out</b>, or <b>straight out</b> (beginners and children: only going below zero busts).</li>
+                    <li><b>Straight in</b> (usual): every dart scores. <b>Double in</b>: nothing scores until a double (or bull) lands, often used with 301. <b>Double/triple in</b>: a double or triple opens. Darts before you are in score 0.</li>
+                    <li><b>Double out</b> (PDC, WDF and most leagues), <b>double/triple out</b>, or <b>straight out</b> (beginners and children: only going below zero busts).</li>
                     <li><b>50/50 bull</b>: some pubs score the outer bull 50 too, with only the inner bull counting as a double.</li>
                     <li><b>First to</b> legs sets the match length. Sets are not scored here.</li>
                     <li>Bounce-outs, a dart sticking in another dart and darts thrown out of turn are settled by your league or house rules. Enter what the dart scored, using Miss for no score.</li>
