@@ -59,11 +59,6 @@ $kp_balls = range(1, 5);
                     <p class="muted">Lose a ball every time one of yours goes down. Last player left wins.</p>
                     <div class="actions"><button class="btn primary" type="button" data-act="kp-mode" data-id="lms">Start last man standing</button></div>
                 </section>
-                <section class="card">
-                    <h2>Sink balls you win</h2>
-                    <p class="muted">Pot one of your own balls to win straight away.</p>
-                    <div class="actions"><button class="btn" type="button" data-act="kp-mode" data-id="sink">Start sink balls you win</button></div>
-                </section>
             </div>
             <div class="actions kp-home-more">
                 <button class="btn" type="button" data-act="drawer" aria-controls="kp-rules">Read the rules</button>
@@ -87,7 +82,6 @@ $kp_balls = range(1, 5);
                         <summary>When someone pots your ball</summary>
                         <ul>
                             <li><b>Last man standing:</b> each number is a life. A potted ball costs its owner a life, whoever pots it. The last player with a life wins. <span class="badge">Tracker default</span></li>
-                            <li><b>Sink balls you win:</b> pot your own number and you win. If someone else pots it, you lose that ball, or nothing happens if the table plays that way. <span class="badge">Tracker</span></li>
                             <li><b>Dead players:</b> some tables let a killed player keep shooting but they can't win, and they must announce it before their next shot.</li>
                             <li><b>Points:</b> the BCA points game gives 1 point for potting someone else's number and 2 from everyone to the winner.</li>
                         </ul>
@@ -230,18 +224,7 @@ $kp_balls = range(1, 5);
         <aside class="drawer kp-drawer" id="kp-rules" aria-label="Rules" aria-hidden="true" tabindex="-1" inert>
             <button class="close" type="button" data-act="drawer-close" aria-label="Close">&times;</button>
             <h2>Rules</h2>
-            <div class="stabs" role="group" aria-label="Game mode">
-                <button type="button" class="on" data-act="kp-rules-tab" data-id="lms" aria-pressed="true">Last man standing</button>
-                <button type="button" data-act="kp-rules-tab" data-id="sink" aria-pressed="false">Sink balls you win</button>
-            </div>
-            <ol class="kp-rules-list" data-rules="sink" hidden>
-                <li>Everyone is dealt secret numbers. Keep them to yourself.</li>
-                <li>Take turns. Hit the lowest-numbered ball on the table first.</li>
-                <li>Pot one of your own numbers and you win straight away.</li>
-                <li>If someone else pots one of your numbers, you lose it (unless the table plays "Nothing happens"). Lose them all and you're out.</li>
-                <li>A ball potted on a foul goes back on the table. Don't tap it.</li>
-            </ol>
-            <ol class="kp-rules-list" data-rules="lms">
+            <ol class="kp-rules-list">
                 <li>Everyone is dealt secret numbers. Each one is a life.</li>
                 <li>Take turns. Hit the lowest-numbered ball on the table first.</li>
                 <li>Whenever one of your numbers goes down, whoever potted it, you lose a life.</li>
@@ -255,17 +238,11 @@ $kp_balls = range(1, 5);
             <button class="close" type="button" data-act="drawer-close" aria-label="Close">&times;</button>
             <h2>Settings</h2>
             <form class="form kp-settings-form">
-                <label>When someone else pots your ball (sink balls you win)
-                    <select class="field" name="othersPotYourBall">
-                        <option value="out">You're out</option>
-                        <option value="nothing">Nothing happens</option>
-                    </select>
-                </label>
                 <div>
                     <label class="check"><input type="checkbox" name="pin"> Lock numbers with a PIN</label>
                     <small class="muted">Stops casual peeking. It isn't secure storage.</small>
                 </div>
-                <small class="muted kp-locked" hidden>These two settings are locked until the current game ends.</small>
+                <small class="muted kp-locked" hidden>This setting is locked until the current game ends.</small>
                 <label>Hide numbers after
                     <select class="field" name="hideAfter">
                         <option value="10">10 seconds</option>

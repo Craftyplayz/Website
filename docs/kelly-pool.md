@@ -134,9 +134,8 @@ Illegally potted balls are spotted on the foot spot, or as close as possible beh
 | **BCA points** | Winner is paid 2 points by each player. Potting another's number gives you 1 point and the owner loses 1. The owner stays in the game. Failing to announce a killed number forfeits that player and the potter gets 2 points. If no one pots their own number the game ends when the last number drops and is replayed at double points. |
 | **Kill / dead players** | Owner is dead when another player pots their number, keeps shooting in rotation, and must announce it. A dead player cannot win. |
 | **Out of the round** | A killed player leaves the game and stops shooting. |
-| **Last man standing** | Each number is a life. A potted ball costs its owner a life whoever sank it, including the owner. Last player with a life wins. Potting your own number does not win. **Tracker: default mode.** |
-| **Sink balls you win** | The tracker's name for the simple rule with elimination: pot your own ball to win, if someone else pots it you lose that ball (or nothing happens, a setting). **Tracker.** |
-| **Lives / several peas** | Each player holds 2 to 5 numbers. Out only when all are gone (lms), or win when any of your own is potted (simple). **Tracker: 1 to 5 balls each.** |
+| **Last man standing** | Each number is a life. A potted ball costs its owner a life whoever sank it, including the owner. Last player with a life wins. Potting your own number does not win. **Tracker: the only mode.** |
+| **Lives / several peas** | Each player holds 2 to 5 numbers. Out only when all are gone (lms), or win when any of your own is potted (simple). **Tracker: 1 to 5 balls each, last man standing only.** |
 | **Rotation vs call-shot** | Rotation: must hit the lowest ball first. Call-shot or any-ball: no lowest-ball rule, which favours players who can go straight for their number. **Tracker: rotation text only.** |
 | **Kill scoring / payouts per ball** | Money moves on every kill (for example 25 cents from the owner to the shooter) and on the win (from every player). |
 | **Ante pot** | One pot, winner takes all, no per-kill payments. |
@@ -152,10 +151,9 @@ Illegally potted balls are spotted on the foot spot, or as close as possible beh
 
 The tracker on `/games/kelly-pool/` replaces the peas and bottle and keeps count of lives. It does not track the cue ball, fouls, money or the shooting order (turn tracking is optional).
 
-- **Modes:** last man standing (default) and sink balls you win.
+- **Mode:** last man standing only. Potting your own ball never wins; leave your balls on the table.
 - **Balls:** 2 to 15 players, 1 to 5 balls each, players x balls at most 15. Unused balls belong to no one.
 - **Last man standing:** whoever pots it, the owner loses one life. Last player alive wins.
-- **Sink balls you win:** you are asked who potted the ball. If the owner did, they win. If someone else did, the setting decides: the owner loses that ball (out when none are left) or nothing happens.
 - **Not tracked:** fouls, scratches, penalties and money. If a ball is potted on a foul, don't tap it (or use Undo).
 - **No winner:** if every ball is potted with no winner the game ends as no winner.
 - **Privacy:** numbers show only after a pass screen, and everyone's numbers are shown once the game ends.
