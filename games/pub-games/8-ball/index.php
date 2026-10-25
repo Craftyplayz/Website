@@ -21,6 +21,12 @@ $eb_fouls = [
     'break' => 'Illegal break',
     'black-off' => 'Black off the table (loses the frame)',
 ];
+
+// rows from the apex back: British is the EPA rack, American is one legal WPA rack
+$eb_racks = [
+    'British: reds and yellows' => [['red'], ['yellow', 'red'], ['red', 'black', 'yellow'], ['yellow', 'red', 'yellow', 'red'], ['red', 'yellow', 'yellow', 'red', 'yellow']],
+    'American: numbered' => [[1], [9, 2], [10, 8, 3], [11, 7, 14, 4], [5, 13, 15, 6, 12]],
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -137,8 +143,26 @@ $eb_fouls = [
                 <ul></ul>
             </div>
             <h3>Rack and break</h3>
+            <div class="eb-racks">
+                <?php foreach ($eb_racks as $name => $rows): ?>
+                    <figure class="eb-rack-fig">
+                        <div class="eb-rack" role="img" aria-label="<?= h($name . ', from the apex: ' . implode(' / ', array_map(fn($r) => implode(', ', $r), $rows))) ?>">
+                            <?php foreach ($rows as $row): ?>
+                                <div class="eb-rack-row">
+                                    <?php foreach ($row as $b): ?>
+                                        <?php if (is_int($b)): ?><span class="eb-ball n<?= $b > 8 ? ' stripe' : '' ?>" style="--ball: var(--eb-n<?= $b > 8 ? $b - 8 : $b ?>)"><b><?= $b ?></b></span>
+                                        <?php else: ?><span class="eb-ball <?= $b ?>"></span><?php endif; ?>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <figcaption><?= h($name) ?></figcaption>
+                    </figure>
+                <?php endforeach; ?>
+            </div>
+            <p class="muted eb-rack-note">Apex towards the breaker. British: the black on the black spot and the reds and yellows exactly as shown. American: the 8 in the middle, the apex ball on the foot spot, a solid and a stripe in the back corners; the rest can go anywhere.</p>
             <ul>
-                <li>Black in the middle of the third row, reds and yellows mixed, apex towards the breaker.</li>
+                <li>Black in the middle of the third row, apex towards the breaker, reds and yellows in the pattern above.</li>
                 <li>Break from behind the baulk line. A legal break pots a ball or sends at least 2 balls to a cushion (World Rules: 4).</li>
                 <li>Pot a ball on the break and you carry on. An illegal break is re-racked and the opponent breaks with the foul penalty.</li>
                 <li>Black on the break: re-rack and break again in pub, World and Blackball rules; re-spotted in International Rules.</li>

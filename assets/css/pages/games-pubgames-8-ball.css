@@ -1,6 +1,7 @@
 /* 8-Ball Pool: UK pub frame tracker (games/pub-games/8-ball) */
 /* cloth and ball colours are the only literal colours: they have real meaning */
-.eb { --eb-cloth: #1f5a3c; --eb-cloth-edge: #163f2b; --eb-red: #c8281e; --eb-yellow: #f2c418; --eb-black: #151515; --eb-ivory: #f7f3e8; }
+.eb { --eb-cloth: #1f5a3c; --eb-cloth-edge: #163f2b; --eb-red: #c8281e; --eb-yellow: #f2c418; --eb-black: #151515; --eb-ivory: #f7f3e8;
+    --eb-n1: #f3c623; --eb-n2: #1d4fb8; --eb-n3: #d0342c; --eb-n4: #57308f; --eb-n5: #f07f1d; --eb-n6: #178049; --eb-n7: #7d1f2b; --eb-n8: #151515; }
 .eb [hidden] { display: none !important; }
 .eb :where(button:not(.btn)) { margin: 0; padding: 0; background: none; border: 0; color: inherit; font: inherit; cursor: pointer; }
 
@@ -54,6 +55,19 @@
 .eb-ball.potted { opacity: .25; filter: grayscale(.6); }
 .eb-ball.mini { --d: 14px; box-shadow: none; }
 .eb-row-black .eb-balls { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+
+/* rack diagrams in the rules; numbered balls copy Kelly Pool's */
+.eb-racks { display: flex; flex-wrap: wrap; gap: 16px; margin: 8px 0; }
+.eb-rack-fig { flex: 1 1 200px; margin: 0; }
+.eb-rack { --d: clamp(26px, 8vw, 34px); display: grid; justify-items: center; padding: 14px 10px; background: var(--eb-cloth); border: 6px solid var(--eb-cloth-edge); border-radius: var(--radius-lg); }
+.eb-rack-row { display: flex; gap: 2px; }
+.eb-rack-row + .eb-rack-row { margin-top: calc(var(--d) * -.12); }
+.eb-rack .eb-ball { width: var(--d); }
+.eb-ball.n { display: grid; place-items: center; }
+.eb-ball.stripe { background: linear-gradient(var(--eb-ivory) 0 22%, var(--ball) 22% 78%, var(--eb-ivory) 78%); }
+.eb-ball.n b { display: grid; place-items: center; width: 56%; height: 56%; border-radius: 50%; background: var(--eb-ivory); color: var(--eb-black); font-family: var(--mono); font-size: calc(var(--d) * .3); line-height: 1; }
+.eb-rack-fig figcaption { margin-top: 6px; color: var(--muted); font-size: 13px; text-align: center; }
+.eb-rack-note { margin: 0 0 8px; font-size: 13px; }
 
 /* log and rules */
 .eb-more summary, .eb-rules summary { font-weight: 600; cursor: pointer; }
