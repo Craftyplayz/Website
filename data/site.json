@@ -77,6 +77,7 @@
                     "title": "Play",
                     "pages": [
                         { "title": "Chapter Oracle", "url": "/games/chapterguesser/", "description": "Guess the book chapter from a passage", "keywords": ["harry potter", "quiz", "chapter guesser"] },
+                        { "title": "Frame Guesser", "url": "/games/frame-guesser/", "description": "Guess the episode or film from a single still frame", "keywords": ["tv", "episode", "screenshot", "still", "quiz", "movie", "film"] },
                         { "title": "Guess Who", "url": "/games/guesswho/", "description": "Guess Who boards: Classic, Avatar and more", "keywords": ["atla", "avatar"] },
                         { "title": "Free Games", "url": "/games/free/", "description": "Browse free-to-play PC and browser games", "keywords": ["freetogame", "f2p", "free to play"] },
                         { "title": "A Dark Room", "url": "/games/adarkroom/", "description": "A minimalist text adventure" },
