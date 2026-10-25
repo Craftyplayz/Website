@@ -32,11 +32,12 @@ function fg_url(array $parts, bool $dir = false): string
     return FG_BASE . implode('/', array_map('rawurlencode', $parts)) . ($dir && $parts ? '/' : '');
 }
 
-// Folders and .jpg files linked from an Apache "Index of" page, in natural order
+// Folders and .jpg files linked from a listing page (Apache "Index of" or the
+// host's generated pages, where links carry a class first), in natural order
 function fg_parse_listing(string $html): array
 {
     $out = ['dirs' => [], 'files' => []];
-    preg_match_all('/<a\s+href="([^"]+)"/i', $html, $m);
+    preg_match_all('/<a\b[^>]*?\shref="([^"]+)"/i', $html, $m);
     foreach ($m[1] as $href) {
         $href = html_entity_decode($href, ENT_QUOTES);
         // skip the parent link (absolute), sort links (?C=N) and anything off-site
