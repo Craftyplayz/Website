@@ -14,7 +14,7 @@
 
 /* the always-visible top: one column on phones, art + saves + senses on the right from 960 px */
 .hb-sheet {
-    display: grid; gap: 16px; grid-template-columns: clamp(88px, 26vw, 160px) minmax(0, 1fr);
+    display: grid; gap: 16px; grid-template-columns: clamp(80px, 22vw, 160px) minmax(0, 1fr);
     grid-template-areas: "art id" "abil abil" "combat combat" "saves saves" "senses senses" "panels panels";
 }
 .hb-top-id { grid-area: id; }
@@ -31,8 +31,9 @@
     }
 }
 
-.hb-id { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr)); gap: 8px; }
-.hb-id .hb-name { grid-column: 1 / -1; }
+.hb-id { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 110px), 1fr)); gap: 8px; }
+.hb-id .hb-name, .hb-classes { grid-column: 1 / -1; }
+@media (min-width: 480px) { .hb-id .hb-name { grid-column: span 2; } }
 .hb-id .hb-name .field { font-size: 20px; font-weight: 700; }
 
 .hb-art {
@@ -66,8 +67,12 @@
 }
 .hb-edit:hover { color: var(--text); background: var(--card2); }
 
-.hb-combat { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 8px; }
-.hb-hp { grid-column: span 2; }
+.hb-combat { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); align-items: start; gap: 8px; }
+.hb-hp-head { display: flex; justify-content: center; align-items: center; gap: 4px; width: 100%; position: relative; }
+.hb-hp-head .hb-x { position: absolute; right: -4px; top: -6px; display: grid; place-items: center; }
+.hb-hp-head .hb-x[aria-expanded="true"] { color: var(--accent); }
+.hb-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; }
+.hb-stats > * { display: grid; justify-items: center; gap: 6px; min-width: 0; }
 .hb-hpv { display: flex; align-items: center; gap: 6px; font-size: 20px; }
 .hb .hb-hpv .field { width: 72px; padding: 4px 6px; font-size: 20px; font-weight: 700; text-align: center; }
 .hb-hp .progress { width: 100%; }
@@ -148,3 +153,114 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-dlg h3:first-of-type { margin-top: 12px; }
 .hb-dlg .hb-err { color: var(--danger-line); }
 .hb-addpanel select.field { width: auto; }
+
+/* classes (multiclass rows) */
+.hb-classes { display: grid; gap: 8px; }
+.hb-cls { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+.hb-cls > label:first-child { flex: 1 1 160px; }
+.hb-cls .hb-lvl { flex: 0 0 72px; }
+.hb-cls .hb-die { flex: 0 0 84px; }
+.hb-cls label { display: grid; gap: 4px; min-width: 0; color: var(--muted); font-size: 13px; }
+.hb-cls-more { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 13px; }
+
+/* hit points: current / max with temp, a two-part bar, and the edit fields */
+.hb-hpv b { font-size: 20px; }
+.hb-temp { color: var(--accent); font-size: 14px; font-weight: 600; }
+.hb .hb-warn { color: var(--danger-line); }
+.hb-hpbar { display: flex; width: 100%; height: 8px; overflow: hidden; background: var(--card2); border-radius: 999px; }
+.hb-hpbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--btn), var(--accent)); }
+.hb-hpbar i + i { background: var(--series-3); }
+.hb-hpf { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; width: 100%; }
+.hb-hpf label { display: grid; gap: 2px; min-width: 0; color: var(--muted); font-size: 12px; }
+.hb .hb-hpf .field { padding: 4px 6px; text-align: center; }
+
+/* conditions, speeds and defences */
+.hb-more-body h3:first-child { margin-top: 0; }
+.hb-exh { display: inline-grid; gap: 4px; color: var(--muted); font-size: 13px; }
+.hb .hb-exh .field { width: 80px; }
+.hb-speeds { display: grid; gap: 6px; }
+.hb-speed { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.hb .hb-speed .field:first-child { flex: 1 1 140px; width: auto; }
+.hb .hb-speed .hb-n, .hb .hb-n { width: 72px; min-width: 0; padding: 4px 6px; text-align: center; }
+
+/* sub-tabs inside a panel */
+.hb-sub { margin: 4px 0 12px; }
+.hb-sub button { padding: 3px 10px; font-size: 12px; }
+
+/* actions and spells: a summary line that opens into an editor */
+.hb-entry-h { flex-wrap: wrap; }
+.hb-link { padding: 0; background: none; border: 0; color: var(--link); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+.hb-link:hover { text-decoration: underline; }
+.hb-sum { flex: 1 1 200px; min-width: 0; color: var(--muted); font-size: 13px; }
+.hb-toggle { display: grid; place-items: center; margin-left: auto; }
+.hb-toggle[aria-expanded="true"] { color: var(--accent); }
+.hb-editor { display: grid; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+.hb-editor h4 { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+.hb-editor .actions { margin-top: 0; }
+.hb-wide { display: grid; gap: 4px; color: var(--muted); font-size: 13px; }
+.hb-fxbox { display: grid; gap: 4px; justify-items: start; color: var(--muted); font-size: 13px; }
+.hb-checks { display: flex; flex-wrap: wrap; align-items: end; gap: 4px 14px; }
+.hb-dmgs { display: grid; gap: 6px; }
+.hb-dmgrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 6px; }
+.hb-addtag { display: flex; gap: 6px; max-width: 360px; }
+.hb .hb-addtag .field { flex: 1; width: auto; }
+.hb-prep { display: flex; }
+.hb-prep input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+.hb-cost { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
+.hb-tool .field { width: auto; }
+.hb .hb-tool .grow { flex: 1 1 160px; }
+.hb-attune { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 0 0 12px; font-size: 14px; }
+.hb-attune label { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
+.hb .field.hb-auto { width: auto; }
+.hb-lists textarea.field { min-height: 120px; }
+
+/* formula builder */
+.hb-result { margin: 4px 0; }
+.hb-part { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 0; border-top: 1px solid var(--line); }
+.hb .hb-part .field { width: auto; }
+.hb .hb-part .hb-sign { width: 56px; }
+.hb .hb-part .hb-formula, .hb .hb-part .hb-plabel { flex: 1 1 140px; }
+
+/* rests and the details drawer */
+.hb-plain { margin: 0 0 8px; padding-left: 20px; font-size: 14px; }
+.hb-drawer h2 { margin: 0 32px 4px 0; font-size: 20px; }
+.hb-drawer:focus { outline: none; }
+.hb-desc { margin-top: 12px; font-size: 14px; overflow-wrap: anywhere; }
+.hb-desc p { margin: 0 0 8px; }
+@media (prefers-reduced-motion: reduce) { .hb-drawer { transition: none; } }
+
+/* notes: list beside the open note once the panel is wide enough */
+.hb-panel { container-type: inline-size; }
+.hb-ntools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+.hb .hb-ntools .hb-nq { flex: 1 1 180px; width: auto; }
+.hb .hb-ntools select.field { width: auto; }
+.hb-notes { display: grid; gap: 12px; }
+@container (min-width: 620px) { .hb-notes { grid-template-columns: minmax(200px, 260px) minmax(0, 1fr); } }
+.hb-nlist { display: grid; gap: 6px; align-content: start; max-height: 560px; overflow-y: auto; }
+.hb-nitem {
+    display: grid; gap: 2px; min-width: 0; padding: 8px 10px; background: var(--card2); border: 1px solid transparent; border-radius: var(--radius);
+    color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: border-color var(--fast);
+}
+.hb-nitem:hover { border-color: var(--line-strong); }
+.hb-nitem.on { background: var(--accent-soft); border-color: var(--btn-line); }
+.hb-ntitle { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 14px; }
+.hb-ntitle b, .hb-nsnip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hb-ntitle .badge { flex: none; }
+.hb-nsnip { color: var(--muted); font-size: 13px; }
+.hb-nsnip:empty { display: none; }
+.hb-nitem small { color: var(--muted); font-size: 12px; }
+.hb-nedit { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.hb .hb-ntitle-in { font-size: 17px; font-weight: 600; }
+.hb-nbar { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+.hb-ngroup { display: grid; flex: 1 1 160px; gap: 4px; color: var(--muted); font-size: 13px; }
+.hb textarea.hb-nbody { min-height: 260px; field-sizing: content; }
+.hb-nempty { margin: 0; }
+.hb-grename { display: inline-grid; gap: 4px; margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+.hb .btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--btn-line); }
+
+/* notes pinned to the sheet */
+.hb-pins { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 8px; }
+.hb-pin { display: grid; gap: 6px; padding: 10px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.hb-pin-h { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.hb-pin-h .hb-link { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hb textarea.hb-pin-body { min-height: 64px; max-height: 220px; field-sizing: content; font-size: 14px; }
