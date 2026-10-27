@@ -16,3 +16,7 @@ private/bs/shroom.php
 
 # frame tool output (local only)
 _dev/frame-tool/output/
+
+# progress ticked in /private/minecraft/ - written on the server, never deployed over
+minecraft/projects/farms/done.json
+minecraft/projects/collection/done.json

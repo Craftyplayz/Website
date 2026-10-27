@@ -11,6 +11,8 @@ $sections = [
     'downloads' => 'Files for download',
     'scripts' => 'Small test scripts',
     'gifs' => 'Meme GIF maker',
+    'minecraft/farms' => 'Tick off farms built',
+    'minecraft/collection' => 'Tick off collected items',
 ];
 ?>
 <!DOCTYPE html>

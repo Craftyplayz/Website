@@ -1,0 +1,40 @@
+/* All Possible Farms (/minecraft/projects/farms/) */
+.mcf [hidden] { display: none !important; }
+.mcf .mcf-q { flex: 1 1 220px; }
+.mcf .bar select.field { flex: 1 1 160px; min-width: 0; max-width: 240px; }
+.mcf .bar .check { font-size: 13px; }
+.mcf-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 6px; }
+.mcf-row { display: flex; align-items: center; min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); transition: border-color var(--fast); }
+.mcf-row:hover { border-color: var(--accent); }
+.mcf-open { display: flex; flex: 1; align-items: center; gap: 10px; min-width: 0; min-height: 48px; padding: 6px 10px; background: none; border: 0; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.mcf img { flex: none; image-rendering: pixelated; }
+.mcf-name { display: grid; flex: 1; min-width: 0; }
+.mcf-name b, .mcf-name small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mcf-name b { font-size: 14px; font-weight: 600; }
+.mcf-name b .muted { font-weight: 400; }
+.mcf-name small { color: var(--muted); font-size: 13px; }
+.mcf-open .badge { flex: none; white-space: nowrap; }
+.mcf-more { margin: 16px 0 0; text-align: center; }
+
+/* done tick: a circle that fills green when farmed; the box around it is the 44px tap target */
+.mcf-tick { position: relative; flex: none; width: 44px; height: 44px; margin-right: 2px; padding: 0; background: none; border: 0; border-radius: var(--radius); }
+.mcf-tick::before { content: ""; position: absolute; inset: 11px; border: 2px solid var(--line-strong); border-radius: 50%; transition: border-color var(--fast); }
+.mcf-tick.on::before { background: var(--ok-line); border-color: var(--ok-line); }
+.mcf-tick.on::after { content: ""; position: absolute; top: 15px; left: 19px; width: 6px; height: 11px; border: solid var(--text); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+button.mcf-tick { cursor: pointer; }
+button.mcf-tick:hover::before { border-color: var(--accent); }
+
+.mcf-head { display: flex; align-items: center; gap: 12px; padding-right: 32px; }
+.mcf-head h2 { margin: 0; font-size: 17px; }
+.mcf-head p { margin: 2px 0 0; font-size: 13px; }
+/* the drawer sits outside .page, so it misses the border-box rule and would be 33px wider than a phone */
+.mcf-drawer { box-sizing: border-box; }
+.mcf-drawer img { flex: none; image-rendering: pixelated; }
+.mcf-drawer .kv { margin-top: 12px; font-size: 14px; }
+
+/* phones: the full toolbar would cover a third of the screen if it stuck, and names need the badge's room */
+@media (max-width: 560px) {
+    .mcf .bar { position: static; }
+    .mcf .bar select.field { max-width: none; }
+    .mcf-open .badge { display: none; }
+}
