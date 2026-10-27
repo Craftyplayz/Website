@@ -4,6 +4,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
     const { $, esc, toast, debounce } = UI;
+    // test copy: its own storage, seeded once from the live sheet so testing never rewrites live characters
     const KEY = 'hb-sheet';
     const root = $('#hb-sheet'), dlg = $('#hb-dlg'), dlgBody = $('#hb-dlg-body'), drawer = $('#hb-drawer');
 
@@ -31,6 +32,82 @@ document.addEventListener('DOMContentLoaded', () => {
         "Weaver's tools", "Woodcarver's tools", 'Disguise kit', 'Forgery kit', 'Herbalism kit', "Navigator's tools", "Poisoner's kit", "Thieves' tools",
         'Dice set', 'Playing card set', 'Bagpipes', 'Drum', 'Flute', 'Lute', 'Lyre', 'Horn', 'Viol', 'Vehicles (land)', 'Vehicles (water)'];
     const HIT_DIE = { barbarian: 12, fighter: 10, paladin: 10, ranger: 10, sorcerer: 6, wizard: 6, artificer: 8, bard: 8, cleric: 8, druid: 8, monk: 8, rogue: 8, warlock: 8 };
+    // suggestion lists for the plain text fields
+    const CLASSES = Object.keys(HIT_DIE).map((c) => c[0].toUpperCase() + c.slice(1));
+    const RACES = ['Aasimar', 'Bugbear', 'Changeling', 'Dragonborn', 'Dwarf', 'Hill Dwarf', 'Mountain Dwarf', 'Elf', 'High Elf', 'Wood Elf', 'Drow', 'Fairy', 'Firbolg',
+        'Genasi', 'Gnome', 'Forest Gnome', 'Rock Gnome', 'Goblin', 'Goliath', 'Half-Elf', 'Half-Orc', 'Halfling', 'Lightfoot Halfling', 'Stout Halfling', 'Harengon',
+        'Hobgoblin', 'Human', 'Variant Human', 'Kenku', 'Kobold', 'Lizardfolk', 'Orc', 'Owlin', 'Satyr', 'Tabaxi', 'Tiefling', 'Tortle', 'Triton', 'Warforged', 'Yuan-ti'];
+    const ALIGNMENTS = ['Lawful Good', 'Neutral Good', 'Chaotic Good', 'Lawful Neutral', 'True Neutral', 'Chaotic Neutral', 'Lawful Evil', 'Neutral Evil', 'Chaotic Evil', 'Unaligned'];
+    const SCHOOLS = ['Abjuration', 'Conjuration', 'Divination', 'Enchantment', 'Evocation', 'Illusion', 'Necromancy', 'Transmutation'];
+    const DURATIONS = ['Instantaneous', '1 round', '1 minute', '10 minutes', '1 hour', '8 hours', '24 hours', '7 days', '10 days', '30 days', 'Until dispelled', 'Special',
+        'Up to 1 round', 'Up to 1 minute', 'Up to 10 minutes', 'Up to 1 hour', 'Up to 8 hours', 'Up to 24 hours'];
+    // SRD weapons: name|damage|type|properties|range|weight (lb)
+    const WEAPONS = `Club|1d4|Bludgeoning|Light|5 ft|2
+Dagger|1d4|Piercing|Finesse, Light, Thrown|5 ft or 20/60 ft|1
+Greatclub|1d8|Bludgeoning|Two-handed|5 ft|10
+Handaxe|1d6|Slashing|Light, Thrown|5 ft or 20/60 ft|2
+Javelin|1d6|Piercing|Thrown|5 ft or 30/120 ft|2
+Light hammer|1d4|Bludgeoning|Light, Thrown|5 ft or 20/60 ft|2
+Mace|1d6|Bludgeoning||5 ft|4
+Quarterstaff|1d6|Bludgeoning|Versatile|5 ft|4
+Sickle|1d4|Slashing|Light|5 ft|2
+Spear|1d6|Piercing|Thrown, Versatile|5 ft or 20/60 ft|3
+Light crossbow|1d8|Piercing|Ammunition, Loading, Two-handed|80/320 ft|5
+Dart|1d4|Piercing|Finesse, Thrown|5 ft or 20/60 ft|0.25
+Shortbow|1d6|Piercing|Ammunition, Two-handed|80/320 ft|2
+Sling|1d4|Bludgeoning|Ammunition|30/120 ft|0
+Battleaxe|1d8|Slashing|Versatile|5 ft|4
+Flail|1d8|Bludgeoning||5 ft|2
+Glaive|1d10|Slashing|Heavy, Reach, Two-handed|10 ft|6
+Greataxe|1d12|Slashing|Heavy, Two-handed|5 ft|7
+Greatsword|2d6|Slashing|Heavy, Two-handed|5 ft|6
+Halberd|1d10|Slashing|Heavy, Reach, Two-handed|10 ft|6
+Lance|1d12|Piercing|Reach|10 ft|6
+Longsword|1d8|Slashing|Versatile|5 ft|3
+Maul|2d6|Bludgeoning|Heavy, Two-handed|5 ft|10
+Morningstar|1d8|Piercing||5 ft|4
+Pike|1d10|Piercing|Heavy, Reach, Two-handed|10 ft|18
+Rapier|1d8|Piercing|Finesse|5 ft|2
+Scimitar|1d6|Slashing|Finesse, Light|5 ft|3
+Shortsword|1d6|Piercing|Finesse, Light|5 ft|2
+Trident|1d6|Piercing|Thrown, Versatile|5 ft or 20/60 ft|4
+War pick|1d8|Piercing||5 ft|2
+Warhammer|1d8|Bludgeoning|Versatile|5 ft|2
+Whip|1d4|Slashing|Finesse, Reach|10 ft|3
+Blowgun|1|Piercing|Ammunition, Loading|25/100 ft|1
+Hand crossbow|1d6|Piercing|Ammunition, Light, Loading|30/120 ft|3
+Heavy crossbow|1d10|Piercing|Ammunition, Heavy, Loading, Two-handed|100/400 ft|18
+Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map((l) => l.split('|'));
+    const ARMOUR = [['Padded armour', 8], ['Leather armour', 10], ['Studded leather armour', 13], ['Hide armour', 12], ['Chain shirt', 20], ['Scale mail', 45],
+        ['Breastplate', 20], ['Half plate', 40], ['Ring mail', 40], ['Chain mail', 55], ['Splint armour', 60], ['Plate armour', 65], ['Shield', 6]];
+    // SRD gear: [name, weight, category]
+    const GEAR = [['Backpack', 5], ['Bedroll', 7], ['Blanket', 3], ['Candle', 0], ['Caltrops (bag of 20)', 2], ['Chalk', 0], ['Component pouch', 2], ['Crowbar', 5],
+        ['Arcane focus (crystal)', 1], ['Arcane focus (staff)', 4], ['Druidic focus (wooden staff)', 4], ['Holy symbol (amulet)', 1], ["Healer's kit", 3],
+        ['Hempen rope (50 ft)', 10], ['Silk rope (50 ft)', 5], ['Hooded lantern', 2], ['Bullseye lantern', 2], ['Lamp', 1], ['Oil (flask)', 1], ['Rations (1 day)', 2],
+        ['Tinderbox', 1], ['Torch', 1], ['Waterskin', 5], ['Mess kit', 1], ['Spellbook', 3], ['Ball bearings (bag of 1,000)', 2], ['Grappling hook', 4], ['Hammer', 3],
+        ['Piton', 0.25], ['Steel mirror', 0.5], ['Book', 5], ['Ink (1 ounce bottle)', 0], ['Ink pen', 0], ['Parchment (one sheet)', 0], ['Pouch', 1], ['Sack', 0.5],
+        ['Shovel', 5], ['Manacles', 6], ["Climber's kit", 12], ['Hunting trap', 25], ['Common clothes', 3], ["Traveler's clothes", 4], ['Fine clothes', 6],
+        ['Costume clothes', 4], ['Robes', 4], ['Arrows (20)', 1], ['Crossbow bolts (20)', 1.5], ['Sling bullets (20)', 1.5], ['Blowgun needles (50)', 1],
+        ['Potion of healing', 0.5, 'Consumables'], ['Antitoxin (vial)', 0, 'Consumables'], ['Acid (vial)', 1, 'Consumables'], ["Alchemist's fire (flask)", 1, 'Consumables'],
+        ['Holy water (flask)', 1, 'Consumables'], ['Basic poison (vial)', 0, 'Consumables'],
+        ...WEAPONS.map((w) => [w[0], +w[5], 'Weapons']), ...ARMOUR.map(([n, w]) => [n, w, 'Armour'])];
+    const LANGS = ['Aarakocra', 'Aquan', 'Auran', 'Druidic', 'Gith', 'Gnoll', 'Ignan', 'Leonin', 'Loxodon', 'Minotaur', 'Quori', 'Sign language', 'Sylvan', 'Terran', 'Thieves’ Cant', 'Vedalken'];
+    const FEATURES = ['Darkvision', 'Superior Darkvision', 'Fey Ancestry', 'Trance', 'Keen Senses', 'Dwarven Resilience', 'Stonecunning', 'Lucky', 'Brave',
+        'Halfling Nimbleness', 'Relentless Endurance', 'Savage Attacks', 'Hellish Resistance', 'Infernal Legacy', 'Breath Weapon', 'Damage Resistance', 'Gnome Cunning',
+        'Menacing', 'Rage', 'Unarmored Defense', 'Reckless Attack', 'Danger Sense', 'Extra Attack', 'Fighting Style', 'Second Wind', 'Action Surge', 'Indomitable',
+        'Sneak Attack', 'Cunning Action', 'Uncanny Dodge', 'Evasion', 'Expertise', 'Martial Arts', 'Unarmored Movement', 'Deflect Missiles', 'Slow Fall',
+        'Stunning Strike', 'Divine Sense', 'Lay on Hands', 'Divine Smite', 'Aura of Protection', 'Channel Divinity', 'Wild Shape', 'Bardic Inspiration',
+        'Jack of All Trades', 'Song of Rest', 'Font of Magic', 'Arcane Recovery', 'Eldritch Invocations', 'Pact Boon', 'Favored Enemy', 'Natural Explorer',
+        'Spellcasting', 'Ability Score Improvement',
+        'Alert', 'Actor', 'Athlete', 'Charger', 'Chef', 'Crossbow Expert', 'Crusher', 'Defensive Duelist', 'Dual Wielder', 'Dungeon Delver', 'Durable',
+        'Eldritch Adept', 'Elemental Adept', 'Fey Touched', 'Fighting Initiate', 'Grappler', 'Great Weapon Master', 'Healer', 'Heavily Armored', 'Inspiring Leader',
+        'Keen Mind', 'Lightly Armored', 'Linguist', 'Mage Slayer', 'Magic Initiate', 'Martial Adept', 'Medium Armor Master', 'Metamagic Adept', 'Mobile',
+        'Moderately Armored', 'Mounted Combatant', 'Observant', 'Piercer', 'Poisoner', 'Polearm Master', 'Resilient', 'Ritual Caster', 'Savage Attacker', 'Sentinel',
+        'Shadow Touched', 'Sharpshooter', 'Shield Master', 'Skill Expert', 'Skilled', 'Skulker', 'Slasher', 'Spell Sniper', 'Tavern Brawler', 'Telekinetic',
+        'Telepathic', 'Tough', 'War Caster', 'Weapon Master'];
+    const RESOURCES = ['Rage', 'Ki points', 'Bardic Inspiration', 'Channel Divinity', 'Wild Shape', 'Second Wind', 'Action Surge', 'Indomitable', 'Lay on Hands',
+        'Divine Sense', 'Sorcery points', 'Superiority dice', 'Arcane Recovery', 'Spell slots', 'Pact slots', 'Hit dice', 'Infusions', 'Flash of Genius',
+        'Luck points', 'Breath Weapon', 'Relentless Endurance', 'Healing Light', 'Fey Step'];
     const METAMAGIC = [['Careful Spell', '1', 'Some creatures you choose automatically succeed on the save against your spell.'],
         ['Distant Spell', '1', 'Double the range, or make a touch spell reach 30 ft.'],
         ['Empowered Spell', '1', 'Reroll some of the damage dice and use the new rolls.'],
@@ -40,6 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ['Subtle Spell', '1', 'Cast without verbal or somatic components.'],
         ['Twinned Spell', 'spell level', 'Target a second creature with a spell that targets only one.']];
     const TYPES = { profs: 'Proficiencies', attacks: 'Actions', spells: 'Spells', items: 'Inventory', list: 'List', trackers: 'Trackers', notes: 'Notes', text: 'Text', combat: 'Death saves and hit dice' };
+    const RESETS = [['', 'No reset'], ['short', 'Short rest'], ['long', 'Long rest']];
+    const TRACKER_KINDS = [['count', 'Counter'], ['pips', 'Boxes'], ['levels', 'Slots by level'], ['sorcery', 'Sorcery points'], ['ki', 'Ki points']];
     const PROF = [[0, 'Not proficient'], [0.5, 'Half proficient'], [1, 'Proficient'], [2, 'Expertise']];
     const HELP = 'Formulas can use ability keys for modifiers (DEX), _SCORE for scores (DEX_SCORE), PROF, LEVEL, class levels (FIGHTER_LEVEL), skill names without spaces (SleightofHand), numbers, + - * / ( ), min(), max(), floor(), ceil(), and [labels] like 2 [Shield]. Results round down.';
     const SRD_CREDIT = 'From the <a href="https://dnd.wizards.com/resources/systems-reference-document" target="_blank" rel="noopener">System Reference Document 5.1</a> by Wizards of the Coast, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC-BY-4.0</a>.';
@@ -50,8 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
         attack: () => ({ id: uid(), name: '', time: 'Action', range: '', props: [], mode: 'hit', hit: 'STR + PROF', save: 'DEX', dc: '8 + PROF + STR', dmg: [{ dice: '1d6 + STR', type: 'Slashing' }], desc: '' }),
         spell: () => ({ id: uid(), lvl: 0, name: '', school: '', time: 'Action', range: '', comp: '', dur: '', conc: false, ritual: false, prep: false, mode: 'none', save: 'DEX', dc: '', dmg: [], desc: '', higher: '', srd: '' }),
         item: () => ({ id: uid(), cat: 'Gear', eq: false, att: '', name: '', qty: 1, wt: 0, notes: '' }),
-        list: () => ({ id: uid(), name: '', src: '', text: '' }),
-        tracker: () => ({ id: uid(), name: '', cur: 1, max: 1, reset: 'long' }),
+        list: () => ({ id: uid(), name: '', src: '', text: '', uses: '', used: 0, reset: '' }),
+        // kind: count (left / max), pips (boxes ticked as used) or levels (a row of boxes per level, like spell slots)
+        tracker: () => ({ id: uid(), name: '', kind: 'count', cur: 1, max: 1, used: 0, reset: 'long', group: '', levels: [] }),
+        level: () => ({ label: '', max: '1', used: 0 }),
         meta: () => ({ id: uid(), name: '', cost: '1', desc: '' }),
         dmg: () => ({ dice: '', type: '' }),
         speed: () => ({ type: 'Fly', ft: 30, hover: false }),
@@ -59,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tool: () => ({ name: '', ab: 'DEX', p: 1 }),
         ability: () => ({ key: 'NEW', name: 'New ability', score: 10, save: false, sb: '' }),
         skill: () => ({ name: 'New skill', ab: 'STR', p: 0, b: '' }),
-        passive: () => ({ name: 'Passive', f: '10' }),
+        passive: () => ({ name: 'Passive', f: '10', unit: '' }),
         note: () => ({ id: uid(), title: '', group: '', body: '', pinned: false, created: Date.now(), updated: Date.now() }),
     };
     const PANEL_ROW = { attacks: ROW.attack, spells: ROW.spell, items: ROW.item, list: ROW.list, trackers: ROW.tracker };
@@ -73,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'combat') Object.assign(p, { ok: 0, bad: 0 });
         if (type === 'profs') p.sub = 'skills';
         if (type === 'notes') Object.assign(p, { notes: [], open: '', sort: 'edited' });
+        if (type === 'trackers') p.tabs = [];
         return p;
     }
 
@@ -89,9 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
             profs: { armour: [], weapons: [], langs: ['Common'], tools: [], notes: '' },
             lists: { ...LISTS },
             panels: [newPanel('profs'), newPanel('attacks'), newPanel('spells'), newPanel('items'), newPanel('list', 'Passive abilities'),
-                newPanel('trackers', 'Resources'), newPanel('combat'),
+                newPanel('trackers', 'Resources'), newPanel('trackers', 'Homebrew'), newPanel('combat'),
                 Object.assign(newPanel('notes'), { notes: ['Personality', 'Backstory'].map((title) => Object.assign(ROW.note(), { title, group: 'Character' })) })],
-            view: { tab: '', all: false },
+            view: { tab: '', all: false }, hbPanel: true,
         };
     }
 
@@ -114,6 +196,12 @@ document.addEventListener('DOMContentLoaded', () => {
             c.profs = Object.assign({ notes: old ? old.text || '' : '' }, isObj(c.profs) ? c.profs : {});
             c.panels = panels.filter((p) => p.type !== 'skills' && p !== old);
             c.panels.splice(at, 0, newPanel('profs'));
+        }
+        // a Homebrew resources panel, added once after Resources (a removed or renamed one stays that way)
+        if (Array.isArray(c.panels) && !c.hbPanel) {
+            const at = c.panels.findIndex((p) => isObj(p) && p.type === 'trackers');
+            c.panels.splice(at < 0 ? c.panels.length : at + 1, 0, newPanel('trackers', 'Homebrew'));
+            c.hbPanel = true;
         }
         // Personality, Backstory and Notes text panels become notes in one Notes panel
         if (Array.isArray(c.panels) && !c.panels.some((p) => isObj(p) && p.type === 'notes')) {
@@ -140,7 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function normalise(c) {
         c = upgrade(isObj(c) ? c : {});
         const d = blank(), out = {};
-        for (const k in d) out[k] = typeof c[k] === typeof d[k] && Array.isArray(c[k]) === Array.isArray(d[k]) && c[k] !== null ? c[k] : d[k];
+        // number fields hold whatever was typed, so a string is fine there too
+        for (const k in d) out[k] = (typeof c[k] === typeof d[k] || typeof d[k] === 'number' && typeof c[k] === 'string') && Array.isArray(c[k]) === Array.isArray(d[k]) && c[k] !== null ? c[k] : d[k];
         const rows = (list, make) => (Array.isArray(list) ? list : []).filter(isObj).map((r) => Object.assign(make(), r));
         const strs = (list) => (Array.isArray(list) ? list : []).filter((x) => typeof x === 'string');
         out.abilities = rows(out.abilities, ROW.ability);
@@ -157,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return r;
             });
             if (q.type === 'notes') q.notes = rows(q.notes, ROW.note);
+            if (q.type === 'trackers') { q.tabs = strs(q.tabs); for (const r of q.rows) r.levels = rows(r.levels, ROW.level); }
             if (q.type === 'spells') {
                 q.meta = rows(q.meta, ROW.meta);
                 q.sp = Object.assign({ cur: 0, max: 0 }, isObj(q.sp) ? q.sp : {});
@@ -199,12 +289,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!db.cur) { const c = blank(); db.chars[c.id] = c; db.cur = c.id; }
     let C = db.chars[db.cur];
     let warned = false;
-    function saveNow() {
+    function store() {
         try { localStorage.setItem(KEY, JSON.stringify(db)); warned = false; }
         catch (e) { if (!warned) toast("Couldn't save: this browser's storage is full or blocked. Export the character so you don't lose it.", 'err'); warned = true; }
     }
+    // every edit is also backed up on the server as a new version (backup.php), a few seconds after typing stops
+    const dirty = new Set();
+    let backupTimer = 0;
+    function flushBackups() {
+        clearTimeout(backupTimer);
+        for (const id of [...dirty]) {
+            const c = db.chars[id];
+            dirty.delete(id);
+            if (!c) continue;
+            const body = JSON.stringify(c);
+            // keepalive lets a backup finish while the page closes (browsers allow it for bodies up to 64 KB)
+            fetch('backup.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: body.length < 60000 })
+                .then((r) => { if (!r.ok && r.status >= 500) dirty.add(id); }).catch(() => dirty.add(id));
+        }
+    }
+    function saveNow() {
+        store();
+        if (C) { dirty.add(C.id); clearTimeout(backupTimer); backupTimer = setTimeout(flushBackups, 4000); }
+    }
     const save = debounce(saveNow, 250);
-    addEventListener('pagehide', saveNow);
+    addEventListener('pagehide', () => { store(); flushBackups(); });
 
     const get = (path) => path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), C);
     function set(path, val) {
@@ -220,6 +329,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const sg = (n) => (n < 0 ? '−' + -n : '+' + n);
     const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
     function ev(f, V) { try { return hbCalc(f, V); } catch (e) { return { v: NaN, err: e.message }; } }
+    // a maximum may be a number or a formula (PROF, LEVEL, CHA, SORCERER_LEVEL); a broken one counts as 0
+    const maxOf = (f, V) => { const r = ev(f, V || vars()); return isNaN(r.v) ? 0 : Math.max(0, r.v); };
     const level = () => C.classes.reduce((s, c) => s + nm(c.level), 0);
     const hpMax = () => nm(C.hp.max) + nm(C.hp.mod);
     function profT(ab, p, extra, V) {
@@ -278,6 +389,8 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'fs': return { ...ev(get(a), V), signed: true, why: why(get(a), V) };
             case 'asum': return { v: actSum(get(a), V) };
             case 'ssum': return { v: spellSum(get(a), panelOf(a), V) };
+            case 'lsum': return { v: get(a).src };
+            case 'msum': return { v: get(a).cost === '' ? '' : `${get(a).cost} SP` };
             case 'wt': return { v: C.panels[a].rows.reduce((s, r) => s + nm(r.qty) * nm(r.wt), 0) };
             case 'att': { const P = C.panels[a], n = P.rows.filter((r) => r.att === 'yes').length; return { v: `${n} / ${nm(P.attMax)}`, warn: n > nm(P.attMax) }; }
             case 'hdl': { const c = C.classes[a]; return { v: `${Math.max(0, nm(c.level) - nm(c.hdUsed))} of ${nm(c.level)} left` }; }
@@ -287,6 +400,8 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'speed': return { v: C.speeds.map((s) => `${s.type} ${/^\s*[\d.]+\s*$/.test(s.ft) ? s.ft + ' ft' : s.ft}${s.hover ? ' (hover)' : ''}`).join(' · ') };
             case 'cond': return { v: [...C.conditions, nm(C.exhaustion) ? 'Exhaustion ' + C.exhaustion : ''].filter(Boolean).join(', ') };
             case 'ntitle': return { v: get(a).title || 'Untitled note' };
+            // the worked-out maximum next to a formula like LEVEL or PROF
+            case 'tmax': { const s = String(get(a) ?? '').trim(); return { v: !s || /^\d+$/.test(s) ? '' : '= ' + maxOf(s, V) }; }
             case 'nsnip': { const b = String(get(a).body || '').replace(/\s+/g, ' ').trim(); return { v: b.length > 90 ? b.slice(0, 90) + '…' : b }; }
             case 'nago': return { v: 'Edited ' + UI.ago(get(a).updated) };
             case 'def': return { v: [C.res && 'Resists ' + C.res, C.imm && 'Immune to ' + C.imm, C.vul && 'Vulnerable to ' + C.vul].filter(Boolean).join(' · ') };
@@ -318,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (o.area) return `<textarea class="field${cls}" data-k="${k}" aria-label="${esc(label)}"${ph}>${esc(v ?? '')}</textarea>`;
         if (o.check) return `<input type="checkbox" data-k="${k}" aria-label="${esc(label)}"${v ? ' checked' : ''}>`;
         const num = o.num ? ' inputmode="decimal"' : '';
-        return `<input class="field${cls}"${num} data-k="${k}" value="${esc(v ?? '')}" aria-label="${esc(label)}"${ph}${o.list ? ` list="${o.list}"` : ''} autocomplete="off">`;
+        return `<input class="field${cls}"${num} data-k="${k}" value="${esc(v ?? '')}" aria-label="${esc(label)}"${ph}${o.list ? ` list="${o.list}"` : ''}${o.multi ? ' data-multi="1"' : ''} autocomplete="off">`;
     }
     const sel = (k, label, opts) => `<select class="field" data-k="${k}" aria-label="${esc(label)}">${opts.map(([v, t]) => `<option value="${esc(v)}"${String(get(k)) === String(v) ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
     const abSel = (k, label) => { const keys = C.abilities.map((a) => [a.key, a.key]); const v = get(k); return sel(k, label, keys.some(([x]) => x === v) ? keys : [[v, v + ' (missing)'], ...keys]); };
@@ -337,16 +452,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const pickSub = (p, opts) => (opts.some(([id]) => id === p.sub) ? p.sub : opts[0][0]);
     // removable tags with an "add your own" field
-    function tags(path, presets, ph, list) {
+    function tags(path, presets, ph, list, kind) {
         const have = get(path), all = uniq([...presets, ...have]);
-        return `<div class="badges">${all.map((n) => `<button type="button" class="badge${have.includes(n) ? ' b' : ''}" data-act="chip" data-p="${path}" data-n="${esc(n)}" aria-pressed="${have.includes(n)}">${esc(n)}${presets.includes(n) ? '' : ' <span aria-hidden="true">&times;</span>'}</button>`).join('')}</div>
+        return `<div class="badges">${all.map((n) => `<button type="button" class="badge${have.includes(n) ? ' b' : ''}" data-act="chip" data-p="${path}" data-n="${esc(n)}" aria-pressed="${have.includes(n)}"${kind ? ruleTip(kind, n) : ''}>${esc(n)}${presets.includes(n) ? '' : ' <span aria-hidden="true">&times;</span>'}</button>`).join('')}</div>
             <div class="hb-addtag"><input class="field hb-tagin" data-p="${path}" aria-label="Add your own" placeholder="${esc(ph)}"${list ? ` list="${list}"` : ''} autocomplete="off"><button type="button" class="btn small" data-act="tagadd">Add</button></div>`;
     }
     const dmgEdit = (rp) => `<div class="hb-dmgs">${get(rp + '.dmg').map((d, j) => `<div class="hb-dmgrow">${f(`${rp}.dmg.${j}.dice`, 'Damage dice', { cls: 'hb-formula', ph: '1d8 + STR' })}${f(`${rp}.dmg.${j}.type`, 'Damage type', { list: 'hb-dl-dmg', ph: 'Slashing' })}${del(rp + '.dmg', j, 'damage')}</div>`).join('')}</div>
         <div class="actions">${add(rp + '.dmg', 'dmg', 'Add damage')}</div>`;
     function datalists() {
         const dl = (id, items) => `<datalist id="${id}">${items.map((x) => `<option value="${esc(x)}">`).join('')}</datalist>`;
-        return dl('hb-dl-time', L('time')) + dl('hb-dl-dmg', L('dmg')) + dl('hb-dl-props', L('props')) + dl('hb-dl-speeds', L('speeds')) + dl('hb-dl-tools', TOOLS);
+        return dl('hb-dl-time', L('time')) + dl('hb-dl-dmg', L('dmg')) + dl('hb-dl-props', L('props')) + dl('hb-dl-speeds', L('speeds')) + dl('hb-dl-tools', TOOLS)
+            + dl('hb-dl-race', RACES) + dl('hb-dl-align', ALIGNMENTS) + dl('hb-dl-class', CLASSES) + dl('hb-dl-school', SCHOOLS) + dl('hb-dl-dur', DURATIONS)
+            + dl('hb-dl-weapon', WEAPONS.map((w) => w[0])) + dl('hb-dl-gear', GEAR.map((g) => g[0])) + dl('hb-dl-meta', METAMAGIC.map((m) => m[0]))
+            + dl('hb-dl-feat', FEATURES) + dl('hb-dl-src', [...RACES, ...CLASSES, 'Feat', 'Background', 'Item']) + dl('hb-dl-rsrc', RESOURCES)
+            + dl('hb-dl-armour', ARMOUR.map((a) => a[0])) + dl('hb-dl-langs', LANGS)
+            + ['res', 'imm', 'vul'].map((k) => `<datalist id="hb-dl-${k}"></datalist>`).join('');
     }
 
     // ---- the always-visible top ----
@@ -354,11 +474,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const DICE = [4, 6, 8, 10, 12, 20].map((n) => [n, 'd' + n]);
         const id = `<div class="hb-id">
             <label class="hb-name">Name ${f('name', 'Name')}</label>
-            <label>Race ${f('race', 'Race')}</label>
-            <label>Alignment ${f('alignment', 'Alignment')}</label>
+            <label>Race ${f('race', 'Race', { list: 'hb-dl-race' })}</label>
+            <label>Alignment ${f('alignment', 'Alignment', { list: 'hb-dl-align' })}</label>
             <label class="hb-age">Age ${f('age', 'Age')}</label>
             <div class="hb-classes">${C.classes.map((c, i) => `<div class="hb-cls">
-                <label>Class ${f(`classes.${i}.name`, 'Class', { ph: 'Fighter' })}</label>
+                <label>Class ${f(`classes.${i}.name`, 'Class', { list: 'hb-dl-class', ph: 'Fighter' })}</label>
                 <label class="hb-lvl">Level ${f(`classes.${i}.level`, 'Level', { num: true })}</label>
                 <label class="hb-die">Hit die ${sel(`classes.${i}.die`, 'Hit die', DICE)}</label>
                 ${C.classes.length > 1 ? del('classes', i, c.name || 'class') : ''}
@@ -398,16 +518,17 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="card hb-more-body" id="hb-more"${open.more ? '' : ' hidden'}>
             <h3>Conditions</h3>
-            <div class="badges" aria-label="Conditions">${conds.map((n) => `<button type="button" class="badge${C.conditions.includes(n) ? ' r' : ''}" data-act="cond" data-n="${esc(n)}" aria-pressed="${C.conditions.includes(n)}">${esc(n)}</button>`).join('')}</div>
+            <div class="badges" aria-label="Conditions">${conds.map((n) => `<button type="button" class="badge${C.conditions.includes(n) ? ' r' : ''}" data-act="cond" data-n="${esc(n)}" aria-pressed="${C.conditions.includes(n)}"${ruleTip('cond', n)}>${esc(n)}</button>`).join('')}</div>
             <label class="hb-exh">Exhaustion ${f('exhaustion', 'Exhaustion level', { num: true })}</label>
+            ${rulesBlock('cond', conds.filter((n) => C.conditions.includes(n)))}${nm(C.exhaustion) > 0 ? `<div class="hb-rules"><div class="hb-rule"><b>Exhaustion level ${Math.min(6, nm(C.exhaustion))}</b>${rulePs((rule('cond', 'exhaustion') || []).filter((x) => /^\d - /.test(x) && +x[0] <= nm(C.exhaustion)).map((x) => '- ' + x.slice(4)))}</div></div>` : ''}
             <h3>Speed</h3>
             <div class="hb-speeds">${C.speeds.map((s, i) => `<div class="hb-speed">${f(`speeds.${i}.type`, 'Speed type', { list: 'hb-dl-speeds' })}${f(`speeds.${i}.ft`, 'Feet', { num: true, cls: 'hb-n' })}<span class="muted">ft</span><label class="check">${f(`speeds.${i}.hover`, 'Hover', { check: true })} Hover</label>${del('speeds', i, s.type + ' speed')}</div>`).join('')}</div>
             <div class="actions">${add('speeds', 'speed', 'Add speed')}</div>
             <h3>Defences</h3>
             <div class="hb-grid">
-                <label>Resistances ${f('res', 'Resistances', { ph: 'fire, cold' })}</label>
-                <label>Immunities ${f('imm', 'Immunities')}</label>
-                <label>Vulnerabilities ${f('vul', 'Vulnerabilities')}</label>
+                <label>Resistances ${f('res', 'Resistances', { list: 'hb-dl-res', multi: true, ph: 'fire, cold' })}</label>
+                <label>Immunities ${f('imm', 'Immunities', { list: 'hb-dl-imm', multi: true })}</label>
+                <label>Vulnerabilities ${f('vul', 'Vulnerabilities', { list: 'hb-dl-vul', multi: true })}</label>
             </div>
         </div>`;
         const saves = `<section class="card hb-saves"><h2>Saving throws</h2><div class="hb-savegrid">${C.abilities.map((a, i) => `<div class="hb-save">
@@ -415,7 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>${esc(a.key)}</span>${val('save:' + i)}
         </div>`).join('')}</div></section>`;
         const senses = `<section class="card hb-senses"><h2>Senses</h2>
-            <div class="rows">${C.passives.map((p, i) => `<div class="rowi"><span class="grow">${esc(p.name)}</span>${fx(`passives.${i}.f`, p.name, false)}</div>`).join('')}</div>
+            <div class="rows">${C.passives.map((p, i) => `<div class="rowi"><span class="grow">${esc(p.name)}</span>${fx(`passives.${i}.f`, p.name, false)}${p.unit ? `<small class="muted">${esc(p.unit)}</small>` : ''}</div>`).join('')}</div>
             <label class="hb-lbl hb-other">Other senses ${f('senses', 'Other senses', { area: true, ph: '120 ft magical darkvision' })}</label>
         </section>`;
         return `<div class="hb-top-id">${id}</div><div class="hb-top-art">${art}</div><div class="hb-top-abil">${abils}</div>
@@ -434,19 +555,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ---- configurable panels ----
     // one action or spell: a summary line you can open to edit
-    function entry(rp, r, summaryKey, editor, lead = '') {
+    function entry(rp, r, summaryKey, editor, lead = '', tail = '') {
         const isOpen = openRows.has(r.id);
         return `<div class="hb-entry">
             <div class="hb-entry-h">${lead}<button type="button" class="hb-link" data-act="info" data-p="${rp}">${esc(r.name || 'Unnamed')}</button>
                 <span class="hb-sum" data-c="${summaryKey}:${rp}"></span>
                 <button type="button" class="hb-x hb-toggle" data-act="toggle" data-id="${esc(r.id)}" aria-expanded="${isOpen}" aria-label="Edit ${esc(r.name || 'entry')}" title="Edit">${PENCIL}</button></div>
-            ${isOpen ? `<div class="hb-editor">${editor()}</div>` : ''}
+            ${tail}${isOpen ? `<div class="hb-editor">${editor()}</div>` : ''}
         </div>`;
     }
 
     function actionEditor(rp, r) {
         return `<div class="hb-grid">
-            <label>Name ${f(rp + '.name', 'Name', { ph: 'Longsword' })}</label>
+            <label>Name ${f(rp + '.name', 'Name', { list: 'hb-dl-weapon', ph: 'Longsword' })}</label>
             <label>Timing ${f(rp + '.time', 'Timing', { list: 'hb-dl-time' })}</label>
             <label>Range or reach ${f(rp + '.range', 'Range or reach', { ph: '5 ft or 80/320 ft' })}</label>
             <label>Resolves with ${sel(rp + '.mode', 'Resolves with', [['hit', 'Attack roll'], ['save', 'Saving throw'], ['none', 'Nothing']])}</label>
@@ -454,7 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${r.mode === 'save' ? `<label>Save ${abSel(rp + '.save', 'Save ability')}</label><div class="hb-fxbox"><span>Save DC</span>${fx(rp + '.dc', 'Save DC', false)}</div>` : ''}
         </div>
         <h4>Damage</h4>${dmgEdit(rp)}
-        <h4>Properties</h4>${tags(rp + '.props', [], 'Finesse', 'hb-dl-props')}
+        <h4>Properties</h4>${tags(rp + '.props', [], 'Finesse', 'hb-dl-props', 'prop')}
         <label class="hb-wide">Description ${f(rp + '.desc', 'Description', { area: true })}</label>
         <div class="actions">${del(panelPath(rp) + '.rows', rp.split('.').pop(), r.name || 'action', 'Remove action')}</div>`;
     }
@@ -463,11 +584,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<div class="hb-grid">
             <label>Name ${f(rp + '.name', 'Spell name', { list: 'hb-dl-srd', ph: 'Fireball' })}</label>
             <label>Level ${f(rp + '.lvl', 'Level, 0 for a cantrip', { num: true })}</label>
-            <label>School ${f(rp + '.school', 'School', { ph: 'Evocation' })}</label>
+            <label>School ${f(rp + '.school', 'School', { list: 'hb-dl-school', ph: 'Evocation' })}</label>
             <label>Casting time ${f(rp + '.time', 'Casting time', { list: 'hb-dl-time' })}</label>
             <label>Range ${f(rp + '.range', 'Range', { ph: '150 feet' })}</label>
             <label>Components ${f(rp + '.comp', 'Components', { ph: 'V, S, M (bat guano)' })}</label>
-            <label>Duration ${f(rp + '.dur', 'Duration', { ph: 'Instantaneous' })}</label>
+            <label>Duration ${f(rp + '.dur', 'Duration', { list: 'hb-dl-dur', ph: 'Instantaneous' })}</label>
             <div class="hb-checks"><label class="check">${f(rp + '.conc', 'Concentration', { check: true })} Concentration</label><label class="check">${f(rp + '.ritual', 'Ritual', { check: true })} Ritual</label></div>
             <label>Resolves with ${sel(rp + '.mode', 'Resolves with', [['none', 'Nothing'], ['atk', 'Spell attack'], ['save', 'Saving throw']])}</label>
             ${r.mode === 'save' ? `<label>Save ${abSel(rp + '.save', 'Save ability')}</label><label>DC override (optional) ${f(rp + '.dc', 'DC override formula', { cls: 'hb-formula', ph: 'Uses your spell save DC' })}</label>` : ''}
@@ -486,12 +607,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (C.profs.notes) opts.push(['notes', 'Notes']);
             const cur = pickSub(p, opts);
             let body;
-            if (cur === 'skills') body = `<div class="rows hb-two">${C.skills.map((s, i) => `<div class="rowi">${dot('prof', i, s, s.name)}<span class="grow">${esc(s.name)}</span><small>${esc(s.ab)}</small>${val('skill:' + i)}</div>`).join('')}</div>
+            if (cur === 'skills') body = `<div class="rows hb-two">${C.skills.map((s, i) => `<div class="rowi">${dot('prof', i, s, s.name)}<button type="button" class="hb-link grow" data-act="skill" data-i="${i}">${esc(s.name)}</button><small>${esc(s.ab)}</small>${val('skill:' + i)}</div>`).join('')}</div>
                 <p class="muted hb-hint">Click a dot to change proficiency. Add or rename skills in Customise.</p>`;
             else if (cur === 'tools') body = `<div class="rows">${C.profs.tools.map((t, i) => `<div class="rowi hb-tool">${dot('tprof', i, t, t.name || 'tool')}${f(`profs.tools.${i}.name`, 'Tool', { cls: 'grow', list: 'hb-dl-tools', ph: "Thieves' tools" })}${abSel(`profs.tools.${i}.ab`, 'Ability')}${val('tool:' + i)}${del('profs.tools', i, t.name || 'tool')}</div>`).join('')}</div>
                 <div class="actions">${add('profs.tools', 'tool', 'Add tool')}</div>`;
             else if (cur === 'notes') body = f('profs.notes', 'Notes', { area: true, cls: 'hb-text' });
-            else body = tags('profs.' + cur, PRESET[cur], { armour: 'Mithral armour', weapons: 'Longsword', langs: 'Thieves’ Cant' }[cur]);
+            else body = tags('profs.' + cur, PRESET[cur], { armour: 'Mithral armour', weapons: 'Longsword', langs: 'Thieves’ Cant' }[cur], { armour: 'hb-dl-armour', weapons: 'hb-dl-weapon', langs: 'hb-dl-langs' }[cur], { armour: 'armour', weapons: 'weapons', langs: 'lang' }[cur])
+                + rulesBlock({ armour: 'armour', weapons: 'weapons', langs: 'lang' }[cur], C.profs[cur]);
             return subtabs(path + '.sub', opts, cur) + body;
         },
 
@@ -515,7 +637,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button type="button" class="btn small" data-act="track" data-p="${path}.sp" data-d="-1" aria-label="Spend a sorcery point">−</button>
                     ${f(path + '.sp.cur', 'Sorcery points left', { num: true, cls: 'hb-n' })}<span>/</span>${f(path + '.sp.max', 'Sorcery points maximum', { num: true, cls: 'hb-n' })}
                     <button type="button" class="btn small" data-act="track" data-p="${path}.sp" data-d="1" aria-label="Get a sorcery point back">+</button></div>
-                <div class="hb-list">${p.meta.map((m, i) => `<div class="hb-entry"><div class="hb-entry-h">${f(`${path}.meta.${i}.name`, 'Name', { cls: 'hb-strong', ph: 'Quickened Spell' })}<label class="hb-cost">Cost ${f(`${path}.meta.${i}.cost`, 'Cost in sorcery points', { cls: 'hb-n' })}</label>${del(path + '.meta', i, m.name || 'metamagic')}</div>${f(`${path}.meta.${i}.desc`, 'Description', { area: true })}</div>`).join('')}</div>
+                <div class="hb-list">${p.meta.map((m, i) => { const mp = `${path}.meta.${i}`; return entry(mp, m, 'msum', () => `<div class="hb-entry-h">${f(mp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-meta', ph: 'Quickened Spell' })}<label class="hb-cost">Cost ${f(mp + '.cost', 'Cost in sorcery points', { cls: 'hb-n' })}</label></div>
+                    <label class="hb-wide">Description ${f(mp + '.desc', 'Description', { area: true })}</label>
+                    <div class="actions">${del(path + '.meta', i, m.name || 'metamagic', 'Remove metamagic')}</div>`); }).join('')}</div>
                 <div class="actions"><select class="field hb-auto" id="hb-meta-pick" aria-label="Metamagic option"><option value="">Your own</option>${METAMAGIC.map(([n]) => `<option>${esc(n)}</option>`).join('')}</select><button type="button" class="btn small" data-act="addmeta" data-p="${path}.meta">Add metamagic</button></div>`;
             const slots = p.slots.map((s, l) => (nm(s.max) > 0 ? `<span class="hb-slot"><small>${ordinal(l + 1)}</small>${pips(`${path}.slots.${l}.used`, s.max)}</span>` : '')).join('');
             const list = p.rows.map((r, i) => [r, `${path}.rows.${i}`]).sort((a, b) => (nm(a[0].lvl) || 0) - (nm(b[0].lvl) || 0))
@@ -538,7 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cur = pickSub(p, opts);
             const rows = p.rows.map((r, i) => [r, i]).filter(([r]) => cur === 'all' || r.cat === cur).map(([r, i]) => `<tr>
                 <td class="hb-c">${f(`${path}.rows.${i}.eq`, 'Equipped', { check: true })}</td>
-                <td>${f(`${path}.rows.${i}.name`, 'Item', { ph: 'Rope, 50 ft' })}</td>
+                <td>${f(`${path}.rows.${i}.name`, 'Item', { list: 'hb-dl-gear', ph: 'Rope, 50 ft' })}</td>
                 <td>${sel(`${path}.rows.${i}.cat`, 'Category', cats.map((c) => [c, c]))}</td>
                 <td>${f(`${path}.rows.${i}.qty`, 'Quantity', { num: true, cls: 'hb-n' })}</td>
                 <td>${f(`${path}.rows.${i}.wt`, 'Weight each', { num: true, cls: 'hb-n' })}</td>
@@ -551,19 +675,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="actions">${add(path + '.rows', 'item', 'Add item', ` data-cat="${esc(cur === 'all' ? 'Gear' : cur)}"`)}<span class="muted">Total weight <b data-c="wt:${pi}"></b></span></div>`;
         },
 
-        list: (p, path) => `<div class="hb-list">${p.rows.map((r, i) => `<div class="hb-entry">
-                <div class="hb-entry-h">${f(`${path}.rows.${i}.name`, 'Name', { cls: 'hb-strong', ph: 'Darkvision' })}${f(`${path}.rows.${i}.src`, 'Source (optional)', { cls: 'hb-src', ph: 'Elf' })}${del(path + '.rows', i, r.name || 'entry')}</div>
-                ${f(`${path}.rows.${i}.text`, 'Description', { area: true })}
-            </div>`).join('')}</div><div class="actions">${add(path + '.rows', 'list', 'Add entry')}</div>`,
+        // entries (passive abilities, features); each can have uses that come back on a rest
+        list: (p, path) => {
+            const V = vars();
+            // the name opens the description; uses stay out so they can be ticked off in play
+            return `<div class="hb-list">${p.rows.map((r, i) => { const rp = `${path}.rows.${i}`; return entry(rp, r, 'lsum', () => `<div class="hb-entry-h">${f(rp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-feat', ph: 'Darkvision' })}${f(rp + '.src', 'Source (optional)', { cls: 'hb-src', list: 'hb-dl-src', ph: 'Elf' })}</div>
+                <div class="hb-uses">
+                    <label>Uses ${f(rp + '.uses', 'Uses (number or formula)', { cls: 'hb-n hb-formula', ph: 'none' })}</label><small class="muted" data-c="tmax:${rp}.uses"></small>
+                    ${sel(rp + '.reset', 'Resets on', RESETS)}
+                </div>
+                <label class="hb-wide">Description ${f(rp + '.text', 'Description', { area: true })}</label>
+                <div class="actions">${del(path + '.rows', i, r.name || 'entry', 'Remove entry')}</div>`, '',
+                String(r.uses).trim() ? `<div class="hb-uses">${pips(rp + '.used', maxOf(r.uses, V))}<small class="muted">${esc(r.reset ? RESETS.find(([k]) => k === r.reset)[1] : '')}</small></div>` : ''); }).join('')}</div><div class="actions">${add(path + '.rows', 'list', 'Add entry')}</div>`;
+        },
 
-        trackers: (p, path) => `<div class="rows">${p.rows.map((r, i) => `<div class="rowi hb-track">
-                ${f(`${path}.rows.${i}.name`, 'Name', { cls: 'grow', ph: 'Rage' })}
-                <button type="button" class="btn small" data-act="track" data-p="${path}.rows.${i}" data-d="-1" aria-label="Use one">−</button>
-                ${f(`${path}.rows.${i}.cur`, 'Left', { num: true, cls: 'hb-n' })}<span>/</span>${f(`${path}.rows.${i}.max`, 'Maximum', { num: true, cls: 'hb-n' })}
-                <button type="button" class="btn small" data-act="track" data-p="${path}.rows.${i}" data-d="1" aria-label="Get one back">+</button>
-                ${sel(`${path}.rows.${i}.reset`, 'Resets on', [['', 'No reset'], ['short', 'Short rest'], ['long', 'Long rest']])}
-                ${del(path + '.rows', i, r.name || 'tracker')}
-            </div>`).join('')}</div><div class="actions">${add(path + '.rows', 'tracker', 'Add tracker')}</div>`,
+        // resources in your own sub-tabs: counters, boxes, or slots by level
+        trackers: (p, path, pi) => {
+            const V = vars();
+            const tabs = uniq([...p.tabs, ...p.rows.map((r) => r.group).filter(Boolean)]);
+            const opts = [['all', 'All', p.rows.length], ...tabs.map((t) => ['t:' + t, t, p.rows.filter((r) => r.group === t).length])];
+            const cur = pickSub(p, opts), tab = cur.startsWith('t:') ? cur.slice(2) : '';
+            const row = (r, rp, i) => {
+                const head = `${f(rp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-rsrc', ph: r.kind === 'levels' ? 'Spell slots' : 'Rage' })}`;
+                const main = r.kind === 'count' ? `<span class="hb-count">
+                        <button type="button" class="btn small" data-act="track" data-p="${rp}" data-d="-1" aria-label="Use one">−</button>
+                        ${f(rp + '.cur', 'Left', { num: true, cls: 'hb-n' })}<span>/</span>${f(rp + '.max', 'Maximum (number or formula)', { cls: 'hb-n hb-formula' })}
+                        <button type="button" class="btn small" data-act="track" data-p="${rp}" data-d="1" aria-label="Get one back">+</button><small class="muted" data-c="tmax:${rp}.max"></small></span>`
+                    : r.kind === 'pips' ? `<span class="hb-count">${pips(rp + '.used', maxOf(r.max, V))}<label class="hb-maxl">Max ${f(rp + '.max', 'Maximum (number or formula)', { cls: 'hb-n hb-formula' })}</label><small class="muted" data-c="tmax:${rp}.max"></small></span>` : '';
+                const levels = r.kind === 'levels' ? `<div class="hb-levels">${r.levels.map((l, j) => `<div class="hb-level">
+                        ${f(`${rp}.levels.${j}.label`, 'Level name', { cls: 'hb-lvlname', ph: '1st' })}
+                        <label class="hb-maxl">Max ${f(`${rp}.levels.${j}.max`, 'Maximum (number or formula)', { cls: 'hb-n hb-formula' })}</label>
+                        ${pips(`${rp}.levels.${j}.used`, maxOf(l.max, V))}${del(rp + '.levels', j, (l.label || 'level') + ' level')}
+                    </div>`).join('')}<div class="actions">${add(rp + '.levels', 'level', 'Add level')}</div></div>` : '';
+                return `<div class="hb-entry hb-res">
+                    <div class="hb-entry-h">${head}${main}${sel(rp + '.reset', 'Resets on', RESETS)}
+                        ${tabs.length ? sel(rp + '.group', 'Tab', [['', 'No tab'], ...tabs.map((t) => [t, t])]) : ''}${del(path + '.rows', i, r.name || 'resource')}</div>
+                    ${levels}
+                </div>`;
+            };
+            const list = p.rows.map((r, i) => [r, i]).filter(([r]) => cur === 'all' || r.group === tab).map(([r, i]) => row(r, `${path}.rows.${i}`, i)).join('');
+            return `<div class="hb-subrow">${subtabs(path + '.sub', opts, cur)}<button type="button" class="btn small" data-act="tadd" data-p="${path}">New tab</button></div>
+                ${tab ? `<div class="hb-tabtools"><label class="hb-grename">Rename this tab <input class="field hb-tname" data-p="${path}" data-g="${esc(tab)}" value="${esc(tab)}" autocomplete="off"></label><button type="button" class="btn small" data-act="tdel" data-p="${path}" data-g="${esc(tab)}">Delete tab</button></div>` : ''}
+                <div class="hb-list">${list || '<p class="muted">No resources here yet.</p>'}</div>
+                <div class="actions"><select class="field hb-auto" id="hb-tkind-${pi}" aria-label="Kind of resource">${TRACKER_KINDS.map(([k, t]) => `<option value="${k}">${t}</option>`).join('')}</select><button type="button" class="btn small" data-act="tnew" data-p="${path}" data-i="${pi}">Add resource</button></div>`;
+        },
 
         text: (p, path) => f(path + '.text', p.title, { area: true, cls: 'hb-text' }),
 
@@ -710,7 +865,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function rest(kind) {
         for (const p of C.panels) {
-            if (p.type === 'trackers') for (const r of p.rows) if (r.reset === 'short' || (kind === 'long' && r.reset === 'long')) r.cur = r.max;
+            const due = (r) => r.reset === 'short' || (kind === 'long' && r.reset === 'long');
+            if (p.type === 'trackers') for (const r of p.rows.filter(due)) {
+                if (r.kind === 'levels') for (const l of r.levels) l.used = 0;
+                else if (r.kind === 'pips') r.used = 0;
+                else r.cur = maxOf(r.max);
+            }
+            if (p.type === 'list') for (const r of p.rows.filter(due)) r.used = 0;
             if (kind !== 'long') continue;
             if (p.type === 'spells') { for (const s of p.slots) s.used = 0; p.sp.cur = p.sp.max; }
             if (p.type === 'combat') { p.ok = 0; p.bad = 0; }
@@ -771,21 +932,87 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { toast(`Couldn't load ${r.name} from the SRD. Try again in a minute.`, 'err'); }
     }
 
+    // picking a known weapon, item or metamagic from the suggestions fills in the rest of its row
+    const named = (list, name) => list.find((x) => x[0].toLowerCase() === String(name).trim().toLowerCase());
+    function rowFill(k) {
+        const rp = k.replace(/\.name$/, ''), r = get(rp), P = panelOf(k);
+        if (/\.meta\.\d+\.name$/.test(k)) {
+            const m = named(METAMAGIC, r.name);
+            if (!m) return false;
+            Object.assign(r, { name: m[0], cost: m[1], desc: r.desc || m[2] });
+        } else if (P.type === 'attacks') {
+            const w = named(WEAPONS, r.name);
+            if (!w) return false;
+            const props = w[3] ? w[3].split(', ') : [], ab = props.includes('Finesse') || props.includes('Ammunition') ? 'DEX' : 'STR';
+            Object.assign(r, { name: w[0], range: w[4], props, mode: 'hit', hit: ab + ' + PROF', dmg: [{ dice: w[1] + ' + ' + ab, type: w[2] }] });
+        } else if (P.type === 'items') {
+            const g = named(GEAR, r.name);
+            if (!g) return false;
+            Object.assign(r, { name: g[0], wt: g[1], cat: g[2] || 'Gear' });
+        } else return false;
+        saveNow(); draw();
+        toast(`Filled in ${r.name}.`, 'ok');
+        return true;
+    }
+    // comma-separated fields: suggest the next entry after what's already typed
+    function multiList(el) {
+        const pre = el.value.includes(',') ? el.value.replace(/[^,]*$/, '').replace(/\s*$/, ' ') : '';
+        const have = el.value.toLowerCase().split(',').map((s) => s.trim());
+        const items = uniq([...L('dmg'), ...(C.condList || CONDITIONS).split('\n').map((s) => s.trim()).filter(Boolean)]).filter((x) => !have.includes(x.toLowerCase()));
+        $('#' + el.getAttribute('list')).innerHTML = items.map((x) => `<option value="${esc(pre + x)}">`).join('');
+    }
+
+    // ---- SRD rules text (rules.js): conditions, skills, weapon properties, languages, armour and weapon proficiencies ----
+    const RULES = window.HB_RULES || {};
+    function rule(kind, name) {
+        const n = String(name).trim().toLowerCase();
+        if (kind === 'weapons') {
+            const simple = WEAPONS.slice(0, 14), w = named(WEAPONS, n);
+            if (n === 'simple weapons' || n === 'martial weapons') return [(n[0] === 's' ? simple : WEAPONS.slice(14)).map((x) => x[0]).join(', ') + '.'];
+            return w ? [`${simple.includes(w) ? 'Simple' : 'Martial'} weapon. ${w[1]} ${w[2].toLowerCase()} damage${w[3] ? '. ' + w[3] : ''}. ${w[4]}.`] : null;
+        }
+        return (RULES[kind] || {})[n] || null;
+    }
+    const ruleTip = (kind, name) => { const r = rule(kind, name); return r ? ` title="${esc(r.join(' ').replace(/(^|\s)- /g, '$1'))}"` : ''; };
+    // "- " lines are SRD bullet points
+    const rulePs = (r) => (r || []).map((x) => (x.startsWith('- ') ? `<p class="hb-bullet">${esc(x.slice(2))}</p>` : `<p>${esc(x)}</p>`)).join('');
+    // what the chosen conditions, properties or proficiencies do, under where they're picked
+    function rulesBlock(kind, names, heading) {
+        const rows = names.map((n) => [n, rule(kind, n)]).filter(([, r]) => r);
+        return rows.length ? `<div class="hb-rules">${heading ? `<h4>${esc(heading)}</h4>` : ''}${rows.map(([n, r]) => `<div class="hb-rule"><b>${esc(n)}</b>${rulePs(r)}</div>`).join('')}
+            <p class="muted hb-hint">Rules text from the SRD 5.1, CC-BY-4.0.</p></div>` : '';
+    }
+
     // ---- details drawer ----
     const paras = (s) => String(s || '').split(/\n+/).filter((x) => x.trim()).map((x) => `<p>${esc(x)}</p>`).join('');
     function info(rp) {
         const r = get(rp), V = vars(), spell = 'lvl' in r, P = panelOf(rp);
         const kv = (rows) => rows.filter(([, v]) => v).map(([k, v]) => `<div class="kv"><span>${k}</span><span>${esc(v)}</span></div>`).join('');
+        // list entries and metamagic: just a source or cost, uses and the text
+        if (!('time' in r)) {
+            const uses = String(r.uses ?? '').trim() ? `${maxOf(r.uses, V)}${r.reset ? ', back on a ' + RESETS.find(([k]) => k === r.reset)[1].toLowerCase() : ''}` : '';
+            return openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(r.src || '')}</p>
+                ${kv([['Cost', 'cost' in r && r.cost !== '' ? r.cost + ' sorcery points' : ''], ['Uses', uses]])}
+                <div class="hb-desc">${paras(r.text ?? r.desc) || '<p class="muted">No description yet. Add one with the edit button.</p>'}</div>`);
+        }
         const head = spell ? (nm(r.lvl) ? `${ordinal(nm(r.lvl))}-level ${(r.school || 'spell').toLowerCase()}` : `${r.school || 'Spell'} cantrip`) + (r.ritual ? ' (ritual)' : '') : r.time;
         const res = spell ? (r.mode === 'atk' ? show({ ...ev(P.atk, V), signed: true }) + ' to hit' : r.mode === 'save' ? `DC ${show(ev(r.dc || P.dc, V))} ${r.save} save` : '')
             : r.mode === 'hit' ? show({ ...ev(r.hit, V), signed: true }) + ' to hit' : r.mode === 'save' ? `DC ${show(ev(r.dc, V))} ${r.save} save` : '';
-        $('#hb-drawer-body').innerHTML = `<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(head || '')}</p>
+        openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(head || '')}</p>
             ${kv(spell ? [['Casting time', r.time], ['Range', r.range], ['Components', r.comp], ['Duration', (r.conc ? 'Concentration, ' : '') + r.dur], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)]]
-                : [['Timing', r.time], ['Range', r.range], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)], ['Properties', r.props.join(', ')]])}
+                : [['Timing', r.time], ['Range', r.range], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)], ['Properties', r.props.filter((n) => !rule('prop', n)).join(', ')]])}
             <div class="hb-desc">${paras(r.desc) || '<p class="muted">No description yet. Add one with the edit button.</p>'}
             ${spell && r.higher ? `<p><b>At higher levels.</b></p>${paras(r.higher)}` : ''}</div>
-            ${spell && r.srd ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`;
-        drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); drawer.focus();
+            ${spell ? '' : rulesBlock('prop', r.props, 'Properties')}
+            ${spell && r.srd ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
+    }
+    function openDrawer(html) { $('#hb-drawer-body').innerHTML = html; drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); drawer.focus(); }
+    function skillInfo(i) {
+        const sk = C.skills[i], v = value('skill:' + i, vars());
+        openDrawer(`<h2>${esc(sk.name)}</h2><p class="muted">${esc(sk.ab)} skill, ${PROF.find(([p]) => p === sk.p)?.[1].toLowerCase() || 'not proficient'}</p>
+            <div class="kv"><span>Bonus</span><span>${esc(show({ ...v, signed: true }))}</span></div>
+            <div class="hb-desc">${rulePs(rule('skill', sk.name)) || '<p class="muted">No SRD description for this skill.</p>'}</div>
+            ${rule('skill', sk.name) ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
     }
     function closeDrawer() { drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); }
 
@@ -837,6 +1064,25 @@ document.addEventListener('DOMContentLoaded', () => {
         finally { btn.disabled = false; btn.textContent = 'Import character'; }
     }
 
+    // ---- sense pick list: passive skills from this sheet, senses from D&D Beyond's rule data ----
+    let senseNames = ['Blindsight', 'Darkvision', 'Tremorsense', 'Truesight'], senseLoaded = false;
+    function senseOptions() {
+        const have = new Set(C.passives.map((p) => p.name));
+        const opt = (v, t) => `<option value="${esc(v)}"${have.has(t) ? ' disabled' : ''}>${esc(t)}</option>`;
+        return '<option value="">Your own</option>'
+            + `<optgroup label="Passive skills">${C.skills.map((k) => opt('p:' + k.name, 'Passive ' + k.name)).join('')}</optgroup>`
+            + `<optgroup label="Senses">${senseNames.map((n) => opt('s:' + n, n)).join('')}</optgroup>`;
+    }
+    function loadSenses() {
+        if (senseLoaded) return;
+        senseLoaded = true;
+        fetch('ddb.php?rules=1').then((r) => (r.ok ? r.json() : Promise.reject())).then((j) => {
+            if (Array.isArray(j.senses) && j.senses.length) senseNames = j.senses;
+            const pick = $('#hb-sense-pick');
+            if (pick) pick.innerHTML = senseOptions();
+        }).catch(() => { senseLoaded = false; });
+    }
+
     // ---- customise ----
     function customDlg() {
         const mini = (head, rows, addBtn) => table(head, rows) + `<div class="actions">${addBtn}</div>`;
@@ -856,7 +1102,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <h3>Skills</h3>
             ${mini(['Skill', 'Ability', 'Extra bonus', ''], C.skills.map((s, i) => `<tr><td>${f(`skills.${i}.name`, 'Skill')}</td><td>${abSel(`skills.${i}.ab`, 'Ability')}</td><td>${f(`skills.${i}.b`, 'Extra bonus formula', { cls: 'hb-formula', ph: '0' })}</td><td>${del('skills', i, s.name)}</td></tr>`).join(''), add('skills', 'skill', 'Add skill'))}
             <h3>Senses</h3>
-            ${mini(['Name', 'Formula', 'Result', ''], C.passives.map((p, i) => `<tr><td>${f(`passives.${i}.name`, 'Name')}</td><td>${f(`passives.${i}.f`, 'Formula', { cls: 'hb-formula' })}</td><td><b data-c="fx:passives.${i}.f"></b></td><td>${del('passives', i, p.name)}</td></tr>`).join(''), add('passives', 'passive', 'Add sense'))}
+            ${table(['Name', 'Formula', 'Result', 'Unit', ''], C.passives.map((p, i) => `<tr><td>${f(`passives.${i}.name`, 'Name')}</td><td>${f(`passives.${i}.f`, 'Formula', { cls: 'hb-formula' })}</td><td><b data-c="fx:passives.${i}.f"></b></td><td>${f(`passives.${i}.unit`, 'Unit', { cls: 'hb-n', ph: 'ft' })}</td><td>${del('passives', i, p.name)}</td></tr>`).join(''))}
+            <div class="actions"><select class="field hb-auto" id="hb-sense-pick" aria-label="Sense to add">${senseOptions()}</select><button type="button" class="btn small" data-act="addsense">Add sense</button></div>
             <h3>Lists</h3>
             <p class="muted hb-hint">One entry per line. These fill the suggestions and tabs.</p>
             <div class="hb-grid hb-lists"><label>Conditions ${f('condList', 'Conditions', { area: true })}</label>${Object.entries(LIST_NAMES).map(([k, t]) => `<label>${t} ${f('lists.' + k, t, { area: true })}</label>`).join('')}</div>
@@ -929,6 +1176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const k = el.dataset.k;
         if (!k) return;
         set(k, el.type === 'checkbox' ? el.checked : el.value);
+        if (el.dataset.multi) multiList(el);
         // the same field can show twice (a pinned note and the Notes tab); keep both in step
         for (const o of document.querySelectorAll(`.hb [data-k="${k}"]`)) if (o !== el && o.type !== 'checkbox') o.value = el.value;
         if (/\.notes\.\d+\.(title|body|group)$/.test(k)) get(k.replace(/\.\w+$/, '')).updated = Date.now();
@@ -951,13 +1199,22 @@ document.addEventListener('DOMContentLoaded', () => {
             P.sub = 'g:' + to;
             saveNow(); return draw();
         }
-        if (/\.notes\.\d+\.group$/.test(k)) { saveNow(); return draw(); }
+        if (el.classList.contains('hb-tname')) {
+            const P = get(el.dataset.p), from = el.dataset.g, to = el.value.trim();
+            if (!to || to === from) return;
+            P.tabs = uniq(P.tabs.map((t) => (t === from ? to : t)).concat(to));
+            for (const r of P.rows) if (r.group === from) r.group = to;
+            P.sub = 't:' + to;
+            saveNow(); return draw();
+        }
+        if (/\.notes\.\d+\.group$/.test(k) || /^panels\.\d+\.rows\.\d+\.(uses|max|group)$/.test(k) || /\.levels\.\d+\.max$/.test(k)) { saveNow(); return draw(); }
         if (/^classes\.\d+\.name$/.test(k)) { const d = HIT_DIE[el.value.trim().toLowerCase()]; if (d) set(k.replace(/name$/, 'die'), d); }
         if (/^panels\.\d+\.rows\.\d+\.name$/.test(k) && panelOf(k).type === 'spells' && el.value.trim()) srdFill(k.replace(/\.name$/, ''));
-        if (/\.(time|lvl)$/.test(k) || /^classes\.\d+\.(name|level|die)$/.test(k) || /^(lists\.|condList)/.test(k) || /^speeds\./.test(k) && /\.type$/.test(k)) return dlg.open ? null : draw();
+        if (/^panels\.\d+\.(rows|meta)\.\d+\.name$/.test(k) && rowFill(k)) return;
+        if (/\.(time|lvl)$/.test(k) || /^classes\.\d+\.(name|level|die)$/.test(k) || /^(lists\.|condList|exhaustion)/.test(k) || /^speeds\./.test(k) && /\.type$/.test(k)) return dlg.open ? null : draw();
         if (/\.(name|key|title)$/.test(k) && !dlg.open) $('#hb-bar').innerHTML = bar();
     });
-    main.addEventListener('focusin', (e) => { if (e.target.getAttribute('list') === 'hb-dl-srd') loadSrdList(); });
+    main.addEventListener('focusin', (e) => { if (e.target.getAttribute('list') === 'hb-dl-srd') loadSrdList(); if (e.target.dataset.multi) multiList(e.target); });
     main.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && e.target.classList.contains('hb-tagin')) { e.preventDefault(); addTag(e.target); }
     });
@@ -987,11 +1244,12 @@ document.addEventListener('DOMContentLoaded', () => {
             set(dlgMode.p, buildParts(dlgMode.parts));
             dlgBody.innerHTML = formulaDlg(dlgMode); saveNow(); return refresh();
         }
-        if (act === 'custom') return showDlg('custom');
+        if (act === 'custom') { loadSenses(); return showDlg('custom'); }
         if (act === 'ddb') { showDlg({ kind: 'ddb' }); return $('#hb-ddb-id').focus(); }
         if (act === 'close') return dlg.close();
         if (act === 'rest') return showDlg({ kind: 'rest', r: b.dataset.r });
         if (act === 'doshort' || act === 'dolong') return rest(act === 'dolong' ? 'long' : 'short');
+        if (act === 'skill') return skillInfo(+b.dataset.i);
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && !r.desc) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
         if (act === 'more') { open.more = !open.more; return draw(); }
@@ -1008,6 +1266,37 @@ document.addEventListener('DOMContentLoaded', () => {
             saveNow(); draw();
             const t = $(`[data-k="${p}.notes.${P.notes.length - 1}.${act === 'nnew' ? 'title' : 'body'}"]`);
             return t && t.focus();
+        }
+        if (act === 'tadd') {
+            const P = get(p), taken = uniq([...P.tabs, ...P.rows.map((r) => r.group)]);
+            let name = 'New tab', n = 2;
+            while (taken.includes(name)) name = 'New tab ' + n++;
+            P.tabs.push(name); P.sub = 't:' + name;
+            saveNow(); draw();
+            const t = $(`.hb-tname[data-p="${p}"]`);
+            if (t) { t.focus(); t.select(); }
+            return;
+        }
+        if (act === 'tdel') {
+            const P = get(p), g = b.dataset.g, n = P.rows.filter((r) => r.group === g).length;
+            if (n && !confirm(`Delete the ${g} tab? Its ${n} resource${n === 1 ? '' : 's'} stay under All.`)) return;
+            for (const r of P.rows) if (r.group === g) r.group = '';
+            P.tabs = P.tabs.filter((t) => t !== g); P.sub = 'all';
+            saveNow(); return draw();
+        }
+        if (act === 'tnew') {
+            const P = get(p), kind = $('#hb-tkind-' + i).value, tab = P.sub.startsWith('t:') ? P.sub.slice(2) : '';
+            const cls = (name) => C.classes.some((c) => kk(c.name) === name) ? name.toUpperCase() + '_LEVEL' : 'LEVEL';
+            const r = Object.assign(ROW.tracker(), { group: tab }, {
+                count: { kind: 'count' },
+                pips: { kind: 'pips', max: '3' },
+                levels: { kind: 'levels', name: 'Spell slots', levels: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'].map((label) => ({ label, max: '0', used: 0 })) },
+                sorcery: { kind: 'count', name: 'Sorcery points', max: cls('sorcerer') },
+                ki: { kind: 'count', name: 'Ki points', max: cls('monk'), reset: 'short' },
+            }[kind] || {});
+            r.cur = maxOf(r.max);
+            P.rows.push(r);
+            saveNow(); return draw();
         }
         if (act === 'nopen') { get(p).open = b.dataset.id; save(); return draw(); }
         if (act === 'ngo') {
@@ -1034,17 +1323,22 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (act === 'chip') { const list = get(p), n = b.dataset.n; set(p, list.includes(n) ? list.filter((x) => x !== n) : [...list, n]); }
         else if (act === 'prof' || act === 'tprof') { const s = act === 'prof' ? C.skills[i] : C.profs.tools[i], lv = PROF.findIndex(([q]) => q === s.p); s.p = PROF[(lv + 1) % PROF.length][0]; }
         else if (act === 'pip') set(p, get(p) === i + 1 ? i : i + 1);
-        else if (act === 'track') { const r = get(p); r.cur = Math.max(0, Math.min(nm(r.max), nm(r.cur) + +b.dataset.d)); }
+        else if (act === 'track') { const r = get(p); r.cur = Math.max(0, Math.min(maxOf(r.max), nm(r.cur) + +b.dataset.d)); }
         else if (act === 'add') {
             const row = ROW[b.dataset.t]();
             if (b.dataset.time) row.time = b.dataset.time;
             if (b.dataset.cat) row.cat = b.dataset.cat;
             if (b.dataset.lvl) row.lvl = +b.dataset.lvl;
             if (b.dataset.prep) row.prep = true;
-            if (row.id && 'desc' in row) openRows.add(row.id);
+            if (b.dataset.t === 'level') row.label = ordinal(get(p).length + 1);
+            if (row.id && ('desc' in row || 'text' in row)) openRows.add(row.id);
             get(p).push(row);
         }
-        else if (act === 'addmeta') { const m = METAMAGIC.find(([n]) => n === $('#hb-meta-pick').value); get(p).push(Object.assign(ROW.meta(), m ? { name: m[0], cost: m[1], desc: m[2] } : {})); }
+        else if (act === 'addsense') {
+            const v = $('#hb-sense-pick').value, name = v.slice(2);
+            C.passives.push(Object.assign(ROW.passive(), v.startsWith('p:') ? { name: 'Passive ' + name, f: '10 + ' + name.replace(/\W/g, '') } : v.startsWith('s:') ? { name, f: '60', unit: 'ft' } : {}));
+        }
+        else if (act === 'addmeta') { const m = METAMAGIC.find(([n]) => n === $('#hb-meta-pick').value), row = Object.assign(ROW.meta(), m ? { name: m[0], cost: m[1], desc: m[2] } : {}); if (!m) openRows.add(row.id); get(p).push(row); }
         else if (act === 'addpanel') C.panels.push(newPanel($('#hb-newtype').value));
         else if (act === 'del') {
             if (p === 'panels' && !confirm(`Remove the ${C.panels[i].title} panel and everything in it?`)) return;

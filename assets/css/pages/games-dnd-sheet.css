@@ -227,6 +227,13 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-drawer:focus { outline: none; }
 .hb-desc { margin-top: 12px; font-size: 14px; overflow-wrap: anywhere; }
 .hb-desc p { margin: 0 0 8px; }
+/* SRD rules text under conditions and proficiencies, and in the drawer */
+.hb-rules { margin-top: 12px; display: grid; gap: 10px; font-size: 14px; }
+.hb-rules h4 { margin: 4px 0 0; }
+.hb-rule p { margin: 2px 0 0; color: var(--muted); }
+.hb-rule p.hb-bullet, .hb-desc p.hb-bullet { position: relative; padding-left: 14px; }
+.hb-rule p.hb-bullet::before, .hb-desc p.hb-bullet::before { content: ""; position: absolute; left: 3px; top: .6em; width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+.hb-rules .hb-hint { margin: 0; font-size: 12px; }
 @media (prefers-reduced-motion: reduce) { .hb-drawer { transition: none; } }
 
 /* notes: list beside the open note once the panel is wide enough */
@@ -264,3 +271,21 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-pin-h { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .hb-pin-h .hb-link { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hb textarea.hb-pin-body { min-height: 64px; max-height: 220px; field-sizing: content; font-size: 14px; }
+
+/* uses on passive abilities, and resources with their own tabs */
+.hb-uses { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13px; color: var(--muted); }
+.hb-uses label, .hb-maxl { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
+.hb .hb-uses select.field, .hb .hb-res select.field { width: auto; }
+.hb-subrow { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px 8px; }
+.hb-subrow .hb-sub { margin-bottom: 8px; }
+.hb-tabtools { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin-bottom: 10px; }
+.hb-tabtools .hb-grename { margin: 0; }
+.hb-count { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.hb .hb-res .hb-strong { flex: 1 1 160px; width: auto; }
+.hb .hb-count .hb-formula, .hb .hb-uses .hb-formula { width: 140px; }
+.hb-levels { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; }
+.hb-levels > .actions { flex-basis: 100%; margin-top: 0; }
+.hb-level { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--radius); }
+.hb .hb-level .hb-lvlname { width: 64px; padding: 4px 6px; }
+.hb .hb-level .hb-n { width: 56px; }
+.hb-level .hb-x { width: 24px; height: 24px; font-size: 16px; }
