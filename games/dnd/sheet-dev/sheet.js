@@ -33,6 +33,82 @@ document.addEventListener('DOMContentLoaded', () => {
         "Weaver's tools", "Woodcarver's tools", 'Disguise kit', 'Forgery kit', 'Herbalism kit', "Navigator's tools", "Poisoner's kit", "Thieves' tools",
         'Dice set', 'Playing card set', 'Bagpipes', 'Drum', 'Flute', 'Lute', 'Lyre', 'Horn', 'Viol', 'Vehicles (land)', 'Vehicles (water)'];
     const HIT_DIE = { barbarian: 12, fighter: 10, paladin: 10, ranger: 10, sorcerer: 6, wizard: 6, artificer: 8, bard: 8, cleric: 8, druid: 8, monk: 8, rogue: 8, warlock: 8 };
+    // suggestion lists for the plain text fields
+    const CLASSES = Object.keys(HIT_DIE).map((c) => c[0].toUpperCase() + c.slice(1));
+    const RACES = ['Aasimar', 'Bugbear', 'Changeling', 'Dragonborn', 'Dwarf', 'Hill Dwarf', 'Mountain Dwarf', 'Elf', 'High Elf', 'Wood Elf', 'Drow', 'Fairy', 'Firbolg',
+        'Genasi', 'Gnome', 'Forest Gnome', 'Rock Gnome', 'Goblin', 'Goliath', 'Half-Elf', 'Half-Orc', 'Halfling', 'Lightfoot Halfling', 'Stout Halfling', 'Harengon',
+        'Hobgoblin', 'Human', 'Variant Human', 'Kenku', 'Kobold', 'Lizardfolk', 'Orc', 'Owlin', 'Satyr', 'Tabaxi', 'Tiefling', 'Tortle', 'Triton', 'Warforged', 'Yuan-ti'];
+    const ALIGNMENTS = ['Lawful Good', 'Neutral Good', 'Chaotic Good', 'Lawful Neutral', 'True Neutral', 'Chaotic Neutral', 'Lawful Evil', 'Neutral Evil', 'Chaotic Evil', 'Unaligned'];
+    const SCHOOLS = ['Abjuration', 'Conjuration', 'Divination', 'Enchantment', 'Evocation', 'Illusion', 'Necromancy', 'Transmutation'];
+    const DURATIONS = ['Instantaneous', '1 round', '1 minute', '10 minutes', '1 hour', '8 hours', '24 hours', '7 days', '10 days', '30 days', 'Until dispelled', 'Special',
+        'Up to 1 round', 'Up to 1 minute', 'Up to 10 minutes', 'Up to 1 hour', 'Up to 8 hours', 'Up to 24 hours'];
+    // SRD weapons: name|damage|type|properties|range|weight (lb)
+    const WEAPONS = `Club|1d4|Bludgeoning|Light|5 ft|2
+Dagger|1d4|Piercing|Finesse, Light, Thrown|5 ft or 20/60 ft|1
+Greatclub|1d8|Bludgeoning|Two-handed|5 ft|10
+Handaxe|1d6|Slashing|Light, Thrown|5 ft or 20/60 ft|2
+Javelin|1d6|Piercing|Thrown|5 ft or 30/120 ft|2
+Light hammer|1d4|Bludgeoning|Light, Thrown|5 ft or 20/60 ft|2
+Mace|1d6|Bludgeoning||5 ft|4
+Quarterstaff|1d6|Bludgeoning|Versatile|5 ft|4
+Sickle|1d4|Slashing|Light|5 ft|2
+Spear|1d6|Piercing|Thrown, Versatile|5 ft or 20/60 ft|3
+Light crossbow|1d8|Piercing|Ammunition, Loading, Two-handed|80/320 ft|5
+Dart|1d4|Piercing|Finesse, Thrown|5 ft or 20/60 ft|0.25
+Shortbow|1d6|Piercing|Ammunition, Two-handed|80/320 ft|2
+Sling|1d4|Bludgeoning|Ammunition|30/120 ft|0
+Battleaxe|1d8|Slashing|Versatile|5 ft|4
+Flail|1d8|Bludgeoning||5 ft|2
+Glaive|1d10|Slashing|Heavy, Reach, Two-handed|10 ft|6
+Greataxe|1d12|Slashing|Heavy, Two-handed|5 ft|7
+Greatsword|2d6|Slashing|Heavy, Two-handed|5 ft|6
+Halberd|1d10|Slashing|Heavy, Reach, Two-handed|10 ft|6
+Lance|1d12|Piercing|Reach|10 ft|6
+Longsword|1d8|Slashing|Versatile|5 ft|3
+Maul|2d6|Bludgeoning|Heavy, Two-handed|5 ft|10
+Morningstar|1d8|Piercing||5 ft|4
+Pike|1d10|Piercing|Heavy, Reach, Two-handed|10 ft|18
+Rapier|1d8|Piercing|Finesse|5 ft|2
+Scimitar|1d6|Slashing|Finesse, Light|5 ft|3
+Shortsword|1d6|Piercing|Finesse, Light|5 ft|2
+Trident|1d6|Piercing|Thrown, Versatile|5 ft or 20/60 ft|4
+War pick|1d8|Piercing||5 ft|2
+Warhammer|1d8|Bludgeoning|Versatile|5 ft|2
+Whip|1d4|Slashing|Finesse, Reach|10 ft|3
+Blowgun|1|Piercing|Ammunition, Loading|25/100 ft|1
+Hand crossbow|1d6|Piercing|Ammunition, Light, Loading|30/120 ft|3
+Heavy crossbow|1d10|Piercing|Ammunition, Heavy, Loading, Two-handed|100/400 ft|18
+Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map((l) => l.split('|'));
+    const ARMOUR = [['Padded armour', 8], ['Leather armour', 10], ['Studded leather armour', 13], ['Hide armour', 12], ['Chain shirt', 20], ['Scale mail', 45],
+        ['Breastplate', 20], ['Half plate', 40], ['Ring mail', 40], ['Chain mail', 55], ['Splint armour', 60], ['Plate armour', 65], ['Shield', 6]];
+    // SRD gear: [name, weight, category]
+    const GEAR = [['Backpack', 5], ['Bedroll', 7], ['Blanket', 3], ['Candle', 0], ['Caltrops (bag of 20)', 2], ['Chalk', 0], ['Component pouch', 2], ['Crowbar', 5],
+        ['Arcane focus (crystal)', 1], ['Arcane focus (staff)', 4], ['Druidic focus (wooden staff)', 4], ['Holy symbol (amulet)', 1], ["Healer's kit", 3],
+        ['Hempen rope (50 ft)', 10], ['Silk rope (50 ft)', 5], ['Hooded lantern', 2], ['Bullseye lantern', 2], ['Lamp', 1], ['Oil (flask)', 1], ['Rations (1 day)', 2],
+        ['Tinderbox', 1], ['Torch', 1], ['Waterskin', 5], ['Mess kit', 1], ['Spellbook', 3], ['Ball bearings (bag of 1,000)', 2], ['Grappling hook', 4], ['Hammer', 3],
+        ['Piton', 0.25], ['Steel mirror', 0.5], ['Book', 5], ['Ink (1 ounce bottle)', 0], ['Ink pen', 0], ['Parchment (one sheet)', 0], ['Pouch', 1], ['Sack', 0.5],
+        ['Shovel', 5], ['Manacles', 6], ["Climber's kit", 12], ['Hunting trap', 25], ['Common clothes', 3], ["Traveler's clothes", 4], ['Fine clothes', 6],
+        ['Costume clothes', 4], ['Robes', 4], ['Arrows (20)', 1], ['Crossbow bolts (20)', 1.5], ['Sling bullets (20)', 1.5], ['Blowgun needles (50)', 1],
+        ['Potion of healing', 0.5, 'Consumables'], ['Antitoxin (vial)', 0, 'Consumables'], ['Acid (vial)', 1, 'Consumables'], ["Alchemist's fire (flask)", 1, 'Consumables'],
+        ['Holy water (flask)', 1, 'Consumables'], ['Basic poison (vial)', 0, 'Consumables'],
+        ...WEAPONS.map((w) => [w[0], +w[5], 'Weapons']), ...ARMOUR.map(([n, w]) => [n, w, 'Armour'])];
+    const LANGS = ['Aarakocra', 'Aquan', 'Auran', 'Druidic', 'Gith', 'Gnoll', 'Ignan', 'Leonin', 'Loxodon', 'Minotaur', 'Quori', 'Sign language', 'Sylvan', 'Terran', 'Thieves’ Cant', 'Vedalken'];
+    const FEATURES = ['Darkvision', 'Superior Darkvision', 'Fey Ancestry', 'Trance', 'Keen Senses', 'Dwarven Resilience', 'Stonecunning', 'Lucky', 'Brave',
+        'Halfling Nimbleness', 'Relentless Endurance', 'Savage Attacks', 'Hellish Resistance', 'Infernal Legacy', 'Breath Weapon', 'Damage Resistance', 'Gnome Cunning',
+        'Menacing', 'Rage', 'Unarmored Defense', 'Reckless Attack', 'Danger Sense', 'Extra Attack', 'Fighting Style', 'Second Wind', 'Action Surge', 'Indomitable',
+        'Sneak Attack', 'Cunning Action', 'Uncanny Dodge', 'Evasion', 'Expertise', 'Martial Arts', 'Unarmored Movement', 'Deflect Missiles', 'Slow Fall',
+        'Stunning Strike', 'Divine Sense', 'Lay on Hands', 'Divine Smite', 'Aura of Protection', 'Channel Divinity', 'Wild Shape', 'Bardic Inspiration',
+        'Jack of All Trades', 'Song of Rest', 'Font of Magic', 'Arcane Recovery', 'Eldritch Invocations', 'Pact Boon', 'Favored Enemy', 'Natural Explorer',
+        'Spellcasting', 'Ability Score Improvement',
+        'Alert', 'Actor', 'Athlete', 'Charger', 'Chef', 'Crossbow Expert', 'Crusher', 'Defensive Duelist', 'Dual Wielder', 'Dungeon Delver', 'Durable',
+        'Eldritch Adept', 'Elemental Adept', 'Fey Touched', 'Fighting Initiate', 'Grappler', 'Great Weapon Master', 'Healer', 'Heavily Armored', 'Inspiring Leader',
+        'Keen Mind', 'Lightly Armored', 'Linguist', 'Mage Slayer', 'Magic Initiate', 'Martial Adept', 'Medium Armor Master', 'Metamagic Adept', 'Mobile',
+        'Moderately Armored', 'Mounted Combatant', 'Observant', 'Piercer', 'Poisoner', 'Polearm Master', 'Resilient', 'Ritual Caster', 'Savage Attacker', 'Sentinel',
+        'Shadow Touched', 'Sharpshooter', 'Shield Master', 'Skill Expert', 'Skilled', 'Skulker', 'Slasher', 'Spell Sniper', 'Tavern Brawler', 'Telekinetic',
+        'Telepathic', 'Tough', 'War Caster', 'Weapon Master'];
+    const RESOURCES = ['Rage', 'Ki points', 'Bardic Inspiration', 'Channel Divinity', 'Wild Shape', 'Second Wind', 'Action Surge', 'Indomitable', 'Lay on Hands',
+        'Divine Sense', 'Sorcery points', 'Superiority dice', 'Arcane Recovery', 'Spell slots', 'Pact slots', 'Hit dice', 'Infusions', 'Flash of Genius',
+        'Luck points', 'Breath Weapon', 'Relentless Endurance', 'Healing Light', 'Fey Step'];
     const METAMAGIC = [['Careful Spell', '1', 'Some creatures you choose automatically succeed on the save against your spell.'],
         ['Distant Spell', '1', 'Double the range, or make a touch spell reach 30 ft.'],
         ['Empowered Spell', '1', 'Reroll some of the damage dice and use the new rolls.'],
@@ -341,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (o.area) return `<textarea class="field${cls}" data-k="${k}" aria-label="${esc(label)}"${ph}>${esc(v ?? '')}</textarea>`;
         if (o.check) return `<input type="checkbox" data-k="${k}" aria-label="${esc(label)}"${v ? ' checked' : ''}>`;
         const num = o.num ? ' inputmode="decimal"' : '';
-        return `<input class="field${cls}"${num} data-k="${k}" value="${esc(v ?? '')}" aria-label="${esc(label)}"${ph}${o.list ? ` list="${o.list}"` : ''} autocomplete="off">`;
+        return `<input class="field${cls}"${num} data-k="${k}" value="${esc(v ?? '')}" aria-label="${esc(label)}"${ph}${o.list ? ` list="${o.list}"` : ''}${o.multi ? ' data-multi="1"' : ''} autocomplete="off">`;
     }
     const sel = (k, label, opts) => `<select class="field" data-k="${k}" aria-label="${esc(label)}">${opts.map(([v, t]) => `<option value="${esc(v)}"${String(get(k)) === String(v) ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
     const abSel = (k, label) => { const keys = C.abilities.map((a) => [a.key, a.key]); const v = get(k); return sel(k, label, keys.some(([x]) => x === v) ? keys : [[v, v + ' (missing)'], ...keys]); };
@@ -369,7 +445,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="actions">${add(rp + '.dmg', 'dmg', 'Add damage')}</div>`;
     function datalists() {
         const dl = (id, items) => `<datalist id="${id}">${items.map((x) => `<option value="${esc(x)}">`).join('')}</datalist>`;
-        return dl('hb-dl-time', L('time')) + dl('hb-dl-dmg', L('dmg')) + dl('hb-dl-props', L('props')) + dl('hb-dl-speeds', L('speeds')) + dl('hb-dl-tools', TOOLS);
+        return dl('hb-dl-time', L('time')) + dl('hb-dl-dmg', L('dmg')) + dl('hb-dl-props', L('props')) + dl('hb-dl-speeds', L('speeds')) + dl('hb-dl-tools', TOOLS)
+            + dl('hb-dl-race', RACES) + dl('hb-dl-align', ALIGNMENTS) + dl('hb-dl-class', CLASSES) + dl('hb-dl-school', SCHOOLS) + dl('hb-dl-dur', DURATIONS)
+            + dl('hb-dl-weapon', WEAPONS.map((w) => w[0])) + dl('hb-dl-gear', GEAR.map((g) => g[0])) + dl('hb-dl-meta', METAMAGIC.map((m) => m[0]))
+            + dl('hb-dl-feat', FEATURES) + dl('hb-dl-src', [...RACES, ...CLASSES, 'Feat', 'Background', 'Item']) + dl('hb-dl-rsrc', RESOURCES)
+            + dl('hb-dl-armour', ARMOUR.map((a) => a[0])) + dl('hb-dl-langs', LANGS)
+            + ['res', 'imm', 'vul'].map((k) => `<datalist id="hb-dl-${k}"></datalist>`).join('');
     }
 
     // ---- the always-visible top ----
@@ -377,11 +458,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const DICE = [4, 6, 8, 10, 12, 20].map((n) => [n, 'd' + n]);
         const id = `<div class="hb-id">
             <label class="hb-name">Name ${f('name', 'Name')}</label>
-            <label>Race ${f('race', 'Race')}</label>
-            <label>Alignment ${f('alignment', 'Alignment')}</label>
+            <label>Race ${f('race', 'Race', { list: 'hb-dl-race' })}</label>
+            <label>Alignment ${f('alignment', 'Alignment', { list: 'hb-dl-align' })}</label>
             <label class="hb-age">Age ${f('age', 'Age')}</label>
             <div class="hb-classes">${C.classes.map((c, i) => `<div class="hb-cls">
-                <label>Class ${f(`classes.${i}.name`, 'Class', { ph: 'Fighter' })}</label>
+                <label>Class ${f(`classes.${i}.name`, 'Class', { list: 'hb-dl-class', ph: 'Fighter' })}</label>
                 <label class="hb-lvl">Level ${f(`classes.${i}.level`, 'Level', { num: true })}</label>
                 <label class="hb-die">Hit die ${sel(`classes.${i}.die`, 'Hit die', DICE)}</label>
                 ${C.classes.length > 1 ? del('classes', i, c.name || 'class') : ''}
@@ -428,9 +509,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="actions">${add('speeds', 'speed', 'Add speed')}</div>
             <h3>Defences</h3>
             <div class="hb-grid">
-                <label>Resistances ${f('res', 'Resistances', { ph: 'fire, cold' })}</label>
-                <label>Immunities ${f('imm', 'Immunities')}</label>
-                <label>Vulnerabilities ${f('vul', 'Vulnerabilities')}</label>
+                <label>Resistances ${f('res', 'Resistances', { list: 'hb-dl-res', multi: true, ph: 'fire, cold' })}</label>
+                <label>Immunities ${f('imm', 'Immunities', { list: 'hb-dl-imm', multi: true })}</label>
+                <label>Vulnerabilities ${f('vul', 'Vulnerabilities', { list: 'hb-dl-vul', multi: true })}</label>
             </div>
         </div>`;
         const saves = `<section class="card hb-saves"><h2>Saving throws</h2><div class="hb-savegrid">${C.abilities.map((a, i) => `<div class="hb-save">
@@ -469,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function actionEditor(rp, r) {
         return `<div class="hb-grid">
-            <label>Name ${f(rp + '.name', 'Name', { ph: 'Longsword' })}</label>
+            <label>Name ${f(rp + '.name', 'Name', { list: 'hb-dl-weapon', ph: 'Longsword' })}</label>
             <label>Timing ${f(rp + '.time', 'Timing', { list: 'hb-dl-time' })}</label>
             <label>Range or reach ${f(rp + '.range', 'Range or reach', { ph: '5 ft or 80/320 ft' })}</label>
             <label>Resolves with ${sel(rp + '.mode', 'Resolves with', [['hit', 'Attack roll'], ['save', 'Saving throw'], ['none', 'Nothing']])}</label>
@@ -486,11 +567,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<div class="hb-grid">
             <label>Name ${f(rp + '.name', 'Spell name', { list: 'hb-dl-srd', ph: 'Fireball' })}</label>
             <label>Level ${f(rp + '.lvl', 'Level, 0 for a cantrip', { num: true })}</label>
-            <label>School ${f(rp + '.school', 'School', { ph: 'Evocation' })}</label>
+            <label>School ${f(rp + '.school', 'School', { list: 'hb-dl-school', ph: 'Evocation' })}</label>
             <label>Casting time ${f(rp + '.time', 'Casting time', { list: 'hb-dl-time' })}</label>
             <label>Range ${f(rp + '.range', 'Range', { ph: '150 feet' })}</label>
             <label>Components ${f(rp + '.comp', 'Components', { ph: 'V, S, M (bat guano)' })}</label>
-            <label>Duration ${f(rp + '.dur', 'Duration', { ph: 'Instantaneous' })}</label>
+            <label>Duration ${f(rp + '.dur', 'Duration', { list: 'hb-dl-dur', ph: 'Instantaneous' })}</label>
             <div class="hb-checks"><label class="check">${f(rp + '.conc', 'Concentration', { check: true })} Concentration</label><label class="check">${f(rp + '.ritual', 'Ritual', { check: true })} Ritual</label></div>
             <label>Resolves with ${sel(rp + '.mode', 'Resolves with', [['none', 'Nothing'], ['atk', 'Spell attack'], ['save', 'Saving throw']])}</label>
             ${r.mode === 'save' ? `<label>Save ${abSel(rp + '.save', 'Save ability')}</label><label>DC override (optional) ${f(rp + '.dc', 'DC override formula', { cls: 'hb-formula', ph: 'Uses your spell save DC' })}</label>` : ''}
@@ -514,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (cur === 'tools') body = `<div class="rows">${C.profs.tools.map((t, i) => `<div class="rowi hb-tool">${dot('tprof', i, t, t.name || 'tool')}${f(`profs.tools.${i}.name`, 'Tool', { cls: 'grow', list: 'hb-dl-tools', ph: "Thieves' tools" })}${abSel(`profs.tools.${i}.ab`, 'Ability')}${val('tool:' + i)}${del('profs.tools', i, t.name || 'tool')}</div>`).join('')}</div>
                 <div class="actions">${add('profs.tools', 'tool', 'Add tool')}</div>`;
             else if (cur === 'notes') body = f('profs.notes', 'Notes', { area: true, cls: 'hb-text' });
-            else body = tags('profs.' + cur, PRESET[cur], { armour: 'Mithral armour', weapons: 'Longsword', langs: 'Thieves’ Cant' }[cur]);
+            else body = tags('profs.' + cur, PRESET[cur], { armour: 'Mithral armour', weapons: 'Longsword', langs: 'Thieves’ Cant' }[cur], { armour: 'hb-dl-armour', weapons: 'hb-dl-weapon', langs: 'hb-dl-langs' }[cur]);
             return subtabs(path + '.sub', opts, cur) + body;
         },
 
@@ -538,7 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button type="button" class="btn small" data-act="track" data-p="${path}.sp" data-d="-1" aria-label="Spend a sorcery point">−</button>
                     ${f(path + '.sp.cur', 'Sorcery points left', { num: true, cls: 'hb-n' })}<span>/</span>${f(path + '.sp.max', 'Sorcery points maximum', { num: true, cls: 'hb-n' })}
                     <button type="button" class="btn small" data-act="track" data-p="${path}.sp" data-d="1" aria-label="Get a sorcery point back">+</button></div>
-                <div class="hb-list">${p.meta.map((m, i) => `<div class="hb-entry"><div class="hb-entry-h">${f(`${path}.meta.${i}.name`, 'Name', { cls: 'hb-strong', ph: 'Quickened Spell' })}<label class="hb-cost">Cost ${f(`${path}.meta.${i}.cost`, 'Cost in sorcery points', { cls: 'hb-n' })}</label>${del(path + '.meta', i, m.name || 'metamagic')}</div>${f(`${path}.meta.${i}.desc`, 'Description', { area: true })}</div>`).join('')}</div>
+                <div class="hb-list">${p.meta.map((m, i) => `<div class="hb-entry"><div class="hb-entry-h">${f(`${path}.meta.${i}.name`, 'Name', { cls: 'hb-strong', list: 'hb-dl-meta', ph: 'Quickened Spell' })}<label class="hb-cost">Cost ${f(`${path}.meta.${i}.cost`, 'Cost in sorcery points', { cls: 'hb-n' })}</label>${del(path + '.meta', i, m.name || 'metamagic')}</div>${f(`${path}.meta.${i}.desc`, 'Description', { area: true })}</div>`).join('')}</div>
                 <div class="actions"><select class="field hb-auto" id="hb-meta-pick" aria-label="Metamagic option"><option value="">Your own</option>${METAMAGIC.map(([n]) => `<option>${esc(n)}</option>`).join('')}</select><button type="button" class="btn small" data-act="addmeta" data-p="${path}.meta">Add metamagic</button></div>`;
             const slots = p.slots.map((s, l) => (nm(s.max) > 0 ? `<span class="hb-slot"><small>${ordinal(l + 1)}</small>${pips(`${path}.slots.${l}.used`, s.max)}</span>` : '')).join('');
             const list = p.rows.map((r, i) => [r, `${path}.rows.${i}`]).sort((a, b) => (nm(a[0].lvl) || 0) - (nm(b[0].lvl) || 0))
@@ -561,7 +642,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cur = pickSub(p, opts);
             const rows = p.rows.map((r, i) => [r, i]).filter(([r]) => cur === 'all' || r.cat === cur).map(([r, i]) => `<tr>
                 <td class="hb-c">${f(`${path}.rows.${i}.eq`, 'Equipped', { check: true })}</td>
-                <td>${f(`${path}.rows.${i}.name`, 'Item', { ph: 'Rope, 50 ft' })}</td>
+                <td>${f(`${path}.rows.${i}.name`, 'Item', { list: 'hb-dl-gear', ph: 'Rope, 50 ft' })}</td>
                 <td>${sel(`${path}.rows.${i}.cat`, 'Category', cats.map((c) => [c, c]))}</td>
                 <td>${f(`${path}.rows.${i}.qty`, 'Quantity', { num: true, cls: 'hb-n' })}</td>
                 <td>${f(`${path}.rows.${i}.wt`, 'Weight each', { num: true, cls: 'hb-n' })}</td>
@@ -578,7 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
         list: (p, path) => {
             const V = vars();
             return `<div class="hb-list">${p.rows.map((r, i) => { const rp = `${path}.rows.${i}`; return `<div class="hb-entry">
-                <div class="hb-entry-h">${f(rp + '.name', 'Name', { cls: 'hb-strong', ph: 'Darkvision' })}${f(rp + '.src', 'Source (optional)', { cls: 'hb-src', ph: 'Elf' })}${del(path + '.rows', i, r.name || 'entry')}</div>
+                <div class="hb-entry-h">${f(rp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-feat', ph: 'Darkvision' })}${f(rp + '.src', 'Source (optional)', { cls: 'hb-src', list: 'hb-dl-src', ph: 'Elf' })}${del(path + '.rows', i, r.name || 'entry')}</div>
                 <div class="hb-uses">
                     <label>Uses ${f(rp + '.uses', 'Uses (number or formula)', { cls: 'hb-n hb-formula', ph: 'none' })}</label><small class="muted" data-c="tmax:${rp}.uses"></small>
                     ${sel(rp + '.reset', 'Resets on', RESETS)}
@@ -595,7 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const opts = [['all', 'All', p.rows.length], ...tabs.map((t) => ['t:' + t, t, p.rows.filter((r) => r.group === t).length])];
             const cur = pickSub(p, opts), tab = cur.startsWith('t:') ? cur.slice(2) : '';
             const row = (r, rp, i) => {
-                const head = `${f(rp + '.name', 'Name', { cls: 'hb-strong', ph: r.kind === 'levels' ? 'Spell slots' : 'Rage' })}`;
+                const head = `${f(rp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-rsrc', ph: r.kind === 'levels' ? 'Spell slots' : 'Rage' })}`;
                 const main = r.kind === 'count' ? `<span class="hb-count">
                         <button type="button" class="btn small" data-act="track" data-p="${rp}" data-d="-1" aria-label="Use one">−</button>
                         ${f(rp + '.cur', 'Left', { num: true, cls: 'hb-n' })}<span>/</span>${f(rp + '.max', 'Maximum (number or formula)', { cls: 'hb-n hb-formula' })}
@@ -831,6 +912,36 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { toast(`Couldn't load ${r.name} from the SRD. Try again in a minute.`, 'err'); }
     }
 
+    // picking a known weapon, item or metamagic from the suggestions fills in the rest of its row
+    const named = (list, name) => list.find((x) => x[0].toLowerCase() === String(name).trim().toLowerCase());
+    function rowFill(k) {
+        const rp = k.replace(/\.name$/, ''), r = get(rp), P = panelOf(k);
+        if (/\.meta\.\d+\.name$/.test(k)) {
+            const m = named(METAMAGIC, r.name);
+            if (!m) return false;
+            Object.assign(r, { name: m[0], cost: m[1], desc: r.desc || m[2] });
+        } else if (P.type === 'attacks') {
+            const w = named(WEAPONS, r.name);
+            if (!w) return false;
+            const props = w[3] ? w[3].split(', ') : [], ab = props.includes('Finesse') || props.includes('Ammunition') ? 'DEX' : 'STR';
+            Object.assign(r, { name: w[0], range: w[4], props, mode: 'hit', hit: ab + ' + PROF', dmg: [{ dice: w[1] + ' + ' + ab, type: w[2] }] });
+        } else if (P.type === 'items') {
+            const g = named(GEAR, r.name);
+            if (!g) return false;
+            Object.assign(r, { name: g[0], wt: g[1], cat: g[2] || 'Gear' });
+        } else return false;
+        saveNow(); draw();
+        toast(`Filled in ${r.name}.`, 'ok');
+        return true;
+    }
+    // comma-separated fields: suggest the next entry after what's already typed
+    function multiList(el) {
+        const pre = el.value.includes(',') ? el.value.replace(/[^,]*$/, '').replace(/\s*$/, ' ') : '';
+        const have = el.value.toLowerCase().split(',').map((s) => s.trim());
+        const items = uniq([...L('dmg'), ...(C.condList || CONDITIONS).split('\n').map((s) => s.trim()).filter(Boolean)]).filter((x) => !have.includes(x.toLowerCase()));
+        $('#' + el.getAttribute('list')).innerHTML = items.map((x) => `<option value="${esc(pre + x)}">`).join('');
+    }
+
     // ---- details drawer ----
     const paras = (s) => String(s || '').split(/\n+/).filter((x) => x.trim()).map((x) => `<p>${esc(x)}</p>`).join('');
     function info(rp) {
@@ -1009,6 +1120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const k = el.dataset.k;
         if (!k) return;
         set(k, el.type === 'checkbox' ? el.checked : el.value);
+        if (el.dataset.multi) multiList(el);
         // the same field can show twice (a pinned note and the Notes tab); keep both in step
         for (const o of document.querySelectorAll(`.hb [data-k="${k}"]`)) if (o !== el && o.type !== 'checkbox') o.value = el.value;
         if (/\.notes\.\d+\.(title|body|group)$/.test(k)) get(k.replace(/\.\w+$/, '')).updated = Date.now();
@@ -1042,10 +1154,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (/\.notes\.\d+\.group$/.test(k) || /^panels\.\d+\.rows\.\d+\.(uses|max|group)$/.test(k) || /\.levels\.\d+\.max$/.test(k)) { saveNow(); return draw(); }
         if (/^classes\.\d+\.name$/.test(k)) { const d = HIT_DIE[el.value.trim().toLowerCase()]; if (d) set(k.replace(/name$/, 'die'), d); }
         if (/^panels\.\d+\.rows\.\d+\.name$/.test(k) && panelOf(k).type === 'spells' && el.value.trim()) srdFill(k.replace(/\.name$/, ''));
+        if (/^panels\.\d+\.(rows|meta)\.\d+\.name$/.test(k) && rowFill(k)) return;
         if (/\.(time|lvl)$/.test(k) || /^classes\.\d+\.(name|level|die)$/.test(k) || /^(lists\.|condList)/.test(k) || /^speeds\./.test(k) && /\.type$/.test(k)) return dlg.open ? null : draw();
         if (/\.(name|key|title)$/.test(k) && !dlg.open) $('#hb-bar').innerHTML = bar();
     });
-    main.addEventListener('focusin', (e) => { if (e.target.getAttribute('list') === 'hb-dl-srd') loadSrdList(); });
+    main.addEventListener('focusin', (e) => { if (e.target.getAttribute('list') === 'hb-dl-srd') loadSrdList(); if (e.target.dataset.multi) multiList(e.target); });
     main.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && e.target.classList.contains('hb-tagin')) { e.preventDefault(); addTag(e.target); }
     });
