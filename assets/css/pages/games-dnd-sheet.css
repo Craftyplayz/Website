@@ -56,6 +56,7 @@
     color: var(--text); font: inherit; font-size: 14px; font-variant-numeric: tabular-nums; cursor: pointer; transition: border-color var(--fast);
 }
 .hb-roll:hover { border-color: var(--accent); }
+.hb-val { min-width: 44px; font-variant-numeric: tabular-nums; text-align: center; }
 .hb-roll:active { transform: translateY(1px); }
 .hb-big { font-size: clamp(22px, 3vw, 28px); font-weight: 700; line-height: 1.2; }
 .hb .hb-bad { color: var(--danger-line); border-color: var(--danger-line); }

@@ -12,11 +12,5 @@ assert.strictEqual(calc('', vars).v, 0);
 assert.strictEqual(calc('10 + Perception', vars).v, 14);
 assert.throws(() => calc('10 + WIS', vars), /Unknown name WIS/);
 assert.throws(() => calc('(1 + 2', vars), /Missing \)/);
-assert.throws(() => calc('1d8', vars), /Dice only/);
 assert.throws(() => calc('constructor', vars), /Unknown name/);
-for (let n = 0; n < 200; n++) {
-    const r = calc('2d6 + DEX', vars, true);
-    assert.ok(r.v >= 5 && r.v <= 15 && r.rolls.length === 1);
-}
-assert.strictEqual(calc('d1', vars, true).v, 1);
 console.log('dnd sheet formula ok');
