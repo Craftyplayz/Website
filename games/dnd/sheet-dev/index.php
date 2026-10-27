@@ -36,6 +36,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
     <?php site_footer(null, false); ?>
     <script src="<?= h(asset('/games/dnd/sheet-dev/formula.js')) ?>" defer></script>
     <script src="<?= h(asset('/games/dnd/sheet-dev/ddb.js')) ?>" defer></script>
+    <script src="<?= h(asset('/games/dnd/sheet-dev/rules.js')) ?>" defer></script>
     <script src="<?= h(asset('/games/dnd/sheet-dev/sheet.js')) ?>" defer></script>
 </body>
 
