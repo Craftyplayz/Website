@@ -63,6 +63,14 @@ function ddb_trim_rules($r)
     return $out;
 }
 
+// ddb.php?rules=1 -> { senses: [...], skills: [...] } from D&D Beyond's rule data, for the sheet's pick lists
+if (isset($_GET['rules'])) {
+    $rules = ddb_get('https://character-service.dndbeyond.com/character/v5/rule-data', 'rules.json', DDB_RULES_TTL, 'ddb_trim_rules');
+    if (!$rules['data']) ddb_out(502, ['error' => "Couldn't reach D&D Beyond right now."]);
+    $names = function ($rows) { return array_values(array_filter(array_map(function ($r) { return (string)($r['name'] ?? ''); }, (array)$rows), function ($n) { return $n !== '' && $n !== 'Unknown'; })); };
+    ddb_out(200, ['senses' => $names($rules['data']['senses'] ?? []), 'skills' => $names($rules['data']['abilitySkills'] ?? [])]);
+}
+
 $id = preg_match('/(\d{4,12})/', (string)($_GET['id'] ?? ''), $m) ? $m[1] : '';
 if ($id === '') ddb_out(400, ['error' => 'Paste a D&D Beyond character link or its ID number.']);
 
