@@ -14,7 +14,7 @@
 
 /* the always-visible top: one column on phones, art + saves + senses on the right from 960 px */
 .hb-sheet {
-    display: grid; gap: 16px; grid-template-columns: clamp(88px, 26vw, 160px) minmax(0, 1fr);
+    display: grid; gap: 16px; grid-template-columns: clamp(80px, 22vw, 160px) minmax(0, 1fr);
     grid-template-areas: "art id" "abil abil" "combat combat" "saves saves" "senses senses" "panels panels";
 }
 .hb-top-id { grid-area: id; }
@@ -31,8 +31,9 @@
     }
 }
 
-.hb-id { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr)); gap: 8px; }
-.hb-id .hb-name { grid-column: 1 / -1; }
+.hb-id { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 110px), 1fr)); gap: 8px; }
+.hb-id .hb-name, .hb-classes { grid-column: 1 / -1; }
+@media (min-width: 480px) { .hb-id .hb-name { grid-column: span 2; } }
 .hb-id .hb-name .field { font-size: 20px; font-weight: 700; }
 
 .hb-art {
@@ -66,8 +67,12 @@
 }
 .hb-edit:hover { color: var(--text); background: var(--card2); }
 
-.hb-combat { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 8px; }
-.hb-hp { grid-column: span 2; }
+.hb-combat { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); align-items: start; gap: 8px; }
+.hb-hp-head { display: flex; justify-content: center; align-items: center; gap: 4px; width: 100%; position: relative; }
+.hb-hp-head .hb-x { position: absolute; right: -4px; top: -6px; display: grid; place-items: center; }
+.hb-hp-head .hb-x[aria-expanded="true"] { color: var(--accent); }
+.hb-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; }
+.hb-stats > * { display: grid; justify-items: center; gap: 6px; min-width: 0; }
 .hb-hpv { display: flex; align-items: center; gap: 6px; font-size: 20px; }
 .hb .hb-hpv .field { width: 72px; padding: 4px 6px; font-size: 20px; font-weight: 700; text-align: center; }
 .hb-hp .progress { width: 100%; }
@@ -150,8 +155,11 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-addpanel select.field { width: auto; }
 
 /* classes (multiclass rows) */
-.hb-classes { display: grid; gap: 8px; grid-column: 1 / -1; }
-.hb-cls { display: grid; grid-template-columns: minmax(0, 1fr) 80px 90px auto; align-items: end; gap: 8px; }
+.hb-classes { display: grid; gap: 8px; }
+.hb-cls { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+.hb-cls > label:first-child { flex: 1 1 160px; }
+.hb-cls .hb-lvl { flex: 0 0 72px; }
+.hb-cls .hb-die { flex: 0 0 84px; }
 .hb-cls label { display: grid; gap: 4px; min-width: 0; color: var(--muted); font-size: 13px; }
 .hb-cls-more { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 13px; }
 
@@ -220,3 +228,39 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-desc { margin-top: 12px; font-size: 14px; overflow-wrap: anywhere; }
 .hb-desc p { margin: 0 0 8px; }
 @media (prefers-reduced-motion: reduce) { .hb-drawer { transition: none; } }
+
+/* notes: list beside the open note once the panel is wide enough */
+.hb-panel { container-type: inline-size; }
+.hb-ntools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+.hb .hb-ntools .hb-nq { flex: 1 1 180px; width: auto; }
+.hb .hb-ntools select.field { width: auto; }
+.hb-notes { display: grid; gap: 12px; }
+@container (min-width: 620px) { .hb-notes { grid-template-columns: minmax(200px, 260px) minmax(0, 1fr); } }
+.hb-nlist { display: grid; gap: 6px; align-content: start; max-height: 560px; overflow-y: auto; }
+.hb-nitem {
+    display: grid; gap: 2px; min-width: 0; padding: 8px 10px; background: var(--card2); border: 1px solid transparent; border-radius: var(--radius);
+    color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: border-color var(--fast);
+}
+.hb-nitem:hover { border-color: var(--line-strong); }
+.hb-nitem.on { background: var(--accent-soft); border-color: var(--btn-line); }
+.hb-ntitle { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 14px; }
+.hb-ntitle b, .hb-nsnip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hb-ntitle .badge { flex: none; }
+.hb-nsnip { color: var(--muted); font-size: 13px; }
+.hb-nsnip:empty { display: none; }
+.hb-nitem small { color: var(--muted); font-size: 12px; }
+.hb-nedit { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.hb .hb-ntitle-in { font-size: 17px; font-weight: 600; }
+.hb-nbar { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+.hb-ngroup { display: grid; flex: 1 1 160px; gap: 4px; color: var(--muted); font-size: 13px; }
+.hb textarea.hb-nbody { min-height: 260px; field-sizing: content; }
+.hb-nempty { margin: 0; }
+.hb-grename { display: inline-grid; gap: 4px; margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+.hb .btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--btn-line); }
+
+/* notes pinned to the sheet */
+.hb-pins { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 8px; }
+.hb-pin { display: grid; gap: 6px; padding: 10px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.hb-pin-h { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.hb-pin-h .hb-link { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hb textarea.hb-pin-body { min-height: 64px; max-height: 220px; field-sizing: content; font-size: 14px; }

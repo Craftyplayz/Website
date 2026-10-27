@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ['Quickened Spell', '2', 'Cast a spell that takes an action as a bonus action instead.'],
         ['Subtle Spell', '1', 'Cast without verbal or somatic components.'],
         ['Twinned Spell', 'spell level', 'Target a second creature with a spell that targets only one.']];
-    const TYPES = { profs: 'Proficiencies', attacks: 'Actions', spells: 'Spells', items: 'Inventory', list: 'List', trackers: 'Trackers', text: 'Text', combat: 'Death saves and hit dice' };
+    const TYPES = { profs: 'Proficiencies', attacks: 'Actions', spells: 'Spells', items: 'Inventory', list: 'List', trackers: 'Trackers', notes: 'Notes', text: 'Text', combat: 'Death saves and hit dice' };
     const PROF = [[0, 'Not proficient'], [0.5, 'Half proficient'], [1, 'Proficient'], [2, 'Expertise']];
     const HELP = 'Formulas can use ability keys for modifiers (DEX), _SCORE for scores (DEX_SCORE), PROF, LEVEL, class levels (FIGHTER_LEVEL), skill names without spaces (SleightofHand), numbers, + - * / ( ), min(), max(), floor(), ceil(), and [labels] like 2 [Shield]. Results round down.';
     const SRD_CREDIT = 'From the <a href="https://dnd.wizards.com/resources/systems-reference-document" target="_blank" rel="noopener">System Reference Document 5.1</a> by Wizards of the Coast, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC-BY-4.0</a>.';
@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ability: () => ({ key: 'NEW', name: 'New ability', score: 10, save: false, sb: '' }),
         skill: () => ({ name: 'New skill', ab: 'STR', p: 0, b: '' }),
         passive: () => ({ name: 'Passive', f: '10' }),
+        note: () => ({ id: uid(), title: '', group: '', body: '', pinned: false, created: Date.now(), updated: Date.now() }),
     };
     const PANEL_ROW = { attacks: ROW.attack, spells: ROW.spell, items: ROW.item, list: ROW.list, trackers: ROW.tracker };
 
@@ -73,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'text') p.text = '';
         if (type === 'combat') Object.assign(p, { ok: 0, bad: 0 });
         if (type === 'profs') p.sub = 'skills';
+        if (type === 'notes') Object.assign(p, { notes: [], open: '', sort: 'edited' });
         return p;
     }
 
@@ -89,7 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
             profs: { armour: [], weapons: [], langs: ['Common'], tools: [], notes: '' },
             lists: { ...LISTS },
             panels: [newPanel('profs'), newPanel('attacks'), newPanel('spells'), newPanel('items'), newPanel('list', 'Passive abilities'),
-                newPanel('trackers', 'Resources'), newPanel('combat'), newPanel('text', 'Personality'), newPanel('text', 'Backstory'), newPanel('text', 'Notes')],
+                newPanel('trackers', 'Resources'), newPanel('combat'),
+                Object.assign(newPanel('notes'), { notes: ['Personality', 'Backstory'].map((title) => Object.assign(ROW.note(), { title, group: 'Character' })) })],
             view: { tab: '', all: false },
         };
     }
@@ -113,6 +116,16 @@ document.addEventListener('DOMContentLoaded', () => {
             c.profs = Object.assign({ notes: old ? old.text || '' : '' }, isObj(c.profs) ? c.profs : {});
             c.panels = panels.filter((p) => p.type !== 'skills' && p !== old);
             c.panels.splice(at, 0, newPanel('profs'));
+        }
+        // Personality, Backstory and Notes text panels become notes in one Notes panel
+        if (Array.isArray(c.panels) && !c.panels.some((p) => isObj(p) && p.type === 'notes')) {
+            const old = c.panels.filter((p) => isObj(p) && p.type === 'text' && ['Personality', 'Backstory', 'Notes'].includes(p.title));
+            if (old.length) {
+                const np = newPanel('notes');
+                np.notes = old.filter((p) => String(p.text || '').trim()).map((p) => Object.assign(ROW.note(), { title: p.title, group: p.title === 'Notes' ? '' : 'Character', body: p.text }));
+                c.panels.splice(c.panels.indexOf(old[0]), 0, np);
+                c.panels = c.panels.filter((p) => !old.includes(p));
+            }
         }
         for (const p of Array.isArray(c.panels) ? c.panels.filter(isObj) : []) {
             if (p.type === 'list' && p.title === 'Features and traits') p.title = 'Passive abilities';
@@ -145,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if ('props' in r) r.props = strs(r.props);
                 return r;
             });
+            if (q.type === 'notes') q.notes = rows(q.notes, ROW.note);
             if (q.type === 'spells') {
                 q.meta = rows(q.meta, ROW.meta);
                 q.sp = Object.assign({ cur: 0, max: 0 }, isObj(q.sp) ? q.sp : {});
@@ -223,6 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .replace(/\+\s*-\s*(\d)/g, '− $1').replace(/\s+/g, ' ').trim();
     const dmgText = (list, V) => list.filter((d) => d.dice || d.type).map((d) => `${resolve(d.dice, V)} ${d.type}`.trim()).join(' + ');
     const ordinal = (n) => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
+    const dateText = (ms) => new Date(ms).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    let noteQ = '';
     const panelOf = (rp) => get(rp.split('.').slice(0, 2).join('.'));
 
     function actSum(r, V) {
@@ -258,6 +274,9 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'hptemp': return { v: nm(C.hp.temp) ? `+${nm(C.hp.temp)} temp` : '' };
             case 'speed': return { v: C.speeds.map((s) => `${s.type} ${/^\s*[\d.]+\s*$/.test(s.ft) ? s.ft + ' ft' : s.ft}${s.hover ? ' (hover)' : ''}`).join(' · ') };
             case 'cond': return { v: [...C.conditions, nm(C.exhaustion) ? 'Exhaustion ' + C.exhaustion : ''].filter(Boolean).join(', ') };
+            case 'ntitle': return { v: get(a).title || 'Untitled note' };
+            case 'nsnip': { const b = String(get(a).body || '').replace(/\s+/g, ' ').trim(); return { v: b.length > 90 ? b.slice(0, 90) + '…' : b }; }
+            case 'nago': return { v: 'Edited ' + UI.ago(get(a).updated) };
             case 'def': return { v: [C.res && 'Resists ' + C.res, C.imm && 'Immune to ' + C.imm, C.vul && 'Vulnerable to ' + C.vul].filter(Boolean).join(' · ') };
         }
         return { v: '' };
@@ -323,17 +342,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const DICE = [4, 6, 8, 10, 12, 20].map((n) => [n, 'd' + n]);
         const id = `<div class="hb-id">
             <label class="hb-name">Name ${f('name', 'Name')}</label>
+            <label>Race ${f('race', 'Race')}</label>
+            <label>Alignment ${f('alignment', 'Alignment')}</label>
+            <label class="hb-age">Age ${f('age', 'Age')}</label>
             <div class="hb-classes">${C.classes.map((c, i) => `<div class="hb-cls">
                 <label>Class ${f(`classes.${i}.name`, 'Class', { ph: 'Fighter' })}</label>
                 <label class="hb-lvl">Level ${f(`classes.${i}.level`, 'Level', { num: true })}</label>
                 <label class="hb-die">Hit die ${sel(`classes.${i}.die`, 'Hit die', DICE)}</label>
                 ${C.classes.length > 1 ? del('classes', i, c.name || 'class') : ''}
+                ${i === C.classes.length - 1 ? `<div class="hb-cls-more">${add('classes', 'cls', 'Add a class')}<span class="muted" data-c="lvl"></span></div>` : ''}
             </div>`).join('')}
-                <div class="hb-cls-more">${add('classes', 'cls', 'Add a class')}<span class="muted" data-c="lvl"></span></div>
             </div>
-            <label>Race ${f('race', 'Race')}</label>
-            <label>Alignment ${f('alignment', 'Alignment')}</label>
-            <label class="hb-age">Age ${f('age', 'Age')}</label>
         </div>`;
         const art = `<button type="button" class="hb-art" data-act="art" aria-label="${C.art ? 'Change' : 'Add'} character art">${C.art ? `<img src="${esc(C.art)}" alt="" width="300" height="300">` : '<span>Add art</span>'}</button>`;
         const abils = `<div class="hb-abils">${C.abilities.map((a, i) => `<div class="hb-abil">
@@ -343,20 +362,22 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`).join('')}</div>`;
         const combat = `<div class="hb-combat">
             <div class="hb-box hb-hp">
-                <span class="hb-lbl">Hit points</span>
+                <div class="hb-hp-head"><span class="hb-lbl">Hit points</span><button type="button" class="hb-x" data-act="hpedit" aria-expanded="${!!open.hp}" aria-label="Edit maximum and temporary hit points" title="Edit max and temp HP">${PENCIL}</button></div>
                 <div class="hb-hpv">${f('hp.cur', 'Current hit points', { num: true })}<span>/</span><b data-c="hpmax"></b><span class="hb-temp" data-c="hptemp"></span></div>
                 <div class="hb-hpbar" aria-hidden="true"><i id="hb-hpbar"></i><i id="hb-tempbar"></i></div>
-                <div class="hb-hpf">
+                ${open.hp ? `<div class="hb-hpf">
                     <label>Max ${f('hp.max', 'Maximum hit points', { num: true })}</label>
                     <label>Max change ${f('hp.mod', 'Temporary change to maximum hit points', { num: true })}</label>
                     <label>Temp ${f('hp.temp', 'Temporary hit points', { num: true })}</label>
-                </div>
-                <form class="hb-dmg" data-act="hp"><input class="field" id="hb-amt" inputmode="decimal" min="0" aria-label="Amount" placeholder="5"><button class="btn small" value="dmg">Damage</button><button class="btn small" value="heal">Heal</button><button class="btn small" value="temp">Set temp</button></form>
+                </div>` : ''}
+                <form class="hb-dmg" data-act="hp"><input class="field" id="hb-amt" inputmode="decimal" aria-label="Amount" placeholder="5"><button class="btn small" value="dmg">Damage</button><button class="btn small" value="heal">Heal</button><button class="btn small" value="temp">Set temp</button></form>
             </div>
-            <div class="hb-box"><span class="hb-lbl">Armour class</span>${fx('ac', 'Armour class', false, ' hb-big')}</div>
-            <div class="hb-box"><span class="hb-lbl">Initiative</span>${fx('init', 'Initiative', true, ' hb-big')}</div>
-            <div class="hb-box"><span class="hb-lbl">Proficiency</span>${fx('prof', 'Proficiency bonus', true, ' hb-big')}</div>
-            <label class="hb-box hb-insp"><span class="hb-lbl">Heroic inspiration</span>${f('insp', 'Heroic inspiration', { check: true })}</label>
+            <div class="hb-box hb-stats">
+                <div><span class="hb-lbl">AC</span>${fx('ac', 'Armour class', false, ' hb-big')}</div>
+                <div><span class="hb-lbl">Initiative</span>${fx('init', 'Initiative', true, ' hb-big')}</div>
+                <div><span class="hb-lbl">Prof.</span>${fx('prof', 'Proficiency bonus', true, ' hb-big')}</div>
+                <label class="hb-insp"><span class="hb-lbl">Inspiration</span>${f('insp', 'Heroic inspiration', { check: true })}</label>
+            </div>
         </div>`;
         const conds = C.condList.split('\n').map((s) => s.trim()).filter(Boolean);
         const more = `<div class="hb-more">
@@ -386,7 +407,17 @@ document.addEventListener('DOMContentLoaded', () => {
             <label class="hb-lbl hb-other">Other senses ${f('senses', 'Other senses', { area: true, ph: '120 ft magical darkvision' })}</label>
         </section>`;
         return `<div class="hb-top-id">${id}</div><div class="hb-top-art">${art}</div><div class="hb-top-abil">${abils}</div>
-            <div class="hb-top-combat">${combat}${more}</div><div class="hb-top-saves">${saves}</div><div class="hb-top-senses">${senses}</div>`;
+            <div class="hb-top-combat">${combat}${more}${pinned()}</div><div class="hb-top-saves">${saves}</div><div class="hb-top-senses">${senses}</div>`;
+    }
+
+    // notes pinned to the sheet: always on screen, editable in place
+    function pinned() {
+        const pins = C.panels.flatMap((p, pi) => (p.type === 'notes' && p.on ? p.notes.map((n, i) => [n, `panels.${pi}.notes.${i}`, pi]).filter(([n]) => n.pinned) : []));
+        return pins.length ? `<div class="hb-pins">${pins.map(([n, np, pi]) => `<div class="hb-pin">
+            <div class="hb-pin-h"><button type="button" class="hb-link" data-act="ngo" data-i="${pi}" data-id="${esc(n.id)}" data-c="ntitle:${np}" title="Open in notes"></button>
+                <button type="button" class="hb-x" data-act="npin" data-p="${np}" aria-label="Unpin ${esc(n.title || 'note')}" title="Unpin">&times;</button></div>
+            ${f(np + '.body', n.title || 'Pinned note', { area: true, cls: 'hb-pin-body' })}
+        </div>`).join('')}</div>` : '';
     }
 
     // ---- configurable panels ----
@@ -523,6 +554,49 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`).join('')}</div><div class="actions">${add(path + '.rows', 'tracker', 'Add tracker')}</div>`,
 
         text: (p, path) => f(path + '.text', p.title, { area: true, cls: 'hb-text' }),
+
+        // notes: a list (search, groups as sub-tabs, sort) beside the open note
+        notes: (p, path, pi) => {
+            const g = (n) => String(n.group || '').trim();
+            const count = (fn) => p.notes.filter(fn).length;
+            const groups = uniq(p.notes.map(g).filter(Boolean)).sort((a, b) => a.localeCompare(b));
+            const opts = [['all', 'All', p.notes.length], ['pinned', 'Pinned', count((n) => n.pinned)], ...groups.map((x) => ['g:' + x, x, count((n) => g(n) === x)])];
+            if (groups.length && count((n) => !g(n))) opts.push(['none', 'No group', count((n) => !g(n))]);
+            const cur = pickSub(p, opts);
+            const inSub = (n) => cur === 'all' || (cur === 'pinned' ? n.pinned : cur === 'none' ? !g(n) : g(n) === cur.slice(2));
+            const by = { created: (a, b) => b.created - a.created, title: (a, b) => (a.title || '').localeCompare(b.title || '') }[p.sort] || ((a, b) => b.updated - a.updated);
+            const shown = p.notes.map((n, i) => [n, i]).filter(([n]) => inSub(n)).sort(([a], [b]) => (b.pinned - a.pinned) || by(a, b));
+            const list = shown.map(([n, i]) => {
+                const rp = `${path}.notes.${i}`, s = `${n.title} ${n.group} ${n.body}`.toLowerCase();
+                return `<button type="button" class="hb-nitem${n.id === p.open ? ' on' : ''}" data-act="nopen" data-p="${path}" data-id="${esc(n.id)}" data-s="${esc(s)}" aria-pressed="${n.id === p.open}"${noteQ && !s.includes(noteQ) ? ' hidden' : ''}>
+                    <span class="hb-ntitle"><b data-c="ntitle:${rp}"></b>${n.pinned ? '<span class="badge">Pinned</span>' : ''}</span>
+                    <span class="hb-nsnip" data-c="nsnip:${rp}"></span>
+                    <small>${g(n) ? esc(g(n)) + ' · ' : ''}<span data-c="nago:${rp}"></span></small>
+                </button>`;
+            }).join('');
+            const oi = p.notes.findIndex((n) => n.id === p.open), n = p.notes[oi], np = `${path}.notes.${oi}`;
+            const editor = !n ? `<p class="muted hb-nempty">${p.notes.length ? 'Pick a note, or make a new one.' : 'No notes yet. Make one with New note.'}</p>` : `<div class="hb-nedit">
+                ${f(np + '.title', 'Note title', { cls: 'hb-ntitle-in', ph: 'Untitled note' })}
+                <div class="hb-nbar">
+                    <label class="hb-ngroup">Group ${f(np + '.group', 'Group', { list: 'hb-dl-ng-' + pi, ph: 'No group' })}</label>
+                    <button type="button" class="btn small" data-act="npin" data-p="${np}" aria-pressed="${n.pinned}">${n.pinned ? 'Unpin from sheet' : 'Pin to sheet'}</button>
+                    <button type="button" class="btn small" data-act="ndup" data-p="${path}" data-i="${oi}">Duplicate</button>
+                    <button type="button" class="btn small" data-act="ndel" data-p="${path}" data-i="${oi}">Delete</button>
+                </div>
+                ${f(np + '.body', 'Note', { area: true, cls: 'hb-nbody', ph: 'Write anything' })}
+                <small class="muted"><span data-c="nago:${np}"></span> · created ${esc(dateText(n.created))}</small>
+            </div>`;
+            const rename = cur.startsWith('g:') ? `<label class="hb-grename">Rename this group <input class="field hb-gname" data-p="${path}" data-g="${esc(cur.slice(2))}" value="${esc(cur.slice(2))}" autocomplete="off"></label>` : '';
+            return `<div class="hb-ntools">
+                    <button type="button" class="btn small" data-act="nnew" data-p="${path}">New note</button>
+                    <button type="button" class="btn small" data-act="nsession" data-p="${path}">New session note</button>
+                    <input class="field hb-nq" type="search" value="${esc(noteQ)}" placeholder="Search notes" aria-label="Search notes" autocomplete="off">
+                    ${sel(path + '.sort', 'Sort notes', [['edited', 'Recently edited'], ['created', 'Newest first'], ['title', 'Title A to Z']])}
+                </div>
+                ${subtabs(path + '.sub', opts, cur)}${rename}
+                <div class="hb-notes"><div class="hb-nlist">${list || '<p class="muted">No notes here.</p>'}</div>${editor}</div>
+                <datalist id="hb-dl-ng-${pi}">${groups.map((x) => `<option value="${esc(x)}">`).join('')}</datalist>`;
+        },
 
         combat: (p, path) => `<div class="kv"><span>Death save successes</span><span>${pips(path + '.ok', 3)}</span></div>
             <div class="kv"><span>Death save failures</span><span class="hb-bad-pips">${pips(path + '.bad', 3)}</span></div>
@@ -730,7 +804,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ---- drawing ----
-    const open = { more: false };
+    const open = { more: false, hp: false };
     const openRows = new Set();
     let dlgMode = null;
     const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : formulaDlg(dlgMode));
@@ -786,21 +860,37 @@ document.addEventListener('DOMContentLoaded', () => {
             if (field === 'k') $('#hb-parts').innerHTML = partsHTML(dlgMode.parts);
             save(); return refresh();
         }
+        if (el.classList.contains('hb-nq')) {
+            noteQ = el.value.trim().toLowerCase();
+            for (const it of el.closest('.hb-panel').querySelectorAll('.hb-nitem')) it.hidden = !!noteQ && !it.dataset.s.includes(noteQ);
+            return;
+        }
         const k = el.dataset.k;
         if (!k) return;
         set(k, el.type === 'checkbox' ? el.checked : el.value);
+        // the same field can show twice (a pinned note and the Notes tab); keep both in step
+        for (const o of document.querySelectorAll(`.hb [data-k="${k}"]`)) if (o !== el && o.type !== 'checkbox') o.value = el.value;
+        if (/\.notes\.\d+\.(title|body|group)$/.test(k)) get(k.replace(/\.\w+$/, '')).updated = Date.now();
         save(); refresh();
         if (dlgMode && dlgMode.parts && k === dlgMode.p) { dlgMode.parts = parseParts(el.value); $('#hb-parts').innerHTML = partsHTML(dlgMode.parts); }
         if (/\.att$/.test(k) && el.value === 'yes') {
             const P = panelOf(k), n = P.rows.filter((r) => r.att === 'yes').length;
             if (n > nm(P.attMax)) toast(`You're attuned to ${n} items but have ${nm(P.attMax)} attunement slots.`, 'note');
         }
-        if (k === 'view.all' || /^panels\.\d+\.on$/.test(k) || /\.(mode|cat)$/.test(k) || (el.type === 'checkbox' && /\.prep$/.test(k) && panelOf(k).sub === 'prep')) draw();
+        if (k === 'view.all' || /^panels\.\d+\.on$/.test(k) || /\.(mode|cat)$/.test(k) || /^panels\.\d+\.sort$/.test(k) || (el.type === 'checkbox' && /\.prep$/.test(k) && panelOf(k).sub === 'prep')) draw();
     });
     main.addEventListener('change', (e) => {
         const el = e.target, k = el.dataset.k || '';
         if (el.dataset.act === 'pick') return switchTo(db.chars[el.value]);
         if (el.classList.contains('hb-tagin')) return addTag(el);
+        if (el.classList.contains('hb-gname')) {
+            const P = get(el.dataset.p), from = el.dataset.g, to = el.value.trim();
+            if (!to || to === from) return;
+            for (const n of P.notes) if (String(n.group).trim() === from) n.group = to;
+            P.sub = 'g:' + to;
+            saveNow(); return draw();
+        }
+        if (/\.notes\.\d+\.group$/.test(k)) { saveNow(); return draw(); }
         if (/^classes\.\d+\.name$/.test(k)) { const d = HIT_DIE[el.value.trim().toLowerCase()]; if (d) set(k.replace(/name$/, 'die'), d); }
         if (/^panels\.\d+\.rows\.\d+\.name$/.test(k) && panelOf(k).type === 'spells' && el.value.trim()) srdFill(k.replace(/\.name$/, ''));
         if (/\.(time|lvl)$/.test(k) || /^classes\.\d+\.(name|level|die)$/.test(k) || /^(lists\.|condList)/.test(k) || /^speeds\./.test(k) && /\.type$/.test(k)) return dlg.open ? null : draw();
@@ -842,9 +932,40 @@ document.addEventListener('DOMContentLoaded', () => {
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && !r.desc) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
         if (act === 'more') { open.more = !open.more; return draw(); }
+        if (act === 'hpedit') { open.hp = !open.hp; return draw(); }
         if (act === 'tab') { C.view.tab = b.dataset.id; save(); return draw(); }
         if (act === 'toggle') { const id = b.dataset.id; openRows.has(id) ? openRows.delete(id) : openRows.add(id); return draw(); }
         if (act === 'tagadd') return addTag(b.previousElementSibling);
+        if (act === 'nnew' || act === 'nsession') {
+            const P = get(p), n = ROW.note();
+            if (act === 'nsession') Object.assign(n, { group: 'Sessions', title: `Session ${P.notes.filter((x) => String(x.group).trim() === 'Sessions').length + 1} · ${dateText(Date.now())}` });
+            else if (P.sub.startsWith('g:')) n.group = P.sub.slice(2);
+            else if (P.sub === 'pinned') n.pinned = true;
+            P.notes.push(n); P.open = n.id;
+            saveNow(); draw();
+            const t = $(`[data-k="${p}.notes.${P.notes.length - 1}.${act === 'nnew' ? 'title' : 'body'}"]`);
+            return t && t.focus();
+        }
+        if (act === 'nopen') { get(p).open = b.dataset.id; save(); return draw(); }
+        if (act === 'ngo') {
+            const P = C.panels[i];
+            P.open = b.dataset.id; C.view.tab = P.id;
+            if (P.sub === 'pinned' || P.sub.startsWith('g:') || P.sub === 'none') P.sub = 'all';
+            save(); draw();
+            const el = $('#hb-p-' + P.id);
+            return el && el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        if (act === 'ndel') {
+            const P = get(p), n = P.notes[i];
+            if (!confirm(`Delete the note "${n.title || 'Untitled note'}"?`)) return;
+            P.notes.splice(i, 1); if (P.open === n.id) P.open = '';
+        }
+        else if (act === 'npin') { const n = get(p); n.pinned = !n.pinned; }
+        else if (act === 'ndup') {
+            const P = get(p), n = Object.assign({}, P.notes[i], { id: uid(), title: (P.notes[i].title || 'Untitled note') + ' (copy)', pinned: false, created: Date.now(), updated: Date.now() });
+            P.notes.splice(i + 1, 0, n); P.open = n.id;
+        }
+        else
         if (act === 'sub') set(p, b.dataset.id);
         else if (act === 'cond') { const n = b.dataset.n; C.conditions = C.conditions.includes(n) ? C.conditions.filter((x) => x !== n) : [...C.conditions, n]; }
         else if (act === 'chip') { const list = get(p), n = b.dataset.n; set(p, list.includes(n) ? list.filter((x) => x !== n) : [...list, n]); }
