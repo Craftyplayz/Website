@@ -229,7 +229,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     function normalise(c) {
         c = upgrade(isObj(c) ? c : {});
         const d = blank(), out = {};
-        for (const k in d) out[k] = typeof c[k] === typeof d[k] && Array.isArray(c[k]) === Array.isArray(d[k]) && c[k] !== null ? c[k] : d[k];
+        // number fields hold whatever was typed, so a string is fine there too
+        for (const k in d) out[k] = (typeof c[k] === typeof d[k] || typeof d[k] === 'number' && typeof c[k] === 'string') && Array.isArray(c[k]) === Array.isArray(d[k]) && c[k] !== null ? c[k] : d[k];
         const rows = (list, make) => (Array.isArray(list) ? list : []).filter(isObj).map((r) => Object.assign(make(), r));
         const strs = (list) => (Array.isArray(list) ? list : []).filter((x) => typeof x === 'string');
         out.abilities = rows(out.abilities, ROW.ability);
@@ -438,9 +439,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     }
     const pickSub = (p, opts) => (opts.some(([id]) => id === p.sub) ? p.sub : opts[0][0]);
     // removable tags with an "add your own" field
-    function tags(path, presets, ph, list) {
+    function tags(path, presets, ph, list, kind) {
         const have = get(path), all = uniq([...presets, ...have]);
-        return `<div class="badges">${all.map((n) => `<button type="button" class="badge${have.includes(n) ? ' b' : ''}" data-act="chip" data-p="${path}" data-n="${esc(n)}" aria-pressed="${have.includes(n)}">${esc(n)}${presets.includes(n) ? '' : ' <span aria-hidden="true">&times;</span>'}</button>`).join('')}</div>
+        return `<div class="badges">${all.map((n) => `<button type="button" class="badge${have.includes(n) ? ' b' : ''}" data-act="chip" data-p="${path}" data-n="${esc(n)}" aria-pressed="${have.includes(n)}"${kind ? ruleTip(kind, n) : ''}>${esc(n)}${presets.includes(n) ? '' : ' <span aria-hidden="true">&times;</span>'}</button>`).join('')}</div>
             <div class="hb-addtag"><input class="field hb-tagin" data-p="${path}" aria-label="Add your own" placeholder="${esc(ph)}"${list ? ` list="${list}"` : ''} autocomplete="off"><button type="button" class="btn small" data-act="tagadd">Add</button></div>`;
     }
     const dmgEdit = (rp) => `<div class="hb-dmgs">${get(rp + '.dmg').map((d, j) => `<div class="hb-dmgrow">${f(`${rp}.dmg.${j}.dice`, 'Damage dice', { cls: 'hb-formula', ph: '1d8 + STR' })}${f(`${rp}.dmg.${j}.type`, 'Damage type', { list: 'hb-dl-dmg', ph: 'Slashing' })}${del(rp + '.dmg', j, 'damage')}</div>`).join('')}</div>
@@ -504,8 +505,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         </div>
         <div class="card hb-more-body" id="hb-more"${open.more ? '' : ' hidden'}>
             <h3>Conditions</h3>
-            <div class="badges" aria-label="Conditions">${conds.map((n) => `<button type="button" class="badge${C.conditions.includes(n) ? ' r' : ''}" data-act="cond" data-n="${esc(n)}" aria-pressed="${C.conditions.includes(n)}">${esc(n)}</button>`).join('')}</div>
+            <div class="badges" aria-label="Conditions">${conds.map((n) => `<button type="button" class="badge${C.conditions.includes(n) ? ' r' : ''}" data-act="cond" data-n="${esc(n)}" aria-pressed="${C.conditions.includes(n)}"${ruleTip('cond', n)}>${esc(n)}</button>`).join('')}</div>
             <label class="hb-exh">Exhaustion ${f('exhaustion', 'Exhaustion level', { num: true })}</label>
+            ${rulesBlock('cond', conds.filter((n) => C.conditions.includes(n)))}${nm(C.exhaustion) > 0 ? `<div class="hb-rules"><div class="hb-rule"><b>Exhaustion level ${Math.min(6, nm(C.exhaustion))}</b>${rulePs((rule('cond', 'exhaustion') || []).filter((x) => /^\d - /.test(x) && +x[0] <= nm(C.exhaustion)).map((x) => '- ' + x.slice(4)))}</div></div>` : ''}
             <h3>Speed</h3>
             <div class="hb-speeds">${C.speeds.map((s, i) => `<div class="hb-speed">${f(`speeds.${i}.type`, 'Speed type', { list: 'hb-dl-speeds' })}${f(`speeds.${i}.ft`, 'Feet', { num: true, cls: 'hb-n' })}<span class="muted">ft</span><label class="check">${f(`speeds.${i}.hover`, 'Hover', { check: true })} Hover</label>${del('speeds', i, s.type + ' speed')}</div>`).join('')}</div>
             <div class="actions">${add('speeds', 'speed', 'Add speed')}</div>
@@ -560,7 +562,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             ${r.mode === 'save' ? `<label>Save ${abSel(rp + '.save', 'Save ability')}</label><div class="hb-fxbox"><span>Save DC</span>${fx(rp + '.dc', 'Save DC', false)}</div>` : ''}
         </div>
         <h4>Damage</h4>${dmgEdit(rp)}
-        <h4>Properties</h4>${tags(rp + '.props', [], 'Finesse', 'hb-dl-props')}
+        <h4>Properties</h4>${tags(rp + '.props', [], 'Finesse', 'hb-dl-props', 'prop')}
         <label class="hb-wide">Description ${f(rp + '.desc', 'Description', { area: true })}</label>
         <div class="actions">${del(panelPath(rp) + '.rows', rp.split('.').pop(), r.name || 'action', 'Remove action')}</div>`;
     }
@@ -592,12 +594,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             if (C.profs.notes) opts.push(['notes', 'Notes']);
             const cur = pickSub(p, opts);
             let body;
-            if (cur === 'skills') body = `<div class="rows hb-two">${C.skills.map((s, i) => `<div class="rowi">${dot('prof', i, s, s.name)}<span class="grow">${esc(s.name)}</span><small>${esc(s.ab)}</small>${val('skill:' + i)}</div>`).join('')}</div>
+            if (cur === 'skills') body = `<div class="rows hb-two">${C.skills.map((s, i) => `<div class="rowi">${dot('prof', i, s, s.name)}<button type="button" class="hb-link grow" data-act="skill" data-i="${i}">${esc(s.name)}</button><small>${esc(s.ab)}</small>${val('skill:' + i)}</div>`).join('')}</div>
                 <p class="muted hb-hint">Click a dot to change proficiency. Add or rename skills in Customise.</p>`;
             else if (cur === 'tools') body = `<div class="rows">${C.profs.tools.map((t, i) => `<div class="rowi hb-tool">${dot('tprof', i, t, t.name || 'tool')}${f(`profs.tools.${i}.name`, 'Tool', { cls: 'grow', list: 'hb-dl-tools', ph: "Thieves' tools" })}${abSel(`profs.tools.${i}.ab`, 'Ability')}${val('tool:' + i)}${del('profs.tools', i, t.name || 'tool')}</div>`).join('')}</div>
                 <div class="actions">${add('profs.tools', 'tool', 'Add tool')}</div>`;
             else if (cur === 'notes') body = f('profs.notes', 'Notes', { area: true, cls: 'hb-text' });
-            else body = tags('profs.' + cur, PRESET[cur], { armour: 'Mithral armour', weapons: 'Longsword', langs: 'Thieves’ Cant' }[cur], { armour: 'hb-dl-armour', weapons: 'hb-dl-weapon', langs: 'hb-dl-langs' }[cur]);
+            else body = tags('profs.' + cur, PRESET[cur], { armour: 'Mithral armour', weapons: 'Longsword', langs: 'Thieves’ Cant' }[cur], { armour: 'hb-dl-armour', weapons: 'hb-dl-weapon', langs: 'hb-dl-langs' }[cur], { armour: 'armour', weapons: 'weapons', langs: 'lang' }[cur])
+                + rulesBlock({ armour: 'armour', weapons: 'weapons', langs: 'lang' }[cur], C.profs[cur]);
             return subtabs(path + '.sub', opts, cur) + body;
         },
 
@@ -946,6 +949,27 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         $('#' + el.getAttribute('list')).innerHTML = items.map((x) => `<option value="${esc(pre + x)}">`).join('');
     }
 
+    // ---- SRD rules text (rules.js): conditions, skills, weapon properties, languages, armour and weapon proficiencies ----
+    const RULES = window.HB_RULES || {};
+    function rule(kind, name) {
+        const n = String(name).trim().toLowerCase();
+        if (kind === 'weapons') {
+            const simple = WEAPONS.slice(0, 14), w = named(WEAPONS, n);
+            if (n === 'simple weapons' || n === 'martial weapons') return [(n[0] === 's' ? simple : WEAPONS.slice(14)).map((x) => x[0]).join(', ') + '.'];
+            return w ? [`${simple.includes(w) ? 'Simple' : 'Martial'} weapon. ${w[1]} ${w[2].toLowerCase()} damage${w[3] ? '. ' + w[3] : ''}. ${w[4]}.`] : null;
+        }
+        return (RULES[kind] || {})[n] || null;
+    }
+    const ruleTip = (kind, name) => { const r = rule(kind, name); return r ? ` title="${esc(r.join(' ').replace(/(^|\s)- /g, '$1'))}"` : ''; };
+    // "- " lines are SRD bullet points
+    const rulePs = (r) => (r || []).map((x) => (x.startsWith('- ') ? `<p class="hb-bullet">${esc(x.slice(2))}</p>` : `<p>${esc(x)}</p>`)).join('');
+    // what the chosen conditions, properties or proficiencies do, under where they're picked
+    function rulesBlock(kind, names, heading) {
+        const rows = names.map((n) => [n, rule(kind, n)]).filter(([, r]) => r);
+        return rows.length ? `<div class="hb-rules">${heading ? `<h4>${esc(heading)}</h4>` : ''}${rows.map(([n, r]) => `<div class="hb-rule"><b>${esc(n)}</b>${rulePs(r)}</div>`).join('')}
+            <p class="muted hb-hint">Rules text from the SRD 5.1, CC-BY-4.0.</p></div>` : '';
+    }
+
     // ---- details drawer ----
     const paras = (s) => String(s || '').split(/\n+/).filter((x) => x.trim()).map((x) => `<p>${esc(x)}</p>`).join('');
     function info(rp) {
@@ -954,22 +978,28 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         // list entries and metamagic: just a source or cost, uses and the text
         if (!('time' in r)) {
             const uses = String(r.uses ?? '').trim() ? `${maxOf(r.uses, V)}${r.reset ? ', back on a ' + RESETS.find(([k]) => k === r.reset)[1].toLowerCase() : ''}` : '';
-            $('#hb-drawer-body').innerHTML = `<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(r.src || '')}</p>
+            return openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(r.src || '')}</p>
                 ${kv([['Cost', 'cost' in r && r.cost !== '' ? r.cost + ' sorcery points' : ''], ['Uses', uses]])}
-                <div class="hb-desc">${paras(r.text ?? r.desc) || '<p class="muted">No description yet. Add one with the edit button.</p>'}</div>`;
-            drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); drawer.focus();
-            return;
+                <div class="hb-desc">${paras(r.text ?? r.desc) || '<p class="muted">No description yet. Add one with the edit button.</p>'}</div>`);
         }
         const head = spell ? (nm(r.lvl) ? `${ordinal(nm(r.lvl))}-level ${(r.school || 'spell').toLowerCase()}` : `${r.school || 'Spell'} cantrip`) + (r.ritual ? ' (ritual)' : '') : r.time;
         const res = spell ? (r.mode === 'atk' ? show({ ...ev(P.atk, V), signed: true }) + ' to hit' : r.mode === 'save' ? `DC ${show(ev(r.dc || P.dc, V))} ${r.save} save` : '')
             : r.mode === 'hit' ? show({ ...ev(r.hit, V), signed: true }) + ' to hit' : r.mode === 'save' ? `DC ${show(ev(r.dc, V))} ${r.save} save` : '';
-        $('#hb-drawer-body').innerHTML = `<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(head || '')}</p>
+        openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(head || '')}</p>
             ${kv(spell ? [['Casting time', r.time], ['Range', r.range], ['Components', r.comp], ['Duration', (r.conc ? 'Concentration, ' : '') + r.dur], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)]]
-                : [['Timing', r.time], ['Range', r.range], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)], ['Properties', r.props.join(', ')]])}
+                : [['Timing', r.time], ['Range', r.range], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)], ['Properties', r.props.filter((n) => !rule('prop', n)).join(', ')]])}
             <div class="hb-desc">${paras(r.desc) || '<p class="muted">No description yet. Add one with the edit button.</p>'}
             ${spell && r.higher ? `<p><b>At higher levels.</b></p>${paras(r.higher)}` : ''}</div>
-            ${spell && r.srd ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`;
-        drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); drawer.focus();
+            ${spell ? '' : rulesBlock('prop', r.props, 'Properties')}
+            ${spell && r.srd ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
+    }
+    function openDrawer(html) { $('#hb-drawer-body').innerHTML = html; drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); drawer.focus(); }
+    function skillInfo(i) {
+        const sk = C.skills[i], v = value('skill:' + i, vars());
+        openDrawer(`<h2>${esc(sk.name)}</h2><p class="muted">${esc(sk.ab)} skill, ${PROF.find(([p]) => p === sk.p)?.[1].toLowerCase() || 'not proficient'}</p>
+            <div class="kv"><span>Bonus</span><span>${esc(show({ ...v, signed: true }))}</span></div>
+            <div class="hb-desc">${rulePs(rule('skill', sk.name)) || '<p class="muted">No SRD description for this skill.</p>'}</div>
+            ${rule('skill', sk.name) ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
     }
     function closeDrawer() { drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); }
 
@@ -1168,7 +1198,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (/^classes\.\d+\.name$/.test(k)) { const d = HIT_DIE[el.value.trim().toLowerCase()]; if (d) set(k.replace(/name$/, 'die'), d); }
         if (/^panels\.\d+\.rows\.\d+\.name$/.test(k) && panelOf(k).type === 'spells' && el.value.trim()) srdFill(k.replace(/\.name$/, ''));
         if (/^panels\.\d+\.(rows|meta)\.\d+\.name$/.test(k) && rowFill(k)) return;
-        if (/\.(time|lvl)$/.test(k) || /^classes\.\d+\.(name|level|die)$/.test(k) || /^(lists\.|condList)/.test(k) || /^speeds\./.test(k) && /\.type$/.test(k)) return dlg.open ? null : draw();
+        if (/\.(time|lvl)$/.test(k) || /^classes\.\d+\.(name|level|die)$/.test(k) || /^(lists\.|condList|exhaustion)/.test(k) || /^speeds\./.test(k) && /\.type$/.test(k)) return dlg.open ? null : draw();
         if (/\.(name|key|title)$/.test(k) && !dlg.open) $('#hb-bar').innerHTML = bar();
     });
     main.addEventListener('focusin', (e) => { if (e.target.getAttribute('list') === 'hb-dl-srd') loadSrdList(); if (e.target.dataset.multi) multiList(e.target); });
@@ -1206,6 +1236,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'close') return dlg.close();
         if (act === 'rest') return showDlg({ kind: 'rest', r: b.dataset.r });
         if (act === 'doshort' || act === 'dolong') return rest(act === 'dolong' ? 'long' : 'short');
+        if (act === 'skill') return skillInfo(+b.dataset.i);
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && !r.desc) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
         if (act === 'more') { open.more = !open.more; return draw(); }
