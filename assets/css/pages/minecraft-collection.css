@@ -1,0 +1,16 @@
+/* Collection Checklist (/minecraft/projects/collection/) */
+.mcc [hidden] { display: none !important; }
+.mcc .bar { flex-wrap: wrap; align-items: center; gap: 10px; }
+.mcc .bar .field { flex: 1 1 160px; min-width: 0; max-width: 280px; }
+.mcc-key { font-size: 13px; margin: 0 0 12px; }
+.mcc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 6px; margin-bottom: 16px; }
+.mcc-t { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); color: var(--text); font: inherit; font-size: 14px; text-align: left; transition: border-color var(--fast), background var(--fast); }
+button.mcc-t { cursor: pointer; width: 100%; }
+button.mcc-t:hover { border-color: var(--accent); }
+.mcc-t img { flex: none; width: 32px; height: 32px; image-rendering: pixelated; }
+.mcc-t .ph { flex: none; width: 32px; height: 32px; }
+.mcc-t .nm { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mcc-t .badge { margin-left: 4px; vertical-align: 1px; }
+.mcc-t .tk { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid var(--line-strong); border-radius: 4px; color: transparent; font-size: 14px; font-weight: 700; line-height: 1; }
+.mcc-t.on { background: var(--ok-bg); border-color: var(--ok-line); }
+.mcc-t.on .tk { background: var(--ok-line); border-color: var(--ok-line); color: var(--text); }
