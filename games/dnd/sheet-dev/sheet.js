@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`).join('')}
             </div>
         </div>`;
-        const art = `<button type="button" class="hb-art" data-act="art" aria-label="${C.art ? 'Change' : 'Add'} character art">${C.art ? `<img src="${esc(C.art)}" alt="" width="300" height="300">` : '<span>Add art</span>'}</button>`;
+        const art = `<button type="button" class="hb-art" data-act="art" aria-label="${C.art ? 'Change' : 'Add'} character art">${C.art ? `<img src="${esc(C.art)}" alt="" referrerpolicy="no-referrer" width="300" height="300">` : '<span>Add art</span>'}</button>`;
         const abils = `<div class="hb-abils">${C.abilities.map((a, i) => `<div class="hb-abil">
             <span class="hb-lbl" title="${esc(a.name)}">${esc(a.key)}</span>
             ${val('mod:' + i, ' hb-big')}
@@ -622,6 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<select class="field hb-pick" data-act="pick" aria-label="Character">${opts}</select>
             <button type="button" class="btn small" data-act="new">New</button>
             <button type="button" class="btn small" data-act="import">Import</button>
+            <button type="button" class="btn small" data-act="ddb">From D&amp;D Beyond</button>
             <button type="button" class="btn small" data-act="export">Export</button>
             <button type="button" class="btn small" data-act="delete">Delete</button>
             <span class="hb-gap"></span>
@@ -776,6 +777,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function closeDrawer() { drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); }
 
+    // ---- D&D Beyond import (the conversion itself is in ddb.js) ----
+    function ddbDlg() {
+        return `<h2>Import from D&amp;D Beyond</h2>
+            <p>Paste a link to a public D&amp;D Beyond character, or its ID number. This makes a new character here and changes nothing on D&amp;D Beyond.</p>
+            <form class="hb-ddb">
+                <label class="hb-lbl hb-wide">Character link or ID <input class="field" id="hb-ddb-id" placeholder="https://www.dndbeyond.com/characters/12345678" autocomplete="off"></label>
+                <p id="hb-ddb-msg" role="status" hidden></p>
+                <div class="actions"><button class="btn primary" id="hb-ddb-go">Import character</button><button type="button" class="btn" data-act="close">Cancel</button></div>
+            </form>`;
+    }
+    function fromDdbData(x) {
+        const c = blank(), P = (type) => c.panels.find((p) => p.type === type);
+        Object.assign(c, {
+            name: x.name, race: x.race, alignment: x.alignment, age: x.age, art: x.art, insp: x.insp, prof: x.prof, ac: x.ac, init: x.init,
+            classes: x.classes.map((k) => ({ name: k.name, level: k.level, die: k.die, hdUsed: k.hdUsed })), hp: { ...x.hp, mod: 0 },
+            speeds: x.speeds, senses: x.senses, res: x.res, imm: x.imm, vul: x.vul, conditions: x.conditions, exhaustion: x.exhaustion,
+            skills: x.skills.map((k) => ({ name: k.name, ab: k.ab, p: k.p, b: k.b })), profs: x.profs,
+        });
+        for (const a of c.abilities) { a.score = x.scores[a.key] ?? 10; const sv = x.saves[a.key]; if (sv) { a.save = sv.prof; a.sb = sv.extra ? String(sv.extra) : ''; } }
+        P('attacks').rows = x.actions.map((r) => Object.assign(ROW.attack(), r));
+        Object.assign(P('spells'), { dc: x.spells.dc, atk: x.spells.atk, slots: x.spells.slots, rows: x.spells.rows.map((r) => Object.assign(ROW.spell(), r)) });
+        Object.assign(P('items'), { coins: x.items.coins, attMax: x.items.attMax, rows: x.items.rows.map((r) => Object.assign(ROW.item(), r)) });
+        P('list').rows = x.passives.map((r) => Object.assign(ROW.list(), r));
+        P('trackers').rows = x.trackers.map((r) => Object.assign(ROW.tracker(), r));
+        Object.assign(P('combat'), x.deathSaves);
+        const subs = x.classes.filter((k) => k.sub).map((k) => k.name + ': ' + k.sub);
+        P('notes').notes = [...(subs.length ? [{ title: 'Subclass', group: 'Character', body: subs.join('\n') }] : []), ...x.notes,
+            { title: 'Imported from D&D Beyond', group: '', body: [x.ddbUrl, `Imported ${dateText(Date.now())}. Later changes on D&D Beyond don't carry over; import again for a fresh copy.`].filter(Boolean).join('\n') }]
+            .map((n) => Object.assign(ROW.note(), n));
+        return normalise(c);
+    }
+    async function importDdb() {
+        const v = $('#hb-ddb-id').value.trim(), msg = $('#hb-ddb-msg'), btn = $('#hb-ddb-go');
+        const say = (cls, text) => { msg.hidden = false; msg.className = cls; msg.textContent = text; };
+        if (!/\d{4,}/.test(v)) return say('err', 'Paste a D&D Beyond character link or its ID number.');
+        btn.disabled = true; btn.textContent = 'Importing...'; say('note', 'Fetching the character from D&D Beyond...');
+        try {
+            const res = await fetch('ddb.php?id=' + encodeURIComponent(v));
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok || !j.character) return say('err', j.error || "Couldn't reach D&D Beyond right now. Try again in a minute.");
+            let c;
+            try { c = fromDdbData(hbFromDdb(j.character, j.rules)); } catch (err) { return say('err', "Couldn't convert that character. Try again, or tell the site owner which character it was."); }
+            switchTo(c); dlg.close();
+            toast(`Imported ${c.name || 'the character'} from D&D Beyond.`, 'ok');
+        } catch (err) { say('err', "Couldn't reach D&D Beyond right now. Try again in a minute."); }
+        finally { btn.disabled = false; btn.textContent = 'Import character'; }
+    }
+
     // ---- customise ----
     function customDlg() {
         const mini = (head, rows, addBtn) => table(head, rows) + `<div class="actions">${addBtn}</div>`;
@@ -807,11 +856,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const open = { more: false, hp: false };
     const openRows = new Set();
     let dlgMode = null;
-    const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : formulaDlg(dlgMode));
+    const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : dlgMode.kind === 'ddb' ? ddbDlg() : formulaDlg(dlgMode));
     function draw() {
         $('#hb-bar').innerHTML = bar();
         root.innerHTML = top() + `<div class="hb-top-panels">${panels()}</div><div hidden>${datalists()}</div>`;
-        if (dlg.open && dlgMode && dlgMode.kind !== 'rest') dlgBody.innerHTML = dlgHTML();
+        if (dlg.open && dlgMode && dlgMode.kind !== 'rest' && dlgMode.kind !== 'ddb') dlgBody.innerHTML = dlgHTML();
         refresh();
     }
     function showDlg(mode) { dlgMode = mode; dlgBody.innerHTML = dlgHTML(); dlg.showModal(); refresh(); }
@@ -903,6 +952,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawer.classList.contains('open') && !dlg.open) closeDrawer(); });
     main.addEventListener('submit', (e) => {
         e.preventDefault();
+        if (e.target.classList.contains('hb-ddb')) return importDdb();
         const amt = Math.abs(nm($('#hb-amt').value)), how = e.submitter && e.submitter.value;
         if (!amt && how !== 'temp') return $('#hb-amt').focus();
         if (how === 'dmg') {
@@ -926,6 +976,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dlgBody.innerHTML = formulaDlg(dlgMode); saveNow(); return refresh();
         }
         if (act === 'custom') return showDlg('custom');
+        if (act === 'ddb') { showDlg({ kind: 'ddb' }); return $('#hb-ddb-id').focus(); }
         if (act === 'close') return dlg.close();
         if (act === 'rest') return showDlg({ kind: 'rest', r: b.dataset.r });
         if (act === 'doshort' || act === 'dolong') return rest(act === 'dolong' ? 'long' : 'short');
