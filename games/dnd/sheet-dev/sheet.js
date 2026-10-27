@@ -375,6 +375,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             case 'fs': return { ...ev(get(a), V), signed: true, why: why(get(a), V) };
             case 'asum': return { v: actSum(get(a), V) };
             case 'ssum': return { v: spellSum(get(a), panelOf(a), V) };
+            case 'lsum': return { v: get(a).src };
+            case 'msum': return { v: get(a).cost === '' ? '' : `${get(a).cost} SP` };
             case 'wt': return { v: C.panels[a].rows.reduce((s, r) => s + nm(r.qty) * nm(r.wt), 0) };
             case 'att': { const P = C.panels[a], n = P.rows.filter((r) => r.att === 'yes').length; return { v: `${n} / ${nm(P.attMax)}`, warn: n > nm(P.attMax) }; }
             case 'hdl': { const c = C.classes[a]; return { v: `${Math.max(0, nm(c.level) - nm(c.hdUsed))} of ${nm(c.level)} left` }; }
@@ -538,13 +540,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
 
     // ---- configurable panels ----
     // one action or spell: a summary line you can open to edit
-    function entry(rp, r, summaryKey, editor, lead = '') {
+    function entry(rp, r, summaryKey, editor, lead = '', tail = '') {
         const isOpen = openRows.has(r.id);
         return `<div class="hb-entry">
             <div class="hb-entry-h">${lead}<button type="button" class="hb-link" data-act="info" data-p="${rp}">${esc(r.name || 'Unnamed')}</button>
                 <span class="hb-sum" data-c="${summaryKey}:${rp}"></span>
                 <button type="button" class="hb-x hb-toggle" data-act="toggle" data-id="${esc(r.id)}" aria-expanded="${isOpen}" aria-label="Edit ${esc(r.name || 'entry')}" title="Edit">${PENCIL}</button></div>
-            ${isOpen ? `<div class="hb-editor">${editor()}</div>` : ''}
+            ${tail}${isOpen ? `<div class="hb-editor">${editor()}</div>` : ''}
         </div>`;
     }
 
@@ -619,7 +621,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                     <button type="button" class="btn small" data-act="track" data-p="${path}.sp" data-d="-1" aria-label="Spend a sorcery point">−</button>
                     ${f(path + '.sp.cur', 'Sorcery points left', { num: true, cls: 'hb-n' })}<span>/</span>${f(path + '.sp.max', 'Sorcery points maximum', { num: true, cls: 'hb-n' })}
                     <button type="button" class="btn small" data-act="track" data-p="${path}.sp" data-d="1" aria-label="Get a sorcery point back">+</button></div>
-                <div class="hb-list">${p.meta.map((m, i) => `<div class="hb-entry"><div class="hb-entry-h">${f(`${path}.meta.${i}.name`, 'Name', { cls: 'hb-strong', list: 'hb-dl-meta', ph: 'Quickened Spell' })}<label class="hb-cost">Cost ${f(`${path}.meta.${i}.cost`, 'Cost in sorcery points', { cls: 'hb-n' })}</label>${del(path + '.meta', i, m.name || 'metamagic')}</div>${f(`${path}.meta.${i}.desc`, 'Description', { area: true })}</div>`).join('')}</div>
+                <div class="hb-list">${p.meta.map((m, i) => { const mp = `${path}.meta.${i}`; return entry(mp, m, 'msum', () => `<div class="hb-entry-h">${f(mp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-meta', ph: 'Quickened Spell' })}<label class="hb-cost">Cost ${f(mp + '.cost', 'Cost in sorcery points', { cls: 'hb-n' })}</label></div>
+                    <label class="hb-wide">Description ${f(mp + '.desc', 'Description', { area: true })}</label>
+                    <div class="actions">${del(path + '.meta', i, m.name || 'metamagic', 'Remove metamagic')}</div>`); }).join('')}</div>
                 <div class="actions"><select class="field hb-auto" id="hb-meta-pick" aria-label="Metamagic option"><option value="">Your own</option>${METAMAGIC.map(([n]) => `<option>${esc(n)}</option>`).join('')}</select><button type="button" class="btn small" data-act="addmeta" data-p="${path}.meta">Add metamagic</button></div>`;
             const slots = p.slots.map((s, l) => (nm(s.max) > 0 ? `<span class="hb-slot"><small>${ordinal(l + 1)}</small>${pips(`${path}.slots.${l}.used`, s.max)}</span>` : '')).join('');
             const list = p.rows.map((r, i) => [r, `${path}.rows.${i}`]).sort((a, b) => (nm(a[0].lvl) || 0) - (nm(b[0].lvl) || 0))
@@ -658,15 +662,15 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         // entries (passive abilities, features); each can have uses that come back on a rest
         list: (p, path) => {
             const V = vars();
-            return `<div class="hb-list">${p.rows.map((r, i) => { const rp = `${path}.rows.${i}`; return `<div class="hb-entry">
-                <div class="hb-entry-h">${f(rp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-feat', ph: 'Darkvision' })}${f(rp + '.src', 'Source (optional)', { cls: 'hb-src', list: 'hb-dl-src', ph: 'Elf' })}${del(path + '.rows', i, r.name || 'entry')}</div>
+            // the name opens the description; uses stay out so they can be ticked off in play
+            return `<div class="hb-list">${p.rows.map((r, i) => { const rp = `${path}.rows.${i}`; return entry(rp, r, 'lsum', () => `<div class="hb-entry-h">${f(rp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-feat', ph: 'Darkvision' })}${f(rp + '.src', 'Source (optional)', { cls: 'hb-src', list: 'hb-dl-src', ph: 'Elf' })}</div>
                 <div class="hb-uses">
                     <label>Uses ${f(rp + '.uses', 'Uses (number or formula)', { cls: 'hb-n hb-formula', ph: 'none' })}</label><small class="muted" data-c="tmax:${rp}.uses"></small>
                     ${sel(rp + '.reset', 'Resets on', RESETS)}
-                    ${String(r.uses).trim() ? pips(rp + '.used', maxOf(r.uses, V)) : ''}
                 </div>
-                ${f(rp + '.text', 'Description', { area: true })}
-            </div>`; }).join('')}</div><div class="actions">${add(path + '.rows', 'list', 'Add entry')}</div>`;
+                <label class="hb-wide">Description ${f(rp + '.text', 'Description', { area: true })}</label>
+                <div class="actions">${del(path + '.rows', i, r.name || 'entry', 'Remove entry')}</div>`, '',
+                String(r.uses).trim() ? `<div class="hb-uses">${pips(rp + '.used', maxOf(r.uses, V))}<small class="muted">${esc(r.reset ? RESETS.find(([k]) => k === r.reset)[1] : '')}</small></div>` : ''); }).join('')}</div><div class="actions">${add(path + '.rows', 'list', 'Add entry')}</div>`;
         },
 
         // resources in your own sub-tabs: counters, boxes, or slots by level
@@ -947,6 +951,15 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     function info(rp) {
         const r = get(rp), V = vars(), spell = 'lvl' in r, P = panelOf(rp);
         const kv = (rows) => rows.filter(([, v]) => v).map(([k, v]) => `<div class="kv"><span>${k}</span><span>${esc(v)}</span></div>`).join('');
+        // list entries and metamagic: just a source or cost, uses and the text
+        if (!('time' in r)) {
+            const uses = String(r.uses ?? '').trim() ? `${maxOf(r.uses, V)}${r.reset ? ', back on a ' + RESETS.find(([k]) => k === r.reset)[1].toLowerCase() : ''}` : '';
+            $('#hb-drawer-body').innerHTML = `<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(r.src || '')}</p>
+                ${kv([['Cost', 'cost' in r && r.cost !== '' ? r.cost + ' sorcery points' : ''], ['Uses', uses]])}
+                <div class="hb-desc">${paras(r.text ?? r.desc) || '<p class="muted">No description yet. Add one with the edit button.</p>'}</div>`;
+            drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); drawer.focus();
+            return;
+        }
         const head = spell ? (nm(r.lvl) ? `${ordinal(nm(r.lvl))}-level ${(r.school || 'spell').toLowerCase()}` : `${r.school || 'Spell'} cantrip`) + (r.ritual ? ' (ritual)' : '') : r.time;
         const res = spell ? (r.mode === 'atk' ? show({ ...ev(P.atk, V), signed: true }) + ' to hit' : r.mode === 'save' ? `DC ${show(ev(r.dc || P.dc, V))} ${r.save} save` : '')
             : r.mode === 'hit' ? show({ ...ev(r.hit, V), signed: true }) + ' to hit' : r.mode === 'save' ? `DC ${show(ev(r.dc, V))} ${r.save} save` : '';
@@ -1274,14 +1287,14 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             if (b.dataset.lvl) row.lvl = +b.dataset.lvl;
             if (b.dataset.prep) row.prep = true;
             if (b.dataset.t === 'level') row.label = ordinal(get(p).length + 1);
-            if (row.id && 'desc' in row) openRows.add(row.id);
+            if (row.id && ('desc' in row || 'text' in row)) openRows.add(row.id);
             get(p).push(row);
         }
         else if (act === 'addsense') {
             const v = $('#hb-sense-pick').value, name = v.slice(2);
             C.passives.push(Object.assign(ROW.passive(), v.startsWith('p:') ? { name: 'Passive ' + name, f: '10 + ' + name.replace(/\W/g, '') } : v.startsWith('s:') ? { name, f: '60', unit: 'ft' } : {}));
         }
-        else if (act === 'addmeta') { const m = METAMAGIC.find(([n]) => n === $('#hb-meta-pick').value); get(p).push(Object.assign(ROW.meta(), m ? { name: m[0], cost: m[1], desc: m[2] } : {})); }
+        else if (act === 'addmeta') { const m = METAMAGIC.find(([n]) => n === $('#hb-meta-pick').value), row = Object.assign(ROW.meta(), m ? { name: m[0], cost: m[1], desc: m[2] } : {}); if (!m) openRows.add(row.id); get(p).push(row); }
         else if (act === 'addpanel') C.panels.push(newPanel($('#hb-newtype').value));
         else if (act === 'del') {
             if (p === 'panels' && !confirm(`Remove the ${C.panels[i].title} panel and everything in it?`)) return;
