@@ -1,0 +1,68 @@
+<?php
+// SRD 5.1 spells for the homebrew sheet, from dnd5eapi.co (SRD 5.1, CC-BY-4.0).
+//   spells.php?list=1      -> [[index, name, level], ...]
+//   spells.php?i=fireball  -> one spell, trimmed to the fields the sheet uses
+// Cached on disk for 30 days (SRD text doesn't change); a failed refresh serves the last copy.
+const SRD_API = 'https://www.dnd5eapi.co/api/2014/spells';
+const SRD_TTL = 2592000;
+
+function srd_out($code, $data)
+{
+    http_response_code($code);
+    header('Content-Type: application/json; charset=utf-8');
+    header($code === 200 ? 'Cache-Control: public, max-age=86400' : 'Cache-Control: no-store');
+    echo is_string($data) ? $data : json_encode($data);
+    exit;
+}
+
+// GET $url, trim it, cache the trimmed JSON. Returns [json|null, status]
+function srd_get($url, $trim)
+{
+    $dir = sys_get_temp_dir() . '/craftyplayz-srd';
+    $file = $dir . '/' . md5($url) . '.json';
+    if (is_file($file) && time() - filemtime($file) < SRD_TTL) return [file_get_contents($file), 200];
+    // a recent 404 is remembered so made-up names can't hammer the API
+    if (is_file($file . '.miss') && time() - filemtime($file . '.miss') < 86400) return [null, 404];
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_TIMEOUT => 10,
+        CURLOPT_ENCODING => '',
+        CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; CraftyPlayz homebrew sheet; +https://craftyplayz.com/games/dnd/sheet/)',
+    ]);
+    $body = curl_exec($ch);
+    $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $json = $body ? json_decode($body, true) : null;
+    if ($status === 200 && is_array($json)) {
+        $out = json_encode($trim($json));
+        if (!is_dir($dir)) @mkdir($dir, 0755, true);
+        @file_put_contents($file, $out, LOCK_EX);
+        return [$out, 200];
+    }
+    if (is_file($file)) return [file_get_contents($file), 200];
+    if ($status === 404) { if (!is_dir($dir)) @mkdir($dir, 0755, true); @file_put_contents($file . '.miss', '404', LOCK_EX); }
+    return [null, $status === 404 ? 404 : 502];
+}
+
+if (isset($_GET['list'])) {
+    [$out, $code] = srd_get(SRD_API, function ($j) {
+        return array_map(function ($s) { return [(string)$s['index'], (string)$s['name'], (int)$s['level']]; }, (array)($j['results'] ?? []));
+    });
+    $out ? srd_out(200, $out) : srd_out(502, ['error' => "Couldn't reach the spell list. Try again in a minute."]);
+}
+
+$i = (string)($_GET['i'] ?? '');
+if (!preg_match('/^[a-z0-9-]{1,80}$/', $i)) srd_out(400, ['error' => 'Unknown spell.']);
+[$out, $code] = srd_get(SRD_API . '/' . $i, function ($j) {
+    $keep = ['index', 'name', 'level', 'desc', 'higher_level', 'range', 'components', 'material', 'ritual', 'duration', 'concentration', 'casting_time', 'attack_type'];
+    $s = array_intersect_key($j, array_flip($keep));
+    $s['school'] = $j['school']['name'] ?? '';
+    if (!empty($j['dc']['dc_type']['name'])) $s['save'] = $j['dc']['dc_type']['name'];
+    $s['damage'] = array_map(function ($d) {
+        return ['type' => $d['damage_type']['name'] ?? '', 'slot' => $d['damage_at_slot_level'] ?? null, 'char' => $d['damage_at_character_level'] ?? null];
+    }, isset($j['damage']['damage_type']) || isset($j['damage']['damage_at_slot_level']) || isset($j['damage']['damage_at_character_level']) ? [$j['damage']] : (array)($j['damage'] ?? []));
+    return $s;
+});
+$out ? srd_out(200, $out) : srd_out($code, ['error' => $code === 404 ? 'That spell isn\'t in the SRD.' : "Couldn't reach the spell list. Try again in a minute."]);
