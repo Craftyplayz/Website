@@ -42,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ['Subtle Spell', '1', 'Cast without verbal or somatic components.'],
         ['Twinned Spell', 'spell level', 'Target a second creature with a spell that targets only one.']];
     const TYPES = { profs: 'Proficiencies', attacks: 'Actions', spells: 'Spells', items: 'Inventory', list: 'List', trackers: 'Trackers', notes: 'Notes', text: 'Text', combat: 'Death saves and hit dice' };
+    const RESETS = [['', 'No reset'], ['short', 'Short rest'], ['long', 'Long rest']];
+    const TRACKER_KINDS = [['count', 'Counter'], ['pips', 'Boxes'], ['levels', 'Slots by level'], ['sorcery', 'Sorcery points'], ['ki', 'Ki points']];
     const PROF = [[0, 'Not proficient'], [0.5, 'Half proficient'], [1, 'Proficient'], [2, 'Expertise']];
     const HELP = 'Formulas can use ability keys for modifiers (DEX), _SCORE for scores (DEX_SCORE), PROF, LEVEL, class levels (FIGHTER_LEVEL), skill names without spaces (SleightofHand), numbers, + - * / ( ), min(), max(), floor(), ceil(), and [labels] like 2 [Shield]. Results round down.';
     const SRD_CREDIT = 'From the <a href="https://dnd.wizards.com/resources/systems-reference-document" target="_blank" rel="noopener">System Reference Document 5.1</a> by Wizards of the Coast, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC-BY-4.0</a>.';
@@ -52,8 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
         attack: () => ({ id: uid(), name: '', time: 'Action', range: '', props: [], mode: 'hit', hit: 'STR + PROF', save: 'DEX', dc: '8 + PROF + STR', dmg: [{ dice: '1d6 + STR', type: 'Slashing' }], desc: '' }),
         spell: () => ({ id: uid(), lvl: 0, name: '', school: '', time: 'Action', range: '', comp: '', dur: '', conc: false, ritual: false, prep: false, mode: 'none', save: 'DEX', dc: '', dmg: [], desc: '', higher: '', srd: '' }),
         item: () => ({ id: uid(), cat: 'Gear', eq: false, att: '', name: '', qty: 1, wt: 0, notes: '' }),
-        list: () => ({ id: uid(), name: '', src: '', text: '' }),
-        tracker: () => ({ id: uid(), name: '', cur: 1, max: 1, reset: 'long' }),
+        list: () => ({ id: uid(), name: '', src: '', text: '', uses: '', used: 0, reset: '' }),
+        // kind: count (left / max), pips (boxes ticked as used) or levels (a row of boxes per level, like spell slots)
+        tracker: () => ({ id: uid(), name: '', kind: 'count', cur: 1, max: 1, used: 0, reset: 'long', group: '', levels: [] }),
+        level: () => ({ label: '', max: '1', used: 0 }),
         meta: () => ({ id: uid(), name: '', cost: '1', desc: '' }),
         dmg: () => ({ dice: '', type: '' }),
         speed: () => ({ type: 'Fly', ft: 30, hover: false }),
@@ -75,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'combat') Object.assign(p, { ok: 0, bad: 0 });
         if (type === 'profs') p.sub = 'skills';
         if (type === 'notes') Object.assign(p, { notes: [], open: '', sort: 'edited' });
+        if (type === 'trackers') p.tabs = [];
         return p;
     }
 
@@ -159,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return r;
             });
             if (q.type === 'notes') q.notes = rows(q.notes, ROW.note);
+            if (q.type === 'trackers') { q.tabs = strs(q.tabs); for (const r of q.rows) r.levels = rows(r.levels, ROW.level); }
             if (q.type === 'spells') {
                 q.meta = rows(q.meta, ROW.meta);
                 q.sp = Object.assign({ cur: 0, max: 0 }, isObj(q.sp) ? q.sp : {});
@@ -208,6 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const sg = (n) => (n < 0 ? '−' + -n : '+' + n);
     const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
     function ev(f, V) { try { return hbCalc(f, V); } catch (e) { return { v: NaN, err: e.message }; } }
+    // a maximum may be a number or a formula (PROF, LEVEL, CHA, SORCERER_LEVEL); a broken one counts as 0
+    const maxOf = (f, V) => { const r = ev(f, V || vars()); return isNaN(r.v) ? 0 : Math.max(0, r.v); };
     const level = () => C.classes.reduce((s, c) => s + nm(c.level), 0);
     const hpMax = () => nm(C.hp.max) + nm(C.hp.mod);
     function profT(ab, p, extra, V) {
@@ -275,6 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'speed': return { v: C.speeds.map((s) => `${s.type} ${/^\s*[\d.]+\s*$/.test(s.ft) ? s.ft + ' ft' : s.ft}${s.hover ? ' (hover)' : ''}`).join(' · ') };
             case 'cond': return { v: [...C.conditions, nm(C.exhaustion) ? 'Exhaustion ' + C.exhaustion : ''].filter(Boolean).join(', ') };
             case 'ntitle': return { v: get(a).title || 'Untitled note' };
+            // the worked-out maximum next to a formula like LEVEL or PROF
+            case 'tmax': { const s = String(get(a) ?? '').trim(); return { v: !s || /^\d+$/.test(s) ? '' : '= ' + maxOf(s, V) }; }
             case 'nsnip': { const b = String(get(a).body || '').replace(/\s+/g, ' ').trim(); return { v: b.length > 90 ? b.slice(0, 90) + '…' : b }; }
             case 'nago': return { v: 'Edited ' + UI.ago(get(a).updated) };
             case 'def': return { v: [C.res && 'Resists ' + C.res, C.imm && 'Immune to ' + C.imm, C.vul && 'Vulnerable to ' + C.vul].filter(Boolean).join(' · ') };
@@ -539,19 +549,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="actions">${add(path + '.rows', 'item', 'Add item', ` data-cat="${esc(cur === 'all' ? 'Gear' : cur)}"`)}<span class="muted">Total weight <b data-c="wt:${pi}"></b></span></div>`;
         },
 
-        list: (p, path) => `<div class="hb-list">${p.rows.map((r, i) => `<div class="hb-entry">
-                <div class="hb-entry-h">${f(`${path}.rows.${i}.name`, 'Name', { cls: 'hb-strong', ph: 'Darkvision' })}${f(`${path}.rows.${i}.src`, 'Source (optional)', { cls: 'hb-src', ph: 'Elf' })}${del(path + '.rows', i, r.name || 'entry')}</div>
-                ${f(`${path}.rows.${i}.text`, 'Description', { area: true })}
-            </div>`).join('')}</div><div class="actions">${add(path + '.rows', 'list', 'Add entry')}</div>`,
+        // entries (passive abilities, features); each can have uses that come back on a rest
+        list: (p, path) => {
+            const V = vars();
+            return `<div class="hb-list">${p.rows.map((r, i) => { const rp = `${path}.rows.${i}`; return `<div class="hb-entry">
+                <div class="hb-entry-h">${f(rp + '.name', 'Name', { cls: 'hb-strong', ph: 'Darkvision' })}${f(rp + '.src', 'Source (optional)', { cls: 'hb-src', ph: 'Elf' })}${del(path + '.rows', i, r.name || 'entry')}</div>
+                <div class="hb-uses">
+                    <label>Uses ${f(rp + '.uses', 'Uses (number or formula)', { cls: 'hb-n hb-formula', ph: 'none' })}</label><small class="muted" data-c="tmax:${rp}.uses"></small>
+                    ${sel(rp + '.reset', 'Resets on', RESETS)}
+                    ${String(r.uses).trim() ? pips(rp + '.used', maxOf(r.uses, V)) : ''}
+                </div>
+                ${f(rp + '.text', 'Description', { area: true })}
+            </div>`; }).join('')}</div><div class="actions">${add(path + '.rows', 'list', 'Add entry')}</div>`;
+        },
 
-        trackers: (p, path) => `<div class="rows">${p.rows.map((r, i) => `<div class="rowi hb-track">
-                ${f(`${path}.rows.${i}.name`, 'Name', { cls: 'grow', ph: 'Rage' })}
-                <button type="button" class="btn small" data-act="track" data-p="${path}.rows.${i}" data-d="-1" aria-label="Use one">−</button>
-                ${f(`${path}.rows.${i}.cur`, 'Left', { num: true, cls: 'hb-n' })}<span>/</span>${f(`${path}.rows.${i}.max`, 'Maximum', { num: true, cls: 'hb-n' })}
-                <button type="button" class="btn small" data-act="track" data-p="${path}.rows.${i}" data-d="1" aria-label="Get one back">+</button>
-                ${sel(`${path}.rows.${i}.reset`, 'Resets on', [['', 'No reset'], ['short', 'Short rest'], ['long', 'Long rest']])}
-                ${del(path + '.rows', i, r.name || 'tracker')}
-            </div>`).join('')}</div><div class="actions">${add(path + '.rows', 'tracker', 'Add tracker')}</div>`,
+        // resources in your own sub-tabs: counters, boxes, or slots by level
+        trackers: (p, path, pi) => {
+            const V = vars();
+            const tabs = uniq([...p.tabs, ...p.rows.map((r) => r.group).filter(Boolean)]);
+            const opts = [['all', 'All', p.rows.length], ...tabs.map((t) => ['t:' + t, t, p.rows.filter((r) => r.group === t).length])];
+            const cur = pickSub(p, opts), tab = cur.startsWith('t:') ? cur.slice(2) : '';
+            const row = (r, rp, i) => {
+                const head = `${f(rp + '.name', 'Name', { cls: 'hb-strong', ph: r.kind === 'levels' ? 'Spell slots' : 'Rage' })}`;
+                const main = r.kind === 'count' ? `<span class="hb-count">
+                        <button type="button" class="btn small" data-act="track" data-p="${rp}" data-d="-1" aria-label="Use one">−</button>
+                        ${f(rp + '.cur', 'Left', { num: true, cls: 'hb-n' })}<span>/</span>${f(rp + '.max', 'Maximum (number or formula)', { cls: 'hb-n hb-formula' })}
+                        <button type="button" class="btn small" data-act="track" data-p="${rp}" data-d="1" aria-label="Get one back">+</button><small class="muted" data-c="tmax:${rp}.max"></small></span>`
+                    : r.kind === 'pips' ? `<span class="hb-count">${pips(rp + '.used', maxOf(r.max, V))}<label class="hb-maxl">Max ${f(rp + '.max', 'Maximum (number or formula)', { cls: 'hb-n hb-formula' })}</label><small class="muted" data-c="tmax:${rp}.max"></small></span>` : '';
+                const levels = r.kind === 'levels' ? `<div class="hb-levels">${r.levels.map((l, j) => `<div class="hb-level">
+                        ${f(`${rp}.levels.${j}.label`, 'Level name', { cls: 'hb-lvlname', ph: '1st' })}
+                        <label class="hb-maxl">Max ${f(`${rp}.levels.${j}.max`, 'Maximum (number or formula)', { cls: 'hb-n hb-formula' })}</label>
+                        ${pips(`${rp}.levels.${j}.used`, maxOf(l.max, V))}${del(rp + '.levels', j, (l.label || 'level') + ' level')}
+                    </div>`).join('')}<div class="actions">${add(rp + '.levels', 'level', 'Add level')}</div></div>` : '';
+                return `<div class="hb-entry hb-res">
+                    <div class="hb-entry-h">${head}${main}${sel(rp + '.reset', 'Resets on', RESETS)}
+                        ${tabs.length ? sel(rp + '.group', 'Tab', [['', 'No tab'], ...tabs.map((t) => [t, t])]) : ''}${del(path + '.rows', i, r.name || 'resource')}</div>
+                    ${levels}
+                </div>`;
+            };
+            const list = p.rows.map((r, i) => [r, i]).filter(([r]) => cur === 'all' || r.group === tab).map(([r, i]) => row(r, `${path}.rows.${i}`, i)).join('');
+            return `<div class="hb-subrow">${subtabs(path + '.sub', opts, cur)}<button type="button" class="btn small" data-act="tadd" data-p="${path}">New tab</button></div>
+                ${tab ? `<div class="hb-tabtools"><label class="hb-grename">Rename this tab <input class="field hb-tname" data-p="${path}" data-g="${esc(tab)}" value="${esc(tab)}" autocomplete="off"></label><button type="button" class="btn small" data-act="tdel" data-p="${path}" data-g="${esc(tab)}">Delete tab</button></div>` : ''}
+                <div class="hb-list">${list || '<p class="muted">No resources here yet.</p>'}</div>
+                <div class="actions"><select class="field hb-auto" id="hb-tkind-${pi}" aria-label="Kind of resource">${TRACKER_KINDS.map(([k, t]) => `<option value="${k}">${t}</option>`).join('')}</select><button type="button" class="btn small" data-act="tnew" data-p="${path}" data-i="${pi}">Add resource</button></div>`;
+        },
 
         text: (p, path) => f(path + '.text', p.title, { area: true, cls: 'hb-text' }),
 
@@ -698,7 +739,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function rest(kind) {
         for (const p of C.panels) {
-            if (p.type === 'trackers') for (const r of p.rows) if (r.reset === 'short' || (kind === 'long' && r.reset === 'long')) r.cur = r.max;
+            const due = (r) => r.reset === 'short' || (kind === 'long' && r.reset === 'long');
+            if (p.type === 'trackers') for (const r of p.rows.filter(due)) {
+                if (r.kind === 'levels') for (const l of r.levels) l.used = 0;
+                else if (r.kind === 'pips') r.used = 0;
+                else r.cur = maxOf(r.max);
+            }
+            if (p.type === 'list') for (const r of p.rows.filter(due)) r.used = 0;
             if (kind !== 'long') continue;
             if (p.type === 'spells') { for (const s of p.slots) s.used = 0; p.sp.cur = p.sp.max; }
             if (p.type === 'combat') { p.ok = 0; p.bad = 0; }
@@ -939,7 +986,15 @@ document.addEventListener('DOMContentLoaded', () => {
             P.sub = 'g:' + to;
             saveNow(); return draw();
         }
-        if (/\.notes\.\d+\.group$/.test(k)) { saveNow(); return draw(); }
+        if (el.classList.contains('hb-tname')) {
+            const P = get(el.dataset.p), from = el.dataset.g, to = el.value.trim();
+            if (!to || to === from) return;
+            P.tabs = uniq(P.tabs.map((t) => (t === from ? to : t)).concat(to));
+            for (const r of P.rows) if (r.group === from) r.group = to;
+            P.sub = 't:' + to;
+            saveNow(); return draw();
+        }
+        if (/\.notes\.\d+\.group$/.test(k) || /^panels\.\d+\.rows\.\d+\.(uses|max|group)$/.test(k) || /\.levels\.\d+\.max$/.test(k)) { saveNow(); return draw(); }
         if (/^classes\.\d+\.name$/.test(k)) { const d = HIT_DIE[el.value.trim().toLowerCase()]; if (d) set(k.replace(/name$/, 'die'), d); }
         if (/^panels\.\d+\.rows\.\d+\.name$/.test(k) && panelOf(k).type === 'spells' && el.value.trim()) srdFill(k.replace(/\.name$/, ''));
         if (/\.(time|lvl)$/.test(k) || /^classes\.\d+\.(name|level|die)$/.test(k) || /^(lists\.|condList)/.test(k) || /^speeds\./.test(k) && /\.type$/.test(k)) return dlg.open ? null : draw();
@@ -997,6 +1052,37 @@ document.addEventListener('DOMContentLoaded', () => {
             const t = $(`[data-k="${p}.notes.${P.notes.length - 1}.${act === 'nnew' ? 'title' : 'body'}"]`);
             return t && t.focus();
         }
+        if (act === 'tadd') {
+            const P = get(p), taken = uniq([...P.tabs, ...P.rows.map((r) => r.group)]);
+            let name = 'New tab', n = 2;
+            while (taken.includes(name)) name = 'New tab ' + n++;
+            P.tabs.push(name); P.sub = 't:' + name;
+            saveNow(); draw();
+            const t = $(`.hb-tname[data-p="${p}"]`);
+            if (t) { t.focus(); t.select(); }
+            return;
+        }
+        if (act === 'tdel') {
+            const P = get(p), g = b.dataset.g, n = P.rows.filter((r) => r.group === g).length;
+            if (n && !confirm(`Delete the ${g} tab? Its ${n} resource${n === 1 ? '' : 's'} stay under All.`)) return;
+            for (const r of P.rows) if (r.group === g) r.group = '';
+            P.tabs = P.tabs.filter((t) => t !== g); P.sub = 'all';
+            saveNow(); return draw();
+        }
+        if (act === 'tnew') {
+            const P = get(p), kind = $('#hb-tkind-' + i).value, tab = P.sub.startsWith('t:') ? P.sub.slice(2) : '';
+            const cls = (name) => C.classes.some((c) => kk(c.name) === name) ? name.toUpperCase() + '_LEVEL' : 'LEVEL';
+            const r = Object.assign(ROW.tracker(), { group: tab }, {
+                count: { kind: 'count' },
+                pips: { kind: 'pips', max: '3' },
+                levels: { kind: 'levels', name: 'Spell slots', levels: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'].map((label) => ({ label, max: '0', used: 0 })) },
+                sorcery: { kind: 'count', name: 'Sorcery points', max: cls('sorcerer') },
+                ki: { kind: 'count', name: 'Ki points', max: cls('monk'), reset: 'short' },
+            }[kind] || {});
+            r.cur = maxOf(r.max);
+            P.rows.push(r);
+            saveNow(); return draw();
+        }
         if (act === 'nopen') { get(p).open = b.dataset.id; save(); return draw(); }
         if (act === 'ngo') {
             const P = C.panels[i];
@@ -1022,13 +1108,14 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (act === 'chip') { const list = get(p), n = b.dataset.n; set(p, list.includes(n) ? list.filter((x) => x !== n) : [...list, n]); }
         else if (act === 'prof' || act === 'tprof') { const s = act === 'prof' ? C.skills[i] : C.profs.tools[i], lv = PROF.findIndex(([q]) => q === s.p); s.p = PROF[(lv + 1) % PROF.length][0]; }
         else if (act === 'pip') set(p, get(p) === i + 1 ? i : i + 1);
-        else if (act === 'track') { const r = get(p); r.cur = Math.max(0, Math.min(nm(r.max), nm(r.cur) + +b.dataset.d)); }
+        else if (act === 'track') { const r = get(p); r.cur = Math.max(0, Math.min(maxOf(r.max), nm(r.cur) + +b.dataset.d)); }
         else if (act === 'add') {
             const row = ROW[b.dataset.t]();
             if (b.dataset.time) row.time = b.dataset.time;
             if (b.dataset.cat) row.cat = b.dataset.cat;
             if (b.dataset.lvl) row.lvl = +b.dataset.lvl;
             if (b.dataset.prep) row.prep = true;
+            if (b.dataset.t === 'level') row.label = ordinal(get(p).length + 1);
             if (row.id && 'desc' in row) openRows.add(row.id);
             get(p).push(row);
         }
