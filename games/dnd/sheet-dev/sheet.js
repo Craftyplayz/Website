@@ -96,9 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
             profs: { armour: [], weapons: [], langs: ['Common'], tools: [], notes: '' },
             lists: { ...LISTS },
             panels: [newPanel('profs'), newPanel('attacks'), newPanel('spells'), newPanel('items'), newPanel('list', 'Passive abilities'),
-                newPanel('trackers', 'Resources'), newPanel('combat'),
+                newPanel('trackers', 'Resources'), newPanel('trackers', 'Homebrew'), newPanel('combat'),
                 Object.assign(newPanel('notes'), { notes: ['Personality', 'Backstory'].map((title) => Object.assign(ROW.note(), { title, group: 'Character' })) })],
-            view: { tab: '', all: false },
+            view: { tab: '', all: false }, hbPanel: true,
         };
     }
 
@@ -121,6 +121,12 @@ document.addEventListener('DOMContentLoaded', () => {
             c.profs = Object.assign({ notes: old ? old.text || '' : '' }, isObj(c.profs) ? c.profs : {});
             c.panels = panels.filter((p) => p.type !== 'skills' && p !== old);
             c.panels.splice(at, 0, newPanel('profs'));
+        }
+        // a Homebrew resources panel, added once after Resources (a removed or renamed one stays that way)
+        if (Array.isArray(c.panels) && !c.hbPanel) {
+            const at = c.panels.findIndex((p) => isObj(p) && p.type === 'trackers');
+            c.panels.splice(at < 0 ? c.panels.length : at + 1, 0, newPanel('trackers', 'Homebrew'));
+            c.hbPanel = true;
         }
         // Personality, Backstory and Notes text panels become notes in one Notes panel
         if (Array.isArray(c.panels) && !c.panels.some((p) => isObj(p) && p.type === 'notes')) {
