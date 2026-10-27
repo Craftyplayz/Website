@@ -1,0 +1,149 @@
+/* Homebrew character sheet (/games/dnd/sheet/). Built on components.css; colours are global tokens only. */
+.hb [hidden] { display: none !important; }
+.hb .field { min-width: 0; width: 100%; }
+.hb .hb-hint { margin: 8px 0 0; font-size: 13px; }
+.hb .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.hb h3 { margin: 20px 0 8px; font-size: 15px; }
+.hb-lbl { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.hb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 8px; }
+.hb-grid label, .hb-id label, .hb-coins label, .hb-slotmax label { display: grid; gap: 4px; min-width: 0; color: var(--muted); font-size: 13px; }
+
+/* toolbar */
+.hb-bar .hb-pick { flex: 0 1 260px; }
+.hb-bar .hb-gap { flex: 1; }
+
+/* the always-visible top: one column on phones, art + saves + senses on the right from 960 px */
+.hb-sheet {
+    display: grid; gap: 16px; grid-template-columns: clamp(88px, 26vw, 160px) minmax(0, 1fr);
+    grid-template-areas: "art id" "abil abil" "combat combat" "saves saves" "senses senses" "panels panels";
+}
+.hb-top-id { grid-area: id; }
+.hb-top-art { grid-area: art; }
+.hb-top-abil { grid-area: abil; }
+.hb-top-combat { grid-area: combat; display: grid; gap: 10px; align-content: start; }
+.hb-top-saves { grid-area: saves; }
+.hb-top-senses { grid-area: senses; }
+.hb-top-panels { grid-area: panels; min-width: 0; }
+@media (min-width: 960px) {
+    .hb-sheet {
+        grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto auto auto auto auto 1fr;
+        grid-template-areas: "id art" "abil art" "combat art" "panels saves" "panels senses" "panels .";
+    }
+}
+
+.hb-id { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr)); gap: 8px; }
+.hb-id .hb-name { grid-column: 1 / -1; }
+.hb-id .hb-name .field { font-size: 20px; font-weight: 700; }
+
+.hb-art {
+    display: grid; place-items: center; width: 100%; aspect-ratio: 1; padding: 0; overflow: hidden;
+    background: var(--card); border: 1px dashed var(--line-strong); border-radius: var(--radius-lg);
+    color: var(--muted); font: inherit; font-size: 14px; cursor: pointer; transition: border-color var(--fast);
+}
+.hb-art:hover { border-color: var(--accent); }
+.hb-art img { width: 100%; height: 100%; object-fit: cover; }
+
+/* boxes: abilities, combat numbers */
+.hb-abils { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 8px; }
+.hb-abil, .hb-box {
+    position: relative; display: grid; justify-items: center; align-content: start; gap: 6px; min-width: 0; padding: 10px;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); text-align: center;
+}
+.hb .hb-panel .hb-box { background: var(--card2); }
+.hb .hb-score { width: 64px; padding: 4px 6px; text-align: center; }
+.hb-roll {
+    min-width: 44px; padding: 2px 8px; background: var(--card2); border: 1px solid var(--line); border-radius: var(--radius);
+    color: var(--text); font: inherit; font-size: 14px; font-variant-numeric: tabular-nums; cursor: pointer; transition: border-color var(--fast);
+}
+.hb-roll:hover { border-color: var(--accent); }
+.hb-roll:active { transform: translateY(1px); }
+.hb-big { font-size: clamp(22px, 3vw, 28px); font-weight: 700; line-height: 1.2; }
+.hb .hb-bad { color: var(--danger-line); border-color: var(--danger-line); }
+.hb-edit {
+    position: absolute; right: 4px; bottom: 4px; display: grid; place-items: center; width: 28px; height: 28px; padding: 0;
+    background: none; border: 0; border-radius: var(--radius); color: var(--muted); cursor: pointer;
+}
+.hb-edit:hover { color: var(--text); background: var(--card2); }
+
+.hb-combat { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 8px; }
+.hb-hp { grid-column: span 2; }
+.hb-hpv { display: flex; align-items: center; gap: 6px; font-size: 20px; }
+.hb .hb-hpv .field { width: 72px; padding: 4px 6px; font-size: 20px; font-weight: 700; text-align: center; }
+.hb-hp .progress { width: 100%; }
+.hb-dmg { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.hb .hb-dmg .field { width: 64px; padding: 4px 6px; text-align: center; }
+.hb-insp { cursor: pointer; }
+.hb-insp input { width: 28px; height: 28px; margin: 0; accent-color: var(--accent); }
+
+.hb-more { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 14px; }
+.hb-condsum { color: var(--highlight); }
+.hb-more-body .badges { margin-top: 0; }
+.hb button.badge { color: var(--text); font: inherit; font-size: 12px; cursor: pointer; }
+
+/* saves and senses */
+.hb-savegrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; }
+.hb-save { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: var(--card2); border-radius: var(--radius); font-size: 14px; font-weight: 600; }
+.hb-save span { flex: 1; }
+.hb-dot { display: flex; cursor: pointer; }
+.hb-dot input, .hb-prof {
+    flex: none; width: 14px; height: 14px; margin: 0; padding: 0; appearance: none; background: none;
+    border: 1.5px solid var(--line-strong); border-radius: 50%; cursor: pointer;
+}
+.hb-dot input:checked, .hb-prof.l2 { background: var(--accent); border-color: var(--accent); }
+.hb-prof.l1 { background: linear-gradient(90deg, var(--accent) 50%, transparent 50%); border-color: var(--accent); }
+.hb-prof.l3 { background: var(--accent); border-color: var(--highlight); box-shadow: 0 0 0 2px var(--card2), 0 0 0 3.5px var(--highlight); }
+.hb-senses .rowi b { font-size: 17px; }
+.hb-other { display: grid; gap: 4px; margin-top: 12px; }
+.hb-other textarea.field { min-height: 64px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+/* panels */
+.hb-tabs { margin-bottom: 12px; }
+.hb-two { grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); }
+.hb-two .rowi { padding: 4px 4px 4px 10px; }
+.hb-table td { padding: 6px 4px; vertical-align: middle; }
+.hb-table th { padding: 6px 4px; }
+.hb-table .field { min-width: 110px; padding: 6px 8px; }
+.hb .hb-table .hb-n { width: 64px; min-width: 64px; }
+.hb .hb-table .hb-formula { min-width: 120px; }
+.hb-c { text-align: center; }
+.hb-c input { width: 18px; height: 18px; accent-color: var(--accent); }
+.hb-nowrap { white-space: nowrap; }
+.hb-fx { display: flex; align-items: center; gap: 6px; }
+.hb-formula { font-family: var(--mono); font-size: 13px; }
+.hb-x {
+    width: 32px; height: 32px; padding: 0; background: none; border: 1px solid transparent; border-radius: var(--radius);
+    color: var(--muted); font: inherit; font-size: 18px; line-height: 1; cursor: pointer;
+}
+.hb-x:hover:not(:disabled) { color: var(--text); border-color: var(--line-strong); }
+.hb-x:disabled { opacity: .3; cursor: default; }
+
+.hb-pips { display: inline-flex; flex-wrap: wrap; gap: 4px; vertical-align: middle; }
+.hb-pips button { width: 18px; height: 18px; padding: 0; background: none; border: 1.5px solid var(--accent); border-radius: 4px; cursor: pointer; }
+.hb-pips button.used { background: var(--line-strong); border-color: var(--line-strong); }
+.hb-panel .kv .hb-pips button.used { background: var(--accent); border-color: var(--accent); }
+.hb-panel .kv .hb-bad-pips .hb-pips button { border-color: var(--danger-line); }
+.hb-panel .kv .hb-bad-pips .hb-pips button.used { background: var(--danger-line); }
+.hb-slots { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 12px 0 0; }
+.hb-slot { display: inline-flex; align-items: center; gap: 6px; }
+.hb-slot small { color: var(--muted); font-size: 13px; }
+.hb-details { margin: 12px 0; font-size: 14px; }
+.hb-details summary { color: var(--muted); cursor: pointer; }
+.hb-slotmax, .hb-coins { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; margin: 10px 0; }
+
+.hb-list { display: grid; gap: 10px; }
+.hb-entry { display: grid; gap: 6px; padding: 10px; background: var(--card2); border-radius: var(--radius); }
+.hb-entry-h { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.hb .hb-entry-h .hb-strong { flex: 1 1 180px; width: auto; font-weight: 600; }
+.hb .hb-entry-h .hb-src { flex: 0 1 160px; width: auto; }
+.hb-entry textarea.field, .hb-text { min-height: 64px; field-sizing: content; }
+.hb .hb-text { min-height: 160px; }
+.hb-track { flex-wrap: wrap; }
+.hb .hb-track .grow { flex: 1 1 140px; width: auto; }
+.hb .hb-track .hb-n { width: 64px; padding: 4px 6px; text-align: center; }
+.hb .hb-track select.field { width: auto; }
+
+/* dialogs */
+dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); }
+.hb-dlg h3:first-of-type { margin-top: 12px; }
+.hb-dlg .hb-err { color: var(--danger-line); }
+.hb-addpanel select.field { width: auto; }
