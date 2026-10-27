@@ -199,12 +199,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!db.cur) { const c = blank(); db.chars[c.id] = c; db.cur = c.id; }
     let C = db.chars[db.cur];
     let warned = false;
-    function saveNow() {
+    function store() {
         try { localStorage.setItem(KEY, JSON.stringify(db)); warned = false; }
         catch (e) { if (!warned) toast("Couldn't save: this browser's storage is full or blocked. Export the character so you don't lose it.", 'err'); warned = true; }
     }
+    // every edit is also backed up on the server as a new version (backup.php), a few seconds after typing stops
+    const dirty = new Set();
+    let backupTimer = 0;
+    function flushBackups() {
+        clearTimeout(backupTimer);
+        for (const id of [...dirty]) {
+            const c = db.chars[id];
+            dirty.delete(id);
+            if (!c) continue;
+            const body = JSON.stringify(c);
+            // keepalive lets a backup finish while the page closes (browsers allow it for bodies up to 64 KB)
+            fetch('backup.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: body.length < 60000 })
+                .then((r) => { if (!r.ok && r.status >= 500) dirty.add(id); }).catch(() => dirty.add(id));
+        }
+    }
+    function saveNow() {
+        store();
+        if (C) { dirty.add(C.id); clearTimeout(backupTimer); backupTimer = setTimeout(flushBackups, 4000); }
+    }
     const save = debounce(saveNow, 250);
-    addEventListener('pagehide', saveNow);
+    addEventListener('pagehide', () => { store(); flushBackups(); });
 
     const get = (path) => path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), C);
     function set(path, val) {
