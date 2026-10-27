@@ -20,3 +20,6 @@ _dev/frame-tool/output/
 # progress ticked in /private/minecraft/ - written on the server, never deployed over
 minecraft/projects/farms/done.json
 minecraft/projects/collection/done.json
+
+# homebrew sheet server backups - written on the server, never committed (they hold visitor IPs)
+private/dnd/backups/
