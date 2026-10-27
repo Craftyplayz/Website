@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tool: () => ({ name: '', ab: 'DEX', p: 1 }),
         ability: () => ({ key: 'NEW', name: 'New ability', score: 10, save: false, sb: '' }),
         skill: () => ({ name: 'New skill', ab: 'STR', p: 0, b: '' }),
-        passive: () => ({ name: 'Passive', f: '10' }),
+        passive: () => ({ name: 'Passive', f: '10', unit: '' }),
         note: () => ({ id: uid(), title: '', group: '', body: '', pinned: false, created: Date.now(), updated: Date.now() }),
     };
     const PANEL_ROW = { attacks: ROW.attack, spells: ROW.spell, items: ROW.item, list: ROW.list, trackers: ROW.tracker };
@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>${esc(a.key)}</span>${val('save:' + i)}
         </div>`).join('')}</div></section>`;
         const senses = `<section class="card hb-senses"><h2>Senses</h2>
-            <div class="rows">${C.passives.map((p, i) => `<div class="rowi"><span class="grow">${esc(p.name)}</span>${fx(`passives.${i}.f`, p.name, false)}</div>`).join('')}</div>
+            <div class="rows">${C.passives.map((p, i) => `<div class="rowi"><span class="grow">${esc(p.name)}</span>${fx(`passives.${i}.f`, p.name, false)}${p.unit ? `<small class="muted">${esc(p.unit)}</small>` : ''}</div>`).join('')}</div>
             <label class="hb-lbl hb-other">Other senses ${f('senses', 'Other senses', { area: true, ph: '120 ft magical darkvision' })}</label>
         </section>`;
         return `<div class="hb-top-id">${id}</div><div class="hb-top-art">${art}</div><div class="hb-top-abil">${abils}</div>
@@ -872,6 +872,25 @@ document.addEventListener('DOMContentLoaded', () => {
         finally { btn.disabled = false; btn.textContent = 'Import character'; }
     }
 
+    // ---- sense pick list: passive skills from this sheet, senses from D&D Beyond's rule data ----
+    let senseNames = ['Blindsight', 'Darkvision', 'Tremorsense', 'Truesight'], senseLoaded = false;
+    function senseOptions() {
+        const have = new Set(C.passives.map((p) => p.name));
+        const opt = (v, t) => `<option value="${esc(v)}"${have.has(t) ? ' disabled' : ''}>${esc(t)}</option>`;
+        return '<option value="">Your own</option>'
+            + `<optgroup label="Passive skills">${C.skills.map((k) => opt('p:' + k.name, 'Passive ' + k.name)).join('')}</optgroup>`
+            + `<optgroup label="Senses">${senseNames.map((n) => opt('s:' + n, n)).join('')}</optgroup>`;
+    }
+    function loadSenses() {
+        if (senseLoaded) return;
+        senseLoaded = true;
+        fetch('ddb.php?rules=1').then((r) => (r.ok ? r.json() : Promise.reject())).then((j) => {
+            if (Array.isArray(j.senses) && j.senses.length) senseNames = j.senses;
+            const pick = $('#hb-sense-pick');
+            if (pick) pick.innerHTML = senseOptions();
+        }).catch(() => { senseLoaded = false; });
+    }
+
     // ---- customise ----
     function customDlg() {
         const mini = (head, rows, addBtn) => table(head, rows) + `<div class="actions">${addBtn}</div>`;
@@ -891,7 +910,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <h3>Skills</h3>
             ${mini(['Skill', 'Ability', 'Extra bonus', ''], C.skills.map((s, i) => `<tr><td>${f(`skills.${i}.name`, 'Skill')}</td><td>${abSel(`skills.${i}.ab`, 'Ability')}</td><td>${f(`skills.${i}.b`, 'Extra bonus formula', { cls: 'hb-formula', ph: '0' })}</td><td>${del('skills', i, s.name)}</td></tr>`).join(''), add('skills', 'skill', 'Add skill'))}
             <h3>Senses</h3>
-            ${mini(['Name', 'Formula', 'Result', ''], C.passives.map((p, i) => `<tr><td>${f(`passives.${i}.name`, 'Name')}</td><td>${f(`passives.${i}.f`, 'Formula', { cls: 'hb-formula' })}</td><td><b data-c="fx:passives.${i}.f"></b></td><td>${del('passives', i, p.name)}</td></tr>`).join(''), add('passives', 'passive', 'Add sense'))}
+            ${table(['Name', 'Formula', 'Result', 'Unit', ''], C.passives.map((p, i) => `<tr><td>${f(`passives.${i}.name`, 'Name')}</td><td>${f(`passives.${i}.f`, 'Formula', { cls: 'hb-formula' })}</td><td><b data-c="fx:passives.${i}.f"></b></td><td>${f(`passives.${i}.unit`, 'Unit', { cls: 'hb-n', ph: 'ft' })}</td><td>${del('passives', i, p.name)}</td></tr>`).join(''))}
+            <div class="actions"><select class="field hb-auto" id="hb-sense-pick" aria-label="Sense to add">${senseOptions()}</select><button type="button" class="btn small" data-act="addsense">Add sense</button></div>
             <h3>Lists</h3>
             <p class="muted hb-hint">One entry per line. These fill the suggestions and tabs.</p>
             <div class="hb-grid hb-lists"><label>Conditions ${f('condList', 'Conditions', { area: true })}</label>${Object.entries(LIST_NAMES).map(([k, t]) => `<label>${t} ${f('lists.' + k, t, { area: true })}</label>`).join('')}</div>
@@ -1030,7 +1050,7 @@ document.addEventListener('DOMContentLoaded', () => {
             set(dlgMode.p, buildParts(dlgMode.parts));
             dlgBody.innerHTML = formulaDlg(dlgMode); saveNow(); return refresh();
         }
-        if (act === 'custom') return showDlg('custom');
+        if (act === 'custom') { loadSenses(); return showDlg('custom'); }
         if (act === 'ddb') { showDlg({ kind: 'ddb' }); return $('#hb-ddb-id').focus(); }
         if (act === 'close') return dlg.close();
         if (act === 'rest') return showDlg({ kind: 'rest', r: b.dataset.r });
@@ -1118,6 +1138,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (b.dataset.t === 'level') row.label = ordinal(get(p).length + 1);
             if (row.id && 'desc' in row) openRows.add(row.id);
             get(p).push(row);
+        }
+        else if (act === 'addsense') {
+            const v = $('#hb-sense-pick').value, name = v.slice(2);
+            C.passives.push(Object.assign(ROW.passive(), v.startsWith('p:') ? { name: 'Passive ' + name, f: '10 + ' + name.replace(/\W/g, '') } : v.startsWith('s:') ? { name, f: '60', unit: 'ft' } : {}));
         }
         else if (act === 'addmeta') { const m = METAMAGIC.find(([n]) => n === $('#hb-meta-pick').value); get(p).push(Object.assign(ROW.meta(), m ? { name: m[0], cost: m[1], desc: m[2] } : {})); }
         else if (act === 'addpanel') C.panels.push(newPanel($('#hb-newtype').value));
