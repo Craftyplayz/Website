@@ -13,6 +13,7 @@ $sections = [
     'gifs' => 'Meme GIF maker',
     'minecraft/farms' => 'Tick off farms built',
     'minecraft/collection' => 'Tick off collected items',
+    'dnd' => 'D&D sheet backups',
 ];
 ?>
 <!DOCTYPE html>
