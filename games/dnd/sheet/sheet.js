@@ -154,20 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (bar) bar.style.width = Math.max(0, Math.min(100, (C.hp.cur / C.hp.max) * 100 || 0)) + '%';
     }
 
-    // ---- dice ----
-    function rollD20(label, bonus, e) {
-        if (isNaN(bonus)) return toast(label + ' has a formula error. Fix it in Customise.', 'err');
-        const a = 1 + Math.floor(Math.random() * 20), b = 1 + Math.floor(Math.random() * 20);
-        const mode = e.shiftKey ? 'adv' : e.ctrlKey || e.metaKey ? 'dis' : '';
-        const d = mode === 'adv' ? Math.max(a, b) : mode === 'dis' ? Math.min(a, b) : a;
-        const how = mode ? `d20 ${a}, ${b} ${mode === 'adv' ? 'advantage' : 'disadvantage'}` : 'd20 ' + d;
-        toast(`${label}: ${d + bonus}  (${how} ${sg(bonus)})${d === 20 ? ' · natural 20' : d === 1 ? ' · natural 1' : ''}`, d === 20 ? 'ok' : 'note');
-    }
-    function rollFormula(label, f) {
-        try { const r = hbCalc(f, vars(), true); toast(`${label}: ${r.v}  (${r.rolls.join(' ') || 'no dice'})`, 'note'); }
-        catch (e) { toast(label + ': ' + e.message, 'err'); }
-    }
-
     // ---- markup helpers ----
     const PENCIL = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zm17.7-10.2a1 1 0 0 0 0-1.42l-2.33-2.33a1 1 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
     function f(k, label, o = {}) {
@@ -178,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<input class="field${o.cls ? ' ' + o.cls : ''}"${num} data-k="${k}" value="${esc(v ?? '')}" aria-label="${esc(label)}"${o.ph ? ` placeholder="${esc(o.ph)}"` : ''} autocomplete="off">`;
     }
     const sel = (k, label, opts) => `<select class="field" data-k="${k}" aria-label="${esc(label)}">${opts.map(([v, t]) => `<option value="${esc(v)}"${String(get(k)) === String(v) ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
-    const roll = (key, label, cls = '') => `<button type="button" class="hb-roll${cls}" data-act="roll" data-roll="${key}" data-c="${key}" aria-label="Roll ${esc(label)}"></button>`;
+    const val = (key, cls = '') => `<b class="hb-val${cls}" data-c="${key}"></b>`;
     const del = (p, i, what) => `<button type="button" class="hb-x" data-act="del" data-p="${p}" data-i="${i}" aria-label="Remove ${esc(what)}" title="Remove">&times;</button>`;
     const add = (p, t, text) => `<button type="button" class="btn small" data-act="add" data-p="${p}" data-t="${t}">${text}</button>`;
     const pips = (path, max) => `<span class="hb-pips">${Array.from({ length: Math.max(0, Math.min(+max || 0, 30)) }, (_, i) =>
@@ -198,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const art = `<button type="button" class="hb-art" data-act="art" aria-label="${C.art ? 'Change' : 'Add'} character art">${C.art ? `<img src="${esc(C.art)}" alt="" width="300" height="300">` : '<span>Add art</span>'}</button>`;
         const abils = `<div class="hb-abils">${C.abilities.map((a, i) => `<div class="hb-abil">
             <span class="hb-lbl" title="${esc(a.name)}">${esc(a.key)}</span>
-            ${roll('mod:' + i, a.name + ' check', ' hb-big')}
+            ${val('mod:' + i, ' hb-big')}
             ${f(`abilities.${i}.score`, a.name + ' score', { num: true, cls: 'hb-score' })}
         </div>`).join('')}</div>`;
         const edit = (path, label) => `<button type="button" class="hb-edit" data-act="formula" data-p="${path}" data-t="${esc(label)}" aria-label="Edit the ${esc(label.toLowerCase())} formula" title="Edit formula">${PENCIL}</button>`;
@@ -211,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="hb-box"><span class="hb-lbl">Temp HP</span>${f('hp.temp', 'Temporary hit points', { num: true, cls: 'hb-score' })}</div>
             <div class="hb-box"><span class="hb-lbl">Armour class</span><button type="button" class="hb-roll hb-big" data-act="formula" data-p="ac" data-t="Armour class" data-c="ac" aria-label="Armour class, edit the formula"></button></div>
-            <div class="hb-box"><span class="hb-lbl">Initiative</span>${roll('init', 'initiative', ' hb-big')}${edit('init', 'Initiative')}</div>
+            <div class="hb-box"><span class="hb-lbl">Initiative</span>${val('init', ' hb-big')}${edit('init', 'Initiative')}</div>
             <div class="hb-box"><span class="hb-lbl">Proficiency</span><button type="button" class="hb-roll hb-big" data-act="formula" data-p="prof" data-t="Proficiency bonus" data-c="prof" aria-label="Proficiency bonus, edit the formula"></button></div>
             <label class="hb-box hb-insp"><span class="hb-lbl">Heroic inspiration</span>${f('insp', 'Heroic inspiration', { check: true })}</label>
         </div>`;
@@ -232,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`;
         const saves = `<section class="card hb-saves"><h2>Saving throws</h2><div class="hb-savegrid">${C.abilities.map((a, i) => `<div class="hb-save">
             <label class="hb-dot">${f(`abilities.${i}.save`, 'Proficient in ' + a.name + ' saves', { check: true })}</label>
-            <span>${esc(a.key)}</span>${roll('save:' + i, a.name + ' save')}
+            <span>${esc(a.key)}</span>${val('save:' + i)}
         </div>`).join('')}</div></section>`;
         const senses = `<section class="card hb-senses"><h2>Senses</h2>
             <div class="rows">${C.passives.map((p, i) => `<div class="rowi"><span class="grow">${esc(p.name)}</span><b data-c="pas:${i}"></b></div>`).join('')}</div>
@@ -247,13 +233,13 @@ document.addEventListener('DOMContentLoaded', () => {
         skills: () => `<div class="rows hb-two">${C.skills.map((s, i) => {
             const lv = PROF.findIndex(([p]) => p === s.p);
             return `<div class="rowi"><button type="button" class="hb-prof l${Math.max(0, lv)}" data-act="prof" data-i="${i}" aria-label="${esc(s.name)}: ${PROF[Math.max(0, lv)][1]}" title="${PROF[Math.max(0, lv)][1]}"></button>
-                <span class="grow">${esc(s.name)}</span><small>${esc(s.ab)}</small>${roll('skill:' + i, s.name)}</div>`;
+                <span class="grow">${esc(s.name)}</span><small>${esc(s.ab)}</small>${val('skill:' + i)}</div>`;
         }).join('')}</div><p class="muted hb-hint">Click a dot to change proficiency. Add or rename skills in Customise.</p>`,
 
         attacks: (p, path, pi) => table(['Name', 'To hit', 'Damage', 'Notes', ''], p.rows.map((r, i) => `<tr>
             <td>${f(`${path}.rows.${i}.name`, 'Name', { ph: 'Longsword' })}</td>
-            <td><div class="hb-fx">${f(`${path}.rows.${i}.hit`, 'To hit formula', { cls: 'hb-formula' })}${roll(`hit:${pi}:${i}`, (r.name || 'attack') + ' to hit')}</div></td>
-            <td><div class="hb-fx">${f(`${path}.rows.${i}.dmg`, 'Damage formula', { cls: 'hb-formula' })}<button type="button" class="btn small" data-act="dmg" data-p="${path}.rows.${i}">Roll</button></div></td>
+            <td><div class="hb-fx">${f(`${path}.rows.${i}.hit`, 'To hit formula', { cls: 'hb-formula' })}${val(`hit:${pi}:${i}`)}</div></td>
+            <td>${f(`${path}.rows.${i}.dmg`, 'Damage', { cls: 'hb-formula' })}</td>
             <td>${f(`${path}.rows.${i}.notes`, 'Notes', { ph: 'slashing, versatile' })}</td><td>${del(path + '.rows', i, r.name || 'attack')}</td></tr>`).join(''))
             + `<div class="actions">${add(path + '.rows', 'attack', 'Add attack')}</div>`,
 
@@ -266,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${f(`${path}.rows.${i}.notes`, 'Notes', { ph: '120 ft, 1d10 fire' })}</td><td>${del(path + '.rows', i, r.name || 'spell')}</td></tr>`).join('');
             return `<div class="hb-grid">
                 <div class="hb-box"><span class="hb-lbl">Save DC</span><b class="hb-big" data-c="dc:${pi}"></b>${f(path + '.dc', 'Save DC formula', { cls: 'hb-formula' })}</div>
-                <div class="hb-box"><span class="hb-lbl">Spell attack</span>${roll('sa:' + pi, 'spell attack', ' hb-big')}${f(path + '.atk', 'Spell attack formula', { cls: 'hb-formula' })}</div>
+                <div class="hb-box"><span class="hb-lbl">Spell attack</span>${val('sa:' + pi, ' hb-big')}${f(path + '.atk', 'Spell attack formula', { cls: 'hb-formula' })}</div>
             </div>
             ${slots ? `<div class="hb-slots">${slots}</div>` : ''}
             <details class="hb-details"><summary>Spell slots per level</summary><div class="hb-slotmax">${p.slots.map((s, l) => `<label>${ordinal(l + 1)} ${f(`${path}.slots.${l}.max`, ordinal(l + 1) + ' level slots', { num: true })}</label>`).join('')}</div></details>
@@ -305,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <label>Hit dice total (formula) ${f(path + '.hdMax', 'Hit dice total formula', { cls: 'hb-formula' })}</label>
                 <label>Used ${f(path + '.hdUsed', 'Hit dice used', { num: true })}</label>
             </div>
-            <div class="actions"><span class="muted">Total <b data-c="hd:${pi}"></b></span><button type="button" class="btn small" data-act="hitdie" data-p="${path}">Spend a hit die</button></div>`,
+            <div class="actions"><span class="muted">Total <b data-c="hd:${pi}"></b></span></div>`,
     };
     const ordinal = (n) => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
 
@@ -414,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (kind === 'long') { C.hp.cur = C.hp.max; C.hp.temp = 0; if (+C.exhaustion > 0) C.exhaustion = +C.exhaustion - 1; }
         saveNow(); draw();
-        toast(kind === 'long' ? 'Long rest: hit points, spell slots, resources and half your hit dice are back.' : 'Short rest: short-rest resources are back. Spend hit dice under Death saves and hit dice.', 'ok');
+        toast(kind === 'long' ? 'Long rest: hit points, spell slots, resources and half your hit dice are back.' : 'Short rest: short-rest resources are back. Mark hit dice you spend under Death saves and hit dice.', 'ok');
     }
 
     // ---- events ----
@@ -445,26 +431,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const b = e.target.closest('[data-act]');
         if (!b || b.tagName === 'SELECT' || b.tagName === 'FORM') return;
         const act = b.dataset.act, p = b.dataset.p, i = +b.dataset.i;
-        const V = () => vars();
-        if (act === 'roll') {
-            const [t, a, r] = b.dataset.roll.split(':');
-            const label = { mod: () => C.abilities[a].name + ' check', save: () => C.abilities[a].name + ' save', skill: () => C.skills[a].name, init: () => 'Initiative', hit: () => (C.panels[a].rows[r].name || 'Attack') + ' to hit', sa: () => 'Spell attack' }[t]();
-            const v = value(b.dataset.roll, V());
-            return rollD20(label, v.err ? NaN : v.v, e);
-        }
-        if (act === 'dmg') { const r = get(p); return rollFormula((r.name || 'Attack') + ' damage', r.dmg); }
-        if (act === 'hitdie') {
-            const P = get(p), max = ev(P.hdMax, V()).v || 0;
-            if ((+P.hdUsed || 0) >= max) return toast('No hit dice left. A long rest gives half of them back.', 'note');
-            const con = C.abilities.find((a) => kk(a.key) === 'con');
-            P.hdUsed = (+P.hdUsed || 0) + 1;
-            try {
-                const r = hbCalc(P.hd + (con ? ' + ' + con.key : ''), V(), true), gain = Math.max(0, r.v);
-                C.hp.cur = Math.min(+C.hp.max || 0, (+C.hp.cur || 0) + gain);
-                toast(`Hit die: +${gain} HP  (${r.rolls.join(' ')})`, 'ok');
-            } catch (err) { P.hdUsed--; toast('Hit die: ' + err.message, 'err'); }
-            saveNow(); return draw();
-        }
         if (act === 'formula') return showDlg({ p, t: b.dataset.t });
         if (act === 'custom') return showDlg('custom');
         if (act === 'close') return dlg.close();
