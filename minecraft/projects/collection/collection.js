@@ -11,8 +11,7 @@
         const t = [];
         if (/ \+$/.test(e.name)) t.push(['+', 'Longer duration']);
         if (e.name.includes('[JE]')) t.push(['JE', 'Java Edition only']);
-        if (e.name.includes('[BE]')) t.push(['BE', 'Bedrock Edition only']);
-        e.disp = e.name.replace(/ ?\[(JE|BE)\]/g, '').replace(/ \+$/, '');
+        e.disp = e.name.replace(/ ?\[JE\]/g, '').replace(/ \+$/, '');
         e.badges = t.map(b => `<span class="badge" title="${b[1]}">${b[0]}</span>`).join('');
     }
 
