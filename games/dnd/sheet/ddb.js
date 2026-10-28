@@ -341,6 +341,9 @@
                 name: (cv(8, it.id) || {}).value || d.name || 'Item', cat: catOf(d), qty: it.quantity || 1, eq: !!it.equipped,
                 wt: Math.round(((over != null ? over : (d.weight || 0) * (d.weightMultiplier ?? 1)) / (d.bundleSize || 1)) * 100) / 100,
                 att: it.isAttuned ? 'yes' : d.canAttune ? 'needs' : '', notes: [d.magic ? d.rarity : '', (cv(9, it.id) || {}).value].filter(Boolean).join(' · '),
+                // item attributes as D&D Beyond lists them: properties, range, armour type and AC, then its tags
+                props: [...new Set([...arr(d.properties).map((p) => p.name), d.longRange ? `Range (${d.range}/${d.longRange})` : '',
+                    ['', 'Light armour', 'Medium armour', 'Heavy armour', 'Shield'][d.armorTypeId] || '', d.armorClass ? 'AC ' + (d.armorTypeId === 4 ? '+' : '') + d.armorClass : '', ...arr(d.tags)].filter(Boolean))],
             };
         }).concat(arr(C.customItems).map((c) => ({ name: c.name, cat: 'Gear', qty: c.quantity || 1, eq: false, wt: c.weight || 0, att: '', notes: c.notes || '' })));
 
