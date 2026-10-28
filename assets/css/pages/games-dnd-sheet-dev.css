@@ -298,3 +298,4 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb .hb-level .hb-lvlname { width: 64px; padding: 4px 6px; }
 .hb .hb-level .hb-n { width: 56px; }
 .hb-level .hb-x { width: 24px; height: 24px; font-size: 16px; }
+.hb-unit { display: inline-flex; align-items: center; gap: 4px; }
