@@ -667,12 +667,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
 
     // ---- configurable panels ----
     // one action or spell: a summary line you can open to edit
-    function entry(rp, r, summaryKey, editor, lead = '', tail = '') {
+    // end: buttons after the pencil (the inventory's remove ×)
+    function entry(rp, r, summaryKey, editor, lead = '', tail = '', end = '') {
         const isOpen = openRows.has(r.id);
         return `<div class="hb-entry">
             <div class="hb-entry-h">${lead}<button type="button" class="hb-link" data-act="info" data-p="${rp}">${esc(r.name || 'Unnamed')}</button>
                 <span class="hb-sum" data-c="${summaryKey}:${rp}"></span>
-                <button type="button" class="hb-x hb-toggle" data-act="toggle" data-id="${esc(r.id)}" aria-expanded="${isOpen}" aria-label="Edit ${esc(r.name || 'entry')}" title="Edit">${PENCIL}</button></div>
+                <button type="button" class="hb-x hb-toggle" data-act="toggle" data-id="${esc(r.id)}" aria-expanded="${isOpen}" aria-label="Edit ${esc(r.name || 'entry')}" title="Edit">${PENCIL}</button>${end}</div>
             ${tail}${isOpen ? `<div class="hb-editor">${editor()}</div>` : ''}
         </div>`;
     }
@@ -809,9 +810,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 </div>
                 <div class="hb-wide"><span class="muted">Attributes</span><div class="hb-attrs">${r.props.map((n) => `<span class="hb-attr"><button type="button" class="hb-prop" data-act="attr" data-n="${esc(n)}">${esc(n)}</button><button type="button" class="hb-x" data-act="chip" data-p="${rp}.props" data-n="${esc(n)}" aria-label="Remove ${esc(n)}" title="Remove">&times;</button></span>`).join('')}
                     <input class="field hb-tagin hb-attrin" data-p="${rp}.props" list="hb-dl-attr" placeholder="Add" aria-label="Add an attribute to ${esc(r.name || 'this item')}" autocomplete="off"></div></div>
-                <label class="hb-wide">Notes ${f(rp + '.notes', 'Notes', { area: true })}</label>
-                <div class="actions">${del(path + '.rows', i, r.name || 'item', 'Remove item')}</div>`,
-                `<label class="hb-prep" title="Equipped">${f(rp + '.eq', 'Equipped', { check: true })}</label>`); }).join('');
+                <label class="hb-wide">Notes ${f(rp + '.notes', 'Notes', { area: true })}</label>`,
+                `<label class="hb-prep" title="Equipped">${f(rp + '.eq', 'Equipped', { check: true })}</label>`, '', del(path + '.rows', i, r.name || 'item')); }).join('');
             return `<div class="hb-coins">${['cp', 'sp', 'ep', 'gp', 'pp'].map((c) => `<label>${c.toUpperCase()} ${f(`${path}.coins.${c}`, c.toUpperCase(), { num: true })}</label>`).join('')}</div>
                 <div class="hb-attune"><span>Attuned <b data-c="att:${pi}"></b></span><label>Attunement slots ${f(path + '.attMax', 'Attunement slots', { num: true, cls: 'hb-n' })}</label></div>
                 ${subtabs(path + '.sub', opts, cur)}
