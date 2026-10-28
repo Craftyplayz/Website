@@ -21,7 +21,7 @@ function srd_get($url, $trim, $html = false)
 {
     $dir = sys_get_temp_dir() . '/craftyplayz-srd';
     // bump the html tag when the wikidot parser changes, to drop its old cached text
-    $file = $dir . '/' . md5($url . ($html ? '#html3' : '')) . '.json';
+    $file = $dir . '/' . md5($url . ($html ? '#html4' : '')) . '.json';
     if (is_file($file) && time() - filemtime($file) < SRD_TTL) return [file_get_contents($file), 200];
     // a recent 404 is remembered so made-up names can't hammer the API
     if (is_file($file . '.miss') && time() - filemtime($file . '.miss') < 86400) return [null, 404];
