@@ -651,8 +651,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <div class="rows">${C.passives.map((p, i) => `<div class="rowi"><button type="button" class="hb-link grow" data-act="sense" data-i="${i}">${esc(p.name)}</button>${fx(`passives.${i}.f`, p.name, false)}${p.unit ? `<small class="muted">${esc(p.unit)}</small>` : ''}</div>`).join('')}</div>
             <label class="hb-lbl hb-other">Other senses ${f('senses', 'Other senses', { area: true, ph: '120 ft magical darkvision' })}</label>
         </section>`;
-        return `<div class="hb-top-id">${id}</div><div class="hb-top-art">${art}</div><div class="hb-top-abil">${abils}</div>
-            <div class="hb-top-combat">${combat}${more}${pinned()}</div><div class="hb-top-saves">${saves}</div><div class="hb-top-senses">${senses}</div>`;
+        return `<div class="hb-top-id">${id}</div><div class="hb-top-abil">${abils}</div><div class="hb-top-combat">${combat}${more}${pinned()}</div>
+            <div class="hb-side"><div class="hb-top-art">${art}</div><div class="hb-top-saves">${saves}</div><div class="hb-top-senses">${senses}</div></div>`;
     }
 
     // notes pinned to the sheet: always on screen, editable in place
