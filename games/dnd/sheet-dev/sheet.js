@@ -418,6 +418,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         }
         return null;
     }
+    // path of a counter resource, for views elsewhere that edit the same numbers
+    function resPath(name) {
+        const r = resOf(name);
+        if (!r || r.kind !== 'count') return '';
+        const pi = C.panels.findIndex((p) => p.type === 'trackers' && p.rows.includes(r));
+        return `panels.${pi}.rows.${C.panels[pi].rows.indexOf(r)}`;
+    }
     const resLeft = (r) => (r.kind === 'pips' ? maxOf(r.max) - nm(r.used) : nm(r.cur));
     const costAmt = (r) => (String(r.cost.amt).trim() ? maxOf(r.cost.amt) : 1);
     function spellSum(r, P, V) {
@@ -705,11 +712,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const opts = [['all', 'All', p.rows.length], ...lv.map((l) => [String(l), l ? ordinal(l) : 'Cantrips', p.rows.filter((r) => nm(r.lvl) === l).length]),
                 ['prep', 'Prepared', p.rows.filter((r) => r.prep).length], ['meta', 'Metamagic']];
             const cur = pickSub(p, opts);
+            // a "Sorcery points" counter in Resources is the one source; otherwise the tab keeps its own
+            const sp = resPath('Sorcery points'), spP = sp || path + '.sp';
             if (cur === 'meta') return subtabs(path + '.sub', opts, cur) + `
-                <div class="rowi hb-track"><span class="grow">Sorcery points</span>
-                    <button type="button" class="btn small" data-act="track" data-p="${path}.sp" data-d="-1" aria-label="Spend a sorcery point">−</button>
-                    ${f(path + '.sp.cur', 'Sorcery points left', { num: true, cls: 'hb-n' })}<span>/</span>${f(path + '.sp.max', 'Sorcery points maximum', { num: true, cls: 'hb-n' })}
-                    <button type="button" class="btn small" data-act="track" data-p="${path}.sp" data-d="1" aria-label="Get a sorcery point back">+</button></div>
+                <div class="rowi hb-track"><span class="grow">Sorcery points${sp ? ' <small class="muted">(synced with Resources)</small>' : ''}</span>
+                    <button type="button" class="btn small" data-act="track" data-p="${spP}" data-d="-1" aria-label="Spend a sorcery point">−</button>
+                    ${f(spP + '.cur', 'Sorcery points left', { num: true, cls: 'hb-n' })}<span>/</span>${sp ? f(spP + '.max', 'Sorcery points maximum (number or formula)', { cls: 'hb-n hb-formula' }) + `<small class="muted" data-c="tmax:${spP}.max"></small>` : f(spP + '.max', 'Sorcery points maximum', { num: true, cls: 'hb-n' })}
+                    <button type="button" class="btn small" data-act="track" data-p="${spP}" data-d="1" aria-label="Get a sorcery point back">+</button></div>
                 <div class="hb-list">${p.meta.map((m, i) => { const mp = `${path}.meta.${i}`; return entry(mp, m, 'msum', () => `<div class="hb-entry-h">${f(mp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-meta', ph: 'Quickened Spell' })}<label class="hb-cost">Cost ${f(mp + '.cost', 'Cost in sorcery points', { cls: 'hb-n' })}</label></div>
                     <label class="hb-wide">Description ${f(mp + '.desc', 'Description', { area: true })}</label>
                     <div class="actions">${del(path + '.meta', i, m.name || 'metamagic', 'Remove metamagic')}</div>`); }).join('')}</div>
