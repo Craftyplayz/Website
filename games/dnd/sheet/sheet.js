@@ -1096,9 +1096,16 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     // ---- SRD equipment: item names to suggest, attributes / weight / cost when one is picked ----
     let eqList = null, eqNames = [];
     // the SRD lists some names back to front ("Crossbow, light"); show them the usual way round so they match the sheet's own
-    const natural = (n) => n.replace(/^([^,(]+), ([^,(]+?)(\s*\(.*\))?$/, (_, a, b, c = '') => b[0].toUpperCase() + b.slice(1) + ' ' + a.toLowerCase() + c);
+    const natural = (n) => n.replace(/^([^,(]+), ([^,(]+?)(\s*\(.*\))?$/, (_, a, b, c = '') => b[0].toUpperCase() + b.slice(1) + ' ' + a.toLowerCase() + c).replace(/\bArmor\b/i, 'armour');
+    // the sheet's own names for SRD items it spells differently; the SRD twin is hidden and the sheet's name fills from it
+    const EQ_ALIAS = { 'caltrops (bag of 20)': 'Caltrops', chalk: 'Chalk (1 piece)', 'arcane focus (crystal)': 'Crystal', 'arcane focus (staff)': 'Staff', 'druidic focus (wooden staff)': 'Wooden staff',
+        'holy symbol (amulet)': 'Amulet', 'hempen rope (50 ft)': 'Hempen rope (50 feet)', 'silk rope (50 ft)': 'Silk rope (50 feet)', 'arrows (20)': 'Arrow', 'crossbow bolts (20)': 'Crossbow bolt',
+        'sling bullets (20)': 'Sling bullet', 'blowgun needles (50)': 'Blowgun needle', 'half plate': 'Half plate armour' };
     // sheet names first, then SRD ones not already there (ignoring case)
-    const gearNames = () => { const seen = new Set(); return [...GEAR.map((g) => g[0]), ...eqNames].filter((n) => !seen.has(n.toLowerCase()) && seen.add(n.toLowerCase())); };
+    const gearNames = () => {
+        const seen = new Set(Object.values(EQ_ALIAS).map((n) => n.toLowerCase()));
+        return [...GEAR.map((g) => g[0]), ...eqNames].filter((n) => !seen.has(n.toLowerCase()) && seen.add(n.toLowerCase()));
+    };
     function loadEqList() {
         if (eqList) return eqList;
         eqList = fetch('spells.php?eqlist=1').then((r) => (r.ok ? r.json() : Promise.reject())).then((list) => {
@@ -1110,7 +1117,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     }
     // fills only what's empty, so typed-in attributes, weight and cost stay
     async function eqFill(rp) {
-        const r = get(rp), hit = (await loadEqList()).find(([, n]) => natural(n).toLowerCase() === String(r.name).trim().toLowerCase());
+        const r = get(rp), name = String(r.name).trim().toLowerCase(), want = (EQ_ALIAS[name] || name).toLowerCase();
+        const hit = (await loadEqList()).find(([, n]) => natural(n).toLowerCase() === want);
         if (!hit) return;
         try {
             const res = await fetch('spells.php?eq=' + encodeURIComponent(hit[0]));
