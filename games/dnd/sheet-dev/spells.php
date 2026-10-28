@@ -21,7 +21,7 @@ function srd_get($url, $trim, $html = false)
 {
     $dir = sys_get_temp_dir() . '/craftyplayz-srd';
     // bump the html tag when the wikidot parser changes, to drop its old cached text
-    $file = $dir . '/' . md5($url . ($html ? '#html5' : '')) . '.json';
+    $file = $dir . '/' . md5($url . ($html ? '#html5' : '#v2')) . '.json';
     if (is_file($file) && time() - filemtime($file) < SRD_TTL) return [file_get_contents($file), 200];
     // a recent 404 is remembered so made-up names can't hammer the API
     if (is_file($file . '.miss') && time() - filemtime($file . '.miss') < 86400) return [null, 404];
@@ -52,7 +52,9 @@ function srd_get($url, $trim, $html = false)
 // fills a missing save, spell attack or damage from the spell's text ("a Wisdom saving throw", "1d6 psychic damage")
 function spell_mech($s)
 {
-    $t = implode(' ', (array)($s['desc'] ?? []));
+    // stop at a summoned creature's stat block, its attacks aren't the spell's
+    $t = '';
+    foreach ((array)($s['desc'] ?? []) as $p) { if (stripos($p, 'Armor Class') === 0) break; $t .= ' ' . $p; }
     if (empty($s['save']) && preg_match('~(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) saving throw~i', $t, $m)) $s['save'] = strtoupper(substr($m[1], 0, 3));
     if (empty($s['attack_type']) && preg_match('~(melee|ranged) spell attack~i', $t, $m)) $s['attack_type'] = strtolower($m[1]);
     if (empty($s['damage']) && preg_match_all('~(\d+d\d+(?:\s*\+\s*\d+)?)\s+(acid|bludgeoning|cold|fire|force|lightning|necrotic|piercing|poison|psychic|radiant|slashing|thunder)\s+damage~i', $t, $ms, PREG_SET_ORDER)) {
@@ -110,7 +112,7 @@ if (substr($i, 0, 3) === 'wd:') {
 }
 if (!preg_match('/^[a-z0-9-]{1,80}$/', $i)) srd_out(400, ['error' => 'Unknown spell.']);
 [$out, $code] = srd_get(SRD_API . '/' . $i, function ($j) {
-    $keep = ['index', 'name', 'level', 'desc', 'higher_level', 'range', 'components', 'material', 'ritual', 'duration', 'concentration', 'casting_time', 'attack_type'];
+    $keep = ['index', 'name', 'level', 'desc', 'higher_level', 'range', 'components', 'material', 'ritual', 'duration', 'concentration', 'casting_time', 'attack_type', 'heal_at_slot_level'];
     $s = array_intersect_key($j, array_flip($keep));
     $s['school'] = $j['school']['name'] ?? '';
     if (!empty($j['dc']['dc_type']['name'])) $s['save'] = $j['dc']['dc_type']['name'];
