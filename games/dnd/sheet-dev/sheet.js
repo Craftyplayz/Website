@@ -362,7 +362,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const level = () => C.classes.reduce((s, c) => s + nm(c.level), 0);
     const hpMax = () => nm(C.hp.max) + nm(C.hp.mod);
     function profT(ab, p, extra, V) {
-        const m = V[kk(ab)];
+        const m = ab ? V[kk(ab)] : 0; // '' = N/A, proficiency only
         if (m === undefined) return { v: NaN, err: 'No ability called ' + ab };
         const b = ev(extra, V);
         return { v: m + Math.floor(V.prof * p) + (b.v || 0), err: b.err };
@@ -487,7 +487,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         return `<input class="field${cls}"${num} data-k="${k}" value="${esc(v ?? '')}" aria-label="${esc(label)}"${ph}${o.list ? ` list="${o.list}"` : ''}${o.multi ? ' data-multi="1"' : ''} autocomplete="off">`;
     }
     const sel = (k, label, opts) => `<select class="field" data-k="${k}" aria-label="${esc(label)}">${opts.map(([v, t]) => `<option value="${esc(v)}"${String(get(k)) === String(v) ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
-    const abSel = (k, label) => { const keys = C.abilities.map((a) => [a.key, a.key]); const v = get(k); return sel(k, label, keys.some(([x]) => x === v) ? keys : [[v, v + ' (missing)'], ...keys]); };
+    const abSel = (k, label, na) => { const keys = [...(na ? [['', 'N/A']] : []), ...C.abilities.map((a) => [a.key, a.key])]; const v = get(k); return sel(k, label, keys.some(([x]) => x === v) ? keys : [[v, v + ' (missing)'], ...keys]); };
     const val = (key, cls = '') => `<b class="hb-val${cls}" data-c="${key}"></b>`;
     // a computed number that opens the formula builder
     const fx = (path, title, signed, cls = '') => `<button type="button" class="hb-roll${cls}" data-act="formula" data-p="${path}" data-t="${esc(title)}"${signed ? ' data-s="1"' : ''} data-c="${signed ? 'fs' : 'fx'}:${path}" aria-label="${esc(title)}, edit the formula"></button>`;
@@ -681,7 +681,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             let body;
             if (cur === 'skills') body = `<div class="rows hb-two">${C.skills.map((s, i) => `<div class="rowi">${dot('prof', i, s, s.name)}<button type="button" class="hb-link grow" data-act="skill" data-i="${i}">${esc(s.name)}</button><small>${esc(s.ab)}</small>${val('skill:' + i)}</div>`).join('')}</div>
                 <p class="muted hb-hint">Click a dot to change proficiency. Add or rename skills in Customise.</p>`;
-            else if (cur === 'tools') body = `<div class="rows">${C.profs.tools.map((t, i) => `<div class="rowi hb-tool">${dot('tprof', i, t, t.name || 'tool')}${f(`profs.tools.${i}.name`, 'Tool', { cls: 'grow', list: 'hb-dl-tools', ph: "Thieves' tools" })}${abSel(`profs.tools.${i}.ab`, 'Ability')}${val('tool:' + i)}${del('profs.tools', i, t.name || 'tool')}</div>`).join('')}</div>
+            else if (cur === 'tools') body = `<div class="rows">${C.profs.tools.map((t, i) => `<div class="rowi hb-tool">${dot('tprof', i, t, t.name || 'tool')}${f(`profs.tools.${i}.name`, 'Tool', { cls: 'grow', list: 'hb-dl-tools', ph: "Thieves' tools" })}${abSel(`profs.tools.${i}.ab`, 'Ability', true)}${val('tool:' + i)}${del('profs.tools', i, t.name || 'tool')}</div>`).join('')}</div>
                 <div class="actions">${add('profs.tools', 'tool', 'Add tool')}</div>`;
             else if (cur === 'notes') body = f('profs.notes', 'Notes', { area: true, cls: 'hb-text' });
             else body = tags('profs.' + cur, PRESET[cur], { armour: 'Mithral armour', weapons: 'Longsword', langs: 'Thieves’ Cant' }[cur], { armour: 'hb-dl-armour', weapons: 'hb-dl-weapon', langs: 'hb-dl-langs' }[cur], { armour: 'armour', weapons: 'weapons', langs: 'lang' }[cur])
