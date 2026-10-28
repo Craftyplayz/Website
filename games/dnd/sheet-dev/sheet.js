@@ -763,7 +763,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const sp = resPath('Sorcery points'), spP = sp || path + '.sp';
             if (cur === 'meta') return subtabs(path + '.sub', opts, cur) + `
                 <div class="rowi hb-track"><span class="grow">Sorcery points${sp ? ' <small class="muted">(synced with Resources)</small>' : ''}</span>
-                    ${pips(spP + '.used', maxOf(get(spP).max))}<label class="hb-maxl">Max ${f(spP + '.max', 'Sorcery points maximum (number or formula)', { cls: 'hb-n hb-formula' })}</label><small class="muted" data-c="tmax:${spP}.max"></small></div>
+                    ${pips(spP + '.used', maxOf(get(spP).max))}${sp ? `<small class="muted">${Math.max(0, maxOf(get(spP).max) - nm(get(spP).used))} / ${maxOf(get(spP).max)} left</small>`
+                        : `<label class="hb-maxl">Max ${f(spP + '.max', 'Sorcery points maximum (number or formula)', { cls: 'hb-n hb-formula' })}</label><small class="muted" data-c="tmax:${spP}.max"></small>`}</div>
                 <div class="hb-list">${p.meta.map((m, i) => { const mp = `${path}.meta.${i}`; return entry(mp, m, 'msum', () => `<div class="hb-entry-h">${f(mp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-meta', ph: 'Quickened Spell' })}<label class="hb-cost">Cost ${f(mp + '.cost', 'Cost in sorcery points', { cls: 'hb-n' })}</label></div>
                     <label class="hb-wide">Description ${f(mp + '.desc', 'Description', { area: true })}</label>
                     <div class="actions">${del(path + '.meta', i, m.name || 'metamagic', 'Remove metamagic')}</div>`); }).join('')}</div>
@@ -853,9 +854,17 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                         <div class="hb-levels">${lv || '<p class="muted">No slots yet. Press the pencil to set them.</p>'}</div>
                     </div>`;
                 }
+                // boxes (sorcery points and the like) compact the same way: name, how many are left, the boxes
+                if (r.kind === 'pips' && !openRows.has(r.id)) {
+                    const mx = maxOf(r.max, V), reset = r.reset ? ' · ' + RESETS.find(([k]) => k === r.reset)[1].toLowerCase() : '';
+                    return `<div class="hb-entry hb-res">
+                        <div class="hb-entry-h"><b class="grow">${esc(r.name || 'Resource')}</b><small class="muted">${Math.max(0, mx - nm(r.used))} / ${mx} left${reset}</small>${edit(false)}</div>
+                        <div class="hb-levels">${mx ? pips(rp + '.used', mx) : '<p class="muted">No boxes yet. Press the pencil to set the maximum.</p>'}</div>
+                    </div>`;
+                }
                 return `<div class="hb-entry hb-res">
                     <div class="hb-entry-h">${head}${main}${sel(rp + '.reset', 'Resets on', RESETS)}
-                        ${tabs.length ? sel(rp + '.group', 'Tab', [['', 'No tab'], ...tabs.map((t) => [t, t])]) : ''}${r.kind === 'levels' ? edit(true) : ''}${del(path + '.rows', i, r.name || 'resource')}</div>
+                        ${tabs.length ? sel(rp + '.group', 'Tab', [['', 'No tab'], ...tabs.map((t) => [t, t])]) : ''}${r.kind === 'levels' || r.kind === 'pips' ? edit(true) : ''}${del(path + '.rows', i, r.name || 'resource')}</div>
                     ${levels}
                 </div>`;
             };
@@ -1581,7 +1590,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 ki: { kind: 'count', name: 'Ki points', max: cls('monk'), reset: 'short' },
             }[kind] || {});
             r.cur = maxOf(r.max);
-            if (kind === 'levels') openRows.add(r.id);
+            if (kind === 'levels' || r.kind === 'pips') openRows.add(r.id);
             P.rows.push(r);
             saveNow(); return draw();
         }
