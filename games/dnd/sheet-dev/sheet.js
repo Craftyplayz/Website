@@ -136,7 +136,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const ROW = {
         attack: () => ({ id: uid(), name: '', time: 'Action', range: '', props: [], mode: 'hit', hit: 'STR + PROF', save: 'DEX', dc: '8 + PROF + STR', dmg: [{ dice: '1d6 + STR', type: 'Slashing' }], desc: '' }),
         spell: () => ({ id: uid(), lvl: 0, name: '', school: '', time: 'Action', range: '', comp: '', dur: '', conc: false, ritual: false, prep: false, mode: 'none', save: 'DEX', dc: '', dmg: [], desc: '', higher: '', srd: '' }),
-        item: () => ({ id: uid(), cat: 'Gear', eq: false, att: '', name: '', qty: 1, wt: 0, notes: '' }),
+        item: () => ({ id: uid(), cat: 'Gear', eq: false, att: '', name: '', qty: 1, wt: 0, gp: '', notes: '' }),
         list: () => ({ id: uid(), name: '', src: '', text: '', uses: '', used: 0, reset: '', grp: '' }),
         // kind: count (left / max), pips (boxes ticked as used) or levels (a row of boxes per level, like spell slots)
         tracker: () => ({ id: uid(), name: '', kind: 'count', cur: 1, max: 1, used: 0, reset: 'long', group: '', levels: [] }),
@@ -747,12 +747,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 <td>${sel(`${path}.rows.${i}.cat`, 'Category', cats.map((c) => [c, c]))}</td>
                 <td>${f(`${path}.rows.${i}.qty`, 'Quantity', { num: true, cls: 'hb-n' })}</td>
                 <td>${f(`${path}.rows.${i}.wt`, 'Weight each', { num: true, cls: 'hb-n' })}</td>
+                <td>${f(`${path}.rows.${i}.gp`, 'Cost each in gold', { num: true, cls: 'hb-n', ph: '0' })}</td>
                 <td>${sel(`${path}.rows.${i}.att`, 'Attunement', [['', 'None'], ['needs', 'Needs attunement'], ['yes', 'Attuned']])}</td>
                 <td>${f(`${path}.rows.${i}.notes`, 'Notes')}</td><td>${del(path + '.rows', i, r.name || 'item')}</td></tr>`).join('');
             return `<div class="hb-coins">${['cp', 'sp', 'ep', 'gp', 'pp'].map((c) => `<label>${c.toUpperCase()} ${f(`${path}.coins.${c}`, c.toUpperCase(), { num: true })}</label>`).join('')}</div>
                 <div class="hb-attune"><span>Attuned <b data-c="att:${pi}"></b></span><label>Attunement slots ${f(path + '.attMax', 'Attunement slots', { num: true, cls: 'hb-n' })}</label></div>
                 ${subtabs(path + '.sub', opts, cur)}
-                ${table(['Eq.', 'Item', 'Category', 'Qty', 'Weight', 'Attunement', 'Notes', ''], rows)}
+                ${table(['Eq.', 'Item', 'Category', 'Qty', 'Weight', 'Cost (gp)', 'Attunement', 'Notes', ''], rows)}
                 <div class="actions">${add(path + '.rows', 'item', 'Add item', ` data-cat="${esc(cur === 'all' ? 'Gear' : cur)}"`)}<span class="muted">Total weight <b data-c="wt:${pi}"></b></span></div>`;
         },
 
