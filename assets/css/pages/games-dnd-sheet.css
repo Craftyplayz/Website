@@ -347,3 +347,9 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-fwords { white-space: normal; }
 .hb-fword { margin: 2px; padding: 2px 8px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--sunken); color: var(--text); font: 13px/1.5 ui-monospace, Consolas, monospace; cursor: pointer; }
 .hb-fword:hover { border-color: var(--accent); color: var(--accent); }
+/* Flexible Casting: made slots and points above the maximum are dashed until a long rest */
+.hb-pips button.extra { border-style: dashed; }
+.hb-flex { margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius); }
+.hb-flex h4 { margin: 0 0 8px; }
+.hb-flexrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0; }
+.hb-flexrow > span:first-child { min-width: 170px; }
