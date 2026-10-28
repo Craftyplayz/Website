@@ -821,7 +821,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const worth = ['pp', 'gp', 'ep', 'sp', 'cp'].reduce((t, c) => t + nm(p.coins[c]) * { pp: 1000, gp: 100, ep: 50, sp: 10, cp: 1 }[c], 0) / 100;
             return `<div class="hb-purse">${['pp', 'gp', 'ep', 'sp', 'cp'].map((c) => `<span class="hb-coin"><b>${nm(p.coins[c]).toLocaleString()}</b> ${c}</span>`).join('')}
                     <small class="muted">${worth.toLocaleString()} gp in all</small>
-                    <input class="field hb-coinin" data-p="${path}.coins" placeholder="-5g5s or +10gp" aria-label="Spend or add coins, like -5g5s or +10gp" autocomplete="off"></div>
+                    <span class="hb-coinbox"><input class="field hb-coinin" data-p="${path}.coins" placeholder="5g5s" aria-label="Coins to spend or add, like 5g5s" autocomplete="off">
+                    <button type="button" class="btn small" data-act="coins" data-sign="-" aria-label="Spend these coins" title="Spend">&minus;</button><button type="button" class="btn small" data-act="coins" data-sign="+" aria-label="Add these coins" title="Add">+</button></span></div>
                 <div class="hb-attune"><span>Attuned <b data-c="att:${pi}"></b></span><label>Attunement slots ${f(path + '.attMax', 'Attunement slots', { num: true, cls: 'hb-n' })}</label></div>
                 ${subtabs(path + '.sub', opts, cur)}
                 <div class="hb-list">${list}</div>
@@ -1474,6 +1475,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         <label class="hb-lbl hb-wide">Zoom <input type="range" id="hb-crop-z" min="1" max="4" step="0.01" value="1"></label>
         <div class="actions"><button type="button" class="btn primary" data-act="cropsave">Save art</button><button type="button" class="btn" data-act="close">Cancel</button></div>`;
 
+    // the coin box: a button's sign replaces any typed one; Enter keeps what's typed (no sign adds)
+    function coinApply(input, sign) {
+        const v = input.value.trim(), k = input.dataset.p;
+        if (!v) return input.focus();
+        try { const r = window.hbCoins(get(k), sign ? sign + v.replace(/^[+-]\s*/, '') : v); Object.assign(get(k), r.purse); saveNow(); draw(); toast(r.text, 'ok'); $('.hb-coinin')?.focus(); }
+        catch (err) { toast(err.message, 'err'); }
+    }
     function addTag(input) {
         const v = input.value.trim(), list = get(input.dataset.p);
         input.value = '';
@@ -1565,12 +1573,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     main.addEventListener('focusin', (e) => { if (e.target.getAttribute('list') === 'hb-dl-srd') loadSrdList(); if (e.target.getAttribute('list') === 'hb-dl-gear') loadEqList(); if (e.target.dataset.multi) multiList(e.target); });
     main.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && e.target.classList.contains('hb-tagin')) { e.preventDefault(); addTag(e.target); }
-        if (e.key === 'Enter' && e.target.classList.contains('hb-coinin') && e.target.value.trim()) {
-            e.preventDefault();
-            const k = e.target.dataset.p;
-            try { const r = window.hbCoins(get(k), e.target.value); Object.assign(get(k), r.purse); saveNow(); draw(); toast(r.text, 'ok'); $('.hb-coinin')?.focus(); }
-            catch (err) { toast(err.message, 'err'); }
-        }
+        if (e.key === 'Enter' && e.target.classList.contains('hb-coinin') && e.target.value.trim()) { e.preventDefault(); coinApply(e.target, ''); }
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawer.classList.contains('open') && !dlg.open) closeDrawer(); });
     main.addEventListener('submit', (e) => {
@@ -1608,6 +1611,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'attr') return attrInfo(b.dataset.n);
         if (act === 'sense') return senseInfo(+b.dataset.i);
         if (act === 'rinfo') return ruleInfo(b.dataset.k, b.dataset.n, b.dataset.t, b.dataset.s);
+        if (act === 'coins') return coinApply(b.parentElement.querySelector('.hb-coinin'), b.dataset.sign);
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && needsFill(r)) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
         if (act === 'more') { open.more = !open.more; return draw(); }
