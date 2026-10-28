@@ -176,7 +176,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (type === 'profs') p.sub = 'skills';
         if (type === 'notes') Object.assign(p, { notes: [], open: '', sort: 'edited' });
         if (type === 'trackers') p.tabs = [];
-        if (type === 'homebrew') Object.assign(p, { sub: 'all', text: '', tabs: [] });
+        if (type === 'homebrew') Object.assign(p, { sub: 'Action', text: '', tabs: [] });
         return p;
     }
 
@@ -938,19 +938,23 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 <div class="actions"><select class="field hb-auto" id="hb-tkind-${pi}" aria-label="Kind of resource">${TRACKER_KINDS.map(([k, t]) => `<option value="${k}">${t}</option>`).join('')}</select><button type="button" class="btn small" data-act="tnew" data-p="${path}" data-i="${pi}">Add resource</button></div>`;
         },
 
-        // homebrew abilities, each with effects and a cost that can spend one of your resources; tabs work like Resources: All, your own tabs, then notes
+        // homebrew abilities, each with effects and a cost that can spend one of your resources
+        // tabs: the timings, then your own (pencil to add, rename, delete, like Resources), then notes; an ability in your tab still shows under its timing
         homebrew: (p, path) => {
+            const main = HB_TIMES.slice(0, 3).map(([t]) => t);
+            const inTab = (r, t) => (t.startsWith('t:') ? r.group === t.slice(2) : t === 'Other' ? !main.includes(r.time) : r.time === t);
             const tabs = uniq([...p.tabs, ...p.rows.map((r) => r.group).filter(Boolean)]);
-            const opts = [['all', 'All', p.rows.length], ...tabs.map((g) => ['t:' + g, g, p.rows.filter((r) => r.group === g).length]), ['notes', 'Notes']];
+            const opts = [...HB_TIMES.map(([t, label]) => [t, label, p.rows.filter((r) => inTab(r, t)).length]), ...tabs.map((g) => ['t:' + g, g, p.rows.filter((r) => r.group === g).length]), ['notes', 'Notes']];
             const cur = pickSub(p, opts), tab = cur.startsWith('t:') ? cur.slice(2) : '', bar = tabBar(p, path, opts, cur, tabs);
             if (cur === 'notes') return bar + f(path + '.text', p.title + ' notes', { area: true, cls: 'hb-text', ph: 'House rules, reminders, ideas' });
-            const list = p.rows.map((r, i) => [r, `${path}.rows.${i}`]).filter(([r]) => cur === 'all' || r.group === tab).map(([r, rp]) => {
+            const what = tab ? 'ability' : HB_TIMES.find(([t]) => t === cur)[2];
+            const list = p.rows.map((r, i) => [r, `${path}.rows.${i}`]).filter(([r]) => inTab(r, cur)).map(([r, rp]) => {
                 const res = resOf(r.cost.what);
                 const use = res ? `<div class="hb-uses"><button type="button" class="btn small" data-act="hbuse" data-p="${rp}">Use</button><span>${esc(costAmt(r) + ' ' + res.name)}, ${resLeft(res)} left</span></div>` : '';
                 return entry(rp, r, 'hsum', () => hbEditor(rp, r), '', use);
             }).join('');
-            return bar + `<div class="hb-list">${list || '<p class="muted">No abilities here yet.</p>'}</div>
-                <div class="actions">${add(path + '.rows', 'hb', 'Add ability', tab ? ` data-group="${esc(tab)}"` : '')}</div>`;
+            return bar + `<div class="hb-list">${list || `<p class="muted">No ${tab ? 'abilities in this tab' : what === 'ability' ? 'other abilities' : what + 's'} yet.</p>`}</div>
+                <div class="actions">${add(path + '.rows', 'hb', 'Add ' + what, tab ? ` data-group="${esc(tab)}"` : ` data-time="${esc(cur)}"`)}</div>`;
         },
 
         text: (p, path) => f(path + '.text', p.title, { area: true, cls: 'hb-text' }),
@@ -1748,7 +1752,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'tdel') {
             const P = get(p), g = b.dataset.g, n = P.rows.filter((r) => r.group === g).length;
             const hb = P.type === 'homebrew';
-            if (n && !confirm(`Delete the ${g} tab? Its ${n} ${hb ? (n === 1 ? 'ability' : 'abilities') : 'resource' + (n === 1 ? '' : 's')} stay under All.`)) return;
+            if (n && !confirm(`Delete the ${g} tab? Its ${n} ${hb ? (n === 1 ? 'ability' : 'abilities') : 'resource' + (n === 1 ? '' : 's')} stay under ${hb ? 'their timing' : 'All'}.`)) return;
             snap(b);
             for (const r of P.rows) if (r.group === g) r.group = '';
             P.tabs = P.tabs.filter((t) => t !== g); if (P.sub === 't:' + g) P.sub = 'all';
