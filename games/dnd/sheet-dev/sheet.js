@@ -136,7 +136,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const FX_PH = { buff: '+2 AC until the start of your next turn', debuff: 'Disadvantage on attack rolls', control: 'The target is restrained', teleport: 'Teleport up to 30 feet', summon: 'A spectral steed appears', defence: '+5 AC until your next turn', utility: 'Bright light in a 20-foot radius' };
     const TRACKER_KINDS = [['count', 'Counter'], ['pips', 'Boxes'], ['levels', 'Slots by level'], ['sorcery', 'Sorcery points'], ['ki', 'Ki points']];
     const PROF = [[0, 'Not proficient'], [0.5, 'Half proficient'], [1, 'Proficient'], [2, 'Expertise']];
-    const HELP = 'Formulas can use ability keys for modifiers (DEX), _SCORE for scores (DEX_SCORE), PROF, LEVEL, CANTRIP (cantrip dice, CANTRIPd10), class levels (FIGHTER_LEVEL), skill names without spaces (SleightofHand), numbers, + - * / ( ), min(), max(), floor(), ceil(), and [labels] like 2 [Shield]. Results round down.';
+    const HELP = 'Formulas can use ability keys for modifiers (DEX), _SCORE for scores (DEX_SCORE), PROF, LEVEL, CANTRIP (cantrip dice, CANTRIPd10), class levels (FIGHTER_LEVEL), skill names without spaces (SleightofHand), resources by name without spaces (KIPOINTS left, KIPOINTS_USED spent, KIPOINTS_MAX), spell slots (SLOTS, SLOTS_USED, SLOTS_3, SLOTS_3_USED), numbers, + - * / ( ), min(), max(), floor(), ceil(), and [labels] like 2 [Shield]. Results round down.';
     // non-SRD spells (srd: 'wd:<slug>') carry stats only; their text is linked on dnd5e.wikidot.com
     const wdUrl = (r) => (String(r.srd || '').startsWith('wd:') ? 'https://dnd5e.wikidot.com/spell:' + r.srd.slice(3) : '');
     const SRD_CREDIT = 'From the <a href="https://dnd.wizards.com/resources/systems-reference-document" target="_blank" rel="noopener">System Reference Document 5.1 and 5.2</a> by Wizards of the Coast, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC-BY-4.0</a>.';
@@ -403,6 +403,22 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         for (const a of C.abilities) { const s = nm(a.score); V[kk(a.key)] = Math.floor((s - 10) / 2); V[kk(a.key) + '_score'] = s; }
         V.prof = ev(C.prof, V).v || 0;
         for (const s of C.skills) V[kk(s.name)] = profT(s.ab, s.p, s.b, V).v;
+        // resources: NAME is what's left, NAME_USED what's spent, NAME_MAX the maximum (Ki points -> KIPOINTS);
+        // slots by level add NAME_1..NAME_9 (each with _USED, _MAX); SLOTS is the spell slots wherever they're kept
+        const put = (k, left, max) => { if (!k || has(V, k)) return; V[k] = left; V[k + '_max'] = max; V[k + '_used'] = max - left; };
+        const lvls = (k, list) => {
+            let L = 0, M = 0;
+            list.forEach((o, j) => { const m = maxOf(o.max, V) + nm(o.extra), l = Math.max(0, m - nm(o.used)); put(`${k}_${j + 1}`, l, m); L += l; M += m; });
+            put(k, L, M);
+        };
+        for (const p of C.panels) if (p.type === 'trackers') for (const r of p.rows) {
+            const k = kk(r.name);
+            if (r.kind === 'levels') lvls(k, r.levels);
+            else if (r.kind === 'pips') { const m = maxOf(r.max, V) + nm(r.extra); put(k, Math.max(0, m - nm(r.used)), m); }
+            else put(k, nm(r.cur), maxOf(r.max, V));
+        }
+        const st = slotTracker(), sp = C.panels.find((p) => p.type === 'spells');
+        lvls('slots', st ? get(st).levels : sp ? sp.slots : []);
         return V;
     }
     function saveT(a, V) { const b = ev(a.sb, V); return { v: V[kk(a.key)] + (a.save ? V.prof : 0) + (b.v || 0), err: b.err }; }
@@ -1430,6 +1446,21 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
 
     // ---- customise ----
     // top of Customise: a formula to try out (kept in view.fb, never used by the sheet) and every word a formula can use, with its value now
+    // guide rows for resources: left / spent / max, plus one row of per-level words for slots
+    function resWords(V, w) {
+        const U = (k) => k.toUpperCase(), trio = (k) => w(U(k)) + w(U(k) + '_USED') + w(U(k) + '_MAX'), nums = (k) => `${V[k]} / ${V[k + '_used']} / ${V[k + '_max']}`;
+        const levelRow = (k, list, name) => [list.map((_, j) => `${k}_${j + 1}`).filter((x) => V[x + '_max'] > 0).map((x) => w(U(x)) + w(U(x) + '_USED')).join(' ') || '<span class="muted">none set</span>',
+            `${name} at one level: <code>${U(k)}_3</code> is 3rd-level slots left, <code>${U(k)}_3_USED</code> spent, <code>${U(k)}_3_MAX</code> the maximum`, ''];
+        const out = [], st = slotTracker(), sp = C.panels.find((p) => p.type === 'spells'), slots = st ? get(st).levels : sp ? sp.slots : [];
+        if (slots.length) out.push([trio('slots'), 'Spell slots, every level together: left, spent (missing), maximum', nums('slots')], levelRow('slots', slots, 'Spell slots'));
+        for (const p of C.panels) if (p.type === 'trackers') for (const r of p.rows) {
+            const k = kk(r.name);
+            if (!k || !has(V, k + '_max')) continue;
+            out.push([trio(k), `${esc(r.name)}: left, spent, maximum`, nums(k)]);
+            if (r.kind === 'levels') out.push(levelRow(k, r.levels, esc(r.name)));
+        }
+        return out;
+    }
     function formulaGuide() {
         const V = vars();
         if (C.view.fb == null) C.view.fb = 'ceil(LEVEL / 4) + 1';
@@ -1443,6 +1474,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             ...uniq(C.classes.filter((c) => c.name).map((c) => kk(c.name))).map((k) => [w(k.toUpperCase() + '_LEVEL'), `Levels in ${esc(C.classes.find((c) => kk(c.name) === k).name)} only`, now(k + '_level')]),
             [w('CANTRIP'), 'Cantrip dice: 1, then 2 at level 5, 3 at 11, 4 at 17. In damage, <code>CANTRIPd10</code> rolls that many d10s', now('cantrip')],
             [C.skills.map((s) => w(s.name.replace(/\s+/g, ''))).join(' '), 'A skill\'s full bonus, its name without spaces', ''],
+            ...resWords(V, w),
         ];
         const syntax = [
             [w('+') + w('-') + w('*') + w('/') + w('( )', '()'), 'Maths. * and / happen before + and −; brackets go first. Results round down.', ''],
