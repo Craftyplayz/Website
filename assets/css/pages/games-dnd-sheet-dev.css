@@ -299,3 +299,5 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb .hb-level .hb-n { width: 56px; }
 .hb-level .hb-x { width: 24px; height: 24px; font-size: 16px; }
 .hb-unit { display: inline-flex; align-items: center; gap: 4px; }
+.hb-table .hb-total td { border-top: 1px solid var(--line); color: var(--muted); font-weight: 600; }
+.hb-table .hb-total b { color: var(--text); }
