@@ -192,6 +192,9 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-link { padding: 0; background: none; border: 0; color: var(--link); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
 .hb-link:hover { text-decoration: underline; }
 .hb-sum { flex: 1 1 200px; min-width: 0; color: var(--muted); font-size: 13px; }
+.hb-sum > span:not(:empty) + .hb-props::before { content: ' · '; }
+.hb-prop { padding: 0; background: none; border: 0; color: inherit; font: inherit; text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
+.hb-prop:hover { color: var(--link); text-decoration-style: solid; }
 .hb-toggle { display: grid; place-items: center; margin-left: auto; }
 .hb-toggle[aria-expanded="true"] { color: var(--accent); }
 .hb-editor { display: grid; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); }

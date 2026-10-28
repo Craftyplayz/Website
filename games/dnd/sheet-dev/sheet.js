@@ -396,7 +396,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         return [r.time, r.range,
             r.mode === 'hit' ? show({ ...ev(r.hit, V), signed: true }) + ' to hit' : '',
             r.mode === 'save' ? `DC ${show(ev(r.dc, V))} ${r.save}` : '',
-            dmgText(r.dmg, V), r.props.join(', ')].filter(Boolean).join(' · ');
+            dmgText(r.dmg, V)].filter(Boolean).join(' · ');
     }
     const fxOne = (e, V) => (e.k === 'buff' ? e.text : e.k === 'heal' ? 'Heals ' + resolve(e.dice, V) : e.k === 'temp' ? resolve(e.dice, V) + ' temp HP' : dmgText([e], V)).trim();
     function fxText(fx, V) {
@@ -611,7 +611,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const isOpen = openRows.has(r.id);
         return `<div class="hb-entry">
             <div class="hb-entry-h">${lead}<button type="button" class="hb-link" data-act="info" data-p="${rp}">${esc(r.name || 'Unnamed')}</button>
-                <span class="hb-sum" data-c="${summaryKey}:${rp}"></span>
+                <span class="hb-sum"><span data-c="${summaryKey}:${rp}"></span>${r.props?.length ? `<span class="hb-props">${r.props.map((n) =>
+                    `<button type="button" class="hb-prop" data-act="prop" data-n="${esc(n)}">${esc(n)}</button>`).join(', ')}</span>` : ''}</span>
                 <button type="button" class="hb-x hb-toggle" data-act="toggle" data-id="${esc(r.id)}" aria-expanded="${isOpen}" aria-label="Edit ${esc(r.name || 'entry')}" title="Edit">${PENCIL}</button></div>
             ${tail}${isOpen ? `<div class="hb-editor">${editor()}</div>` : ''}
         </div>`;
@@ -1104,6 +1105,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             ${spell && wdUrl(r) ? `<p class="muted hb-hint">Full spell text: <a href="${wdUrl(r)}" target="_blank" rel="noopener">${esc(r.name)} on dnd5e.wikidot.com</a></p>` : spell && r.srd ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
     }
     function openDrawer(html) { $('#hb-drawer-body').innerHTML = html; drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); drawer.focus(); }
+    function propInfo(n) {
+        const r = rule('prop', n);
+        openDrawer(`<h2>${esc(n)}</h2><p class="muted">Weapon property</p>
+            <div class="hb-desc">${rulePs(r) || '<p class="muted">No SRD description for this property.</p>'}</div>
+            ${r ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
+    }
     function skillInfo(i) {
         const sk = C.skills[i], v = value('skill:' + i, vars());
         openDrawer(`<h2>${esc(sk.name)}</h2><p class="muted">${esc(sk.ab)} skill, ${PROF.find(([p]) => p === sk.p)?.[1].toLowerCase() || 'not proficient'}</p>
@@ -1347,6 +1354,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'rest') return showDlg({ kind: 'rest', r: b.dataset.r });
         if (act === 'doshort' || act === 'dolong') return rest(act === 'dolong' ? 'long' : 'short');
         if (act === 'skill') return skillInfo(+b.dataset.i);
+        if (act === 'prop') return propInfo(b.dataset.n);
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && !r.desc && !wdUrl(r)) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
         if (act === 'more') { open.more = !open.more; return draw(); }
