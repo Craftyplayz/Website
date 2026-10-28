@@ -320,7 +320,7 @@
                 if (!d || seen.has(d.name)) continue;
                 seen.add(d.name);
                 spells.push({
-                    lvl: d.level || 0, name: d.name, school: d.school || '', time: timing(sp.activation || d.activation), range: rng(sp.range || d.range),
+                    lvl: d.level || 0, name: d.name, school: d.school || '', time: timing(sp.activation || d.activation), trig: d.castingTimeDescription || '', range: rng(sp.range || d.range),
                     comp: comp(d.components) + (d.componentsDescription ? ` (${d.componentsDescription})` : ''), dur: dur(d.duration),
                     conc: !!d.concentration, ritual: !!d.ritual, prep: !!(sp.prepared || sp.alwaysPrepared || !d.level),
                     mode: d.requiresSavingThrow ? 'save' : d.requiresAttackRoll ? 'atk' : 'none', save: d.saveDcAbilityId ? statKey(d.saveDcAbilityId) : 'DEX',
