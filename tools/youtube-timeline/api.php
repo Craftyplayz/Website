@@ -49,8 +49,8 @@ function yt_get($urls)
 
 $list = (string)($_GET['list'] ?? '');
 $tok = (string)($_GET['token'] ?? '');
-if (!preg_match('/^[A-Za-z0-9_-]{10,80}$/', $list) || !preg_match('/^[A-Za-z0-9_-]{0,200}$/', $tok)) yt_out(['error' => 'That isn\'t a playlist link.'], 400);
-if ($key === '') yt_out(['error' => 'The YouTube API key isn\'t set up on this site yet.'], 503);
+if (!preg_match('/^[A-Za-z0-9_-]{10,80}$/', $list) || !preg_match('/^[A-Za-z0-9_-]{0,200}$/', $tok)) yt_out(['error' => 'That isn\'t a playlist link.']);
+if ($key === '') yt_out(['error' => 'The YouTube API key isn\'t set up on this site yet.']);
 
 $file = "$cache/" . md5("$list|$tok") . '.json';
 $age = is_file($file) ? time() - filemtime($file) : null;
@@ -62,13 +62,14 @@ if ($tok === '') $urls['head'] = $api . 'playlists?' . http_build_query(['part' 
 $r = yt_get($urls);
 [$code, $items] = $r['items'];
 
-if ($code == 404 || ($tok === '' && $code == 200 && empty($r['head'][1]['items']))) yt_out(['error' => 'Couldn\'t find that playlist. Check it\'s public or unlisted, not private.'], 404);
+if ($code == 404 || ($tok === '' && $code == 200 && empty($r['head'][1]['items']))) yt_out(['error' => 'Couldn\'t find that playlist. Check it\'s public or unlisted, not private.']);
 if ($code != 200 || !isset($items['items'])) {
     if ($age !== null) yt_out(json_decode(file_get_contents($file), true) + ['stale' => $age]); // stale beats blank
     $reason = $items['error']['errors'][0]['reason'] ?? '';
+    $detail = $items['error']['details'][0]['reason'] ?? $reason; // e.g. API_KEY_IP_ADDRESS_BLOCKED; never contains the key
     yt_out(['error' => match (true) {
         $reason === 'quotaExceeded' => 'The site has used today\'s YouTube allowance. Try again tomorrow.',
-        $code == 400 || $code == 403 => 'The site\'s YouTube API key isn\'t set up yet.', // key blocked, wrong IP or API not enabled
+        $code == 400 || $code == 403 => "The site's YouTube API key isn't set up yet ($detail).", // key blocked, wrong IP or API not enabled
         default => 'Couldn\'t reach YouTube. Try again in a minute.',
     }]);
 }
