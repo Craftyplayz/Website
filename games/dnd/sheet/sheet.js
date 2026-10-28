@@ -135,7 +135,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const ROW = {
         attack: () => ({ id: uid(), name: '', time: 'Action', range: '', props: [], mode: 'hit', hit: 'STR + PROF', save: 'DEX', dc: '8 + PROF + STR', dmg: [{ dice: '1d6 + STR', type: 'Slashing' }], desc: '' }),
         spell: () => ({ id: uid(), lvl: 0, name: '', school: '', time: 'Action', range: '', comp: '', dur: '', conc: false, ritual: false, prep: false, mode: 'none', save: 'DEX', dc: '', dmg: [], desc: '', higher: '', srd: '' }),
-        item: () => ({ id: uid(), cat: 'Gear', eq: false, att: '', name: '', qty: 1, wt: 0, notes: '' }),
+        item: () => ({ id: uid(), cat: 'Gear', eq: false, att: '', name: '', qty: 1, wt: 0, gp: '', notes: '' }),
         list: () => ({ id: uid(), name: '', src: '', text: '', uses: '', used: 0, reset: '', grp: '' }),
         // kind: count (left / max), pips (boxes ticked as used) or levels (a row of boxes per level, like spell slots)
         tracker: () => ({ id: uid(), name: '', kind: 'count', cur: 1, max: 1, used: 0, reset: 'long', group: '', levels: [] }),
@@ -291,6 +291,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             if (q.type === 'spells') {
                 q.meta = rows(q.meta, ROW.meta);
                 q.sp = Object.assign({ cur: 0, max: 0 }, isObj(q.sp) ? q.sp : {});
+                if (!('used' in q.sp)) q.sp.used = Math.max(0, nm(q.sp.max) - nm(q.sp.cur)); // was a left/max counter, now boxes
                 q.slots = Array.from({ length: 9 }, (_, l) => Object.assign({ max: 0, used: 0 }, isObj(q.slots && q.slots[l]) ? q.slots[l] : {}));
             }
             return q;
@@ -405,11 +406,21 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     let noteQ = '';
     const panelOf = (rp) => get(rp.split('.').slice(0, 2).join('.'));
 
+    // each part of an action's summary links to its SRD rule (rules.js); names is "a|b" for more than one rule
+    const ruleLink = (kind, names, text, title, sub) => (String(names).split('|').some((n) => rule(kind, n))
+        ? `<button type="button" class="hb-prop" data-act="rinfo" data-k="${kind}" data-n="${esc(names)}" data-t="${esc(title)}" data-s="${esc(sub)}">${esc(text)}</button>` : esc(text));
+    function rangeRules(range) {
+        const s = String(range), first = +(s.match(/\d+/) || [0])[0];
+        return [(/\bor\b/.test(s) || (!s.includes('/') && first && first <= 10)) && 'melee attacks', (s.includes('/') || first > 10) && 'ranged attacks'].filter(Boolean).join('|');
+    }
     function actSum(r, V) {
-        return [r.time, r.range,
-            r.mode === 'hit' ? show({ ...ev(r.hit, V), signed: true }) + ' to hit' : '',
-            r.mode === 'save' ? `DC ${show(ev(r.dc, V))} ${r.save}` : '',
-            dmgText(r.dmg, V), r.props.join(', ')].filter(Boolean).join(' · ');
+        return [r.time && ruleLink('act', String(r.time).toLowerCase(), r.time, r.time, 'Timing'),
+            r.range && ruleLink('act', rangeRules(r.range), r.range, 'Range: ' + r.range, 'Range'),
+            r.mode === 'hit' ? ruleLink('act', 'attack rolls', show({ ...ev(r.hit, V), signed: true }) + ' to hit', 'Attack rolls', 'To hit') : '',
+            r.mode === 'save' ? ruleLink('act', 'saving throws', `DC ${show(ev(r.dc, V))} ${r.save}`, 'Saving throws', 'Save') : '',
+            r.dmg.filter((d) => d.dice || d.type).map((d) => [d.dice && ruleLink('act', 'damage rolls', resolve(d.dice, V), 'Damage rolls', 'Damage'),
+                d.type && ruleLink('dmg', d.type, d.type, d.type + ' damage', 'Damage type')].filter(Boolean).join(' ')).join(' + '),
+            r.props.map((n) => ruleLink('prop', n, n, n, 'Weapon property')).join(', ')].filter(Boolean).join(' · ');
     }
     const fxOne = (e, V) => (e.k === 'buff' ? e.text : e.k === 'heal' ? 'Heals ' + resolve(e.dice, V) : e.k === 'temp' ? resolve(e.dice, V) + ' temp HP' : dmgText([e], V)).trim();
     function fxText(fx, V) {
@@ -431,6 +442,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         }
         return null;
     }
+    // path of a counter resource, for views elsewhere that edit the same numbers
+    function resPath(name) {
+        const r = resOf(name);
+        if (!r || r.kind !== 'pips') return '';
+        const pi = C.panels.findIndex((p) => p.type === 'trackers' && p.rows.includes(r));
+        return `panels.${pi}.rows.${C.panels[pi].rows.indexOf(r)}`;
+    }
     const resLeft = (r) => (r.kind === 'pips' ? maxOf(r.max) - nm(r.used) : nm(r.cur));
     const costAmt = (r) => (String(r.cost.amt).trim() ? maxOf(r.cost.amt) : 1);
     function spellSum(r, P, V) {
@@ -450,12 +468,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             case 'tool': { const s = C.profs.tools[a]; return { ...profT(s.ab, s.p, '', V), signed: true }; }
             case 'fx': return { ...ev(get(a), V), why: why(get(a), V) };
             case 'fs': return { ...ev(get(a), V), signed: true, why: why(get(a), V) };
-            case 'asum': return { v: actSum(get(a), V) };
+            case 'asum': return { html: actSum(get(a), V) };
             case 'ssum': return { v: spellSum(get(a), panelOf(a), V) };
             case 'lsum': return { v: get(a).src };
             case 'hsum': return { v: hbSum(get(a), V) };
             case 'msum': return { v: get(a).cost === '' ? '' : `${get(a).cost} SP` };
-            case 'wt': return { v: C.panels[a].rows.reduce((s, r) => s + nm(r.qty) * nm(r.wt), 0) };
+            case 'wt': return { v: Math.round(C.panels[a].rows.reduce((s, r) => s + nm(r.qty) * nm(r.wt), 0) * 100) / 100 + ' lb' };
             case 'att': { const P = C.panels[a], n = P.rows.filter((r) => r.att === 'yes').length; return { v: `${n} / ${nm(P.attMax)}`, warn: n > nm(P.attMax) }; }
             case 'hdl': { const c = C.classes[a]; return { v: `${Math.max(0, nm(c.level) - nm(c.hdUsed))} of ${nm(c.level)} left` }; }
             case 'lvl': return { v: C.classes.length > 1 ? 'Level ' + level() + ' total' : '' };
@@ -477,7 +495,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const V = vars();
         for (const el of document.querySelectorAll('.hb [data-c]')) {
             const r = value(el.dataset.c, V);
-            el.textContent = show(r);
+            if ('html' in r) el.innerHTML = r.html; else el.textContent = show(r);
             el.classList.toggle('hb-bad', !!r.err);
             el.classList.toggle('hb-warn', !!r.warn);
             if (r.err || r.why) el.title = r.err || r.why; else el.removeAttribute('title');
@@ -527,7 +545,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const dl = (id, items) => `<datalist id="${id}">${items.map((x) => `<option value="${esc(x)}">`).join('')}</datalist>`;
         return dl('hb-dl-time', L('time')) + dl('hb-dl-dmg', L('dmg')) + dl('hb-dl-props', L('props')) + dl('hb-dl-speeds', L('speeds')) + dl('hb-dl-tools', TOOLS)
             + dl('hb-dl-race', RACES) + dl('hb-dl-align', ALIGNMENTS) + dl('hb-dl-class', CLASSES) + dl('hb-dl-school', SCHOOLS) + dl('hb-dl-dur', DURATIONS)
-            + dl('hb-dl-weapon', WEAPONS.map((w) => w[0])) + dl('hb-dl-gear', GEAR.map((g) => g[0])) + dl('hb-dl-meta', METAMAGIC.map((m) => m[0]))
+            + dl('hb-dl-weapon', WEAPONS.map((w) => w[0])) + dl('hb-dl-attack', [UNARMED.name, ...WEAPONS.map((w) => w[0])]) + dl('hb-dl-gear', GEAR.map((g) => g[0])) + dl('hb-dl-meta', METAMAGIC.map((m) => m[0]))
             + dl('hb-dl-feat', FEATURES) + dl('hb-dl-src', [...RACES, ...CLASSES, 'Feat', 'Background', 'Item']) + dl('hb-dl-rsrc', RESOURCES)
             + dl('hb-dl-armour', ARMOUR.map((a) => a[0])) + dl('hb-dl-langs', LANGS)
             + dl('hb-dl-hbtime', HB_TIMES.map(([t]) => t)) + dl('hb-dl-cost', uniq([...C.panels.filter((p) => p.type === 'trackers').flatMap((p) => p.rows.filter((r) => r.kind !== 'levels').map((r) => r.name)).filter(Boolean), 'Spell slot', 'Hit points', 'gp', 'Hit dice']))
@@ -632,7 +650,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
 
     function actionEditor(rp, r) {
         return `<div class="hb-grid">
-            <label>Name ${f(rp + '.name', 'Name', { list: 'hb-dl-weapon', ph: 'Longsword' })}</label>
+            <label>Name ${f(rp + '.name', 'Name', { list: 'hb-dl-attack', ph: 'Longsword' })}</label>
             <label>Timing ${f(rp + '.time', 'Timing', { list: 'hb-dl-time' })}</label>
             <label>Range or reach ${f(rp + '.range', 'Range or reach', { ph: '5 ft or 80/320 ft' })}</label>
             <label>Resolves with ${sel(rp + '.mode', 'Resolves with', [['hit', 'Attack roll'], ['save', 'Saving throw'], ['none', 'Nothing']])}</label>
@@ -717,11 +735,11 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const opts = [['all', 'All', p.rows.length], ...lv.map((l) => [String(l), l ? ordinal(l) : 'Cantrips', p.rows.filter((r) => nm(r.lvl) === l).length]),
                 ['prep', 'Prepared', p.rows.filter((r) => r.prep).length], ['meta', 'Metamagic']];
             const cur = pickSub(p, opts);
+            // a "Sorcery points" counter in Resources is the one source; otherwise the tab keeps its own
+            const sp = resPath('Sorcery points'), spP = sp || path + '.sp';
             if (cur === 'meta') return subtabs(path + '.sub', opts, cur) + `
-                <div class="rowi hb-track"><span class="grow">Sorcery points</span>
-                    <button type="button" class="btn small" data-act="track" data-p="${path}.sp" data-d="-1" aria-label="Spend a sorcery point">−</button>
-                    ${f(path + '.sp.cur', 'Sorcery points left', { num: true, cls: 'hb-n' })}<span>/</span>${f(path + '.sp.max', 'Sorcery points maximum', { num: true, cls: 'hb-n' })}
-                    <button type="button" class="btn small" data-act="track" data-p="${path}.sp" data-d="1" aria-label="Get a sorcery point back">+</button></div>
+                <div class="rowi hb-track"><span class="grow">Sorcery points${sp ? ' <small class="muted">(synced with Resources)</small>' : ''}</span>
+                    ${pips(spP + '.used', maxOf(get(spP).max))}<label class="hb-maxl">Max ${f(spP + '.max', 'Sorcery points maximum (number or formula)', { cls: 'hb-n hb-formula' })}</label><small class="muted" data-c="tmax:${spP}.max"></small></div>
                 <div class="hb-list">${p.meta.map((m, i) => { const mp = `${path}.meta.${i}`; return entry(mp, m, 'msum', () => `<div class="hb-entry-h">${f(mp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-meta', ph: 'Quickened Spell' })}<label class="hb-cost">Cost ${f(mp + '.cost', 'Cost in sorcery points', { cls: 'hb-n' })}</label></div>
                     <label class="hb-wide">Description ${f(mp + '.desc', 'Description', { area: true })}</label>
                     <div class="actions">${del(path + '.meta', i, m.name || 'metamagic', 'Remove metamagic')}</div>`); }).join('')}</div>
@@ -750,14 +768,15 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 <td>${f(`${path}.rows.${i}.name`, 'Item', { list: 'hb-dl-gear', ph: 'Rope, 50 ft' })}</td>
                 <td>${sel(`${path}.rows.${i}.cat`, 'Category', cats.map((c) => [c, c]))}</td>
                 <td>${f(`${path}.rows.${i}.qty`, 'Quantity', { num: true, cls: 'hb-n' })}</td>
-                <td>${f(`${path}.rows.${i}.wt`, 'Weight each', { num: true, cls: 'hb-n' })}</td>
+                <td><span class="hb-unit">${f(`${path}.rows.${i}.wt`, 'Weight each in pounds', { num: true, cls: 'hb-n' })}<span class="muted">lb</span></span></td>
+                <td>${f(`${path}.rows.${i}.gp`, 'Cost each in gold', { num: true, cls: 'hb-n', ph: '0' })}</td>
                 <td>${sel(`${path}.rows.${i}.att`, 'Attunement', [['', 'None'], ['needs', 'Needs attunement'], ['yes', 'Attuned']])}</td>
                 <td>${f(`${path}.rows.${i}.notes`, 'Notes')}</td><td>${del(path + '.rows', i, r.name || 'item')}</td></tr>`).join('');
             return `<div class="hb-coins">${['cp', 'sp', 'ep', 'gp', 'pp'].map((c) => `<label>${c.toUpperCase()} ${f(`${path}.coins.${c}`, c.toUpperCase(), { num: true })}</label>`).join('')}</div>
                 <div class="hb-attune"><span>Attuned <b data-c="att:${pi}"></b></span><label>Attunement slots ${f(path + '.attMax', 'Attunement slots', { num: true, cls: 'hb-n' })}</label></div>
                 ${subtabs(path + '.sub', opts, cur)}
-                ${table(['Eq.', 'Item', 'Category', 'Qty', 'Weight', 'Attunement', 'Notes', ''], rows)}
-                <div class="actions">${add(path + '.rows', 'item', 'Add item', ` data-cat="${esc(cur === 'all' ? 'Gear' : cur)}"`)}<span class="muted">Total weight <b data-c="wt:${pi}"></b></span></div>`;
+                ${table(['Eq.', 'Item', 'Category', 'Qty', 'Weight', 'Cost (gp)', 'Attunement', 'Notes', ''], rows && rows + `<tr class="hb-total"><td></td><td colspan="3">Total weight, all items</td><td><b data-c="wt:${pi}"></b></td><td colspan="4"></td></tr>`)}
+                <div class="actions">${add(path + '.rows', 'item', 'Add item', ` data-cat="${esc(cur === 'all' ? 'Gear' : cur)}"`)}</div>`;
         },
 
         // entries (passive abilities, features); each can have uses that come back on a rest
@@ -795,9 +814,19 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                         <label class="hb-maxl">Max ${f(`${rp}.levels.${j}.max`, 'Maximum (number or formula)', { cls: 'hb-n hb-formula' })}</label>
                         ${pips(`${rp}.levels.${j}.used`, maxOf(l.max, V))}${del(rp + '.levels', j, (l.label || 'level') + ' level')}
                     </div>`).join('')}<div class="actions">${add(rp + '.levels', 'level', 'Add level')}</div></div>` : '';
+                const edit = (on) => `<button type="button" class="hb-x hb-toggle" data-act="toggle" data-id="${esc(r.id)}" aria-expanded="${on}" aria-label="Edit ${esc(r.name || 'resource')}" title="${on ? 'Done' : 'Edit'}">${PENCIL}</button>`;
+                // slots by level stay compact (Lv1 and its boxes, levels with at least one slot) until the pencil opens the full editor
+                if (r.kind === 'levels' && !openRows.has(r.id)) {
+                    const lv = r.levels.map((l, j) => [l, j]).filter(([l]) => maxOf(l.max, V) > 0)
+                        .map(([l, j]) => `<span class="hb-slot"><small>Lv${j + 1}</small>${pips(`${rp}.levels.${j}.used`, maxOf(l.max, V))}</span>`).join('');
+                    return `<div class="hb-entry hb-res">
+                        <div class="hb-entry-h"><b class="grow">${esc(r.name || 'Spell slots')}</b>${edit(false)}</div>
+                        <div class="hb-levels">${lv || '<p class="muted">No slots yet. Press the pencil to set them.</p>'}</div>
+                    </div>`;
+                }
                 return `<div class="hb-entry hb-res">
                     <div class="hb-entry-h">${head}${main}${sel(rp + '.reset', 'Resets on', RESETS)}
-                        ${tabs.length ? sel(rp + '.group', 'Tab', [['', 'No tab'], ...tabs.map((t) => [t, t])]) : ''}${del(path + '.rows', i, r.name || 'resource')}</div>
+                        ${tabs.length ? sel(rp + '.group', 'Tab', [['', 'No tab'], ...tabs.map((t) => [t, t])]) : ''}${r.kind === 'levels' ? edit(true) : ''}${del(path + '.rows', i, r.name || 'resource')}</div>
                     ${levels}
                 </div>`;
             };
@@ -977,7 +1006,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             }
             if (p.type === 'list') for (const r of p.rows.filter(due)) r.used = 0;
             if (kind !== 'long') continue;
-            if (p.type === 'spells') { for (const s of p.slots) s.used = 0; p.sp.cur = p.sp.max; }
+            if (p.type === 'spells') { for (const s of p.slots) s.used = 0; p.sp.used = 0; }
             if (p.type === 'combat') { p.ok = 0; p.bad = 0; }
         }
         if (kind === 'long') {
@@ -1038,6 +1067,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         } catch (e) { toast(`Couldn't load ${r.name} from the SRD. Try again in a minute.`, 'err'); }
     }
 
+    // SRD 5.2 (CC-BY-4.0) unarmed strike: 1 + STR bludgeoning, or grapple / shove
+    const UNARMED = { name: 'Unarmed Strike', range: '5 ft', mode: 'hit', hit: 'STR + PROF', dmg: [{ dice: '1 + STR', type: 'Bludgeoning' }],
+        desc: 'Instead of using a weapon to make a melee attack, you can use a punch, kick, head-butt, or similar forceful blow. Whenever you use your Unarmed Strike, choose one of the following options for its effect.\n'
+            + 'Damage. You make an attack roll against the target. Your bonus to the roll equals your Strength modifier plus your Proficiency Bonus. On a hit, the target takes Bludgeoning damage equal to 1 plus your Strength modifier.\n'
+            + 'Grapple. The target must succeed on a Strength or Dexterity saving throw (it chooses which), or it has the Grappled condition. The DC for the saving throw and any escape attempts equals 8 plus your Strength modifier and Proficiency Bonus. This grapple is possible only if the target is no more than one size larger than you and if you have a hand free to grab it.\n'
+            + 'Shove. The target must succeed on a Strength or Dexterity saving throw (it chooses which), or you either push it 5 feet away or cause it to have the Prone condition. The DC for the saving throw equals 8 plus your Strength modifier and Proficiency Bonus. This shove is possible only if the target is no more than one size larger than you.' };
     // picking a known weapon, item or metamagic from the suggestions fills in the rest of its row
     const named = (list, name) => list.find((x) => x[0].toLowerCase() === String(name).trim().toLowerCase());
     function rowFill(k) {
@@ -1046,6 +1081,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const m = named(METAMAGIC, r.name);
             if (!m) return false;
             Object.assign(r, { name: m[0], cost: m[1], desc: r.desc || m[2] });
+        } else if (P.type === 'attacks' && named([[UNARMED.name]], r.name)) {
+            Object.assign(r, { ...UNARMED, props: [], dmg: UNARMED.dmg.map((d) => ({ ...d })), desc: r.desc || UNARMED.desc });
         } else if (P.type === 'attacks') {
             const w = named(WEAPONS, r.name);
             if (!w) return false;
@@ -1117,6 +1154,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             ${spell && wdUrl(r) ? `<p class="muted hb-hint">Full spell text: <a href="${wdUrl(r)}" target="_blank" rel="noopener">${esc(r.name)} on dnd5e.wikidot.com</a></p>` : spell && r.srd ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
     }
     function openDrawer(html) { $('#hb-drawer-body').innerHTML = html; drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); drawer.focus(); }
+    function ruleInfo(kind, names, title, sub) {
+        const list = names.split('|').filter((n) => rule(kind, n));
+        const body = list.length === 1 ? rulePs(rule(kind, list[0]))
+            : list.map((n) => `<h4>${esc(n[0].toUpperCase() + n.slice(1))}</h4>${rulePs(rule(kind, n))}`).join('');
+        openDrawer(`<h2>${esc(title)}</h2><p class="muted">${esc(sub)}</p><div class="hb-desc">${body}</div><p class="muted hb-hint">${SRD_CREDIT}</p>`);
+    }
     function skillInfo(i) {
         const sk = C.skills[i], v = value('skill:' + i, vars());
         openDrawer(`<h2>${esc(sk.name)}</h2><p class="muted">${esc(sk.ab)} skill, ${PROF.find(([p]) => p === sk.p)?.[1].toLowerCase() || 'not proficient'}</p>
@@ -1227,6 +1270,10 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     let dlgMode = null;
     const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : dlgMode.kind === 'ddb' ? ddbDlg() : formulaDlg(dlgMode));
     function draw() {
+        // sorcery points are boxes: an old counter turns into boxes with the same number left
+        for (const p of C.panels) if (p.type === 'trackers') for (const r of p.rows) if (r.kind === 'count' && /^sorcery points?$/i.test(String(r.name).trim())) {
+            Object.assign(r, { kind: 'pips', used: Math.max(0, maxOf(r.max) - nm(r.cur)) });
+        }
         $('#hb-bar').innerHTML = bar();
         root.innerHTML = top() + `<div class="hb-top-panels">${panels()}</div><div hidden>${datalists()}</div>`;
         if (dlg.open && dlgMode && dlgMode.kind !== 'rest' && dlgMode.kind !== 'ddb') dlgBody.innerHTML = dlgHTML();
@@ -1317,7 +1364,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             P.sub = 't:' + to;
             saveNow(); return draw();
         }
-        if (/\.notes\.\d+\.group$/.test(k) || /^panels\.\d+\.rows\.\d+\.(uses|max|group)$/.test(k) || /\.levels\.\d+\.max$/.test(k)) { saveNow(); return draw(); }
+        if (/\.notes\.\d+\.group$/.test(k) || /^panels\.\d+\.rows\.\d+\.(uses|max|group)$/.test(k) || /\.(levels\.\d+|sp)\.max$/.test(k)) { saveNow(); return draw(); }
         if (/^classes\.\d+\.name$/.test(k)) { const d = HIT_DIE[el.value.trim().toLowerCase()]; if (d) set(k.replace(/name$/, 'die'), d); }
         if (/^panels\.\d+\.rows\.\d+\.name$/.test(k) && panelOf(k).type === 'spells' && el.value.trim()) srdFill(k.replace(/\.name$/, ''));
         if (/^panels\.\d+\.(rows|meta)\.\d+\.name$/.test(k) && rowFill(k)) return;
@@ -1360,6 +1407,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'rest') return showDlg({ kind: 'rest', r: b.dataset.r });
         if (act === 'doshort' || act === 'dolong') return rest(act === 'dolong' ? 'long' : 'short');
         if (act === 'skill') return skillInfo(+b.dataset.i);
+        if (act === 'rinfo') return ruleInfo(b.dataset.k, b.dataset.n, b.dataset.t, b.dataset.s);
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && !r.desc && !wdUrl(r)) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
         if (act === 'more') { open.more = !open.more; return draw(); }
@@ -1401,10 +1449,11 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 count: { kind: 'count' },
                 pips: { kind: 'pips', max: '3' },
                 levels: { kind: 'levels', name: 'Spell slots', levels: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'].map((label) => ({ label, max: '0', used: 0 })) },
-                sorcery: { kind: 'count', name: 'Sorcery points', max: cls('sorcerer') },
+                sorcery: { kind: 'pips', name: 'Sorcery points', max: cls('sorcerer') },
                 ki: { kind: 'count', name: 'Ki points', max: cls('monk'), reset: 'short' },
             }[kind] || {});
             r.cur = maxOf(r.max);
+            if (kind === 'levels') openRows.add(r.id);
             P.rows.push(r);
             saveNow(); return draw();
         }
