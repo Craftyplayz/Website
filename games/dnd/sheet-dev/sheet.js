@@ -126,7 +126,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const FX_KINDS = [['dmg', 'Damage'], ['heal', 'Healing'], ['temp', 'Temp HP'], ['buff', 'Buff / utility']];
     const TRACKER_KINDS = [['count', 'Counter'], ['pips', 'Boxes'], ['levels', 'Slots by level'], ['sorcery', 'Sorcery points'], ['ki', 'Ki points']];
     const PROF = [[0, 'Not proficient'], [0.5, 'Half proficient'], [1, 'Proficient'], [2, 'Expertise']];
-    const HELP = 'Formulas can use ability keys for modifiers (DEX), _SCORE for scores (DEX_SCORE), PROF, LEVEL, class levels (FIGHTER_LEVEL), skill names without spaces (SleightofHand), numbers, + - * / ( ), min(), max(), floor(), ceil(), and [labels] like 2 [Shield]. Results round down.';
+    const HELP = 'Formulas can use ability keys for modifiers (DEX), _SCORE for scores (DEX_SCORE), PROF, LEVEL, CANTRIP (cantrip dice, CANTRIPd10), class levels (FIGHTER_LEVEL), skill names without spaces (SleightofHand), numbers, + - * / ( ), min(), max(), floor(), ceil(), and [labels] like 2 [Shield]. Results round down.';
     // non-SRD spells (srd: 'wd:<slug>') carry stats only; their text is linked on dnd5e.wikidot.com
     const wdUrl = (r) => (String(r.srd || '').startsWith('wd:') ? 'https://dnd5e.wikidot.com/spell:' + r.srd.slice(3) : '');
     const SRD_CREDIT = 'From the <a href="https://dnd.wizards.com/resources/systems-reference-document" target="_blank" rel="noopener">System Reference Document 5.1</a> by Wizards of the Coast, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC-BY-4.0</a>.';
@@ -282,6 +282,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const q = Object.assign(newPanel(p.type), p);
             if (q.rows) q.rows = rows(q.rows, PANEL_ROW[q.type]).map((r) => {
                 if ('dmg' in r) r.dmg = rows(r.dmg, ROW.dmg);
+                // SRD cantrips filled before CANTRIP existed: their dice now scale with level
+                if ('lvl' in r && !nm(r.lvl) && r.srd && !String(r.srd).startsWith('wd:')) for (const d of r.dmg) d.dice = String(d.dice).replace(/^[1-4]d(\d+)$/, 'CANTRIPd$1');
                 if ('props' in r) r.props = strs(r.props);
                 return r;
             });
@@ -369,7 +371,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         return { v: m + Math.floor(V.prof * p) + (b.v || 0), err: b.err };
     }
     function vars() {
-        const V = { level: level() };
+        // CANTRIP: cantrip damage dice by character level (1, then 2 at 5th, 3 at 11th, 4 at 17th)
+        const V = { level: level(), cantrip: 1 + [5, 11, 17].filter((l) => level() >= l).length };
         for (const c of C.classes) if (c.name) V[kk(c.name) + '_level'] = (V[kk(c.name) + '_level'] || 0) + nm(c.level);
         for (const a of C.abilities) { const s = nm(a.score); V[kk(a.key)] = Math.floor((s - 10) / 2); V[kk(a.key) + '_score'] = s; }
         V.prof = ev(C.prof, V).v || 0;
@@ -384,8 +387,10 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (t.length < 2 && !(t[0] && t[0].label)) return '';
         return t.map((x, n) => { const r = ev(x.src, V); return (n ? ` ${x.sign === '-' ? '−' : '+'} ` : x.sign === '-' ? '−' : '') + (x.label || x.src.replace(/^min\(\s*(\w+)\s*,\s*(\d+)\s*\)$/i, '$1 (max $2)')) + (x.label || !/^\d+$/.test(x.src) ? ' ' + show(r) : ''); }).join('');
     }
-    // "1d8 + STR" -> "1d8 + 3"
-    const resolve = (s, V) => String(s || '').replace(/[A-Za-z_]\w*/g, (w) => { const k = w.toLowerCase(); return /^d\d+$/.test(k) || !has(V, k) || isNaN(V[k]) ? w : String(V[k]); })
+    // "1d8 + STR" -> "1d8 + 3"; a variable straight before a die is its count ("CANTRIPd10" -> "2d10")
+    const resolve = (s, V) => String(s || '').replace(/[A-Za-z_]\w*/g, (w) => { const k = w.toLowerCase(), m = k.match(/^(.+?)(d\d+)$/);
+        if (m && has(V, m[1]) && !isNaN(V[m[1]])) return V[m[1]] + m[2];
+        return /^d\d+$/.test(k) || !has(V, k) || isNaN(V[k]) ? w : String(V[k]); })
         .replace(/\+\s*-\s*(\d)/g, '− $1').replace(/\s+/g, ' ').trim();
     const dmgText = (list, V) => list.filter((d) => d.dice || d.type).map((d) => `${resolve(d.dice, V)} ${d.type}`.trim()).join(' + ');
     const ordinal = (n) => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
@@ -1027,6 +1032,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     }
     const pickDice = (d, lvl) => {
         if (d.slot) return d.slot[lvl] || Object.values(d.slot)[0] || '';
+        // the usual cantrip steps (1dX, 2dX, 3dX, 4dX) keep scaling with level
+        const steps = d.char ? Object.values(d.char) : [], die = String(steps[0] || '').split('d')[1];
+        if (steps.length === 4 && steps.every((v, i) => v === `${i + 1}d${die}`)) return 'CANTRIPd' + die;
         if (d.char) { let best = ''; for (const [k, v] of Object.entries(d.char)) if (+k <= level()) best = v; return best || Object.values(d.char)[0] || ''; }
         return '';
     };
