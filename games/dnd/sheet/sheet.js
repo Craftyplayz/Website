@@ -474,6 +474,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     }
     const resLeft = (r) => (r.kind === 'pips' ? maxOf(r.max) - nm(r.used) : nm(r.cur));
     const costAmt = (r) => (String(r.cost.amt).trim() ? maxOf(r.cost.amt) : 1);
+    const ITEM_ATT = [['', 'None'], ['needs', 'Needs attunement'], ['yes', 'Attuned']];
+    // everything the old inventory table showed, on one line that wraps; attributes open their rule
+    const itemFacts = (r) => [r.cat, nm(r.qty) !== 1 ? '×' + nm(r.qty) : '', nm(r.wt) ? `${nm(r.wt)} lb${nm(r.qty) > 1 ? ` each (${Math.round(nm(r.wt) * nm(r.qty) * 100) / 100} lb)` : ''}` : '',
+        String(r.gp).trim() !== '' && nm(r.gp) ? `${nm(r.gp)} gp${nm(r.qty) > 1 ? ' each' : ''}` : '', r.att ? ITEM_ATT.find(([k]) => k === r.att)?.[1] : ''].filter(Boolean);
+    const itemSum = (r) => [...itemFacts(r).map(esc), ...r.props.map((n) => `<button type="button" class="hb-prop" data-act="attr" data-n="${esc(n)}">${esc(n)}</button>`),
+        r.notes ? esc(r.notes) : ''].filter(Boolean).join(' · ');
     function spellSum(r, P, V) {
         return [nm(r.lvl) ? ruleLink('spell', 'spell level', ordinal(nm(r.lvl)), ordinal(nm(r.lvl)) + '-level spell', 'Spell level') : ruleLink('spell', 'cantrips', 'Cantrip', 'Cantrip', 'Spell level'),
             r.time && ruleLink('spell', 'casting time', r.time, 'Casting time: ' + r.time, 'Casting time') + (r.trig ? ', ' + esc(r.trig) : ''),
@@ -497,6 +503,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             case 'fs': return { ...ev(get(a), V), signed: true, why: why(get(a), V) };
             case 'asum': return { html: actSum(get(a), V) };
             case 'ssum': return { html: spellSum(get(a), panelOf(a), V) };
+            case 'isum': return { html: itemSum(get(a)) };
             case 'lsum': return { v: get(a).src };
             case 'hsum': return { v: hbSum(get(a), V) };
             case 'msum': return { v: get(a).cost === '' ? '' : `${get(a).cost} SP` };
@@ -656,8 +663,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <div class="rows">${C.passives.map((p, i) => `<div class="rowi"><button type="button" class="hb-link grow" data-act="sense" data-i="${i}">${esc(p.name)}</button>${fx(`passives.${i}.f`, p.name, false)}${p.unit ? `<small class="muted">${esc(p.unit)}</small>` : ''}</div>`).join('')}</div>
             <label class="hb-lbl hb-other">Other senses ${f('senses', 'Other senses', { area: true, ph: '120 ft magical darkvision' })}</label>
         </section>`;
-        return `<div class="hb-top-id">${id}</div><div class="hb-top-art">${art}</div><div class="hb-top-abil">${abils}</div>
-            <div class="hb-top-combat">${combat}${more}${pinned()}</div><div class="hb-top-saves">${saves}</div><div class="hb-top-senses">${senses}</div>`;
+        return `<div class="hb-top-id">${id}</div><div class="hb-top-abil">${abils}</div><div class="hb-top-combat">${combat}${more}${pinned()}</div>
+            <div class="hb-side"><div class="hb-top-art">${art}</div><div class="hb-top-saves">${saves}</div><div class="hb-top-senses">${senses}</div></div>`;
     }
 
     // notes pinned to the sheet: always on screen, editable in place
@@ -803,21 +810,25 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const cats = uniq([...L('cats'), ...p.rows.map((r) => r.cat).filter(Boolean)]);
             const opts = [['all', 'All', p.rows.length], ...cats.map((c) => [c, c, p.rows.filter((r) => r.cat === c).length])];
             const cur = pickSub(p, opts);
-            const rows = p.rows.map((r, i) => [r, i]).filter(([r]) => cur === 'all' || r.cat === cur).map(([r, i]) => `<tr>
-                <td class="hb-c">${f(`${path}.rows.${i}.eq`, 'Equipped', { check: true })}</td>
-                <td>${f(`${path}.rows.${i}.name`, 'Item', { list: 'hb-dl-gear', ph: 'Rope, 50 ft' })}</td>
-                <td>${sel(`${path}.rows.${i}.cat`, 'Category', cats.map((c) => [c, c]))}</td>
-                <td>${f(`${path}.rows.${i}.qty`, 'Quantity', { num: true, cls: 'hb-n' })}</td>
-                <td><span class="hb-unit">${f(`${path}.rows.${i}.wt`, 'Weight each in pounds', { num: true, cls: 'hb-n' })}<span class="muted">lb</span></span></td>
-                <td>${f(`${path}.rows.${i}.gp`, 'Cost each in gold', { num: true, cls: 'hb-n', ph: '0' })}</td>
-                <td>${sel(`${path}.rows.${i}.att`, 'Attunement', [['', 'None'], ['needs', 'Needs attunement'], ['yes', 'Attuned']])}</td>
-                <td><div class="hb-attrs">${r.props.map((n) => `<span class="hb-attr"><button type="button" class="hb-prop" data-act="attr" data-n="${esc(n)}">${esc(n)}</button><button type="button" class="hb-x" data-act="chip" data-p="${path}.rows.${i}.props" data-n="${esc(n)}" aria-label="Remove ${esc(n)}" title="Remove">&times;</button></span>`).join('')}
-                    <input class="field hb-tagin hb-attrin" data-p="${path}.rows.${i}.props" list="hb-dl-attr" placeholder="Add" aria-label="Add an attribute to ${esc(r.name || 'this item')}" autocomplete="off"></div></td>
-                <td>${f(`${path}.rows.${i}.notes`, 'Notes')}</td><td>${del(path + '.rows', i, r.name || 'item')}</td></tr>`).join('');
+            // like spells: equipped box, name (opens the details), a summary that wraps, and the fields behind the pencil
+            const list = p.rows.map((r, i) => [r, i]).filter(([r]) => cur === 'all' || r.cat === cur).map(([r, i]) => { const rp = `${path}.rows.${i}`; return entry(rp, r, 'isum', () => `<div class="hb-grid">
+                    <label>Name ${f(rp + '.name', 'Item', { list: 'hb-dl-gear', ph: 'Rope, 50 ft' })}</label>
+                    <label>Category ${sel(rp + '.cat', 'Category', cats.map((c) => [c, c]))}</label>
+                    <label>Quantity ${f(rp + '.qty', 'Quantity', { num: true })}</label>
+                    <label>Weight each (lb) ${f(rp + '.wt', 'Weight each in pounds', { num: true })}</label>
+                    <label>Cost each (gp) ${f(rp + '.gp', 'Cost each in gold', { num: true, ph: '0' })}</label>
+                    <label>Attunement ${sel(rp + '.att', 'Attunement', ITEM_ATT)}</label>
+                </div>
+                <div class="hb-wide"><span class="muted">Attributes</span><div class="hb-attrs">${r.props.map((n) => `<span class="hb-attr"><button type="button" class="hb-prop" data-act="attr" data-n="${esc(n)}">${esc(n)}</button><button type="button" class="hb-x" data-act="chip" data-p="${rp}.props" data-n="${esc(n)}" aria-label="Remove ${esc(n)}" title="Remove">&times;</button></span>`).join('')}
+                    <input class="field hb-tagin hb-attrin" data-p="${rp}.props" list="hb-dl-attr" placeholder="Add" aria-label="Add an attribute to ${esc(r.name || 'this item')}" autocomplete="off"></div></div>
+                <label class="hb-wide">Notes ${f(rp + '.notes', 'Notes', { area: true })}</label>
+                <div class="actions">${del(path + '.rows', i, r.name || 'item', 'Remove item')}</div>`,
+                `<label class="hb-prep" title="Equipped">${f(rp + '.eq', 'Equipped', { check: true })}</label>`); }).join('');
             return `<div class="hb-coins">${['cp', 'sp', 'ep', 'gp', 'pp'].map((c) => `<label>${c.toUpperCase()} ${f(`${path}.coins.${c}`, c.toUpperCase(), { num: true })}</label>`).join('')}</div>
                 <div class="hb-attune"><span>Attuned <b data-c="att:${pi}"></b></span><label>Attunement slots ${f(path + '.attMax', 'Attunement slots', { num: true, cls: 'hb-n' })}</label></div>
                 ${subtabs(path + '.sub', opts, cur)}
-                ${table(['Eq.', 'Item', 'Category', 'Qty', 'Weight', 'Cost (gp)', 'Attunement', 'Attributes', 'Notes', ''], rows && rows + `<tr class="hb-total"><td></td><td colspan="3">Total weight, all items</td><td><b data-c="wt:${pi}"></b></td><td colspan="5"></td></tr>`)}
+                <div class="hb-list">${list}</div>
+                ${p.rows.length ? `<p class="hb-wt">Total weight, all items <b data-c="wt:${pi}"></b></p>` : ''}
                 <div class="actions">${add(path + '.rows', 'item', 'Add item', ` data-cat="${esc(cur === 'all' ? 'Gear' : cur)}"`)}</div>`;
         },
 
@@ -1244,6 +1255,10 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const r = get(rp), V = vars(), spell = 'lvl' in r, P = panelOf(rp);
         const kv = (rows) => rows.filter(([, v]) => v).map(([k, v]) => `<div class="kv"><span>${k}</span><span>${esc(v)}</span></div>`).join('');
         // list entries and metamagic: just a source or cost, uses and the text
+        if (P.type === 'items') return openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc([r.cat, r.eq ? 'Equipped' : ''].filter(Boolean).join(', '))}</p>
+            ${kv([['Quantity', String(nm(r.qty))], ['Weight', nm(r.wt) ? `${nm(r.wt)} lb each` : ''], ['Cost', nm(r.gp) ? `${nm(r.gp)} gp each` : ''], ['Attunement', r.att ? ITEM_ATT.find(([k]) => k === r.att)?.[1] : '']])}
+            ${r.props.length ? `<h4>Attributes</h4><p>${r.props.map((n) => `<button type="button" class="hb-prop" data-act="attr" data-n="${esc(n)}">${esc(n)}</button>`).join(', ')}</p>` : ''}
+            <div class="hb-desc">${paras(r.notes) || '<p class="muted">No notes yet. Add some with the edit button.</p>'}</div>`);
         if (!('time' in r)) {
             const uses = String(r.uses ?? '').trim() ? `${maxOf(r.uses, V)}${r.reset ? ', back on a ' + RESETS.find(([k]) => k === r.reset)[1].toLowerCase() : ''}` : '';
             return openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(r.src || '')}</p>

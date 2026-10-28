@@ -35,11 +35,14 @@
 .hb-top-saves { grid-area: saves; }
 .hb-top-senses { grid-area: senses; }
 .hb-top-panels { grid-area: panels; min-width: 0; }
+/* art, saves and senses: separate grid cells on phones, one tight stack in the right column from 960 px */
+.hb-side { display: contents; }
 @media (min-width: 960px) {
     .hb-sheet {
-        grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto auto auto auto auto 1fr;
-        grid-template-areas: "id art" "abil art" "combat art" "panels saves" "panels senses" "panels .";
+        grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto auto auto 1fr;
+        grid-template-areas: "id side" "abil side" "combat side" "panels side";
     }
+    .hb-side { grid-area: side; display: flex; flex-direction: column; gap: 16px; align-self: start; min-width: 0; }
 }
 
 .hb-id { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 110px), 1fr)); gap: 8px; }
@@ -327,3 +330,5 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-unit { display: inline-flex; align-items: center; gap: 4px; }
 .hb-table .hb-total td { border-top: 1px solid var(--line); color: var(--muted); font-weight: 600; }
 .hb-table .hb-total b { color: var(--text); }
+.hb-wt { margin: 8px 0 0; color: var(--muted); font-size: 14px; font-weight: 600; }
+.hb-wt b { color: var(--text); }
