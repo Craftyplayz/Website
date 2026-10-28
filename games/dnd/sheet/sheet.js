@@ -134,7 +134,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const nm = (x) => parseFloat(x) || 0;
     const ROW = {
         attack: () => ({ id: uid(), name: '', time: 'Action', range: '', props: [], mode: 'hit', hit: 'STR + PROF', save: 'DEX', dc: '8 + PROF + STR', dmg: [{ dice: '1d6 + STR', type: 'Slashing' }], desc: '' }),
-        spell: () => ({ id: uid(), lvl: 0, name: '', school: '', time: 'Action', range: '', comp: '', dur: '', conc: false, ritual: false, prep: false, mode: 'none', save: 'DEX', dc: '', dmg: [], desc: '', higher: '', srd: '' }),
+        spell: () => ({ id: uid(), lvl: 0, name: '', school: '', time: 'Action', trig: '', range: '', comp: '', dur: '', conc: false, ritual: false, prep: false, mode: 'none', save: 'DEX', dc: '', dmg: [], desc: '', higher: '', srd: '' }),
         item: () => ({ id: uid(), cat: 'Gear', eq: false, att: '', name: '', qty: 1, wt: 0, gp: '', notes: '' }),
         list: () => ({ id: uid(), name: '', src: '', text: '', uses: '', used: 0, reset: '', grp: '' }),
         // kind: count (left / max), pips (boxes ticked as used) or levels (a row of boxes per level, like spell slots)
@@ -465,7 +465,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const costAmt = (r) => (String(r.cost.amt).trim() ? maxOf(r.cost.amt) : 1);
     function spellSum(r, P, V) {
         return [nm(r.lvl) ? ruleLink('spell', 'spell level', ordinal(nm(r.lvl)), ordinal(nm(r.lvl)) + '-level spell', 'Spell level') : ruleLink('spell', 'cantrips', 'Cantrip', 'Cantrip', 'Spell level'),
-            r.time && ruleLink('spell', 'casting time', r.time, 'Casting time: ' + r.time, 'Casting time'),
+            r.time && ruleLink('spell', 'casting time', r.time, 'Casting time: ' + r.time, 'Casting time') + (r.trig ? ', ' + esc(r.trig) : ''),
             r.range && ruleLink('spell', 'spell range', r.range, 'Range: ' + r.range, 'Range'),
             r.conc ? ruleLink('spell', 'concentration', 'Concentration', 'Concentration', 'Duration') : '',
             r.ritual ? ruleLink('spell', 'rituals', 'Ritual', 'Ritual', 'Casting') : '',
@@ -705,6 +705,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <label>Level ${f(rp + '.lvl', 'Level, 0 for a cantrip', { num: true })}</label>
             <label>School ${f(rp + '.school', 'School', { list: 'hb-dl-school', ph: 'Evocation' })}</label>
             <label>Casting time ${f(rp + '.time', 'Casting time', { list: 'hb-dl-time' })}</label>
+            ${/reaction/i.test(r.time) || r.trig ? `<label>Reaction trigger ${f(rp + '.trig', 'When you can take the reaction', { ph: 'which you take when you are hit by an attack' })}</label>` : ''}
             <label>Range ${f(rp + '.range', 'Range', { ph: '150 feet' })}</label>
             <label>Components ${f(rp + '.comp', 'Components', { ph: 'V, S, M (bat guano)' })}</label>
             <label>Duration ${f(rp + '.dur', 'Duration', { list: 'hb-dl-dur', ph: 'Instantaneous' })}</label>
@@ -1069,7 +1070,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const ct = s.casting_time || '';
         Object.assign(r, {
             name: s.name, lvl: nm(s.level), school: s.school || '', range: s.range || '', dur: s.duration || '',
-            time: /^1 action$/i.test(ct) ? 'Action' : /^1 bonus action$/i.test(ct) ? 'Bonus action' : /^1 reaction/i.test(ct) ? 'Reaction' : ct,
+            time: /^1 action$/i.test(ct) ? 'Action' : /^1 bonus action$/i.test(ct) ? 'Bonus action' : /^1 reaction/i.test(ct) ? 'Reaction' : ct, trig: s.trigger || '',
             comp: (s.components || []).join(', ') + (s.material ? ` (${s.material})` : ''),
             conc: !!s.concentration, ritual: !!s.ritual, mode: s.save ? 'save' : s.attack_type ? 'atk' : 'none', save: s.save || r.save,
             dmg: (s.damage || []).map((d) => ({ dice: pickDice(d, nm(s.level)), type: d.type || '' })).filter((d) => d.dice),
@@ -1173,7 +1174,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             ${r.fx.some((e) => e.dice || e.text) ? `<h4>Effects</h4><ul class="hb-plain">${r.fx.filter((e) => e.dice || e.text).map((e) => `<li>${esc(fxOne(e, V))}</li>`).join('')}</ul>` : ''}
             <div class="hb-desc">${paras(r.desc)}</div>`);
         openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(head || '')}</p>
-            ${kv(spell ? [['Casting time', r.time], ['Range', r.range], ['Components', r.comp], ['Duration', (r.conc ? 'Concentration, ' : '') + r.dur], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)]]
+            ${kv(spell ? [['Casting time', r.time + (r.trig ? ', ' + r.trig : '')], ['Range', r.range], ['Components', r.comp], ['Duration', (r.conc ? 'Concentration, ' : '') + r.dur], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)]]
                 : [['Timing', r.time], ['Range', r.range], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)], ['Properties', r.props.filter((n) => !rule('prop', n)).join(', ')]])}
             <div class="hb-desc">${paras(r.desc) || '<p class="muted">No description yet. Add one with the edit button.</p>'}
             ${spell && r.higher ? `<p><b>At higher levels.</b></p>${paras(r.higher)}` : ''}</div>
