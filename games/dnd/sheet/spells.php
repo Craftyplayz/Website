@@ -21,7 +21,7 @@ function srd_get($url, $trim, $html = false)
 {
     $dir = sys_get_temp_dir() . '/craftyplayz-srd';
     // bump the html tag when the wikidot parser changes, to drop its old cached text
-    $file = $dir . '/' . md5($url . ($html ? '#html5' : '')) . '.json';
+    $file = $dir . '/' . md5($url . ($html ? '#html5' : '#v2')) . '.json';
     if (is_file($file) && time() - filemtime($file) < SRD_TTL) return [file_get_contents($file), 200];
     // a recent 404 is remembered so made-up names can't hammer the API
     if (is_file($file . '.miss') && time() - filemtime($file . '.miss') < 86400) return [null, 404];
@@ -49,6 +49,28 @@ function srd_get($url, $trim, $html = false)
 }
 
 // "which you take when ..." from a wikidot page; the SRD API drops a reaction's trigger
+// fills a missing save, spell attack or damage from the spell's text ("a Wisdom saving throw", "1d6 psychic damage")
+function spell_mech($s)
+{
+    // stop at a summoned creature's stat block, its attacks aren't the spell's
+    $t = '';
+    foreach ((array)($s['desc'] ?? []) as $p) { if (stripos($p, 'Armor Class') === 0) break; $t .= ' ' . $p; }
+    if (empty($s['save']) && preg_match('~(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) saving throw~i', $t, $m)) $s['save'] = strtoupper(substr($m[1], 0, 3));
+    if (empty($s['attack_type']) && preg_match('~(melee|ranged) spell attack~i', $t, $m)) $s['attack_type'] = strtolower($m[1]);
+    if (empty($s['damage']) && preg_match_all('~(\d+d\d+(?:\s*\+\s*\d+)?)\s+(acid|bludgeoning|cold|fire|force|lightning|necrotic|piercing|poison|psychic|radiant|slashing|thunder)\s+damage~i', $t, $ms, PREG_SET_ORDER)) {
+        $s['damage'] = [];
+        foreach ($ms as [, $dice, $type]) {
+            $type = ucfirst(strtolower($type));
+            if (in_array($type, array_column($s['damage'], 'type'))) continue;
+            $die = preg_match('~^1d(\d+)$~', $dice, $d) ? $d[1] : '';
+            // cantrips use the usual 1dX..4dX steps so the sheet scales them with character level
+            $s['damage'][] = ['type' => $type, 'slot' => (int)$s['level'] || !$die ? [(string)(int)$s['level'] => $dice] : null,
+                'char' => (int)$s['level'] || !$die ? null : ['1' => $dice, '5' => "2d$die", '11' => "3d$die", '17' => "4d$die"]];
+        }
+    }
+    return $s;
+}
+
 function wd_trigger($html)
 {
     return preg_match('~Casting Time:</strong>\s*1 reaction,\s*(.*?)<br~is', $html, $m) ? trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8')) : '';
@@ -84,13 +106,13 @@ if (substr($i, 0, 3) === 'wd:') {
             }
             return ['desc' => $desc, 'higher_level' => $higher, 'trigger' => wd_trigger($j['html'])];
         }, true);
-        srd_out(200, ['wd' => $url, 'index' => $i] + $s + (json_decode((string)$text, true) ?: []));
+        srd_out(200, spell_mech(['wd' => $url, 'index' => $i] + $s + (json_decode((string)$text, true) ?: [])));
     }
     srd_out(404, ['error' => 'Unknown spell.']);
 }
 if (!preg_match('/^[a-z0-9-]{1,80}$/', $i)) srd_out(400, ['error' => 'Unknown spell.']);
 [$out, $code] = srd_get(SRD_API . '/' . $i, function ($j) {
-    $keep = ['index', 'name', 'level', 'desc', 'higher_level', 'range', 'components', 'material', 'ritual', 'duration', 'concentration', 'casting_time', 'attack_type'];
+    $keep = ['index', 'name', 'level', 'desc', 'higher_level', 'range', 'components', 'material', 'ritual', 'duration', 'concentration', 'casting_time', 'attack_type', 'heal_at_slot_level'];
     $s = array_intersect_key($j, array_flip($keep));
     $s['school'] = $j['school']['name'] ?? '';
     if (!empty($j['dc']['dc_type']['name'])) $s['save'] = $j['dc']['dc_type']['name'];
@@ -100,6 +122,7 @@ if (!preg_match('/^[a-z0-9-]{1,80}$/', $i)) srd_out(400, ['error' => 'Unknown sp
     return $s;
 });
 $s = $out ? json_decode($out, true) : null;
+if ($s) $out = json_encode($s = spell_mech($s));
 if ($s && stripos($s['casting_time'] ?? '', 'reaction') !== false) {
     [$t] = srd_get('https://dnd5e.wikidot.com/spell:' . $i, function ($j) { return ['trigger' => wd_trigger($j['html'])]; }, true);
     $out = json_encode($s + (json_decode((string)$t, true) ?: []));
