@@ -125,7 +125,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const FX_KINDS = [['dmg', 'Damage'], ['heal', 'Healing'], ['temp', 'Temp HP'], ['buff', 'Buff / utility']];
     const TRACKER_KINDS = [['count', 'Counter'], ['pips', 'Boxes'], ['levels', 'Slots by level'], ['sorcery', 'Sorcery points'], ['ki', 'Ki points']];
     const PROF = [[0, 'Not proficient'], [0.5, 'Half proficient'], [1, 'Proficient'], [2, 'Expertise']];
-    const HELP = 'Formulas can use ability keys for modifiers (DEX), _SCORE for scores (DEX_SCORE), PROF, LEVEL, class levels (FIGHTER_LEVEL), skill names without spaces (SleightofHand), numbers, + - * / ( ), min(), max(), floor(), ceil(), and [labels] like 2 [Shield]. Results round down.';
+    const HELP = 'Formulas can use ability keys for modifiers (DEX), _SCORE for scores (DEX_SCORE), PROF, LEVEL, CANTRIP (cantrip dice, CANTRIPd10), class levels (FIGHTER_LEVEL), skill names without spaces (SleightofHand), numbers, + - * / ( ), min(), max(), floor(), ceil(), and [labels] like 2 [Shield]. Results round down.';
     // non-SRD spells (srd: 'wd:<slug>') carry stats only; their text is linked on dnd5e.wikidot.com
     const wdUrl = (r) => (String(r.srd || '').startsWith('wd:') ? 'https://dnd5e.wikidot.com/spell:' + r.srd.slice(3) : '');
     const SRD_CREDIT = 'From the <a href="https://dnd.wizards.com/resources/systems-reference-document" target="_blank" rel="noopener">System Reference Document 5.1</a> by Wizards of the Coast, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC-BY-4.0</a>.';
@@ -281,6 +281,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const q = Object.assign(newPanel(p.type), p);
             if (q.rows) q.rows = rows(q.rows, PANEL_ROW[q.type]).map((r) => {
                 if ('dmg' in r) r.dmg = rows(r.dmg, ROW.dmg);
+                // SRD cantrips filled before CANTRIP existed: their dice now scale with level
+                if ('lvl' in r && !nm(r.lvl) && r.srd && !String(r.srd).startsWith('wd:')) for (const d of r.dmg) d.dice = String(d.dice).replace(/^[1-4]d(\d+)$/, 'CANTRIPd$1');
                 if ('props' in r) r.props = strs(r.props);
                 return r;
             });
@@ -382,7 +384,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         return { v: m + Math.floor(V.prof * p) + (b.v || 0), err: b.err };
     }
     function vars() {
-        const V = { level: level() };
+        // CANTRIP: cantrip damage dice by character level (1, then 2 at 5th, 3 at 11th, 4 at 17th)
+        const V = { level: level(), cantrip: 1 + [5, 11, 17].filter((l) => level() >= l).length };
         for (const c of C.classes) if (c.name) V[kk(c.name) + '_level'] = (V[kk(c.name) + '_level'] || 0) + nm(c.level);
         for (const a of C.abilities) { const s = nm(a.score); V[kk(a.key)] = Math.floor((s - 10) / 2); V[kk(a.key) + '_score'] = s; }
         V.prof = ev(C.prof, V).v || 0;
@@ -397,8 +400,10 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (t.length < 2 && !(t[0] && t[0].label)) return '';
         return t.map((x, n) => { const r = ev(x.src, V); return (n ? ` ${x.sign === '-' ? '−' : '+'} ` : x.sign === '-' ? '−' : '') + (x.label || x.src.replace(/^min\(\s*(\w+)\s*,\s*(\d+)\s*\)$/i, '$1 (max $2)')) + (x.label || !/^\d+$/.test(x.src) ? ' ' + show(r) : ''); }).join('');
     }
-    // "1d8 + STR" -> "1d8 + 3"
-    const resolve = (s, V) => String(s || '').replace(/[A-Za-z_]\w*/g, (w) => { const k = w.toLowerCase(); return /^d\d+$/.test(k) || !has(V, k) || isNaN(V[k]) ? w : String(V[k]); })
+    // "1d8 + STR" -> "1d8 + 3"; a variable straight before a die is its count ("CANTRIPd10" -> "2d10")
+    const resolve = (s, V) => String(s || '').replace(/[A-Za-z_]\w*/g, (w) => { const k = w.toLowerCase(), m = k.match(/^(.+?)(d\d+)$/);
+        if (m && has(V, m[1]) && !isNaN(V[m[1]])) return V[m[1]] + m[2];
+        return /^d\d+$/.test(k) || !has(V, k) || isNaN(V[k]) ? w : String(V[k]); })
         .replace(/\+\s*-\s*(\d)/g, '− $1').replace(/\s+/g, ' ').trim();
     const dmgText = (list, V) => list.filter((d) => d.dice || d.type).map((d) => `${resolve(d.dice, V)} ${d.type}`.trim()).join(' + ');
     const ordinal = (n) => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
@@ -1040,6 +1045,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     }
     const pickDice = (d, lvl) => {
         if (d.slot) return d.slot[lvl] || Object.values(d.slot)[0] || '';
+        // the usual cantrip steps (1dX, 2dX, 3dX, 4dX) keep scaling with level
+        const steps = d.char ? Object.values(d.char) : [], die = String(steps[0] || '').split('d')[1];
+        if (steps.length === 4 && steps.every((v, i) => v === `${i + 1}d${die}`)) return 'CANTRIPd' + die;
         if (d.char) { let best = ''; for (const [k, v] of Object.entries(d.char)) if (+k <= level()) best = v; return best || Object.values(d.char)[0] || ''; }
         return '';
     };
@@ -1268,7 +1276,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const open = { more: false, hp: false };
     const openRows = new Set();
     let dlgMode = null;
-    const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : dlgMode.kind === 'ddb' ? ddbDlg() : formulaDlg(dlgMode));
+    const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'crop' ? cropDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : dlgMode.kind === 'ddb' ? ddbDlg() : formulaDlg(dlgMode));
     function draw() {
         // sorcery points are boxes: an old counter turns into boxes with the same number left
         for (const p of C.panels) if (p.type === 'trackers') for (const r of p.rows) if (r.kind === 'count' && /^sorcery points?$/i.test(String(r.name).trim())) {
@@ -1276,7 +1284,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         }
         $('#hb-bar').innerHTML = bar();
         root.innerHTML = top() + `<div class="hb-top-panels">${panels()}</div><div hidden>${datalists()}</div>`;
-        if (dlg.open && dlgMode && dlgMode.kind !== 'rest' && dlgMode.kind !== 'ddb') dlgBody.innerHTML = dlgHTML();
+        if (dlg.open && dlgMode && !['rest', 'ddb', 'crop'].includes(dlgMode.kind)) dlgBody.innerHTML = dlgHTML();
         refresh();
     }
     function showDlg(mode) { dlgMode = mode; dlgBody.innerHTML = dlgHTML(); dlg.showModal(); refresh(); }
@@ -1292,18 +1300,39 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     }
 
-    // shrink art to 480 px so a few characters fit in localStorage (about 5 MB)
+    // art is cropped to a 480 px square (the art box is square) so a few characters fit in localStorage (about 5 MB)
+    const CROP = 480;
     async function loadArt(file) {
-        try {
-            const img = await createImageBitmap(file);
-            const s = Math.min(1, 480 / Math.max(img.width, img.height));
-            const cv = document.createElement('canvas');
-            cv.width = Math.round(img.width * s); cv.height = Math.round(img.height * s);
-            cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-            C.art = cv.toDataURL('image/jpeg', 0.85);
-            saveNow(); draw();
-        } catch (e) { toast("Couldn't read that image. Try a PNG or JPEG.", 'err'); }
+        let img;
+        try { img = await createImageBitmap(file); } catch (e) { return toast("Couldn't read that image. Try a PNG or JPEG.", 'err'); }
+        showDlg({ kind: 'crop', img, z: 1, cx: img.width / 2, cy: img.height / 2 });
+        const cv = $('#hb-crop');
+        let drag = null;
+        cv.addEventListener('pointerdown', (e) => { drag = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); });
+        cv.addEventListener('pointermove', (e) => {
+            if (!drag) return;
+            const k = CROP / cv.clientWidth / cropScale();
+            dlgMode.cx -= (e.clientX - drag[0]) * k; dlgMode.cy -= (e.clientY - drag[1]) * k;
+            drag = [e.clientX, e.clientY]; drawCrop();
+        });
+        cv.addEventListener('pointerup', () => { drag = null; });
+        cv.addEventListener('wheel', (e) => { e.preventDefault(); setZoom(dlgMode.z * (e.deltaY < 0 ? 1.1 : 1 / 1.1)); }, { passive: false });
+        $('#hb-crop-z').addEventListener('input', (e) => setZoom(+e.target.value));
+        drawCrop();
     }
+    const cropScale = () => CROP / Math.min(dlgMode.img.width, dlgMode.img.height) * dlgMode.z;
+    function setZoom(z) { dlgMode.z = Math.min(4, Math.max(1, z)); $('#hb-crop-z').value = dlgMode.z; drawCrop(); }
+    function drawCrop() {
+        const m = dlgMode, s = cropScale(), half = CROP / 2 / s;
+        // keep the square inside the picture
+        m.cx = Math.min(m.img.width - half, Math.max(half, m.cx)); m.cy = Math.min(m.img.height - half, Math.max(half, m.cy));
+        $('#hb-crop').getContext('2d').drawImage(m.img, CROP / 2 - m.cx * s, CROP / 2 - m.cy * s, m.img.width * s, m.img.height * s);
+    }
+    const cropDlg = () => `<h2>Crop art</h2>
+        <p class="muted hb-hint">Drag the picture to move it. Zoom with the slider or the mouse wheel.</p>
+        <canvas class="hb-crop" id="hb-crop" width="${CROP}" height="${CROP}"></canvas>
+        <label class="hb-lbl hb-wide">Zoom <input type="range" id="hb-crop-z" min="1" max="4" step="0.01" value="1"></label>
+        <div class="actions"><button type="button" class="btn primary" data-act="cropsave">Save art</button><button type="button" class="btn" data-act="close">Cancel</button></div>`;
 
     function addTag(input) {
         const v = input.value.trim(), list = get(input.dataset.p);
@@ -1404,6 +1433,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'custom') { loadSenses(); return showDlg('custom'); }
         if (act === 'ddb') { showDlg({ kind: 'ddb' }); return $('#hb-ddb-id').focus(); }
         if (act === 'close') return dlg.close();
+        if (act === 'cropsave') { C.art = $('#hb-crop').toDataURL('image/jpeg', 0.85); saveNow(); return dlg.close(); }
         if (act === 'rest') return showDlg({ kind: 'rest', r: b.dataset.r });
         if (act === 'doshort' || act === 'dolong') return rest(act === 'dolong' ? 'long' : 'short');
         if (act === 'skill') return skillInfo(+b.dataset.i);
