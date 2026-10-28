@@ -254,6 +254,11 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-rule p.hb-bullet, .hb-desc p.hb-bullet { position: relative; padding-left: 14px; }
 .hb-rule p.hb-bullet::before, .hb-desc p.hb-bullet::before { content: ""; position: absolute; left: 3px; top: .6em; width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
 .hb-rules .hb-hint { margin: 0; font-size: 12px; }
+/* combat actions everyone has, under the Actions panel */
+.hb-basics { margin-top: 12px; font-size: 14px; }
+.hb-basics h4 { margin: 0 0 4px; }
+.hb-basics p { margin: 4px 0 0; }
+.hb-basics .muted { margin-right: 6px; }
 @media (prefers-reduced-motion: reduce) { .hb-drawer { transition: none; } }
 
 /* notes: list beside the open note once the panel is wide enough */
@@ -303,6 +308,10 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-tedit { margin-left: auto; }
 .hb-fxf { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 8px auto; color: var(--muted); font-size: 13px; }
 .hb-fxf .field { width: auto; }
+.hb-attrs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 160px; }
+.hb-attr { display: inline-flex; align-items: center; gap: 2px; padding: 0 2px 0 8px; background: var(--btn2); border: 1px solid var(--line-strong); border-radius: 999px; font-size: 13px; white-space: nowrap; }
+.hb-attr .hb-x { width: 20px; height: 20px; }
+.hb .hb-attrin { width: 72px; min-width: 72px; padding: 4px 6px; font-size: 13px; }
 .hb-tabedit { display: grid; gap: 8px; margin-bottom: 12px; }
 .hb-tabedit .hb-tabtools { margin: 0; flex-wrap: nowrap; }
 .hb-tabedit .actions { margin-top: 0; }
