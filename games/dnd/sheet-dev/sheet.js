@@ -1255,7 +1255,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const open = { more: false, hp: false };
     const openRows = new Set();
     let dlgMode = null;
-    const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : dlgMode.kind === 'ddb' ? ddbDlg() : formulaDlg(dlgMode));
+    const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'crop' ? cropDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : dlgMode.kind === 'ddb' ? ddbDlg() : formulaDlg(dlgMode));
     function draw() {
         // sorcery points are boxes: an old counter turns into boxes with the same number left
         for (const p of C.panels) if (p.type === 'trackers') for (const r of p.rows) if (r.kind === 'count' && /^sorcery points?$/i.test(String(r.name).trim())) {
@@ -1263,7 +1263,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         }
         $('#hb-bar').innerHTML = bar();
         root.innerHTML = top() + `<div class="hb-top-panels">${panels()}</div><div hidden>${datalists()}</div>`;
-        if (dlg.open && dlgMode && dlgMode.kind !== 'rest' && dlgMode.kind !== 'ddb') dlgBody.innerHTML = dlgHTML();
+        if (dlg.open && dlgMode && !['rest', 'ddb', 'crop'].includes(dlgMode.kind)) dlgBody.innerHTML = dlgHTML();
         refresh();
     }
     function showDlg(mode) { dlgMode = mode; dlgBody.innerHTML = dlgHTML(); dlg.showModal(); refresh(); }
@@ -1279,18 +1279,39 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     }
 
-    // shrink art to 480 px so a few characters fit in localStorage (about 5 MB)
+    // art is cropped to a 480 px square (the art box is square) so a few characters fit in localStorage (about 5 MB)
+    const CROP = 480;
     async function loadArt(file) {
-        try {
-            const img = await createImageBitmap(file);
-            const s = Math.min(1, 480 / Math.max(img.width, img.height));
-            const cv = document.createElement('canvas');
-            cv.width = Math.round(img.width * s); cv.height = Math.round(img.height * s);
-            cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-            C.art = cv.toDataURL('image/jpeg', 0.85);
-            saveNow(); draw();
-        } catch (e) { toast("Couldn't read that image. Try a PNG or JPEG.", 'err'); }
+        let img;
+        try { img = await createImageBitmap(file); } catch (e) { return toast("Couldn't read that image. Try a PNG or JPEG.", 'err'); }
+        showDlg({ kind: 'crop', img, z: 1, cx: img.width / 2, cy: img.height / 2 });
+        const cv = $('#hb-crop');
+        let drag = null;
+        cv.addEventListener('pointerdown', (e) => { drag = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); });
+        cv.addEventListener('pointermove', (e) => {
+            if (!drag) return;
+            const k = CROP / cv.clientWidth / cropScale();
+            dlgMode.cx -= (e.clientX - drag[0]) * k; dlgMode.cy -= (e.clientY - drag[1]) * k;
+            drag = [e.clientX, e.clientY]; drawCrop();
+        });
+        cv.addEventListener('pointerup', () => { drag = null; });
+        cv.addEventListener('wheel', (e) => { e.preventDefault(); setZoom(dlgMode.z * (e.deltaY < 0 ? 1.1 : 1 / 1.1)); }, { passive: false });
+        $('#hb-crop-z').addEventListener('input', (e) => setZoom(+e.target.value));
+        drawCrop();
     }
+    const cropScale = () => CROP / Math.min(dlgMode.img.width, dlgMode.img.height) * dlgMode.z;
+    function setZoom(z) { dlgMode.z = Math.min(4, Math.max(1, z)); $('#hb-crop-z').value = dlgMode.z; drawCrop(); }
+    function drawCrop() {
+        const m = dlgMode, s = cropScale(), half = CROP / 2 / s;
+        // keep the square inside the picture
+        m.cx = Math.min(m.img.width - half, Math.max(half, m.cx)); m.cy = Math.min(m.img.height - half, Math.max(half, m.cy));
+        $('#hb-crop').getContext('2d').drawImage(m.img, CROP / 2 - m.cx * s, CROP / 2 - m.cy * s, m.img.width * s, m.img.height * s);
+    }
+    const cropDlg = () => `<h2>Crop art</h2>
+        <p class="muted hb-hint">Drag the picture to move it. Zoom with the slider or the mouse wheel.</p>
+        <canvas class="hb-crop" id="hb-crop" width="${CROP}" height="${CROP}"></canvas>
+        <label class="hb-lbl hb-wide">Zoom <input type="range" id="hb-crop-z" min="1" max="4" step="0.01" value="1"></label>
+        <div class="actions"><button type="button" class="btn primary" data-act="cropsave">Save art</button><button type="button" class="btn" data-act="close">Cancel</button></div>`;
 
     function addTag(input) {
         const v = input.value.trim(), list = get(input.dataset.p);
@@ -1391,6 +1412,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'custom') { loadSenses(); return showDlg('custom'); }
         if (act === 'ddb') { showDlg({ kind: 'ddb' }); return $('#hb-ddb-id').focus(); }
         if (act === 'close') return dlg.close();
+        if (act === 'cropsave') { C.art = $('#hb-crop').toDataURL('image/jpeg', 0.85); saveNow(); return dlg.close(); }
         if (act === 'rest') return showDlg({ kind: 'rest', r: b.dataset.r });
         if (act === 'doshort' || act === 'dolong') return rest(act === 'dolong' ? 'long' : 'short');
         if (act === 'skill') return skillInfo(+b.dataset.i);
