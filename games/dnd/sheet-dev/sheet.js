@@ -127,6 +127,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const LIST_GROUPS = [['race', 'Racial abilities'], ['class', 'Class abilities'], ['other', 'Other']];
     const FX_KINDS = [['dmg', 'Damage'], ['heal', 'Healing'], ['temp', 'Temp HP'], ['buff', 'Buff / utility']];
     // what a spell does besides damage (damage keeps its own rows); also the spell list's effect filter
+    // suggestions for item attributes; picking an SRD item fills its own from dnd5eapi.co
+    const ITEM_ATTRS = ['Simple', 'Martial', 'Melee', 'Ranged', 'Ammunition', 'Finesse', 'Heavy', 'Light', 'Loading', 'Reach', 'Special', 'Thrown', 'Two-Handed', 'Versatile',
+        'Silvered', 'Magical', 'Light armour', 'Medium armour', 'Heavy armour', 'Shield', 'Stealth disadvantage', 'Consumable', 'Arcane Foci', 'Holy Symbols', 'Druidic Foci', 'Kits'];
     const SPELL_FX = [['heal', 'Healing'], ['temp', 'Temp HP'], ['buff', 'Buff'], ['debuff', 'Debuff'], ['control', 'Control'], ['teleport', 'Teleport / movement'], ['summon', 'Summon'], ['defence', 'Defence'], ['utility', 'Utility']];
     const FX_PH = { buff: '+2 AC until the start of your next turn', debuff: 'Disadvantage on attack rolls', control: 'The target is restrained', teleport: 'Teleport up to 30 feet', summon: 'A spectral steed appears', defence: '+5 AC until your next turn', utility: 'Bright light in a 20-foot radius' };
     const TRACKER_KINDS = [['count', 'Counter'], ['pips', 'Boxes'], ['levels', 'Slots by level'], ['sorcery', 'Sorcery points'], ['ki', 'Ki points']];
@@ -141,7 +144,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const ROW = {
         attack: () => ({ id: uid(), name: '', time: 'Action', range: '', props: [], mode: 'hit', hit: 'STR + PROF', save: 'DEX', dc: '8 + PROF + STR', dmg: [{ dice: '1d6 + STR', type: 'Slashing' }], desc: '' }),
         spell: () => ({ id: uid(), lvl: 0, name: '', school: '', time: 'Action', trig: '', range: '', comp: '', dur: '', conc: false, ritual: false, prep: false, mode: 'none', save: 'DEX', dc: '', dmg: [], fx: [], desc: '', higher: '', srd: '' }),
-        item: () => ({ id: uid(), cat: 'Gear', eq: false, att: '', name: '', qty: 1, wt: 0, gp: '', notes: '' }),
+        item: () => ({ id: uid(), cat: 'Gear', eq: false, att: '', name: '', qty: 1, wt: 0, gp: '', props: [], notes: '' }),
         list: () => ({ id: uid(), name: '', src: '', text: '', uses: '', used: 0, reset: '', grp: '' }),
         // kind: count (left / max), pips (boxes ticked as used) or levels (a row of boxes per level, like spell slots)
         tracker: () => ({ id: uid(), name: '', kind: 'count', cur: 1, max: 1, used: 0, reset: 'long', group: '', levels: [] }),
@@ -563,9 +566,10 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const dl = (id, items) => `<datalist id="${id}">${items.map((x) => `<option value="${esc(x)}">`).join('')}</datalist>`;
         return dl('hb-dl-time', L('time')) + dl('hb-dl-dmg', L('dmg')) + dl('hb-dl-props', L('props')) + dl('hb-dl-speeds', L('speeds')) + dl('hb-dl-tools', TOOLS)
             + dl('hb-dl-race', RACES) + dl('hb-dl-align', ALIGNMENTS) + dl('hb-dl-class', CLASSES) + dl('hb-dl-school', SCHOOLS) + dl('hb-dl-dur', DURATIONS)
-            + dl('hb-dl-weapon', WEAPONS.map((w) => w[0])) + dl('hb-dl-attack', [UNARMED.name, ...WEAPONS.map((w) => w[0])]) + dl('hb-dl-gear', GEAR.map((g) => g[0])) + dl('hb-dl-meta', METAMAGIC.map((m) => m[0]))
+            + dl('hb-dl-weapon', WEAPONS.map((w) => w[0])) + dl('hb-dl-attack', [UNARMED.name, ...WEAPONS.map((w) => w[0])]) + dl('hb-dl-gear', uniq([...GEAR.map((g) => g[0]), ...eqNames])) + dl('hb-dl-meta', METAMAGIC.map((m) => m[0]))
             + dl('hb-dl-feat', FEATURES) + dl('hb-dl-src', [...RACES, ...CLASSES, 'Feat', 'Background', 'Item']) + dl('hb-dl-rsrc', RESOURCES)
             + dl('hb-dl-armour', ARMOUR.map((a) => a[0])) + dl('hb-dl-langs', LANGS)
+            + dl('hb-dl-attr', uniq([...ITEM_ATTRS, ...itemRows().flatMap((r) => r.props)]))
             + dl('hb-dl-hbtime', HB_TIMES.map(([t]) => t)) + dl('hb-dl-cost', uniq([...C.panels.filter((p) => p.type === 'trackers').flatMap((p) => p.rows.filter((r) => r.kind !== 'levels').map((r) => r.name)).filter(Boolean), 'Spell slot', 'Hit points', 'gp', 'Hit dice']))
             + ['res', 'imm', 'vul'].map((k) => `<datalist id="hb-dl-${k}"></datalist>`).join('');
     }
@@ -794,11 +798,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 <td><span class="hb-unit">${f(`${path}.rows.${i}.wt`, 'Weight each in pounds', { num: true, cls: 'hb-n' })}<span class="muted">lb</span></span></td>
                 <td>${f(`${path}.rows.${i}.gp`, 'Cost each in gold', { num: true, cls: 'hb-n', ph: '0' })}</td>
                 <td>${sel(`${path}.rows.${i}.att`, 'Attunement', [['', 'None'], ['needs', 'Needs attunement'], ['yes', 'Attuned']])}</td>
+                <td><div class="hb-attrs">${r.props.map((n) => `<span class="hb-attr"><button type="button" class="hb-prop" data-act="attr" data-n="${esc(n)}">${esc(n)}</button><button type="button" class="hb-x" data-act="chip" data-p="${path}.rows.${i}.props" data-n="${esc(n)}" aria-label="Remove ${esc(n)}" title="Remove">&times;</button></span>`).join('')}
+                    <input class="field hb-tagin hb-attrin" data-p="${path}.rows.${i}.props" list="hb-dl-attr" placeholder="Add" aria-label="Add an attribute to ${esc(r.name || 'this item')}" autocomplete="off"></div></td>
                 <td>${f(`${path}.rows.${i}.notes`, 'Notes')}</td><td>${del(path + '.rows', i, r.name || 'item')}</td></tr>`).join('');
             return `<div class="hb-coins">${['cp', 'sp', 'ep', 'gp', 'pp'].map((c) => `<label>${c.toUpperCase()} ${f(`${path}.coins.${c}`, c.toUpperCase(), { num: true })}</label>`).join('')}</div>
                 <div class="hb-attune"><span>Attuned <b data-c="att:${pi}"></b></span><label>Attunement slots ${f(path + '.attMax', 'Attunement slots', { num: true, cls: 'hb-n' })}</label></div>
                 ${subtabs(path + '.sub', opts, cur)}
-                ${table(['Eq.', 'Item', 'Category', 'Qty', 'Weight', 'Cost (gp)', 'Attunement', 'Notes', ''], rows && rows + `<tr class="hb-total"><td></td><td colspan="3">Total weight, all items</td><td><b data-c="wt:${pi}"></b></td><td colspan="4"></td></tr>`)}
+                ${table(['Eq.', 'Item', 'Category', 'Qty', 'Weight', 'Cost (gp)', 'Attunement', 'Attributes', 'Notes', ''], rows && rows + `<tr class="hb-total"><td></td><td colspan="3">Total weight, all items</td><td><b data-c="wt:${pi}"></b></td><td colspan="5"></td></tr>`)}
                 <div class="actions">${add(path + '.rows', 'item', 'Add item', ` data-cat="${esc(cur === 'all' ? 'Gear' : cur)}"`)}</div>`;
         },
 
@@ -1053,6 +1059,44 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     }
 
     // ---- SRD spells (loaded on first use) ----
+    // ---- SRD equipment: item names to suggest, attributes / weight / cost when one is picked ----
+    let eqList = null, eqNames = [];
+    function loadEqList() {
+        if (eqList) return eqList;
+        eqList = fetch('spells.php?eqlist=1').then((r) => (r.ok ? r.json() : Promise.reject())).then((list) => {
+            eqNames = list.map(([, n]) => n);
+            $('#hb-dl-gear').innerHTML = uniq([...GEAR.map((g) => g[0]), ...eqNames]).map((n) => `<option value="${esc(n)}">`).join('');
+            return list;
+        }).catch(() => { eqList = null; return []; });
+        return eqList;
+    }
+    // fills only what's empty, so typed-in attributes, weight and cost stay
+    async function eqFill(rp) {
+        const r = get(rp), hit = (await loadEqList()).find(([, n]) => n.toLowerCase() === String(r.name).trim().toLowerCase());
+        if (!hit) return;
+        try {
+            const res = await fetch('spells.php?eq=' + encodeURIComponent(hit[0]));
+            if (!res.ok) throw 0;
+            const s = await res.json();
+            if (!r.props.length) r.props = s.props || [];
+            if (!nm(r.wt) && s.wt) r.wt = s.wt;
+            if (String(r.gp).trim() === '' && s.gp) r.gp = s.gp;
+            saveNow(); draw();
+        } catch (e) { }
+    }
+    const itemRows = () => C.panels.filter((p) => p.type === 'items').flatMap((p) => p.rows);
+    // an item attribute: its SRD rule when there is one, and which of your items have it
+    function attrInfo(n) {
+        const k = n.toLowerCase().replace(/\s*\(.*\)$/, '');
+        const r = rule('prop', k) || rule('armour', k === 'shield' ? 'shields' : k.replace(/armor$/, 'armour')) || (k === 'simple' || k === 'martial' ? rule('weapons', k + ' weapons') : null)
+            || (k === 'range' || k === 'ranged' ? rule('act', 'ranged attacks') : k === 'melee' ? rule('act', 'melee attacks') : null);
+        const have = itemRows().filter((x) => x.props.includes(n)).map((x) => x.name || 'Unnamed item');
+        openDrawer(`<h2>${esc(n)}</h2><p class="muted">Item attribute</p>
+            <div class="hb-desc">${r ? rulePs(r) : '<p class="muted">No SRD description for this attribute.</p>'}</div>
+            ${have.length ? `<h4>Your items with it</h4><ul class="hb-plain">${have.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+            ${r ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
+    }
+
     let srdList = null;
     function loadSrdList() {
         if (srdList) return srdList;
@@ -1447,11 +1491,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (/\.notes\.\d+\.group$/.test(k) || /^panels\.\d+\.rows\.\d+\.(uses|max|group)$/.test(k) || /\.(levels\.\d+|sp)\.max$/.test(k)) { saveNow(); return draw(); }
         if (/^classes\.\d+\.name$/.test(k)) { const d = HIT_DIE[el.value.trim().toLowerCase()]; if (d) set(k.replace(/name$/, 'die'), d); }
         if (/^panels\.\d+\.rows\.\d+\.name$/.test(k) && panelOf(k).type === 'spells' && el.value.trim()) srdFill(k.replace(/\.name$/, ''));
+        if (/^panels\.\d+\.rows\.\d+\.name$/.test(k) && panelOf(k).type === 'items' && el.value.trim()) eqFill(k.replace(/\.name$/, ''));
         if (/^panels\.\d+\.(rows|meta)\.\d+\.name$/.test(k) && rowFill(k)) return;
         if (/\.(time|lvl)$/.test(k) || /\.cost\.(what|amt)$/.test(k) || /^classes\.\d+\.(name|level|die)$/.test(k) || /^(lists\.|condList|exhaustion)/.test(k) || /^speeds\./.test(k) && /\.type$/.test(k)) return dlg.open ? null : draw();
         if (/\.(name|key|title)$/.test(k) && !dlg.open) $('#hb-bar').innerHTML = bar();
     });
-    main.addEventListener('focusin', (e) => { if (e.target.getAttribute('list') === 'hb-dl-srd') loadSrdList(); if (e.target.dataset.multi) multiList(e.target); });
+    main.addEventListener('focusin', (e) => { if (e.target.getAttribute('list') === 'hb-dl-srd') loadSrdList(); if (e.target.getAttribute('list') === 'hb-dl-gear') loadEqList(); if (e.target.dataset.multi) multiList(e.target); });
     main.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && e.target.classList.contains('hb-tagin')) { e.preventDefault(); addTag(e.target); }
     });
@@ -1488,6 +1533,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'rest') return showDlg({ kind: 'rest', r: b.dataset.r });
         if (act === 'doshort' || act === 'dolong') return rest(act === 'dolong' ? 'long' : 'short');
         if (act === 'skill') return skillInfo(+b.dataset.i);
+        if (act === 'attr') return attrInfo(b.dataset.n);
         if (act === 'sense') return senseInfo(+b.dataset.i);
         if (act === 'rinfo') return ruleInfo(b.dataset.k, b.dataset.n, b.dataset.t, b.dataset.s);
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && needsFill(r)) srdFill(p); return info(p); }

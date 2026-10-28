@@ -2,9 +2,12 @@
 // SRD 5.1 spells for the homebrew sheet, from dnd5eapi.co (SRD 5.1, CC-BY-4.0).
 //   spells.php?list=1      -> [[index, name, level], ...]
 //   spells.php?i=fireball  -> one spell, trimmed to the fields the sheet uses
+//   spells.php?eqlist=1    -> SRD equipment [[index, name], ...] for the items tab
+//   spells.php?eq=longbow  -> { name, props (item attributes), wt, gp }
 // Non-SRD spells come from extra-spells.json (stats); their text is fetched from dnd5e.wikidot.com when picked.
 // Cached on disk for 30 days (SRD text doesn't change); a failed refresh serves the last copy.
 const SRD_API = 'https://www.dnd5eapi.co/api/2014/spells';
+const SRD_EQ = 'https://www.dnd5eapi.co/api/2014/equipment';
 const SRD_TTL = 2592000;
 
 function srd_out($code, $data)
@@ -86,6 +89,37 @@ if (isset($_GET['list'])) {
     $list = array_merge(json_decode($out, true), array_map(function ($s) { return ['wd:' . $s['index'], $s['name'], $s['level']]; }, $extra));
     usort($list, function ($a, $b) { return strcasecmp($a[1], $b[1]); });
     srd_out(200, $list);
+}
+
+if (isset($_GET['eqlist'])) {
+    [$out] = srd_get(SRD_EQ, function ($j) {
+        return array_map(function ($s) { return [(string)$s['index'], (string)$s['name']]; }, (array)($j['results'] ?? []));
+    });
+    $out ? srd_out(200, $out) : srd_out(502, ['error' => "Couldn't reach the item list. Try again in a minute."]);
+}
+if (isset($_GET['eq'])) {
+    $e = (string)$_GET['eq'];
+    if (!preg_match('/^[a-z0-9-]{1,80}$/', $e)) srd_out(400, ['error' => 'Unknown item.']);
+    // attributes in the order D&D Beyond lists them: category, properties, range, armour numbers
+    [$out, $code] = srd_get(SRD_EQ . '/' . $e, function ($j) {
+        $p = [];
+        foreach (['weapon_category', 'weapon_range', 'tool_category', 'vehicle_category'] as $k) if (!empty($j[$k])) $p[] = (string)$j[$k];
+        if (!empty($j['gear_category']['name'])) $p[] = $j['gear_category']['name'];
+        foreach ((array)($j['properties'] ?? []) as $q) $p[] = $q['name'];
+        $r = $j['throw_range'] ?? (($j['weapon_range'] ?? '') === 'Ranged' ? ($j['range'] ?? null) : null);
+        if (!empty($r['long'])) $p[] = 'Range (' . $r['normal'] . '/' . $r['long'] . ')';
+        $cat = $j['armor_category'] ?? '';
+        if ($cat) $p[] = $cat === 'Shield' ? 'Shield' : $cat . ' armour';
+        if (isset($j['armor_class']['base'])) {
+            $ac = $j['armor_class'];
+            $p[] = 'AC ' . ($cat === 'Shield' ? '+' : '') . $ac['base'] . (!empty($ac['dex_bonus']) ? ' + DEX' . (!empty($ac['max_bonus']) ? ' (max ' . $ac['max_bonus'] . ')' : '') : '');
+        }
+        if (!empty($j['str_minimum'])) $p[] = 'Str ' . $j['str_minimum'];
+        if (!empty($j['stealth_disadvantage'])) $p[] = 'Stealth disadvantage';
+        $gp = ($j['cost']['quantity'] ?? 0) * (['cp' => 0.01, 'sp' => 0.1, 'ep' => 0.5, 'gp' => 1, 'pp' => 10][$j['cost']['unit'] ?? 'gp'] ?? 1);
+        return ['name' => $j['name'] ?? '', 'props' => $p, 'wt' => $j['weight'] ?? 0, 'gp' => $gp];
+    });
+    $out ? srd_out(200, $out) : srd_out($code, ['error' => $code === 404 ? 'That item isn\'t in the SRD.' : "Couldn't reach the item list. Try again in a minute."]);
 }
 
 $i = (string)($_GET['i'] ?? '');
