@@ -127,6 +127,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const TRACKER_KINDS = [['count', 'Counter'], ['pips', 'Boxes'], ['levels', 'Slots by level'], ['sorcery', 'Sorcery points'], ['ki', 'Ki points']];
     const PROF = [[0, 'Not proficient'], [0.5, 'Half proficient'], [1, 'Proficient'], [2, 'Expertise']];
     const HELP = 'Formulas can use ability keys for modifiers (DEX), _SCORE for scores (DEX_SCORE), PROF, LEVEL, class levels (FIGHTER_LEVEL), skill names without spaces (SleightofHand), numbers, + - * / ( ), min(), max(), floor(), ceil(), and [labels] like 2 [Shield]. Results round down.';
+    // non-SRD spells (srd: 'wd:<slug>') carry stats only; their text is linked on dnd5e.wikidot.com
+    const wdUrl = (r) => (String(r.srd || '').startsWith('wd:') ? 'https://dnd5e.wikidot.com/spell:' + r.srd.slice(3) : '');
     const SRD_CREDIT = 'From the <a href="https://dnd.wizards.com/resources/systems-reference-document" target="_blank" rel="noopener">System Reference Document 5.1</a> by Wizards of the Coast, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC-BY-4.0</a>.';
     const uid = () => Math.random().toString(36).slice(2, 10);
     // read a number out of whatever was typed ("30 ft" -> 30)
@@ -723,7 +725,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 <details class="hb-details"><summary>Spell slots per level</summary><div class="hb-slotmax">${p.slots.map((s, l) => `<label>${ordinal(l + 1)} ${f(`${path}.slots.${l}.max`, ordinal(l + 1) + ' level slots', { num: true })}</label>`).join('')}</div></details>
                 ${subtabs(path + '.sub', opts, cur)}<div class="hb-list">${list}</div>
                 <div class="actions">${add(path + '.rows', 'spell', 'Add spell', /^\d$/.test(cur) ? ` data-lvl="${cur}"` : cur === 'prep' ? ' data-prep="1"' : '')}</div>
-                ${p.rows.some((r) => r.srd) ? `<p class="muted hb-hint">SRD spell text: ${SRD_CREDIT}</p>` : ''}`;
+                ${p.rows.some((r) => r.srd && !wdUrl(r)) ? `<p class="muted hb-hint">SRD spell text: ${SRD_CREDIT}</p>` : ''}`;
         },
 
         items: (p, path, pi) => {
@@ -1018,7 +1020,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             if (!res.ok) throw 0;
             fromSrd(await res.json(), r);
             saveNow(); draw();
-            toast(`Filled in ${r.name} from the SRD.`, 'ok');
+            toast(`Filled in ${r.name}${wdUrl(r) ? '' : ' from the SRD'}.`, 'ok');
         } catch (e) { toast(`Couldn't load ${r.name} from the SRD. Try again in a minute.`, 'err'); }
     }
 
@@ -1098,7 +1100,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <div class="hb-desc">${paras(r.desc) || '<p class="muted">No description yet. Add one with the edit button.</p>'}
             ${spell && r.higher ? `<p><b>At higher levels.</b></p>${paras(r.higher)}` : ''}</div>
             ${spell ? '' : rulesBlock('prop', r.props, 'Properties')}
-            ${spell && r.srd ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
+            ${spell && wdUrl(r) ? `<p class="muted hb-hint">Full spell text: <a href="${wdUrl(r)}" target="_blank" rel="noopener">${esc(r.name)} on dnd5e.wikidot.com</a></p>` : spell && r.srd ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
     }
     function openDrawer(html) { $('#hb-drawer-body').innerHTML = html; drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); drawer.focus(); }
     function skillInfo(i) {
@@ -1344,7 +1346,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'rest') return showDlg({ kind: 'rest', r: b.dataset.r });
         if (act === 'doshort' || act === 'dolong') return rest(act === 'dolong' ? 'long' : 'short');
         if (act === 'skill') return skillInfo(+b.dataset.i);
-        if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && !r.desc) srdFill(p); return info(p); }
+        if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && !r.desc && !wdUrl(r)) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
         if (act === 'more') { open.more = !open.more; return draw(); }
         if (act === 'hpedit') { open.hp = !open.hp; return draw(); }
