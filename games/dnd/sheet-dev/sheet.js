@@ -817,7 +817,11 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                     <input class="field hb-tagin hb-attrin" data-p="${rp}.props" list="hb-dl-attr" placeholder="Add" aria-label="Add an attribute to ${esc(r.name || 'this item')}" autocomplete="off"></div></div>
                 <label class="hb-wide">Notes ${f(rp + '.notes', 'Notes', { area: true })}</label>`,
                 `<label class="hb-prep" title="Equipped">${f(rp + '.eq', 'Equipped', { check: true })}</label>`, '', del(path + '.rows', i, r.name || 'item')); }).join('');
-            return `<div class="hb-coins">${['cp', 'sp', 'ep', 'gp', 'pp'].map((c) => `<label>${c.toUpperCase()} ${f(`${path}.coins.${c}`, c.toUpperCase(), { num: true })}</label>`).join('')}</div>
+            // coins are shown, and changed by typing an amount (formula.js hbCoins breaks coins for change)
+            const worth = ['pp', 'gp', 'ep', 'sp', 'cp'].reduce((t, c) => t + nm(p.coins[c]) * { pp: 1000, gp: 100, ep: 50, sp: 10, cp: 1 }[c], 0) / 100;
+            return `<div class="hb-purse">${['pp', 'gp', 'ep', 'sp', 'cp'].map((c) => `<span class="hb-coin"><b>${nm(p.coins[c]).toLocaleString()}</b> ${c}</span>`).join('')}
+                    <small class="muted">${worth.toLocaleString()} gp in all</small>
+                    <input class="field hb-coinin" data-p="${path}.coins" placeholder="-5g5s or +10gp" aria-label="Spend or add coins, like -5g5s or +10gp" autocomplete="off"></div>
                 <div class="hb-attune"><span>Attuned <b data-c="att:${pi}"></b></span><label>Attunement slots ${f(path + '.attMax', 'Attunement slots', { num: true, cls: 'hb-n' })}</label></div>
                 ${subtabs(path + '.sub', opts, cur)}
                 <div class="hb-list">${list}</div>
@@ -1561,6 +1565,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     main.addEventListener('focusin', (e) => { if (e.target.getAttribute('list') === 'hb-dl-srd') loadSrdList(); if (e.target.getAttribute('list') === 'hb-dl-gear') loadEqList(); if (e.target.dataset.multi) multiList(e.target); });
     main.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && e.target.classList.contains('hb-tagin')) { e.preventDefault(); addTag(e.target); }
+        if (e.key === 'Enter' && e.target.classList.contains('hb-coinin') && e.target.value.trim()) {
+            e.preventDefault();
+            const k = e.target.dataset.p;
+            try { const r = window.hbCoins(get(k), e.target.value); Object.assign(get(k), r.purse); saveNow(); draw(); toast(r.text, 'ok'); $('.hb-coinin')?.focus(); }
+            catch (err) { toast(err.message, 'err'); }
+        }
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawer.classList.contains('open') && !dlg.open) closeDrawer(); });
     main.addEventListener('submit', (e) => {
