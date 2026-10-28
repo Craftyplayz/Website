@@ -623,7 +623,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <span>${esc(a.key)}</span>${val('save:' + i)}
         </div>`).join('')}</div></section>`;
         const senses = `<section class="card hb-senses"><h2>Senses</h2>
-            <div class="rows">${C.passives.map((p, i) => `<div class="rowi"><span class="grow">${esc(p.name)}</span>${fx(`passives.${i}.f`, p.name, false)}${p.unit ? `<small class="muted">${esc(p.unit)}</small>` : ''}</div>`).join('')}</div>
+            <div class="rows">${C.passives.map((p, i) => `<div class="rowi"><button type="button" class="hb-link grow" data-act="sense" data-i="${i}">${esc(p.name)}</button>${fx(`passives.${i}.f`, p.name, false)}${p.unit ? `<small class="muted">${esc(p.unit)}</small>` : ''}</div>`).join('')}</div>
             <label class="hb-lbl hb-other">Other senses ${f('senses', 'Other senses', { area: true, ph: '120 ft magical darkvision' })}</label>
         </section>`;
         return `<div class="hb-top-id">${id}</div><div class="hb-top-art">${art}</div><div class="hb-top-abil">${abils}</div>
@@ -1179,6 +1179,17 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <div class="hb-desc">${rulePs(rule('skill', sk.name)) || '<p class="muted">No SRD description for this skill.</p>'}</div>
             ${rule('skill', sk.name) ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
     }
+    function senseInfo(i) {
+        const p = C.passives[i], n = String(p.name).toLowerCase(), v = value('fx:passives.' + i + '.f', vars());
+        // "Passive Perception": the passive check rule plus the skill; otherwise the first SRD sense named in it
+        const sk = n.startsWith('passive') && C.skills.find((s) => n.includes(s.name.toLowerCase()));
+        const key = n.startsWith('passive') ? 'passive' : Object.keys(RULES.sense || {}).find((k) => n.includes(k));
+        const text = rulePs(rule('sense', key || '')) + (sk ? `<h4>${esc(sk.name)}</h4>${rulePs(rule('skill', sk.name))}` : '');
+        openDrawer(`<h2>${esc(p.name)}</h2><p class="muted">Sense</p>
+            <div class="kv"><span>Value</span><span>${esc(show(v))}${p.unit ? ' ' + esc(p.unit) : ''}</span></div>
+            <div class="hb-desc">${text || '<p class="muted">No SRD description for this sense.</p>'}</div>
+            ${text ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
+    }
     function closeDrawer() { drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); }
 
     // ---- D&D Beyond import (the conversion itself is in ddb.js) ----
@@ -1441,6 +1452,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'rest') return showDlg({ kind: 'rest', r: b.dataset.r });
         if (act === 'doshort' || act === 'dolong') return rest(act === 'dolong' ? 'long' : 'short');
         if (act === 'skill') return skillInfo(+b.dataset.i);
+        if (act === 'sense') return senseInfo(+b.dataset.i);
         if (act === 'rinfo') return ruleInfo(b.dataset.k, b.dataset.n, b.dataset.t, b.dataset.s);
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && !r.desc) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
