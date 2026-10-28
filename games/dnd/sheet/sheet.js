@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         time: 'Action\nBonus action\nReaction\nFree\nSpecial',
         dmg: 'Acid\nBludgeoning\nCold\nFire\nForce\nLightning\nNecrotic\nPiercing\nPoison\nPsychic\nRadiant\nSlashing\nThunder',
         props: 'Ammunition\nFinesse\nHeavy\nLight\nLoading\nMagical\nReach\nSilvered\nThrown\nTwo-handed\nVersatile',
-        cats: 'Weapons\nArmour\nGear\nConsumables\nTreasure\nMagic items',
+        cats: 'Weapons\nArmour\nGear\nConsumables\nTreasure\nMagic items\nMisc',
         speeds: 'Walk\nFly\nSwim\nClimb\nBurrow',
     };
     const LIST_NAMES = { time: 'Timings', dmg: 'Damage types', props: 'Weapon properties', cats: 'Item categories', speeds: 'Speed types' };
@@ -313,6 +313,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         out.hp = Object.assign(d.hp, out.hp);
         out.view = Object.assign(d.view, out.view);
         out.lists = Object.assign(d.lists, out.lists);
+        // Misc joined the item categories later; older sheets get it once (removing it in Customise sticks)
+        if (!out.miscCat && !/^misc$/im.test(out.lists.cats)) out.lists.cats = String(out.lists.cats).trim() + '\nMisc';
+        out.miscCat = 1;
         out.profs = Object.assign(d.profs, out.profs);
         for (const k of ['armour', 'weapons', 'langs']) out.profs[k] = strs(out.profs[k]);
         out.profs.tools = rows(out.profs.tools, ROW.tool);
