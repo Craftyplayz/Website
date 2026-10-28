@@ -12,7 +12,7 @@ if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
 header_remove('Set-Cookie');
 header('Content-Type: application/json; charset=utf-8');
 
-$key = $youtubekey ?? $googlebookskey ?? '';
+$key = ($youtubekey ?? '') ?: ($googlebookskey ?? '');
 $cache = sys_get_temp_dir() . '/craftyplayz-yt';
 
 function yt_out($data)
