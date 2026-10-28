@@ -1663,7 +1663,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             if (b.dataset.lvl) row.lvl = +b.dataset.lvl;
             if (b.dataset.prep) row.prep = true;
             if (b.dataset.t === 'level') row.label = ordinal(get(p).length + 1);
-            if (row.id && ('desc' in row || 'text' in row)) openRows.add(row.id);
+            if (row.id && ('desc' in row || 'text' in row || 'notes' in row)) openRows.add(row.id);
             get(p).push(row);
         }
         else if (act === 'addsense') {
