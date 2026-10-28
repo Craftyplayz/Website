@@ -308,6 +308,10 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-tedit { margin-left: auto; }
 .hb-fxf { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 8px auto; color: var(--muted); font-size: 13px; }
 .hb-fxf .field { width: auto; }
+.hb-attrs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 160px; }
+.hb-attr { display: inline-flex; align-items: center; gap: 2px; padding: 0 2px 0 8px; background: var(--btn2); border: 1px solid var(--line-strong); border-radius: 999px; font-size: 13px; white-space: nowrap; }
+.hb-attr .hb-x { width: 20px; height: 20px; }
+.hb .hb-attrin { width: 72px; min-width: 72px; padding: 4px 6px; font-size: 13px; }
 .hb-tabedit { display: grid; gap: 8px; margin-bottom: 12px; }
 .hb-tabedit .hb-tabtools { margin: 0; flex-wrap: nowrap; }
 .hb-tabedit .actions { margin-top: 0; }
