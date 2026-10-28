@@ -137,10 +137,8 @@
 .hb-x:disabled { opacity: .3; cursor: default; }
 
 .hb-pips { display: inline-flex; flex-wrap: wrap; gap: 4px; vertical-align: middle; }
-.hb-pips button { width: 18px; height: 18px; padding: 0; background: var(--accent); border: 1.5px solid var(--accent); border-radius: 4px; cursor: pointer; }
-.hb-pips button.used { background: var(--line-strong); border-color: var(--line-strong); }
-.hb-panel .kv .hb-pips button { background: none; }
-.hb-panel .kv .hb-pips button.used { background: var(--accent); border-color: var(--accent); }
+.hb-pips button { width: 18px; height: 18px; padding: 0; background: none; border: 1.5px solid var(--accent); border-radius: 4px; cursor: pointer; }
+.hb-pips button.used { background: var(--accent); }
 .hb-panel .kv .hb-bad-pips .hb-pips button { border-color: var(--danger-line); }
 .hb-panel .kv .hb-bad-pips .hb-pips button.used { background: var(--danger-line); }
 .hb-slots { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 12px 0 0; }
