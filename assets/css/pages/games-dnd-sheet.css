@@ -301,6 +301,8 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-tabtools { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin-bottom: 10px; }
 .hb-tabtools .hb-grename { margin: 0; }
 .hb-tedit { margin-left: auto; }
+.hb-fxf { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 8px auto; color: var(--muted); font-size: 13px; }
+.hb-fxf .field { width: auto; }
 .hb-tabedit { display: grid; gap: 8px; margin-bottom: 12px; }
 .hb-tabedit .hb-tabtools { margin: 0; flex-wrap: nowrap; }
 .hb-tabedit .actions { margin-top: 0; }
