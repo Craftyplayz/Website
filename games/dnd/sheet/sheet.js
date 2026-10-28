@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
         "Glassblower's tools", "Jeweler's tools", "Leatherworker's tools", "Mason's tools", "Painter's supplies", "Potter's tools", "Smith's tools", "Tinker's tools",
         "Weaver's tools", "Woodcarver's tools", 'Disguise kit', 'Forgery kit', 'Herbalism kit', "Navigator's tools", "Poisoner's kit", "Thieves' tools",
         'Dice set', 'Playing card set', 'Bagpipes', 'Drum', 'Flute', 'Lute', 'Lyre', 'Horn', 'Viol', 'Vehicles (land)', 'Vehicles (water)'];
+    // 2014 classes that prepare spells; the rest know theirs, so the Prepared tab hides unless Customise turns it on
+    const PREP_CLASSES = ['artificer', 'cleric', 'druid', 'paladin', 'wizard'];
     const HIT_DIE = { barbarian: 12, fighter: 10, paladin: 10, ranger: 10, sorcerer: 6, wizard: 6, artificer: 8, bard: 8, cleric: 8, druid: 8, monk: 8, rogue: 8, warlock: 8 };
     // suggestion lists for the plain text fields
     const CLASSES = Object.keys(HIT_DIE).map((c) => c[0].toUpperCase() + c.slice(1));
@@ -187,7 +189,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             panels: [newPanel('profs'), newPanel('attacks'), newPanel('spells'), newPanel('items'), Object.assign(newPanel('list', 'Passive abilities'), { split: true, sub: 'race' }),
                 newPanel('trackers', 'Resources'), newPanel('homebrew'), newPanel('combat'),
                 Object.assign(newPanel('notes'), { notes: ['Personality', 'Backstory'].map((title) => Object.assign(ROW.note(), { title, group: 'Character' })) })],
-            view: { tab: '', all: false }, hbPanel: true, hb2: true, passSplit: true,
+            view: { tab: '', all: false, prep: false }, hbPanel: true, hb2: true, passSplit: true,
         };
     }
 
@@ -757,8 +759,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
 
         spells: (p, path, pi) => {
             const lv = uniq(p.rows.map((r) => nm(r.lvl))).sort((a, b) => a - b);
+            const prep = C.view.prep || C.classes.some((c) => PREP_CLASSES.includes(kk(c.name)));
             const opts = [['all', 'All', p.rows.length], ...lv.map((l) => [String(l), l ? ordinal(l) : 'Cantrips', p.rows.filter((r) => nm(r.lvl) === l).length]),
-                ['prep', 'Prepared', p.rows.filter((r) => r.prep).length], ['meta', 'Metamagic']];
+                ...(prep ? [['prep', 'Prepared', p.rows.filter((r) => r.prep).length]] : []), ['meta', 'Metamagic']];
             const cur = pickSub(p, opts);
             // a "Sorcery points" counter in Resources is the one source; otherwise the tab keeps its own
             const sp = resPath('Sorcery points'), spP = sp || path + '.sp';
@@ -775,7 +778,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const filter = kinds.length ? `<label class="hb-fxf">Effect ${sel(path + '.fxf', 'Show spells with this effect', [['', 'Any'], ...kinds.map(([k, t]) => [k, `${t} (${p.rows.filter((r) => hasFx(r, k)).length})`])])}</label>` : '';
             const list = p.rows.map((r, i) => [r, `${path}.rows.${i}`]).sort((a, b) => (nm(a[0].lvl) || 0) - (nm(b[0].lvl) || 0))
                 .filter(([r]) => (cur === 'all' || (cur === 'prep' ? r.prep : String(nm(r.lvl)) === cur)) && (!fxf || hasFx(r, fxf)))
-                .map(([r, rp]) => entry(rp, r, 'ssum', () => spellEditor(rp, r), `<label class="hb-prep" title="Prepared">${f(rp + '.prep', 'Prepared', { check: true })}</label>`)).join('');
+                .map(([r, rp]) => entry(rp, r, 'ssum', () => spellEditor(rp, r), prep ? `<label class="hb-prep" title="Prepared">${f(rp + '.prep', 'Prepared', { check: true })}</label>` : '')).join('');
             return `<div class="hb-grid">
                     <div class="hb-box"><span class="hb-lbl">Save DC</span>${fx(path + '.dc', 'Spell save DC', false, ' hb-big')}</div>
                     <div class="hb-box"><span class="hb-lbl">Spell attack</span>${fx(path + '.atk', 'Spell attack', true, ' hb-big')}</div>
@@ -1303,6 +1306,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <p class="muted hb-hint">Changes apply as you type. ${HELP}</p>
             <h3>Panels</h3>
             <label class="check">${f('view.all', 'Show every panel at once', { check: true })} Show every panel at once instead of tabs</label>
+            <label class="check">${f('view.prep', 'Always show prepared spells', { check: true })} Always show the Prepared tab and checkboxes (for homebrew classes; otherwise only Artificer, Cleric, Druid, Paladin and Wizard get them)</label>
             ${table(['Show', 'Title', 'Type', ''], C.panels.map((p, i) => `<tr><td class="hb-c">${f(`panels.${i}.on`, 'Show ' + p.title, { check: true })}</td>
                 <td>${f(`panels.${i}.title`, 'Title')}</td><td class="muted">${TYPES[p.type]}</td>
                 <td class="hb-nowrap"><button type="button" class="hb-x" data-act="mv" data-i="${i}" data-d="-1" aria-label="Move ${esc(p.title)} up" title="Move up"${i ? '' : ' disabled'}>↑</button><button type="button" class="hb-x" data-act="mv" data-i="${i}" data-d="1" aria-label="Move ${esc(p.title)} down" title="Move down"${i < C.panels.length - 1 ? '' : ' disabled'}>↓</button>${del('panels', i, p.title)}</td></tr>`).join(''))}
@@ -1424,7 +1428,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const P = panelOf(k), n = P.rows.filter((r) => r.att === 'yes').length;
             if (n > nm(P.attMax)) toast(`You're attuned to ${n} items but have ${nm(P.attMax)} attunement slots.`, 'note');
         }
-        if (k === 'view.all' || /^panels\.\d+\.on$/.test(k) || /\.(mode|cat|k|grp|fxf)$/.test(k) || /^panels\.\d+\.sort$/.test(k) || (el.type === 'checkbox' && /\.prep$/.test(k) && panelOf(k).sub === 'prep')) draw();
+        if (k === 'view.all' || k === 'view.prep' || /^panels\.\d+\.on$/.test(k) || /\.(mode|cat|k|grp|fxf)$/.test(k) || /^panels\.\d+\.sort$/.test(k) || (el.type === 'checkbox' && /\.prep$/.test(k) && panelOf(k).sub === 'prep')) draw();
     });
     main.addEventListener('change', (e) => {
         const el = e.target, k = el.dataset.k || '';
