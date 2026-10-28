@@ -1385,10 +1385,48 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     }
 
     // ---- customise ----
+    // top of Customise: a formula to try out (kept in view.fb, never used by the sheet) and every word a formula can use, with its value now
+    function formulaGuide() {
+        const V = vars();
+        if (C.view.fb == null) C.view.fb = 'ceil(LEVEL / 4) + 1';
+        const w = (word, ins = word) => `<button type="button" class="hb-fword" data-act="fbadd" data-n="${esc(ins)}" title="Add to the formula">${esc(word)}</button>`;
+        const now = (k) => (has(V, k) && !isNaN(V[k]) ? String(V[k]) : '');
+        const rows = [
+            ...C.abilities.map((a) => [w(kk(a.key).toUpperCase()), `${esc(a.name || a.key)} modifier`, sg(V[kk(a.key)] || 0)]),
+            ...C.abilities.map((a) => [w(kk(a.key).toUpperCase() + '_SCORE'), `${esc(a.name || a.key)} score`, now(kk(a.key) + '_score')]),
+            [w('PROF'), 'Proficiency bonus', sg(V.prof)],
+            [w('LEVEL'), 'Total character level, all classes added up', now('level')],
+            ...uniq(C.classes.filter((c) => c.name).map((c) => kk(c.name))).map((k) => [w(k.toUpperCase() + '_LEVEL'), `Levels in ${esc(C.classes.find((c) => kk(c.name) === k).name)} only`, now(k + '_level')]),
+            [w('CANTRIP'), 'Cantrip dice: 1, then 2 at level 5, 3 at 11, 4 at 17. In damage, <code>CANTRIPd10</code> rolls that many d10s', now('cantrip')],
+            [C.skills.map((s) => w(s.name.replace(/\s+/g, ''))).join(' '), 'A skill\'s full bonus, its name without spaces', ''],
+        ];
+        const syntax = [
+            [w('+') + w('-') + w('*') + w('/') + w('( )', '()'), 'Maths. * and / happen before + and −; brackets go first. Results round down.', ''],
+            [w('min(a, b)', 'min(DEX, 2)'), 'The smaller value. <code>min(DEX, 2)</code> caps DEX at +2, like medium armour', ''],
+            [w('max(a, b)', 'max(1, CHA)'), 'The larger value. <code>max(1, CHA)</code> is never below 1', ''],
+            [w('floor(x)', 'floor(LEVEL / 2)'), 'Round down. <code>floor(LEVEL / 2)</code> is half your level', ''],
+            [w('ceil(x)', 'ceil(LEVEL / 2)'), 'Round up. <code>ceil(LEVEL / 4) + 1</code> is the proficiency bonus', ''],
+            [w('round(x)', 'round(LEVEL / 3)'), 'Round to the nearest whole number', ''],
+            [w('abs(x)', 'abs(STR)'), 'Drop a minus sign: <code>abs(-2)</code> is 2', ''],
+            [w('[label]', '2 [Shield]'), 'Names the number before it in the breakdown: <code>10 + DEX + 2 [Shield]</code>', ''],
+            [w('1d8'), 'Dice, in damage and healing boxes only. Written as is; a word straight before <code>d</code> sets how many', ''],
+        ];
+        const tbl = (list) => table(['Word', 'What it does', 'Now'], list.map(([a, b, c]) => `<tr><td class="hb-fwords">${a}</td><td>${b}</td><td class="hb-c">${esc(c)}</td></tr>`).join(''));
+        return `<h3>Formulas</h3>
+            <div class="hb-fbuild">
+                <label class="hb-lbl hb-wide">Try a formula ${f('view.fb', 'Formula to try', { cls: 'hb-formula', ph: '10 + DEX + 2 [Shield]' })}</label>
+                <p class="hb-result">= <b class="hb-big" data-c="fx:view.fb"></b> <small class="hb-err" data-e="fx:view.fb"></small></p>
+                <p class="muted hb-hint" data-w="fx:view.fb"></p>
+                <p class="muted hb-hint">Only for trying things out; nothing on the sheet uses it. Click any word below to add it, then copy the formula into any box on the sheet.</p>
+            </div>
+            <h4>For this character</h4>${tbl(rows)}
+            <h4>Maths and other parts</h4>${tbl(syntax)}`;
+    }
     function customDlg() {
         const mini = (head, rows, addBtn) => table(head, rows) + `<div class="actions">${addBtn}</div>`;
         return `<h2>Customise</h2>
-            <p class="muted hb-hint">Changes apply as you type. ${HELP}</p>
+            <p class="muted hb-hint">Changes apply as you type.</p>
+            ${formulaGuide()}
             <h3>Panels</h3>
             <label class="check">${f('view.all', 'Show every panel at once', { check: true })} Show every panel at once instead of tabs</label>
             <label class="check">${f('view.prep', 'Always show prepared spells', { check: true })} Always show the Prepared tab and checkboxes (for homebrew classes; otherwise only Artificer, Cleric, Druid, Paladin and Wizard get them)</label>
@@ -1610,6 +1648,16 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'skill') return skillInfo(+b.dataset.i);
         if (act === 'attr') return attrInfo(b.dataset.n);
         if (act === 'sense') return senseInfo(+b.dataset.i);
+        if (act === 'fbadd') {
+            // operators go on the end, () wraps what's there, anything else joins with + unless the formula ends waiting for a value
+            const cur = String(C.view.fb || '').trim(), n = b.dataset.n;
+            C.view.fb = ['+', '-', '*', '/'].includes(n) ? `${cur} ${n} ` : n === '()' ? `(${cur})`
+                : !cur ? n : /[-+*/(,]$/.test(cur) ? `${cur}${cur.endsWith('(') ? '' : ' '}${n}` : `${cur} + ${n}`;
+            save();
+            const inp = $('.hb-fbuild [data-k="view.fb"]');
+            if (inp) { inp.value = C.view.fb; inp.focus(); }
+            return refresh();
+        }
         if (act === 'rinfo') return ruleInfo(b.dataset.k, b.dataset.n, b.dataset.t, b.dataset.s);
         if (act === 'coins') return coinApply(b.parentElement.querySelector('.hb-coinin'), b.dataset.sign);
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && needsFill(r)) srdFill(p); return info(p); }
