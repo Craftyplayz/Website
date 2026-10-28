@@ -835,8 +835,11 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 </div>`;
             };
             const list = p.rows.map((r, i) => [r, i]).filter(([r]) => cur === 'all' || r.group === tab).map(([r, i]) => row(r, `${path}.rows.${i}`, i)).join('');
-            return `<div class="hb-subrow">${subtabs(path + '.sub', opts, cur)}<button type="button" class="btn small" data-act="tadd" data-p="${path}">New tab</button></div>
-                ${tab ? `<div class="hb-tabtools"><label class="hb-grename">Rename this tab <input class="field hb-tname" data-p="${path}" data-g="${esc(tab)}" value="${esc(tab)}" autocomplete="off"></label><button type="button" class="btn small" data-act="tdel" data-p="${path}" data-g="${esc(tab)}">Delete tab</button></div>` : ''}
+            // one pencil edits every tab: rename, delete, add
+            const tid = p.id + ':tabs', tedit = openRows.has(tid);
+            return `<div class="hb-subrow">${subtabs(path + '.sub', opts, cur)}<button type="button" class="hb-x hb-toggle hb-tedit" data-act="toggle" data-id="${esc(tid)}" aria-expanded="${tedit}" aria-label="Edit tabs" title="${tedit ? 'Done' : 'Edit tabs'}">${PENCIL}</button></div>
+                ${tedit ? `<div class="hb-tabedit">${tabs.map((g) => `<div class="hb-tabtools"><input class="field hb-tname" data-p="${path}" data-g="${esc(g)}" value="${esc(g)}" autocomplete="off" aria-label="Tab name"><button type="button" class="btn small" data-act="tdel" data-p="${path}" data-g="${esc(g)}">Delete</button></div>`).join('')}
+                    <div class="actions"><button type="button" class="btn small" data-act="tadd" data-p="${path}">New tab</button></div></div>` : ''}
                 <div class="hb-list">${list || '<p class="muted">No resources here yet.</p>'}</div>
                 <div class="actions"><select class="field hb-auto" id="hb-tkind-${pi}" aria-label="Kind of resource">${TRACKER_KINDS.map(([k, t]) => `<option value="${k}">${t}</option>`).join('')}</select><button type="button" class="btn small" data-act="tnew" data-p="${path}" data-i="${pi}">Add resource</button></div>`;
         },
@@ -1405,7 +1408,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             if (!to || to === from) return;
             P.tabs = uniq(P.tabs.map((t) => (t === from ? to : t)).concat(to));
             for (const r of P.rows) if (r.group === from) r.group = to;
-            P.sub = 't:' + to;
+            if (P.sub === 't:' + from) P.sub = 't:' + to;
             saveNow(); return draw();
         }
         if (/\.notes\.\d+\.group$/.test(k) || /^panels\.\d+\.rows\.\d+\.(uses|max|group)$/.test(k) || /\.(levels\.\d+|sp)\.max$/.test(k)) { saveNow(); return draw(); }
@@ -1477,7 +1480,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             while (taken.includes(name)) name = 'New tab ' + n++;
             P.tabs.push(name); P.sub = 't:' + name;
             saveNow(); draw();
-            const t = $(`.hb-tname[data-p="${p}"]`);
+            const t = $(`.hb-tname[data-p="${p}"][data-g="${name}"]`);
             if (t) { t.focus(); t.select(); }
             return;
         }
@@ -1485,7 +1488,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const P = get(p), g = b.dataset.g, n = P.rows.filter((r) => r.group === g).length;
             if (n && !confirm(`Delete the ${g} tab? Its ${n} resource${n === 1 ? '' : 's'} stay under All.`)) return;
             for (const r of P.rows) if (r.group === g) r.group = '';
-            P.tabs = P.tabs.filter((t) => t !== g); P.sub = 'all';
+            P.tabs = P.tabs.filter((t) => t !== g); if (P.sub === 't:' + g) P.sub = 'all';
             saveNow(); return draw();
         }
         if (act === 'tnew') {
