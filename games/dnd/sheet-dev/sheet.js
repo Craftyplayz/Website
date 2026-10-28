@@ -1065,19 +1065,26 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             desc: (s.desc || []).join('\n\n'), higher: (s.higher_level || []).join('\n\n'), srd: s.index,
         });
     }
+    // rows filled before spells.php read save/attack/damage from the text get one re-check (mech marks it done)
+    const noMech = (r) => r.mode === 'none' && !(r.dmg || []).length;
+    const needsFill = (r) => !r.desc || (noMech(r) && !r.mech);
     async function srdFill(rp) {
         const r = get(rp), list = await loadSrdList();
         const hit = list.find(([, n]) => n.toLowerCase() === String(r.name).trim().toLowerCase());
-        // an already-filled spell with no text (older wikidot rows) only gets its text, so edits to the rest stay
+        // an already-filled spell only gets what it's missing (text, or save/attack/damage on older rows), so edits stay
         const textOnly = hit && r.srd === hit[0];
-        if (!hit || (textOnly && r.desc)) return;
+        if (!hit || (textOnly && !needsFill(r))) return;
         try {
             const res = await fetch('spells.php?i=' + encodeURIComponent(hit[0]));
             if (!res.ok) throw 0;
             const s = await res.json();
             if (!textOnly) fromSrd(s, r);
-            else if (!(s.desc || []).length) return;
-            else Object.assign(r, { desc: s.desc.join('\n\n'), higher: (s.higher_level || []).join('\n\n') });
+            else {
+                const t = {}; fromSrd(s, t);
+                if (!r.desc && t.desc) Object.assign(r, { desc: t.desc, higher: t.higher });
+                if (noMech(r)) Object.assign(r, { mode: t.mode, save: t.save || r.save, dmg: t.dmg });
+            }
+            r.mech = 1;
             saveNow(); draw();
             toast(`Filled in ${r.name}${wdUrl(r) ? '' : ' from the SRD'}.`, 'ok');
         } catch (e) { toast(`Couldn't load ${r.name} from the SRD. Try again in a minute.`, 'err'); }
@@ -1458,7 +1465,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'skill') return skillInfo(+b.dataset.i);
         if (act === 'sense') return senseInfo(+b.dataset.i);
         if (act === 'rinfo') return ruleInfo(b.dataset.k, b.dataset.n, b.dataset.t, b.dataset.s);
-        if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && !r.desc) srdFill(p); return info(p); }
+        if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && needsFill(r)) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
         if (act === 'more') { open.more = !open.more; return draw(); }
         if (act === 'hpedit') { open.hp = !open.hp; return draw(); }
