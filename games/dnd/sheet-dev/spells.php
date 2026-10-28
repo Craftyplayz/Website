@@ -2,7 +2,7 @@
 // SRD 5.1 spells for the homebrew sheet, from dnd5eapi.co (SRD 5.1, CC-BY-4.0).
 //   spells.php?list=1      -> [[index, name, level], ...]
 //   spells.php?i=fireball  -> one spell, trimmed to the fields the sheet uses
-// Non-SRD spells come from extra-spells.json: stats only, the full text stays on dnd5e.wikidot.com.
+// Non-SRD spells come from extra-spells.json (stats); their text is fetched from dnd5e.wikidot.com when picked.
 // Cached on disk for 30 days (SRD text doesn't change); a failed refresh serves the last copy.
 const SRD_API = 'https://www.dnd5eapi.co/api/2014/spells';
 const SRD_TTL = 2592000;
@@ -17,7 +17,7 @@ function srd_out($code, $data)
 }
 
 // GET $url, trim it, cache the trimmed JSON. Returns [json|null, status]
-function srd_get($url, $trim)
+function srd_get($url, $trim, $html = false)
 {
     $dir = sys_get_temp_dir() . '/craftyplayz-srd';
     $file = $dir . '/' . md5($url) . '.json';
@@ -35,7 +35,7 @@ function srd_get($url, $trim)
     ]);
     $body = curl_exec($ch);
     $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $json = $body ? json_decode($body, true) : null;
+    $json = $body ? ($html ? ['html' => $body] : json_decode($body, true)) : null;
     if ($status === 200 && is_array($json)) {
         $out = json_encode($trim($json));
         if (!is_dir($dir)) @mkdir($dir, 0755, true);
@@ -61,7 +61,24 @@ if (isset($_GET['list'])) {
 
 $i = (string)($_GET['i'] ?? '');
 if (substr($i, 0, 3) === 'wd:') {
-    foreach ($extra as $s) if ('wd:' . $s['index'] === $i) srd_out(200, ['wd' => 'https://dnd5e.wikidot.com/spell:' . $s['index'], 'index' => $i] + $s);
+    foreach ($extra as $s) if ('wd:' . $s['index'] === $i) {
+        $url = 'https://dnd5e.wikidot.com/spell:' . $s['index'];
+        // the paragraphs after the stat block, minus the class list; a failed fetch still returns the stats
+        [$text] = srd_get($url, function ($j) {
+            if (!preg_match('~<div id="page-content">(.*?)<div class="content-separator"[^>]*>\s*</div>\s*</div>~s', $j['html'], $m)) return ['desc' => [], 'higher_level' => []];
+            $body = preg_replace('~^.*?<strong>Duration:</strong>.*?</p>~s', '', $m[1]);
+            $body = preg_replace('~</(p|li|tr|h\d)>|<br\s*/?>~i', "\n", preg_replace('~</t[dh]>~i', ' | ', $body));
+            $desc = $higher = [];
+            foreach (explode("\n", html_entity_decode(strip_tags($body), ENT_QUOTES | ENT_HTML5, 'UTF-8')) as $line) {
+                $line = trim(preg_replace('~\s*\|\s*$~', '', trim($line)));
+                if ($line === '' || strpos($line, 'Spell Lists.') === 0) continue;
+                if (strpos($line, 'At Higher Levels.') === 0) $higher[] = trim(substr($line, 17));
+                else $desc[] = $line;
+            }
+            return ['desc' => $desc, 'higher_level' => $higher];
+        }, true);
+        srd_out(200, ['wd' => $url, 'index' => $i] + $s + (json_decode((string)$text, true) ?: []));
+    }
     srd_out(404, ['error' => 'Unknown spell.']);
 }
 if (!preg_match('/^[a-z0-9-]{1,80}$/', $i)) srd_out(400, ['error' => 'Unknown spell.']);
