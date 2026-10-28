@@ -174,7 +174,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             abilities: ABIL.map(([key, name]) => ({ key, name, score: 10, save: false, sb: '' })),
             skills: SKILLS.map(([name, ab]) => ({ name, ab, p: 0, b: '' })),
             prof: 'ceil(LEVEL / 4) + 1', ac: '10 + DEX', init: 'DEX',
-            hp: { cur: 10, max: 10, temp: 0, mod: 0 }, insp: false,
+            hp: { cur: 10, base: 10, temp: 0, mod: 0 }, insp: false,
             speeds: [{ type: 'Walk', ft: 30, hover: false }], conditions: [], exhaustion: 0, condList: CONDITIONS, res: '', imm: '', vul: '',
             passives: [['Passive Perception', '10 + Perception'], ['Passive Investigation', '10 + Investigation'], ['Passive Insight', '10 + Insight']].map(([name, f]) => ({ name, f })),
             senses: '',
@@ -298,6 +298,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             }
             return q;
         });
+        if (!('base' in out.hp)) out.hp.base = nm(out.hp.max) - conHp(out); // max used to be typed in whole, CON included
+        delete out.hp.max;
         out.hp = Object.assign(d.hp, out.hp);
         out.view = Object.assign(d.view, out.view);
         out.lists = Object.assign(d.lists, out.lists);
@@ -328,8 +330,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             localStorage.setItem(KEY, JSON.stringify(db));
             localStorage.setItem('hb-sheet-merged', '1');
         }
-    } catch (e) { }
-    if (!db.chars[db.cur]) db.cur = Object.keys(db.chars)[0] || '';
+    } catch (e) { }    if (!db.chars[db.cur]) db.cur = Object.keys(db.chars)[0] || '';
     if (!db.cur) { const c = blank(); db.chars[c.id] = c; db.cur = c.id; }
     let C = db.chars[db.cur];
     let warned = false;
@@ -376,7 +377,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     // a maximum may be a number or a formula (PROF, LEVEL, CHA, SORCERER_LEVEL); a broken one counts as 0
     const maxOf = (f, V) => { const r = ev(f, V || vars()); return isNaN(r.v) ? 0 : Math.max(0, r.v); };
     const level = () => C.classes.reduce((s, c) => s + nm(c.level), 0);
-    const hpMax = () => nm(C.hp.max) + nm(C.hp.mod);
+    // max HP = base + level × CON modifier (+ any temporary change); a function so normalise can use it before kk exists
+    function conHp(c) {
+        const a = c.abilities.find((x) => String(x.key).replace(/W/g, '').toLowerCase() === 'con');
+        return a ? Math.floor((nm(a.score) - 10) / 2) * c.classes.reduce((t, k) => t + nm(k.level), 0) : 0;
+    }
+    const hpMax = () => nm(C.hp.base) + conHp(C) + nm(C.hp.mod);
     function profT(ab, p, extra, V) {
         const m = ab ? V[kk(ab)] : 0; // '' = N/A, proficiency only
         if (m === undefined) return { v: NaN, err: 'No ability called ' + ab };
@@ -487,7 +493,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             case 'att': { const P = C.panels[a], n = P.rows.filter((r) => r.att === 'yes').length; return { v: `${n} / ${nm(P.attMax)}`, warn: n > nm(P.attMax) }; }
             case 'hdl': { const c = C.classes[a]; return { v: `${Math.max(0, nm(c.level) - nm(c.hdUsed))} of ${nm(c.level)} left` }; }
             case 'lvl': return { v: C.classes.length > 1 ? 'Level ' + level() + ' total' : '' };
-            case 'hpmax': return { v: hpMax(), warn: nm(C.hp.mod) < 0, why: nm(C.hp.mod) ? `${nm(C.hp.max)} ${sg(nm(C.hp.mod))} change` : '' };
+            case 'hpmax': return { v: hpMax(), warn: nm(C.hp.mod) < 0, why: `${nm(C.hp.base)} base ${sg(conHp(C))} CON × level${nm(C.hp.mod) ? ` ${sg(nm(C.hp.mod))} change` : ''}` };
             case 'hptemp': return { v: nm(C.hp.temp) ? `+${nm(C.hp.temp)} temp` : '' };
             case 'speed': return { v: C.speeds.map((s) => `${s.type} ${/^\s*[\d.]+\s*$/.test(s.ft) ? s.ft + ' ft' : s.ft}${s.hover ? ' (hover)' : ''}`).join(' · ') };
             case 'cond': return { v: [...C.conditions, nm(C.exhaustion) ? 'Exhaustion ' + C.exhaustion : ''].filter(Boolean).join(', ') };
@@ -587,11 +593,11 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         </div>`).join('')}</div>`;
         const combat = `<div class="hb-combat">
             <div class="hb-box hb-hp">
-                <div class="hb-hp-head"><span class="hb-lbl">Hit points</span><button type="button" class="hb-x" data-act="hpedit" aria-expanded="${!!open.hp}" aria-label="Edit maximum and temporary hit points" title="Edit max and temp HP">${PENCIL}</button></div>
+                <div class="hb-hp-head"><span class="hb-lbl">Hit points</span><button type="button" class="hb-x" data-act="hpedit" aria-expanded="${!!open.hp}" aria-label="Edit base and temporary hit points" title="Edit base and temp HP">${PENCIL}</button></div>
                 <div class="hb-hpv">${f('hp.cur', 'Current hit points', { num: true })}<span>/</span><b data-c="hpmax"></b><span class="hb-temp" data-c="hptemp"></span></div>
                 <div class="hb-hpbar" aria-hidden="true"><i id="hb-hpbar"></i><i id="hb-tempbar"></i></div>
                 ${open.hp ? `<div class="hb-hpf">
-                    <label>Max ${f('hp.max', 'Maximum hit points', { num: true })}</label>
+                    <label>Base ${f('hp.base', 'Base hit points, before level × CON modifier', { num: true })}</label>
                     <label>Max change ${f('hp.mod', 'Temporary change to maximum hit points', { num: true })}</label>
                     <label>Temp ${f('hp.temp', 'Temporary hit points', { num: true })}</label>
                 </div>` : ''}
@@ -1070,11 +1076,16 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     async function srdFill(rp) {
         const r = get(rp), list = await loadSrdList();
         const hit = list.find(([, n]) => n.toLowerCase() === String(r.name).trim().toLowerCase());
-        if (!hit || r.srd === hit[0]) return;
+        // an already-filled spell with no text (older wikidot rows) only gets its text, so edits to the rest stay
+        const textOnly = hit && r.srd === hit[0];
+        if (!hit || (textOnly && r.desc)) return;
         try {
             const res = await fetch('spells.php?i=' + encodeURIComponent(hit[0]));
             if (!res.ok) throw 0;
-            fromSrd(await res.json(), r);
+            const s = await res.json();
+            if (!textOnly) fromSrd(s, r);
+            else if (!(s.desc || []).length) return;
+            else Object.assign(r, { desc: s.desc.join('\n\n'), higher: (s.higher_level || []).join('\n\n') });
             saveNow(); draw();
             toast(`Filled in ${r.name}${wdUrl(r) ? '' : ' from the SRD'}.`, 'ok');
         } catch (e) { toast(`Couldn't load ${r.name} from the SRD. Try again in a minute.`, 'err'); }
@@ -1443,7 +1454,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'doshort' || act === 'dolong') return rest(act === 'dolong' ? 'long' : 'short');
         if (act === 'skill') return skillInfo(+b.dataset.i);
         if (act === 'rinfo') return ruleInfo(b.dataset.k, b.dataset.n, b.dataset.t, b.dataset.s);
-        if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && !r.desc && !wdUrl(r)) srdFill(p); return info(p); }
+        if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && !r.desc) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
         if (act === 'more') { open.more = !open.more; return draw(); }
         if (act === 'hpedit') { open.hp = !open.hp; return draw(); }
