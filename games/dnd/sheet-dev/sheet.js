@@ -152,7 +152,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         tracker: () => ({ id: uid(), name: '', kind: 'count', cur: 1, max: 1, used: 0, reset: 'long', group: '', levels: [] }),
         level: () => ({ label: '', max: '1', used: 0 }),
         meta: () => ({ id: uid(), name: '', cost: '1', desc: '' }),
-        hb: () => ({ id: uid(), name: '', time: 'Action', range: '', mode: 'none', hit: 'PROF + STR', save: 'DEX', dc: '8 + PROF + STR', fx: [], cost: { amt: '', what: '' }, desc: '' }),
+        hb: () => ({ id: uid(), group: '', name: '', time: 'Action', range: '', mode: 'none', hit: 'PROF + STR', save: 'DEX', dc: '8 + PROF + STR', fx: [], cost: { amt: '', what: '' }, desc: '' }),
         fx: () => ({ k: 'dmg', dice: '', type: '', text: '' }),
         sfx: () => ({ k: 'buff', dice: '', type: '', text: '' }),
         dmg: () => ({ dice: '', type: '' }),
@@ -176,7 +176,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (type === 'profs') p.sub = 'skills';
         if (type === 'notes') Object.assign(p, { notes: [], open: '', sort: 'edited' });
         if (type === 'trackers') p.tabs = [];
-        if (type === 'homebrew') Object.assign(p, { sub: 'Action', text: '' });
+        if (type === 'homebrew') Object.assign(p, { sub: 'Action', text: '', tabs: [] });
         return p;
     }
 
@@ -301,6 +301,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             if (q.type === 'notes') q.notes = rows(q.notes, ROW.note);
             if (q.type === 'list' && q.split) for (const r of q.rows) if (!LIST_GROUPS.some(([g]) => g === r.grp)) r.grp = groupOf(r.src, c);
             if (q.type === 'homebrew') for (const r of q.rows) { r.fx = rows(r.fx, ROW.fx); r.cost = Object.assign({ amt: '', what: '' }, isObj(r.cost) ? r.cost : {}); }
+            if (q.type === 'homebrew') q.tabs = strs(q.tabs);
             if (q.type === 'trackers') { q.tabs = strs(q.tabs); for (const r of q.rows) r.levels = rows(r.levels, ROW.level); }
             if (q.type === 'spells') {
                 for (const r of q.rows) r.fx = rows(r.fx, ROW.fx);
@@ -584,6 +585,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const table = (head, body) => !body ? '' : `<div class="table-wrap"><table class="table hb-table"><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>`;
     const dot = (act, i, s, name) => { const lv = Math.max(0, PROF.findIndex(([p]) => p === s.p)); return `<button type="button" class="hb-prof l${lv}" data-act="${act}" data-i="${i}" aria-label="${esc(name)}: ${PROF[lv][1]}" title="${PROF[lv][1]}"></button>`; };
     // sub-tabs inside a panel; the choice is saved on the panel as .sub
+    // sub-tabs plus a pencil that opens your own tabs for renaming, deleting and adding (Resources, Homebrew)
+    function tabBar(p, path, opts, cur, tabs) {
+        const tid = p.id + ':tabs', tedit = openRows.has(tid);
+        return `<div class="hb-subrow">${subtabs(path + '.sub', opts, cur)}<button type="button" class="hb-x hb-toggle hb-tedit" data-act="toggle" data-id="${esc(tid)}" aria-expanded="${tedit}" aria-label="Edit tabs" title="${tedit ? 'Done' : 'Edit tabs'}">${PENCIL}</button></div>
+            ${tedit ? `<div class="hb-tabedit">${tabs.map((g) => `<div class="hb-tabtools"><input class="field hb-tname" data-p="${path}" data-g="${esc(g)}" value="${esc(g)}" autocomplete="off" aria-label="Tab name"><button type="button" class="btn small" data-act="tdel" data-p="${path}" data-g="${esc(g)}">Delete</button></div>`).join('')}
+                <div class="actions"><button type="button" class="btn small" data-act="tadd" data-p="${path}">New tab</button></div></div>` : ''}`;
+    }
     function subtabs(path, opts, cur) {
         return `<div class="stabs hb-sub">${opts.map(([id, label, n]) => `<button type="button" class="${id === cur ? 'on' : ''}" data-act="sub" data-p="${path}" data-id="${esc(id)}" aria-pressed="${id === cur}">${esc(label)}${n != null ? ` <span class="muted">${n}</span>` : ''}</button>`).join('')}</div>`;
     }
@@ -727,8 +735,10 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     }
 
     function hbEditor(rp, r) {
+        const P = panelOf(rp), tabs = uniq([...P.tabs, ...P.rows.map((x) => x.group).filter(Boolean)]);
         return `<div class="hb-grid">
             <label>Name ${f(rp + '.name', 'Name', { ph: 'Shadow Strike' })}</label>
+            ${tabs.length ? `<label>Tab ${sel(rp + '.group', 'Tab', [['', 'No tab'], ...tabs.map((t) => [t, t])])}</label>` : ''}
             <label>Timing ${f(rp + '.time', 'Timing', { list: 'hb-dl-hbtime' })}</label>
             <label>Range ${f(rp + '.range', 'Range', { ph: '30 ft' })}</label>
             <label>Resolves with ${sel(rp + '.mode', 'Resolves with', [['none', 'Nothing'], ['hit', 'Attack roll'], ['save', 'Saving throw']])}</label>
@@ -923,28 +933,28 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             };
             const list = p.rows.map((r, i) => [r, i]).filter(([r]) => cur === 'all' || r.group === tab).map(([r, i]) => row(r, `${path}.rows.${i}`, i)).join('');
             // one pencil edits every tab: rename, delete, add
-            const tid = p.id + ':tabs', tedit = openRows.has(tid);
-            return `<div class="hb-subrow">${subtabs(path + '.sub', opts, cur)}<button type="button" class="hb-x hb-toggle hb-tedit" data-act="toggle" data-id="${esc(tid)}" aria-expanded="${tedit}" aria-label="Edit tabs" title="${tedit ? 'Done' : 'Edit tabs'}">${PENCIL}</button></div>
-                ${tedit ? `<div class="hb-tabedit">${tabs.map((g) => `<div class="hb-tabtools"><input class="field hb-tname" data-p="${path}" data-g="${esc(g)}" value="${esc(g)}" autocomplete="off" aria-label="Tab name"><button type="button" class="btn small" data-act="tdel" data-p="${path}" data-g="${esc(g)}">Delete</button></div>`).join('')}
-                    <div class="actions"><button type="button" class="btn small" data-act="tadd" data-p="${path}">New tab</button></div></div>` : ''}
+            return `${tabBar(p, path, opts, cur, tabs)}
                 <div class="hb-list">${list || '<p class="muted">No resources here yet.</p>'}</div>
                 <div class="actions"><select class="field hb-auto" id="hb-tkind-${pi}" aria-label="Kind of resource">${TRACKER_KINDS.map(([k, t]) => `<option value="${k}">${t}</option>`).join('')}</select><button type="button" class="btn small" data-act="tnew" data-p="${path}" data-i="${pi}">Add resource</button></div>`;
         },
 
         // homebrew abilities by timing, each with effects and a cost that can spend one of your resources
         homebrew: (p, path) => {
-            const main = HB_TIMES.slice(0, 3).map(([t]) => t), inTab = (r, t) => (t === 'Other' ? !main.includes(r.time) : r.time === t);
-            const opts = [...HB_TIMES.map(([t, label]) => [t, label, p.rows.filter((r) => inTab(r, t)).length]), ['notes', 'Notes']];
-            const cur = pickSub(p, opts);
-            if (cur === 'notes') return subtabs(path + '.sub', opts, cur) + f(path + '.text', p.title + ' notes', { area: true, cls: 'hb-text', ph: 'House rules, reminders, ideas' });
-            const what = HB_TIMES.find(([t]) => t === cur)[2];
+            // timing tabs, then your own tabs (an ability shows under its timing and its own tab), then notes
+            const main = HB_TIMES.slice(0, 3).map(([t]) => t);
+            const inTab = (r, t) => (t.startsWith('t:') ? r.group === t.slice(2) : t === 'Other' ? !main.includes(r.time) : r.time === t);
+            const tabs = uniq([...p.tabs, ...p.rows.map((r) => r.group).filter(Boolean)]);
+            const opts = [...HB_TIMES.map(([t, label]) => [t, label]), ...tabs.map((g) => ['t:' + g, g]), ['notes', 'Notes']].map(([t, label]) => (t === 'notes' ? [t, label] : [t, label, p.rows.filter((r) => inTab(r, t)).length]));
+            const cur = pickSub(p, opts), bar = tabBar(p, path, opts, cur, tabs);
+            if (cur === 'notes') return bar + f(path + '.text', p.title + ' notes', { area: true, cls: 'hb-text', ph: 'House rules, reminders, ideas' });
+            const what = cur.startsWith('t:') ? 'ability' : HB_TIMES.find(([t]) => t === cur)[2];
             const list = p.rows.map((r, i) => [r, `${path}.rows.${i}`]).filter(([r]) => inTab(r, cur)).map(([r, rp]) => {
                 const res = resOf(r.cost.what);
                 const use = res ? `<div class="hb-uses"><button type="button" class="btn small" data-act="hbuse" data-p="${rp}">Use</button><span>${esc(costAmt(r) + ' ' + res.name)}, ${resLeft(res)} left</span></div>` : '';
                 return entry(rp, r, 'hsum', () => hbEditor(rp, r), '', use);
             }).join('');
             return subtabs(path + '.sub', opts, cur) + `<div class="hb-list">${list || `<p class="muted">No ${what === 'ability' ? 'other abilities' : what + 's'} yet.</p>`}</div>
-                <div class="actions">${add(path + '.rows', 'hb', 'Add ' + what, ` data-time="${esc(cur)}"`)}</div>`;
+                <div class="actions">${add(path + '.rows', 'hb', 'Add ' + what, cur.startsWith('t:') ? ` data-group="${esc(cur.slice(2))}"` : ` data-time="${esc(cur)}"`)}</div>`;
         },
 
         text: (p, path) => f(path + '.text', p.title, { area: true, cls: 'hb-text' }),
@@ -1741,7 +1751,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         }
         if (act === 'tdel') {
             const P = get(p), g = b.dataset.g, n = P.rows.filter((r) => r.group === g).length;
-            if (n && !confirm(`Delete the ${g} tab? Its ${n} resource${n === 1 ? '' : 's'} stay under All.`)) return;
+            const hb = P.type === 'homebrew';
+            if (n && !confirm(`Delete the ${g} tab? Its ${n} ${hb ? (n === 1 ? 'ability' : 'abilities') : 'resource' + (n === 1 ? '' : 's')} stay under ${hb ? 'their timing' : 'All'}.`)) return;
             snap(b);
             for (const r of P.rows) if (r.group === g) r.group = '';
             P.tabs = P.tabs.filter((t) => t !== g); if (P.sub === 't:' + g) P.sub = 'all';
@@ -1802,6 +1813,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         else if (act === 'add') {
             const row = ROW[b.dataset.t]();
             if (b.dataset.time) row.time = b.dataset.time;
+            if (b.dataset.group) row.group = b.dataset.group;
             if (b.dataset.cat) row.cat = b.dataset.cat;
             if (b.dataset.grp) row.grp = b.dataset.grp;
             if (b.dataset.lvl) row.lvl = +b.dataset.lvl;
