@@ -28,6 +28,8 @@
     display: grid; gap: 16px; grid-template-columns: clamp(80px, 22vw, 160px) minmax(0, 1fr);
     grid-template-areas: "art id" "abil abil" "combat combat" "saves saves" "senses senses" "panels panels";
 }
+/* wider than the site's 1280px: above it the side space is halved (width = 1280 + half the extra) */
+.page.hb { max-width: calc(50vw + 640px); }
 .hb-top-id { grid-area: id; }
 .hb-top-art { grid-area: art; }
 .hb-top-abil { grid-area: abil; }
