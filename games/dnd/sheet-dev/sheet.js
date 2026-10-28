@@ -393,11 +393,21 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     let noteQ = '';
     const panelOf = (rp) => get(rp.split('.').slice(0, 2).join('.'));
 
+    // each part of an action's summary links to its SRD rule (rules.js); names is "a|b" for more than one rule
+    const ruleLink = (kind, names, text, title, sub) => (String(names).split('|').some((n) => rule(kind, n))
+        ? `<button type="button" class="hb-prop" data-act="rinfo" data-k="${kind}" data-n="${esc(names)}" data-t="${esc(title)}" data-s="${esc(sub)}">${esc(text)}</button>` : esc(text));
+    function rangeRules(range) {
+        const s = String(range), first = +(s.match(/\d+/) || [0])[0];
+        return [(/\bor\b/.test(s) || (!s.includes('/') && first && first <= 10)) && 'melee attacks', (s.includes('/') || first > 10) && 'ranged attacks'].filter(Boolean).join('|');
+    }
     function actSum(r, V) {
-        return [r.time, r.range,
-            r.mode === 'hit' ? show({ ...ev(r.hit, V), signed: true }) + ' to hit' : '',
-            r.mode === 'save' ? `DC ${show(ev(r.dc, V))} ${r.save}` : '',
-            dmgText(r.dmg, V)].filter(Boolean).join(' · ');
+        return [r.time && ruleLink('act', String(r.time).toLowerCase(), r.time, r.time, 'Timing'),
+            r.range && ruleLink('act', rangeRules(r.range), r.range, 'Range: ' + r.range, 'Range'),
+            r.mode === 'hit' ? ruleLink('act', 'attack rolls', show({ ...ev(r.hit, V), signed: true }) + ' to hit', 'Attack rolls', 'To hit') : '',
+            r.mode === 'save' ? ruleLink('act', 'saving throws', `DC ${show(ev(r.dc, V))} ${r.save}`, 'Saving throws', 'Save') : '',
+            r.dmg.filter((d) => d.dice || d.type).map((d) => [d.dice && ruleLink('act', 'damage rolls', resolve(d.dice, V), 'Damage rolls', 'Damage'),
+                d.type && ruleLink('dmg', d.type, d.type, d.type + ' damage', 'Damage type')].filter(Boolean).join(' ')).join(' + '),
+            r.props.map((n) => ruleLink('prop', n, n, n, 'Weapon property')).join(', ')].filter(Boolean).join(' · ');
     }
     const fxOne = (e, V) => (e.k === 'buff' ? e.text : e.k === 'heal' ? 'Heals ' + resolve(e.dice, V) : e.k === 'temp' ? resolve(e.dice, V) + ' temp HP' : dmgText([e], V)).trim();
     function fxText(fx, V) {
@@ -445,7 +455,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             case 'tool': { const s = C.profs.tools[a]; return { ...profT(s.ab, s.p, '', V), signed: true }; }
             case 'fx': return { ...ev(get(a), V), why: why(get(a), V) };
             case 'fs': return { ...ev(get(a), V), signed: true, why: why(get(a), V) };
-            case 'asum': return { v: actSum(get(a), V) };
+            case 'asum': return { html: actSum(get(a), V) };
             case 'ssum': return { v: spellSum(get(a), panelOf(a), V) };
             case 'lsum': return { v: get(a).src };
             case 'hsum': return { v: hbSum(get(a), V) };
@@ -472,7 +482,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const V = vars();
         for (const el of document.querySelectorAll('.hb [data-c]')) {
             const r = value(el.dataset.c, V);
-            el.textContent = show(r);
+            if ('html' in r) el.innerHTML = r.html; else el.textContent = show(r);
             el.classList.toggle('hb-bad', !!r.err);
             el.classList.toggle('hb-warn', !!r.warn);
             if (r.err || r.why) el.title = r.err || r.why; else el.removeAttribute('title');
@@ -619,8 +629,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const isOpen = openRows.has(r.id);
         return `<div class="hb-entry">
             <div class="hb-entry-h">${lead}<button type="button" class="hb-link" data-act="info" data-p="${rp}">${esc(r.name || 'Unnamed')}</button>
-                <span class="hb-sum"><span data-c="${summaryKey}:${rp}"></span>${r.props?.length ? `<span class="hb-props">${r.props.map((n) =>
-                    `<button type="button" class="hb-prop" data-act="prop" data-n="${esc(n)}">${esc(n)}</button>`).join(', ')}</span>` : ''}</span>
+                <span class="hb-sum" data-c="${summaryKey}:${rp}"></span>
                 <button type="button" class="hb-x hb-toggle" data-act="toggle" data-id="${esc(r.id)}" aria-expanded="${isOpen}" aria-label="Edit ${esc(r.name || 'entry')}" title="Edit">${PENCIL}</button></div>
             ${tail}${isOpen ? `<div class="hb-editor">${editor()}</div>` : ''}
         </div>`;
@@ -1132,11 +1141,11 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             ${spell && wdUrl(r) ? `<p class="muted hb-hint">Full spell text: <a href="${wdUrl(r)}" target="_blank" rel="noopener">${esc(r.name)} on dnd5e.wikidot.com</a></p>` : spell && r.srd ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
     }
     function openDrawer(html) { $('#hb-drawer-body').innerHTML = html; drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); drawer.focus(); }
-    function propInfo(n) {
-        const r = rule('prop', n);
-        openDrawer(`<h2>${esc(n)}</h2><p class="muted">Weapon property</p>
-            <div class="hb-desc">${rulePs(r) || '<p class="muted">No SRD description for this property.</p>'}</div>
-            ${r ? `<p class="muted hb-hint">${SRD_CREDIT}</p>` : ''}`);
+    function ruleInfo(kind, names, title, sub) {
+        const list = names.split('|').filter((n) => rule(kind, n));
+        const body = list.length === 1 ? rulePs(rule(kind, list[0]))
+            : list.map((n) => `<h4>${esc(n[0].toUpperCase() + n.slice(1))}</h4>${rulePs(rule(kind, n))}`).join('');
+        openDrawer(`<h2>${esc(title)}</h2><p class="muted">${esc(sub)}</p><div class="hb-desc">${body}</div><p class="muted hb-hint">${SRD_CREDIT}</p>`);
     }
     function skillInfo(i) {
         const sk = C.skills[i], v = value('skill:' + i, vars());
@@ -1385,7 +1394,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'rest') return showDlg({ kind: 'rest', r: b.dataset.r });
         if (act === 'doshort' || act === 'dolong') return rest(act === 'dolong' ? 'long' : 'short');
         if (act === 'skill') return skillInfo(+b.dataset.i);
-        if (act === 'prop') return propInfo(b.dataset.n);
+        if (act === 'rinfo') return ruleInfo(b.dataset.k, b.dataset.n, b.dataset.t, b.dataset.s);
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && !r.desc && !wdUrl(r)) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
         if (act === 'more') { open.more = !open.more; return draw(); }
