@@ -1,0 +1,26 @@
+/* YouTube Playlist Timeline (/tools/youtube-timeline/) */
+.ytt [hidden] { display: none !important; }
+.ytt .form-card { margin-bottom: 20px; }
+.ytt #bar { max-width: 560px; margin-top: 8px; }
+.ytt .sec-h a { color: var(--text); text-decoration: none; min-width: 0; overflow-wrap: anywhere; }
+.ytt .sec-h a:hover { color: var(--link); }
+
+/* uploads chart: one column per month or year */
+.ytt-chart { display: flex; align-items: flex-end; gap: 2px; height: 160px; padding: 16px 16px 28px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow-x: auto; }
+.ytt-col { position: relative; flex: 1 0 4px; height: 100%; display: flex; align-items: flex-end; }
+.ytt-col i { display: block; width: 100%; min-height: 1px; background: linear-gradient(0deg, var(--btn), var(--accent)); border-radius: 2px 2px 0 0; transition: opacity var(--fast); }
+.ytt-chart:hover .ytt-col:not(:hover) i { opacity: .5; }
+.ytt-col span { position: absolute; top: 100%; left: 0; margin-top: 6px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+/* timeline: a vertical line with one dot per video */
+.ytt-year { margin: 20px 0 8px; font-size: 17px; }
+.ytt-year .n { color: var(--muted); font-size: 13px; font-weight: 400; }
+.ytt-line { list-style: none; margin: 0; padding: 0 0 0 20px; border-left: 2px solid var(--line); display: grid; gap: 6px; }
+.ytt-line li { position: relative; content-visibility: auto; contain-intrinsic-size: auto 78px; }
+.ytt-line li::before { content: ""; position: absolute; left: -27px; top: 50%; width: 12px; height: 12px; margin-top: -6px; background: var(--card2); border: 2px solid var(--accent); border-radius: 999px; }
+.page a.ytt-row { display: flex; align-items: center; gap: 12px; padding: 6px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); color: var(--text); text-decoration: none; transition: border-color var(--fast), transform var(--fast); }
+.page a.ytt-row:hover { border-color: var(--accent); transform: translateX(4px); }
+.ytt-row img { flex: none; width: clamp(96px, 22vw, 120px); height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; background: var(--sunken); }
+.ytt-row .grow { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ytt-row b { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.ytt-row small { color: var(--muted); font-size: 13px; }
