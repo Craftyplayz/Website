@@ -32,9 +32,9 @@
             document.querySelector(`[data-n="${s}"]`).textContent = `${n}/${t}`;
             document.querySelector(`[data-stat="${s}"] b`).textContent = `${n.toLocaleString()} / ${t.toLocaleString()}`;
         }
-        const pc = tot ? Math.floor(all / tot * 100) : 0, r = $('#mcc-ring');
+        const pc = tot ? Math.floor(all / tot * 10000) / 100 : 0, r = $('#mcc-ring');
         r.style.setProperty('--p', pc); r.classList.toggle('full', pc >= 100);
-        r.firstChild.textContent = pc + '%'; r.setAttribute('aria-label', `${all} of ${tot} collected`);
+        r.firstChild.textContent = pc.toFixed(2) + '%'; r.setAttribute('aria-label', `${all} of ${tot} collected`);
         $('#mcc-all').textContent = `${all.toLocaleString()} of ${tot.toLocaleString()}`;
     }
 

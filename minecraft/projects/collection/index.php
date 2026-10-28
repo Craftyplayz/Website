@@ -22,7 +22,7 @@ foreach ($secs as $s => $_) {
 }
 $all = array_sum(array_column($counts, 0));
 $allTotal = array_sum(array_column($counts, 1));
-$pct = $allTotal ? (int)floor($all / $allTotal * 100) : 0;
+$pct = $allTotal ? number_format(floor($all / $allTotal * 10000) / 100, 2, '.', '') : '0.00';
 $data = ['list' => $list, 'done' => (object)$done, 'edit' => $mc_edit];
 ?>
 <!DOCTYPE html>
