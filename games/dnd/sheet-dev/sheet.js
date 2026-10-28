@@ -966,7 +966,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     function loadSrdList() {
         if (srdList) return srdList;
         srdList = fetch('spells.php?list=1').then((r) => (r.ok ? r.json() : Promise.reject())).then((list) => {
-            $('#hb-dl-srd').innerHTML = list.map(([, n, l]) => `<option value="${esc(n)}">${l ? ordinal(l) + ' level' : 'Cantrip'}</option>`).join('');
+            // the label carries the name too: Firefox shows only the label, Chrome shows the value beside it
+            $('#hb-dl-srd').innerHTML = list.map(([, n, l]) => `<option value="${esc(n)}" label="${esc(n + ' · ' + (l ? ordinal(l) + ' level' : 'cantrip'))}"></option>`).join('');
             return list;
         }).catch(() => { srdList = null; toast("Couldn't load the SRD spell list. You can still type spells in yourself.", 'err'); return []; });
         return srdList;
