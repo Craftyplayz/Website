@@ -20,7 +20,8 @@ function srd_out($code, $data)
 function srd_get($url, $trim, $html = false)
 {
     $dir = sys_get_temp_dir() . '/craftyplayz-srd';
-    $file = $dir . '/' . md5($url) . '.json';
+    // bump the html tag when the wikidot parser changes, to drop its old cached text
+    $file = $dir . '/' . md5($url . ($html ? '#html2' : '')) . '.json';
     if (is_file($file) && time() - filemtime($file) < SRD_TTL) return [file_get_contents($file), 200];
     // a recent 404 is remembered so made-up names can't hammer the API
     if (is_file($file . '.miss') && time() - filemtime($file . '.miss') < 86400) return [null, 404];
@@ -66,7 +67,7 @@ if (substr($i, 0, 3) === 'wd:') {
         // the paragraphs after the stat block, minus the class list; a failed fetch still returns the stats
         [$text] = srd_get($url, function ($j) {
             if (!preg_match('~<div id="page-content">(.*?)<div class="content-separator"[^>]*>\s*</div>\s*</div>~s', $j['html'], $m)) return ['desc' => [], 'higher_level' => []];
-            $body = preg_replace('~^.*?<strong>Duration:</strong>.*?</p>~s', '', $m[1]);
+            $body = preg_replace('~^.*?<strong>Duration:</strong>.*?</p>~', '', preg_replace('~\s+~', ' ', $m[1]));
             $body = preg_replace('~</(p|li|tr|h\d)>|<br\s*/?>~i', "\n", preg_replace('~</t[dh]>~i', ' | ', $body));
             $desc = $higher = [];
             foreach (explode("\n", html_entity_decode(strip_tags($body), ENT_QUOTES | ENT_HTML5, 'UTF-8')) as $line) {
