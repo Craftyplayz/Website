@@ -451,6 +451,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             case 'hsum': return { v: hbSum(get(a), V) };
             case 'msum': return { v: get(a).cost === '' ? '' : `${get(a).cost} SP` };
             case 'wt': return { v: C.panels[a].rows.reduce((s, r) => s + nm(r.qty) * nm(r.wt), 0) };
+            case 'iwt': { const r = get(a); return { v: Math.round(nm(r.qty) * nm(r.wt) * 100) / 100 + ' lb' }; }
             case 'att': { const P = C.panels[a], n = P.rows.filter((r) => r.att === 'yes').length; return { v: `${n} / ${nm(P.attMax)}`, warn: n > nm(P.attMax) }; }
             case 'hdl': { const c = C.classes[a]; return { v: `${Math.max(0, nm(c.level) - nm(c.hdUsed))} of ${nm(c.level)} left` }; }
             case 'lvl': return { v: C.classes.length > 1 ? 'Level ' + level() + ' total' : '' };
@@ -746,15 +747,16 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 <td>${f(`${path}.rows.${i}.name`, 'Item', { list: 'hb-dl-gear', ph: 'Rope, 50 ft' })}</td>
                 <td>${sel(`${path}.rows.${i}.cat`, 'Category', cats.map((c) => [c, c]))}</td>
                 <td>${f(`${path}.rows.${i}.qty`, 'Quantity', { num: true, cls: 'hb-n' })}</td>
-                <td>${f(`${path}.rows.${i}.wt`, 'Weight each', { num: true, cls: 'hb-n' })}</td>
+                <td><span class="hb-unit">${f(`${path}.rows.${i}.wt`, 'Weight each in pounds', { num: true, cls: 'hb-n' })}<span class="muted">lb</span></span></td>
+                <td class="muted" data-c="iwt:${path}.rows.${i}"></td>
                 <td>${f(`${path}.rows.${i}.gp`, 'Cost each in gold', { num: true, cls: 'hb-n', ph: '0' })}</td>
                 <td>${sel(`${path}.rows.${i}.att`, 'Attunement', [['', 'None'], ['needs', 'Needs attunement'], ['yes', 'Attuned']])}</td>
                 <td>${f(`${path}.rows.${i}.notes`, 'Notes')}</td><td>${del(path + '.rows', i, r.name || 'item')}</td></tr>`).join('');
             return `<div class="hb-coins">${['cp', 'sp', 'ep', 'gp', 'pp'].map((c) => `<label>${c.toUpperCase()} ${f(`${path}.coins.${c}`, c.toUpperCase(), { num: true })}</label>`).join('')}</div>
                 <div class="hb-attune"><span>Attuned <b data-c="att:${pi}"></b></span><label>Attunement slots ${f(path + '.attMax', 'Attunement slots', { num: true, cls: 'hb-n' })}</label></div>
                 ${subtabs(path + '.sub', opts, cur)}
-                ${table(['Eq.', 'Item', 'Category', 'Qty', 'Weight', 'Cost (gp)', 'Attunement', 'Notes', ''], rows)}
-                <div class="actions">${add(path + '.rows', 'item', 'Add item', ` data-cat="${esc(cur === 'all' ? 'Gear' : cur)}"`)}<span class="muted">Total weight <b data-c="wt:${pi}"></b></span></div>`;
+                ${table(['Eq.', 'Item', 'Category', 'Qty', 'Weight', 'Total', 'Cost (gp)', 'Attunement', 'Notes', ''], rows)}
+                <div class="actions">${add(path + '.rows', 'item', 'Add item', ` data-cat="${esc(cur === 'all' ? 'Gear' : cur)}"`)}<span class="muted">Total weight <b data-c="wt:${pi}"></b> lb</span></div>`;
         },
 
         // entries (passive abilities, features); each can have uses that come back on a rest
