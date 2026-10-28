@@ -349,14 +349,15 @@
         const passives = [];
         // class boilerplate the sheet already shows elsewhere
         const BOILER = new Set(['Hit Points', 'Proficiencies', 'Equipment', 'Core Barbarian Traits', 'Core Bard Traits', 'Core Cleric Traits', 'Core Druid Traits', 'Core Fighter Traits', 'Core Monk Traits', 'Core Paladin Traits', 'Core Ranger Traits', 'Core Rogue Traits', 'Core Sorcerer Traits', 'Core Warlock Traits', 'Core Wizard Traits']);
-        const addPassive = (name, src, text) => { if (name && !actionNames.has(name) && !BOILER.has(name)) passives.push({ name, src, text }); };
+        // grp is the sheet's Passive abilities tab: race, class or other
+        const addPassive = (name, src, text, grp = 'other') => { if (name && !actionNames.has(name) && !BOILER.has(name)) passives.push({ name, src, text, grp }); };
         for (const cl of arr(C.classes)) {
             const owned = arr(cl.classFeatures).filter((f) => (f.definition.requiredLevel || 1) <= cl.level && !f.definition.hideInSheet)
                 .sort((a, b) => (a.definition.requiredLevel || 0) - (b.definition.requiredLevel || 0) || (a.definition.displayOrder || 0) - (b.definition.displayOrder || 0));
-            for (const f of owned) addPassive(f.definition.name, `${cl.definition.name} ${f.definition.requiredLevel || 1}`, desc(f.definition.description, { cls: cl, scale: f.levelScale }));
+            for (const f of owned) addPassive(f.definition.name, `${cl.definition.name} ${f.definition.requiredLevel || 1}`, desc(f.definition.description, { cls: cl, scale: f.levelScale }), 'class');
         }
         const race = C.race || {};
-        for (const t of arr(race.racialTraits).filter((x) => x.definition && !x.definition.hideInSheet)) addPassive(t.definition.name, race.fullName || 'Species', desc(t.definition.description));
+        for (const t of arr(race.racialTraits).filter((x) => x.definition && !x.definition.hideInSheet)) addPassive(t.definition.name, race.fullName || 'Species', desc(t.definition.description), 'race');
         const bg = C.background && (C.background.definition || C.background.customBackground);
         if (bg && (bg.featureName || bg.featureDescription)) addPassive(bg.featureName || 'Background feature', 'Background: ' + (bg.name || ''), desc(bg.featureDescription));
         for (const f of arr(C.feats).filter((x) => x.definition)) addPassive(f.definition.name, 'Feat', desc(f.definition.description));
