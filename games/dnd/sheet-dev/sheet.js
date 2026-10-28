@@ -134,7 +134,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const HELP = 'Formulas can use ability keys for modifiers (DEX), _SCORE for scores (DEX_SCORE), PROF, LEVEL, CANTRIP (cantrip dice, CANTRIPd10), class levels (FIGHTER_LEVEL), skill names without spaces (SleightofHand), numbers, + - * / ( ), min(), max(), floor(), ceil(), and [labels] like 2 [Shield]. Results round down.';
     // non-SRD spells (srd: 'wd:<slug>') carry stats only; their text is linked on dnd5e.wikidot.com
     const wdUrl = (r) => (String(r.srd || '').startsWith('wd:') ? 'https://dnd5e.wikidot.com/spell:' + r.srd.slice(3) : '');
-    const SRD_CREDIT = 'From the <a href="https://dnd.wizards.com/resources/systems-reference-document" target="_blank" rel="noopener">System Reference Document 5.1</a> by Wizards of the Coast, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC-BY-4.0</a>.';
+    const SRD_CREDIT = 'From the <a href="https://dnd.wizards.com/resources/systems-reference-document" target="_blank" rel="noopener">System Reference Document 5.1 and 5.2</a> by Wizards of the Coast, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC-BY-4.0</a>.';
     const uid = () => Math.random().toString(36).slice(2, 10);
     // read a number out of whatever was typed ("30 ft" -> 30)
     const nm = (x) => parseFloat(x) || 0;
@@ -741,8 +741,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const cur = pickSub(p, opts);
             const list = p.rows.map((r, i) => [r, `${path}.rows.${i}`]).filter(([r]) => cur === 'all' || r.time === cur)
                 .map(([r, rp]) => entry(rp, r, 'asum', () => actionEditor(rp, r))).join('');
+            // what every character can do, per timing tab; each name opens its rule (rules.js)
+            const basics = COMBAT.filter(([t]) => cur === 'all' || cur === t).map(([t, names]) => `<p><span class="muted">${t}</span> ${names.split('|')
+                .map((n) => ruleLink('act', n.toLowerCase(), n, n, t + (n === 'Grapple' || n === 'Shove' ? ', part of an Unarmed Strike' : ''))).join(', ')}</p>`).join('');
             return (p.rows.length ? subtabs(path + '.sub', opts, cur) : '') + `<div class="hb-list">${list}</div>
-                <div class="actions">${add(path + '.rows', 'attack', 'Add action', cur !== 'all' ? ` data-time="${esc(cur)}"` : '')}</div>`;
+                <div class="actions">${add(path + '.rows', 'attack', 'Add action', cur !== 'all' ? ` data-time="${esc(cur)}"` : '')}</div>
+                ${basics ? `<div class="hb-basics"><h4>Actions in combat</h4>${basics}</div>` : ''}`;
         },
 
         spells: (p, path, pi) => {
@@ -1107,6 +1111,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         } catch (e) { toast(`Couldn't load ${r.name} from the SRD. Try again in a minute.`, 'err'); }
     }
 
+    // the SRD 5.2 combat actions every character has, by timing; rule text in rules.js
+    const COMBAT = [['Action', 'Attack|Dash|Disengage|Dodge|Grapple|Help|Hide|Improvise|Influence|Magic|Ready|Search|Shove|Study|Utilize'],
+        ['Bonus action', 'Two-Weapon Fighting'], ['Reaction', 'Opportunity Attack'], ['Free', 'Interact with an Object']];
     // SRD 5.2 (CC-BY-4.0) unarmed strike: 1 + STR bludgeoning, or grapple / shove
     const UNARMED = { name: 'Unarmed Strike', range: '5 ft', mode: 'hit', hit: 'STR + PROF', dmg: [{ dice: '1 + STR', type: 'Bludgeoning' }],
         desc: 'Instead of using a weapon to make a melee attack, you can use a punch, kick, head-butt, or similar forceful blow. Whenever you use your Unarmed Strike, choose one of the following options for its effect.\n'

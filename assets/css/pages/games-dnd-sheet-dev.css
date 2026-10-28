@@ -254,6 +254,11 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-rule p.hb-bullet, .hb-desc p.hb-bullet { position: relative; padding-left: 14px; }
 .hb-rule p.hb-bullet::before, .hb-desc p.hb-bullet::before { content: ""; position: absolute; left: 3px; top: .6em; width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
 .hb-rules .hb-hint { margin: 0; font-size: 12px; }
+/* combat actions everyone has, under the Actions panel */
+.hb-basics { margin-top: 12px; font-size: 14px; }
+.hb-basics h4 { margin: 0 0 4px; }
+.hb-basics p { margin: 4px 0 0; }
+.hb-basics .muted { margin-right: 6px; }
 @media (prefers-reduced-motion: reduce) { .hb-drawer { transition: none; } }
 
 /* notes: list beside the open note once the panel is wide enough */
