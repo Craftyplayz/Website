@@ -753,7 +753,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         },
 
         attacks: (p, path, pi) => {
-            const times = uniq([...L('time'), ...p.rows.map((r) => r.time)]).filter((t) => p.rows.some((r) => r.time === t));
+            // the four combat timings always get a tab; any other timing only once something uses it
+            const always = ['Action', 'Bonus action', 'Reaction', 'Free'];
+            const times = uniq([...always, ...L('time'), ...p.rows.map((r) => r.time)]).filter((t) => always.includes(t) || p.rows.some((r) => r.time === t));
             const opts = [['all', 'All', p.rows.length], ...times.map((t) => [t, t, p.rows.filter((r) => r.time === t).length])];
             const cur = pickSub(p, opts);
             const list = p.rows.map((r, i) => [r, `${path}.rows.${i}`]).filter(([r]) => cur === 'all' || r.time === cur)
