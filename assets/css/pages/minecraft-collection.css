@@ -2,6 +2,8 @@
 .mcc [hidden] { display: none !important; }
 .mcc .bar { flex-wrap: wrap; align-items: center; gap: 10px; }
 .mcc .bar .field { flex: 1 1 160px; min-width: 0; max-width: 280px; }
+.mcc .stat-ring .ring { --size: 64px; }
+.mcc .stat-ring .ring b { font-size: 12px; }
 .mcc-key { font-size: 13px; margin: 0 0 12px; }
 .mcc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 6px; margin-bottom: 16px; }
 .mcc-t { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); color: var(--text); font: inherit; font-size: 14px; text-align: left; transition: border-color var(--fast), background var(--fast); }
