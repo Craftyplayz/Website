@@ -120,6 +120,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const RESETS = [['', 'No reset'], ['short', 'Short rest'], ['long', 'Long rest']];
     // homebrew abilities: a sub-tab per timing (anything else goes under Other), and what each effect does
     const HB_TIMES = [['Action', 'Actions', 'action'], ['Bonus action', 'Bonus actions', 'bonus action'], ['Reaction', 'Reactions', 'reaction'], ['Other', 'Other', 'ability']];
+    // Passive abilities sub-tabs
+    const LIST_GROUPS = [['race', 'Racial abilities'], ['class', 'Class abilities'], ['other', 'Other']];
     const FX_KINDS = [['dmg', 'Damage'], ['heal', 'Healing'], ['temp', 'Temp HP'], ['buff', 'Buff / utility']];
     const TRACKER_KINDS = [['count', 'Counter'], ['pips', 'Boxes'], ['levels', 'Slots by level'], ['sorcery', 'Sorcery points'], ['ki', 'Ki points']];
     const PROF = [[0, 'Not proficient'], [0.5, 'Half proficient'], [1, 'Proficient'], [2, 'Expertise']];
@@ -132,7 +134,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         attack: () => ({ id: uid(), name: '', time: 'Action', range: '', props: [], mode: 'hit', hit: 'STR + PROF', save: 'DEX', dc: '8 + PROF + STR', dmg: [{ dice: '1d6 + STR', type: 'Slashing' }], desc: '' }),
         spell: () => ({ id: uid(), lvl: 0, name: '', school: '', time: 'Action', range: '', comp: '', dur: '', conc: false, ritual: false, prep: false, mode: 'none', save: 'DEX', dc: '', dmg: [], desc: '', higher: '', srd: '' }),
         item: () => ({ id: uid(), cat: 'Gear', eq: false, att: '', name: '', qty: 1, wt: 0, notes: '' }),
-        list: () => ({ id: uid(), name: '', src: '', text: '', uses: '', used: 0, reset: '' }),
+        list: () => ({ id: uid(), name: '', src: '', text: '', uses: '', used: 0, reset: '', grp: '' }),
         // kind: count (left / max), pips (boxes ticked as used) or levels (a row of boxes per level, like spell slots)
         tracker: () => ({ id: uid(), name: '', kind: 'count', cur: 1, max: 1, used: 0, reset: 'long', group: '', levels: [] }),
         level: () => ({ label: '', max: '1', used: 0 }),
@@ -176,14 +178,23 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             senses: '',
             profs: { armour: [], weapons: [], langs: ['Common'], tools: [], notes: '' },
             lists: { ...LISTS },
-            panels: [newPanel('profs'), newPanel('attacks'), newPanel('spells'), newPanel('items'), newPanel('list', 'Passive abilities'),
+            panels: [newPanel('profs'), newPanel('attacks'), newPanel('spells'), newPanel('items'), Object.assign(newPanel('list', 'Passive abilities'), { split: true, sub: 'race' }),
                 newPanel('trackers', 'Resources'), newPanel('homebrew'), newPanel('combat'),
                 Object.assign(newPanel('notes'), { notes: ['Personality', 'Backstory'].map((title) => Object.assign(ROW.note(), { title, group: 'Character' })) })],
-            view: { tab: '', all: false }, hbPanel: true, hb2: true,
+            view: { tab: '', all: false }, hbPanel: true, hb2: true, passSplit: true,
         };
     }
 
     const isObj = (x) => x && typeof x === 'object' && !Array.isArray(x);
+    // which Passive abilities tab an entry belongs in, from its source ("Fighter 3", "Hill Dwarf", "Feat")
+    function groupOf(src, c) {
+        const s = String(src || '').trim().toLowerCase();
+        const has = (n) => { const t = String(n || '').trim().toLowerCase(); return t !== '' && s.startsWith(t); };
+        if (!s) return 'other';
+        if ((Array.isArray(c.classes) ? c.classes : []).some((k) => isObj(k) && has(k.name)) || CLASSES.some(has)) return 'class';
+        if (has(c.race) || RACES.some(has) || s === 'species') return 'race';
+        return 'other';
+    }
     // older sheets (before classes, speed lists, proficiency tabs and damage parts) are upgraded in place
     function upgrade(c) {
         const panels = Array.isArray(c.panels) ? c.panels.filter(isObj) : null;
@@ -222,6 +233,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 c.panels[c.panels.indexOf(old)] = newPanel('homebrew');
             }
             c.hb2 = true;
+        }
+        // Passive abilities get Racial, Class and Other tabs once (each entry is sorted by its source in normalise)
+        if (Array.isArray(c.panels) && !c.passSplit) {
+            const pa = c.panels.find((p) => isObj(p) && p.type === 'list' && p.title === 'Passive abilities');
+            if (pa) pa.split = true;
+            c.passSplit = true;
         }
         // Personality, Backstory and Notes text panels become notes in one Notes panel
         if (Array.isArray(c.panels) && !c.panels.some((p) => isObj(p) && p.type === 'notes')) {
@@ -266,6 +283,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 return r;
             });
             if (q.type === 'notes') q.notes = rows(q.notes, ROW.note);
+            if (q.type === 'list' && q.split) for (const r of q.rows) if (!LIST_GROUPS.some(([g]) => g === r.grp)) r.grp = groupOf(r.src, c);
             if (q.type === 'homebrew') for (const r of q.rows) { r.fx = rows(r.fx, ROW.fx); r.cost = Object.assign({ amt: '', what: '' }, isObj(r.cost) ? r.cost : {}); }
             if (q.type === 'trackers') { q.tabs = strs(q.tabs); for (const r of q.rows) r.levels = rows(r.levels, ROW.level); }
             if (q.type === 'spells') {
@@ -743,15 +761,18 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         // entries (passive abilities, features); each can have uses that come back on a rest
         list: (p, path) => {
             const V = vars();
+            // a split list (Passive abilities) has a sub-tab per group, each with its own entries and Add button
+            const opts = p.split ? LIST_GROUPS.map(([g, label]) => [g, label, p.rows.filter((r) => r.grp === g).length]) : null, cur = opts && pickSub(p, opts);
             // the name opens the description; uses stay out so they can be ticked off in play
-            return `<div class="hb-list">${p.rows.map((r, i) => { const rp = `${path}.rows.${i}`; return entry(rp, r, 'lsum', () => `<div class="hb-entry-h">${f(rp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-feat', ph: 'Darkvision' })}${f(rp + '.src', 'Source (optional)', { cls: 'hb-src', list: 'hb-dl-src', ph: 'Elf' })}</div>
+            return (opts ? subtabs(path + '.sub', opts, cur) : '') + `<div class="hb-list">${p.rows.map((r, i) => [r, i]).filter(([r]) => !cur || r.grp === cur).map(([r, i]) => { const rp = `${path}.rows.${i}`; return entry(rp, r, 'lsum', () => `<div class="hb-entry-h">${f(rp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-feat', ph: 'Darkvision' })}${f(rp + '.src', 'Source (optional)', { cls: 'hb-src', list: 'hb-dl-src', ph: 'Elf' })}</div>
                 <div class="hb-uses">
                     <label>Uses ${f(rp + '.uses', 'Uses (number or formula)', { cls: 'hb-n hb-formula', ph: 'none' })}</label><small class="muted" data-c="tmax:${rp}.uses"></small>
                     ${sel(rp + '.reset', 'Resets on', RESETS)}
+                    ${cur ? `<label>Tab ${sel(rp + '.grp', 'Tab', LIST_GROUPS.map(([g, label]) => [g, label]))}</label>` : ''}
                 </div>
                 <label class="hb-wide">Description ${f(rp + '.text', 'Description', { area: true })}</label>
                 <div class="actions">${del(path + '.rows', i, r.name || 'entry', 'Remove entry')}</div>`, '',
-                String(r.uses).trim() ? `<div class="hb-uses">${pips(rp + '.used', maxOf(r.uses, V))}<small class="muted">${esc(r.reset ? RESETS.find(([k]) => k === r.reset)[1] : '')}</small></div>` : ''); }).join('')}</div><div class="actions">${add(path + '.rows', 'list', 'Add entry')}</div>`;
+                String(r.uses).trim() ? `<div class="hb-uses">${pips(rp + '.used', maxOf(r.uses, V))}<small class="muted">${esc(r.reset ? RESETS.find(([k]) => k === r.reset)[1] : '')}</small></div>` : ''); }).join('') || (cur ? `<p class="muted">No ${LIST_GROUPS.find(([g]) => g === cur)[1].toLowerCase()} yet.</p>` : '')}</div><div class="actions">${add(path + '.rows', 'list', 'Add entry', cur ? ` data-grp="${cur}"` : '')}</div>`;
         },
 
         // resources in your own sub-tabs: counters, boxes, or slots by level
@@ -1272,7 +1293,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const P = panelOf(k), n = P.rows.filter((r) => r.att === 'yes').length;
             if (n > nm(P.attMax)) toast(`You're attuned to ${n} items but have ${nm(P.attMax)} attunement slots.`, 'note');
         }
-        if (k === 'view.all' || /^panels\.\d+\.on$/.test(k) || /\.(mode|cat|k)$/.test(k) || /^panels\.\d+\.sort$/.test(k) || (el.type === 'checkbox' && /\.prep$/.test(k) && panelOf(k).sub === 'prep')) draw();
+        if (k === 'view.all' || /^panels\.\d+\.on$/.test(k) || /\.(mode|cat|k|grp)$/.test(k) || /^panels\.\d+\.sort$/.test(k) || (el.type === 'checkbox' && /\.prep$/.test(k) && panelOf(k).sub === 'prep')) draw();
     });
     main.addEventListener('change', (e) => {
         const el = e.target, k = el.dataset.k || '';
@@ -1422,6 +1443,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const row = ROW[b.dataset.t]();
             if (b.dataset.time) row.time = b.dataset.time;
             if (b.dataset.cat) row.cat = b.dataset.cat;
+            if (b.dataset.grp) row.grp = b.dataset.grp;
             if (b.dataset.lvl) row.lvl = +b.dataset.lvl;
             if (b.dataset.prep) row.prep = true;
             if (b.dataset.t === 'level') row.label = ordinal(get(p).length + 1);
