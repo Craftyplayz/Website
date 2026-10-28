@@ -405,13 +405,14 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const s = String(range), first = +(s.match(/\d+/) || [0])[0];
         return [(/\bor\b/.test(s) || (!s.includes('/') && first && first <= 10)) && 'melee attacks', (s.includes('/') || first > 10) && 'ranged attacks'].filter(Boolean).join('|');
     }
+    const dmgLinks = (dmg, V) => dmg.filter((d) => d.dice || d.type).map((d) => [d.dice && ruleLink('act', 'damage rolls', resolve(d.dice, V), 'Damage rolls', 'Damage'),
+        d.type && ruleLink('dmg', d.type, d.type, d.type + ' damage', 'Damage type')].filter(Boolean).join(' ')).join(' + ');
     function actSum(r, V) {
         return [r.time && ruleLink('act', String(r.time).toLowerCase(), r.time, r.time, 'Timing'),
             r.range && ruleLink('act', rangeRules(r.range), r.range, 'Range: ' + r.range, 'Range'),
             r.mode === 'hit' ? ruleLink('act', 'attack rolls', show({ ...ev(r.hit, V), signed: true }) + ' to hit', 'Attack rolls', 'To hit') : '',
             r.mode === 'save' ? ruleLink('act', 'saving throws', `DC ${show(ev(r.dc, V))} ${r.save}`, 'Saving throws', 'Save') : '',
-            r.dmg.filter((d) => d.dice || d.type).map((d) => [d.dice && ruleLink('act', 'damage rolls', resolve(d.dice, V), 'Damage rolls', 'Damage'),
-                d.type && ruleLink('dmg', d.type, d.type, d.type + ' damage', 'Damage type')].filter(Boolean).join(' ')).join(' + '),
+            dmgLinks(r.dmg, V),
             r.props.map((n) => ruleLink('prop', n, n, n, 'Weapon property')).join(', ')].filter(Boolean).join(' · ');
     }
     const fxOne = (e, V) => (e.k === 'buff' ? e.text : e.k === 'heal' ? 'Heals ' + resolve(e.dice, V) : e.k === 'temp' ? resolve(e.dice, V) + ' temp HP' : dmgText([e], V)).trim();
@@ -444,10 +445,14 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const resLeft = (r) => (r.kind === 'pips' ? maxOf(r.max) - nm(r.used) : nm(r.cur));
     const costAmt = (r) => (String(r.cost.amt).trim() ? maxOf(r.cost.amt) : 1);
     function spellSum(r, P, V) {
-        return [nm(r.lvl) ? ordinal(nm(r.lvl)) : 'Cantrip', r.time, r.range, r.conc ? 'Concentration' : '', r.ritual ? 'Ritual' : '',
-            r.mode === 'atk' ? show({ ...ev(P.atk, V), signed: true }) + ' to hit' : '',
-            r.mode === 'save' ? `DC ${show(ev(r.dc || P.dc, V))} ${r.save}` : '',
-            dmgText(r.dmg, V)].filter(Boolean).join(' · ');
+        return [nm(r.lvl) ? ruleLink('spell', 'spell level', ordinal(nm(r.lvl)), ordinal(nm(r.lvl)) + '-level spell', 'Spell level') : ruleLink('spell', 'cantrips', 'Cantrip', 'Cantrip', 'Spell level'),
+            r.time && ruleLink('spell', 'casting time', r.time, 'Casting time: ' + r.time, 'Casting time'),
+            r.range && ruleLink('spell', 'spell range', r.range, 'Range: ' + r.range, 'Range'),
+            r.conc ? ruleLink('spell', 'concentration', 'Concentration', 'Concentration', 'Duration') : '',
+            r.ritual ? ruleLink('spell', 'rituals', 'Ritual', 'Ritual', 'Casting') : '',
+            r.mode === 'atk' ? ruleLink('spell', 'spell attack rolls', show({ ...ev(P.atk, V), signed: true }) + ' to hit', 'Spell attack rolls', 'To hit') : '',
+            r.mode === 'save' ? ruleLink('spell', 'spell saving throws', `DC ${show(ev(r.dc || P.dc, V))} ${r.save}`, 'Spell saving throws', 'Save') : '',
+            dmgLinks(r.dmg, V)].filter(Boolean).join(' · ');
     }
 
     // value behind a [data-c] key: { v (number or text), err, signed, why, warn }
@@ -461,7 +466,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             case 'fx': return { ...ev(get(a), V), why: why(get(a), V) };
             case 'fs': return { ...ev(get(a), V), signed: true, why: why(get(a), V) };
             case 'asum': return { html: actSum(get(a), V) };
-            case 'ssum': return { v: spellSum(get(a), panelOf(a), V) };
+            case 'ssum': return { html: spellSum(get(a), panelOf(a), V) };
             case 'lsum': return { v: get(a).src };
             case 'hsum': return { v: hbSum(get(a), V) };
             case 'msum': return { v: get(a).cost === '' ? '' : `${get(a).cost} SP` };
