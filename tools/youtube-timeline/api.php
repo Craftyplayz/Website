@@ -15,9 +15,9 @@ header('Content-Type: application/json; charset=utf-8');
 $key = $youtubekey ?? $googlebookskey ?? '';
 $cache = sys_get_temp_dir() . '/craftyplayz-yt';
 
-function yt_out($data, $code = 200)
+function yt_out($data)
 {
-    http_response_code($code);
+    // errors go out as 200 + {"error"}: the host swaps 4xx/5xx bodies for its own page
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
@@ -70,7 +70,7 @@ if ($code != 200 || !isset($items['items'])) {
         $reason === 'quotaExceeded' => 'The site has used today\'s YouTube allowance. Try again tomorrow.',
         $code == 400 || $code == 403 => 'The site\'s YouTube API key isn\'t set up yet.', // key blocked, wrong IP or API not enabled
         default => 'Couldn\'t reach YouTube. Try again in a minute.',
-    }], 502);
+    }]);
 }
 
 $videos = [];
