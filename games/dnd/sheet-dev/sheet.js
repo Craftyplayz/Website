@@ -988,7 +988,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     let srdList = null;
     function loadSrdList() {
         if (srdList) return srdList;
-        srdList = fetch('spells.php?list=1').then((r) => (r.ok ? r.json() : Promise.reject())).then((list) => {
+        // ?list=N: bump N when the list changes, browsers cache it for a day
+        srdList = fetch('spells.php?list=2').then((r) => (r.ok ? r.json() : Promise.reject())).then((list) => {
             // the label carries the name too: Firefox shows only the label, Chrome shows the value beside it
             $('#hb-dl-srd').innerHTML = list.map(([, n, l]) => `<option value="${esc(n)}" label="${esc(n + ' · ' + (l ? ordinal(l) + ' level' : 'cantrip'))}"></option>`).join('');
             return list;
