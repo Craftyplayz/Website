@@ -343,3 +343,7 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-wt b { color: var(--text); }
 .hb-undo { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 8px 8px 14px; border-radius: var(--radius); font-size: 14px; background: var(--info-bg); border: 1px solid var(--info-line); }
 .hb-undo[hidden] { display: none; }
+.hb-fbuild { padding: 12px; margin-bottom: 8px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--sunken); }
+.hb-fwords { white-space: normal; }
+.hb-fword { margin: 2px; padding: 2px 8px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--sunken); color: var(--text); font: 13px/1.5 ui-monospace, Consolas, monospace; cursor: pointer; }
+.hb-fword:hover { border-color: var(--accent); color: var(--accent); }
