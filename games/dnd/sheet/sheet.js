@@ -976,7 +976,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
 
         combat: (p, path) => `<div class="kv"><span>Death save successes</span><span>${pips(path + '.ok', 3)}</span></div>
             <div class="kv"><span>Death save failures</span><span class="hb-bad-pips">${pips(path + '.bad', 3)}</span></div>
-            <details class="hb-details"><summary>Death save rules</summary>${rulesBlock('hp', ['Death saving throws', 'Falling unconscious', 'Stabilizing a creature', 'Instant death'])}</details>
+            ${rulesBlock('hp', ['Death saving throws', 'Falling unconscious', 'Stabilizing a creature', 'Instant death'], 'Death save rules')}
             <h3>Hit dice</h3>
             <div class="rows">${C.classes.map((c, i) => `<div class="rowi"><span class="grow">${esc(c.name || 'Class')} · d${nm(c.die) || 8}</span><small data-c="hdl:${i}"></small>${pips(`classes.${i}.hdUsed`, c.level)}</div>`).join('')}</div>
             <p class="muted hb-hint">One hit die per level; filled boxes are spent. Spend any number in a short rest; a long rest gives half back, rounded up.</p>`,
