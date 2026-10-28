@@ -21,7 +21,7 @@ function srd_get($url, $trim, $html = false)
 {
     $dir = sys_get_temp_dir() . '/craftyplayz-srd';
     // bump the html tag when the wikidot parser changes, to drop its old cached text
-    $file = $dir . '/' . md5($url . ($html ? '#html4' : '')) . '.json';
+    $file = $dir . '/' . md5($url . ($html ? '#html5' : '')) . '.json';
     if (is_file($file) && time() - filemtime($file) < SRD_TTL) return [file_get_contents($file), 200];
     // a recent 404 is remembered so made-up names can't hammer the API
     if (is_file($file . '.miss') && time() - filemtime($file . '.miss') < 86400) return [null, 404];
@@ -51,7 +51,7 @@ function srd_get($url, $trim, $html = false)
 // "which you take when ..." from a wikidot page; the SRD API drops a reaction's trigger
 function wd_trigger($html)
 {
-    return preg_match('~Casting Time:</strong>s*1 reaction,s*(.*?)<br~is', $html, $m) ? trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8')) : '';
+    return preg_match('~Casting Time:</strong>\s*1 reaction,\s*(.*?)<br~is', $html, $m) ? trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8')) : '';
 }
 
 $extra = json_decode((string)@file_get_contents(__DIR__ . '/extra-spells.json'), true) ?: [];
