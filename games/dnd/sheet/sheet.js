@@ -363,7 +363,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 .then((r) => { if (!r.ok && r.status >= 500) dirty.add(id); }).catch(() => dirty.add(id));
         }
     }
+    let undoSnap = null, undoTimer = 0; // undo for deletes, see snap()
     function saveNow() {
+        if (undoSnap && Date.now() - undoSnap.at > 1000) dropUndo();
         store();
         if (C) { dirty.add(C.id); clearTimeout(backupTimer); backupTimer = setTimeout(flushBackups, 4000); }
     }
@@ -585,7 +587,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const dl = (id, items) => `<datalist id="${id}">${items.map((x) => `<option value="${esc(x)}">`).join('')}</datalist>`;
         return dl('hb-dl-time', L('time')) + dl('hb-dl-dmg', L('dmg')) + dl('hb-dl-props', L('props')) + dl('hb-dl-speeds', L('speeds')) + dl('hb-dl-tools', TOOLS)
             + dl('hb-dl-race', RACES) + dl('hb-dl-align', ALIGNMENTS) + dl('hb-dl-class', CLASSES) + dl('hb-dl-school', SCHOOLS) + dl('hb-dl-dur', DURATIONS)
-            + dl('hb-dl-weapon', WEAPONS.map((w) => w[0])) + dl('hb-dl-attack', [UNARMED.name, ...WEAPONS.map((w) => w[0])]) + dl('hb-dl-gear', uniq([...GEAR.map((g) => g[0]), ...eqNames])) + dl('hb-dl-meta', METAMAGIC.map((m) => m[0]))
+            + dl('hb-dl-weapon', WEAPONS.map((w) => w[0])) + dl('hb-dl-attack', [UNARMED.name, ...WEAPONS.map((w) => w[0])]) + dl('hb-dl-gear', gearNames()) + dl('hb-dl-meta', METAMAGIC.map((m) => m[0]))
             + dl('hb-dl-feat', FEATURES) + dl('hb-dl-src', [...RACES, ...CLASSES, 'Feat', 'Background', 'Item']) + dl('hb-dl-rsrc', RESOURCES)
             + dl('hb-dl-armour', ARMOUR.map((a) => a[0])) + dl('hb-dl-langs', LANGS)
             + dl('hb-dl-attr', uniq([...ITEM_ATTRS, ...itemRows().flatMap((r) => r.props)]))
@@ -1093,18 +1095,22 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     // ---- SRD spells (loaded on first use) ----
     // ---- SRD equipment: item names to suggest, attributes / weight / cost when one is picked ----
     let eqList = null, eqNames = [];
+    // the SRD lists some names back to front ("Crossbow, light"); show them the usual way round so they match the sheet's own
+    const natural = (n) => n.replace(/^([^,(]+), ([^,(]+?)(\s*\(.*\))?$/, (_, a, b, c = '') => b[0].toUpperCase() + b.slice(1) + ' ' + a.toLowerCase() + c);
+    // sheet names first, then SRD ones not already there (ignoring case)
+    const gearNames = () => { const seen = new Set(); return [...GEAR.map((g) => g[0]), ...eqNames].filter((n) => !seen.has(n.toLowerCase()) && seen.add(n.toLowerCase())); };
     function loadEqList() {
         if (eqList) return eqList;
         eqList = fetch('spells.php?eqlist=1').then((r) => (r.ok ? r.json() : Promise.reject())).then((list) => {
-            eqNames = list.map(([, n]) => n);
-            $('#hb-dl-gear').innerHTML = uniq([...GEAR.map((g) => g[0]), ...eqNames]).map((n) => `<option value="${esc(n)}">`).join('');
+            eqNames = list.map(([, n]) => natural(n));
+            $('#hb-dl-gear').innerHTML = gearNames().map((n) => `<option value="${esc(n)}">`).join('');
             return list;
         }).catch(() => { eqList = null; return []; });
         return eqList;
     }
     // fills only what's empty, so typed-in attributes, weight and cost stay
     async function eqFill(rp) {
-        const r = get(rp), hit = (await loadEqList()).find(([, n]) => n.toLowerCase() === String(r.name).trim().toLowerCase());
+        const r = get(rp), hit = (await loadEqList()).find(([, n]) => natural(n).toLowerCase() === String(r.name).trim().toLowerCase());
         if (!hit) return;
         try {
             const res = await fetch('spells.php?eq=' + encodeURIComponent(hit[0]));
@@ -1471,6 +1477,27 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (v && !list.includes(v)) { list.push(v); saveNow(); draw(); }
     }
 
+    // ---- undo: a delete can be taken back for 15 seconds; a later save (any other edit) drops it so undo never wipes newer work ----
+    const undoBox = document.createElement('div');
+    undoBox.className = 'hb-undo'; undoBox.hidden = true;
+    function dropUndo() { undoSnap = null; clearTimeout(undoTimer); undoBox.hidden = true; }
+    function snap(b) {
+        undoSnap = { db: JSON.stringify(db), cur: C.id, at: Date.now() };
+        const what = (b.getAttribute('aria-label') || b.textContent || 'Deleted').trim().replace(/^Remove\b/, 'Removed').replace(/^Delete\b/, 'Deleted');
+        undoBox.innerHTML = `<span>${esc(what)}</span><button type="button" class="btn small">Undo</button>`;
+        let box = $('.toasts');
+        if (!box) { box = document.createElement('div'); box.className = 'toasts'; box.setAttribute('role', 'status'); document.body.appendChild(box); }
+        box.appendChild(undoBox); undoBox.hidden = false;
+        clearTimeout(undoTimer); undoTimer = setTimeout(dropUndo, 15000);
+    }
+    undoBox.addEventListener('click', (e) => {
+        if (!e.target.closest('button') || !undoSnap) return;
+        const s = undoSnap;
+        dropUndo(); db = JSON.parse(s.db);
+        switchTo(db.chars[s.cur] || Object.values(db.chars)[0] || blank());
+        toast('Restored.', 'ok');
+    });
+
     // ---- events ----
     const main = $('.hb');
     main.addEventListener('input', (e) => {
@@ -1602,6 +1629,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'tdel') {
             const P = get(p), g = b.dataset.g, n = P.rows.filter((r) => r.group === g).length;
             if (n && !confirm(`Delete the ${g} tab? Its ${n} resource${n === 1 ? '' : 's'} stay under All.`)) return;
+            snap(b);
             for (const r of P.rows) if (r.group === g) r.group = '';
             P.tabs = P.tabs.filter((t) => t !== g); if (P.sub === 't:' + g) P.sub = 'all';
             saveNow(); return draw();
@@ -1633,6 +1661,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'ndel') {
             const P = get(p), n = P.notes[i];
             if (!confirm(`Delete the note "${n.title || 'Untitled note'}"?`)) return;
+            snap(b);
             P.notes.splice(i, 1); if (P.open === n.id) P.open = '';
         }
         else if (act === 'npin') { const n = get(p); n.pinned = !n.pinned; }
@@ -1674,16 +1703,17 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         else if (act === 'addpanel') C.panels.push(newPanel($('#hb-newtype').value));
         else if (act === 'del') {
             if (p === 'panels' && !confirm(`Remove the ${C.panels[i].title} panel and everything in it?`)) return;
-            get(p).splice(i, 1);
+            snap(b); get(p).splice(i, 1);
         }
         else if (act === 'mv') { const j = i + +b.dataset.d; [C.panels[i], C.panels[j]] = [C.panels[j], C.panels[i]]; }
         else if (act === 'art') return $('#hb-artfile').click();
-        else if (act === 'artdel') C.art = '';
+        else if (act === 'artdel') { snap(b); C.art = ''; }
         else if (act === 'new') return switchTo(blank());
         else if (act === 'import') return $('#hb-file').click();
         else if (act === 'export') return download((C.name || 'character').replace(/[^\w -]+/g, '').trim() + '.json', JSON.stringify(C, null, 1));
         else if (act === 'delete') {
             if (!confirm(`Delete ${C.name || 'this character'} from this browser? Export it first if you want to keep a copy.`)) return;
+            snap(b);
             delete db.chars[C.id];
             return switchTo(Object.values(db.chars)[0] || blank());
         } else return;

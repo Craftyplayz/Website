@@ -334,3 +334,5 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-table .hb-total b { color: var(--text); }
 .hb-wt { margin: 8px 0 0; color: var(--muted); font-size: 14px; font-weight: 600; }
 .hb-wt b { color: var(--text); }
+.hb-undo { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 8px 8px 14px; border-radius: var(--radius); font-size: 14px; background: var(--info-bg); border: 1px solid var(--info-line); }
+.hb-undo[hidden] { display: none; }
