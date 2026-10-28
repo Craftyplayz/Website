@@ -514,7 +514,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const dl = (id, items) => `<datalist id="${id}">${items.map((x) => `<option value="${esc(x)}">`).join('')}</datalist>`;
         return dl('hb-dl-time', L('time')) + dl('hb-dl-dmg', L('dmg')) + dl('hb-dl-props', L('props')) + dl('hb-dl-speeds', L('speeds')) + dl('hb-dl-tools', TOOLS)
             + dl('hb-dl-race', RACES) + dl('hb-dl-align', ALIGNMENTS) + dl('hb-dl-class', CLASSES) + dl('hb-dl-school', SCHOOLS) + dl('hb-dl-dur', DURATIONS)
-            + dl('hb-dl-weapon', WEAPONS.map((w) => w[0])) + dl('hb-dl-gear', GEAR.map((g) => g[0])) + dl('hb-dl-meta', METAMAGIC.map((m) => m[0]))
+            + dl('hb-dl-weapon', WEAPONS.map((w) => w[0])) + dl('hb-dl-attack', [UNARMED.name, ...WEAPONS.map((w) => w[0])]) + dl('hb-dl-gear', GEAR.map((g) => g[0])) + dl('hb-dl-meta', METAMAGIC.map((m) => m[0]))
             + dl('hb-dl-feat', FEATURES) + dl('hb-dl-src', [...RACES, ...CLASSES, 'Feat', 'Background', 'Item']) + dl('hb-dl-rsrc', RESOURCES)
             + dl('hb-dl-armour', ARMOUR.map((a) => a[0])) + dl('hb-dl-langs', LANGS)
             + dl('hb-dl-hbtime', HB_TIMES.map(([t]) => t)) + dl('hb-dl-cost', uniq([...C.panels.filter((p) => p.type === 'trackers').flatMap((p) => p.rows.filter((r) => r.kind !== 'levels').map((r) => r.name)).filter(Boolean), 'Spell slot', 'Hit points', 'gp', 'Hit dice']))
@@ -620,7 +620,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
 
     function actionEditor(rp, r) {
         return `<div class="hb-grid">
-            <label>Name ${f(rp + '.name', 'Name', { list: 'hb-dl-weapon', ph: 'Longsword' })}</label>
+            <label>Name ${f(rp + '.name', 'Name', { list: 'hb-dl-attack', ph: 'Longsword' })}</label>
             <label>Timing ${f(rp + '.time', 'Timing', { list: 'hb-dl-time' })}</label>
             <label>Range or reach ${f(rp + '.range', 'Range or reach', { ph: '5 ft or 80/320 ft' })}</label>
             <label>Resolves with ${sel(rp + '.mode', 'Resolves with', [['hit', 'Attack roll'], ['save', 'Saving throw'], ['none', 'Nothing']])}</label>
@@ -1026,6 +1026,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         } catch (e) { toast(`Couldn't load ${r.name} from the SRD. Try again in a minute.`, 'err'); }
     }
 
+    // SRD 5.2 (CC-BY-4.0) unarmed strike: 1 + STR bludgeoning, or grapple / shove
+    const UNARMED = { name: 'Unarmed Strike', range: '5 ft', mode: 'hit', hit: 'STR + PROF', dmg: [{ dice: '1 + STR', type: 'Bludgeoning' }],
+        desc: 'Instead of using a weapon to make a melee attack, you can use a punch, kick, head-butt, or similar forceful blow. Whenever you use your Unarmed Strike, choose one of the following options for its effect.\n'
+            + 'Damage. You make an attack roll against the target. Your bonus to the roll equals your Strength modifier plus your Proficiency Bonus. On a hit, the target takes Bludgeoning damage equal to 1 plus your Strength modifier.\n'
+            + 'Grapple. The target must succeed on a Strength or Dexterity saving throw (it chooses which), or it has the Grappled condition. The DC for the saving throw and any escape attempts equals 8 plus your Strength modifier and Proficiency Bonus. This grapple is possible only if the target is no more than one size larger than you and if you have a hand free to grab it.\n'
+            + 'Shove. The target must succeed on a Strength or Dexterity saving throw (it chooses which), or you either push it 5 feet away or cause it to have the Prone condition. The DC for the saving throw equals 8 plus your Strength modifier and Proficiency Bonus. This shove is possible only if the target is no more than one size larger than you.' };
     // picking a known weapon, item or metamagic from the suggestions fills in the rest of its row
     const named = (list, name) => list.find((x) => x[0].toLowerCase() === String(name).trim().toLowerCase());
     function rowFill(k) {
@@ -1034,6 +1040,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const m = named(METAMAGIC, r.name);
             if (!m) return false;
             Object.assign(r, { name: m[0], cost: m[1], desc: r.desc || m[2] });
+        } else if (P.type === 'attacks' && named([[UNARMED.name]], r.name)) {
+            Object.assign(r, { ...UNARMED, props: [], dmg: UNARMED.dmg.map((d) => ({ ...d })), desc: r.desc || UNARMED.desc });
         } else if (P.type === 'attacks') {
             const w = named(WEAPONS, r.name);
             if (!w) return false;
