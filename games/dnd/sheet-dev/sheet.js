@@ -292,6 +292,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             if (q.type === 'spells') {
                 q.meta = rows(q.meta, ROW.meta);
                 q.sp = Object.assign({ cur: 0, max: 0 }, isObj(q.sp) ? q.sp : {});
+                if (!('used' in q.sp)) q.sp.used = Math.max(0, nm(q.sp.max) - nm(q.sp.cur)); // was a left/max counter, now boxes
                 q.slots = Array.from({ length: 9 }, (_, l) => Object.assign({ max: 0, used: 0 }, isObj(q.slots && q.slots[l]) ? q.slots[l] : {}));
             }
             return q;
@@ -421,7 +422,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     // path of a counter resource, for views elsewhere that edit the same numbers
     function resPath(name) {
         const r = resOf(name);
-        if (!r || r.kind !== 'count') return '';
+        if (!r || r.kind !== 'pips') return '';
         const pi = C.panels.findIndex((p) => p.type === 'trackers' && p.rows.includes(r));
         return `panels.${pi}.rows.${C.panels[pi].rows.indexOf(r)}`;
     }
@@ -716,9 +717,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const sp = resPath('Sorcery points'), spP = sp || path + '.sp';
             if (cur === 'meta') return subtabs(path + '.sub', opts, cur) + `
                 <div class="rowi hb-track"><span class="grow">Sorcery points${sp ? ' <small class="muted">(synced with Resources)</small>' : ''}</span>
-                    <button type="button" class="btn small" data-act="track" data-p="${spP}" data-d="-1" aria-label="Spend a sorcery point">−</button>
-                    ${f(spP + '.cur', 'Sorcery points left', { num: true, cls: 'hb-n' })}<span>/</span>${sp ? f(spP + '.max', 'Sorcery points maximum (number or formula)', { cls: 'hb-n hb-formula' }) + `<small class="muted" data-c="tmax:${spP}.max"></small>` : f(spP + '.max', 'Sorcery points maximum', { num: true, cls: 'hb-n' })}
-                    <button type="button" class="btn small" data-act="track" data-p="${spP}" data-d="1" aria-label="Get a sorcery point back">+</button></div>
+                    ${pips(spP + '.used', maxOf(get(spP).max))}<label class="hb-maxl">Max ${f(spP + '.max', 'Sorcery points maximum (number or formula)', { cls: 'hb-n hb-formula' })}</label><small class="muted" data-c="tmax:${spP}.max"></small></div>
                 <div class="hb-list">${p.meta.map((m, i) => { const mp = `${path}.meta.${i}`; return entry(mp, m, 'msum', () => `<div class="hb-entry-h">${f(mp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-meta', ph: 'Quickened Spell' })}<label class="hb-cost">Cost ${f(mp + '.cost', 'Cost in sorcery points', { cls: 'hb-n' })}</label></div>
                     <label class="hb-wide">Description ${f(mp + '.desc', 'Description', { area: true })}</label>
                     <div class="actions">${del(path + '.meta', i, m.name || 'metamagic', 'Remove metamagic')}</div>`); }).join('')}</div>
@@ -792,9 +791,19 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                         <label class="hb-maxl">Max ${f(`${rp}.levels.${j}.max`, 'Maximum (number or formula)', { cls: 'hb-n hb-formula' })}</label>
                         ${pips(`${rp}.levels.${j}.used`, maxOf(l.max, V))}${del(rp + '.levels', j, (l.label || 'level') + ' level')}
                     </div>`).join('')}<div class="actions">${add(rp + '.levels', 'level', 'Add level')}</div></div>` : '';
+                const edit = (on) => `<button type="button" class="hb-x hb-toggle" data-act="toggle" data-id="${esc(r.id)}" aria-expanded="${on}" aria-label="Edit ${esc(r.name || 'resource')}" title="${on ? 'Done' : 'Edit'}">${PENCIL}</button>`;
+                // slots by level stay compact (Lv1 and its boxes, levels with at least one slot) until the pencil opens the full editor
+                if (r.kind === 'levels' && !openRows.has(r.id)) {
+                    const lv = r.levels.map((l, j) => [l, j]).filter(([l]) => maxOf(l.max, V) > 0)
+                        .map(([l, j]) => `<span class="hb-slot"><small>Lv${j + 1}</small>${pips(`${rp}.levels.${j}.used`, maxOf(l.max, V))}</span>`).join('');
+                    return `<div class="hb-entry hb-res">
+                        <div class="hb-entry-h"><b class="grow">${esc(r.name || 'Spell slots')}</b>${edit(false)}</div>
+                        <div class="hb-levels">${lv || '<p class="muted">No slots yet. Press the pencil to set them.</p>'}</div>
+                    </div>`;
+                }
                 return `<div class="hb-entry hb-res">
                     <div class="hb-entry-h">${head}${main}${sel(rp + '.reset', 'Resets on', RESETS)}
-                        ${tabs.length ? sel(rp + '.group', 'Tab', [['', 'No tab'], ...tabs.map((t) => [t, t])]) : ''}${del(path + '.rows', i, r.name || 'resource')}</div>
+                        ${tabs.length ? sel(rp + '.group', 'Tab', [['', 'No tab'], ...tabs.map((t) => [t, t])]) : ''}${r.kind === 'levels' ? edit(true) : ''}${del(path + '.rows', i, r.name || 'resource')}</div>
                     ${levels}
                 </div>`;
             };
@@ -974,7 +983,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             }
             if (p.type === 'list') for (const r of p.rows.filter(due)) r.used = 0;
             if (kind !== 'long') continue;
-            if (p.type === 'spells') { for (const s of p.slots) s.used = 0; p.sp.cur = p.sp.max; }
+            if (p.type === 'spells') { for (const s of p.slots) s.used = 0; p.sp.used = 0; }
             if (p.type === 'combat') { p.ok = 0; p.bad = 0; }
         }
         if (kind === 'long') {
@@ -1238,6 +1247,10 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     let dlgMode = null;
     const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : dlgMode.kind === 'ddb' ? ddbDlg() : formulaDlg(dlgMode));
     function draw() {
+        // sorcery points are boxes: an old counter turns into boxes with the same number left
+        for (const p of C.panels) if (p.type === 'trackers') for (const r of p.rows) if (r.kind === 'count' && /^sorcery points?$/i.test(String(r.name).trim())) {
+            Object.assign(r, { kind: 'pips', used: Math.max(0, maxOf(r.max) - nm(r.cur)) });
+        }
         $('#hb-bar').innerHTML = bar();
         root.innerHTML = top() + `<div class="hb-top-panels">${panels()}</div><div hidden>${datalists()}</div>`;
         if (dlg.open && dlgMode && dlgMode.kind !== 'rest' && dlgMode.kind !== 'ddb') dlgBody.innerHTML = dlgHTML();
@@ -1328,7 +1341,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             P.sub = 't:' + to;
             saveNow(); return draw();
         }
-        if (/\.notes\.\d+\.group$/.test(k) || /^panels\.\d+\.rows\.\d+\.(uses|max|group)$/.test(k) || /\.levels\.\d+\.max$/.test(k)) { saveNow(); return draw(); }
+        if (/\.notes\.\d+\.group$/.test(k) || /^panels\.\d+\.rows\.\d+\.(uses|max|group)$/.test(k) || /\.(levels\.\d+|sp)\.max$/.test(k)) { saveNow(); return draw(); }
         if (/^classes\.\d+\.name$/.test(k)) { const d = HIT_DIE[el.value.trim().toLowerCase()]; if (d) set(k.replace(/name$/, 'die'), d); }
         if (/^panels\.\d+\.rows\.\d+\.name$/.test(k) && panelOf(k).type === 'spells' && el.value.trim()) srdFill(k.replace(/\.name$/, ''));
         if (/^panels\.\d+\.(rows|meta)\.\d+\.name$/.test(k) && rowFill(k)) return;
@@ -1413,10 +1426,11 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 count: { kind: 'count' },
                 pips: { kind: 'pips', max: '3' },
                 levels: { kind: 'levels', name: 'Spell slots', levels: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'].map((label) => ({ label, max: '0', used: 0 })) },
-                sorcery: { kind: 'count', name: 'Sorcery points', max: cls('sorcerer') },
+                sorcery: { kind: 'pips', name: 'Sorcery points', max: cls('sorcerer') },
                 ki: { kind: 'count', name: 'Ki points', max: cls('monk'), reset: 'short' },
             }[kind] || {});
             r.cur = maxOf(r.max);
+            if (kind === 'levels') openRows.add(r.id);
             P.rows.push(r);
             saveNow(); return draw();
         }
