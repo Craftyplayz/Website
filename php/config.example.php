@@ -32,6 +32,12 @@ $googlebookskey = '';
 ?>
 
 <?php
+/* YouTube Data API v3 (tools/youtube-timeline); leave empty to use $googlebookskey with the YouTube API enabled on its project */
+global $youtubekey;
+$youtubekey = '';
+?>
+
+<?php
 /* Jellyfin */
 global $jellyfinkey;
 $jellyfinkey = '';
