@@ -64,7 +64,7 @@ $data = ['list' => $list, 'done' => (object)$done, 'edit' => $mc_edit];
             <label class="check"><input type="checkbox" id="mcc-missing"> Missing only</label>
             <span class="muted" id="mcc-count"></span>
         </div>
-        <p class="muted mcc-key"><span class="badge">+</span> longer-duration potion &nbsp; <span class="badge">JE</span> Java Edition only &nbsp; <span class="badge">BE</span> Bedrock Edition only</p>
+        <p class="muted mcc-key"><span class="badge">+</span> longer-duration potion &nbsp; <span class="badge">JE</span> Java Edition only</p>
 
         <div class="mcc-grid" id="mcc-grid"></div>
         <p><button type="button" class="btn" id="mcc-more" hidden>Show more</button></p>
