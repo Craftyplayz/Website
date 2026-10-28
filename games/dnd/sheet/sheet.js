@@ -1253,7 +1253,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const head = spell ? (nm(r.lvl) ? `${ordinal(nm(r.lvl))}-level ${(r.school || 'spell').toLowerCase()}` : `${r.school || 'Spell'} cantrip`) + (r.ritual ? ' (ritual)' : '') : r.time;
         const res = spell ? (r.mode === 'atk' ? show({ ...ev(P.atk, V), signed: true }) + ' to hit' : r.mode === 'save' ? `DC ${show(ev(r.dc || P.dc, V))} ${r.save} save` : '')
             : r.mode === 'hit' ? show({ ...ev(r.hit, V), signed: true }) + ' to hit' : r.mode === 'save' ? `DC ${show(ev(r.dc, V))} ${r.save} save` : '';
-        if ('fx' in r) return openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(r.time)}</p>
+        if ('fx' in r && !spell) return openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(r.time)}</p>
             ${kv([['Range', r.range], ['Resolves with', res], ['Cost', costText(r)]])}
             ${r.fx.some((e) => e.dice || e.text) ? `<h4>Effects</h4><ul class="hb-plain">${r.fx.filter((e) => e.dice || e.text).map((e) => `<li>${esc(fxOne(e, V))}</li>`).join('')}</ul>` : ''}
             <div class="hb-desc">${paras(r.desc)}</div>`);
