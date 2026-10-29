@@ -400,3 +400,5 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 /* to-hit and damage roll buttons in action and spell summaries, boxed like D&D Beyond's */
 .hb-rollbtn { display: inline-block; padding: 0 6px; background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--radius); color: var(--text); font: inherit; font-weight: 600; line-height: 1.6; cursor: pointer; transition: border-color var(--fast), background var(--fast); }
 .hb-rollbtn:hover { border-color: var(--accent); background: var(--accent-soft); }
+/* the latest roll shows in the top-right corner, under the sticky sheet bar and clear of the toasts at the bottom */
+#hb-rolls { position: fixed; top: 76px; right: 16px; z-index: 1750; }
