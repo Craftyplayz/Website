@@ -694,7 +694,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             </div>
             <div class="hb-box hb-stats">
                 <div><span class="hb-lbl">AC</span>${fx('ac', 'Armour class', false, ' hb-big')}</div>
-                <div><span class="hb-lbl">Initiative</span>${fx('init', 'Initiative', true, ' hb-big')}</div>
+                <div><span class="hb-lbl">Initiative</span>${C.view.noRoll ? fx('init', 'Initiative', true, ' hb-big')
+                    // rolls 1d20 + initiative; its formula is still in Customise
+                    : '<button type="button" class="hb-roll hb-big" data-act="roll" data-k="fs:init" data-t="Initiative" data-c="fs:init" title="Roll initiative" aria-label="Roll initiative"></button>'}</div>
                 <div><span class="hb-lbl">Prof.</span>${fx('prof', 'Proficiency bonus', true, ' hb-big')}</div>
                 <label class="hb-insp"><span class="hb-lbl">Inspiration</span>${f('insp', 'Heroic inspiration', { check: true })}</label>
             </div>
@@ -1571,6 +1573,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const shown = rolls.map(([, r]) => r.join(', ')).join(' | ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
             // a lone d20 shows a natural 20 or 1
             const nat = groups.length === 1 && groups[0][0] === 20 && groups[0][1] === 1 ? (rolls[0][1][0] === 20 ? ' hb-nat20' : rolls[0][1][0] === 1 ? ' hb-nat1' : '') : '';
+            // just under the sticky sheet bar, which wraps taller on phones
+            $('#hb-rolls').style.top = Math.max(76, $('#hb-bar').offsetHeight + 12) + 'px';
             $('#hb-rolls').innerHTML = `<button type="button" class="hb-rollcard${nat}" data-act="rollx" aria-label="Dismiss roll">
                 <span class="hb-rollhead"><b>${esc(title)}</b><small>${esc(expr)}</small></span>
                 <span class="hb-rolldice">${esc(shown)}</span><span class="hb-rolltot">${total}</span></button>`;
