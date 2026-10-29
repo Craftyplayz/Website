@@ -17,8 +17,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
     <main class="page hb" id="main">
         <p class="hb-devwarn" role="alert">Dev sheet: testing only, do not use</p>
         <?= site_breadcrumbs(site_current_path()) ?>
-        <h1 class="page-title">Homebrew Character Sheet</h1>
-        <p class="page-lede">Test copy. Characters here are separate from the live sheet; they were copied from it the first time you opened this page.</p>
+        <h1 class="hb-sr">Homebrew Character Sheet</h1>
 
         <div class="bar hb-bar" id="hb-bar"></div>
         <div class="hb-sheet" id="hb-sheet"><noscript><p class="err">This sheet needs JavaScript.</p></noscript></div>

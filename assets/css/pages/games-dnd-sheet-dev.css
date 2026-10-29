@@ -47,10 +47,11 @@
     .hb-side { grid-area: side; display: flex; flex-direction: column; gap: 16px; align-self: start; min-width: 0; }
 }
 
-.hb-id { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 110px), 1fr)); gap: 8px; }
-.hb-id .hb-name, .hb-classes { grid-column: 1 / -1; }
-@media (min-width: 480px) { .hb-id .hb-name { grid-column: span 2; } }
-.hb-id .hb-name .field { font-size: 20px; font-weight: 700; }
+/* classes on the left, conditions, speed and defences filling the rest of the row */
+.hb-id { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 24px; }
+.hb-id .hb-classes { flex: 0 1 auto; }
+.hb-id .hb-more { flex: 1 1 260px; min-height: 38px; }
+.hb-id .hb-more-body { flex: 1 1 100%; }
 
 .hb-art {
     display: grid; place-items: center; width: 100%; aspect-ratio: 1; padding: 0; overflow: hidden;
@@ -174,7 +175,7 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 /* classes (multiclass rows) */
 .hb-classes { display: grid; gap: 8px; }
 .hb-cls { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
-.hb-cls > label:first-child { flex: 1 1 160px; }
+.hb-cls > label:first-child { flex: 0 1 200px; }
 .hb-cls .hb-lvl { flex: 0 0 72px; }
 .hb-cls .hb-die { flex: 0 0 84px; }
 .hb-cls label { display: grid; gap: 4px; min-width: 0; color: var(--muted); font-size: 13px; }
@@ -410,3 +411,16 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-hpgo > span + span, .hb-hpgo[data-heal] > span:first-child { visibility: hidden; }
 .hb-hpgo[data-heal] { border-color: var(--ok-line); }
 .hb-hpgo[data-heal] > span + span { visibility: visible; }
+/* the top line: character, Edit, who they are, rests and Customise; fields line up with the buttons along the bottom */
+.hb-bar { align-items: end; }
+.hb-bar label { display: grid; gap: 2px; min-width: 0; color: var(--muted); font-size: 12px; }
+.hb-bar .hb-name { flex: 1 1 160px; }
+.hb-bar .hb-name .field { font-weight: 700; }
+.hb-bar .hb-race, .hb-bar .hb-align { flex: 0 1 130px; }
+.hb-bar .hb-age { flex: 0 0 64px; }
+.hb-manage { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+.hb-bar [data-act=manage] { display: inline-flex; align-items: center; gap: 4px; }
+/* the bar wraps to several rows on phones, so it scrolls away there instead of sticking */
+@media (max-width: 760px) { .hb-bar { position: static; } }
+/* the page title is for screen readers only */
+.hb-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
