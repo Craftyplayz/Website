@@ -19,7 +19,7 @@
 .dt-hint { margin: 8px 0 0; font-size: 13px; }
 .dt-range { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
 .dt-range .field { width: auto; }
-.dt-panel figcaption { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.dt-panel figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; }
 .dt-panel figcaption .field { flex: 0 0 auto; width: auto; padding: 4px 8px; font-size: 13px; }
 .dt-panel figcaption span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dt-results .stabs { margin-bottom: 12px; flex-wrap: wrap; }
