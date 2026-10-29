@@ -1,10 +1,12 @@
-/* Dice fairness test (/games/dnd/sheet/test/): four roller panels and a chart of every result */
+/* Dice fairness test (/games/dnd/sheet/test/): eight roller panels and a chart of every result */
 .dt [hidden] { display: none !important; }
 .dt-bar { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
 .dt-bar label { display: grid; gap: 4px; color: var(--muted); font-size: 13px; }
-.dt-panels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+.dt-panels { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+/* four across get too thin for a die below this */
+@media (max-width: 760px) { .dt-panels { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .dt-panel { display: grid; gap: 6px; margin: 0; min-width: 0; }
-.dt-panel iframe { width: 100%; height: clamp(200px, calc(50svh - 110px), 520px); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--sunken); }
+.dt-panel iframe { width: 100%; height: clamp(180px, calc(50svh - 130px), 420px); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--sunken); }
 .dt-panel figcaption { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dt-chart { position: relative; display: grid; grid-template-columns: repeat(var(--faces, 20), minmax(0, 1fr)); align-items: end; gap: 2px; height: 220px; padding: 0 0 20px; }
 .dt-col { position: relative; display: flex; align-items: flex-end; height: 100%; min-width: 0; }
