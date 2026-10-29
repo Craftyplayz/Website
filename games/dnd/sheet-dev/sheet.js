@@ -1509,7 +1509,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <h3>Dice</h3>
             <label class="check">${f('view.noRoll', 'Turn off click to roll', { check: true })} Roll your own dice: don't roll when an ability, save, skill or tool bonus is clicked</label>
             <label class="check">${f('view.noTray', 'Hide the dice button', { check: true })} Hide the dice button in the bottom-left corner</label>
-            <label>Dice style ${sel('view.diceStyle', 'Dice style', DICE_STYLES)}</label>
+            <div class="hb-dstyles" role="group" aria-label="Dice style">${DICE_STYLES.map(([k, t]) => `<button type="button" class="hb-dstyle" data-act="dstyle" data-s="${k}" aria-pressed="${(C.view.diceStyle || 'purple') === k}"><img data-prev="${k}" alt="" width="336" height="56"${dicePrev[k] ? ` src="${dicePrev[k]}"` : ''}><span>${t}</span></button>`).join('')}</div>
             <label class="check">${f('view.noSound', 'Turn off dice sounds', { check: true })} No sound when the dice land</label>
             <label class="check">${f('view.noAnim', 'Turn off thrown dice', { check: true })} Show results straight away instead of throwing 3D dice across the page</label>
             <h3>Panels</h3>
@@ -1567,6 +1567,14 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const css = getComputedStyle(main);
         dice3d().then((m) => m.throwDice(groups, { style: C.view.diceStyle || 'purple', accent: css.getPropertyValue('--btn').trim() || '#5b3f8f', sound: !C.view.noSound })).then(card, () => { dice3dP = null; quick(); });
     }
+    // pictures of each dice style for Customise, drawn once with the 3D dice
+    const dicePrev = {};
+    function fillPrev() {
+        const imgs = [...document.querySelectorAll('img[data-prev]:not([src])')];
+        if (!imgs.length || C.view.noAnim) return;
+        const accent = getComputedStyle(main).getPropertyValue('--btn').trim() || '#5b3f8f';
+        dice3d().then((m) => { for (const im of imgs) im.src = dicePrev[im.dataset.prev] ||= m.previewStyle(im.dataset.prev, accent); }, () => { dice3dP = null; });
+    }
     // shortcut: dice3d.js reuses sheet.js's ?v= version, so a change to dice3d.js alone needs sheet.js touched too
     let dice3dP = null;
     const dice3d = () => dice3dP || (dice3dP = import(new URL('dice3d.js' + (($('script[src*="/sheet.js"]')?.src || '').match(/\?v=\d+/) || [''])[0], location.href).href));
@@ -1591,10 +1599,10 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         $('#hb-bar').innerHTML = bar();
         root.innerHTML = top() + `<div class="hb-top-panels">${panels()}</div><div hidden>${datalists()}</div>`;
         drawTray();
-        if (dlg.open && dlgMode && !['rest', 'ddb', 'crop'].includes(dlgMode.kind)) dlgBody.innerHTML = dlgHTML();
+        if (dlg.open && dlgMode && !['rest', 'ddb', 'crop'].includes(dlgMode.kind)) { dlgBody.innerHTML = dlgHTML(); fillPrev(); }
         refresh();
     }
-    function showDlg(mode) { dlgMode = mode; dlgBody.innerHTML = dlgHTML(); dlg.showModal(); refresh(); }
+    function showDlg(mode) { dlgMode = mode; dlgBody.innerHTML = dlgHTML(); dlg.showModal(); refresh(); fillPrev(); }
     dlg.addEventListener('close', () => { dlgMode = null; draw(); });
 
     function switchTo(c) { saveNow(); C = c; db.chars[c.id] = c; db.cur = c.id; openRows.clear(); saveNow(); draw(); }
@@ -1810,6 +1818,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'roll') { const v = value(b.dataset.k, vars()); return rollShow(b.dataset.t, [[20, 1]], Number.isFinite(+v.v) ? +v.v : 0); }
         if (act === 'rollx') { clearTimeout(rollTimer); $('#hb-rolls').innerHTML = ''; return; }
         if (act === 'tray') { tray.open = !tray.open; return drawTray(); }
+        if (act === 'dstyle') { C.view.diceStyle = b.dataset.s; saveNow(); for (const x of document.querySelectorAll('.hb-dstyle')) x.setAttribute('aria-pressed', x === b); return; }
         if (act === 'die') { tray.pool[b.dataset.n] = (tray.pool[b.dataset.n] || 0) + 1; return drawTray(); }
         if (act === 'dieclear') { tray.pool = {}; return drawTray(); }
         if (act === 'dieroll') { rollShow('Dice', DICE.filter((n) => tray.pool[n]).map((n) => [n, tray.pool[n]])); tray.pool = {}; return drawTray(); }
