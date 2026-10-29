@@ -353,3 +353,24 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-flex h4 { margin: 0 0 8px; }
 .hb-flexrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0; }
 .hb-flexrow > span:first-child { min-width: 170px; }
+/* dice: clickable bonuses, the roll card and the dice tray (bottom left, clear of the toasts on the right) */
+.hb-d20 { padding: 0 4px; background: none; border: 1px solid transparent; border-radius: var(--radius); color: inherit; font: inherit; cursor: pointer; transition: border-color var(--fast), background var(--fast); }
+.hb-d20:hover { border-color: var(--accent); background: var(--accent-soft); }
+.hb-dice { position: fixed; left: 16px; bottom: 16px; z-index: 1750; display: grid; justify-items: start; gap: 8px; }
+.hb-dicebtn { display: grid; place-items: center; width: 52px; height: 52px; background: var(--card2); border: 1px solid var(--line-strong); border-radius: 50%; color: var(--text); box-shadow: var(--lift); cursor: pointer; }
+.hb-dicebtn:hover, .hb-dicebtn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+.hb-tray { display: grid; gap: 10px; width: min(320px, calc(100vw - 32px)); padding: 12px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--lift); }
+.hb-traydice { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.hb-die { position: relative; min-height: 44px; background: var(--card2); border: 1px solid var(--line-strong); border-radius: var(--radius); color: var(--text); font: inherit; font-weight: 600; cursor: pointer; }
+.hb-die:hover { border-color: var(--accent); }
+.hb-die small { position: absolute; top: -6px; right: -6px; min-width: 20px; padding: 0 4px; background: var(--accent); border-radius: 999px; color: var(--sunken); font-size: 12px; line-height: 20px; }
+.hb-trayrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 14px; }
+.hb-trayrow > span { flex: 1 1 120px; min-width: 0; }
+.hb-trayslot { display: grid; justify-items: start; gap: 8px; }
+.hb-rollcard { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "head tot" "dice tot"; align-items: center; gap: 2px 16px; width: min(320px, calc(100vw - 32px)); padding: 12px 16px; background: var(--sunken); border: 1px solid var(--line-strong); border-left: 4px solid var(--accent); border-radius: var(--radius-lg); box-shadow: var(--lift); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.hb-rollhead { grid-area: head; display: grid; }
+.hb-rollhead small, .hb-rolldice { color: var(--muted); font-size: 13px; }
+.hb-rolldice { grid-area: dice; overflow-wrap: anywhere; }
+.hb-rolltot { grid-area: tot; font-size: 34px; font-weight: 700; line-height: 1; }
+.hb-rollcard.hb-nat20 { border-left-color: var(--gold-line); background: var(--gold-bg); }
+.hb-rollcard.hb-nat1 { border-left-color: var(--danger-line); background: var(--danger-bg); }
