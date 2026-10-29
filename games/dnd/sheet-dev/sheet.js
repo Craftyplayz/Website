@@ -1509,7 +1509,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <h3>Dice</h3>
             <label class="check">${f('view.noRoll', 'Turn off click to roll', { check: true })} Roll your own dice: don't roll when an ability, save, skill or tool bonus is clicked</label>
             <label class="check">${f('view.noTray', 'Hide the dice button', { check: true })} Hide the dice button in the bottom-left corner</label>
-            <label class="check">${f('view.noAnim', 'Turn off thrown dice', { check: true })} Show results straight away instead of throwing dice across the page</label>
+            <label class="check">${f('view.noAnim', 'Turn off thrown dice', { check: true })} Show results straight away instead of throwing 3D dice across the page</label>
             <h3>Panels</h3>
             <label class="check">${f('view.all', 'Show every panel at once', { check: true })} Show every panel at once instead of tabs</label>
             <label class="check">${f('view.prep', 'Always show prepared spells', { check: true })} Always show the Prepared tab and checkboxes (for homebrew classes; otherwise only Artificer, Cleric, Druid, Paladin and Wizard get them)</label>
@@ -1545,87 +1545,27 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     let rollTimer = 0;
     // groups: [[sides, count]], mod: number added on top
     function rollShow(title, groups, mod = 0) {
-        const rolls = groups.map(([n, c]) => [n, Array.from({ length: c }, () => die(n))]);
-        const total = rolls.reduce((t, [, r]) => t + r.reduce((a, b) => a + b, 0), 0) + mod;
-        const expr = groups.map(([n, c]) => `${c}d${n}`).join(' + ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
-        const shown = rolls.map(([, r]) => r.join(', ')).join(' | ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
-        // a lone d20 shows a natural 20 or 1
-        const nat = groups.length === 1 && groups[0][0] === 20 && groups[0][1] === 1 ? (rolls[0][1][0] === 20 ? ' hb-nat20' : rolls[0][1][0] === 1 ? ' hb-nat1' : '') : '';
-        const card = () => {
+        const card = (rolls) => {
+            const total = rolls.reduce((t, [, r]) => t + r.reduce((a, b) => a + b, 0), 0) + mod;
+            const expr = groups.map(([n, c]) => `${c}d${n}`).join(' + ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
+            const shown = rolls.map(([, r]) => r.join(', ')).join(' | ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
+            // a lone d20 shows a natural 20 or 1
+            const nat = groups.length === 1 && groups[0][0] === 20 && groups[0][1] === 1 ? (rolls[0][1][0] === 20 ? ' hb-nat20' : rolls[0][1][0] === 1 ? ' hb-nat1' : '') : '';
             $('#hb-rolls').innerHTML = `<button type="button" class="hb-rollcard${nat}" data-act="rollx" aria-label="Dismiss roll">
                 <span class="hb-rollhead"><b>${esc(title)}</b><small>${esc(expr)}</small></span>
                 <span class="hb-rolldice">${esc(shown)}</span><span class="hb-rolltot">${total}</span></button>`;
             clearTimeout(rollTimer); rollTimer = setTimeout(() => { $('#hb-rolls').innerHTML = ''; }, 12000);
         };
-        if (C.view.noAnim || matchMedia('(prefers-reduced-motion: reduce)').matches) return card();
+        const quick = () => card(groups.map(([n, c]) => [n, Array.from({ length: c }, () => die(n))]));
+        if (C.view.noAnim || matchMedia('(prefers-reduced-motion: reduce)').matches) return quick();
         $('#hb-rolls').innerHTML = '';
-        diceThrow(rolls.flatMap(([n, r]) => r.map((v) => [n, v])), card);
+        // 3D dice (dice3d.js, three.js + cannon-es from jsDelivr) load on the first roll; the face that lands up is the result
+        const css = getComputedStyle(main);
+        dice3d().then((m) => m.throwDice(groups, { body: css.getPropertyValue('--btn').trim() || '#5b3f8f', ink: '#ffffff' })).then(card, () => { dice3dP = null; quick(); });
     }
-
-    // ---- thrown dice: flat shapes tumble across the page from the dice button, bounce off the edges and land on their results ----
-    let throwRun = 0;
-    function diceThrow(dice, done) {
-        const run = ++throwRun, cv = document.getElementById('hb-throw') || document.body.appendChild(Object.assign(document.createElement('canvas'), { id: 'hb-throw' }));
-        cv.setAttribute('aria-hidden', 'true');
-        const W = innerWidth, H = innerHeight, dpr = devicePixelRatio || 1, ctx = cv.getContext('2d');
-        cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        const css = getComputedStyle(document.documentElement), tok = (k, d) => css.getPropertyValue(k).trim() || d;
-        const fill = tok('--card2', '#323232'), line = tok('--accent', '#66c0f4'), ink = tok('--text', '#ececec'), gold = tok('--gold-line', '#a8862a'), red = tok('--danger-line', '#8a3a3a');
-        const R = Math.max(22, Math.min(36, W * 0.06));
-        // shortcut: only the first 12 dice are thrown; the card still counts every die
-        const ds = dice.slice(0, 12).map(([n, v], i) => {
-            const a = -Math.PI / 4 + (Math.random() - 0.5) * 0.9, sp = (0.9 + Math.random() * 0.5) * Math.min(W, H) * 0.045;
-            return { n, v, x: 60 + i * 6, y: H - 60 - i * 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, rot: Math.random() * 6, spin: (Math.random() - 0.5) * 0.9, face: die(n) };
-        });
-        // sides of each shape (a d10 and d100 are kites)
-        const SIDES = { 4: 3, 6: 4, 8: 4, 10: 4, 12: 5, 20: 6, 100: 4 };
-        const shape = (d) => {
-            const k = SIDES[d.n] || 6, pts = [];
-            for (let j = 0; j < k; j++) {
-                const t = d.rot + (j / k) * Math.PI * 2 - (d.n === 6 ? Math.PI / 4 : Math.PI / 2);
-                const r = d.n === 10 || d.n === 100 ? R * (j % 2 ? 0.75 : 1.08) : d.n === 8 ? R * 1.05 : R;
-                pts.push([d.x + Math.cos(t) * r, d.y + Math.sin(t) * r]);
-            }
-            return pts;
-        };
-        let last = performance.now(), still = 0, settled = 0;
-        const frame = (now) => {
-            if (run !== throwRun) return;
-            const step = Math.min(2.5, (now - last) / 16.7); last = now;
-            ctx.clearRect(0, 0, W, H);
-            let moving = false;
-            for (const d of ds) {
-                d.x += d.vx * step; d.y += d.vy * step; d.rot += d.spin * step;
-                const f = Math.pow(0.965, step); d.vx *= f; d.vy *= f; d.spin *= Math.pow(0.95, step);
-                if (d.x < R) { d.x = R; d.vx = Math.abs(d.vx) * 0.7; d.spin *= -0.8; } if (d.x > W - R) { d.x = W - R; d.vx = -Math.abs(d.vx) * 0.7; d.spin *= -0.8; }
-                if (d.y < R) { d.y = R; d.vy = Math.abs(d.vy) * 0.7; d.spin *= -0.8; } if (d.y > H - R) { d.y = H - R; d.vy = -Math.abs(d.vy) * 0.7; d.spin *= -0.8; }
-                const fast = Math.hypot(d.vx, d.vy) > 0.6;
-                if (fast) { moving = true; if (Math.random() < 0.35 * step) d.face = die(d.n); } else d.face = d.v;
-            }
-            // dice knock each other apart
-            for (let a = 0; a < ds.length; a++) for (let b = a + 1; b < ds.length; b++) {
-                const p = ds[a], q = ds[b], dx = q.x - p.x, dy = q.y - p.y, dist = Math.hypot(dx, dy) || 1, min = R * 1.9;
-                if (dist < min) { const push = (min - dist) / 2, ux = dx / dist, uy = dy / dist; p.x -= ux * push; p.y -= uy * push; q.x += ux * push; q.y += uy * push;
-                    const t = (q.vx - p.vx) * ux + (q.vy - p.vy) * uy; if (t < 0) { p.vx += t * ux; p.vy += t * uy; q.vx -= t * ux; q.vy -= t * uy; } }
-            }
-            const fade = settled ? Math.max(0, 1 - (now - settled - 900) / 300) : 1;
-            ctx.globalAlpha = fade;
-            for (const d of ds) {
-                const pts = shape(d), top = d.face === d.n && d.n === 20 && !moving ? gold : d.face === 1 && d.n === 20 && !moving ? red : line;
-                ctx.beginPath(); pts.forEach(([x, y], j) => (j ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath();
-                ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6;
-                ctx.fillStyle = fill; ctx.fill(); ctx.shadowColor = 'transparent';
-                ctx.lineWidth = 2.5; ctx.strokeStyle = top; ctx.stroke();
-                ctx.fillStyle = ink; ctx.font = `700 ${Math.round(R * (d.face >= 10 ? 0.62 : 0.78))}px ${tok('--font', 'system-ui')}`;
-                ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(d.face), d.x, d.y + (d.n === 4 ? R * 0.15 : 1));
-            }
-            ctx.globalAlpha = 1;
-            if (!moving && !settled) { still += step; if (still > 4) { settled = now; done(); } }
-            if (settled && now - settled > 1200) { ctx.clearRect(0, 0, W, H); return; }
-            requestAnimationFrame(frame);
-        };
-        requestAnimationFrame(frame);
-    }
+    // shortcut: dice3d.js reuses sheet.js's ?v= version, so a change to dice3d.js alone needs sheet.js touched too
+    let dice3dP = null;
+    const dice3d = () => dice3dP || (dice3dP = import(new URL('dice3d.js' + (($('script[src*="/sheet.js"]')?.src || '').match(/\?v=\d+/) || [''])[0], location.href).href));
     function drawTray() {
         const box = $('#hb-dice');
         box.hidden = !!C.view.noTray;
