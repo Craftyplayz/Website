@@ -62,7 +62,8 @@ $sets = [
         sound.addEventListener('change', () => { try { localStorage.setItem('dice-sets-sound', sound.checked ? '1' : '0'); } catch (e) { } });
         // three.js and cannon-es come from jsDelivr with the dice; each set is its own file
         let engine = null;
-        const load = () => (engine ||= import('../dice3d.js').catch((e) => { engine = null; throw e; }));
+        // versioned, so a changed engine isn't kept from the browser's day-long cache
+        const load = () => (engine ||= import('../dice3d.js?v=<?= filemtime(__DIR__ . '/../dice3d.js') ?>').catch((e) => { engine = null; throw e; }));
         const sets = {};
         const ver = <?= json_encode(array_map(fn($k) => @filemtime(__DIR__ . "/sets/$k.js") ?: 0, array_combine(array_keys($sets), array_keys($sets)))) ?>;
         const setOf = (key) => (sets[key] ||= import(`./sets/${key}.js?v=${ver[key]}`).then((m) => ({ ...m.default, key: 'set-' + key })));
