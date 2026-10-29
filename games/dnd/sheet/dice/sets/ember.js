@@ -21,6 +21,17 @@ function lattice(g, S, corners, col, w) {
     });
 }
 
+// where the engine draws the numbers, as fractions of the face canvas: the centre, or on a d4 three spots 0.62 of the way to the corners
+const D4_SPOTS = [0, 1, 2].map((i) => [0.5 + Math.cos(i * 2.0944) * 0.49 * 0.62, 0.5 + Math.sin(i * 2.0944) * 0.49 * 0.62]);
+const spots = (S, corners, d4) => (d4 ? corners.map(([x, y]) => [S / 2 + (x - S / 2) * 0.62, S / 2 + (y - S / 2) * 0.62, S * 0.15]) : [[S / 2, S / 2, S * 0.3]]);
+// a dark iron plate under each number, so the bright number never sits on the bright core
+function plates(g, S, corners, d4, fill, rim) {
+    for (const [x, y, r] of spots(S, corners, d4)) {
+        g.beginPath(); g.arc(x, y, r, 0, 7); g.fillStyle = fill; g.fill();
+        g.lineWidth = r * 0.12; g.strokeStyle = rim; g.stroke();
+    }
+}
+
 // shared churning overlay (created on first decorate)
 let SH = null, lastDraw = -1;
 function shared(THREE) {
@@ -28,13 +39,17 @@ function shared(THREE) {
     const N = 128, cv = document.createElement('canvas'); cv.width = cv.height = N;
     const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
     const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+    // a d4 has its numbers in other places, so it gets its own copy with different holes
+    const cv4 = document.createElement('canvas'); cv4.width = cv4.height = N;
+    const tex4 = new THREE.CanvasTexture(cv4); tex4.colorSpace = THREE.SRGBColorSpace;
+    const mat4 = new THREE.MeshBasicMaterial({ map: tex4, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
     const sc = document.createElement('canvas'); sc.width = sc.height = 32;
     const sg = sc.getContext('2d'), gr = sg.createRadialGradient(16, 16, 0, 16, 16, 16);
     gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.3, 'rgba(255,200,90,.8)'); gr.addColorStop(1, 'rgba(255,90,0,0)');
     sg.fillStyle = gr; sg.fillRect(0, 0, 32, 32);
     const sparkTex = new THREE.CanvasTexture(sc);
     const sparkMat = new THREE.PointsMaterial({ size: 7, sizeAttenuation: false, map: sparkTex, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
-    return (SH = { cv, g: cv.getContext('2d'), tex, mat, sparkMat, sparkTex, N });
+    return (SH = { cv, g: cv.getContext('2d'), tex, mat, g4: cv4.getContext('2d'), tex4, mat4, sparkMat, sparkTex, N });
 }
 function churn(sh, sec) {
     const { g, N } = sh;
@@ -47,15 +62,20 @@ function churn(sh, sec) {
         gr.addColorStop(0, i % 2 ? 'rgba(255,210,70,.55)' : 'rgba(255,110,10,.5)'); gr.addColorStop(1, 'rgba(255,60,0,0)');
         g.fillStyle = gr; g.fillRect(0, 0, N, N);
     }
-    g.globalCompositeOperation = 'source-over';
-    sh.tex.needsUpdate = true;
+    // copy for the d4, then cut soft holes where the numbers sit so the churn never washes over them
+    sh.g4.clearRect(0, 0, N, N); sh.g4.globalCompositeOperation = 'source-over'; sh.g4.drawImage(sh.cv, 0, 0);
+    const hole = (c, x, y, r) => { const h = c.createRadialGradient(x, y, r * 0.7, x, y, r * 1.15); h.addColorStop(0, 'rgba(0,0,0,1)'); h.addColorStop(1, 'rgba(0,0,0,0)');
+        c.globalCompositeOperation = 'destination-out'; c.fillStyle = h; c.fillRect(0, 0, N, N); c.globalCompositeOperation = 'source-over'; };
+    hole(g, N / 2, N / 2, N * 0.3);
+    for (const [x, y] of D4_SPOTS) hole(sh.g4, x * N, y * N, N * 0.15);
+    sh.tex.needsUpdate = sh.tex4.needsUpdate = true;
 }
 
 const NS = 28;
 export default {
-    name: 'Ember Cage', ink: '#150600', metal: 0.55, rough: 0.38, glow: 0.55, bumpScale: 4,
-    font: 'Georgia, serif',
-    paint(g, S, seed, corners) {
+    // bright bold numbers on dark plates: they glow like hot metal and read at a glance
+    name: 'Ember Cage', ink: '#ffe9a8', metal: 0.55, rough: 0.38, glow: 0.55, bumpScale: 4,
+    paint(g, S, seed, corners, d4) {
         const r = (() => { let s = seed * 97 + 5; return () => ((s = (s * 16807) % 2147483647) / 2147483647); })();
         g.fillStyle = '#120806'; g.fillRect(0, 0, S, S);
         // molten core inside the cage
@@ -71,11 +91,12 @@ export default {
         // dark iron frame; the rim glows faintly where the heat leaks
         lattice(g, S, corners, '#070403', 14);
         g.strokeStyle = 'rgba(255,120,30,.55)'; g.lineWidth = 2; poly(g, shrink(corners, 0.9)); g.stroke();
+        plates(g, S, corners, d4, '#160a05', '#070403');
     },
-    bump(g, S, seed, corners) { lattice(g, S, corners, '#fff', 14); },
-    decorate({ THREE, mesh, faces }) {
+    bump(g, S, seed, corners, d4) { lattice(g, S, corners, '#fff', 14); plates(g, S, corners, d4, '#555', '#fff'); },
+    decorate({ THREE, mesh, faces, sides }) {
         const sh = shared(THREE);
-        const ov = new THREE.Mesh(mesh.geometry, sh.mat); ov.scale.setScalar(1.004); mesh.add(ov);
+        const ov = new THREE.Mesh(mesh.geometry, sides === 4 ? sh.mat4 : sh.mat); ov.scale.setScalar(1.004); mesh.add(ov);
         const pos = new Float32Array(NS * 3), col = new Float32Array(NS * 3), age = new Float32Array(NS), life = new Float32Array(NS);
         const geo = new THREE.BufferGeometry();
         geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
