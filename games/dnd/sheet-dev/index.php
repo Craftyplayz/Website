@@ -15,6 +15,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
     <?php // no site header or footer here: the sheet and its dice use the whole screen (owner's choice) ?>
 
     <main class="page hb" id="main">
+        <p class="hb-devwarn" role="alert">Dev sheet: testing only, do not use</p>
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">Homebrew Character Sheet</h1>
         <p class="page-lede">Test copy. Characters here are separate from the live sheet; they were copied from it the first time you opened this page.</p>
