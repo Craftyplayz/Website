@@ -72,13 +72,16 @@ export const STYLES = {
     ivory: { name: 'Ivory', paint: grad('#fbf5e6', '#d8ccb0'), ink: '#2a2a2a', metal: 0, rough: 0.5 },
 };
 // a face's picture: its number (or, on a d4, the three corner numbers)
-function faceTexture(labels, st, d4, seed) {
-    const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S;
+// corners: the face's corners in canvas pixels, so a style can draw along its edges; st.bump paints a height map the same way
+function faceTexture(labels, st, d4, seed, corners) {
+    const S = 256, canvas = () => { const c = document.createElement('canvas'); c.width = c.height = S; return c; }, cv = canvas();
     const g = cv.getContext('2d');
-    if (st.paint) st.paint(g, S, seed); else { g.fillStyle = st.body; g.fillRect(0, 0, S, S); }
+    if (st.paint) st.paint(g, S, seed, corners, d4); else { g.fillStyle = st.body; g.fillRect(0, 0, S, S); }
+    let bump = null;
+    if (st.bump) { const bc = canvas(), bg = bc.getContext('2d'); bg.fillStyle = '#000'; bg.fillRect(0, 0, S, S); st.bump(bg, S, seed, corners, d4); bump = new THREE.CanvasTexture(bc); }
     g.fillStyle = st.ink; g.textAlign = 'center'; g.textBaseline = 'middle';
     const draw = (txt, x, y, size, rot) => {
-        g.save(); g.translate(x, y); g.rotate(rot); g.font = `700 ${size}px system-ui, sans-serif`;
+        g.save(); g.translate(x, y); g.rotate(rot); g.font = `700 ${size}px ${st.font || 'system-ui, sans-serif'}`;
         // a thin dark edge keeps light numbers readable on shiny faces
         g.lineWidth = size * 0.05; g.strokeStyle = 'rgba(0,0,0,.35)'; g.strokeText(txt, 0, 0); g.fillText(txt, 0, 0);
         if (txt === '6' || txt === '9') g.fillRect(-size * 0.22, size * 0.42, size * 0.44, size * 0.07);
@@ -87,7 +90,7 @@ function faceTexture(labels, st, d4, seed) {
     if (d4) labels.forEach(([txt, x, y]) => draw(txt, S / 2 + (x - 0.5) * S * 0.62, S / 2 + (y - 0.5) * S * 0.62, 60, Math.atan2(y - 0.5, x - 0.5) + Math.PI / 2));
     else draw(labels, S / 2, S / 2, labels.length > 1 ? 92 : 120, 0);
     const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
-    return t;
+    return { t, bump };
 }
 // builds one die type: mesh with a material per face, the physics shape, and how to read it
 const built = {};
@@ -109,7 +112,10 @@ function buildDie(kind, st) {
         if (d4) label = f.pts.map((p) => { const [x, y] = toUV(p); return [String(verts.findIndex((q) => q.distanceTo(p) < 1e-4) + 1), x, 1 - y]; });
         else label = kind === 't' ? (i === 0 ? '00' : i * 10 + '') : kind === 'u' ? String(i) : String(i + 1);
         f.value = d4 ? null : kind === 't' ? i * 10 : kind === 'u' ? i : i + 1;
-        mats.push(new THREE.MeshStandardMaterial({ map: faceTexture(label, st, d4, i * 31 + sides), roughness: st.rough, metalness: st.metal, flatShading: true }));
+        const { t, bump } = faceTexture(label, st, d4, i * 31 + sides, f.pts.map((p) => { const [x, y] = toUV(p); return [x * 256, (1 - y) * 256]; }));
+        // glow: the face lights itself (dark parts stay dark); mat: extra material settings, physical for glass, clearcoat and the like
+        mats.push(new (st.physical ? THREE.MeshPhysicalMaterial : THREE.MeshStandardMaterial)({ map: t, roughness: st.rough, metalness: st.metal, flatShading: true,
+            ...(bump && { bumpMap: bump, bumpScale: st.bumpScale ?? 3 }), ...(st.glow && { emissive: 0xffffff, emissiveMap: t, emissiveIntensity: st.glow }), ...st.mat }));
     });
     geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
@@ -158,10 +164,12 @@ function setup() {
 }
 // ---- sound: every hit in the physics makes a knock, louder and lower the harder it lands ----
 let audio = null, noise = null;
-function knock(speed, onTable) {
+function knock(speed, onTable, st) {
     const vol = Math.min(1, speed / 14) ** 1.4;
     if (!audio || vol < 0.02) return;
     const t = audio.currentTime, out = audio.out;
+    // a style with its own sound makes it instead
+    if (st?.sound?.hit) return st.sound.hit({ ac: audio, out, noise, vol, onTable, t });
     // the click: a burst of noise through a band-pass, higher for dice on dice
     const src = audio.createBufferSource(); src.buffer = noise; src.playbackRate.value = 0.8 + Math.random() * 0.4;
     const bp = audio.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = onTable ? 700 + Math.random() * 500 : 2400 + Math.random() * 1600; bp.Q.value = onTable ? 1.1 : 2.5;
@@ -193,9 +201,11 @@ function walls(hw, hd) {
     plane([-hw, 0, 0], [0, 1, 0], Math.PI / 2); plane([hw, 0, 0], [0, 1, 0], -Math.PI / 2);
     plane([0, 0, -hd], [0, 0, 1], 0); plane([0, 0, hd], [0, 1, 0], Math.PI);
 }
+// takes a die off the table, and anything its style added to the scene
+const drop = (d) => { scene.remove(d.mesh); d.fx?.dispose?.(); };
 function clear() {
     cancelAnimationFrame(raf); raf = 0;
-    for (const d of live) scene.remove(d.mesh);
+    for (const d of live) drop(d);
     live = []; world = null;
 }
 // the table size for this screen; kept while any dice are on it
@@ -217,12 +227,12 @@ export function setSpeed(x) { speed = Math.max(1, Math.min(16, +x || 1)); }
 function frame(now) {
     const dt = Math.min(0.05, (now - (frame.last || now)) / 1000) * speed; frame.last = now;
     world.step(1 / 120, dt, Math.ceil(8 * speed));
-    for (const d of live) { d.mesh.position.copy(d.body.position); d.mesh.quaternion.copy(d.body.quaternion); }
+    for (const d of live) { d.mesh.position.copy(d.body.position); d.mesh.quaternion.copy(d.body.quaternion); d.fx?.tick?.(now / 1000, dt, d.body); }
     renderer.render(scene, camera);
     for (const t of throws) {
         // both counted in table time, so they hold at any speed
         t.age += dt; t.quiet = t.dice.every(asleep) ? t.quiet + dt : 0;
-        if (t.quiet > 0.25 || t.age > 7) { t.done = true; t.resolve(t.results()); }
+        if (t.quiet > 0.25 || t.age > 7) { t.done = true; t.resolve(t.results()); if (audio) t.st.sound?.settle?.({ ac: audio, out: audio.out, noise, t: audio.currentTime, count: t.dice.length }); }
     }
     throws = throws.filter((t) => !t.done);
     // leave them on the table a moment, then fade
@@ -236,7 +246,13 @@ export function clearTable() {
     if (scene && !throws.length) { clear(); renderer.clear(); }
 }
 
-// style: a key of STYLES; accent: the purple style's colour; sound: knock as they land
+// a style is a key of STYLES or a style object (the dice page's sets in dice/sets/*.js); key names its built dice
+const styleOf = (style, accent) => { const base = typeof style === 'object' ? style : STYLES[style] || STYLES.purple;
+    return { ...base, body: accent, key: (base.key || style) + accent }; };
+// moving parts: a style's decorate() adds things to each die (children of its mesh, or to the scene) and returns { tick(sec, dt, body), dispose() }
+const decorate = (st, d) => st.decorate?.({ THREE, scene, mesh: d.mesh, kind: d.kind, sides: d.kind === 't' || d.kind === 'u' ? 10 : d.kind, faces: d.t.fs, rnd }) || null;
+
+// style: see styleOf; accent: the purple style's colour; sound: knock as they land
 export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', sound = true } = {}) {
     // dice already on the table stay; a fade that had started stops
     fadeT.forEach(clearTimeout); fadeT = [];
@@ -244,8 +260,8 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
     if (!world) table();
     if (sound) startAudio();
     // shortcut: past 40 dice the oldest settled ones are taken off so the page stays smooth
-    while (live.length > 40 && !throws.some((t) => t.dice.includes(live[0]))) { scene.remove(live[0].mesh); world.removeBody(live[0].body); live.shift(); }
-    const st = { ...(STYLES[style] || STYLES.purple), body: accent, key: style + accent };
+    while (live.length > 40 && !throws.some((t) => t.dice.includes(live[0]))) { drop(live[0]); world.removeBody(live[0].body); live.shift(); }
+    const st = styleOf(style, accent);
     // a d100 is a tens die and a units die
     const kinds = groups.flatMap(([n, c]) => Array.from({ length: c }, () => (n === 100 ? ['t', 'u'] : [n])).flat());
     // each throw comes in from a random spot on the screen edge: a random direction out from the middle, stopped at the edge
@@ -268,11 +284,12 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
             const other = e.body, now = performance.now();
             if (other.mass && other.id < b.id) return;
             if (now - (b.lastKnock || 0) < 30) return;
-            b.lastKnock = now; knock(Math.abs(e.contact.getImpactVelocityAlongNormal()), !other.mass);
+            b.lastKnock = now; knock(Math.abs(e.contact.getImpactVelocityAlongNormal()), !other.mass, st);
         });
         world.addBody(b);
-        const d = { kind, t, mesh, body: b }; live.push(d); return d;
+        const d = { kind, t, mesh, body: b }; d.fx = decorate(st, d); live.push(d); return d;
     });
+    if (sound && audio) st.sound?.throw?.({ ac: audio, out: audio.out, noise, t: audio.currentTime, count: dice.length });
     cv.style.transition = 'none'; cv.style.opacity = '1';
     return new Promise((resolve) => {
         const results = () => {
@@ -287,7 +304,7 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
             }
             return out;
         };
-        throws.push({ dice, resolve, results, age: 0, quiet: 0 });
+        throws.push({ dice, resolve, results, st: sound ? st : {}, age: 0, quiet: 0 });
         if (!raf) { frame.last = 0; raf = requestAnimationFrame(frame); }
     });
 }
@@ -303,18 +320,20 @@ export function previewStyle(style, accent = '#5b3f8f', w = 336, h = 56) {
         s.environment = roomEnv(r);
         pv = { r, s, cam: new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 100), meshes: [] };
     }
-    const st = { ...(STYLES[style] || STYLES.purple), body: accent, key: style + accent };
+    const st = styleOf(style, accent);
     const kinds = [4, 6, 8, 10, 12, 20, 't'], gap = 2.6, hw = (kinds.length * gap) / 2, hd = (hw * h) / w;
     pv.r.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); pv.r.setSize(w, h, false);
     Object.assign(pv.cam, { left: -hw, right: hw, top: hd, bottom: -hd }); pv.cam.position.set(0, 50, 0); pv.cam.up.set(0, 0, -1); pv.cam.lookAt(0, 0, 0); pv.cam.updateProjectionMatrix();
-    for (const m of pv.meshes) pv.s.remove(m);
+    for (const m of pv.meshes) { pv.s.remove(m); m.fx?.dispose?.(); }
     pv.meshes = kinds.map((kind, i) => {
         const t = buildDie(kind, st), m = new THREE.Mesh(t.geo, t.mats);
         // the top number faces the camera, tipped a little so the edges show
         const top = t.d4 ? t.verts[3].clone().normalize() : t.fs[t.fs.length - 1].n;
         m.quaternion.setFromUnitVectors(top, UP).premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(0.35, 0, -0.25)));
         m.position.set(-hw + gap / 2 + i * gap, 0, 0);
-        pv.s.add(m); return m;
+        // moving parts drawn once, part way into their motion
+        pv.s.add(m); m.fx = st.decorate?.({ THREE, scene: pv.s, mesh: m, kind, sides: kind === 't' ? 10 : kind, faces: t.fs, rnd }) || null; m.fx?.tick?.(1.5, 0, null);
+        return m;
     });
     pv.r.render(pv.s, pv.cam);
     return pv.r.domElement.toDataURL('image/png');

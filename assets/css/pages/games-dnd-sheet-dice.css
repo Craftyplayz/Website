@@ -1,0 +1,12 @@
+/* Dice sets (/games/dnd/sheet/dice/): a card per set with a preview strip and roll buttons */
+.dd [hidden] { display: none !important; }
+.dd-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.dd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 16px; margin-top: 16px; }
+.dd-card { display: grid; align-content: start; gap: 8px; min-width: 0; }
+.dd-card h2, .dd-card p { margin: 0; }
+.dd-prev { width: 100%; height: auto; aspect-ratio: 6 / 1; border-radius: var(--radius); background: var(--sunken); }
+.dd-sound { font-size: 13px; }
+.dd-card .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; }
+.dd-out { color: var(--muted); font-size: 13px; }
+/* the dice table over the whole page; it never takes clicks */
+#hb-throw { position: fixed; inset: 0; z-index: 1740; width: 100vw; height: 100vh; pointer-events: none; }
