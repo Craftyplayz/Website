@@ -397,3 +397,6 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-logd { grid-area: dice; overflow-wrap: anywhere; }
 .hb-logt { grid-area: tot; font-size: 20px; font-weight: 700; }
 .hb-traylog { display: grid; gap: 6px; max-height: 220px; overflow-y: auto; font-size: 13px; }
+/* to-hit and damage roll buttons in action and spell summaries, boxed like D&D Beyond's */
+.hb-rollbtn { display: inline-block; padding: 0 6px; background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--radius); color: var(--text); font: inherit; font-weight: 600; line-height: 1.6; cursor: pointer; transition: border-color var(--fast), background var(--fast); }
+.hb-rollbtn:hover { border-color: var(--accent); background: var(--accent-soft); }
