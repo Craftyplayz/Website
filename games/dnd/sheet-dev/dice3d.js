@@ -140,7 +140,7 @@ function roomEnv(r) {
     return new THREE.PMREMGenerator(r).fromScene(room, 0.04).texture;
 }
 // ---- the scene: a see-through layer over the page, an invisible table that takes shadows, walls at the screen edges ----
-let scene, camera, renderer, world, cv, live = [], finish = null, raf = 0, fadeT = [];
+let scene, camera, renderer, world = null, cv, live = [], throws = [], raf = 0, fadeT = [];
 function setup() {
     cv = document.createElement('canvas'); cv.id = 'hb-throw'; cv.setAttribute('aria-hidden', 'true'); document.body.appendChild(cv);
     renderer = new THREE.WebGLRenderer({ canvas: cv, alpha: true, antialias: true });
@@ -194,30 +194,51 @@ function walls(hw, hd) {
     plane([0, 0, -hd], [0, 0, 1], 0); plane([0, 0, hd], [0, 1, 0], Math.PI);
 }
 function clear() {
-    cancelAnimationFrame(raf);
+    cancelAnimationFrame(raf); raf = 0;
     for (const d of live) scene.remove(d.mesh);
-    live = [];
+    live = []; world = null;
+}
+// the table size for this screen; kept while any dice are on it
+let hw = 0, hd = 0;
+function table() {
+    // about D&D Beyond's size: a d20 is roughly 130 px across on a laptop, smaller on a phone
+    const W = innerWidth, H = innerHeight, ppu = Math.max(28, Math.min(56, Math.min(W, H) / 16));
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); renderer.setSize(W, H, false);
+    hd = H / ppu / 2; hw = W / ppu / 2;
+    Object.assign(camera, { left: -hw, right: hw, top: hd, bottom: -hd });
+    camera.position.set(0, 60, 0); camera.up.set(0, 0, -1); camera.lookAt(0, 0, 0); camera.updateProjectionMatrix();
+    walls(hw - 0.3, hd - 0.3);
+}
+const asleep = (d) => d.body.sleepState === CANNON.Body.SLEEPING || (d.body.velocity.length() < 0.15 && d.body.angularVelocity.length() < 0.15);
+// one loop for every throw on the table; each throw resolves when its own dice stop, the table clears when all have
+function frame(now) {
+    const dt = Math.min(0.05, (now - (frame.last || now)) / 1000); frame.last = now;
+    world.step(1 / 120, dt, 8);
+    for (const d of live) { d.mesh.position.copy(d.body.position); d.mesh.quaternion.copy(d.body.quaternion); }
+    renderer.render(scene, camera);
+    for (const t of throws) {
+        t.quiet = t.dice.every(asleep) ? t.quiet + dt : 0;
+        if (t.quiet > 0.25 || now - t.start > 7000) { t.done = true; t.resolve(t.results()); }
+    }
+    throws = throws.filter((t) => !t.done);
+    // leave them on the table a moment, then fade
+    if (!throws.length && !fadeT.length) fadeT.push(setTimeout(() => { cv.style.transition = 'opacity .3s'; cv.style.opacity = '0'; fadeT.push(setTimeout(() => { fadeT = []; clear(); renderer.clear(); }, 320)); }, 1400));
+    if (world) raf = requestAnimationFrame(frame);
 }
 
 // style: a key of STYLES; accent: the purple style's colour; sound: knock as they land
 export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', sound = true } = {}) {
-    // a new throw ends the one still rolling with what it shows now
-    if (finish) finish();
+    // dice already on the table stay; a fade that had started stops
     fadeT.forEach(clearTimeout); fadeT = [];
     if (!scene) setup();
-    clear();
+    if (!world) table();
     if (sound) startAudio();
+    // shortcut: past 40 dice the oldest settled ones are taken off so the page stays smooth
+    while (live.length > 40 && !throws.some((t) => t.dice.includes(live[0]))) { scene.remove(live[0].mesh); world.removeBody(live[0].body); live.shift(); }
     const st = { ...(STYLES[style] || STYLES.purple), body: accent, key: style + accent };
-    // about D&D Beyond's size: a d20 is roughly 130 px across on a laptop, smaller on a phone
-    const W = innerWidth, H = innerHeight, ppu = Math.max(28, Math.min(56, Math.min(W, H) / 16));
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); renderer.setSize(W, H, false);
-    const hd = H / ppu / 2, hw = W / ppu / 2;
-    Object.assign(camera, { left: -hw, right: hw, top: hd, bottom: -hd });
-    camera.position.set(0, 60, 0); camera.up.set(0, 0, -1); camera.lookAt(0, 0, 0); camera.updateProjectionMatrix();
-    walls(hw - 0.3, hd - 0.3);
     // a d100 is a tens die and a units die
     const kinds = groups.flatMap(([n, c]) => Array.from({ length: c }, () => (n === 100 ? ['t', 'u'] : [n])).flat());
-    kinds.forEach((kind, i) => {
+    const dice = kinds.map((kind, i) => {
         const t = buildDie(kind, st), mesh = new THREE.Mesh(t.geo, t.mats);
         mesh.castShadow = true; scene.add(mesh);
         const b = new CANNON.Body({ mass: 1, shape: t.shape, sleepSpeedLimit: 0.25, sleepTimeLimit: 0.3, angularDamping: 0.15, linearDamping: 0.1 });
@@ -235,39 +256,24 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
             b.lastKnock = now; knock(Math.abs(e.contact.getImpactVelocityAlongNormal()), !other.mass);
         });
         world.addBody(b);
-        live.push({ kind, t, mesh, body: b });
+        const d = { kind, t, mesh, body: b }; live.push(d); return d;
     });
     cv.style.transition = 'none'; cv.style.opacity = '1';
     return new Promise((resolve) => {
-        let last = performance.now(), start = last, quiet = 0, done = false;
         const results = () => {
-            const out = [], vals = live.map((d) => [d.kind, readDie(d)]);
+            const out = [], vals = dice.map((d) => readDie(d));
             for (const [n, c] of groups) {
                 const r = [];
                 for (let j = 0; j < c; j++) {
-                    if (n === 100) { const tens = vals.shift()[1], units = vals.shift()[1]; r.push(tens + units || 100); }
-                    else r.push(vals.shift()[1]);
+                    if (n === 100) { const tens = vals.shift(), units = vals.shift(); r.push(tens + units || 100); }
+                    else r.push(vals.shift());
                 }
                 out.push([n, r]);
             }
             return out;
         };
-        finish = () => { if (done) return; done = true; finish = null; resolve(results()); };
-        const frame = (now) => {
-            const dt = Math.min(0.05, (now - last) / 1000); last = now;
-            world.step(1 / 120, dt, 8);
-            for (const d of live) { d.mesh.position.copy(d.body.position); d.mesh.quaternion.copy(d.body.quaternion); }
-            renderer.render(scene, camera);
-            const still = live.every((d) => d.body.sleepState === CANNON.Body.SLEEPING || (d.body.velocity.length() < 0.15 && d.body.angularVelocity.length() < 0.15));
-            quiet = still ? quiet + dt : 0;
-            if (!done && (quiet > 0.25 || now - start > 7000)) {
-                finish();
-                // leave them on the table a moment, then fade
-                fadeT.push(setTimeout(() => { cv.style.transition = 'opacity .3s'; cv.style.opacity = '0'; fadeT.push(setTimeout(() => { clear(); renderer.clear(); }, 320)); }, 1400));
-            }
-            if (!done || now - start < 60000) raf = requestAnimationFrame(frame);
-        };
-        raf = requestAnimationFrame(frame);
+        throws.push({ dice, resolve, results, start: performance.now(), quiet: 0 });
+        if (!raf) { frame.last = 0; raf = requestAnimationFrame(frame); }
     });
 }
 
