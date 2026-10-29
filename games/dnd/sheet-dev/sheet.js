@@ -1509,6 +1509,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <h3>Dice</h3>
             <label class="check">${f('view.noRoll', 'Turn off click to roll', { check: true })} Roll your own dice: don't roll when an ability, save, skill or tool bonus is clicked</label>
             <label class="check">${f('view.noTray', 'Hide the dice button', { check: true })} Hide the dice button in the bottom-left corner</label>
+            <label>Dice style ${sel('view.diceStyle', 'Dice style', DICE_STYLES)}</label>
+            <label class="check">${f('view.noSound', 'Turn off dice sounds', { check: true })} No sound when the dice land</label>
             <label class="check">${f('view.noAnim', 'Turn off thrown dice', { check: true })} Show results straight away instead of throwing 3D dice across the page</label>
             <h3>Panels</h3>
             <label class="check">${f('view.all', 'Show every panel at once', { check: true })} Show every panel at once instead of tabs</label>
@@ -1541,6 +1543,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'crop' ? cropDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : dlgMode.kind === 'ddb' ? ddbDlg() : formulaDlg(dlgMode));
     // ---- dice: a card for each roll and the dice tray in the bottom-left corner ----
     const DICE = [4, 6, 8, 10, 12, 20, 100], tray = { open: false, pool: {} };
+    // the same keys as STYLES in dice3d.js
+    const DICE_STYLES = [['purple', 'Purple'], ['gold', 'Gold'], ['silver', 'Silver'], ['obsidian', 'Obsidian'], ['ruby', 'Ruby'], ['wood', 'Wood'], ['marble', 'Marble'], ['ivory', 'Ivory']];
     const die = (n) => { const a = new Uint32Array(1); crypto.getRandomValues(a); return (a[0] % n) + 1; };
     let rollTimer = 0;
     // groups: [[sides, count]], mod: number added on top
@@ -1561,7 +1565,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         $('#hb-rolls').innerHTML = '';
         // 3D dice (dice3d.js, three.js + cannon-es from jsDelivr) load on the first roll; the face that lands up is the result
         const css = getComputedStyle(main);
-        dice3d().then((m) => m.throwDice(groups, { body: css.getPropertyValue('--btn').trim() || '#5b3f8f', ink: '#ffffff' })).then(card, () => { dice3dP = null; quick(); });
+        dice3d().then((m) => m.throwDice(groups, { style: C.view.diceStyle || 'purple', accent: css.getPropertyValue('--btn').trim() || '#5b3f8f', sound: !C.view.noSound })).then(card, () => { dice3dP = null; quick(); });
     }
     // shortcut: dice3d.js reuses sheet.js's ?v= version, so a change to dice3d.js alone needs sheet.js touched too
     let dice3dP = null;
