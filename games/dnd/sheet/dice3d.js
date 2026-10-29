@@ -47,14 +47,40 @@ function faces(tris) {
     }
     return list;
 }
+// ---- styles: a surface painted behind the numbers, number colour, and how shiny or metal it is ----
+const grad = (a, b) => (g, S) => { const r = g.createRadialGradient(S * 0.35, S * 0.3, S * 0.05, S / 2, S / 2, S * 0.75); r.addColorStop(0, a); r.addColorStop(1, b); g.fillStyle = r; g.fillRect(0, 0, S, S); };
+// a small seeded random, so a face looks the same every time it's drawn
+const rnd = (seed) => () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const wood = (g, S, seed) => {
+    const r = rnd(seed + 7); g.fillStyle = '#8a5a2b'; g.fillRect(0, 0, S, S);
+    for (let i = 0; i < 26; i++) { g.strokeStyle = `rgba(${60 + r() * 40},${30 + r() * 20},10,${0.25 + r() * 0.35})`; g.lineWidth = 2 + r() * 6; g.beginPath(); const y = r() * S;
+        g.moveTo(0, y); for (let x = 0; x <= S; x += 32) g.lineTo(x, y + Math.sin(x / 40 + i) * 8 + (r() - 0.5) * 6); g.stroke(); }
+};
+const marble = (g, S, seed) => {
+    const r = rnd(seed + 3); g.fillStyle = '#eceae6'; g.fillRect(0, 0, S, S);
+    for (let i = 0; i < 7; i++) { g.strokeStyle = `rgba(90,95,110,${0.2 + r() * 0.35})`; g.lineWidth = 1 + r() * 3; g.beginPath(); let x = r() * S, y = 0; g.moveTo(x, y);
+        while (y < S) { x += (r() - 0.5) * 40; y += 12 + r() * 20; g.lineTo(x, y); } g.stroke(); }
+};
+export const STYLES = {
+    purple: { name: 'Purple', paint: null, ink: '#ffffff', metal: 0.05, rough: 0.45 },
+    gold: { name: 'Gold', paint: grad('#ffe39a', '#b07d22'), ink: '#3b2905', metal: 0.9, rough: 0.32 },
+    silver: { name: 'Silver', paint: grad('#f2f4f7', '#8f99a5'), ink: '#1c222b', metal: 0.9, rough: 0.28 },
+    obsidian: { name: 'Obsidian', paint: grad('#2c2b33', '#0c0c10'), ink: '#e8c35c', metal: 0.3, rough: 0.12 },
+    ruby: { name: 'Ruby', paint: grad('#d23048', '#5c0a18'), ink: '#ffe7a6', metal: 0.15, rough: 0.18 },
+    wood: { name: 'Wood', paint: wood, ink: '#2a1606', metal: 0, rough: 0.75 },
+    marble: { name: 'Marble', paint: marble, ink: '#1f2a44', metal: 0, rough: 0.25 },
+    ivory: { name: 'Ivory', paint: grad('#fbf5e6', '#d8ccb0'), ink: '#2a2a2a', metal: 0, rough: 0.5 },
+};
 // a face's picture: its number (or, on a d4, the three corner numbers)
-function faceTexture(labels, body, ink, d4) {
+function faceTexture(labels, st, d4, seed) {
     const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S;
     const g = cv.getContext('2d');
-    g.fillStyle = body; g.fillRect(0, 0, S, S);
-    g.fillStyle = ink; g.textAlign = 'center'; g.textBaseline = 'middle';
+    if (st.paint) st.paint(g, S, seed); else { g.fillStyle = st.body; g.fillRect(0, 0, S, S); }
+    g.fillStyle = st.ink; g.textAlign = 'center'; g.textBaseline = 'middle';
     const draw = (txt, x, y, size, rot) => {
-        g.save(); g.translate(x, y); g.rotate(rot); g.font = `700 ${size}px system-ui, sans-serif`; g.fillText(txt, 0, 0);
+        g.save(); g.translate(x, y); g.rotate(rot); g.font = `700 ${size}px system-ui, sans-serif`;
+        // a thin dark edge keeps light numbers readable on shiny faces
+        g.lineWidth = size * 0.05; g.strokeStyle = 'rgba(0,0,0,.35)'; g.strokeText(txt, 0, 0); g.fillText(txt, 0, 0);
         if (txt === '6' || txt === '9') g.fillRect(-size * 0.22, size * 0.42, size * 0.44, size * 0.07);
         g.restore();
     };
@@ -65,8 +91,8 @@ function faceTexture(labels, body, ink, d4) {
 }
 // builds one die type: mesh with a material per face, the physics shape, and how to read it
 const built = {};
-function buildDie(kind, body, ink) {
-    const key = kind + body + ink;
+function buildDie(kind, st) {
+    const key = kind + st.key;
     if (built[key]) return built[key];
     const sides = kind === 't' || kind === 'u' ? 10 : kind;
     const fs = faces(SHAPES[sides]()), d4 = sides === 4;
@@ -83,7 +109,7 @@ function buildDie(kind, body, ink) {
         if (d4) label = f.pts.map((p) => { const [x, y] = toUV(p); return [String(verts.findIndex((q) => q.distanceTo(p) < 1e-4) + 1), x, 1 - y]; });
         else label = kind === 't' ? (i === 0 ? '00' : i * 10 + '') : kind === 'u' ? String(i) : String(i + 1);
         f.value = d4 ? null : kind === 't' ? i * 10 : kind === 'u' ? i : i + 1;
-        mats.push(new THREE.MeshStandardMaterial({ map: faceTexture(label, body, ink, d4), roughness: 0.45, metalness: 0.05, flatShading: true }));
+        mats.push(new THREE.MeshStandardMaterial({ map: faceTexture(label, st, d4, i * 31 + sides), roughness: st.rough, metalness: st.metal, flatShading: true }));
     });
     geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
@@ -117,7 +143,44 @@ function setup() {
     scene.add(sun);
     const table = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.ShadowMaterial({ opacity: 0.35 }));
     table.rotation.x = -Math.PI / 2; table.receiveShadow = true; scene.add(table);
-    camera = new THREE.PerspectiveCamera(32, 1, 1, 200);
+    // something for metal dice to reflect: a dark room with a bright sky and two soft lights
+    const room = new THREE.Scene(), sky = new THREE.Mesh(new THREE.SphereGeometry(50, 32, 16), new THREE.MeshBasicMaterial({ side: THREE.BackSide, vertexColors: true }));
+    const sp = sky.geometry.attributes.position, col = [];
+    for (let i = 0; i < sp.count; i++) { const t = (sp.getY(i) / 50 + 1) / 2; col.push(0.08 + t * 0.9, 0.08 + t * 0.88, 0.1 + t * 0.85); }
+    sky.geometry.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); room.add(sky);
+    for (const [x, z] of [[-20, -10], [18, 12]]) { const lamp = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide })); lamp.position.set(x, 30, z); lamp.lookAt(0, 0, 0); room.add(lamp); }
+    scene.environment = new THREE.PMREMGenerator(renderer).fromScene(room, 0.04).texture;
+    // straight down with no perspective, so a die looks the same anywhere on the screen
+    camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 200);
+}
+// ---- sound: every hit in the physics makes a knock, louder and lower the harder it lands ----
+let audio = null, noise = null;
+function knock(speed, onTable) {
+    const vol = Math.min(1, speed / 14) ** 1.4;
+    if (!audio || vol < 0.02) return;
+    const t = audio.currentTime, out = audio.out;
+    // the click: a burst of noise through a band-pass, higher for dice on dice
+    const src = audio.createBufferSource(); src.buffer = noise; src.playbackRate.value = 0.8 + Math.random() * 0.4;
+    const bp = audio.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = onTable ? 700 + Math.random() * 500 : 2400 + Math.random() * 1600; bp.Q.value = onTable ? 1.1 : 2.5;
+    const g = audio.createGain(); g.gain.setValueAtTime(vol * (onTable ? 0.9 : 0.6), t); g.gain.exponentialRampToValueAtTime(0.001, t + (onTable ? 0.14 : 0.07));
+    src.connect(bp).connect(g).connect(out); src.start(t, Math.random() * 0.2, 0.2);
+    // the weight: a short low thump when it hits the table
+    if (onTable) {
+        const o = audio.createOscillator(), og = audio.createGain();
+        o.frequency.setValueAtTime(130 + Math.random() * 40, t); o.frequency.exponentialRampToValueAtTime(55, t + 0.09);
+        og.gain.setValueAtTime(vol * 0.8, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        o.connect(og).connect(out); o.start(t); o.stop(t + 0.13);
+    }
+}
+function startAudio() {
+    if (!audio) {
+        const A = window.AudioContext || window.webkitAudioContext; if (!A) return;
+        audio = new A();
+        audio.out = audio.createDynamicsCompressor(); audio.out.connect(audio.destination);
+        noise = audio.createBuffer(1, audio.sampleRate * 0.4, audio.sampleRate);
+        const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (audio.state === 'suspended') audio.resume();
 }
 function walls(hw, hd) {
     world = new CANNON.World({ gravity: new CANNON.Vec3(0, -50, 0), allowSleep: true });
@@ -133,21 +196,26 @@ function clear() {
     live = [];
 }
 
-export async function throwDice(groups, { body = '#5b3f8f', ink = '#ffffff' } = {}) {
+// style: a key of STYLES; accent: the purple style's colour; sound: knock as they land
+export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', sound = true } = {}) {
     // a new throw ends the one still rolling with what it shows now
     if (finish) finish();
     fadeT.forEach(clearTimeout); fadeT = [];
     if (!scene) setup();
     clear();
-    const W = innerWidth, H = innerHeight, ppu = Math.max(22, Math.min(34, Math.min(W, H) / 20));
+    if (sound) startAudio();
+    const st = { ...(STYLES[style] || STYLES.purple), body: accent, key: style + accent };
+    // about D&D Beyond's size: a d20 is roughly 130 px across on a laptop, smaller on a phone
+    const W = innerWidth, H = innerHeight, ppu = Math.max(28, Math.min(56, Math.min(W, H) / 16));
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); renderer.setSize(W, H, false);
     const hd = H / ppu / 2, hw = W / ppu / 2;
-    camera.aspect = W / H; camera.position.set(0, hd / Math.tan((camera.fov * Math.PI) / 360), 0); camera.lookAt(0, 0, 0); camera.up.set(0, 0, -1); camera.lookAt(0, 0, 0); camera.updateProjectionMatrix();
+    Object.assign(camera, { left: -hw, right: hw, top: hd, bottom: -hd });
+    camera.position.set(0, 60, 0); camera.up.set(0, 0, -1); camera.lookAt(0, 0, 0); camera.updateProjectionMatrix();
     walls(hw - 0.3, hd - 0.3);
     // a d100 is a tens die and a units die
     const kinds = groups.flatMap(([n, c]) => Array.from({ length: c }, () => (n === 100 ? ['t', 'u'] : [n])).flat());
     kinds.forEach((kind, i) => {
-        const t = buildDie(kind, body, ink), mesh = new THREE.Mesh(t.geo, t.mats);
+        const t = buildDie(kind, st), mesh = new THREE.Mesh(t.geo, t.mats);
         mesh.castShadow = true; scene.add(mesh);
         const b = new CANNON.Body({ mass: 1, shape: t.shape, sleepSpeedLimit: 0.25, sleepTimeLimit: 0.3, angularDamping: 0.15, linearDamping: 0.1 });
         // thrown from the bottom-left corner, where the dice button is
@@ -156,6 +224,13 @@ export async function throwDice(groups, { body = '#5b3f8f', ink = '#ffffff' } = 
         b.velocity.set(hw * 1.25 * sp, -2, -hd * 1.1 * sp);
         b.angularVelocity.set((Math.random() - 0.5) * 30, (Math.random() - 0.5) * 30, (Math.random() - 0.5) * 30);
         b.quaternion.setFromEuler(Math.random() * 6, Math.random() * 6, Math.random() * 6);
+        // each hit knocks once: dice on dice is handled by the lower id, and a die can't knock again within 30 ms
+        if (sound) b.addEventListener('collide', (e) => {
+            const other = e.body, now = performance.now();
+            if (other.mass && other.id < b.id) return;
+            if (now - (b.lastKnock || 0) < 30) return;
+            b.lastKnock = now; knock(Math.abs(e.contact.getImpactVelocityAlongNormal()), !other.mass);
+        });
         world.addBody(b);
         live.push({ kind, t, mesh, body: b });
     });
