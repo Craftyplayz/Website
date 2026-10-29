@@ -382,8 +382,8 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-dstyle:hover { border-color: var(--accent); }
 .hb-dstyle[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
 .hb-dstyle img { width: 100%; height: auto; aspect-ratio: 6 / 1; min-height: 32px; }
-/* roll log: fixed in the empty space left of the sheet (sheet.js sets the width), above the dice button */
-.hb-log { position: fixed; left: 16px; top: 72px; bottom: 84px; z-index: 1500; display: grid; grid-template-rows: auto 1fr; gap: 8px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
+/* roll log: fixed in the empty space left of the sheet (sheet.js sets the width), from the top down to the dice button */
+.hb-log { position: fixed; left: 16px; top: 16px; bottom: 84px; z-index: 1500; display: grid; grid-template-rows: auto 1fr; gap: 8px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
 .hb-logbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .hb-logbar h2 { margin: 0; font-size: 17px; }
 .hb-log > .hb-logl { overflow-y: auto; min-height: 0; }

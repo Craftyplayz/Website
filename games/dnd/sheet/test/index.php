@@ -13,7 +13,7 @@ $dice = [4, 6, 8, 10, 12, 20, 100];
 </head>
 
 <body>
-    <?php site_header(); ?>
+    <?php // no site header or footer here: the sheet and its dice use the whole screen (owner's choice) ?>
 
     <main class="page dt" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
@@ -69,7 +69,6 @@ $dice = [4, 6, 8, 10, 12, 20, 100];
         </section>
     </main>
 
-    <?php site_footer(null, false); ?>
 
     <script>
         (() => {
