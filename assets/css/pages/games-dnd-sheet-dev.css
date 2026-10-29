@@ -49,7 +49,7 @@
 
 /* classes on the left, conditions, speed and defences filling the rest of the row */
 .hb-id { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 24px; }
-.hb-id .hb-classes { flex: 0 1 auto; }
+.hb-id .hb-classes { flex: 0 0 auto; max-width: 100%; }
 .hb-id .hb-more { flex: 1 1 260px; min-height: 38px; }
 .hb-id .hb-more-body { flex: 1 1 100%; }
 
