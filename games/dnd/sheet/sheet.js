@@ -459,14 +459,30 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const s = String(range), first = +(s.match(/\d+/) || [0])[0];
         return [(/\bor\b/.test(s) || (!s.includes('/') && first && first <= 10)) && 'melee attacks', (s.includes('/') || first > 10) && 'ranged attacks'].filter(Boolean).join('|');
     }
-    const dmgLinks = (dmg, V) => dmg.filter((d) => d.dice || d.type).map((d) => [d.dice && ruleLink('act', 'damage rolls', resolve(d.dice, V), 'Damage rolls', 'Damage'),
-        d.type && ruleLink('dmg', d.type, d.type, d.type + ' damage', 'Damage type')].filter(Boolean).join(' ')).join(' + ');
+    // "2d6 + 1d8 − 1" -> { g: '6x2,8x1', m: -1 }; null when it isn't plain dice the tray has plus whole numbers
+    function parseRoll(s) {
+        const t = String(s).replace(/−/g, '-').replace(/\s+/g, ''), g = [];
+        let m = 0, rest = t.replace(/([+-]?)(\d*)d(\d+)|([+-]?)(\d+)/gi, (x, sd, c, n, sn, k) => {
+            if (n) { if (sd === '-' || !DICE.includes(+n)) g.push(null); else g.push(`${n}x${c || 1}`); }
+            else m += (sn === '-' ? -1 : 1) * +k;
+            return '';
+        });
+        return !rest && g.length && !g.includes(null) ? { g: g.join(','), m } : null;
+    }
+    // a boxed roll button, or the plain rule link when click to roll is off
+    const rollBtn = (text, roll, title, fallback) => (C.view.noRoll || !roll ? fallback
+        : `<button type="button" class="hb-rollbtn" data-act="roll2" data-g="${roll.g}" data-m="${roll.m}" data-t="${esc(title)}" title="Roll ${esc(title.toLowerCase())}">${esc(text)}</button>`);
+    const dmgLinks = (dmg, V, name = '') => dmg.filter((d) => d.dice || d.type).map((d) => { const txt = d.dice ? resolve(d.dice, V) : '';
+        return [d.dice && rollBtn(txt, parseRoll(txt), `${name || 'Damage'}${d.type ? ' ' + d.type.toLowerCase() : ''} damage`, ruleLink('act', 'damage rolls', txt, 'Damage rolls', 'Damage')),
+            d.type && ruleLink('dmg', d.type, d.type, d.type + ' damage', 'Damage type')].filter(Boolean).join(' '); }).join(' + ');
+    const hitLink = (v, name, kind, rl, title) => { const txt = show({ ...v, signed: true }) + ' to hit';
+        return rollBtn(txt, Number.isFinite(+v.v) ? { g: '20x1', m: +v.v } : null, `${name || 'Attack'} to hit`, ruleLink(kind, rl, txt, title, 'To hit')); };
     function actSum(r, V) {
         return [r.time && ruleLink('act', String(r.time).toLowerCase(), r.time, r.time, 'Timing'),
             r.range && ruleLink('act', rangeRules(r.range), r.range, 'Range: ' + r.range, 'Range'),
-            r.mode === 'hit' ? ruleLink('act', 'attack rolls', show({ ...ev(r.hit, V), signed: true }) + ' to hit', 'Attack rolls', 'To hit') : '',
+            r.mode === 'hit' ? hitLink(ev(r.hit, V), r.name, 'act', 'attack rolls', 'Attack rolls') : '',
             r.mode === 'save' ? ruleLink('act', 'saving throws', `DC ${show(ev(r.dc, V))} ${r.save}`, 'Saving throws', 'Save') : '',
-            dmgLinks(r.dmg, V),
+            dmgLinks(r.dmg, V, r.name),
             r.props.map((n) => ruleLink('prop', n, n, n, 'Weapon property')).join(', ')].filter(Boolean).join(' · ');
     }
     const fxOne = (e, V) => (e.k === 'heal' ? 'Heals ' + resolve(e.dice, V) : e.k === 'temp' ? resolve(e.dice, V) + ' temp HP' : e.k === 'dmg' ? dmgText([e], V) : e.text || (SPELL_FX.find(([k]) => k === e.k) || [])[1] || '').trim();
@@ -535,9 +551,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             r.range && ruleLink('spell', 'spell range', r.range, 'Range: ' + r.range, 'Range'),
             r.conc ? ruleLink('spell', 'concentration', 'Concentration', 'Concentration', 'Duration') : '',
             r.ritual ? ruleLink('spell', 'rituals', 'Ritual', 'Ritual', 'Casting') : '',
-            r.mode === 'atk' ? ruleLink('spell', 'spell attack rolls', show({ ...ev(P.atk, V), signed: true }) + ' to hit', 'Spell attack rolls', 'To hit') : '',
+            r.mode === 'atk' ? hitLink(ev(P.atk, V), r.name, 'spell', 'spell attack rolls', 'Spell attack rolls') : '',
             r.mode === 'save' ? ruleLink('spell', 'spell saving throws', `DC ${show(ev(r.dc || P.dc, V))} ${r.save}`, 'Spell saving throws', 'Save') : '',
-            dmgLinks(r.dmg, V), ...r.fx.map((e) => esc(fxOne(e, V)))].filter(Boolean).join(' · ');
+            dmgLinks(r.dmg, V, r.name), ...r.fx.map((e) => esc(fxOne(e, V)))].filter(Boolean).join(' · ');
     }
 
     // value behind a [data-c] key: { v (number or text), err, signed, why, warn }
@@ -1857,6 +1873,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             saveNow(); return draw();
         }
         if (act === 'rinfo') return ruleInfo(b.dataset.k, b.dataset.n, b.dataset.t, b.dataset.s);
+        if (act === 'roll2') return rollShow(b.dataset.t, b.dataset.g.split(',').map((x) => x.split('x').map(Number)), +b.dataset.m || 0);
         if (act === 'roll') { const v = value(b.dataset.k, vars()); return rollShow(b.dataset.t, [[20, 1]], Number.isFinite(+v.v) ? +v.v : 0); }
         if (act === 'rollx') { clearTimeout(rollTimer); $('#hb-rolls').innerHTML = ''; return; }
         if (act === 'tray') { tray.open = !tray.open; return drawTray(); }
