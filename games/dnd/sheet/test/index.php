@@ -1,5 +1,5 @@
 <?php
-// Dice fairness test: four panels roll the homebrew sheet's 3D dice (../dice3d.js) over and over; the chart adds up every result.
+// Dice fairness test: eight panels roll the homebrew sheet's 3D dice (../dice3d.js) over and over; the chart adds up every result.
 $site_page = ['components' => true, 'css' => ['/assets/css/pages/games-dnd-sheet-test.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
@@ -17,7 +17,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
     <main class="page dt" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">Dice Fairness Test</h1>
-        <p class="page-lede">Four tables roll the Homebrew Sheet's 3D dice over and over; the chart adds up every result so you can see whether each face comes up as often as it should.</p>
+        <p class="page-lede">Eight tables roll the Homebrew Sheet's 3D dice over and over; the chart adds up every result so you can see whether each face comes up as often as it should.</p>
 
         <div class="bar dt-bar">
             <label>Die <select class="field" id="dt-sides">
@@ -28,13 +28,16 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                 <option value="purple">Purple</option><option value="gold">Gold</option><option value="silver">Silver</option><option value="obsidian">Obsidian</option>
                 <option value="ruby">Ruby</option><option value="wood">Wood</option><option value="marble">Marble</option><option value="ivory">Ivory</option>
             </select></label>
+            <label>Speed <select class="field" id="dt-speed">
+                <option value="1">1× (real time)</option><option value="2">2×</option><option value="4" selected>4×</option><option value="8">8×</option>
+            </select></label>
             <button type="button" class="btn primary" id="dt-go">Start rolling</button>
             <button type="button" class="btn" id="dt-reset">Reset counts</button>
             <span class="muted" id="dt-count"></span>
         </div>
 
         <div class="dt-panels">
-            <?php for ($i = 1; $i <= 4; $i++): ?>
+            <?php for ($i = 1; $i <= 8; $i++): ?>
                 <figure class="dt-panel">
                     <iframe src="roller.html" title="Dice table <?= $i ?>" loading="eager"></iframe>
                     <figcaption class="muted" data-cap="<?= $i - 1 ?>">Table <?= $i ?></figcaption>
@@ -105,7 +108,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             const capt = () => caps.forEach((c, i) => { c.textContent = `Table ${i + 1} · ${per[i].n.toLocaleString()} rolls${per[i].last !== '' ? ' · last ' + per[i].last : ''}`; });
 
             const send = (fr, msg) => fr.contentWindow && fr.contentWindow.postMessage(msg, location.origin);
-            const start = (fr) => send(fr, { cmd: 'start', sides: sides(), style: $('#dt-style').value });
+            const start = (fr) => send(fr, { cmd: 'start', sides: sides(), style: $('#dt-style').value, speed: +$('#dt-speed').value });
             addEventListener('message', (e) => {
                 if (e.origin !== location.origin) return;
                 const i = frames.findIndex((fr) => fr.contentWindow === e.source);
@@ -125,6 +128,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             const restart = () => { if (running) frames.forEach(start); per.forEach((p) => { p.last = ''; }); draw(); capt(); };
             $('#dt-sides').addEventListener('change', restart);
             $('#dt-style').addEventListener('change', restart);
+            $('#dt-speed').addEventListener('change', restart);
             $('#dt-reset').addEventListener('click', () => { counts[sides()] = Array(sides()).fill(0); per.forEach((p) => { p.n = 0; p.last = ''; }); store(); draw(); capt(); });
             draw(); capt();
         })();

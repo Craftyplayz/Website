@@ -211,14 +211,18 @@ function table() {
 }
 const asleep = (d) => d.body.sleepState === CANNON.Body.SLEEPING || (d.body.velocity.length() < 0.15 && d.body.angularVelocity.length() < 0.15);
 // one loop for every throw on the table; each throw resolves when its own dice stop, the table clears when all have
+// how many times faster than real time the table runs: the same 1/120 s physics steps, just more of them per frame
+let speed = 1;
+export function setSpeed(x) { speed = Math.max(1, Math.min(16, +x || 1)); }
 function frame(now) {
-    const dt = Math.min(0.05, (now - (frame.last || now)) / 1000); frame.last = now;
-    world.step(1 / 120, dt, 8);
+    const dt = Math.min(0.05, (now - (frame.last || now)) / 1000) * speed; frame.last = now;
+    world.step(1 / 120, dt, Math.ceil(8 * speed));
     for (const d of live) { d.mesh.position.copy(d.body.position); d.mesh.quaternion.copy(d.body.quaternion); }
     renderer.render(scene, camera);
     for (const t of throws) {
-        t.quiet = t.dice.every(asleep) ? t.quiet + dt : 0;
-        if (t.quiet > 0.25 || now - t.start > 7000) { t.done = true; t.resolve(t.results()); }
+        // both counted in table time, so they hold at any speed
+        t.age += dt; t.quiet = t.dice.every(asleep) ? t.quiet + dt : 0;
+        if (t.quiet > 0.25 || t.age > 7) { t.done = true; t.resolve(t.results()); }
     }
     throws = throws.filter((t) => !t.done);
     // leave them on the table a moment, then fade
@@ -278,7 +282,7 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
             }
             return out;
         };
-        throws.push({ dice, resolve, results, start: performance.now(), quiet: 0 });
+        throws.push({ dice, resolve, results, age: 0, quiet: 0 });
         if (!raf) { frame.last = 0; raf = requestAnimationFrame(frame); }
     });
 }

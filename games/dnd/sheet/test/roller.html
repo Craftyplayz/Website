@@ -14,21 +14,22 @@
 <body>
     <script type="module">
         // shortcut: bump ?v= when dice3d.js changes, so browsers don't keep an old copy
-        import { throwDice, clearTable } from '../dice3d.js?v=2';
+        import { throwDice, clearTable, setSpeed } from '../dice3d.js?v=3';
         const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         let run = 0;
-        // the page sends { cmd: 'start', sides, style } or { cmd: 'stop' }; each result goes back as { result, sides }
+        // the page sends { cmd: 'start', sides, style, speed } or { cmd: 'stop' }; each result goes back as { result, sides }
         addEventListener('message', async (e) => {
             if (e.origin !== location.origin) return;
-            const { cmd, sides, style } = e.data || {};
+            const { cmd, sides, style, speed = 1 } = e.data || {};
             const me = ++run;
             if (cmd !== 'start') return;
+            setSpeed(speed);
             while (me === run) {
                 const [[, [v]]] = await throwDice([[sides, 1]], { style, sound: false });
                 if (me !== run) break;
                 parent.postMessage({ result: v, sides }, location.origin);
                 // the die stays a moment so you can read it, then the table is cleared for the next one
-                await sleep(500);
+                await sleep(500 / speed);
                 clearTable();
             }
         });
