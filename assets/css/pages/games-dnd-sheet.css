@@ -402,3 +402,10 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-rollbtn:hover { border-color: var(--accent); background: var(--accent-soft); }
 /* the latest roll shows in the top-right corner, under the sticky sheet bar and clear of the toasts at the bottom */
 #hb-rolls { position: fixed; top: 76px; right: 16px; z-index: 1750; }
+/* scroll style of hit points: both words sit in one cell, so the button keeps the width of the longer one */
+.hb-hpgo { display: inline-grid; border-color: var(--danger-line); }
+.hb-hpgo > span { grid-area: 1 / 1; }
+.hb-hpgo > span + span, .hb-hpgo[data-heal] > span:first-child { visibility: hidden; }
+.hb-hpgo[data-heal] { border-color: var(--ok-line); }
+.hb-hpgo[data-heal] > span + span { visibility: visible; }
+

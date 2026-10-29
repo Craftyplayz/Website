@@ -702,7 +702,10 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                     <label>Max change ${f('hp.mod', 'Temporary change to maximum hit points', { num: true })}</label>
                     <label>Temp ${f('hp.temp', 'Temporary hit points', { num: true })}</label>
                 </div>` : ''}
-                <form class="hb-dmg" data-act="hp"><input class="field" id="hb-amt" inputmode="decimal" aria-label="Amount" placeholder="5"><button class="btn small" value="dmg">Damage</button><button class="btn small" value="heal">Heal</button><button class="btn small" value="temp">Set temp</button></form>
+                ${C.view.hpScroll
+                    // the scroll style: one amount (scroll over it), one button that heals above 0 and damages otherwise
+                    ? '<form class="hb-dmg" data-act="hp"><input class="field" id="hb-amt" inputmode="decimal" value="0" aria-label="Amount: above 0 heals, below 0 damages" title="Scroll to change"><button class="btn small hb-hpgo" value="auto"><span>Damage</span><span>Heal</span></button><button class="btn small" value="temp">Set temp</button></form>'
+                    : '<form class="hb-dmg" data-act="hp"><input class="field" id="hb-amt" inputmode="decimal" aria-label="Amount" placeholder="5"><button class="btn small" value="dmg">Damage</button><button class="btn small" value="heal">Heal</button><button class="btn small" value="temp">Set temp</button></form>'}
             </div>
             <div class="hb-box hb-stats">
                 <div><span class="hb-lbl">AC</span>${fx('ac', 'Armour class', false, ' hb-big')}</div>
@@ -1536,6 +1539,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         return `<h2>Customise</h2>
             <p class="muted hb-hint">Changes apply as you type.</p>
             ${formulaGuide()}
+            <h3>Hit points</h3>
+            <label class="check">${f('view.hpScroll', 'Scroll to set damage or healing', { check: true })} One amount you scroll over (up heals, down damages) and one button that says Heal or Damage to match</label>
             <h3>Dice</h3>
             <label class="check">${f('view.noRoll', 'Turn off click to roll', { check: true })} Roll your own dice: don't roll when an ability, save, skill or tool bonus is clicked</label>
             <label class="check">${f('view.noTray', 'Hide the dice button', { check: true })} Hide the dice button in the bottom-left corner</label>
@@ -1770,7 +1775,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const P = panelOf(k), n = P.rows.filter((r) => r.att === 'yes').length;
             if (n > nm(P.attMax)) toast(`You're attuned to ${n} items but have ${nm(P.attMax)} attunement slots.`, 'note');
         }
-        if (k === 'view.all' || k === 'view.prep' || k === 'view.noRoll' || k === 'view.noTray' || /^panels\.\d+\.on$/.test(k) || /\.(mode|cat|k|grp|fxf)$/.test(k) || /^panels\.\d+\.sort$/.test(k) || (el.type === 'checkbox' && /\.prep$/.test(k) && panelOf(k).sub === 'prep')) draw();
+        if (k === 'view.all' || k === 'view.prep' || k === 'view.hpScroll' || k === 'view.noRoll' || k === 'view.noTray' || /^panels\.\d+\.on$/.test(k) || /\.(mode|cat|k|grp|fxf)$/.test(k) || /^panels\.\d+\.sort$/.test(k) || (el.type === 'checkbox' && /\.prep$/.test(k) && panelOf(k).sub === 'prep')) draw();
     });
     main.addEventListener('change', (e) => {
         const el = e.target, k = el.dataset.k || '';
@@ -1808,7 +1813,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     main.addEventListener('submit', (e) => {
         e.preventDefault();
         if (e.target.classList.contains('hb-ddb')) return importDdb();
-        const amt = Math.abs(nm($('#hb-amt').value)), how = e.submitter && e.submitter.value;
+        const v = nm($('#hb-amt').value), amt = Math.abs(v);
+        let how = e.submitter && e.submitter.value;
+        if (how === 'auto') how = v > 0 ? 'heal' : 'dmg';
         if (!amt && how !== 'temp') return $('#hb-amt').focus();
         if (how === 'dmg') {
             const soak = Math.min(nm(C.hp.temp), amt);
@@ -1820,6 +1827,15 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         } else C.hp.cur = Math.min(hpMax(), nm(C.hp.cur) + amt);
         saveNow(); draw();
     });
+    // the scroll style of hit points: scroll over the amount to change it (shift for 5 at a time); the button follows its sign
+    const hpLabel = () => { const b = $('.hb-hpgo'); if (b) b.toggleAttribute('data-heal', nm($('#hb-amt').value) > 0); };
+    main.addEventListener('wheel', (e) => {
+        const el = e.target.closest('#hb-amt');
+        if (!el || !C.view.hpScroll) return;
+        e.preventDefault();
+        el.value = nm(el.value) + (e.deltaY < 0 ? 1 : -1) * (e.shiftKey ? 5 : 1); hpLabel();
+    }, { passive: false });
+    main.addEventListener('input', (e) => { if (e.target.id === 'hb-amt') hpLabel(); });
     // right-click a die in the tray to take one away
     main.addEventListener('contextmenu', (e) => {
         const b = e.target.closest('[data-act="die"]');
