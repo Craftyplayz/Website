@@ -12,7 +12,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 </head>
 
 <body>
-    <?php site_header(); ?>
+    <?php // no site header or footer here: the sheet and its dice use the whole screen (owner's choice) ?>
 
     <main class="page hb" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
@@ -33,7 +33,6 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         <input type="file" id="hb-artfile" accept="image/*" hidden>
     </main>
 
-    <?php site_footer(null, false); ?>
     <script src="<?= h(asset('/games/dnd/sheet-dev/formula.js')) ?>" defer></script>
     <script src="<?= h(asset('/games/dnd/sheet-dev/ddb.js')) ?>" defer></script>
     <script src="<?= h(asset('/games/dnd/sheet-dev/rules.js')) ?>" defer></script>
