@@ -382,3 +382,18 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-dstyle:hover { border-color: var(--accent); }
 .hb-dstyle[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
 .hb-dstyle img { width: 100%; height: auto; aspect-ratio: 6 / 1; min-height: 32px; }
+/* roll log: fixed in the empty space left of the sheet (sheet.js sets the width), above the dice button */
+.hb-log { position: fixed; left: 16px; top: 72px; bottom: 84px; z-index: 1500; display: grid; grid-template-rows: auto 1fr; gap: 8px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
+.hb-logbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hb-logbar h2 { margin: 0; font-size: 17px; }
+.hb-log > .hb-logl { overflow-y: auto; min-height: 0; }
+.hb-logl { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; align-content: start; }
+.hb-logi { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "head tot" "dice tot"; gap: 2px 10px; align-items: center; padding: 8px 10px; background: var(--card2); border-left: 3px solid var(--accent); border-radius: var(--radius); font-size: 13px; }
+.hb-logi.hb-nat20 { border-left-color: var(--gold-line); background: var(--gold-bg); }
+.hb-logi.hb-nat1 { border-left-color: var(--danger-line); background: var(--danger-bg); }
+.hb-logh { grid-area: head; display: flex; justify-content: space-between; gap: 8px; min-width: 0; }
+.hb-logh b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hb-logh small, .hb-logd { color: var(--muted); }
+.hb-logd { grid-area: dice; overflow-wrap: anywhere; }
+.hb-logt { grid-area: tot; font-size: 20px; font-weight: 700; }
+.hb-traylog { display: grid; gap: 6px; max-height: 220px; overflow-y: auto; font-size: 13px; }
