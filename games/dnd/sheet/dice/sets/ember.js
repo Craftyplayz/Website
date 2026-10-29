@@ -71,8 +71,151 @@ function churn(sh, sec) {
     sh.tex.needsUpdate = sh.tex4.needsUpdate = true;
 }
 
+// ---- exits: how a die leaves the table (see exits in dice3d.js); a nat 1 explodes, a nat 20 flares like a phoenix, anything else crumbles to ash ----
+let FX = null;
+function fx(THREE) {
+    if (FX) return FX;
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,.6)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    const r = document.createElement('canvas'); r.width = r.height = 128;
+    const rg = r.getContext('2d'), rr = rg.createRadialGradient(64, 64, 40, 64, 64, 64);
+    rr.addColorStop(0, 'rgba(255,255,255,0)'); rr.addColorStop(0.6, 'rgba(255,255,255,1)'); rr.addColorStop(1, 'rgba(255,255,255,0)');
+    rg.fillStyle = rr; rg.fillRect(0, 0, 128, 128);
+    return (FX = { soft: new THREE.CanvasTexture(c), ring: new THREE.CanvasTexture(r), plane: new THREE.PlaneGeometry(1, 1) });
+}
+// per-exit things, all removed in end
+const sprite = (x, color, additive = true) => { const s = new x.THREE.Sprite(new x.THREE.SpriteMaterial({ map: fx(x.THREE).soft, color, transparent: true, depthWrite: false, blending: additive ? x.THREE.AdditiveBlending : x.THREE.NormalBlending }));
+    s.position.copy(x.mesh.position); x.scene.add(s); x.own.push(s); return s; };
+const floorRing = (x, color) => { const m = new x.THREE.Mesh(fx(x.THREE).plane, new x.THREE.MeshBasicMaterial({ map: fx(x.THREE).ring, color, transparent: true, depthWrite: false, blending: x.THREE.AdditiveBlending }));
+    m.rotation.x = -Math.PI / 2; m.position.set(x.mesh.position.x, 0.05, x.mesh.position.z); x.scene.add(m); x.own.push(m); return m; };
+// a burst of n points flying out from the die; each frame call move(t) with t seconds since the burst
+function burst(x, n, color, size, speed, spiral = 0) {
+    const T = x.THREE, pos = new Float32Array(n * 3), vel = [], o = x.mesh.position;
+    for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, s = speed * (0.4 + Math.random() * 0.8); vel.push([Math.cos(a) * s, 2 + Math.random() * 3, Math.sin(a) * s, a]); }
+    const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos, 3));
+    const p = new T.Points(geo, new T.PointsMaterial({ map: fx(T).soft, color, size, sizeAttenuation: false, transparent: true, depthWrite: false, blending: T.AdditiveBlending }));
+    p.frustumCulled = false; x.scene.add(p); x.own.push(p);
+    p.move = (t) => { for (let i = 0; i < n; i++) { const [vx, vy, vz, a] = vel[i], r = spiral ? t * speed * (0.6 + (i % 7) / 10) : 0, sa = a + t * spiral;
+        pos[i * 3] = o.x + (spiral ? Math.cos(sa) * r : vx * t); pos[i * 3 + 1] = o.y + vy * t; pos[i * 3 + 2] = o.z + (spiral ? Math.sin(sa) * r : vz * t); }
+        geo.attributes.position.needsUpdate = true; };
+    return p;
+}
+const cleanup = (x) => { for (const o of x.own || []) { x.scene.remove(o); o.material.dispose(); if (o.isPoints) o.geometry.dispose(); } x.own = []; };
+const ease = (k) => 1 - (1 - k) ** 3;
+const at = (k, a, b) => Math.max(0, Math.min(1, (k - a) / (b - a)));
+// sounds for the exits; each is skipped when sound is off
+function boom({ ac, out, noise }, when) {
+    const t = ac.currentTime + when;
+    const s = ac.createBufferSource(); s.buffer = noise; s.loop = true;
+    const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(2400, t); lp.frequency.exponentialRampToValueAtTime(160, t + 1.2);
+    const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.8, t + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
+    s.connect(lp).connect(g).connect(out); s.start(t); s.stop(t + 1.5);
+    const o = ac.createOscillator(), og = ac.createGain(); o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(28, t + 0.6);
+    og.gain.setValueAtTime(0.8, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.7); o.connect(og).connect(out); o.start(t); o.stop(t + 0.75);
+}
+function fanfare({ ac, out, noise }, when) {
+    const t0 = ac.currentTime;
+    // the rise: a noise sweep and a gliding tone
+    const s = ac.createBufferSource(); s.buffer = noise; s.loop = true;
+    const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 2; bp.frequency.setValueAtTime(300, t0); bp.frequency.exponentialRampToValueAtTime(4000, t0 + when);
+    const sg = ac.createGain(); sg.gain.setValueAtTime(0.0001, t0); sg.gain.linearRampToValueAtTime(0.35, t0 + when); sg.gain.exponentialRampToValueAtTime(0.001, t0 + when + 0.3);
+    s.connect(bp).connect(sg).connect(out); s.start(t0); s.stop(t0 + when + 0.35);
+    // the flare: a bright major chord that rings out
+    const t = t0 + when, g = ac.createGain(), lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3200;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.4, t + 0.03); g.gain.exponentialRampToValueAtTime(0.001, t + 1.8);
+    lp.connect(g).connect(out);
+    for (const f of [523.25, 659.25, 783.99, 1046.5]) { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = (Math.random() - 0.5) * 12; o.connect(lp); o.start(t); o.stop(t + 1.85); }
+}
+
+const EXITS = {
+    // nat 1: it heats up and shakes, then blows apart in a fireball with a shockwave across the table
+    fireball: {
+        dur: 1.7,
+        start(x) {
+            x.own = []; x.home = x.mesh.position.clone();
+            x.heat = sprite(x, 0xff6a10); x.heat.scale.setScalar(0.1);
+            if (x.audio) boom(x.audio, 1.7 * 0.28);
+        },
+        tick(k, x) {
+            const pre = at(k, 0, 0.28), post = at(k, 0.28, 1);
+            if (k < 0.28) {
+                // heating up: shaking harder and glowing brighter
+                x.mesh.position.set(x.home.x + (Math.random() - 0.5) * 0.25 * pre, x.home.y, x.home.z + (Math.random() - 0.5) * 0.25 * pre);
+                x.heat.scale.setScalar(1 + pre * 2.6); x.heat.material.opacity = 0.3 + pre * 0.7;
+                return;
+            }
+            if (!x.blown) {
+                x.blown = true; x.mesh.visible = false;
+                x.core = sprite(x, 0xfff2c0); x.fire = sprite(x, 0xff7a10); x.smoke = sprite(x, 0x2a1408, false);
+                x.puffs = Array.from({ length: 7 }, () => { const s = sprite(x, 0xff9a30); s.dir = [Math.random() - 0.5, Math.random() - 0.5]; return s; });
+                x.shock = floorRing(x, 0xffa040); x.debris = burst(x, 40, 0xffb040, 7, 9);
+            }
+            const e = ease(post);
+            x.heat.material.opacity = Math.max(0, 1 - post * 4);
+            x.core.scale.setScalar(1 + e * 4); x.core.material.opacity = Math.max(0, 1 - post * 2.2);
+            x.fire.scale.setScalar(2 + e * 5); x.fire.material.opacity = Math.max(0, 1 - post * 1.3);
+            x.fire.material.color.setRGB(1, 0.45 - post * 0.3, 0.06);
+            x.smoke.scale.setScalar(2 + e * 6); x.smoke.material.opacity = Math.min(0.55, post * 2) * (1 - post);
+            for (const s of x.puffs) { s.position.set(x.home.x + s.dir[0] * e * 5, x.home.y + 1, x.home.z + s.dir[1] * e * 5); s.scale.setScalar(1.5 + e * 3); s.material.opacity = Math.max(0, 0.9 - post * 1.2); }
+            x.shock.scale.setScalar(1 + e * 11); x.shock.material.opacity = Math.max(0, 1 - post * 1.4);
+            x.debris.move(post * 1.2); x.debris.material.opacity = Math.max(0, 1 - post);
+        },
+        end: cleanup,
+    },
+    // nat 20: it swells and spins, a ring of fire spreads, golden sparks spiral out like wings, then it bursts into gold
+    phoenix: {
+        dur: 2.1,
+        start(x) {
+            x.own = []; x.spin = 0;
+            x.halo = sprite(x, 0xffc830); x.halo.scale.setScalar(0.1);
+            if (x.audio) fanfare(x.audio, 2.1 * 0.42);
+        },
+        tick(k, x) {
+            const rise = ease(at(k, 0, 0.42)), out = at(k, 0.42, 1);
+            if (k < 0.42) {
+                x.spin += x.dt * (4 + rise * 18);
+                x.mesh.rotateOnWorldAxis(x.UP ||= new x.THREE.Vector3(0, 1, 0), x.spin);
+                x.mesh.scale.setScalar(1 + rise * 0.7);
+                x.halo.scale.setScalar(1 + rise * 5); x.halo.material.opacity = 0.4 + rise * 0.6;
+                if (k > 0.2 && !x.ring) x.ring = floorRing(x, 0xff8a20);
+                if (x.ring) { const r = ease(at(k, 0.2, 0.42)); x.ring.scale.setScalar(2 + r * 6); }
+                return;
+            }
+            if (!x.flared) {
+                x.flared = true; x.mesh.visible = false;
+                x.flash = sprite(x, 0xfff6d0); x.wings = burst(x, 60, 0xffd040, 8, 6, 5); x.embers = burst(x, 36, 0xff9020, 6, 5);
+                x.wave = floorRing(x, 0xffd860);
+            }
+            const e = ease(out);
+            x.halo.scale.setScalar(6 + e * 3); x.halo.material.opacity = Math.max(0, 1 - out * 1.5);
+            x.flash.scale.setScalar(2 + e * 6); x.flash.material.opacity = Math.max(0, 1 - out * 2.5);
+            x.ring.scale.setScalar(8 + e * 4); x.ring.material.opacity = Math.max(0, 1 - out * 1.2);
+            x.wave.scale.setScalar(1 + e * 13); x.wave.material.opacity = Math.max(0, 0.9 - out);
+            x.wings.move(out * 1.4); x.wings.material.opacity = Math.max(0, 1 - out * 0.9);
+            x.embers.move(out * 1.1); x.embers.material.opacity = Math.max(0, 1 - out);
+        },
+        end: cleanup,
+    },
+    // any other roll: the die cools, shrinks into a puff of ash and a few last sparks
+    ash: {
+        dur: 0.9,
+        start(x) { x.own = []; x.puff = sprite(x, 0x6a5a50, false); x.puff.scale.setScalar(0.1); x.last = burst(x, 12, 0xff8a30, 5, 2.5); },
+        tick(k, x) {
+            const e = ease(k);
+            x.mesh.scale.setScalar(Math.max(0.001, 1 - e));
+            x.puff.scale.setScalar(0.5 + e * 3.5); x.puff.material.opacity = 0.6 * Math.sin(Math.PI * k);
+            x.last.move(k * 0.8); x.last.material.opacity = 1 - k;
+        },
+        end: cleanup,
+    },
+};
+
 const NS = 28;
 export default {
+    // which exit plays for which roll: the most specific key wins ('d20:20', then a range like 'd20:2-19', then 'd20', then '*')
+    exits: { 'd20:1': EXITS.fireball, 'd20:20': EXITS.phoenix, '*': EXITS.ash },
     // bright bold numbers on dark plates: they glow like hot metal and read at a glance
     name: 'Ember Cage', ink: '#ffe9a8', metal: 0.55, rough: 0.38, glow: 0.55, bumpScale: 4,
     paint(g, S, seed, corners, d4) {

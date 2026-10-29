@@ -206,7 +206,49 @@ const drop = (d) => { scene.remove(d.mesh); d.fx?.dispose?.(); };
 function clear() {
     cancelAnimationFrame(raf); raf = 0;
     for (const d of live) drop(d);
-    live = []; world = null;
+    live = []; world = null; exiting = false;
+}
+function fade() { cv.style.transition = 'opacity .3s'; cv.style.opacity = '0'; fadeT.push(setTimeout(() => { fadeT = []; clear(); renderer.clear(); }, 320)); }
+
+// ---- exits: how each die leaves the table, picked by what it rolled ----
+// a style's exits map keys to animations, and the most specific key wins: 'd20:20' (one number), 'd20:2-19' (a range), 'd20' (that die), '*' (any die).
+// The percentile dice are 'd100' (tens: 0, 10 ... 90) and 'd100u' (units: 0-9). A style without exits fades out as before.
+// An animation is { dur (seconds), start(x), tick(k, x) with k from 0 to 1, end(x) }; x is { THREE, scene, mesh, body, die, value, audio, sec, dt },
+// and an animation can keep its own things on x. The die is hidden when its animation ends.
+const dieName = (kind) => (kind === 't' ? 'd100' : kind === 'u' ? 'd100u' : 'd' + kind);
+function exitFor(st, d) {
+    const x = st?.exits, die = dieName(d.kind), v = d.value;
+    if (!x || v == null) return null;
+    if (x[die + ':' + v]) return x[die + ':' + v];
+    for (const k in x) { const m = /^(d\w+):(\d+)-(\d+)$/.exec(k); if (m && m[1] === die && v >= +m[2] && v <= +m[3]) return x[k]; }
+    return x[die] || x['*'] || null;
+}
+let exiting = false;
+// after the pause: start every die's exit, or fade straight away when none has one
+function leave() {
+    for (const d of live) { const a = exitFor(d.st, d);
+        if (a) d.exit = { a, age: 0, x: { THREE, scene, mesh: d.mesh, body: d.body, die: dieName(d.kind), value: d.value, audio: d.sound && audio ? { ac: audio, out: audio.out, noise } : null } }; }
+    exiting = live.some((d) => d.exit);
+    if (!exiting) fade();
+}
+// one step of every running exit; false once they have all finished
+function runExits(sec, dt) {
+    let busy = false;
+    for (const d of live) {
+        const e = d.exit; if (!e || e.done) continue;
+        Object.assign(e.x, { sec, dt });
+        if (!e.started) { e.started = true; e.a.start?.(e.x); }
+        e.age += dt; const k = Math.min(1, e.age / (e.a.dur || 1));
+        e.a.tick?.(k, e.x);
+        if (k >= 1) { e.done = true; e.a.end?.(e.x); d.mesh.visible = false; } else busy = true;
+    }
+    return busy;
+}
+// a new throw cuts running exits short and takes their dice off the table
+function endExits() {
+    if (!exiting) return;
+    for (const d of live) if (d.exit) { if (!d.exit.done) { d.exit.done = true; d.exit.a.end?.(d.exit.x); } drop(d); world.removeBody(d.body); }
+    live = live.filter((d) => !d.exit); exiting = false;
 }
 // the table size for this screen; kept while any dice are on it
 let hw = 0, hd = 0;
@@ -225,9 +267,11 @@ const asleep = (d) => d.body.sleepState === CANNON.Body.SLEEPING || (d.body.velo
 let speed = 1;
 export function setSpeed(x) { speed = Math.max(1, Math.min(16, +x || 1)); }
 function frame(now) {
-    const dt = Math.min(0.05, (now - (frame.last || now)) / 1000) * speed; frame.last = now;
+    const real = Math.min(0.05, (now - (frame.last || now)) / 1000), dt = real * speed; frame.last = now;
     world.step(1 / 120, dt, Math.ceil(8 * speed));
     for (const d of live) { d.mesh.position.copy(d.body.position); d.mesh.quaternion.copy(d.body.quaternion); d.fx?.tick?.(now / 1000, dt, d.body); }
+    // exits run in real time, after the physics placed the die, so they can move, scale or hide it
+    if (exiting && !runExits(now / 1000, real)) { exiting = false; fade(); }
     renderer.render(scene, camera);
     for (const t of throws) {
         // both counted in table time, so they hold at any speed
@@ -235,14 +279,15 @@ function frame(now) {
         if (t.quiet > 0.25 || t.age > 7) { t.done = true; t.resolve(t.results()); if (audio) t.st.sound?.settle?.({ ac: audio, out: audio.out, noise, t: audio.currentTime, count: t.dice.length }); }
     }
     throws = throws.filter((t) => !t.done);
-    // leave them on the table a moment, then fade
-    if (!throws.length && !fadeT.length) fadeT.push(setTimeout(() => { cv.style.transition = 'opacity .3s'; cv.style.opacity = '0'; fadeT.push(setTimeout(() => { fadeT = []; clear(); renderer.clear(); }, 320)); }, 1400));
+    // leave them on the table a moment, then their exits (or a fade)
+    if (!throws.length && !fadeT.length && !exiting) fadeT.push(setTimeout(leave, 1400));
     if (world) raf = requestAnimationFrame(frame);
 }
 
 // empties the table now instead of after the usual pause and fade (the dice test page uses it between rolls)
 export function clearTable() {
     fadeT.forEach(clearTimeout); fadeT = [];
+    if (world) endExits();
     if (scene && !throws.length) { clear(); renderer.clear(); }
 }
 
@@ -258,6 +303,7 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
     fadeT.forEach(clearTimeout); fadeT = [];
     if (!scene) setup();
     if (!world) table();
+    endExits();
     if (sound) startAudio();
     // shortcut: past 40 dice the oldest settled ones are taken off so the page stays smooth
     while (live.length > 40 && !throws.some((t) => t.dice.includes(live[0]))) { drop(live[0]); world.removeBody(live[0].body); live.shift(); }
@@ -287,13 +333,14 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
             b.lastKnock = now; knock(Math.abs(e.contact.getImpactVelocityAlongNormal()), !other.mass, st);
         });
         world.addBody(b);
-        const d = { kind, t, mesh, body: b }; d.fx = decorate(st, d); live.push(d); return d;
+        const d = { kind, t, mesh, body: b, st, sound }; d.fx = decorate(st, d); live.push(d); return d;
     });
     if (sound && audio) st.sound?.throw?.({ ac: audio, out: audio.out, noise, t: audio.currentTime, count: dice.length });
     cv.style.transition = 'none'; cv.style.opacity = '1';
     return new Promise((resolve) => {
         const results = () => {
-            const out = [], vals = dice.map((d) => readDie(d));
+            // each die keeps its value, which picks its exit
+            const out = [], vals = dice.map((d) => (d.value = readDie(d)));
             for (const [n, c] of groups) {
                 const r = [];
                 for (let j = 0; j < c; j++) {
