@@ -115,18 +115,44 @@ function boom({ ac, out, noise }, when) {
     const o = ac.createOscillator(), og = ac.createGain(); o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(28, t + 0.6);
     og.gain.setValueAtTime(0.8, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.7); o.connect(og).connect(out); o.start(t); o.stop(t + 0.75);
 }
+// nat 20: a fire that roars up, a soft whoomp as it flares, then a ring of bells with sparkles and an echo
 function fanfare({ ac, out, noise }, when) {
-    const t0 = ac.currentTime;
-    // the rise: a noise sweep and a gliding tone
-    const s = ac.createBufferSource(); s.buffer = noise; s.loop = true;
-    const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 2; bp.frequency.setValueAtTime(300, t0); bp.frequency.exponentialRampToValueAtTime(4000, t0 + when);
-    const sg = ac.createGain(); sg.gain.setValueAtTime(0.0001, t0); sg.gain.linearRampToValueAtTime(0.35, t0 + when); sg.gain.exponentialRampToValueAtTime(0.001, t0 + when + 0.3);
-    s.connect(bp).connect(sg).connect(out); s.start(t0); s.stop(t0 + when + 0.35);
-    // the flare: a bright major chord that rings out
-    const t = t0 + when, g = ac.createGain(), lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3200;
-    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.4, t + 0.03); g.gain.exponentialRampToValueAtTime(0.001, t + 1.8);
-    lp.connect(g).connect(out);
-    for (const f of [523.25, 659.25, 783.99, 1046.5]) { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = (Math.random() - 0.5) * 12; o.connect(lp); o.start(t); o.stop(t + 1.85); }
+    const t0 = ac.currentTime, t = t0 + when;
+    const env = (g, at, peak, rise, fall) => { g.gain.setValueAtTime(0.0001, at); g.gain.linearRampToValueAtTime(peak, at + rise); g.gain.exponentialRampToValueAtTime(0.0001, at + rise + fall); };
+    // the build: fire noise that opens up and swells
+    const roar = ac.createBufferSource(); roar.buffer = noise; roar.loop = true;
+    const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 0.7;
+    lp.frequency.setValueAtTime(300, t0); lp.frequency.exponentialRampToValueAtTime(2600, t);
+    const rg = ac.createGain(); rg.gain.setValueAtTime(0.0001, t0); rg.gain.exponentialRampToValueAtTime(0.32, t); rg.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+    roar.connect(lp).connect(rg).connect(out); roar.start(t0); roar.stop(t + 0.4);
+    // crackles that come faster as it builds
+    const ck = ac.createBufferSource(); ck.buffer = noise; ck.loop = true;
+    const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 3000;
+    const cg = ac.createGain(); cg.gain.setValueAtTime(0.0001, t0);
+    for (let s = 0.03; s < when; s += 0.16 * (1 - s / when) + 0.025) { const a = t0 + s; cg.gain.setValueAtTime(0.12 + 0.2 * (s / when), a); cg.gain.exponentialRampToValueAtTime(0.0005, a + 0.015); }
+    ck.connect(hp).connect(cg).connect(out); ck.start(t0); ck.stop(t);
+    // a soft rising tone under it
+    const rise = ac.createOscillator(), riseG = ac.createGain(); rise.type = 'triangle';
+    rise.frequency.setValueAtTime(196, t0); rise.frequency.exponentialRampToValueAtTime(784, t);
+    riseG.gain.setValueAtTime(0.0001, t0); riseG.gain.exponentialRampToValueAtTime(0.12, t - 0.05); riseG.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+    rise.connect(riseG).connect(out); rise.start(t0); rise.stop(t + 0.15);
+    // the flare: a low whoomp
+    const thump = ac.createOscillator(), tg = ac.createGain(); thump.frequency.setValueAtTime(130, t); thump.frequency.exponentialRampToValueAtTime(45, t + 0.45);
+    env(tg, t, 0.55, 0.01, 0.5); thump.connect(tg).connect(out); thump.start(t); thump.stop(t + 0.55);
+    // the bells: a quick C major arpeggio up two octaves, bell-like partials, into an echo that dies away
+    const echo = ac.createDelay(1), fb = ac.createGain(), wet = ac.createGain(), tone = ac.createBiquadFilter();
+    echo.delayTime.value = 0.19; fb.gain.value = 0.32; wet.gain.value = 0.45; tone.type = 'lowpass'; tone.frequency.value = 4500;
+    echo.connect(tone).connect(fb).connect(echo); tone.connect(wet).connect(out);
+    const bells = ac.createGain(); bells.gain.value = 1; bells.connect(out); bells.connect(echo);
+    [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568].forEach((f, i) => {
+        const at = t + 0.05 + i * 0.07, g = ac.createGain(); env(g, at, 0.16, 0.004, 1.6 - i * 0.12); g.connect(bells);
+        for (const [m, v] of [[1, 1], [2.01, 0.35], [3.02, 0.12]]) { const o = ac.createOscillator(), og = ac.createGain(); o.frequency.value = f * m; og.gain.value = v; o.connect(og).connect(g); o.start(at); o.stop(at + 1.8); }
+    });
+    // sparkles scattered over the ring-out
+    for (let i = 0; i < 10; i++) { const at = t + 0.15 + Math.random() * 0.9, o = ac.createOscillator(), g = ac.createGain();
+        o.frequency.value = 2400 + Math.random() * 2200; env(g, at, 0.05, 0.002, 0.12); o.connect(g).connect(bells); o.start(at); o.stop(at + 0.15); }
+    // the echo loop is cut once everything has rung out, so it can't hang on
+    setTimeout(() => { try { fb.disconnect(); echo.disconnect(); bells.disconnect(); } catch (e) { } }, (when + 3.2) * 1000);
 }
 
 const EXITS = {
