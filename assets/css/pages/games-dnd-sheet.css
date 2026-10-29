@@ -374,5 +374,5 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-rolltot { grid-area: tot; font-size: 34px; font-weight: 700; line-height: 1; }
 .hb-rollcard.hb-nat20 { border-left-color: var(--gold-line); background: var(--gold-bg); }
 .hb-rollcard.hb-nat1 { border-left-color: var(--danger-line); background: var(--danger-bg); }
-/* thrown dice layer over the page; clicks go through it */
-#hb-throw { position: fixed; inset: 0; z-index: 1760; width: 100vw; height: 100vh; pointer-events: none; }
+/* 3D dice layer over the page, under the roll card and tray; clicks go through it */
+#hb-throw { position: fixed; inset: 0; z-index: 1740; width: 100vw; height: 100vh; pointer-events: none; }
