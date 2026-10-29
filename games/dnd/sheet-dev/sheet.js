@@ -144,7 +144,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     // read a number out of whatever was typed ("30 ft" -> 30)
     const nm = (x) => parseFloat(x) || 0;
     const ROW = {
-        attack: () => ({ id: uid(), name: '', time: 'Action', range: '', props: [], mode: 'hit', hit: 'STR + PROF', save: 'DEX', dc: '8 + PROF + STR', dmg: [{ dice: '1d6 + STR', type: 'Slashing' }], desc: '' }),
+        attack: () => ({ id: uid(), name: '', time: 'Action', range: '', props: [], mode: 'hit', hit: 'STR + PROF', save: 'DEX', dc: '8 + PROF + STR', dmg: [{ dice: '1d6 + STR', type: 'Slashing' }], fx: [], desc: '' }),
         spell: () => ({ id: uid(), lvl: 0, name: '', school: '', time: 'Action', trig: '', range: '', comp: '', dur: '', conc: false, ritual: false, prep: false, mode: 'none', save: 'DEX', dc: '', dmg: [], fx: [], desc: '', higher: '', srd: '' }),
         item: () => ({ id: uid(), cat: 'Gear', eq: false, att: '', name: '', qty: 1, wt: 0, gp: '', props: [], notes: '' }),
         list: () => ({ id: uid(), name: '', src: '', text: '', uses: '', used: 0, reset: '', grp: '' }),
@@ -292,7 +292,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         out.panels = out.panels.filter((p) => isObj(p) && TYPES[p.type]).map((p) => {
             const q = Object.assign(newPanel(p.type), p);
             if (q.rows) q.rows = rows(q.rows, PANEL_ROW[q.type]).map((r) => {
-                if ('dmg' in r) r.dmg = rows(r.dmg, ROW.dmg);
+                if ('dmg' in r) { r.dmg = rows(r.dmg, ROW.dmg); r.fx = rows(r.fx, ROW.fx); }
                 // SRD cantrips filled before CANTRIP existed: their dice now scale with level
                 if ('lvl' in r && !nm(r.lvl) && r.srd && !String(r.srd).startsWith('wd:')) for (const d of r.dmg) d.dice = String(d.dice).replace(/^[1-4]d(\d+)$/, 'CANTRIPd$1');
                 if ('props' in r) r.props = strs(r.props);
@@ -465,24 +465,23 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             d.type && ruleLink('dmg', d.type, d.type, d.type + ' damage', 'Damage type')].filter(Boolean).join(' '); }).join(' + ');
     const hitLink = (v, name, kind, rl, title) => { const txt = show({ ...v, signed: true }) + ' to hit';
         return rollBtn(txt, Number.isFinite(+v.v) ? { g: '20x1', m: +v.v } : null, `${name || 'Attack'} to hit`, ruleLink(kind, rl, txt, title, 'To hit')); };
-    function actSum(r, V) {
+    // effects in a summary; healing and temp HP are buttons that roll them and apply them to your hit points
+    const fxHtml = (fx, V, rp) => fx.map((e, j) => ((e.k === 'heal' || e.k === 'temp') && e.dice
+        ? `<button type="button" class="hb-rollbtn" data-act="fxapply" data-p="${rp}.fx.${j}" title="Apply to your hit points">${esc(fxOne(e, V))}</button>` : esc(fxOne(e, V)))).filter(Boolean);
+    function actSum(r, V, rp) {
         return [r.time && ruleLink('act', String(r.time).toLowerCase(), r.time, r.time, 'Timing'),
             r.range && ruleLink('act', rangeRules(r.range), r.range, 'Range: ' + r.range, 'Range'),
             r.mode === 'hit' ? hitLink(ev(r.hit, V), r.name, 'act', 'attack rolls', 'Attack rolls') : '',
             r.mode === 'save' ? ruleLink('act', 'saving throws', `DC ${show(ev(r.dc, V))} ${r.save}`, 'Saving throws', 'Save') : '',
-            dmgLinks(r.dmg, V, r.name),
+            dmgLinks(r.dmg, V, r.name), ...fxHtml(r.fx, V, rp),
             r.props.map((n) => ruleLink('prop', n, n, n, 'Weapon property')).join(', ')].filter(Boolean).join(' · ');
     }
     const fxOne = (e, V) => (e.k === 'heal' ? 'Heals ' + resolve(e.dice, V) : e.k === 'temp' ? resolve(e.dice, V) + ' temp HP' : e.k === 'dmg' ? dmgText([e], V) : e.text || (SPELL_FX.find(([k]) => k === e.k) || [])[1] || '').trim();
     const hasFx = (r, k) => (k === 'dmg' ? r.dmg.some((d) => d.dice) : r.fx.some((e) => e.k === k));
-    function fxText(fx, V) {
-        const d = dmgText(fx.filter((e) => e.k === 'dmg'), V);
-        return [d, ...fx.filter((e) => e.k !== 'dmg' && (e.dice || e.text)).map((e) => fxOne(e, V))].filter(Boolean).join(' · ');
-    }
     const costText = (r) => [String(r.cost.amt).trim(), String(r.cost.what).trim()].filter(Boolean).join(' ');
-    function hbSum(r, V) {
-        return [r.time, r.range, r.mode === 'hit' ? show({ ...ev(r.hit, V), signed: true }) + ' to hit' : '', r.mode === 'save' ? `DC ${show(ev(r.dc, V))} ${r.save}` : '',
-            fxText(r.fx, V), costText(r)].filter(Boolean).join(' · ');
+    function hbSum(r, V, rp) {
+        return [...[r.time, r.range, r.mode === 'hit' ? show({ ...ev(r.hit, V), signed: true }) + ' to hit' : '', r.mode === 'save' ? `DC ${show(ev(r.dc, V))} ${r.save}` : '',
+            dmgText(r.fx.filter((e) => e.k === 'dmg'), V)].map(esc), ...fxHtml(r.fx.map((e) => (e.k === 'dmg' ? {} : e)), V, rp), esc(costText(r))].filter(Boolean).join(' · ');
     }
     // a counter or boxes resource whose name matches a cost ("Ki point" finds "Ki points")
     function resOf(name) {
@@ -533,7 +532,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         String(r.gp).trim() !== '' && nm(r.gp) ? `${nm(r.gp)} gp${nm(r.qty) > 1 ? ' each' : ''}` : '', r.att ? ITEM_ATT.find(([k]) => k === r.att)?.[1] : ''].filter(Boolean);
     const itemSum = (r) => [...itemFacts(r).map(esc), ...r.props.map((n) => `<button type="button" class="hb-prop" data-act="attr" data-n="${esc(n)}">${esc(n)}</button>`),
         r.notes ? esc(r.notes) : ''].filter(Boolean).join(' · ');
-    function spellSum(r, P, V) {
+    function spellSum(r, P, V, rp) {
         return [nm(r.lvl) ? ruleLink('spell', 'spell level', ordinal(nm(r.lvl)), ordinal(nm(r.lvl)) + '-level spell', 'Spell level') : ruleLink('spell', 'cantrips', 'Cantrip', 'Cantrip', 'Spell level'),
             r.time && ruleLink('spell', 'casting time', r.time, 'Casting time: ' + r.time, 'Casting time') + (r.trig ? ', ' + esc(r.trig) : ''),
             r.range && ruleLink('spell', 'spell range', r.range, 'Range: ' + r.range, 'Range'),
@@ -541,7 +540,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             r.ritual ? ruleLink('spell', 'rituals', 'Ritual', 'Ritual', 'Casting') : '',
             r.mode === 'atk' ? hitLink(ev(P.atk, V), r.name, 'spell', 'spell attack rolls', 'Spell attack rolls') : '',
             r.mode === 'save' ? ruleLink('spell', 'spell saving throws', `DC ${show(ev(r.dc || P.dc, V))} ${r.save}`, 'Spell saving throws', 'Save') : '',
-            dmgLinks(r.dmg, V, r.name), ...r.fx.map((e) => esc(fxOne(e, V)))].filter(Boolean).join(' · ');
+            dmgLinks(r.dmg, V, r.name), ...fxHtml(r.fx, V, rp)].filter(Boolean).join(' · ');
     }
 
     // value behind a [data-c] key: { v (number or text), err, signed, why, warn }
@@ -554,11 +553,11 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             case 'tool': { const s = C.profs.tools[a]; return { ...profT(s.ab, s.p, '', V), signed: true }; }
             case 'fx': return { ...ev(get(a), V), why: why(get(a), V) };
             case 'fs': return { ...ev(get(a), V), signed: true, why: why(get(a), V) };
-            case 'asum': return { html: actSum(get(a), V) };
-            case 'ssum': return { html: spellSum(get(a), panelOf(a), V) };
+            case 'asum': return { html: actSum(get(a), V, a) };
+            case 'ssum': return { html: spellSum(get(a), panelOf(a), V, a) };
             case 'isum': return { html: itemSum(get(a)) };
             case 'lsum': return { v: get(a).src };
-            case 'hsum': return { v: hbSum(get(a), V) };
+            case 'hsum': return { html: hbSum(get(a), V, a) };
             case 'msum': return { v: get(a).cost === '' ? '' : `${get(a).cost} SP` };
             case 'wt': return { v: Math.round(C.panels[a].rows.reduce((s, r) => s + nm(r.qty) * nm(r.wt), 0) * 100) / 100 + ' lb' };
             case 'att': { const P = C.panels[a], n = P.rows.filter((r) => r.att === 'yes').length; return { v: `${n} / ${nm(P.attMax)}`, warn: n > nm(P.attMax) }; }
@@ -763,7 +762,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             ${r.mode === 'hit' ? `<div class="hb-fxbox"><span>To hit</span>${fx(rp + '.hit', 'To hit', true)}</div>` : ''}
             ${r.mode === 'save' ? `<label>Save ${abSel(rp + '.save', 'Save ability')}</label><div class="hb-fxbox"><span>Save DC</span>${fx(rp + '.dc', 'Save DC', false)}</div>` : ''}
         </div>
-        <h4>Damage</h4>${dmgEdit(rp)}
+        <h4>Effects</h4>${dmgEdit(rp)}${fxEdit(rp, r, SPELL_FX, 'sfx')}
         <h4>Properties</h4>${tags(rp + '.props', [], 'Finesse', 'hb-dl-props', 'prop')}
         <label class="hb-wide">Description ${f(rp + '.desc', 'Description', { area: true })}</label>
         <div class="actions">${del(panelPath(rp) + '.rows', rp.split('.').pop(), r.name || 'action', 'Remove action')}</div>`;
@@ -1365,13 +1364,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const head = spell ? (nm(r.lvl) ? `${ordinal(nm(r.lvl))}-level ${(r.school || 'spell').toLowerCase()}` : `${r.school || 'Spell'} cantrip`) + (r.ritual ? ' (ritual)' : '') : r.time;
         const res = spell ? (r.mode === 'atk' ? show({ ...ev(P.atk, V), signed: true }) + ' to hit' : r.mode === 'save' ? `DC ${show(ev(r.dc || P.dc, V))} ${r.save} save` : '')
             : r.mode === 'hit' ? show({ ...ev(r.hit, V), signed: true }) + ' to hit' : r.mode === 'save' ? `DC ${show(ev(r.dc, V))} ${r.save} save` : '';
-        if ('fx' in r && !spell) return openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(r.time)}</p>
+        if ('cost' in r && !spell) return openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(r.time)}</p>
             ${kv([['Range', r.range], ['Resolves with', res], ['Cost', costText(r)]])}
             ${r.fx.some((e) => e.dice || e.text) ? `<h4>Effects</h4><ul class="hb-plain">${r.fx.filter((e) => e.dice || e.text).map((e) => `<li>${esc(fxOne(e, V))}</li>`).join('')}</ul>` : ''}
             <div class="hb-desc">${paras(r.desc)}</div>`);
         openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(head || '')}</p>
             ${kv(spell ? [['Casting time', r.time + (r.trig ? ', ' + r.trig : '')], ['Range', r.range], ['Components', r.comp], ['Duration', (r.conc ? 'Concentration, ' : '') + r.dur], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)], ['Effects', r.fx.map((e) => fxOne(e, V)).filter(Boolean).join(' · ')]]
-                : [['Timing', r.time], ['Range', r.range], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)], ['Properties', r.props.filter((n) => !rule('prop', n)).join(', ')]])}
+                : [['Timing', r.time], ['Range', r.range], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)], ['Effects', r.fx.map((e) => fxOne(e, V)).filter(Boolean).join(' · ')], ['Properties', r.props.filter((n) => !rule('prop', n)).join(', ')]])}
             <div class="hb-desc">${paras(r.desc) || '<p class="muted">No description yet. Add one with the edit button.</p>'}
             ${spell && r.higher ? `<p><b>At higher levels.</b></p>${paras(r.higher)}` : ''}</div>
             ${spell ? '' : rulesBlock('prop', r.props, 'Properties')}
@@ -1886,6 +1885,16 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             saveNow(); return draw();
         }
         if (act === 'rinfo') return ruleInfo(b.dataset.k, b.dataset.n, b.dataset.t, b.dataset.s);
+        if (act === 'fxapply') {
+            const e = get(b.dataset.p), name = get(b.dataset.p.split('.').slice(0, -2).join('.')).name || (e.k === 'heal' ? 'Healing' : 'Temp HP'), V = vars();
+            const rolled = resolve(e.dice, V).replace(/−/g, '-').replace(/(\d*)d(\d+)/gi, (x, c, n) => String(Array.from({ length: +c || 1 }, () => die(+n)).reduce((s, d) => s + d, 0)));
+            const amt = Math.floor(ev(rolled, V).v);
+            if (!Number.isFinite(amt)) return toast(`Couldn't work out ${name}: check its formula.`, 'err');
+            if (e.k === 'heal') { C.hp.cur = Math.min(hpMax(), nm(C.hp.cur) + Math.max(0, amt)); toast(`${name}: healed ${Math.max(0, amt)} (${rolled}).`, 'ok'); }
+            else if (amt <= nm(C.hp.temp)) toast(`${name}: ${amt} temp HP, but temp HP doesn't stack, so you keep ${C.hp.temp}.`, 'note');
+            else { C.hp.temp = amt; toast(`${name}: ${amt} temp HP (${rolled}).`, 'ok'); }
+            saveNow(); return draw();
+        }
         if (act === 'roll2') return rollShow(b.dataset.t, b.dataset.g.split(',').map((x) => x.split('x').map(Number)), +b.dataset.m || 0);
         if (act === 'roll') { const v = value(b.dataset.k, vars()); return rollShow(b.dataset.t, [[20, 1]], Number.isFinite(+v.v) ? +v.v : 0); }
         if (act === 'rollx') { clearTimeout(rollTimer); $('#hb-rolls').innerHTML = ''; return; }
