@@ -1584,7 +1584,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (box.hidden) return;
         const groups = DICE.filter((n) => tray.pool[n]).map((n) => [n, tray.pool[n]]);
         box.innerHTML = `${tray.open ? `<div class="hb-tray" role="group" aria-label="Dice tray">
-                <div class="hb-traydice">${DICE.map((n) => `<button type="button" class="hb-die" data-act="die" data-n="${n}" aria-label="Add a d${n}">d${n}${tray.pool[n] ? `<small>${tray.pool[n]}</small>` : ''}</button>`).join('')}</div>
+                <div class="hb-traydice">${DICE.map((n) => `<button type="button" class="hb-die" data-act="die" data-n="${n}" aria-label="Add a d${n}" title="Right-click to remove one">d${n}${tray.pool[n] ? `<small>${tray.pool[n]}</small>` : ''}</button>`).join('')}</div>
                 <div class="hb-trayrow"><span class="muted">${groups.length ? groups.map(([n, c]) => `${c}d${n}`).join(' + ') : 'Click dice to add them'}</span>
                     <button type="button" class="btn small" data-act="dieclear"${groups.length ? '' : ' disabled'}>Clear</button><button type="button" class="btn small primary" data-act="dieroll"${groups.length ? '' : ' disabled'}>Roll</button></div>
             </div>` : ''}<button type="button" class="hb-dicebtn" data-act="tray" aria-expanded="${tray.open}" aria-label="${tray.open ? 'Close' : 'Open'} the dice tray" title="Dice">${D20}</button>`;
@@ -1766,6 +1766,15 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             C.hp.temp = Math.max(nm(C.hp.temp), amt);
         } else C.hp.cur = Math.min(hpMax(), nm(C.hp.cur) + amt);
         saveNow(); draw();
+    });
+    // right-click a die in the tray to take one away
+    main.addEventListener('contextmenu', (e) => {
+        const b = e.target.closest('[data-act="die"]');
+        if (!b) return;
+        e.preventDefault();
+        const n = b.dataset.n;
+        if (tray.pool[n] > 1) tray.pool[n]--; else delete tray.pool[n];
+        drawTray();
     });
     main.addEventListener('click', (e) => {
         const b = e.target.closest('[data-act]');
