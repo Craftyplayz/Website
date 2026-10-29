@@ -248,14 +248,19 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
     const st = { ...(STYLES[style] || STYLES.purple), body: accent, key: style + accent };
     // a d100 is a tens die and a units die
     const kinds = groups.flatMap(([n, c]) => Array.from({ length: c }, () => (n === 100 ? ['t', 'u'] : [n])).flat());
+    // each throw comes in from a random spot on the screen edge: a random direction out from the middle, stopped at the edge
+    const a = Math.random() * Math.PI * 2, cx = Math.cos(a), cz = Math.sin(a), s = Math.min(hw / Math.abs(cx || 1e-9), hd / Math.abs(cz || 1e-9));
+    const fit = (v, h) => Math.max(-h + 1.5, Math.min(h - 1.5, v));
     const dice = kinds.map((kind, i) => {
         const t = buildDie(kind, st), mesh = new THREE.Mesh(t.geo, t.mats);
         mesh.castShadow = true; scene.add(mesh);
         const b = new CANNON.Body({ mass: 1, shape: t.shape, sleepSpeedLimit: 0.25, sleepTimeLimit: 0.3, angularDamping: 0.15, linearDamping: 0.1 });
-        // thrown from the bottom-left corner, where the dice button is
-        b.position.set(-hw + 2 + (i % 4) * 1.6, 3 + Math.floor(i / 4) * 1.8, hd - 2 - (i % 3) * 1.2);
-        const sp = 0.9 + Math.random() * 0.5;
-        b.velocity.set(hw * 1.25 * sp, -2, -hd * 1.1 * sp);
+        // spread along the edge (i % 4) and inward (i % 3), then thrown at a spot near the middle
+        const along = ((i % 4) - 1.5) * 1.6, inward = 2 + (i % 3) * 1.2;
+        const x = fit(cx * s - cx * inward - cz * along, hw), z = fit(cz * s - cz * inward + cx * along, hd);
+        b.position.set(x, 3 + Math.floor(i / 4) * 1.8, z);
+        const sp = 0.9 + Math.random() * 0.5, tx = (Math.random() - 0.5) * hw * 0.5, tz = (Math.random() - 0.5) * hd * 0.5;
+        b.velocity.set((tx - x) * 1.2 * sp, -2, (tz - z) * 1.2 * sp);
         b.angularVelocity.set((Math.random() - 0.5) * 30, (Math.random() - 0.5) * 30, (Math.random() - 0.5) * 30);
         b.quaternion.setFromEuler(Math.random() * 6, Math.random() * 6, Math.random() * 6);
         // each hit knocks once: dice on dice is handled by the lower id, and a die can't knock again within 30 ms
