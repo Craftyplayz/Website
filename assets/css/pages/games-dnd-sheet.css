@@ -376,3 +376,9 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-rollcard.hb-nat1 { border-left-color: var(--danger-line); background: var(--danger-bg); }
 /* 3D dice layer over the page, under the roll card and tray; clicks go through it */
 #hb-throw { position: fixed; inset: 0; z-index: 1740; width: 100vw; height: 100vh; pointer-events: none; }
+/* dice style pictures in Customise; the picked one is outlined */
+.hb-dstyles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 8px; margin: 8px 0 12px; }
+.hb-dstyle { display: grid; gap: 4px; padding: 8px; background: var(--card2); border: 1px solid var(--line); border-radius: var(--radius); color: var(--text); font: inherit; font-size: 13px; text-align: left; cursor: pointer; transition: border-color var(--fast), background var(--fast); }
+.hb-dstyle:hover { border-color: var(--accent); }
+.hb-dstyle[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.hb-dstyle img { width: 100%; height: auto; aspect-ratio: 6 / 1; min-height: 32px; }

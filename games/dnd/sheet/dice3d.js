@@ -130,6 +130,15 @@ function readDie(d) {
     return v;
 }
 
+// something for metal dice to reflect: a dark room with a bright sky and two soft lights
+function roomEnv(r) {
+    const room = new THREE.Scene(), sky = new THREE.Mesh(new THREE.SphereGeometry(50, 32, 16), new THREE.MeshBasicMaterial({ side: THREE.BackSide, vertexColors: true }));
+    const sp = sky.geometry.attributes.position, col = [];
+    for (let i = 0; i < sp.count; i++) { const t = (sp.getY(i) / 50 + 1) / 2; col.push(0.08 + t * 0.9, 0.08 + t * 0.88, 0.1 + t * 0.85); }
+    sky.geometry.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); room.add(sky);
+    for (const [x, z] of [[-20, -10], [18, 12]]) { const lamp = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide })); lamp.position.set(x, 30, z); lamp.lookAt(0, 0, 0); room.add(lamp); }
+    return new THREE.PMREMGenerator(r).fromScene(room, 0.04).texture;
+}
 // ---- the scene: a see-through layer over the page, an invisible table that takes shadows, walls at the screen edges ----
 let scene, camera, renderer, world, cv, live = [], finish = null, raf = 0, fadeT = [];
 function setup() {
@@ -143,13 +152,7 @@ function setup() {
     scene.add(sun);
     const table = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.ShadowMaterial({ opacity: 0.35 }));
     table.rotation.x = -Math.PI / 2; table.receiveShadow = true; scene.add(table);
-    // something for metal dice to reflect: a dark room with a bright sky and two soft lights
-    const room = new THREE.Scene(), sky = new THREE.Mesh(new THREE.SphereGeometry(50, 32, 16), new THREE.MeshBasicMaterial({ side: THREE.BackSide, vertexColors: true }));
-    const sp = sky.geometry.attributes.position, col = [];
-    for (let i = 0; i < sp.count; i++) { const t = (sp.getY(i) / 50 + 1) / 2; col.push(0.08 + t * 0.9, 0.08 + t * 0.88, 0.1 + t * 0.85); }
-    sky.geometry.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); room.add(sky);
-    for (const [x, z] of [[-20, -10], [18, 12]]) { const lamp = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide })); lamp.position.set(x, 30, z); lamp.lookAt(0, 0, 0); room.add(lamp); }
-    scene.environment = new THREE.PMREMGenerator(renderer).fromScene(room, 0.04).texture;
+    scene.environment = roomEnv(renderer);
     // straight down with no perspective, so a die looks the same anywhere on the screen
     camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 200);
 }
@@ -266,4 +269,32 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
         };
         raf = requestAnimationFrame(frame);
     });
+}
+
+// ---- previews: one still picture per style, the whole set in a row (d4 d6 d8 d10 d12 d20 and the percentile die) ----
+let pv = null;
+export function previewStyle(style, accent = '#5b3f8f', w = 336, h = 56) {
+    if (!pv) {
+        const r = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
+        const s = new THREE.Scene();
+        s.add(new THREE.HemisphereLight(0xffffff, 0x404040, 1.6));
+        const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(-8, 30, -6); s.add(sun);
+        s.environment = roomEnv(r);
+        pv = { r, s, cam: new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 100), meshes: [] };
+    }
+    const st = { ...(STYLES[style] || STYLES.purple), body: accent, key: style + accent };
+    const kinds = [4, 6, 8, 10, 12, 20, 't'], gap = 2.6, hw = (kinds.length * gap) / 2, hd = (hw * h) / w;
+    pv.r.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); pv.r.setSize(w, h, false);
+    Object.assign(pv.cam, { left: -hw, right: hw, top: hd, bottom: -hd }); pv.cam.position.set(0, 50, 0); pv.cam.up.set(0, 0, -1); pv.cam.lookAt(0, 0, 0); pv.cam.updateProjectionMatrix();
+    for (const m of pv.meshes) pv.s.remove(m);
+    pv.meshes = kinds.map((kind, i) => {
+        const t = buildDie(kind, st), m = new THREE.Mesh(t.geo, t.mats);
+        // the top number faces the camera, tipped a little so the edges show
+        const top = t.d4 ? t.verts[3].clone().normalize() : t.fs[t.fs.length - 1].n;
+        m.quaternion.setFromUnitVectors(top, UP).premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(0.35, 0, -0.25)));
+        m.position.set(-hw + gap / 2 + i * gap, 0, 0);
+        pv.s.add(m); return m;
+    });
+    pv.r.render(pv.s, pv.cam);
+    return pv.r.domElement.toDataURL('image/png');
 }
