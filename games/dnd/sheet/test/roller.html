@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<!-- One panel of the dice fairness test (index.php): rolls the sheet's 3D dice over and over and reports each result to the page around it. -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Dice roller</title>
+    <style>
+        html, body { height: 100%; margin: 0; background: #1b1b1b; overflow: hidden; }
+        #hb-throw { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <script type="module">
+        // shortcut: bump ?v= when dice3d.js changes, so browsers don't keep an old copy
+        import { throwDice, clearTable } from '../dice3d.js?v=2';
+        const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+        let run = 0;
+        // the page sends { cmd: 'start', sides, style } or { cmd: 'stop' }; each result goes back as { result, sides }
+        addEventListener('message', async (e) => {
+            if (e.origin !== location.origin) return;
+            const { cmd, sides, style } = e.data || {};
+            const me = ++run;
+            if (cmd !== 'start') return;
+            while (me === run) {
+                const [[, [v]]] = await throwDice([[sides, 1]], { style, sound: false });
+                if (me !== run) break;
+                parent.postMessage({ result: v, sides }, location.origin);
+                // the die stays a moment so you can read it, then the table is cleared for the next one
+                await sleep(500);
+                clearTable();
+            }
+        });
+        parent.postMessage({ ready: true }, location.origin);
+    </script>
+</body>
+</html>
