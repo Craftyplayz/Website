@@ -226,6 +226,12 @@ function frame(now) {
     if (world) raf = requestAnimationFrame(frame);
 }
 
+// empties the table now instead of after the usual pause and fade (the dice test page uses it between rolls)
+export function clearTable() {
+    fadeT.forEach(clearTimeout); fadeT = [];
+    if (scene && !throws.length) { clear(); renderer.clear(); }
+}
+
 // style: a key of STYLES; accent: the purple style's colour; sound: knock as they land
 export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', sound = true } = {}) {
     // dice already on the table stay; a fade that had started stops
