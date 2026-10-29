@@ -180,6 +180,8 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-cls .hb-die { flex: 0 0 84px; }
 .hb-cls label { display: grid; gap: 4px; min-width: 0; color: var(--muted); font-size: 13px; }
 .hb-cls-more { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 13px; }
+/* class, level, hit die and Add a class on one line where there is room */
+@media (min-width: 761px) { .hb-cls { flex-wrap: nowrap; } .hb-cls-more { flex-wrap: nowrap; white-space: nowrap; min-height: 38px; } }
 
 /* hit points: current / max with temp, a two-part bar, and the edit fields */
 .hb-hpv b { font-size: 20px; }
