@@ -672,21 +672,16 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     // ---- the always-visible top ----
     function top() {
         const DICE = [4, 6, 8, 10, 12, 20].map((n) => [n, 'd' + n]);
-        const id = `<div class="hb-id">
-            <label class="hb-name">Name ${f('name', 'Name')}</label>
-            <label>Race ${f('race', 'Race', { list: 'hb-dl-race' })}</label>
-            <label>Alignment ${f('alignment', 'Alignment', { list: 'hb-dl-align' })}</label>
-            <label class="hb-age">Age ${f('age', 'Age')}</label>
-            <div class="hb-classes">${C.classes.map((c, i) => `<div class="hb-cls">
+        // name, race, alignment and age are in the bar; here just the classes (conditions, speed and defences go beside them)
+        const id = `<div class="hb-classes">${C.classes.map((c, i) => `<div class="hb-cls">
                 <label>Class ${f(`classes.${i}.name`, 'Class', { list: 'hb-dl-class', ph: 'Fighter' })}</label>
                 <label class="hb-lvl">Level ${f(`classes.${i}.level`, 'Level', { num: true })}</label>
                 <label class="hb-die">Hit die ${sel(`classes.${i}.die`, 'Hit die', DICE)}</label>
                 ${C.classes.length > 1 ? del('classes', i, c.name || 'class') : ''}
                 ${i === C.classes.length - 1 ? `<div class="hb-cls-more">${add('classes', 'cls', 'Add a class')}<span class="muted" data-c="lvl"></span></div>` : ''}
             </div>`).join('')}
-            </div>
         </div>`;
-        const art = `<button type="button" class="hb-art" data-act="art" aria-label="${C.art ? 'Change' : 'Add'} character art">${C.art ? `<img src="${esc(C.art)}" alt="" referrerpolicy="no-referrer" width="300" height="300">` : '<span>Add art</span>'}</button>`;
+        const art =`<button type="button" class="hb-art" data-act="art" aria-label="${C.art ? 'Change' : 'Add'} character art">${C.art ? `<img src="${esc(C.art)}" alt="" referrerpolicy="no-referrer" width="300" height="300">` : '<span>Add art</span>'}</button>`;
         const abils = `<div class="hb-abils">${C.abilities.map((a, i) => `<div class="hb-abil">
             <span class="hb-lbl" title="${esc(a.name)}">${esc(a.key)}</span>
             ${rollv('mod:' + i, a.name + ' check', ' hb-big')}
@@ -744,7 +739,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <div class="rows">${C.passives.map((p, i) => `<div class="rowi"><button type="button" class="hb-link grow" data-act="sense" data-i="${i}">${esc(p.name)}</button>${fx(`passives.${i}.f`, p.name, false)}${p.unit ? `<small class="muted">${esc(p.unit)}</small>` : ''}</div>`).join('')}</div>
             <label class="hb-lbl hb-other">Other senses ${f('senses', 'Other senses', { area: true, ph: '120 ft magical darkvision' })}</label>
         </section>`;
-        return `<div class="hb-top-id">${id}</div><div class="hb-top-abil">${abils}</div><div class="hb-top-combat">${combat}${more}${pinned()}</div>
+        return `<div class="hb-top-id"><div class="hb-id">${id}${more}</div></div><div class="hb-top-abil">${abils}</div><div class="hb-top-combat">${combat}${pinned()}</div>
             <div class="hb-side"><div class="hb-top-art">${art}</div><div class="hb-top-saves">${saves}</div><div class="hb-top-senses">${senses}</div></div>`;
     }
 
@@ -1073,15 +1068,23 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
 
     // ---- toolbar ----
     const clsText = (c) => c.classes.map((x) => [x.name, x.level].filter(Boolean).join(' ')).filter(Boolean).join(' / ');
+    const pickOpts = () => Object.values(db.chars).sort((a, b) => (a.name || '').localeCompare(b.name || '')).map((c) =>
+        `<option value="${esc(c.id)}"${c.id === C.id ? ' selected' : ''}>${esc(c.name || 'Unnamed character')}${clsText(c) ? ' — ' + esc(clsText(c)) : ''}</option>`).join('');
+    // the top line: which character, who they are, and (behind Edit) the buttons to make, import, export or delete one
     function bar() {
-        const opts = Object.values(db.chars).sort((a, b) => (a.name || '').localeCompare(b.name || '')).map((c) =>
-            `<option value="${esc(c.id)}"${c.id === C.id ? ' selected' : ''}>${esc(c.name || 'Unnamed character')}${clsText(c) ? ' — ' + esc(clsText(c)) : ''}</option>`).join('');
-        return `<select class="field hb-pick" data-act="pick" aria-label="Character">${opts}</select>
-            <button type="button" class="btn small" data-act="new">New</button>
-            <button type="button" class="btn small" data-act="import">Import</button>
-            <button type="button" class="btn small" data-act="ddb">From D&amp;D Beyond</button>
-            <button type="button" class="btn small" data-act="export">Export</button>
-            <button type="button" class="btn small" data-act="delete">Delete</button>
+        return `<select class="field hb-pick" data-act="pick" aria-label="Character">${pickOpts()}</select>
+            <button type="button" class="btn small" data-act="manage" aria-expanded="${!!open.manage}" aria-controls="hb-manage">${PENCIL} Edit</button>
+            <span class="hb-manage" id="hb-manage"${open.manage ? '' : ' hidden'}>
+                <button type="button" class="btn small" data-act="new">New</button>
+                <button type="button" class="btn small" data-act="import">Import</button>
+                <button type="button" class="btn small" data-act="ddb">From D&amp;D Beyond</button>
+                <button type="button" class="btn small" data-act="export">Export</button>
+                <button type="button" class="btn small" data-act="delete">Delete</button>
+            </span>
+            <label class="hb-name">Name ${f('name', 'Name')}</label>
+            <label class="hb-race">Race ${f('race', 'Race', { list: 'hb-dl-race' })}</label>
+            <label class="hb-align">Alignment ${f('alignment', 'Alignment', { list: 'hb-dl-align' })}</label>
+            <label class="hb-age">Age ${f('age', 'Age')}</label>
             <span class="hb-gap"></span>
             <button type="button" class="btn small" data-act="rest" data-r="short">Short rest</button>
             <button type="button" class="btn small" data-act="rest" data-r="long">Long rest</button>
@@ -1572,7 +1575,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     }
 
     // ---- drawing ----
-    const open = { more: false, hp: false };
+    const open = { more: false, hp: false, manage: false };
     const openRows = new Set();
     let dlgMode = null;
     const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'crop' ? cropDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : dlgMode.kind === 'ddb' ? ddbDlg() : formulaDlg(dlgMode));
@@ -1591,7 +1594,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             // a lone d20 shows a natural 20 or 1
             const nat = groups.length === 1 && groups[0][0] === 20 && groups[0][1] === 1 ? (rolls[0][1][0] === 20 ? ' hb-nat20' : rolls[0][1][0] === 1 ? ' hb-nat1' : '') : '';
             // just under the sticky sheet bar, which wraps taller on phones
-            $('#hb-rolls').style.top = Math.max(76, $('#hb-bar').offsetHeight + 12) + 'px';
+            const hbBar = $('#hb-bar');
+            $('#hb-rolls').style.top = (getComputedStyle(hbBar).position === 'sticky' ? Math.max(76, hbBar.offsetHeight + 12) : 16) + 'px';
             $('#hb-rolls').innerHTML = `<button type="button" class="hb-rollcard${nat}" data-act="rollx" aria-label="Dismiss roll">
                 <span class="hb-rollhead"><b>${esc(title)}</b><small>${esc(expr)}</small></span>
                 <span class="hb-rolldice">${esc(shown)}</span><span class="hb-rolltot">${total}</span></button>`;
@@ -1802,7 +1806,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (/^panels\.\d+\.rows\.\d+\.name$/.test(k) && panelOf(k).type === 'items' && el.value.trim()) eqFill(k.replace(/\.name$/, ''));
         if (/^panels\.\d+\.(rows|meta)\.\d+\.name$/.test(k) && rowFill(k)) return;
         if (/\.(time|lvl)$/.test(k) || /\.cost\.(what|amt)$/.test(k) || /^classes\.\d+\.(name|level|die)$/.test(k) || /^(lists\.|condList|exhaustion)/.test(k) || /^speeds\./.test(k) && /\.type$/.test(k)) return dlg.open ? null : draw();
-        if (/\.(name|key|title)$/.test(k) && !dlg.open) $('#hb-bar').innerHTML = bar();
+        // a new name shows in the character list; only its options are redrawn, so typing in the bar isn't interrupted
+        if ((k === 'name' || /\.(name|key|title)$/.test(k)) && !dlg.open) $('.hb-pick').innerHTML = pickOpts();
     });
     main.addEventListener('focusin', (e) => { if (e.target.getAttribute('list') === 'hb-dl-srd') loadSrdList(); if (e.target.getAttribute('list') === 'hb-dl-gear') loadEqList(); if (e.target.dataset.multi) multiList(e.target); });
     main.addEventListener('keydown', (e) => {
@@ -1906,6 +1911,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && needsFill(r)) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
         if (act === 'more') { open.more = !open.more; return draw(); }
+        if (act === 'manage') { open.manage = !open.manage; $('#hb-bar').innerHTML = bar(); return $('[data-act=manage]').focus(); }
         if (act === 'hpedit') { open.hp = !open.hp; return draw(); }
         if (act === 'tab') { C.view.tab = b.dataset.id; save(); return draw(); }
         if (act === 'toggle') { const id = b.dataset.id; openRows.has(id) ? openRows.delete(id) : openRows.add(id); return draw(); }
