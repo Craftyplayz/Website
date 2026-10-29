@@ -404,3 +404,9 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 #hb-rolls { position: fixed; top: 76px; right: 16px; z-index: 1750; }
 /* dev copy only: a big red warning at the top so nobody plays on it by mistake (a meaning colour, like the status ones) */
 .hb-devwarn { margin: 0 0 12px; padding: 12px 16px; background: var(--danger-bg); border: 2px solid var(--danger-line); border-radius: var(--radius-lg); color: #ff6b6b; font-size: clamp(22px, 4vw, 34px); font-weight: 700; line-height: 1.2; text-align: center; text-transform: uppercase; }
+/* scroll style of hit points: both words sit in one cell, so the button keeps the width of the longer one */
+.hb-hpgo { display: inline-grid; border-color: var(--danger-line); }
+.hb-hpgo > span { grid-area: 1 / 1; }
+.hb-hpgo > span + span, .hb-hpgo[data-heal] > span:first-child { visibility: hidden; }
+.hb-hpgo[data-heal] { border-color: var(--ok-line); }
+.hb-hpgo[data-heal] > span + span { visibility: visible; }
