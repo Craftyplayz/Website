@@ -603,6 +603,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const sel = (k, label, opts) => `<select class="field" data-k="${k}" aria-label="${esc(label)}">${opts.map(([v, t]) => `<option value="${esc(v)}"${String(get(k)) === String(v) ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
     const abSel = (k, label, na) => { const keys = [...(na ? [['', 'N/A']] : []), ...C.abilities.map((a) => [a.key, a.key])]; const v = get(k); return sel(k, label, keys.some(([x]) => x === v) ? keys : [[v, v + ' (missing)'], ...keys]); };
     const val = (key, cls = '') => `<b class="hb-val${cls}" data-c="${key}"></b>`;
+    // a bonus you can click to roll d20 + it (Customise turns this off)
+    const rollv = (key, label, cls = '') => (C.view.noRoll ? val(key, cls)
+        : `<button type="button" class="hb-d20" data-act="roll" data-k="${key}" data-t="${esc(label)}" title="Roll ${esc(label)}">${val(key, cls)}</button>`);
     // a computed number that opens the formula builder
     const fx = (path, title, signed, cls = '') => `<button type="button" class="hb-roll${cls}" data-act="formula" data-p="${path}" data-t="${esc(title)}"${signed ? ' data-s="1"' : ''} data-c="${signed ? 'fs' : 'fx'}:${path}" aria-label="${esc(title)}, edit the formula"></button>`;
     const del = (p, i, what, text) => `<button type="button" class="${text ? 'btn small' : 'hb-x'}" data-act="del" data-p="${p}" data-i="${i}" aria-label="Remove ${esc(what)}"${text ? '' : ' title="Remove"'}>${text || '&times;'}</button>`;
@@ -670,7 +673,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const art = `<button type="button" class="hb-art" data-act="art" aria-label="${C.art ? 'Change' : 'Add'} character art">${C.art ? `<img src="${esc(C.art)}" alt="" referrerpolicy="no-referrer" width="300" height="300">` : '<span>Add art</span>'}</button>`;
         const abils = `<div class="hb-abils">${C.abilities.map((a, i) => `<div class="hb-abil">
             <span class="hb-lbl" title="${esc(a.name)}">${esc(a.key)}</span>
-            ${val('mod:' + i, ' hb-big')}
+            ${rollv('mod:' + i, a.name + ' check', ' hb-big')}
             ${f(`abilities.${i}.score`, a.name + ' score', { num: true, cls: 'hb-score' })}
         </div>`).join('')}</div>`;
         const combat = `<div class="hb-combat">
@@ -714,7 +717,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         </div>`;
         const saves = `<section class="card hb-saves"><h2>Saving throws</h2><div class="hb-savegrid">${C.abilities.map((a, i) => `<div class="hb-save">
             <label class="hb-dot">${f(`abilities.${i}.save`, 'Proficient in ' + a.name + ' saves', { check: true })}</label>
-            <span>${esc(a.key)}</span>${val('save:' + i)}
+            <span>${esc(a.key)}</span>${rollv('save:' + i, a.name + ' save')}
         </div>`).join('')}</div></section>`;
         const senses = `<section class="card hb-senses"><h2>Senses</h2>
             <div class="rows">${C.passives.map((p, i) => `<div class="rowi"><button type="button" class="hb-link grow" data-act="sense" data-i="${i}">${esc(p.name)}</button>${fx(`passives.${i}.f`, p.name, false)}${p.unit ? `<small class="muted">${esc(p.unit)}</small>` : ''}</div>`).join('')}</div>
@@ -808,9 +811,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             if (C.profs.notes) opts.push(['notes', 'Notes']);
             const cur = pickSub(p, opts);
             let body;
-            if (cur === 'skills') body = `<div class="rows hb-two">${C.skills.map((s, i) => `<div class="rowi">${dot('prof', i, s, s.name)}<button type="button" class="hb-link grow" data-act="skill" data-i="${i}">${esc(s.name)}</button><small>${esc(s.ab)}</small>${val('skill:' + i)}</div>`).join('')}</div>
+            if (cur === 'skills') body = `<div class="rows hb-two">${C.skills.map((s, i) => `<div class="rowi">${dot('prof', i, s, s.name)}<button type="button" class="hb-link grow" data-act="skill" data-i="${i}">${esc(s.name)}</button><small>${esc(s.ab)}</small>${rollv('skill:' + i, s.name + ' check')}</div>`).join('')}</div>
                 <p class="muted hb-hint">Click a dot to change proficiency. Add or rename skills in Customise.</p>`;
-            else if (cur === 'tools') body = `<div class="rows">${C.profs.tools.map((t, i) => `<div class="rowi hb-tool">${dot('tprof', i, t, t.name || 'tool')}${f(`profs.tools.${i}.name`, 'Tool', { cls: 'grow', list: 'hb-dl-tools', ph: "Thieves' tools" })}${abSel(`profs.tools.${i}.ab`, 'Ability', true)}${val('tool:' + i)}${del('profs.tools', i, t.name || 'tool')}</div>`).join('')}</div>
+            else if (cur === 'tools') body = `<div class="rows">${C.profs.tools.map((t, i) => `<div class="rowi hb-tool">${dot('tprof', i, t, t.name || 'tool')}${f(`profs.tools.${i}.name`, 'Tool', { cls: 'grow', list: 'hb-dl-tools', ph: "Thieves' tools" })}${abSel(`profs.tools.${i}.ab`, 'Ability', true)}${rollv('tool:' + i, (t.name || 'Tool') + ' check')}${del('profs.tools', i, t.name || 'tool')}</div>`).join('')}</div>
                 <div class="actions">${add('profs.tools', 'tool', 'Add tool')}</div>`;
             else if (cur === 'notes') body = f('profs.notes', 'Notes', { area: true, cls: 'hb-text' });
             else body = tags('profs.' + cur, PRESET[cur], { armour: 'Mithral armour', weapons: 'Longsword', langs: 'Thieves’ Cant' }[cur], { armour: 'hb-dl-armour', weapons: 'hb-dl-weapon', langs: 'hb-dl-langs' }[cur], { armour: 'armour', weapons: 'weapons', langs: 'lang' }[cur])
@@ -1515,6 +1518,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         return `<h2>Customise</h2>
             <p class="muted hb-hint">Changes apply as you type.</p>
             ${formulaGuide()}
+            <h3>Dice</h3>
+            <label class="check">${f('view.noRoll', 'Turn off click to roll', { check: true })} Roll your own dice: don't roll when an ability, save, skill or tool bonus is clicked</label>
+            <label class="check">${f('view.noTray', 'Hide the dice button', { check: true })} Hide the dice button in the bottom-left corner</label>
             <h3>Panels</h3>
             <label class="check">${f('view.all', 'Show every panel at once', { check: true })} Show every panel at once instead of tabs</label>
             <label class="check">${f('view.prep', 'Always show prepared spells', { check: true })} Always show the Prepared tab and checkboxes (for homebrew classes; otherwise only Artificer, Cleric, Druid, Paladin and Wizard get them)</label>
@@ -1544,6 +1550,36 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const openRows = new Set();
     let dlgMode = null;
     const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'crop' ? cropDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : dlgMode.kind === 'ddb' ? ddbDlg() : formulaDlg(dlgMode));
+    // ---- dice: a card for each roll and the dice tray in the bottom-left corner ----
+    const DICE = [4, 6, 8, 10, 12, 20, 100], tray = { open: false, pool: {} };
+    const die = (n) => { const a = new Uint32Array(1); crypto.getRandomValues(a); return (a[0] % n) + 1; };
+    let rollTimer = 0;
+    // groups: [[sides, count]], mod: number added on top
+    function rollShow(title, groups, mod = 0) {
+        const rolls = groups.map(([n, c]) => [n, Array.from({ length: c }, () => die(n))]);
+        const total = rolls.reduce((t, [, r]) => t + r.reduce((a, b) => a + b, 0), 0) + mod;
+        const expr = groups.map(([n, c]) => `${c}d${n}`).join(' + ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
+        const shown = rolls.map(([, r]) => r.join(', ')).join(' | ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
+        // a lone d20 shows a natural 20 or 1
+        const nat = groups.length === 1 && groups[0][0] === 20 && groups[0][1] === 1 ? (rolls[0][1][0] === 20 ? ' hb-nat20' : rolls[0][1][0] === 1 ? ' hb-nat1' : '') : '';
+        $('#hb-rolls').innerHTML = `<button type="button" class="hb-rollcard${nat}" data-act="rollx" aria-label="Dismiss roll">
+            <span class="hb-rollhead"><b>${esc(title)}</b><small>${esc(expr)}</small></span>
+            <span class="hb-rolldice">${esc(shown)}</span><span class="hb-rolltot">${total}</span></button>`;
+        clearTimeout(rollTimer); rollTimer = setTimeout(() => { $('#hb-rolls').innerHTML = ''; }, 12000);
+    }
+    function drawTray() {
+        const box = $('#hb-dice');
+        box.hidden = !!C.view.noTray;
+        if (box.hidden) return;
+        const groups = DICE.filter((n) => tray.pool[n]).map((n) => [n, tray.pool[n]]);
+        box.innerHTML = `${tray.open ? `<div class="hb-tray" role="group" aria-label="Dice tray">
+                <div class="hb-traydice">${DICE.map((n) => `<button type="button" class="hb-die" data-act="die" data-n="${n}" aria-label="Add a d${n}">d${n}${tray.pool[n] ? `<small>${tray.pool[n]}</small>` : ''}</button>`).join('')}</div>
+                <div class="hb-trayrow"><span class="muted">${groups.length ? groups.map(([n, c]) => `${c}d${n}`).join(' + ') : 'Click dice to add them'}</span>
+                    <button type="button" class="btn small" data-act="dieclear"${groups.length ? '' : ' disabled'}>Clear</button><button type="button" class="btn small primary" data-act="dieroll"${groups.length ? '' : ' disabled'}>Roll</button></div>
+            </div>` : ''}<button type="button" class="hb-dicebtn" data-act="tray" aria-expanded="${tray.open}" aria-label="${tray.open ? 'Close' : 'Open'} the dice tray" title="Dice">${D20}</button>`;
+    }
+    const D20 = '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" d="M12 2 21 7v10l-9 5-9-5V7zM12 2 7.5 9.5h9zM3 7l4.5 2.5L12 17l4.5-7.5L21 7M7.5 9.5 3 17M16.5 9.5 21 17M12 17v5M3 17h18"/></svg>';
+
     function draw() {
         // sorcery points are boxes: an old counter turns into boxes with the same number left
         for (const p of C.panels) if (p.type === 'trackers') for (const r of p.rows) if (r.kind === 'count' && /^sorcery points?$/i.test(String(r.name).trim())) {
@@ -1551,6 +1587,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         }
         $('#hb-bar').innerHTML = bar();
         root.innerHTML = top() + `<div class="hb-top-panels">${panels()}</div><div hidden>${datalists()}</div>`;
+        drawTray();
         if (dlg.open && dlgMode && !['rest', 'ddb', 'crop'].includes(dlgMode.kind)) dlgBody.innerHTML = dlgHTML();
         refresh();
     }
@@ -1637,6 +1674,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
 
     // ---- events ----
     const main = $('.hb');
+    // one column in the bottom-left corner: the latest roll above the tray and its button
+    main.insertAdjacentHTML('beforeend', '<div class="hb-dice"><div id="hb-rolls" aria-live="polite"></div><div class="hb-trayslot" id="hb-dice"></div></div>');
     main.addEventListener('input', (e) => {
         const el = e.target;
         if (el.dataset.b && dlgMode && dlgMode.parts) {
@@ -1667,7 +1706,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const P = panelOf(k), n = P.rows.filter((r) => r.att === 'yes').length;
             if (n > nm(P.attMax)) toast(`You're attuned to ${n} items but have ${nm(P.attMax)} attunement slots.`, 'note');
         }
-        if (k === 'view.all' || k === 'view.prep' || /^panels\.\d+\.on$/.test(k) || /\.(mode|cat|k|grp|fxf)$/.test(k) || /^panels\.\d+\.sort$/.test(k) || (el.type === 'checkbox' && /\.prep$/.test(k) && panelOf(k).sub === 'prep')) draw();
+        if (k === 'view.all' || k === 'view.prep' || k === 'view.noRoll' || k === 'view.noTray' || /^panels\.\d+\.on$/.test(k) || /\.(mode|cat|k|grp|fxf)$/.test(k) || /^panels\.\d+\.sort$/.test(k) || (el.type === 'checkbox' && /\.prep$/.test(k) && panelOf(k).sub === 'prep')) draw();
     });
     main.addEventListener('change', (e) => {
         const el = e.target, k = el.dataset.k || '';
@@ -1765,6 +1804,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             saveNow(); return draw();
         }
         if (act === 'rinfo') return ruleInfo(b.dataset.k, b.dataset.n, b.dataset.t, b.dataset.s);
+        if (act === 'roll') { const v = value(b.dataset.k, vars()); return rollShow(b.dataset.t, [[20, 1]], Number.isFinite(+v.v) ? +v.v : 0); }
+        if (act === 'rollx') { clearTimeout(rollTimer); $('#hb-rolls').innerHTML = ''; return; }
+        if (act === 'tray') { tray.open = !tray.open; return drawTray(); }
+        if (act === 'die') { tray.pool[b.dataset.n] = (tray.pool[b.dataset.n] || 0) + 1; return drawTray(); }
+        if (act === 'dieclear') { tray.pool = {}; return drawTray(); }
+        if (act === 'dieroll') { rollShow('Dice', DICE.filter((n) => tray.pool[n]).map((n) => [n, tray.pool[n]])); tray.pool = {}; return drawTray(); }
         if (act === 'coins') return coinApply(b.parentElement.querySelector('.hb-coinin'), b.dataset.sign);
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && needsFill(r)) srdFill(p); return info(p); }
         if (act === 'dclose') return closeDrawer();
