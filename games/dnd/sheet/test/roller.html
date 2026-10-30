@@ -14,20 +14,21 @@
 <body>
     <script type="module">
         // shortcut: bump ?v= when dice3d.js changes, so browsers don't keep an old copy
-        import { throwDice, clearTable, setSpeed } from '../dice3d.js?v=3';
+        import { throwDice, clearTable, setSpeed } from '../dice3d.js?v=4';
         const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         let run = 0;
-        // the page sends { cmd: 'start', sides, style, speed, min, max } or { cmd: 'stop' }; each throw goes back as { results, sides }
+        // the page sends { cmd: 'start', sides, style, coin, speed, min, max } or { cmd: 'stop' }; each throw goes back as { results, sides }
+        // (sides 'coin' flips the coin named by coin, and its results are 'heads' or 'tails')
         addEventListener('message', async (e) => {
             if (e.origin !== location.origin) return;
-            const { cmd, sides, style, speed = 1, min = 1, max = 1 } = e.data || {};
+            const { cmd, sides, style, coin, speed = 1, min = 1, max = 1 } = e.data || {};
             const me = ++run;
             if (cmd !== 'start') return;
             setSpeed(speed);
             while (me === run) {
                 // between min and max dice each throw, all of this table's kind
                 const n = min + Math.floor(Math.random() * (max - min + 1));
-                const [[, results]] = await throwDice([[sides, n]], { style, sound: false });
+                const [[, results]] = await throwDice([[sides, n]], { style: sides === 'coin' ? { coin } : style, sound: false });
                 if (me !== run) break;
                 parent.postMessage({ results, sides }, location.origin);
                 // the die stays a moment so you can read it, then the table is cleared for the next one
