@@ -17,7 +17,7 @@ const CATS = [
 
 // what's chosen, kept in this browser
 const KEY = 'dice-sets-page';
-let state = { set: 'ember', sound: 'own', tab: 'own' };
+let state = { set: 'ember', sound: 'own', tab: 'own', nat1: 'orig', nat20: 'orig' };
 try { Object.assign(state, JSON.parse(localStorage.getItem(KEY)) || {}); soundBox.checked = localStorage.getItem('dice-sets-sound') !== '0'; } catch (e) { }
 if (!DATA.sets.some((s) => s.key === state.set)) state.set = DATA.sets[0].key;
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { } };
@@ -28,6 +28,11 @@ let engine = null; const sets = {};
 const load = () => (engine ||= import(DATA.engine).catch((e) => { engine = null; throw e; }));
 const setOf = (k) => (sets[k] ||= import(`./sets/${k}.js?v=${DATA.sets.find((s) => s.key === k).v}`).then((m) => ({ ...m.default, key: 'set-' + k })));
 const sounds = import(DATA.sounds).then((m) => m.default);
+// nat 1 and nat 20 sounds from every natsounds/ file; one that fails to load is left out
+const nats = Promise.all(DATA.nat.map((u) => import(u).then((m) => m.default, () => ({})))).then((mods) => ({
+    1: mods.flatMap((m) => m.nat1 || []), 20: mods.flatMap((m) => m.nat20 || []) }));
+// when the die blows up or flares, after the exit starts (Ember Cage's fireball and phoenix)
+const HIT = { 1: 1.7 * 0.28, 20: 2.1 * 0.42 };
 
 // ---- dice set ----
 function drawSets() {
@@ -58,6 +63,20 @@ async function drawSounds() {
             <button type="button" class="btn small" data-play="roll" data-k="${k}">Play a roll</button></div>`;
     }).join('');
 }
+// the nat 1 and nat 20 lists, shown only for a set whose d20 has its own nat 1 and nat 20 exits
+async function drawNats() {
+    const set = await setOf(state.set), has = !!(set.exits?.['d20:1'] && set.exits?.['d20:20']);
+    $('#dd-nats').hidden = !has; if (!has) return;
+    const all = await nats;
+    for (const n of [1, 20]) {
+        const list = [{ key: 'orig', name: 'Original', blurb: `The set’s own nat ${n} sound.` }, ...all[n]], cur = state['nat' + n];
+        $(`#dd-n${n}count`).textContent = list.length;
+        $(`#dd-nat${n}`).innerHTML = list.map((s) => `<div class="dd-snd${cur === s.key ? ' on' : ''}">
+            <button type="button" class="dd-pick" data-nat="${n}" data-natkey="${esc(s.key)}" aria-pressed="${cur === s.key}"><b>${esc(s.name)}</b><span>${esc(s.blurb)}</span></button>
+            ${s.key === 'orig' ? '' : `<button type="button" class="btn small" data-natplay="${n}" data-natkey="${esc(s.key)}">Play</button>`}</div>`).join('');
+    }
+}
+const natOf = async (n, k) => (await nats)[n].find((s) => s.key === k);
 // the page's own audio for listening without dice, built like the engine's: a compressor and a short noise buffer
 let A = null;
 const audio = () => {
@@ -79,9 +98,10 @@ const fillNums = () => { const d = +$('#dd-die').value, cur = +$('#dd-num').valu
 async function roll(groups, land = null) {
     out.textContent = 'Rolling...';
     try {
-        const [m, set, snd] = await Promise.all([load(), setOf(state.set), soundOf(state.sound)]);
-        // the set as it is, with only its throw and rolling sounds swapped when another sound is chosen
-        const style = state.sound === 'own' ? set : { ...set, sound: { ...set.sound, throw: snd.throw, hit: snd.hit } };
+        const [m, set, snd, n1, n20] = await Promise.all([load(), setOf(state.set), soundOf(state.sound), natOf(1, state.nat1), natOf(20, state.nat20)]);
+        // the set as it is, with its throw and rolling sounds swapped when another sound is chosen, and the chosen nat 1 and nat 20 sounds
+        const style = { ...set, ...(state.sound !== 'own' && { sound: { ...set.sound, throw: snd.throw, hit: snd.hit } }),
+            natSounds: { 1: n1 && ((c) => n1.play(c)), 20: n20 && ((c) => n20.play(c)) } };
         // a new roll takes the last one's dice off the table first, even mid-roll
         m.clearTable(true);
         const res = await m.throwDice(groups, { style, sound: soundBox.checked, land });
@@ -92,7 +112,11 @@ async function roll(groups, land = null) {
 document.addEventListener('click', async (e) => {
     const b = e.target.closest('button'); if (!b) return;
     // the set's own sound row names the set, so it redraws too
-    if (b.dataset.set) { state.set = b.dataset.set; save(); drawSets(); drawSounds(); }
+    if (b.dataset.set) { state.set = b.dataset.set; save(); drawSets(); drawSounds(); drawNats(); }
+    else if (b.dataset.nat) { state['nat' + b.dataset.nat] = b.dataset.natkey; save(); drawNats(); }
+    else if (b.dataset.natplay) { const n = +b.dataset.natplay, s = await natOf(n, b.dataset.natkey), a = audio(), t0 = a.ac.currentTime + 0.05;
+        s.play({ ...a, t0, hit: t0 + HIT[n] }); }
+    else if (b.dataset.try) roll([[20, 1]], [[+b.dataset.try]]);
     else if (b.dataset.tab) { state.tab = b.dataset.tab; save(); drawSounds(); }
     else if (b.dataset.pick) { state.sound = b.dataset.pick; save(); drawSounds(); }
     else if (b.dataset.play) {
@@ -104,4 +128,4 @@ document.addEventListener('click', async (e) => {
     else if (b.id === 'dd-landgo') roll([[+$('#dd-die').value, 1]], [[+$('#dd-num').value]]);
 });
 $('#dd-die').addEventListener('change', fillNums);
-fillNums(); drawSets(); drawSounds();
+fillNums(); drawSets(); drawSounds(); drawNats();

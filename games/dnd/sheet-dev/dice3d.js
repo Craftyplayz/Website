@@ -238,7 +238,7 @@ function fade() { cv.style.transition = 'opacity .3s'; cv.style.opacity = '0'; f
 // ---- exits: how each die leaves the table, picked by what it rolled ----
 // a style's exits map keys to animations, and the most specific key wins: 'd20:20' (one number), 'd20:2-19' (a range), 'd20' (that die), '*' (any die).
 // The percentile dice are 'd100' (tens: 0, 10 ... 90) and 'd100u' (units: 0-9). A style without exits fades out as before.
-// An animation is { dur (seconds), start(x), tick(k, x) with k from 0 to 1, end(x) }; x is { THREE, scene, mesh, body, die, value, audio, sec, dt },
+// An animation is { dur (seconds), start(x), tick(k, x) with k from 0 to 1, end(x) }; x is { THREE, scene, st (the style), mesh, body, die, value, audio, sec, dt },
 // and an animation can keep its own things on x. The die is hidden when its animation ends.
 const dieName = (kind) => (kind === 't' ? 'd100' : kind === 'u' ? 'd100u' : 'd' + kind);
 function exitFor(st, d) {
@@ -252,7 +252,7 @@ let exiting = false;
 // after the pause: start every die's exit, or fade straight away when none has one
 function leave() {
     for (const d of live) { const a = exitFor(d.st, d);
-        if (a) d.exit = { a, age: 0, x: { THREE, scene, mesh: d.mesh, body: d.body, die: dieName(d.kind), value: d.value, audio: d.sound && audio ? { ac: audio, out: audio.out, noise } : null } }; }
+        if (a) d.exit = { a, age: 0, x: { THREE, scene, st: d.st, mesh: d.mesh, body: d.body, die: dieName(d.kind), value: d.value, audio: d.sound && audio ? { ac: audio, out: audio.out, noise } : null } }; }
     exiting = live.some((d) => d.exit);
     if (!exiting) fade();
 }

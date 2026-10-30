@@ -21,5 +21,8 @@
 .dd-pick { display: grid; flex: 1 1 260px; gap: 2px; min-width: 0; padding: 0; background: none; border: 0; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
 .dd-pick b { font-size: 14px; }
 .dd-pick span { color: var(--muted); font-size: 13px; }
+/* nat 1 and nat 20 sounds side by side when there's room */
+.dd-nats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 0 24px; }
+.dd-natline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px; font-size: 14px; }
 /* the dice table over the whole page; it never takes clicks */
 #hb-throw { position: fixed; inset: 0; z-index: 1740; width: 100vw; height: 100vh; pointer-events: none; }
