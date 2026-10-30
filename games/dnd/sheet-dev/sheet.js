@@ -1534,7 +1534,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <h3>Dice</h3>
             <label class="check">${f('view.noRoll', 'Turn off click to roll', { check: true })} Roll your own dice: don't roll when an ability, save, skill or tool bonus is clicked</label>
             <label class="check">${f('view.noTray', 'Hide the dice button', { check: true })} Hide the dice button in the bottom-left corner</label>
-            <div class="hb-dstyles" role="group" aria-label="Dice style">${DICE_STYLES.map(([k, t]) => `<button type="button" class="hb-dstyle" data-act="dstyle" data-s="${k}" aria-pressed="${(C.view.diceStyle || 'purple') === k}"><img data-prev="${k}" alt="" width="96" height="96"${dicePrev[k] ? ` src="${dicePrev[k]}"` : ''}><span>${t}</span></button>`).join('')}</div>
+            <p class="hb-dicelink"><a class="btn" href="/games/dnd/sheet/dice/">Customise dice</a> <span class="muted">Pick the dice, their sounds, trails and nat 1 and nat 20 effects on the Dice Sets page; they apply here straight away.</span></p>
             <label class="check">${f('view.noSound', 'Turn off dice sounds', { check: true })} No sound when the dice land</label>
             <label class="check">${f('view.noAnim', 'Turn off thrown dice', { check: true })} Show results straight away instead of throwing 3D dice across the page</label>
             <h3>Panels</h3>
@@ -1568,15 +1568,14 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'crop' ? cropDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : dlgMode.kind === 'ddb' ? ddbDlg() : formulaDlg(dlgMode));
     // ---- dice: a card for each roll and the dice tray in the bottom-left corner ----
     const DICE = [4, 6, 8, 10, 12, 20, 100], tray = { open: false, pool: {} };
-    // the same keys as STYLES in dice3d.js, then the Dice Sets page's sets (/games/dnd/sheet/dice/sets/<key>.js, with moving parts, sounds and exits)
-    const DICE_SETS = [['ember', 'Ember Cage'], ['frost', 'Frostbound'], ['arcane', 'Arcane Orrery'], ['clockwork', 'Clockwork'], ['storm', 'Stormcaller'],
-        ['wildwood', 'Wildwood'], ['abyss', 'Abyssal Tide'], ['starfall', 'Starfall'], ['venom', 'Viper Venom'], ['spectral', 'Spectral']];
-    const DICE_STYLES = [['purple', 'Purple'], ['gold', 'Gold'], ['silver', 'Silver'], ['obsidian', 'Obsidian'], ['ruby', 'Ruby'], ['wood', 'Wood'], ['marble', 'Marble'], ['ivory', 'Ivory'], ...DICE_SETS];
-    // a plain style is its key; a set is loaded once and passed as its style object
-    const diceSets = {};
-    const styleFor = (k) => (!DICE_SETS.some(([s]) => s === k) ? Promise.resolve(k)
-        : diceSets[k] ||= import(`/games/dnd/sheet/dice/sets/${k}.js${(($('script[src*="/sheet.js"]')?.src || '').match(/\?v=\d+/) || [''])[0]}`)
-            .then((m) => ({ ...m.default, key: 'set-' + k }), (e) => { delete diceSets[k]; throw e; }));
+    // the dice chosen on the Dice Sets page (/games/dnd/sheet/dice/, choice.js), read at every roll so a change there applies here straight away;
+    // with no choice yet, the style this sheet had picked before (C.view.diceStyle). Plain purple if any of it fails to load.
+    let choiceP = null;
+    const chosenStyle = (m) => (choiceP ||= import(`/games/dnd/sheet/dice/choice.js${(($('script[src*="/sheet.js"]')?.src || '').match(/\?v=\d+/) || [''])[0]}`)
+        .catch((e) => { choiceP = null; throw e; }))
+        .then((c) => { const k = C.view.diceStyle || 'purple';
+            return c.styleFrom(c.readChoice() || { set: m.STYLES[k] ? { key: k, builtin: true } : { key: k, url: `./sets/${k}.js` } }, m); })
+        .catch(() => 'purple');
     const die = (n) => { const a = new Uint32Array(1); crypto.getRandomValues(a); return (a[0] % n) + 1; };
     let rollTimer = 0;
     // groups: [[sides, count]], mod: number added on top
@@ -1604,19 +1603,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         $('#hb-rolls').innerHTML = '';
         // 3D dice (dice3d.js, three.js + cannon-es from jsDelivr) load on the first roll; the face that lands up is the result
         const css = getComputedStyle(main);
-        Promise.all([dice3d(), styleFor(C.view.diceStyle || 'purple')])
-            .then(([m, style]) => m.throwDice(groups, { style, accent: css.getPropertyValue('--btn').trim() || '#5b3f8f', sound: !C.view.noSound })).then(card, () => { dice3dP = null; quick(); });
-    }
-    // pictures of each dice style for Customise, drawn once with the 3D dice
-    const dicePrev = {};
-    function fillPrev() {
-        const imgs = [...document.querySelectorAll('img[data-prev]:not([src])')];
-        if (!imgs.length || C.view.noAnim) return;
-        const accent = getComputedStyle(main).getPropertyValue('--btn').trim() || '#5b3f8f';
-        // each style's d20 with the 20 on top, one at a time so Customise stays responsive
-        dice3d().then(async (m) => { for (const im of imgs) {
-            try { im.src = dicePrev[im.dataset.prev] ||= m.previewStyle(await styleFor(im.dataset.prev), accent, 96, 96, [20]); } catch (e) { im.hidden = true; }
-        } }, () => { dice3dP = null; });
+        dice3d().then(async (m) => m.throwDice(groups, { style: await chosenStyle(m), accent: css.getPropertyValue('--btn').trim() || '#5b3f8f', sound: !C.view.noSound }))
+            .then(card, () => { dice3dP = null; quick(); });
     }
     // shortcut: dice3d.js reuses sheet.js's ?v= version, so a change to dice3d.js alone needs sheet.js touched too
     let dice3dP = null;
@@ -1657,10 +1645,10 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         $('#hb-bar').innerHTML = bar();
         root.innerHTML = top() + `<div class="hb-top-panels">${panels()}</div><div hidden>${datalists()}</div>`;
         drawTray(); drawLog();
-        if (dlg.open && dlgMode && !['rest', 'ddb', 'crop'].includes(dlgMode.kind)) { dlgBody.innerHTML = dlgHTML(); fillPrev(); }
+        if (dlg.open && dlgMode && !['rest', 'ddb', 'crop'].includes(dlgMode.kind)) { dlgBody.innerHTML = dlgHTML(); }
         refresh();
     }
-    function showDlg(mode) { dlgMode = mode; dlgBody.innerHTML = dlgHTML(); dlg.showModal(); refresh(); fillPrev(); }
+    function showDlg(mode) { dlgMode = mode; dlgBody.innerHTML = dlgHTML(); dlg.showModal(); refresh(); }
     dlg.addEventListener('close', () => { dlgMode = null; draw(); });
 
     function switchTo(c) { saveNow(); C = c; db.chars[c.id] = c; db.cur = c.id; openRows.clear(); saveNow(); draw(); }
@@ -1911,7 +1899,6 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'rollx') { clearTimeout(rollTimer); $('#hb-rolls').innerHTML = ''; return; }
         if (act === 'tray') { tray.open = !tray.open; return drawTray(); }
         if (act === 'logclear') { if (confirm('Clear the roll log for this character?')) { C.rolls = []; saveNow(); drawLog(); } return; }
-        if (act === 'dstyle') { C.view.diceStyle = b.dataset.s; saveNow(); for (const x of document.querySelectorAll('.hb-dstyle')) x.setAttribute('aria-pressed', x === b); return; }
         if (act === 'die') { tray.pool[b.dataset.n] = (tray.pool[b.dataset.n] || 0) + 1; return drawTray(); }
         if (act === 'dieclear') { tray.pool = {}; return drawTray(); }
         if (act === 'dieroll') { rollShow('Dice', DICE.filter((n) => tray.pool[n]).map((n) => [n, tray.pool[n]])); tray.pool = {}; tray.open = false; return drawTray(); }

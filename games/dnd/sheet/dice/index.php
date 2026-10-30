@@ -16,9 +16,12 @@ $sets = [
     'venom' => ['Viper Venom', 'A bone-white frame over toxic green liquid that bubbles, with drips falling from each die.', 'Dry bone clacks and wet gurgles; a hiss on the throw and a final hiss as they settle.'],
     'spectral' => ['Spectral', 'Ghostly see-through dice with a glowing wisp circling each one and leaving a trail.', 'Hollow, echoing knocks; a breathy rush on the throw and a low moan that fades at rest.'],
 ];
+// the classic plain styles built into dice3d.js (its STYLES), with the standard knock sound
+$classic = ['purple' => 'Purple', 'gold' => 'Gold', 'silver' => 'Silver', 'obsidian' => 'Obsidian', 'ruby' => 'Ruby', 'wood' => 'Wood', 'marble' => 'Marble', 'ivory' => 'Ivory'];
 $v = fn($f) => filemtime(__DIR__ . '/' . $f);
 $data = [
     'engine' => '../dice3d.js?v=' . filemtime(__DIR__ . '/../dice3d.js'),
+    'choice' => './choice.js?v=' . $v('choice.js'),
     'sounds' => './sounds.js?v=' . $v('sounds.js'),
     // things made for one set only, in extras/<set>/trails/ and extras/<set>/anims/ (nat 1 and nat 20 animations)
     'extras' => array_filter(array_combine(array_keys($sets), array_map(fn($k) => array_filter([
@@ -27,7 +30,8 @@ $data = [
     ]), array_keys($sets)))),
     // nat 1 and nat 20 sounds, a few to a file in natsounds/
     'nat' => array_map(fn($f) => './natsounds/' . basename($f) . '?v=' . filemtime($f), glob(__DIR__ . '/natsounds/*.js') ?: []),
-    'sets' => array_map(fn($k, $s) => ['key' => $k, 'name' => $s[0], 'look' => $s[1], 'sound' => $s[2], 'v' => $v("sets/$k.js")], array_keys($sets), $sets),
+    'sets' => [...array_map(fn($k, $s) => ['key' => $k, 'name' => $s[0], 'look' => $s[1], 'sound' => $s[2], 'v' => $v("sets/$k.js")], array_keys($sets), $sets),
+        ...array_map(fn($k, $n) => ['key' => $k, 'name' => $n, 'look' => 'Classic plain dice.', 'sound' => 'Plain knocks as they land.', 'builtin' => true], array_keys($classic), $classic)],
 ];
 ?>
 <!DOCTYPE html>
@@ -44,7 +48,7 @@ $data = [
     <main class="page dd" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">Dice Sets</h1>
-        <p class="page-lede">Pick a dice set and a sound, then roll. You can also make a die land on a number to hear how a roll ending on it sounds.</p>
+        <p class="page-lede">Pick a dice set and a sound, then roll. Your choices are what the Homebrew Sheet rolls with too.</p>
 
         <div class="bar dd-bar">
             <button type="button" class="btn primary" data-roll="20x1">Roll a d20</button>
@@ -60,9 +64,9 @@ $data = [
             <span class="dd-out" id="dd-out" aria-live="polite"></span>
         </div>
 
-        <h2 class="sec-h">Dice set <span class="n"><?= count($sets) ?></span></h2>
+        <h2 class="sec-h">Dice set <span class="n"><?= count($sets) + count($classic) ?></span></h2>
         <div class="dd-sets" role="group" aria-label="Dice set">
-            <?php foreach ($sets as $k => [$name]): ?>
+            <?php foreach (array_merge(array_map(fn($s) => $s[0], $sets), $classic) as $k => $name): ?>
                 <button type="button" class="dd-set" data-set="<?= h($k) ?>" aria-pressed="false"><img alt="" width="96" height="96"><span><?= h($name) ?></span></button>
             <?php endforeach; ?>
         </div>

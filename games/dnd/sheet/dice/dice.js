@@ -1,5 +1,8 @@
 // Dice Sets page: choose a set and a sound, roll, or land a die on a number. Data (sets, file versions) comes from index.php's #dd-data.
+// Every change is saved as the browser's dice choice (choice.js), which the Homebrew Sheet rolls with too.
 const DATA = JSON.parse(document.getElementById('dd-data').textContent);
+// versioned like the page's other files, so a changed choice.js isn't kept from the browser's cache
+const { saveChoice, styleFrom } = await import(DATA.choice);
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const out = $('#dd-out'), soundBox = $('#dd-sound');
@@ -20,17 +23,20 @@ const KEY = 'dice-sets-page';
 let state = { set: 'ember', sound: 'own', tab: 'own', nat1: 'orig', nat20: 'orig' };
 try { Object.assign(state, JSON.parse(localStorage.getItem(KEY)) || {}); soundBox.checked = localStorage.getItem('dice-sets-sound') !== '0'; } catch (e) { }
 if (!DATA.sets.some((s) => s.key === state.set)) state.set = DATA.sets[0].key;
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { } };
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { } syncChoice(); };
 soundBox.addEventListener('change', () => { try { localStorage.setItem('dice-sets-sound', soundBox.checked ? '1' : '0'); } catch (e) { } });
 
 // the engine (three.js and cannon-es come from jsDelivr with it), each set and the sounds load on first use
 let engine = null; const sets = {};
 const load = () => (engine ||= import(DATA.engine).catch((e) => { engine = null; throw e; }));
-const setOf = (k) => (sets[k] ||= import(`./sets/${k}.js?v=${DATA.sets.find((s) => s.key === k).v}`).then((m) => ({ ...m.default, key: 'set-' + k })));
+// a plain style (builtin) comes from the engine itself
+const setInfo = (k) => DATA.sets.find((s) => s.key === k), setUrl = (k) => `./sets/${k}.js?v=${setInfo(k).v}`;
+const setOf = (k) => (sets[k] ||= setInfo(k).builtin ? load().then((m) => ({ ...m.STYLES[k], key: k })) : import(setUrl(k)).then((m) => ({ ...m.default, key: 'set-' + k })));
 const sounds = import(DATA.sounds).then((m) => m.default);
 // nat 1 and nat 20 sounds from every natsounds/ file; one that fails to load is left out
+// each sound keeps the file it came from, for the saved choice
 const nats = Promise.all(DATA.nat.map((u) => import(u).then((m) => m.default, () => ({})))).then((mods) => ({
-    1: mods.flatMap((m) => m.nat1 || []), 20: mods.flatMap((m) => m.nat20 || []) }));
+    1: mods.flatMap((m, i) => (m.nat1 || []).map((s) => ({ ...s, url: DATA.nat[i] }))), 20: mods.flatMap((m, i) => (m.nat20 || []).map((s) => ({ ...s, url: DATA.nat[i] }))) }));
 // when the die blows up or flares, after the exit starts (Ember Cage's fireball and phoenix)
 const HIT = { 1: 1.7 * 0.28, 20: 2.1 * 0.42 };
 // a set's own trails and nat 1 / nat 20 animations (extras/<set>/), loaded when the set is chosen; a file that fails is left out
@@ -38,16 +44,12 @@ const extras = {};
 const extrasOf = (k) => (extras[k] ||= (async () => {
     const ex = DATA.extras?.[k] || {}, load = (urls) => Promise.all((urls || []).map((u) => import(u).then((m) => m.default, () => null)));
     const [trails, anims] = await Promise.all([load(ex.trails), load(ex.anims)]);
-    return { trails: trails.filter(Boolean).flat(), 1: anims.filter(Boolean).map((a) => a.nat1).filter(Boolean), 20: anims.filter(Boolean).map((a) => a.nat20).filter(Boolean) };
+    // each keeps the file it came from, for the saved choice
+    const of = (n) => anims.map((a, i) => a?.['nat' + n] && { ...a['nat' + n], url: ex.anims[i] }).filter(Boolean);
+    return { trails: trails.flatMap((l, i) => (l || []).map((t) => ({ ...t, url: ex.trails[i] }))), 1: of(1), 20: of(20) };
 })());
 // what's chosen for each set: { trail, anim1, anim20 } keys, or none for the set's own
 const pick = () => (state.picks ||= {})[state.set] ||= {};
-// a chosen nat animation, with the chosen nat sound (or the set's original one) played at its impact
-const withSound = (a, n) => ({ ...a, start(x) {
-    a.start?.(x);
-    const s = x.audio && (x.st.natSounds?.[n] || x.st.natOriginal?.[n]);
-    if (s) { const t0 = x.audio.ac.currentTime; s({ ...x.audio, t0, hit: t0 + (a.impact ?? 0) }); }
-} });
 
 // ---- dice set ----
 function drawSets() {
@@ -94,15 +96,18 @@ async function drawNats() {
 const natOf = async (n, k) => (await nats)[n].find((s) => s.key === k);
 // a set's chosen trails, top layer first (older picks kept one trail as p.trail)
 const trailsOf = (p) => { if (!p.trails) { p.trails = p.trail ? [p.trail] : []; delete p.trail; } return p.trails; };
-// several trails at once: each die gets every chosen trail, and what a higher layer adds to the scene is drawn over the layers below it
-const layered = (list) => (ctx) => {
-    const parts = list.map((t, i) => { const order = 10 + (list.length - i) * 10;
-        const scene = Object.assign(Object.create(ctx.scene), {
-            add: (...o) => { for (const obj of o) obj.traverse((c) => { c.renderOrder = order; }); return ctx.scene.add(...o); },
-            remove: (...o) => ctx.scene.remove(...o) });
-        return t.make({ ...ctx, scene }); });
-    return { tick: (...a) => parts.forEach((q) => q?.tick?.(...a)), dispose: () => parts.forEach((q) => q?.dispose?.()) };
-};
+// what's chosen right now, as a choice (choice.js); only: trail keys to use instead of the chosen layers
+async function choice(only = null) {
+    const k = state.set, info = setInfo(k), [all, ex] = await Promise.all([nats, extrasOf(k)]), p = pick();
+    const ref = (x) => x && { key: x.key, url: x.url };
+    return { set: info.builtin ? { key: k, builtin: true } : { key: k, url: setUrl(k) },
+        sound: state.sound === 'own' ? null : { key: state.sound, url: DATA.sounds },
+        nat: { 1: ref(all[1].find((s) => s.key === state.nat1)), 20: ref(all[20].find((s) => s.key === state.nat20)) },
+        trails: (only || trailsOf(p)).map((t) => ref(ex.trails.find((x) => x.key === t))).filter(Boolean),
+        anims: { 1: ref(ex[1].find((a) => a.key === p.anim1)), 20: ref(ex[20].find((a) => a.key === p.anim20)) } };
+}
+// the Homebrew Sheet reads this
+async function syncChoice() { try { saveChoice(await choice()); } catch (e) { } }
 // the trail and nat animation lists, shown only for a set that has its own
 async function drawExtras() {
     const k = state.set, ex = await extrasOf(k); if (k !== state.set) return;
@@ -151,16 +156,8 @@ const fillNums = () => { const d = +$('#dd-die').value, cur = +$('#dd-num').valu
 async function roll(groups, land = null, only = null) {
     out.textContent = 'Rolling...';
     try {
-        const [m, set, snd, n1, n20, ex] = await Promise.all([load(), setOf(state.set), soundOf(state.sound), natOf(1, state.nat1), natOf(20, state.nat20), extrasOf(state.set)]);
-        const p = pick(), a1 = ex[1].find((a) => a.key === p.anim1), a20 = ex[20].find((a) => a.key === p.anim20);
-        const trails = (only || trailsOf(p)).map((k) => ex.trails.find((t) => t.key === k)).filter(Boolean);
-        const trail = trails.length === 1 ? trails[0] : trails.length ? { make: layered(trails) } : null;
-        // the set as it is, with its throw and rolling sounds swapped when another sound is chosen, the chosen nat 1 and nat 20 sounds,
-        // and the set's chosen trail and nat animations
-        const style = { ...set, ...(state.sound !== 'own' && { sound: { ...set.sound, throw: snd.throw, hit: snd.hit } }),
-            natSounds: { 1: n1 && ((c) => n1.play(c)), 20: n20 && ((c) => n20.play(c)) },
-            ...(trail && { trail: trail.make }),
-            ...((a1 || a20) && { exits: { ...set.exits, ...(a1 && { 'd20:1': withSound(a1, 1) }), ...(a20 && { 'd20:20': withSound(a20, 20) }) } }) };
+        // built the same way as the Homebrew Sheet's rolls
+        const m = await load(), style = await styleFrom(await choice(only), m);
         // a new roll takes the last one's dice off the table first, even mid-roll
         m.clearTable(true);
         const res = await m.throwDice(groups, { style, sound: soundBox.checked, land });
