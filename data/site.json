@@ -237,6 +237,7 @@
                     "pages": [
                         { "title": "Memes", "url": "/extras/memes/", "description": "Memes" },
                         { "title": "Cat", "url": "/extras/memes/cat/", "description": "Cat", "nav": false },
+                        { "title": "Funny Clips", "url": "/extras/clips/", "description": "Short funny video clips", "keywords": ["videos", "clips", "funny", "memes"] },
                         { "title": "6 7", "url": "/extras/67/", "description": "The 6 7 meme", "keywords": ["67", "six seven", "doot doot"] },
                         { "title": "Pets", "url": "/extras/pets/", "description": "People's pets", "keywords": ["photos"] },
                         { "title": "Pet", "url": "/extras/pets/pet/", "nav": false, "search": false }
