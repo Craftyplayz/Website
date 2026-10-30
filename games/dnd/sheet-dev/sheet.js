@@ -1579,11 +1579,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const die = (n) => { const a = new Uint32Array(1); crypto.getRandomValues(a); return (a[0] % n) + 1; };
     let rollTimer = 0;
     // groups: [[sides, count]], mod: number added on top
+    // groups [['coin', 1]] flips a coin: the card shows Heads or Tails instead of a total
     function rollShow(title, groups, mod = 0) {
+        const coin = groups[0]?.[0] === 'coin', side = (v) => (v === 'heads' ? 'Heads' : 'Tails');
         const card = (rolls) => {
-            const total = rolls.reduce((t, [, r]) => t + r.reduce((a, b) => a + b, 0), 0) + mod;
-            const expr = groups.map(([n, c]) => `${c}d${n}`).join(' + ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
-            const shown = rolls.map(([, r]) => r.join(', ')).join(' | ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
+            const total = coin ? side(rolls[0][1][0]) : rolls.reduce((t, [, r]) => t + r.reduce((a, b) => a + b, 0), 0) + mod;
+            const expr = coin ? 'Coin' : groups.map(([n, c]) => `${c}d${n}`).join(' + ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
+            const shown = coin ? '' : rolls.map(([, r]) => r.join(', ')).join(' | ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
             // a lone d20 shows a natural 20 or 1
             const nat = groups.length === 1 && groups[0][0] === 20 && groups[0][1] === 1 ? (rolls[0][1][0] === 20 ? ' hb-nat20' : rolls[0][1][0] === 1 ? ' hb-nat1' : '') : '';
             // just under the sticky sheet bar, which wraps taller on phones
@@ -1598,7 +1600,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             C.rolls.length = Math.min(C.rolls.length, 100);
             saveNow(); drawLog(); if (tray.open) drawTray();
         };
-        const quick =() => card(groups.map(([n, c]) => [n, Array.from({ length: c }, () => die(n))]));
+        const quick =() => card(groups.map(([n, c]) => [n, Array.from({ length: c }, () => (n === 'coin' ? (die(2) === 1 ? 'heads' : 'tails') : die(n)))]));
         if (C.view.noAnim || matchMedia('(prefers-reduced-motion: reduce)').matches) return quick();
         $('#hb-rolls').innerHTML = '';
         // 3D dice (dice3d.js, three.js + cannon-es from jsDelivr) load on the first roll; the face that lands up is the result
@@ -1617,7 +1619,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         box.innerHTML = `${tray.open ? `<div class="hb-tray" role="group" aria-label="Dice tray">
                 <div class="hb-traydice">${DICE.map((n) => `<button type="button" class="hb-die" data-act="die" data-n="${n}" aria-label="Add a d${n}" title="Right-click to remove one">d${n}${tray.pool[n] ? `<small>${tray.pool[n]}</small>` : ''}</button>`).join('')}</div>
                 <div class="hb-trayrow"><span class="muted">${groups.length ? groups.map(([n, c]) => `${c}d${n}`).join(' + ') : 'Click dice to add them'}</span>
-                    <button type="button" class="btn small" data-act="dieclear"${groups.length ? '' : ' disabled'}>Clear</button><button type="button" class="btn small primary" data-act="dieroll"${groups.length ? '' : ' disabled'}>Roll</button></div>
+                    <button type="button" class="btn small" data-act="coin">Flip a coin</button><button type="button" class="btn small" data-act="dieclear"${groups.length ? '' : ' disabled'}>Clear</button><button type="button" class="btn small primary" data-act="dieroll"${groups.length ? '' : ' disabled'}>Roll</button></div>
                 ${!logSide() && !C.view.noRoll && (C.rolls || []).length ? `<div class="hb-traylog"><span class="muted">Recent rolls</span>${logRows(5)}</div>` : ''}
             </div>` : ''}<button type="button" class="hb-dicebtn" data-act="tray" aria-expanded="${tray.open}" aria-label="${tray.open ? 'Close' : 'Open'} the dice tray" title="Dice">${D20}</button>`;
     }
@@ -1901,6 +1903,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'logclear') { if (confirm('Clear the roll log for this character?')) { C.rolls = []; saveNow(); drawLog(); } return; }
         if (act === 'die') { tray.pool[b.dataset.n] = (tray.pool[b.dataset.n] || 0) + 1; return drawTray(); }
         if (act === 'dieclear') { tray.pool = {}; return drawTray(); }
+        if (act === 'coin') { rollShow('Coin flip', [['coin', 1]]); tray.open = false; return drawTray(); }
         if (act === 'dieroll') { rollShow('Dice', DICE.filter((n) => tray.pool[n]).map((n) => [n, tray.pool[n]])); tray.pool = {}; tray.open = false; return drawTray(); }
         if (act === 'coins') return coinApply(b.parentElement.querySelector('.hb-coinin'), b.dataset.sign);
         if (act === 'info') { const r = get(p); if ('lvl' in r && r.srd && needsFill(r)) srdFill(p); return info(p); }

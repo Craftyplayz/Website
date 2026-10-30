@@ -127,6 +127,143 @@ function buildDie(kind, st) {
     });
     return (built[key] = { geo, mats, shape, fs, verts, d4, all: uniq });
 }
+
+// ---- the coin: an original, stylised take on Australia's twelve-sided 50 cent piece (not the Mint's artwork), the same in every style ----
+// Heads: a profile with AUSTRALIA and the year; tails: a coat-of-arms design (shield, kangaroo, emu, star, wattle, 50). Raised relief
+// is drawn once as a white mask, then turned into the silver colour map (lit edges, soft shadows) and a bump map.
+const COIN_R = 1.35, COIN_H = 0.2, COIN_A = (i) => (i * Math.PI) / 6 + Math.PI / 12;
+function coinArt(heads, S) {
+    const cv = document.createElement('canvas'); cv.width = cv.height = S;
+    const g = cv.getContext('2d'), c = S / 2, u = S / 100;
+    g.fillStyle = g.strokeStyle = '#fff'; g.lineCap = g.lineJoin = 'round';
+    // the raised rim follows the twelve sides, with a ring of beads inside it
+    const poly = (r) => { g.beginPath(); for (let i = 0; i < 12; i++) { const a = COIN_A(i); g[i ? 'lineTo' : 'moveTo'](c + Math.cos(a) * r, c + Math.sin(a) * r); } g.closePath(); };
+    g.lineWidth = 3.2 * u; poly(48.2 * u); g.stroke();
+    for (let i = 0; i < 96; i++) { const a = (i / 96) * Math.PI * 2; g.beginPath(); g.arc(c + Math.cos(a) * 42.6 * u, c + Math.sin(a) * 42.6 * u, 0.62 * u, 0, 7); g.fill(); }
+    // lettering round an arc: top runs left to right over the top, bottom runs left to right under the bottom
+    const arc = (txt, r, size, top) => {
+        g.save(); g.font = `700 ${size * u}px Georgia, 'Times New Roman', serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        const w = [...txt].map((ch) => g.measureText(ch).width + size * u * 0.12), total = w.reduce((a, b) => a + b, 0);
+        let ang = (top ? -Math.PI / 2 : Math.PI / 2) + ((top ? -1 : 1) * total) / 2 / r;
+        [...txt].forEach((ch, i) => { const half = w[i] / 2 / r; ang += (top ? 1 : -1) * half;
+            g.save(); g.translate(c + Math.cos(ang) * r, c + Math.sin(ang) * r); g.rotate(ang + (top ? Math.PI / 2 : -Math.PI / 2)); g.fillText(ch, 0, 0); g.restore();
+            ang += (top ? 1 : -1) * half; });
+        g.restore();
+    };
+    // a path in a 100 x 100 box, placed at x, y, w wide (mirror flips it left to right)
+    const shape = (pts, x, y, w, mirror = false) => { g.save(); g.translate(x * u, y * u); g.scale((mirror ? -1 : 1) * w * u / 100, w * u / 100); if (mirror) g.translate(-100, 0);
+        g.beginPath(); pts(g); g.restore(); };
+    // engraved detail cut back into a raised shape, in the same 100 x 100 box
+    const cut = (draw, x, y, w, width, mirror = false) => { g.save(); g.globalCompositeOperation = 'destination-out';
+        g.translate(x * u, y * u); g.scale((mirror ? -1 : 1) * w * u / 100, w * u / 100); if (mirror) g.translate(-100, 0);
+        g.lineWidth = width * 100 / w; g.beginPath(); draw(g); g.stroke(); g.restore(); };
+    if (heads) {
+        arc('AUSTRALIA', 35 * u, 7.4, true); arc(String(new Date().getFullYear()), 35 * u, 7.4, false);
+        // a generic, crown-free classical profile facing right, cut off at the neck (not a portrait of anyone)
+        const H = [21, 15, 60];
+        shape((p) => { p.moveTo(34, 100); p.bezierCurveTo(35, 90, 34, 82, 30, 76); p.bezierCurveTo(20, 66, 16, 50, 20, 36); p.bezierCurveTo(24, 18, 40, 8, 56, 8);
+            p.bezierCurveTo(68, 8, 74, 16, 75, 26); p.bezierCurveTo(76, 31, 75, 34, 76, 37); p.bezierCurveTo(78, 41, 82, 46, 83, 50); p.bezierCurveTo(83, 52, 80, 53, 78, 53);
+            p.bezierCurveTo(79, 55, 80, 57, 78, 58); p.bezierCurveTo(79, 60, 79, 62, 77, 63); p.bezierCurveTo(78, 67, 76, 71, 70, 72); p.bezierCurveTo(64, 74, 62, 80, 63, 86);
+            p.bezierCurveTo(64, 92, 66, 96, 68, 100); p.closePath(); }, ...H);
+        g.fill();
+        // hair swept back from the brow, the ear, the eye and a line at the base of the neck
+        cut((p) => { for (let i = 0; i < 7; i++) { p.moveTo(70 - i * 2, 14 + i * 4.5); p.bezierCurveTo(56 - i * 2, 12 + i * 4, 40 - i, 18 + i * 4, 26 + i * 0.5, 34 + i * 5); } }, ...H, 0.55);
+        cut((p) => { p.moveTo(46, 42); p.bezierCurveTo(52, 40, 54, 50, 50, 54); p.bezierCurveTo(47, 56, 45, 54, 46, 52); p.moveTo(64, 36); p.quadraticCurveTo(68, 33, 72, 36);
+            p.moveTo(30, 84); p.bezierCurveTo(42, 80, 54, 82, 64, 88); }, ...H, 0.6);
+    } else {
+        // a seven-pointed star over the arms
+        g.beginPath(); for (let i = 0; i < 14; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 7, r = (i % 2 ? 2.4 : 5.8) * u; g[i ? 'lineTo' : 'moveTo'](c + Math.cos(a) * r, 18 * u + Math.sin(a) * r); } g.closePath(); g.fill();
+        // the shield, raised, with six panels and a small device in each cut in
+        const sx = 39 * u, sy = 27 * u, sw = 22 * u, sh = 30 * u;
+        g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + sw, sy); g.lineTo(sx + sw, sy + sh * 0.62); g.quadraticCurveTo(sx + sw, sy + sh, sx + sw / 2, sy + sh * 1.08);
+        g.quadraticCurveTo(sx, sy + sh, sx, sy + sh * 0.62); g.closePath(); g.fill();
+        g.save(); g.globalCompositeOperation = 'destination-out'; g.lineWidth = 0.7 * u;
+        g.beginPath(); g.moveTo(sx, sy + sh * 0.45); g.lineTo(sx + sw, sy + sh * 0.45); g.moveTo(sx + sw / 3, sy); g.lineTo(sx + sw / 3, sy + sh * 0.95); g.moveTo(sx + (2 * sw) / 3, sy); g.lineTo(sx + (2 * sw) / 3, sy + sh * 0.95);
+        g.moveTo(sx + 1.4 * u, sy + 1.4 * u); g.lineTo(sx + sw - 1.4 * u, sy + 1.4 * u); g.stroke();
+        for (let r = 0; r < 2; r++) for (let k = 0; k < 3; k++) { const px = sx + (k + 0.5) * (sw / 3), py = sy + (r ? 0.7 : 0.24) * sh;
+            g.beginPath(); [() => g.arc(px, py, 1.8 * u, 0, 7), () => g.rect(px - 1.8 * u, py - 1.4 * u, 3.6 * u, 2.8 * u), () => { g.moveTo(px, py - 2.2 * u); g.lineTo(px + 2 * u, py + 1.6 * u); g.lineTo(px - 2 * u, py + 1.6 * u); g.closePath(); }][(r * 3 + k) % 3](); g.stroke(); }
+        g.restore();
+        // a kangaroo on the left, rearing up to face the shield
+        const K = [8, 22, 34];
+        shape((p) => { p.moveTo(10, 98); p.bezierCurveTo(20, 92, 32, 84, 40, 74); p.bezierCurveTo(36, 62, 36, 50, 42, 40); p.bezierCurveTo(44, 34, 46, 30, 48, 26);
+            p.lineTo(46, 14); p.lineTo(51, 23); p.lineTo(52, 12); p.lineTo(55, 24); p.bezierCurveTo(60, 24, 66, 26, 70, 29); p.lineTo(69, 32); p.bezierCurveTo(64, 33, 60, 34, 58, 37);
+            p.bezierCurveTo(58, 40, 60, 42, 64, 44); p.lineTo(72, 46); p.lineTo(71, 49); p.lineTo(62, 48); p.bezierCurveTo(62, 56, 64, 62, 64, 68); p.bezierCurveTo(66, 78, 72, 88, 84, 94);
+            p.lineTo(84, 98); p.lineTo(56, 98); p.bezierCurveTo(52, 92, 50, 86, 48, 80); p.bezierCurveTo(38, 90, 24, 98, 10, 100); p.closePath(); }, ...K);
+        g.fill();
+        cut((p) => { p.moveTo(46, 74); p.bezierCurveTo(54, 66, 60, 70, 62, 80); p.moveTo(61, 28.5); p.lineTo(62.5, 28.5); }, ...K, 0.55);
+        // an emu on the right, facing the shield
+        const E = [58, 22, 34];
+        shape((p) => { p.moveTo(18, 62); p.bezierCurveTo(22, 42, 46, 36, 60, 42); p.bezierCurveTo(64, 30, 66, 18, 68, 12); p.bezierCurveTo(69, 8, 74, 7, 76, 10);
+            p.lineTo(86, 14); p.lineTo(76, 15); p.bezierCurveTo(74, 24, 72, 34, 72, 46); p.bezierCurveTo(76, 56, 70, 68, 56, 70); p.bezierCurveTo(40, 72, 24, 70, 18, 62); p.closePath(); }, ...E, true);
+        g.fill();
+        shape((p) => { p.moveTo(44, 68); p.lineTo(40, 96); p.lineTo(33, 98); p.moveTo(56, 68); p.lineTo(60, 96); p.lineTo(67, 98); }, ...E, true);
+        g.lineWidth = 1.5 * u; g.stroke();
+        cut((p) => { for (let i = 0; i < 5; i++) { p.moveTo(26 + i * 7, 52 + (i % 2) * 3); p.quadraticCurveTo(32 + i * 7, 48, 36 + i * 7, 58); } }, ...E, 0.45, true);
+        // wattle sprays: curving stems with little puff balls
+        for (const side of [-1, 1]) { g.lineWidth = 0.9 * u; g.beginPath(); g.moveTo(c + side * 6 * u, 68 * u); g.quadraticCurveTo(c + side * 22 * u, 72 * u, c + side * 33 * u, 60 * u); g.stroke();
+            for (let i = 0; i < 10; i++) { const t = i / 9, x = c + side * (6 + t * 27) * u, y = (68 + Math.sin(t * Math.PI) * 3 - t * 8) * u + ((i % 2) - 0.5) * 3.2 * u;
+                g.beginPath(); g.arc(x, y, (1.15 + (i % 3) * 0.3) * u, 0, 7); g.fill(); } }
+        // the scroll and the value
+        g.beginPath(); g.moveTo(31 * u, 73 * u); g.quadraticCurveTo(c, 79 * u, 69 * u, 73 * u); g.lineTo(69 * u, 77.5 * u); g.quadraticCurveTo(c, 83.5 * u, 31 * u, 77.5 * u); g.closePath(); g.fill();
+        g.save(); g.globalCompositeOperation = 'destination-out'; g.font = `700 ${3.3 * u}px Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('AUSTRALIA', c, 77.8 * u); g.restore();
+        g.save(); g.font = `700 ${11 * u}px Georgia, 'Times New Roman', serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('50', c, 89 * u); g.restore();
+    }
+    return cv;
+}
+function coinMaps(heads) {
+    const S = 1024, art = coinArt(heads, S), make = () => { const cv = document.createElement('canvas'); cv.width = cv.height = S; return [cv, cv.getContext('2d')]; };
+    const tint = (col) => { const [cv, g] = make(); g.drawImage(art, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = col; g.fillRect(0, 0, S, S); return cv; };
+    // colour: a frosted, darker cupronickel field with the raised design polished bright, lifted by a soft shadow below-right and a lit top edge
+    const [col, g] = make(), field = g.createRadialGradient(S * 0.38, S * 0.32, S * 0.05, S / 2, S / 2, S * 0.62);
+    field.addColorStop(0, '#8d939b'); field.addColorStop(1, '#5f656d'); g.fillStyle = field; g.fillRect(0, 0, S, S);
+    const r = rnd(heads ? 11 : 23); g.globalAlpha = 0.05; for (let i = 0; i < 900; i++) { g.fillStyle = r() < 0.5 ? '#fff' : '#000'; g.fillRect(r() * S, r() * S, 1 + r() * 2, 1 + r() * 2); } g.globalAlpha = 1;
+    g.filter = 'blur(3px)'; g.drawImage(tint('rgba(30,34,40,.55)'), 4, 5); g.filter = 'none';
+    g.drawImage(tint('#e4e7eb'), 0, 0); g.globalAlpha = 0.5; g.drawImage(tint('#ffffff'), -1.5, -1.5); g.globalAlpha = 1;
+    const [bump, b] = make(); b.fillStyle = '#000'; b.fillRect(0, 0, S, S); b.filter = 'blur(2px)'; b.drawImage(art, 0, 0);
+    const map = new THREE.CanvasTexture(col); map.colorSpace = THREE.SRGBColorSpace; map.anisotropy = 8;
+    return { map, bump: new THREE.CanvasTexture(bump) };
+}
+let coinBuilt = null;
+function buildCoin() {
+    if (coinBuilt) return coinBuilt;
+    const top = [], bot = [];
+    for (let i = 0; i < 12; i++) { const a = COIN_A(i); top.push(V(Math.cos(a) * COIN_R, COIN_H / 2, Math.sin(a) * COIN_R)); bot.push(V(Math.cos(a) * COIN_R, -COIN_H / 2, Math.sin(a) * COIN_R)); }
+    // geometry: heads cap (group 0), tails cap (group 1), the twelve flat edges (group 2); caps map so each reads the right way round from outside
+    const pos = [], uv = [], geo = new THREE.BufferGeometry(), R2 = 2 * COIN_R, push = (p, uu, vv) => { pos.push(p.x, p.y, p.z); uv.push(uu, vv); };
+    for (let i = 0; i < 12; i++) { const a = top[i], b = top[(i + 1) % 12];
+        push(V(0, COIN_H / 2, 0), 0.5, 0.5); push(b, 0.5 - b.x / R2, 0.5 + b.z / R2); push(a, 0.5 - a.x / R2, 0.5 + a.z / R2); }
+    geo.addGroup(0, 36, 0);
+    for (let i = 0; i < 12; i++) { const a = bot[i], b = bot[(i + 1) % 12];
+        push(V(0, -COIN_H / 2, 0), 0.5, 0.5); push(a, 0.5 - a.x / R2, 0.5 - a.z / R2); push(b, 0.5 - b.x / R2, 0.5 - b.z / R2); }
+    geo.addGroup(36, 36, 1);
+    for (let i = 0; i < 12; i++) { const j = (i + 1) % 12, u0 = i / 12, u1 = (i + 1) / 12;
+        push(top[i], u0, 1); push(top[j], u1, 1); push(bot[j], u1, 0); push(top[i], u0, 1); push(bot[j], u1, 0); push(bot[i], u0, 0); }
+    geo.addGroup(72, 72, 2);
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); geo.computeVertexNormals();
+    const metal = (m) => new THREE.MeshStandardMaterial({ metalness: 0.9, roughness: 0.4, envMapIntensity: 0.85, ...m });
+    const h = coinMaps(true), t = coinMaps(false);
+    const edge = document.createElement('canvas'); edge.width = 256; edge.height = 16; const eg = edge.getContext('2d'), eGrad = eg.createLinearGradient(0, 0, 0, 16);
+    eGrad.addColorStop(0, '#8d939b'); eGrad.addColorStop(0.5, '#d9dde2'); eGrad.addColorStop(1, '#8d939b'); eg.fillStyle = eGrad; eg.fillRect(0, 0, 256, 16);
+    const eMap = new THREE.CanvasTexture(edge); eMap.colorSpace = THREE.SRGBColorSpace;
+    const mats = [metal({ map: h.map, bumpMap: h.bump, bumpScale: 6 }), metal({ map: t.map, bumpMap: t.bump, bumpScale: 6 }), metal({ map: eMap, roughness: 0.35, flatShading: true })];
+    // physics: the same prism, faces wound outward (caps reversed so their normals point out)
+    const all = [...top, ...bot];
+    const shape = new CANNON.ConvexPolyhedron({ vertices: all.map((p) => new CANNON.Vec3(p.x, p.y, p.z)),
+        faces: [[11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0], [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23], ...Array.from({ length: 12 }, (_, i) => [i, (i + 1) % 12, 12 + ((i + 1) % 12), 12 + i])] });
+    // read like a die with two faces: whichever cap points up
+    const fs = [{ n: V(0, 1, 0), value: 'heads', pts: top }, { n: V(0, -1, 0), value: 'tails', pts: bot }];
+    return (coinBuilt = { geo, mats, shape, fs, verts: [], d4: false, all, coin: true });
+}
+// a coin rings when it lands: a bright, slowly fading metal tone (dice on a table only clack)
+function coinRing(speed, onTable) {
+    const vol = Math.min(1, speed / 12) ** 1.3;
+    if (!audio || vol < 0.02) return;
+    const t = audio.currentTime, base = (onTable ? 2350 : 3100) * (0.97 + Math.random() * 0.06), g = audio.createGain();
+    g.gain.setValueAtTime(vol * 0.22, t); g.gain.exponentialRampToValueAtTime(0.0005, t + (onTable ? 0.55 : 0.8)); g.connect(audio.out);
+    for (const [m, v] of [[1, 1], [2.32, 0.5], [4.25, 0.25], [6.8, 0.12]]) { const o = audio.createOscillator(), og = audio.createGain(); o.frequency.value = base * m; og.gain.value = v; o.connect(og).connect(g); o.start(t); o.stop(t + 0.85); }
+    const s = audio.createBufferSource(); s.buffer = noise; const hp = audio.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 4000;
+    const cg = audio.createGain(); cg.gain.setValueAtTime(vol * 0.3, t); cg.gain.exponentialRampToValueAtTime(0.0005, t + 0.03); s.connect(hp).connect(cg).connect(audio.out); s.start(t, Math.random() * 0.2, 0.05);
+}
 // the value showing: the face pointing most up (a d4: the corner pointing most up)
 const UP = V(0, 1, 0);
 // a die's numbered directions: its face normals, or a d4's corners
@@ -244,6 +381,8 @@ const dieName = (kind) => (kind === 't' ? 'd100' : kind === 'u' ? 'd100u' : 'd' 
 function exitFor(st, d) {
     const x = st?.exits, die = dieName(d.kind), v = d.value;
     if (!x || v == null) return null;
+    // a coin only leaves with an exit made for coins, never a set's catch-all
+    if (d.kind === 'coin') return x.coin || null;
     if (x[die + ':' + v]) return x[die + ':' + v];
     for (const k in x) { const m = /^(d\w+):(\d+)-(\d+)$/.exec(k); if (m && m[1] === die && v >= +m[2] && v <= +m[3]) return x[k]; }
     return x[die] || x['*'] || null;
@@ -348,8 +487,14 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
     // each throw comes in from a random spot on the screen edge: a random direction out from the middle, stopped at the edge
     const a = Math.random() * Math.PI * 2, cx = Math.cos(a), cz = Math.sin(a), s = Math.min(hw / Math.abs(cx || 1e-9), hd / Math.abs(cz || 1e-9));
     const fit = (v, h) => Math.max(-h + 1.5, Math.min(h - 1.5, v));
-    // how each die starts: spread along the edge (i % 4) and inward (i % 3), then thrown at a spot near the middle
+    // a coin (groups: [['coin', 1]]) is the same in every style and lands heads or tails
+    const build = (kind) => (kind === 'coin' ? buildCoin() : buildDie(kind, st));
+    // how each die starts: spread along the edge (i % 4) and inward (i % 3), then thrown at a spot near the middle;
+    // a coin is flipped instead: tossed up from near the bottom of the screen, spinning end over end
     const starts = kinds.map((kind, i) => {
+        if (kind === 'coin') { const x = (Math.random() - 0.5) * hw * 0.4 + (i - (kinds.length - 1) / 2) * 3, z = hd - 3, sp = Math.random() < 0.5 ? -1 : 1;
+            return { pos: [x, 1.5, z], vel: [(Math.random() - 0.5) * 3, 24 + Math.random() * 5, -(hd * 0.55 + Math.random() * 3)],
+                spin: [sp * (32 + Math.random() * 14), (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3], turn: [Math.random() < 0.5 ? 0 : Math.PI, Math.random() * 6, 0] }; }
         const along = ((i % 4) - 1.5) * 1.6, inward = 2 + (i % 3) * 1.2;
         const x = fit(cx * s - cx * inward - cz * along, hw), z = fit(cz * s - cz * inward + cx * along, hd);
         const sp = 0.9 + Math.random() * 0.5, tx = (Math.random() - 0.5) * hw * 0.5, tz = (Math.random() - 0.5) * hd * 0.5;
@@ -364,12 +509,12 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
     // the silent run: same table, same starts, the same fixed physics steps, until everything sleeps
     let landed = null;
     if (wants.some((v) => v != null) && live.length === 0) {
-        const w = walls(hw - 0.3, hd - 0.3), bs = starts.map((a, i) => { const b = body(buildDie(kinds[i], st), a); w.addBody(b); return b; });
+        const w = walls(hw - 0.3, hd - 0.3), bs = starts.map((a, i) => { const b = body(build(kinds[i]), a); w.addBody(b); return b; });
         for (let i = 0; i < 120 * 8 && !bs.every((b) => b.sleepState === CANNON.Body.SLEEPING); i++) w.step(1 / 120);
-        landed = bs.map((b, i) => topIndex(buildDie(kinds[i], st), quatOf(b)));
+        landed = bs.map((b, i) => topIndex(build(kinds[i]), quatOf(b)));
     }
     const dice = kinds.map((kind, i) => {
-        const t = buildDie(kind, st), mesh = new THREE.Mesh(t.geo, t.mats);
+        const t = build(kind), mesh = new THREE.Mesh(t.geo, t.mats);
         mesh.castShadow = true; scene.add(mesh);
         const b = body(t, starts[i]);
         // each hit knocks once: dice on dice is handled by the lower id, and a die can't knock again within 30 ms
@@ -377,13 +522,14 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
             const other = e.body, now = performance.now();
             if (other.mass && other.id < b.id) return;
             if (now - (b.lastKnock || 0) < 30) return;
-            b.lastKnock = now; knock(Math.abs(e.contact.getImpactVelocityAlongNormal()), !other.mass, st);
+            b.lastKnock = now; (kind === 'coin' ? coinRing : knock)(Math.abs(e.contact.getImpactVelocityAlongNormal()), !other.mass, st);
         });
         world.addBody(b);
         const d = { kind, t, mesh, body: b, st, sound, want: wants[i] ?? null };
         if (d.want != null && landed) force(d, landed[i]);
         // a trail: what a die leaves on the table as it rolls, made like decorate() but given the table size; its marks go when the dice do
-        d.fx = decorate(st, d); d.trail = st.trail?.({ THREE, scene, mesh, body: b, kind, sides: kind === 't' || kind === 'u' ? 10 : kind, hw, hd, rnd }) || null;
+        // (a coin stays a plain coin: no set decorations or trails)
+        if (kind !== 'coin') { d.fx = decorate(st, d); d.trail = st.trail?.({ THREE, scene, mesh, body: b, kind, sides: kind === 't' || kind === 'u' ? 10 : kind, hw, hd, rnd }) || null; }
         live.push(d); return d;
     });
     if (sound && audio) st.sound?.throw?.({ ac: audio, out: audio.out, noise, t: audio.currentTime, count: dice.length });
