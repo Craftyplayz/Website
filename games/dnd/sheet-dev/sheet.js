@@ -1608,7 +1608,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         dice3d().then(async (m) => m.throwDice(groups, { style: await chosenStyle(m), accent: css.getPropertyValue('--btn').trim() || '#5b3f8f', sound: !C.view.noSound }))
             .then(card, () => { dice3dP = null; quick(); });
     }
-    // shortcut: dice3d.js reuses sheet.js's ?v= version, so a change to dice3d.js alone needs sheet.js touched too
+    // shortcut: dice3d.js reuses sheet.js's ?v= version, so a change to dice3d.js alone needs sheet.js touched too (last: quiet coins, 30 Oct 2026)
     let dice3dP = null;
     const dice3d = () => dice3dP || (dice3dP = import(new URL('dice3d.js' + (($('script[src*="/sheet.js"]')?.src || '').match(/\?v=\d+/) || [''])[0], location.href).href));
     function drawTray() {
