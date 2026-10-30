@@ -64,6 +64,17 @@ $data = [
             <span class="dd-out" id="dd-out" aria-live="polite"></span>
         </div>
 
+        <h2 class="sec-h">Presets <span class="n" id="dd-pcount"></span></h2>
+        <form class="dd-pbar" id="dd-pform">
+            <label>Name <input class="field" id="dd-pname" maxlength="60" placeholder="Fire night" required></label>
+            <button type="submit" class="btn">Save current as preset</button>
+            <button type="button" class="btn" id="dd-pexport">Export</button>
+            <button type="button" class="btn" id="dd-pimport">Import</button>
+            <input type="file" id="dd-pfile" accept=".json,application/json" hidden>
+            <span class="dd-out" id="dd-pmsg" aria-live="polite"></span>
+        </form>
+        <div class="dd-sounds" id="dd-presets"></div>
+
         <h2 class="sec-h">Dice set <span class="n"><?= count($sets) + count($classic) ?></span></h2>
         <div class="dd-sets" role="group" aria-label="Dice set">
             <?php foreach (array_merge(array_map(fn($s) => $s[0], $sets), $classic) as $k => $name): ?>

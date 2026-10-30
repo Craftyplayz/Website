@@ -35,5 +35,9 @@
 .dd-laybtn { display: inline-grid; place-items: center; width: 28px; height: 28px; padding: 0; background: var(--btn2); border: 1px solid var(--line); border-radius: var(--radius); color: var(--text); font: inherit; cursor: pointer; }
 .dd-laybtn:hover:not(:disabled) { border-color: var(--accent); }
 .dd-laybtn:disabled { opacity: .4; cursor: default; }
+/* presets: name, save, export and import, then the saved ones as rows */
+.dd-pbar { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 12px; margin-bottom: 12px; }
+.dd-pbar label { display: grid; flex: 0 1 240px; gap: 4px; min-width: 0; color: var(--muted); font-size: 14px; }
+.dd-pbar .dd-out { padding-bottom: 10px; }
 /* the dice table over the whole page; it never takes clicks */
 #hb-throw { position: fixed; inset: 0; z-index: 1740; width: 100vw; height: 100vh; pointer-events: none; }
