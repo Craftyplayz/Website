@@ -1,4 +1,4 @@
-// Thirty sound mockups for the dice: each has throw (as the dice leave the hand) and hit (every bump while they roll), in the same shape as a set's sound.
+// Thirty-four sound mockups for the dice: each has throw (as the dice leave the hand) and hit (every bump while they roll), in the same shape as a set's sound.
 // hit ctx: { ac, out, noise, vol 0-1, onTable, t }; throw ctx: { ac, out, noise, t, count }. Everything is scheduled from ctx.t.
 const env = (ac, at, peak, a, d) => { const g = ac.createGain(); g.gain.setValueAtTime(0.0001, at); g.gain.linearRampToValueAtTime(Math.max(0.0002, peak), at + a); g.gain.exponentialRampToValueAtTime(0.0001, at + a + d); return g; };
 const nz = (ac, noise, at, dur) => { const s = ac.createBufferSource(); s.buffer = noise; s.loop = true; s.start(at, Math.random() * 0.3); s.stop(at + dur + 0.02); return s; };
@@ -191,6 +191,34 @@ export default [
         throw: (c) => { thump(c, c.t, 90, 55, 0.35, 0.1); thump(c, c.t + 0.12, 85, 50, 0.3, 0.1); },
         hit: (c) => { thump(c, c.t, c.onTable ? 70 : 120, c.onTable ? 35 : 70, c.vol * 0.75, 0.16);
             ring(c, c.t, r(220, 260), [[1, 1], [2.6, 0.3]], c.vol * 0.12, 0.06); click(c, c.t, 700, 1, c.vol * 0.25, 0.04); },
+    },
+    // ---- heavier, louder takes on tungsten ----
+    {
+        key: 'tungsten2', name: 'Heavy tungsten', blurb: 'Tungsten, louder and deeper: a bigger thud with more weight behind it and a dull knock on top.',
+        throw: (c) => { for (const dt of [0, 0.12]) { thump(c, c.t + dt, 75, 40, 0.5, 0.14); chain(nz(c.ac, c.noise, c.t + dt, 0.1), filt(c.ac, 'lowpass', 350), env(c.ac, c.t + dt, 0.35, 0.003, 0.09), c.out); } },
+        hit: (c) => { thump(c, c.t, c.onTable ? 58 : 100, c.onTable ? 28 : 55, c.vol * 1, 0.22);
+            chain(nz(c.ac, c.noise, c.t, 0.12), filt(c.ac, 'lowpass', 420), env(c.ac, c.t, c.vol * 0.5, 0.002, 0.1), c.out);
+            ring(c, c.t, r(170, 200), [[1, 1], [2.6, 0.3]], c.vol * 0.14, 0.05); click(c, c.t, 550, 1, c.vol * 0.35, 0.03); },
+    },
+    {
+        key: 'tungsten3', name: 'Tungsten slab', blurb: 'The heaviest: every landing has a deep sub-bass thump that rumbles into the table, like dropping a lead weight.',
+        throw: (c) => { thump(c, c.t, 65, 32, 0.55, 0.2); thump(c, c.t + 0.13, 60, 30, 0.5, 0.2); },
+        hit: (c) => { thump(c, c.t, c.onTable ? 52 : 95, c.onTable ? 24 : 50, c.vol * 1, 0.26);
+            if (c.onTable) { thump(c, c.t + 0.01, 38, 22, c.vol * 0.7, 0.32); chain(nz(c.ac, c.noise, c.t, 0.3), filt(c.ac, 'lowpass', 180), env(c.ac, c.t, c.vol * 0.6, 0.01, 0.28), c.out); }
+            click(c, c.t, 450, 1, c.vol * 0.35, 0.04); },
+    },
+    {
+        key: 'tungsten4', name: 'Tungsten clank', blurb: 'Heavy tungsten with a little dull metal edge: a deep thud with a short, low clank on top.',
+        throw: (c) => { for (const dt of [0, 0.11]) { thump(c, c.t + dt, 80, 45, 0.45, 0.12); ring(c, c.t + dt, 300, [[1, 1], [2.6, 0.4]], 0.14, 0.08); } },
+        hit: (c) => { thump(c, c.t, c.onTable ? 62 : 110, c.onTable ? 30 : 60, c.vol * 0.95, 0.2);
+            ring(c, c.t, r(240, 290) * (c.onTable ? 1 : 1.4), [[1, 1], [2.6, 0.45], [4.3, 0.15]], c.vol * 0.28, 0.1); click(c, c.t, 800, 1.2, c.vol * 0.3, 0.03); },
+    },
+    {
+        key: 'tungsten5', name: 'Tungsten on oak', blurb: 'Heavy tungsten landing on a thick oak table: a deep thud with the table knocking back under it.',
+        throw: (c) => { for (const dt of [0, 0.12]) thump(c, c.t + dt, 80, 42, 0.45, 0.13); },
+        hit: (c) => { thump(c, c.t, c.onTable ? 60 : 105, c.onTable ? 30 : 58, c.vol * 0.95, 0.2);
+            if (c.onTable) { click(c, c.t, r(320, 380), 4, c.vol * 0.6, 0.09); ring(c, c.t, r(130, 150), [[1, 1], [2.3, 0.3]], c.vol * 0.25, 0.14); }
+            else click(c, c.t, 900, 2, c.vol * 0.35, 0.04); },
     },
     {
         key: 'chainmail', name: 'Chain mail', blurb: 'Every bump jingles like a handful of tiny metal rings; a loud jangle on the throw.',

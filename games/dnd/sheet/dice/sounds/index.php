@@ -1,5 +1,5 @@
 <?php
-// Dice sound mockups: thirty throw-and-roll sound designs (sounds.js) to listen to and try on real dice, so the owner can pick one
+// Dice sound mockups: thirty-four throw-and-roll sound designs (sounds.js) to listen to and try on real dice, so the owner can pick one
 $site_page = ['components' => true, 'css' => ['/assets/css/pages/games-dnd-sheet-dice.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 $sets = ['ember' => 'Ember Cage', 'frost' => 'Frostbound', 'arcane' => 'Arcane Orrery', 'clockwork' => 'Clockwork', 'storm' => 'Stormcaller',
@@ -21,7 +21,7 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
     <main class="page dd" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">Dice Sound Mockups</h1>
-        <p class="page-lede">Thirty ideas for the sound when dice are thrown and while they roll, in groups. Listen to each, try it on real dice, and pick the one you like.</p>
+        <p class="page-lede">Thirty-four ideas for the sound when dice are thrown and while they roll, in groups. Listen to each, try it on real dice, and pick the one you like.</p>
 
         <div class="bar dd-bar">
             <label>Dice to try them on <select class="field" id="ds-set">
@@ -43,7 +43,7 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
         const CATS = [
             ['surfaces', 'Table surfaces', 'Ordinary dice, but on different things to roll on.', ['felt', 'wood', 'glass', 'stone', 'tavern']],
             ['materials', 'Dice materials', 'What the dice themselves are made of, apart from metal.', ['real', 'bone', 'ice']],
-            ['metals', 'Metal dice', 'Thirteen kinds of metal, from light and tinny to dense and heavy.', ['metal', 'steel', 'brass', 'anvil', 'skillet', 'aluminium', 'copper', 'silver', 'titanium', 'tungsten', 'chainmail', 'coins', 'rusty']],
+            ['metals', 'Metal dice', 'Seventeen kinds of metal, from light and tinny to dense and heavy, with four heavier takes on tungsten.', ['metal', 'steel', 'brass', 'anvil', 'skillet', 'aluminium', 'copper', 'silver', 'titanium', 'tungsten', 'tungsten2', 'tungsten3', 'tungsten4', 'tungsten5', 'chainmail', 'coins', 'rusty']],
             ['throws', 'How they’re thrown', 'The sound of the throw itself: shaken in your hands or slapped down from a cup.', ['hands', 'cup']],
             ['magic', 'Magic and drama', 'Fantasy and film sounds rather than real dice.', ['hearth', 'chime', 'sparkle', 'cinema']],
             ['playful', 'Light and playful', 'Quiet, game-like or silly.', ['whisper', 'arcade', 'bouncy']],
