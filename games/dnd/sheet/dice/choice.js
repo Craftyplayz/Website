@@ -1,7 +1,7 @@
 // The dice chosen on the Dice Sets page, kept in this browser so the Homebrew Sheet rolls with them too.
 // A choice names each piece by its module and key (paths relative to this folder), so it can be rebuilt anywhere:
 // { set: { key, url } or { key, builtin: true } (a plain style of dice3d.js), sound: { key, url } or null (the set's own),
-//   nat: { 1, 20: { key, url } }, trails: [{ key, url }] top layer first, anims: { 1, 20: { key, url } }, coin: a model coin's key or none for the 50c,
+//   nat: { 1, 20: { key, url } }, trails: [{ key, url }] top layer first, anims: { 1, 20, mid: { key, url } } (mid: every other roll), coin: a model coin's key or none for the 50c,
 //   coinSound: { key, url } (a coin sound profile) or none for the coin's own ring }
 const KEY = 'dice-choice';
 export const readChoice = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } };
@@ -31,13 +31,14 @@ export const withSound = (a, n) => ({ ...a, start(x) {
 export async function styleFrom(c, engine) {
     const set = c.set.builtin ? { ...(engine.STYLES[c.set.key] || engine.STYLES.purple), key: c.set.key } : { ...((await mod(c.set.url)) || engine.STYLES.purple), key: 'set-' + c.set.key };
     const find = (ref, get) => (ref ? mod(ref.url).then((m) => m && get(m)) : null);
-    const [snd, n1, n20, trails, a1, a20] = await Promise.all([
+    const [snd, n1, n20, trails, a1, a20, amid] = await Promise.all([
         find(c.sound, (l) => l.find?.((s) => s.key === c.sound.key)),
         find(c.nat?.[1], (m) => m.nat1?.find((s) => s.key === c.nat[1].key)),
         find(c.nat?.[20], (m) => m.nat20?.find((s) => s.key === c.nat[20].key)),
         Promise.all((c.trails || []).map((t) => find(t, (l) => l.find?.((x) => x.key === t.key)))),
         find(c.anims?.[1], (m) => (m.nat1?.key === c.anims[1].key ? m.nat1 : null)),
         find(c.anims?.[20], (m) => (m.nat20?.key === c.anims[20].key ? m.nat20 : null)),
+        find(c.anims?.mid, (m) => (m.mid?.key === c.anims.mid.key ? m.mid : null)),
     ]);
     const coinSound = await find(c.coinSound, (l) => l.find?.((x) => x.key === c.coinSound.key));
     const tr = trails.filter(Boolean);
@@ -45,5 +46,5 @@ export async function styleFrom(c, engine) {
         ...(snd && { sound: { ...set.sound, throw: snd.throw, hit: snd.hit } }),
         natSounds: { 1: n1 && ((x) => n1.play(x)), 20: n20 && ((x) => n20.play(x)) },
         ...(tr.length && { trail: tr.length === 1 ? tr[0].make : layered(tr) }),
-        ...((a1 || a20) && { exits: { ...set.exits, ...(a1 && { 'd20:1': withSound(a1, 1) }), ...(a20 && { 'd20:20': withSound(a20, 20) }) } }) };
+        ...((a1 || a20 || amid) && { exits: { ...set.exits, ...(amid && { '*': amid }), ...(a1 && { 'd20:1': withSound(a1, 1) }), ...(a20 && { 'd20:20': withSound(a20, 20) }) } }) };
 }

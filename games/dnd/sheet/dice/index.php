@@ -25,7 +25,7 @@ $data = [
     'sounds' => './sounds.js?v=' . $v('sounds.js'),
     // coin sound profiles (flip, bounces and settle), a couple to a file
     'coinsounds' => array_map(fn($f) => './coinsounds/' . basename($f) . '?v=' . filemtime($f), glob(__DIR__ . '/coinsounds/*.js') ?: []),
-    // things made for one set only, in extras/<set>/trails/ and extras/<set>/anims/ (nat 1 and nat 20 animations)
+    // things made for one set only, in extras/<set>/trails/ and extras/<set>/anims/ (nat 1, nat 20 and other-roll animations)
     'extras' => array_filter(array_combine(array_keys($sets), array_map(fn($k) => array_filter([
         'trails' => array_map(fn($f) => "./extras/$k/trails/" . basename($f) . '?v=' . filemtime($f), glob(__DIR__ . "/extras/$k/trails/*.js") ?: []),
         'anims' => array_map(fn($f) => "./extras/$k/anims/" . basename($f) . '?v=' . filemtime($f), glob(__DIR__ . "/extras/$k/anims/*.js") ?: []),
@@ -112,10 +112,10 @@ $data = [
             <div class="dd-layers" id="dd-layers" hidden></div>
             <div class="dd-sounds" id="dd-trails"></div>
             <div class="dd-nats">
-                <?php foreach ([1 => 'Nat 1 animation', 20 => 'Nat 20 animation'] as $n => $title): ?>
+                <?php foreach ([1 => 'Nat 1 animation', 20 => 'Nat 20 animation', 'mid' => 'Other rolls animation'] as $n => $title): ?>
                     <section>
                         <h2 class="sec-h"><?= $title ?> <span class="n" id="dd-a<?= $n ?>count"></span></h2>
-                        <p class="muted dd-natline"><?= $n === 1 ? 'How a d20 that lands on 1 leaves the table.' : 'How a d20 that lands on 20 leaves the table.' ?></p>
+                        <p class="muted dd-natline"><?= ['1' => 'How a d20 that lands on 1 leaves the table.', '20' => 'How a d20 that lands on 20 leaves the table.', 'mid' => 'How every other die leaves the table: a d20 on 2 to 19, and the other dice.'][$n] ?></p>
                         <div class="dd-sounds" id="dd-anim<?= $n ?>"></div>
                     </section>
                 <?php endforeach; ?>
