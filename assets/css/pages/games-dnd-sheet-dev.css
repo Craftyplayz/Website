@@ -380,11 +380,11 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 /* 3D dice layer over the page, under the roll card and tray; clicks go through it */
 #hb-throw { position: fixed; inset: 0; z-index: 1740; width: 100vw; height: 100vh; pointer-events: none; }
 /* dice style pictures in Customise; the picked one is outlined */
-.hb-dstyles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 8px; margin: 8px 0 12px; }
-.hb-dstyle { display: grid; gap: 4px; padding: 8px; background: var(--card2); border: 1px solid var(--line); border-radius: var(--radius); color: var(--text); font: inherit; font-size: 13px; text-align: left; cursor: pointer; transition: border-color var(--fast), background var(--fast); }
+.hb-dstyles { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin: 8px 0 12px; }
+.hb-dstyle { display: grid; justify-items: center; gap: 4px; padding: 8px; background: var(--card2); border: 1px solid var(--line); border-radius: var(--radius); color: var(--text); font: inherit; font-size: 13px; text-align: center; cursor: pointer; transition: border-color var(--fast), background var(--fast); }
 .hb-dstyle:hover { border-color: var(--accent); }
 .hb-dstyle[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
-.hb-dstyle img { width: 100%; height: auto; aspect-ratio: 6 / 1; min-height: 32px; }
+.hb-dstyle img { width: 100%; max-width: 96px; height: auto; aspect-ratio: 1; }
 /* roll log: fixed in the empty space left of the sheet (sheet.js sets the width), from the top down to the dice button */
 .hb-log { position: fixed; left: 16px; top: 16px; bottom: 84px; z-index: 1500; display: grid; grid-template-rows: auto 1fr; gap: 8px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
 .hb-logbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
