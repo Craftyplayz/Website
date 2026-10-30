@@ -291,8 +291,9 @@ document.addEventListener('click', async (e) => {
     }
     else if (b.dataset.roll) roll(b.dataset.roll.split(',').map((g) => g.split('x').map(Number)));
     else if (b.id === 'dd-coin') roll([['coin', 1]]);
-    else if (b.id === 'dd-landgo') { const die = $('#dd-die').value, coin = die === 'coin';
-        roll([[coin ? 'coin' : +die, 1]], [[coin ? $('#dd-num').value : +$('#dd-num').value]]); }
+    // Land on: that many of the die, every one landing on the chosen number (1 to 30)
+    else if (b.id === 'dd-landgo') { const die = $('#dd-die').value, coin = die === 'coin', n = Math.max(1, Math.min(30, parseInt($('#dd-count').value, 10) || 1));
+        $('#dd-count').value = n; roll([[coin ? 'coin' : +die, n]], [Array(n).fill(coin ? $('#dd-num').value : +$('#dd-num').value)]); }
 });
 $('#dd-die').addEventListener('change', fillNums);
 fillNums(); drawSets(); drawCoins(); drawCoinSounds(); drawSounds(); drawNats(); drawExtras(); drawPresets();
