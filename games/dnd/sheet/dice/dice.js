@@ -203,8 +203,11 @@ $('#dd-pfile').addEventListener('change', async (e) => {
 
 // ---- rolling ----
 const NUMS = (d) => Array.from({ length: d }, (_, i) => i + 1);
-const fillNums = () => { const d = +$('#dd-die').value, cur = +$('#dd-num').value || d;
+// the coin lands on heads or tails instead of a number
+const fillNums = () => { if ($('#dd-die').value === 'coin') { $('#dd-num').innerHTML = '<option value="heads">Heads</option><option value="tails">Tails</option>'; return; }
+    const d = +$('#dd-die').value, cur = +$('#dd-num').value || d;
     $('#dd-num').innerHTML = NUMS(d).map((n) => `<option${n === Math.min(cur, d) ? ' selected' : ''}>${n}</option>`).join(''); };
+const said = (n, v) => (n === 'coin' ? `Coin: ${v === 'heads' ? 'Heads' : 'Tails'}` : `d${n} ${v}`);
 // only: trail keys to use instead of the chosen layers (a trail's Try shows it on its own)
 async function roll(groups, land = null, only = null) {
     out.textContent = 'Rolling...';
@@ -214,7 +217,7 @@ async function roll(groups, land = null, only = null) {
         // a new roll takes the last one's dice off the table first, even mid-roll
         m.clearTable(true);
         const res = await m.throwDice(groups, { style, sound: soundBox.checked, land });
-        out.textContent = res.flatMap(([n, r]) => r.map((v) => `d${n} ${v}`)).join(' · ');
+        out.textContent = res.flatMap(([n, r]) => r.map((v) => said(n, v))).join(' · ');
     } catch (e) { out.textContent = "Couldn't roll. Try again."; }
 }
 
@@ -262,7 +265,9 @@ document.addEventListener('click', async (e) => {
         a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     }
     else if (b.dataset.roll) roll(b.dataset.roll.split(',').map((g) => g.split('x').map(Number)));
-    else if (b.id === 'dd-landgo') roll([[+$('#dd-die').value, 1]], [[+$('#dd-num').value]]);
+    else if (b.id === 'dd-coin') roll([['coin', 1]]);
+    else if (b.id === 'dd-landgo') { const die = $('#dd-die').value, coin = die === 'coin';
+        roll([[coin ? 'coin' : +die, 1]], [[coin ? $('#dd-num').value : +$('#dd-num').value]]); }
 });
 $('#dd-die').addEventListener('change', fillNums);
 fillNums(); drawSets(); drawSounds(); drawNats(); drawExtras(); drawPresets();
