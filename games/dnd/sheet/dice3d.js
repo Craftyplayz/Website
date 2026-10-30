@@ -607,8 +607,8 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
         if (kind !== 'coin') { d.fx = decorate(st, d); d.trail = st.trail?.({ THREE, scene, mesh, body: b, kind, sides: kind === 't' || kind === 'u' ? 10 : kind, hw, hd, rnd }) || null; }
         live.push(d); return d;
     });
-    // a throw of only coins flips and settles with the coin sound when the style has one
-    const snd = kinds.every((k) => k === 'coin') && st.coinSound ? st.coinSound : st.sound;
+    // a throw of only coins makes no throw or settle sound: a coin is only heard while it bounces (coinHit)
+    const snd = kinds.every((k) => k === 'coin') ? null : st.sound;
     if (sound && audio) snd?.throw?.({ ac: audio, out: audio.out, noise, t: audio.currentTime, count: dice.length });
     cv.style.transition = 'none'; cv.style.opacity = '1';
     return new Promise((resolve) => {

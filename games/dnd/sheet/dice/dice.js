@@ -80,7 +80,7 @@ async function drawCoinSounds() {
         <button type="button" class="dd-pick" data-csnd="${esc(s.key)}" aria-pressed="${cur === s.key}"><b>${esc(s.name)}</b><span>${esc(s.blurb)}</span></button>
         ${s.key ? `<button type="button" class="btn small" data-csplay="${esc(s.key)}">Play a flip</button>` : ''}</div>`).join('');
 }
-// a pretend flip for listening: the flip, a landing, smaller bounces, then the settle
+// a pretend flip for listening: a landing, then smaller bounces (a coin is only heard while it bounces)
 const BOUNCES = [[0.95, 1], [1.15, 0.6], [1.3, 0.4], [1.4, 0.25], [1.47, 0.15], [1.52, 0.08]];
 
 // ---- sound ----
@@ -248,7 +248,7 @@ document.addEventListener('click', async (e) => {
     else if (b.dataset.coin) { state.coin = b.dataset.coin; save(); drawCoins(); roll([['coin', 1]]); }
     else if (b.dataset.csnd != null) { state.coinSound = b.dataset.csnd || undefined; save(); drawCoinSounds(); }
     else if (b.dataset.csplay) { const s = (await coinSounds).find((x) => x.key === b.dataset.csplay), a = audio(), t = a.ac.currentTime + 0.05;
-        s.throw({ ...a, t, count: 1 }); for (const [at, vol] of BOUNCES) s.hit({ ...a, t: t + at, vol, onTable: true }); s.settle({ ...a, t: t + 1.6, count: 1 }); }
+        for (const [at, vol] of BOUNCES) s.hit({ ...a, t: t + at, vol, onTable: true }); }
     else if (b.dataset.field === 'trail') {
         // a trail row adds that trail as the top layer, or takes it off again; None takes them all off; Try rolls the set with just that trail
         const key = b.dataset.xkey, list = trailsOf(pick());
