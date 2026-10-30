@@ -249,6 +249,8 @@ const NS = 28;
 export default {
     // which exit plays for which roll: the most specific key wins ('d20:20', then a range like 'd20:2-19', then 'd20', then '*')
     exits: { 'd20:1': EXITS.fireball, 'd20:20': EXITS.phoenix, '*': EXITS.ash },
+    // the original nat 1 and nat 20 sounds, for other animations to play at their own impact ({ ac, out, noise, t0, hit })
+    natOriginal: { 1: (c) => boom(c, c.hit - c.ac.currentTime), 20: (c) => fanfare(c, c.hit - c.ac.currentTime) },
     // bright bold numbers on dark plates: they glow like hot metal and read at a glance
     name: 'Ember Cage', ink: '#ffe9a8', metal: 0.55, rough: 0.38, glow: 0.55, bumpScale: 4,
     paint(g, S, seed, corners, d4) {
