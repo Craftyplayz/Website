@@ -10,3 +10,9 @@
 .dd-out { color: var(--muted); font-size: 13px; }
 /* the dice table over the whole page; it never takes clicks */
 #hb-throw { position: fixed; inset: 0; z-index: 1740; width: 100vw; height: 100vh; pointer-events: none; }
+/* sound mockups (/games/dnd/sheet/dice/sounds/): sections of cards by kind of sound */
+.dd .jump { margin-top: 16px; }
+.dd .sec-h { margin: 28px 0 4px; }
+.dd-catline { margin: 0 0 12px; }
+.dd-card h3 { margin: 0; font-size: 17px; }
+.dd #ds-grid .dd-grid { margin-top: 0; }

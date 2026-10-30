@@ -1,5 +1,5 @@
 <?php
-// Dice sound mockups: twenty throw-and-roll sound designs (sounds.js) to listen to and try on real dice, so the owner can pick one
+// Dice sound mockups: thirty throw-and-roll sound designs (sounds.js) to listen to and try on real dice, so the owner can pick one
 $site_page = ['components' => true, 'css' => ['/assets/css/pages/games-dnd-sheet-dice.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 $sets = ['ember' => 'Ember Cage', 'frost' => 'Frostbound', 'arcane' => 'Arcane Orrery', 'clockwork' => 'Clockwork', 'storm' => 'Stormcaller',
@@ -21,7 +21,7 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
     <main class="page dd" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">Dice Sound Mockups</h1>
-        <p class="page-lede">Twenty ideas for the sound when dice are thrown and while they roll. Listen to each, try it on real dice, and pick the one you like.</p>
+        <p class="page-lede">Thirty ideas for the sound when dice are thrown and while they roll, in groups. Listen to each, try it on real dice, and pick the one you like.</p>
 
         <div class="bar dd-bar">
             <label>Dice to try them on <select class="field" id="ds-set">
@@ -29,7 +29,8 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
             </select></label>
         </div>
 
-        <div class="dd-grid" id="ds-grid"><p class="note">Loading sounds...</p></div>
+        <nav class="jump" id="ds-jump" aria-label="Sound categories"></nav>
+        <div id="ds-grid"><p class="note">Loading sounds...</p></div>
     </main>
 
     <?php site_footer(null, false); ?>
@@ -38,11 +39,24 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
         import mocks from './sounds.js?v=<?= $v('sounds.js') ?>';
         const $ = (s, r = document) => r.querySelector(s), grid = $('#ds-grid');
         const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-        grid.innerHTML = mocks.map((m, i) => `<section class="card dd-card">
-            <h2>${i + 1}. ${esc(m.name)}</h2><p class="muted dd-sound">${esc(m.blurb)}</p>
+        // the mockups grouped by what kind of sound they are; numbers run through the page in this order
+        const CATS = [
+            ['surfaces', 'Table surfaces', 'Ordinary dice, but on different things to roll on.', ['felt', 'wood', 'glass', 'stone', 'tavern']],
+            ['materials', 'Dice materials', 'What the dice themselves are made of, apart from metal.', ['real', 'bone', 'ice']],
+            ['metals', 'Metal dice', 'Thirteen kinds of metal, from light and tinny to dense and heavy.', ['metal', 'steel', 'brass', 'anvil', 'skillet', 'aluminium', 'copper', 'silver', 'titanium', 'tungsten', 'chainmail', 'coins', 'rusty']],
+            ['throws', 'How they’re thrown', 'The sound of the throw itself: shaken in your hands or slapped down from a cup.', ['hands', 'cup']],
+            ['magic', 'Magic and drama', 'Fantasy and film sounds rather than real dice.', ['hearth', 'chime', 'sparkle', 'cinema']],
+            ['playful', 'Light and playful', 'Quiet, game-like or silly.', ['whisper', 'arcade', 'bouncy']],
+        ];
+        let n = 0;
+        $('#ds-jump').innerHTML = CATS.map(([id, title]) => `<a href="#ds-${id}">${esc(title)}</a>`).join('');
+        grid.innerHTML = CATS.map(([id, title, blurb, keys]) => `<h2 class="sec-h" id="ds-${id}">${esc(title)} <span class="n">${keys.length}</span></h2>
+            <p class="muted dd-catline">${esc(blurb)}</p>
+            <div class="dd-grid">${keys.map((k) => { const i = mocks.findIndex((m) => m.key === k), m = mocks[i]; return `<section class="card dd-card">
+            <h3>${++n}. ${esc(m.name)}</h3><p class="muted dd-sound">${esc(m.blurb)}</p>
             <div class="actions"><button type="button" class="btn" data-play="throw" data-i="${i}">Play throw</button>
             <button type="button" class="btn" data-play="roll" data-i="${i}">Play a roll</button>
-            <button type="button" class="btn" data-dice="${i}">Roll dice with it</button></div></section>`).join('');
+            <button type="button" class="btn" data-dice="${i}">Roll dice with it</button></div></section>`; }).join('')}</div>`).join('');
         // the page's own audio for listening without dice, built like the dice engine's: a compressor and a short noise buffer
         let A = null;
         const audio = () => {
