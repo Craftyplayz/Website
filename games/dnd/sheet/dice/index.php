@@ -74,7 +74,8 @@ $data = [
 
         <div id="dd-extras" hidden>
             <h2 class="sec-h">Trail <span class="n" id="dd-trailcount"></span></h2>
-            <p class="muted dd-natline">What each die leaves on the table as it rolls.</p>
+            <p class="muted dd-natline">What each die leaves on the table as it rolls. Pick several to layer them.</p>
+            <div class="dd-layers" id="dd-layers" hidden></div>
             <div class="dd-sounds" id="dd-trails"></div>
             <div class="dd-nats">
                 <?php foreach ([1 => 'Nat 1 animation', 20 => 'Nat 20 animation'] as $n => $title): ?>
