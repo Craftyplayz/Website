@@ -125,16 +125,39 @@ function buildDie(kind, st) {
         vertices: uniq.map((p) => new CANNON.Vec3(p.x, p.y, p.z)),
         faces: fs.map((f) => f.pts.map((p) => uniq.findIndex((q) => q.distanceTo(p) < 1e-4))),
     });
-    return (built[key] = { geo, mats, shape, fs, verts, d4 });
+    return (built[key] = { geo, mats, shape, fs, verts, d4, all: uniq });
 }
 // the value showing: the face pointing most up (a d4: the corner pointing most up)
 const UP = V(0, 1, 0);
-function readDie(d) {
-    const q = new THREE.Quaternion(d.body.quaternion.x, d.body.quaternion.y, d.body.quaternion.z, d.body.quaternion.w);
-    if (d.t.d4) { let best = -9, v = 1; d.t.verts.forEach((p, i) => { const y = p.clone().applyQuaternion(q).y; if (y > best) { best = y; v = i + 1; } }); return v; }
-    let best = -9, v = 1; for (const f of d.t.fs) { const y = f.n.clone().applyQuaternion(q).dot(UP); if (y > best) { best = y; v = f.value; } }
-    return v;
+// a die's numbered directions: its face normals, or a d4's corners
+const dirOf = (t, i) => (t.d4 ? t.verts[i].clone().normalize() : t.fs[i].n.clone());
+const topIndex = (t, q) => { let best = -9, k = 0; const n = t.d4 ? t.verts.length : t.fs.length;
+    for (let i = 0; i < n; i++) { const y = dirOf(t, i).applyQuaternion(q).y; if (y > best) { best = y; k = i; } } return k; };
+const quatOf = (b) => new THREE.Quaternion(b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w);
+// raw: what the physics landed on, ignoring a forced die's turned numbering (S)
+function readDie(d, raw = false) {
+    const q = quatOf(d.body); if (d.S && !raw) q.multiply(d.S);
+    const k = topIndex(d.t, q);
+    return d.t.d4 ? k + 1 : d.t.fs[k].value;
 }
+// a turn of the die onto itself (its shape doesn't change) that takes direction from to direction to;
+// drawing the die turned by it moves one face's number onto another face, which is how a forced number gets on top
+function symmetry(t, from, to) {
+    const q1 = new THREE.Quaternion().setFromUnitVectors(from, to);
+    const flat = (p) => p.clone().sub(to.clone().multiplyScalar(p.dot(to)));
+    const anchor = t.all.find((p) => Math.abs(p.clone().normalize().dot(from)) < 0.99).clone().applyQuaternion(q1), pa = flat(anchor);
+    for (const c of t.all) {
+        const pc = flat(c);
+        if (Math.abs(c.dot(to) - anchor.dot(to)) > 1e-3 || Math.abs(pc.length() - pa.length()) > 1e-3) continue;
+        const q = new THREE.Quaternion().setFromAxisAngle(to, Math.atan2(pa.clone().cross(pc).dot(to), pa.dot(pc))).multiply(q1);
+        if (t.all.every((p) => { const m = p.clone().applyQuaternion(q); return t.all.some((o) => o.distanceTo(m) < 1e-3); })) return q;
+    }
+    return null;
+}
+// the index of the face (or d4 corner) that carries a value
+const indexOf = (t, v) => (t.d4 ? v - 1 : t.fs.findIndex((f) => f.value === v));
+// turns a forced die's numbering so want shows where the physics put landed (both indexes)
+const force = (d, landed) => { d.S = symmetry(d.t, dirOf(d.t, indexOf(d.t, d.want)), dirOf(d.t, landed)); };
 
 // something for metal dice to reflect: a dark room with a bright sky and two soft lights
 function roomEnv(r) {
@@ -193,13 +216,15 @@ function startAudio() {
     }
     if (audio.state === 'suspended') audio.resume();
 }
+// a table: the floor and four walls; the live one, or a silent copy for working out forced numbers
 function walls(hw, hd) {
-    world = new CANNON.World({ gravity: new CANNON.Vec3(0, -50, 0), allowSleep: true });
-    world.defaultContactMaterial.friction = 0.3; world.defaultContactMaterial.restitution = 0.35;
-    const plane = (pos, axis, ang) => { const b = new CANNON.Body({ mass: 0, shape: new CANNON.Plane() }); b.position.set(...pos); b.quaternion.setFromAxisAngle(new CANNON.Vec3(...axis), ang); world.addBody(b); };
+    const w = new CANNON.World({ gravity: new CANNON.Vec3(0, -50, 0), allowSleep: true });
+    w.defaultContactMaterial.friction = 0.3; w.defaultContactMaterial.restitution = 0.35;
+    const plane = (pos, axis, ang) => { const b = new CANNON.Body({ mass: 0, shape: new CANNON.Plane() }); b.position.set(...pos); b.quaternion.setFromAxisAngle(new CANNON.Vec3(...axis), ang); w.addBody(b); };
     plane([0, 0, 0], [1, 0, 0], -Math.PI / 2);
     plane([-hw, 0, 0], [0, 1, 0], Math.PI / 2); plane([hw, 0, 0], [0, 1, 0], -Math.PI / 2);
     plane([0, 0, -hd], [0, 0, 1], 0); plane([0, 0, hd], [0, 1, 0], Math.PI);
+    return w;
 }
 // takes a die off the table, and anything its style added to the scene
 const drop = (d) => { scene.remove(d.mesh); d.fx?.dispose?.(); };
@@ -259,7 +284,7 @@ function table() {
     hd = H / ppu / 2; hw = W / ppu / 2;
     Object.assign(camera, { left: -hw, right: hw, top: hd, bottom: -hd });
     camera.position.set(0, 60, 0); camera.up.set(0, 0, -1); camera.lookAt(0, 0, 0); camera.updateProjectionMatrix();
-    walls(hw - 0.3, hd - 0.3);
+    world = walls(hw - 0.3, hd - 0.3);
 }
 const asleep = (d) => d.body.sleepState === CANNON.Body.SLEEPING || (d.body.velocity.length() < 0.15 && d.body.angularVelocity.length() < 0.15);
 // one loop for every throw on the table; each throw resolves when its own dice stop, the table clears when all have
@@ -269,7 +294,7 @@ export function setSpeed(x) { speed = Math.max(1, Math.min(16, +x || 1)); }
 function frame(now) {
     const real = Math.min(0.05, (now - (frame.last || now)) / 1000), dt = real * speed; frame.last = now;
     world.step(1 / 120, dt, Math.ceil(8 * speed));
-    for (const d of live) { d.mesh.position.copy(d.body.position); d.mesh.quaternion.copy(d.body.quaternion); d.fx?.tick?.(now / 1000, dt, d.body); }
+    for (const d of live) { d.mesh.position.copy(d.body.position); d.mesh.quaternion.copy(d.body.quaternion); if (d.S) d.mesh.quaternion.multiply(d.S); d.fx?.tick?.(now / 1000, dt, d.body); }
     // exits run in real time, after the physics placed the die, so they can move, scale or hide it
     if (exiting && !runExits(now / 1000, real)) { exiting = false; fade(); }
     renderer.render(scene, camera);
@@ -300,7 +325,10 @@ const styleOf = (style, accent) => { const base = typeof style === 'object' ? st
 const decorate = (st, d) => st.decorate?.({ THREE, scene, mesh: d.mesh, kind: d.kind, sides: d.kind === 't' || d.kind === 'u' ? 10 : d.kind, faces: d.t.fs, rnd }) || null;
 
 // style: see styleOf; accent: the purple style's colour; sound: knock as they land
-export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', sound = true } = {}) {
+// land: numbers to force, shaped like groups' results ([[20], [3, 5]] for [[20, 1], [6, 2]]; a d100's are 1-100); a missing one rolls freely.
+// The throw is first run silently on a copy of the table to see where each die lands, then the die's numbering is turned so the wanted number
+// is on that face. That only matches when the table starts empty (clearTable(true) first); otherwise the numbers are turned once the dice stop.
+export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', sound = true, land = null } = {}) {
     // dice already on the table stay; a fade that had started stops
     fadeT.forEach(clearTimeout); fadeT = [];
     if (!scene) setup();
@@ -315,18 +343,30 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
     // each throw comes in from a random spot on the screen edge: a random direction out from the middle, stopped at the edge
     const a = Math.random() * Math.PI * 2, cx = Math.cos(a), cz = Math.sin(a), s = Math.min(hw / Math.abs(cx || 1e-9), hd / Math.abs(cz || 1e-9));
     const fit = (v, h) => Math.max(-h + 1.5, Math.min(h - 1.5, v));
+    // how each die starts: spread along the edge (i % 4) and inward (i % 3), then thrown at a spot near the middle
+    const starts = kinds.map((kind, i) => {
+        const along = ((i % 4) - 1.5) * 1.6, inward = 2 + (i % 3) * 1.2;
+        const x = fit(cx * s - cx * inward - cz * along, hw), z = fit(cz * s - cz * inward + cx * along, hd);
+        const sp = 0.9 + Math.random() * 0.5, tx = (Math.random() - 0.5) * hw * 0.5, tz = (Math.random() - 0.5) * hd * 0.5;
+        return { pos: [x, 3 + Math.floor(i / 4) * 1.8, z], vel: [(tx - x) * 1.2 * sp, -2, (tz - z) * 1.2 * sp],
+            spin: [0, 0, 0].map(() => (Math.random() - 0.5) * 30), turn: [0, 0, 0].map(() => Math.random() * 6) };
+    });
+    const body = (t, a) => { const b = new CANNON.Body({ mass: 1, shape: t.shape, sleepSpeedLimit: 0.25, sleepTimeLimit: 0.3, angularDamping: 0.15, linearDamping: 0.1 });
+        b.position.set(...a.pos); b.velocity.set(...a.vel); b.angularVelocity.set(...a.spin); b.quaternion.setFromEuler(...a.turn); return b; };
+    // forced numbers, one per die in kinds' order; a d100 splits into its tens and units dice
+    const wants = land ? groups.flatMap(([n, c], g) => Array.from({ length: c }, (_, j) => { const v = land[g]?.[j];
+        return n === 100 ? (v == null ? [null, null] : [Math.floor((v % 100) / 10) * 10, v % 10]) : [v ?? null]; }).flat()) : [];
+    // the silent run: same table, same starts, the same fixed physics steps, until everything sleeps
+    let landed = null;
+    if (wants.some((v) => v != null) && live.length === 0) {
+        const w = walls(hw - 0.3, hd - 0.3), bs = starts.map((a, i) => { const b = body(buildDie(kinds[i], st), a); w.addBody(b); return b; });
+        for (let i = 0; i < 120 * 8 && !bs.every((b) => b.sleepState === CANNON.Body.SLEEPING); i++) w.step(1 / 120);
+        landed = bs.map((b, i) => topIndex(buildDie(kinds[i], st), quatOf(b)));
+    }
     const dice = kinds.map((kind, i) => {
         const t = buildDie(kind, st), mesh = new THREE.Mesh(t.geo, t.mats);
         mesh.castShadow = true; scene.add(mesh);
-        const b = new CANNON.Body({ mass: 1, shape: t.shape, sleepSpeedLimit: 0.25, sleepTimeLimit: 0.3, angularDamping: 0.15, linearDamping: 0.1 });
-        // spread along the edge (i % 4) and inward (i % 3), then thrown at a spot near the middle
-        const along = ((i % 4) - 1.5) * 1.6, inward = 2 + (i % 3) * 1.2;
-        const x = fit(cx * s - cx * inward - cz * along, hw), z = fit(cz * s - cz * inward + cx * along, hd);
-        b.position.set(x, 3 + Math.floor(i / 4) * 1.8, z);
-        const sp = 0.9 + Math.random() * 0.5, tx = (Math.random() - 0.5) * hw * 0.5, tz = (Math.random() - 0.5) * hd * 0.5;
-        b.velocity.set((tx - x) * 1.2 * sp, -2, (tz - z) * 1.2 * sp);
-        b.angularVelocity.set((Math.random() - 0.5) * 30, (Math.random() - 0.5) * 30, (Math.random() - 0.5) * 30);
-        b.quaternion.setFromEuler(Math.random() * 6, Math.random() * 6, Math.random() * 6);
+        const b = body(t, starts[i]);
         // each hit knocks once: dice on dice is handled by the lower id, and a die can't knock again within 30 ms
         if (sound) b.addEventListener('collide', (e) => {
             const other = e.body, now = performance.now();
@@ -335,12 +375,16 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
             b.lastKnock = now; knock(Math.abs(e.contact.getImpactVelocityAlongNormal()), !other.mass, st);
         });
         world.addBody(b);
-        const d = { kind, t, mesh, body: b, st, sound }; d.fx = decorate(st, d); live.push(d); return d;
+        const d = { kind, t, mesh, body: b, st, sound, want: wants[i] ?? null };
+        if (d.want != null && landed) force(d, landed[i]);
+        d.fx = decorate(st, d); live.push(d); return d;
     });
     if (sound && audio) st.sound?.throw?.({ ac: audio, out: audio.out, noise, t: audio.currentTime, count: dice.length });
     cv.style.transition = 'none'; cv.style.opacity = '1';
     return new Promise((resolve) => {
         const results = () => {
+            // a forced die that landed somewhere else than the silent run said gets its numbering turned now
+            for (const d of dice) if (d.want != null && readDie(d) !== d.want) force(d, topIndex(d.t, quatOf(d.body)));
             // each die keeps its value, which picks its exit
             const out = [], vals = dice.map((d) => (d.value = readDie(d)));
             for (const [n, c] of groups) {

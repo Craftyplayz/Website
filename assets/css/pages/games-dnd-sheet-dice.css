@@ -1,18 +1,25 @@
-/* Dice sets (/games/dnd/sheet/dice/): a card per set with a preview strip and roll buttons */
+/* Dice Sets (/games/dnd/sheet/dice/): a roll bar, a grid of dice sets and a list of sounds by kind */
 .dd [hidden] { display: none !important; }
-.dd-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.dd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 16px; margin-top: 16px; }
-.dd-card { display: grid; align-content: start; gap: 8px; min-width: 0; }
-.dd-card h2, .dd-card p { margin: 0; }
-.dd-prev { width: 100%; height: auto; aspect-ratio: 6 / 1; border-radius: var(--radius); background: var(--sunken); }
-.dd-sound { font-size: 13px; }
-.dd-card .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; }
-.dd-out { color: var(--muted); font-size: 13px; }
+.dd-bar { gap: 8px 12px; }
+.dd-land { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.dd-land label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 14px; }
+.dd-land .field { width: 5.5em; }
+.dd-out { min-width: 0; font-size: 14px; font-weight: 600; }
+.dd .sec-h { margin: 28px 0 12px; }
+.dd-sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+.dd-set { display: grid; justify-items: center; gap: 4px; padding: 8px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); color: var(--text); font: inherit; font-size: 13px; text-align: center; cursor: pointer; transition: border-color var(--fast), background var(--fast); }
+.dd-set:hover { border-color: var(--accent); }
+.dd-set[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.dd-set img { width: 100%; max-width: 96px; height: auto; aspect-ratio: 1; }
+.dd-setline { margin: 12px 0 0; font-size: 14px; }
+.dd-cats { flex-wrap: wrap; margin-bottom: 12px; }
+.dd-cats .n { color: var(--muted); font-size: 12px; }
+.dd-sounds { display: grid; gap: 6px; }
+.dd-snd { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); transition: border-color var(--fast), background var(--fast); }
+.dd-snd:hover { border-color: var(--accent); }
+.dd-snd.on { border-color: var(--accent); background: var(--accent-soft); }
+.dd-pick { display: grid; flex: 1 1 260px; gap: 2px; min-width: 0; padding: 0; background: none; border: 0; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.dd-pick b { font-size: 14px; }
+.dd-pick span { color: var(--muted); font-size: 13px; }
 /* the dice table over the whole page; it never takes clicks */
 #hb-throw { position: fixed; inset: 0; z-index: 1740; width: 100vw; height: 100vh; pointer-events: none; }
-/* sound mockups (/games/dnd/sheet/dice/sounds/): sections of cards by kind of sound */
-.dd .jump { margin-top: 16px; }
-.dd .sec-h { margin: 28px 0 4px; }
-.dd-catline { margin: 0 0 12px; }
-.dd-card h3 { margin: 0; font-size: 17px; }
-.dd #ds-grid .dd-grid { margin-top: 0; }
