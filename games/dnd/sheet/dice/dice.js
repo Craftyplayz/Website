@@ -33,6 +33,8 @@ const load = () => (engine ||= import(DATA.engine).catch((e) => { engine = null;
 const setInfo = (k) => DATA.sets.find((s) => s.key === k), setUrl = (k) => `./sets/${k}.js?v=${setInfo(k).v}`;
 const setOf = (k) => (sets[k] ||= setInfo(k).builtin ? load().then((m) => ({ ...m.STYLES[k], key: k })) : import(setUrl(k)).then((m) => ({ ...m.default, key: 'set-' + k })));
 const sounds = import(DATA.sounds).then((m) => m.default);
+// coin sound profiles from every coinsounds/ file, each keeping the file it came from; one that fails to load is left out
+const coinSounds = Promise.all((DATA.coinsounds || []).map((u) => import(u).then((m) => m.default.map((s) => ({ ...s, url: u })), () => []))).then((l) => l.flat());
 // nat 1 and nat 20 sounds from every natsounds/ file; one that fails to load is left out
 // each sound keeps the file it came from, for the saved choice
 const nats = Promise.all(DATA.nat.map((u) => import(u).then((m) => m.default, () => ({})))).then((mods) => ({
@@ -70,6 +72,16 @@ load().then(async (m) => {
 }, () => { out.textContent = "Couldn't load the 3D dice. Check your connection and reload."; });
 // ---- coin: the 50 cent coin, or one of the model coins (coins/fantasy-coins.glb) ----
 const drawCoins = () => { for (const b of $$('.dd-coin')) b.setAttribute('aria-pressed', b.dataset.coin === (state.coin || '50c')); };
+// the coin sound list: the coin's own ring, then the profiles
+async function drawCoinSounds() {
+    const list = [{ key: '', name: 'Coin’s own ring', blurb: 'A bright metal ring on each bounce.' }, ...(await coinSounds)], cur = state.coinSound || '';
+    $('#dd-csndcount').textContent = list.length;
+    $('#dd-coinsnd').innerHTML = list.map((s) => `<div class="dd-snd${cur === s.key ? ' on' : ''}">
+        <button type="button" class="dd-pick" data-csnd="${esc(s.key)}" aria-pressed="${cur === s.key}"><b>${esc(s.name)}</b><span>${esc(s.blurb)}</span></button>
+        ${s.key ? `<button type="button" class="btn small" data-csplay="${esc(s.key)}">Play a flip</button>` : ''}</div>`).join('');
+}
+// a pretend flip for listening: the flip, a landing, smaller bounces, then the settle
+const BOUNCES = [[0.95, 1], [1.15, 0.6], [1.3, 0.4], [1.4, 0.25], [1.47, 0.15], [1.52, 0.08]];
 
 // ---- sound ----
 async function drawSounds() {
@@ -111,7 +123,8 @@ async function choice(only = null) {
         nat: { 1: ref(all[1].find((s) => s.key === state.nat1)), 20: ref(all[20].find((s) => s.key === state.nat20)) },
         trails: (only || trailsOf(p)).map((t) => ref(ex.trails.find((x) => x.key === t))).filter(Boolean),
         anims: { 1: ref(ex[1].find((a) => a.key === p.anim1)), 20: ref(ex[20].find((a) => a.key === p.anim20)) },
-        coin: state.coin && state.coin !== '50c' ? state.coin : null };
+        coin: state.coin && state.coin !== '50c' ? state.coin : null,
+        coinSound: state.coinSound ? (({ key, url }) => ({ key, url }))((await coinSounds).find((s) => s.key === state.coinSound) || {}) : null };
 }
 // the Homebrew Sheet reads this
 async function syncChoice() { try { saveChoice(await choice()); } catch (e) { } }
@@ -233,6 +246,9 @@ document.addEventListener('click', async (e) => {
     // the set's own sound row names the set, so it redraws too
     if (b.dataset.set) { state.set = b.dataset.set; save(); drawSets(); drawSounds(); drawNats(); drawExtras(); }
     else if (b.dataset.coin) { state.coin = b.dataset.coin; save(); drawCoins(); roll([['coin', 1]]); }
+    else if (b.dataset.csnd != null) { state.coinSound = b.dataset.csnd || undefined; save(); drawCoinSounds(); }
+    else if (b.dataset.csplay) { const s = (await coinSounds).find((x) => x.key === b.dataset.csplay), a = audio(), t = a.ac.currentTime + 0.05;
+        s.throw({ ...a, t, count: 1 }); for (const [at, vol] of BOUNCES) s.hit({ ...a, t: t + at, vol, onTable: true }); s.settle({ ...a, t: t + 1.6, count: 1 }); }
     else if (b.dataset.field === 'trail') {
         // a trail row adds that trail as the top layer, or takes it off again; None takes them all off; Try rolls the set with just that trail
         const key = b.dataset.xkey, list = trailsOf(pick());
@@ -278,4 +294,4 @@ document.addEventListener('click', async (e) => {
         roll([[coin ? 'coin' : +die, 1]], [[coin ? $('#dd-num').value : +$('#dd-num').value]]); }
 });
 $('#dd-die').addEventListener('change', fillNums);
-fillNums(); drawSets(); drawCoins(); drawSounds(); drawNats(); drawExtras(); drawPresets();
+fillNums(); drawSets(); drawCoins(); drawCoinSounds(); drawSounds(); drawNats(); drawExtras(); drawPresets();
