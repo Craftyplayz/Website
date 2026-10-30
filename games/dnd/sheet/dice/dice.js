@@ -16,6 +16,8 @@ const CATS = [
     ['throws', 'How they’re thrown', ['hands', 'cup']],
     ['magic', 'Magic and drama', ['hearth', 'chime', 'sparkle', 'cinema']],
     ['playful', 'Light and playful', ['whisper', 'arcade', 'bouncy']],
+    // whole profiles (throw, rolling and settle) from profiles/*.js; their keys are filled in once they load
+    ['profiles', 'Full profiles', []],
 ];
 
 // what's chosen, kept in this browser
@@ -32,7 +34,10 @@ const load = () => (engine ||= import(DATA.engine).catch((e) => { engine = null;
 // a plain style (builtin) comes from the engine itself
 const setInfo = (k) => DATA.sets.find((s) => s.key === k), setUrl = (k) => `./sets/${k}.js?v=${setInfo(k).v}`;
 const setOf = (k) => (sets[k] ||= setInfo(k).builtin ? load().then((m) => ({ ...m.STYLES[k], key: k })) : import(setUrl(k)).then((m) => ({ ...m.default, key: 'set-' + k })));
-const sounds = import(DATA.sounds).then((m) => m.default);
+// every sound keeps the file it came from, for the saved choice; a profile file that fails to load is left out
+const sounds = Promise.all([import(DATA.sounds).then((m) => m.default.map((s) => ({ ...s, url: DATA.sounds }))),
+    ...(DATA.profiles || []).map((u) => import(u).then((m) => m.default.map((s) => ({ ...s, url: u, profile: true })), () => []))])
+    .then(([base, ...profs]) => { const all = profs.flat(); CATS.find(([id]) => id === 'profiles')[2].push(...all.map((s) => s.key)); return [...base, ...all]; });
 // nat 1 and nat 20 sounds from every natsounds/ file; one that fails to load is left out
 // each sound keeps the file it came from, for the saved choice
 const nats = Promise.all(DATA.nat.map((u) => import(u).then((m) => m.default, () => ({})))).then((mods) => ({
@@ -75,7 +80,7 @@ const drawCoins = () => { for (const b of $$('.dd-coin')) b.setAttribute('aria-p
 async function drawSounds() {
     const list = await sounds, set = DATA.sets.find((x) => x.key === state.set);
     $('#dd-scount').textContent = list.length + 1;
-    $('#dd-cats').innerHTML = CATS.map(([id, title, keys]) => `<button type="button" data-tab="${id}" class="${state.tab === id ? 'on' : ''}"
+    $('#dd-cats').innerHTML = CATS.filter(([, , keys]) => keys.length).map(([id, title, keys]) => `<button type="button" data-tab="${id}" class="${state.tab === id ? 'on' : ''}"
         aria-pressed="${state.tab === id}">${esc(title)} <span class="n">${keys.length}</span></button>`).join('');
     const keys = CATS.find(([id]) => id === state.tab)[2];
     $('#dd-sounds').innerHTML = keys.map((k) => {
@@ -104,10 +109,10 @@ const natOf = async (n, k) => (await nats)[n].find((s) => s.key === k);
 const trailsOf = (p) => { if (!p.trails) { p.trails = p.trail ? [p.trail] : []; delete p.trail; } return p.trails; };
 // what's chosen right now, as a choice (choice.js); only: trail keys to use instead of the chosen layers
 async function choice(only = null) {
-    const k = state.set, info = setInfo(k), [all, ex] = await Promise.all([nats, extrasOf(k)]), p = pick();
+    const k = state.set, info = setInfo(k), [all, ex, list] = await Promise.all([nats, extrasOf(k), sounds]), p = pick();
     const ref = (x) => x && { key: x.key, url: x.url };
     return { set: info.builtin ? { key: k, builtin: true } : { key: k, url: setUrl(k) },
-        sound: state.sound === 'own' ? null : { key: state.sound, url: DATA.sounds },
+        sound: state.sound === 'own' ? null : { key: state.sound, url: list.find((s) => s.key === state.sound)?.url || DATA.sounds },
         nat: { 1: ref(all[1].find((s) => s.key === state.nat1)), 20: ref(all[20].find((s) => s.key === state.nat20)) },
         trails: (only || trailsOf(p)).map((t) => ref(ex.trails.find((x) => x.key === t))).filter(Boolean),
         anims: { 1: ref(ex[1].find((a) => a.key === p.anim1)), 20: ref(ex[20].find((a) => a.key === p.anim20)) },
@@ -261,7 +266,9 @@ document.addEventListener('click', async (e) => {
     else if (b.dataset.play) {
         const m = await soundOf(b.dataset.k), a = audio(), t = a.ac.currentTime + 0.05;
         m.throw?.({ ...a, t, count: 3 });
-        if (b.dataset.play === 'roll') for (const [at, vol, table] of HITS) m.hit?.({ ...a, t: t + at, vol, onTable: !!table });
+        if (b.dataset.play === 'roll') { for (const [at, vol, table] of HITS) m.hit?.({ ...a, t: t + at, vol, onTable: !!table });
+            // a full profile also settles at the end
+            m.settle?.({ ...a, t: t + 1.3, count: 3 }); }
     }
     else if (b.dataset.preset) usePreset(presets[+b.dataset.preset]);
     else if (b.dataset.pdel) { const p = presets[+b.dataset.pdel]; if (!confirm(`Delete the preset ${p.name}?`)) return;
