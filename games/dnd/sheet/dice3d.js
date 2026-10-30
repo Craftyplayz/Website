@@ -285,8 +285,10 @@ function frame(now) {
 }
 
 // empties the table now instead of after the usual pause and fade (the dice test page uses it between rolls)
-export function clearTable() {
+// force: also takes dice that are still rolling, reading them where they are (the Dice Sets page clears before every roll)
+export function clearTable(force = false) {
     fadeT.forEach(clearTimeout); fadeT = [];
+    if (force) { for (const t of throws) t.resolve(t.results()); throws = []; }
     if (world) endExits();
     if (scene && !throws.length) { clear(); renderer.clear(); }
 }

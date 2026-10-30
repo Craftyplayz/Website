@@ -83,6 +83,8 @@ $sets = [
             out.textContent = 'Rolling...';
             try {
                 const [m, st] = await Promise.all([load(), setOf(card.dataset.set)]);
+                // a new roll takes the last one's dice off the table first
+                m.clearTable(true);
                 const res = await m.throwDice(groups, { style: st, sound: sound.checked });
                 const vals = res.flatMap(([n, r]) => r.map((v) => (res.length > 1 ? `d${n} ${v}` : v)));
                 out.textContent = res.length > 1 ? vals.join(' · ') : 'Rolled ' + vals[0];
