@@ -322,6 +322,12 @@ export async function previewCoin(key, w = 96, h = 96) {
     return pv.r.domElement.toDataURL('image/png');
 }
 // a coin rings when it lands: a bright, slowly fading metal tone (dice on a table only clack)
+// a style's coinSound ({ throw, hit, settle }, the Dice Sets page's coin sound profiles) rings instead when it has one
+function coinHit(speed, onTable, st) {
+    const vol = Math.min(1, speed / 12) ** 1.3;
+    if (!st?.coinSound?.hit) return coinRing(speed, onTable);
+    if (audio && vol >= 0.02) st.coinSound.hit({ ac: audio, out: audio.out, noise, vol, onTable, t: audio.currentTime });
+}
 function coinRing(speed, onTable) {
     const vol = Math.min(1, speed / 12) ** 1.3;
     if (!audio || vol < 0.02) return;
@@ -512,7 +518,7 @@ function frame(now) {
     for (const t of throws) {
         // both counted in table time, so they hold at any speed
         t.age += dt; t.quiet = t.dice.every(asleep) ? t.quiet + dt : 0;
-        if (t.quiet > 0.25 || t.age > 7) { t.done = true; t.resolve(t.results()); if (audio) t.st.sound?.settle?.({ ac: audio, out: audio.out, noise, t: audio.currentTime, count: t.dice.length }); }
+        if (t.quiet > 0.25 || t.age > 7) { t.done = true; t.resolve(t.results()); if (audio) t.snd?.settle?.({ ac: audio, out: audio.out, noise, t: audio.currentTime, count: t.dice.length }); }
     }
     throws = throws.filter((t) => !t.done);
     // leave them on the table a moment, then their exits (or a fade)
@@ -591,7 +597,7 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
             const other = e.body, now = performance.now();
             if (other.mass && other.id < b.id) return;
             if (now - (b.lastKnock || 0) < 30) return;
-            b.lastKnock = now; (kind === 'coin' ? coinRing : knock)(Math.abs(e.contact.getImpactVelocityAlongNormal()), !other.mass, st);
+            b.lastKnock = now; (kind === 'coin' ? coinHit : knock)(Math.abs(e.contact.getImpactVelocityAlongNormal()), !other.mass, st);
         });
         world.addBody(b);
         const d = { kind, t, mesh, body: b, st, sound, want: wants[i] ?? null };
@@ -601,7 +607,9 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
         if (kind !== 'coin') { d.fx = decorate(st, d); d.trail = st.trail?.({ THREE, scene, mesh, body: b, kind, sides: kind === 't' || kind === 'u' ? 10 : kind, hw, hd, rnd }) || null; }
         live.push(d); return d;
     });
-    if (sound && audio) st.sound?.throw?.({ ac: audio, out: audio.out, noise, t: audio.currentTime, count: dice.length });
+    // a throw of only coins flips and settles with the coin sound when the style has one
+    const snd = kinds.every((k) => k === 'coin') && st.coinSound ? st.coinSound : st.sound;
+    if (sound && audio) snd?.throw?.({ ac: audio, out: audio.out, noise, t: audio.currentTime, count: dice.length });
     cv.style.transition = 'none'; cv.style.opacity = '1';
     return new Promise((resolve) => {
         const results = () => {
@@ -619,7 +627,7 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
             }
             return out;
         };
-        throws.push({ dice, resolve, results, st: sound ? st : {}, age: 0, quiet: 0 });
+        throws.push({ dice, resolve, results, snd: sound ? snd : null, age: 0, quiet: 0 });
         if (!raf) { frame.last = 0; raf = requestAnimationFrame(frame); }
     });
 }

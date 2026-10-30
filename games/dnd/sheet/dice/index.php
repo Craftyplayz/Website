@@ -23,6 +23,8 @@ $data = [
     'engine' => '../dice3d.js?v=' . filemtime(__DIR__ . '/../dice3d.js'),
     'choice' => './choice.js?v=' . $v('choice.js'),
     'sounds' => './sounds.js?v=' . $v('sounds.js'),
+    // coin sound profiles (flip, bounces and settle), a couple to a file
+    'coinsounds' => array_map(fn($f) => './coinsounds/' . basename($f) . '?v=' . filemtime($f), glob(__DIR__ . '/coinsounds/*.js') ?: []),
     // things made for one set only, in extras/<set>/trails/ and extras/<set>/anims/ (nat 1 and nat 20 animations)
     'extras' => array_filter(array_combine(array_keys($sets), array_map(fn($k) => array_filter([
         'trails' => array_map(fn($f) => "./extras/$k/trails/" . basename($f) . '?v=' . filemtime($f), glob(__DIR__ . "/extras/$k/trails/*.js") ?: []),
@@ -95,6 +97,10 @@ $data = [
             <a href="https://sketchfab.com/3d-models/fantasy-designed-coins-gold-silver-copper-71a3526b3403419f97717865afb27a41" target="_blank" rel="noopener">Fantasy Designed Coins</a>
             by <a href="https://sketchfab.com/Kigha" target="_blank" rel="noopener">Kigha</a>, licensed under
             <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> (textures resized).</p>
+
+        <h2 class="sec-h">Coin sound <span class="n" id="dd-csndcount"></span></h2>
+        <p class="muted dd-natline">How the coin sounds as it flips, bounces and settles.</p>
+        <div class="dd-sounds" id="dd-coinsnd"></div>
 
         <h2 class="sec-h">Sound <span class="n" id="dd-scount"></span></h2>
         <div class="stabs dd-cats" id="dd-cats" role="group" aria-label="Kind of sound"></div>
