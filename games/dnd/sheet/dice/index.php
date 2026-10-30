@@ -1,8 +1,9 @@
 <?php
-// Dice sets: ten 3D dice styles with moving parts and their own sounds, each in sets/<key>.js, thrown by the sheet's dice3d.js
+// Dice Sets: pick one of the ten 3D dice sets (sets/<key>.js) and a sound (the set's own, or one of sounds.js), then roll,
+// or make a die land on a chosen number to hear how a roll ending on it sounds. The page's script is dice.js.
 $site_page = ['components' => true, 'css' => ['/assets/css/pages/games-dnd-sheet-dice.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
-// key => [name, what it looks like, what it sounds like]; the look and sound live in sets/<key>.js
+// key => [name, what it looks like, what its own sound is like]; the look and sound live in sets/<key>.js
 $sets = [
     'ember' => ['Ember Cage', 'A dark iron lattice over a molten core that churns, with sparks drifting up off each die.', 'Iron clanks with a crackle of embers; a whoosh of flame on the throw and a hiss as they settle.'],
     'frost' => ['Frostbound', 'Pale blue ice with silver filigree, frost creeping across the faces and snowflakes circling.', 'Glassy ice clinks and crunches; a cold gust on the throw and a wind-chime shimmer at rest.'],
@@ -14,6 +15,12 @@ $sets = [
     'starfall' => ['Starfall', 'Midnight blue with a slowly turning galaxy inside, silver constellations and stars in orbit.', 'Soft glassy pings that ring out; a whoosh on the throw and a twinkling run of notes when they settle.'],
     'venom' => ['Viper Venom', 'A bone-white frame over toxic green liquid that bubbles, with drips falling from each die.', 'Dry bone clacks and wet gurgles; a hiss on the throw and a final hiss as they settle.'],
     'spectral' => ['Spectral', 'Ghostly see-through dice with a glowing wisp circling each one and leaving a trail.', 'Hollow, echoing knocks; a breathy rush on the throw and a low moan that fades at rest.'],
+];
+$v = fn($f) => filemtime(__DIR__ . '/' . $f);
+$data = [
+    'engine' => '../dice3d.js?v=' . filemtime(__DIR__ . '/../dice3d.js'),
+    'sounds' => './sounds.js?v=' . $v('sounds.js'),
+    'sets' => array_map(fn($k, $s) => ['key' => $k, 'name' => $s[0], 'look' => $s[1], 'sound' => $s[2], 'v' => $v("sets/$k.js")], array_keys($sets), $sets),
 ];
 ?>
 <!DOCTYPE html>
@@ -30,67 +37,39 @@ $sets = [
     <main class="page dd" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">Dice Sets</h1>
-        <p class="page-lede">Ten 3D dice sets for the Homebrew Sheet, each with moving parts and its own sounds. Roll one to see it.</p>
+        <p class="page-lede">Pick a dice set and a sound, then roll. You can also make a die land on a number to hear how a roll ending on it sounds.</p>
 
         <div class="bar dd-bar">
+            <button type="button" class="btn primary" data-roll="20x1">Roll a d20</button>
+            <button type="button" class="btn" data-roll="4x1,6x1,8x1,10x1,12x1,20x1">Roll the set</button>
+            <span class="dd-land">
+                <label>Land on <select class="field" id="dd-die" aria-label="Die">
+                    <?php foreach ([4, 6, 8, 10, 12, 20, 100] as $d): ?><option value="<?= $d ?>"<?= $d === 20 ? ' selected' : '' ?>>d<?= $d ?></option><?php endforeach; ?>
+                </select></label>
+                <select class="field" id="dd-num" aria-label="Number to land on"></select>
+                <button type="button" class="btn" id="dd-landgo">Roll it</button>
+            </span>
             <label class="check"><input type="checkbox" id="dd-sound" checked> Sound</label>
-            <span class="muted" id="dd-status"></span>
+            <span class="dd-out" id="dd-out" aria-live="polite"></span>
         </div>
 
-        <div class="dd-grid">
-            <?php foreach ($sets as $key => [$name, $look, $sound]): ?>
-                <section class="card dd-card" data-set="<?= h($key) ?>">
-                    <img class="dd-prev" alt="" width="336" height="56">
-                    <h2><?= h($name) ?></h2>
-                    <p><?= h($look) ?></p>
-                    <p class="muted dd-sound"><?= h($sound) ?></p>
-                    <div class="actions">
-                        <button type="button" class="btn" data-roll="20x1">Roll a d20</button>
-                        <button type="button" class="btn" data-roll="4x1,6x1,8x1,10x1,12x1,20x1">Roll the set</button>
-                        <span class="dd-out" aria-live="polite"></span>
-                    </div>
-                </section>
+        <h2 class="sec-h">Dice set <span class="n"><?= count($sets) ?></span></h2>
+        <div class="dd-sets" role="group" aria-label="Dice set">
+            <?php foreach ($sets as $k => [$name]): ?>
+                <button type="button" class="dd-set" data-set="<?= h($k) ?>" aria-pressed="false"><img alt="" width="96" height="96"><span><?= h($name) ?></span></button>
             <?php endforeach; ?>
         </div>
+        <p class="muted dd-setline" id="dd-setline"></p>
+
+        <h2 class="sec-h">Sound <span class="n" id="dd-scount"></span></h2>
+        <div class="stabs dd-cats" id="dd-cats" role="group" aria-label="Kind of sound"></div>
+        <div class="dd-sounds" id="dd-sounds"><p class="note">Loading sounds...</p></div>
     </main>
 
     <?php site_footer(null, false); ?>
 
-    <script type="module">
-        const $ = (s, r = document) => r.querySelector(s), status = $('#dd-status'), sound = $('#dd-sound');
-        try { sound.checked = localStorage.getItem('dice-sets-sound') !== '0'; } catch (e) { }
-        sound.addEventListener('change', () => { try { localStorage.setItem('dice-sets-sound', sound.checked ? '1' : '0'); } catch (e) { } });
-        // three.js and cannon-es come from jsDelivr with the dice; each set is its own file
-        let engine = null;
-        // versioned, so a changed engine isn't kept from the browser's day-long cache
-        const load = () => (engine ||= import('../dice3d.js?v=<?= filemtime(__DIR__ . '/../dice3d.js') ?>').catch((e) => { engine = null; throw e; }));
-        const sets = {};
-        const ver = <?= json_encode(array_map(fn($k) => @filemtime(__DIR__ . "/sets/$k.js") ?: 0, array_combine(array_keys($sets), array_keys($sets)))) ?>;
-        const setOf = (key) => (sets[key] ||= import(`./sets/${key}.js?v=${ver[key]}`).then((m) => ({ ...m.default, key: 'set-' + key })));
-        const cards = [...document.querySelectorAll('.dd-card')];
-        // previews, one set at a time so the page stays responsive
-        load().then(async (m) => {
-            for (const c of cards) {
-                try { $('.dd-prev', c).src = m.previewStyle(await setOf(c.dataset.set)); }
-                catch (e) { $('.dd-prev', c).hidden = true; }
-                await new Promise((r) => setTimeout(r, 0));
-            }
-        }, () => { status.textContent = "Couldn't load the 3D dice. Check your connection and reload."; });
-        document.addEventListener('click', async (e) => {
-            const b = e.target.closest('[data-roll]'); if (!b) return;
-            const card = b.closest('.dd-card'), out = $('.dd-out', card);
-            const groups = b.dataset.roll.split(',').map((g) => g.split('x').map(Number));
-            out.textContent = 'Rolling...';
-            try {
-                const [m, st] = await Promise.all([load(), setOf(card.dataset.set)]);
-                // a new roll takes the last one's dice off the table first
-                m.clearTable(true);
-                const res = await m.throwDice(groups, { style: st, sound: sound.checked });
-                const vals = res.flatMap(([n, r]) => r.map((v) => (res.length > 1 ? `d${n} ${v}` : v)));
-                out.textContent = res.length > 1 ? vals.join(' · ') : 'Rolled ' + vals[0];
-            } catch (err) { out.textContent = "Couldn't roll. Try again."; }
-        });
-    </script>
+    <script type="application/json" id="dd-data"><?= json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+    <script type="module" src="<?= h('dice.js?v=' . $v('dice.js')) ?>"></script>
 </body>
 
 </html>

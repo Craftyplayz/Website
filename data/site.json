@@ -110,8 +110,7 @@
                         { "title": "D&D Characters", "url": "/games/dnd/characters/", "description": "D&D Beyond character sheets", "keywords": ["dnd beyond", "character sheet"] },
                         { "title": "Homebrew Sheet", "url": "/games/dnd/sheet/", "description": "A character sheet you can change to fit any homebrew rules", "keywords": ["character sheet", "homebrew", "dnd beyond", "5e", "custom", "character builder"] },
                         { "title": "Dice Fairness Test", "url": "/games/dnd/sheet/test/", "description": "Rolls the Homebrew Sheet's 3D dice over and over in four panels to check they are fair", "keywords": ["dice", "fair", "test", "3d dice", "roll"], "nav": false },
-                        { "title": "Dice Sets", "url": "/games/dnd/sheet/dice/", "description": "Ten 3D dice sets with moving parts and their own sounds", "keywords": ["dice", "3d dice", "dice skins", "roll", "sound"], "nav": false },
-                        { "title": "Dice Sound Mockups", "url": "/games/dnd/sheet/dice/sounds/", "description": "Thirty-four throw and rolling sound ideas for the 3D dice to listen to and pick from", "keywords": ["dice", "sound", "mockup"], "nav": false, "search": false },
+                        { "title": "Dice Sets", "url": "/games/dnd/sheet/dice/", "description": "Ten 3D dice sets with moving parts and 35 sounds to pick from, with a test roll that lands on any number", "keywords": ["dice", "3d dice", "dice skins", "roll", "sound", "dice sounds"], "nav": false },
                         { "title": "Session Transcripts", "url": "/games/dnd/transcripts/", "description": "D&D session recordings with transcripts you can click to play", "keywords": ["recording", "audio", "transcript", "session"] }
                     ]
                 },
