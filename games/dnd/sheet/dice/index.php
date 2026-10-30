@@ -23,8 +23,6 @@ $data = [
     'engine' => '../dice3d.js?v=' . filemtime(__DIR__ . '/../dice3d.js'),
     'choice' => './choice.js?v=' . $v('choice.js'),
     'sounds' => './sounds.js?v=' . $v('sounds.js'),
-    // full sound profiles (throw, rolling and settle), a couple to a file
-    'profiles' => array_map(fn($f) => './profiles/' . basename($f) . '?v=' . filemtime($f), glob(__DIR__ . '/profiles/*.js') ?: []),
     // things made for one set only, in extras/<set>/trails/ and extras/<set>/anims/ (nat 1 and nat 20 animations)
     'extras' => array_filter(array_combine(array_keys($sets), array_map(fn($k) => array_filter([
         'trails' => array_map(fn($f) => "./extras/$k/trails/" . basename($f) . '?v=' . filemtime($f), glob(__DIR__ . "/extras/$k/trails/*.js") ?: []),

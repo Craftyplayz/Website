@@ -40,8 +40,7 @@ export async function styleFrom(c, engine) {
     ]);
     const tr = trails.filter(Boolean);
     return { ...set, coin: c.coin || null,
-        // a full profile (profiles/*.js) brings its own settle too
-        ...(snd && { sound: { ...set.sound, throw: snd.throw, hit: snd.hit, ...(snd.settle && { settle: snd.settle }) } }),
+        ...(snd && { sound: { ...set.sound, throw: snd.throw, hit: snd.hit } }),
         natSounds: { 1: n1 && ((x) => n1.play(x)), 20: n20 && ((x) => n20.play(x)) },
         ...(tr.length && { trail: tr.length === 1 ? tr[0].make : layered(tr) }),
         ...((a1 || a20) && { exits: { ...set.exits, ...(a1 && { 'd20:1': withSound(a1, 1) }), ...(a20 && { 'd20:20': withSound(a20, 20) }) } }) };
