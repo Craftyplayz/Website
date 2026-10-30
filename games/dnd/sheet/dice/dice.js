@@ -148,6 +148,59 @@ const soundOf = async (k) => (k === 'own' ? (await setOf(state.set)).sound || {}
 // a pretend roll: the throw, then bumps that come quicker and softer, a few of them dice on dice
 const HITS = [[0.38, 1, 1], [0.52, 0.8, 1], [0.6, 0.55, 0], [0.7, 0.6, 1], [0.79, 0.45, 1], [0.86, 0.3, 0], [0.93, 0.32, 1], [0.99, 0.2, 1], [1.04, 0.14, 1], [1.08, 0.08, 1]];
 
+// ---- presets: named copies of the set, sound, nat sounds and that set's trails and animations; saved here, or exported and imported as JSON ----
+const PKEY = 'dice-presets', pmsg = $('#dd-pmsg');
+const str = (v, max = 80) => (typeof v === 'string' && v.length <= max ? v : undefined);
+// a preset from storage or a file, keeping only known fields of the right kind; null when it can't be used
+function cleanPreset(p) {
+    const name = str(p?.name, 60)?.trim(), k = p?.picks || {};
+    if (!name || !setInfo(p.set)) return null;
+    return { name, set: p.set, sound: str(p.sound) || 'own', nat1: str(p.nat1) || 'orig', nat20: str(p.nat20) || 'orig',
+        picks: { trails: (Array.isArray(k.trails) ? k.trails : []).map((t) => str(t)).filter(Boolean).slice(0, 20), anim1: str(k.anim1), anim20: str(k.anim20) } };
+}
+const cleanAll = (list) => (Array.isArray(list) ? list.map(cleanPreset).filter(Boolean) : []);
+let presets = [];
+try { presets = cleanAll(JSON.parse(localStorage.getItem(PKEY))); } catch (e) { }
+const storePresets = () => { try { localStorage.setItem(PKEY, JSON.stringify(presets)); } catch (e) { } };
+// a preset with a name already saved replaces it
+const upsert = (p) => { const i = presets.findIndex((x) => x.name === p.name); if (i >= 0) presets[i] = p; else presets.push(p); };
+async function drawPresets() {
+    const list = await sounds;
+    $('#dd-pcount').textContent = presets.length || '';
+    $('#dd-pexport').disabled = !presets.length;
+    $('#dd-presets').innerHTML = presets.length ? presets.map((p, i) => {
+        const snd = list.find((x) => x.key === p.sound)?.name || 'Set’s own sound', n = p.picks.trails.length;
+        return `<div class="dd-snd">
+            <button type="button" class="dd-pick" data-preset="${i}"><b>${esc(p.name)}</b><span>${esc(setInfo(p.set).name)} · ${esc(snd)}${n ? ` · ${n} trail${n > 1 ? 's' : ''}` : ''}</span></button>
+            <button type="button" class="btn small" data-pdel="${i}" aria-label="Delete ${esc(p.name)}">Delete</button></div>`;
+    }).join('') : '<p class="muted dd-natline">No presets yet. Name the current set, sound and trails and save them to switch back in one click.</p>';
+}
+async function usePreset(p) {
+    const list = await sounds;
+    Object.assign(state, { set: p.set, sound: p.sound === 'own' || list.some((x) => x.key === p.sound) ? p.sound : 'own', nat1: p.nat1, nat20: p.nat20 });
+    state.tab = (CATS.find(([, , keys]) => keys.includes(state.sound)) || CATS[0])[0];
+    (state.picks ||= {})[p.set] = { trails: [...p.picks.trails], anim1: p.picks.anim1, anim20: p.picks.anim20 };
+    save(); drawSets(); drawSounds(); drawNats(); drawExtras();
+    pmsg.textContent = `Using ${p.name}.`;
+}
+$('#dd-pform').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const p = pick(), preset = cleanPreset({ name: $('#dd-pname').value, set: state.set, sound: state.sound, nat1: state.nat1, nat20: state.nat20,
+        picks: { trails: [...trailsOf(p)], anim1: p.anim1, anim20: p.anim20 } });
+    if (!preset) return;
+    upsert(preset); storePresets(); drawPresets();
+    $('#dd-pname').value = ''; pmsg.textContent = `Saved ${preset.name}.`;
+});
+$('#dd-pfile').addEventListener('change', async (e) => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    let data = null;
+    try { if (f.size < 1e6) data = JSON.parse(await f.text()); } catch (err) { }
+    const got = cleanAll(Array.isArray(data) ? data : data?.presets);
+    if (!got.length) { pmsg.textContent = 'No presets found in that file.'; return; }
+    got.forEach(upsert); storePresets(); drawPresets();
+    pmsg.textContent = `Imported ${got.length} preset${got.length > 1 ? 's' : ''}.`;
+});
+
 // ---- rolling ----
 const NUMS = (d) => Array.from({ length: d }, (_, i) => i + 1);
 const fillNums = () => { const d = +$('#dd-die').value, cur = +$('#dd-num').value || d;
@@ -199,8 +252,17 @@ document.addEventListener('click', async (e) => {
         m.throw?.({ ...a, t, count: 3 });
         if (b.dataset.play === 'roll') for (const [at, vol, table] of HITS) m.hit?.({ ...a, t: t + at, vol, onTable: !!table });
     }
+    else if (b.dataset.preset) usePreset(presets[+b.dataset.preset]);
+    else if (b.dataset.pdel) { const p = presets[+b.dataset.pdel]; if (!confirm(`Delete the preset ${p.name}?`)) return;
+        presets.splice(+b.dataset.pdel, 1); storePresets(); drawPresets(); pmsg.textContent = `Deleted ${p.name}.`; }
+    else if (b.id === 'dd-pimport') $('#dd-pfile').click();
+    else if (b.id === 'dd-pexport') {
+        const a = Object.assign(document.createElement('a'), { download: 'dice-presets.json',
+            href: URL.createObjectURL(new Blob([JSON.stringify({ kind: 'dice-presets', presets }, null, 2)], { type: 'application/json' })) });
+        a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
     else if (b.dataset.roll) roll(b.dataset.roll.split(',').map((g) => g.split('x').map(Number)));
     else if (b.id === 'dd-landgo') roll([[+$('#dd-die').value, 1]], [[+$('#dd-num').value]]);
 });
 $('#dd-die').addEventListener('change', fillNums);
-fillNums(); drawSets(); drawSounds(); drawNats(); drawExtras();
+fillNums(); drawSets(); drawSounds(); drawNats(); drawExtras(); drawPresets();
