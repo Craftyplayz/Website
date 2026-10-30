@@ -145,7 +145,6 @@ export default {
         },
         throw({ ac, out, noise, t }) { hiss(ac, out, noise, t, 0.7, 0.4); },
         settle({ ac, out, noise, t }) {
-            hiss(ac, out, noise, t, 0.5, 0.25);
             const b = ac.createOscillator(), bg = ac.createGain();
             b.type = 'sine'; b.frequency.setValueAtTime(220, t); b.frequency.exponentialRampToValueAtTime(520, t + 0.15); b.frequency.exponentialRampToValueAtTime(300, t + 0.35);
             const lfo = ac.createOscillator(), lg = ac.createGain(); lfo.frequency.value = 18; lg.gain.value = 40; lfo.connect(lg).connect(b.frequency);
