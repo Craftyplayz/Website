@@ -41,16 +41,16 @@ const nats = Promise.all(DATA.nat.map((u) => import(u).then((m) => m.default, ()
     1: mods.flatMap((m, i) => (m.nat1 || []).map((s) => ({ ...s, url: DATA.nat[i] }))), 20: mods.flatMap((m, i) => (m.nat20 || []).map((s) => ({ ...s, url: DATA.nat[i] }))) }));
 // when the die blows up or flares, after the exit starts (Ember Cage's fireball and phoenix)
 const HIT = { 1: 1.7 * 0.28, 20: 2.1 * 0.42 };
-// a set's own trails and nat 1 / nat 20 animations (extras/<set>/), loaded when the set is chosen; a file that fails is left out
+// a set's own trails and nat 1 / nat 20 / other-roll animations (extras/<set>/), loaded when the set is chosen; a file that fails is left out
 const extras = {};
 const extrasOf = (k) => (extras[k] ||= (async () => {
     const ex = DATA.extras?.[k] || {}, load = (urls) => Promise.all((urls || []).map((u) => import(u).then((m) => m.default, () => null)));
     const [trails, anims] = await Promise.all([load(ex.trails), load(ex.anims)]);
     // each keeps the file it came from, for the saved choice
-    const of = (n) => anims.map((a, i) => a?.['nat' + n] && { ...a['nat' + n], url: ex.anims[i] }).filter(Boolean);
-    return { trails: trails.flatMap((l, i) => (l || []).map((t) => ({ ...t, url: ex.trails[i] }))), 1: of(1), 20: of(20) };
+    const of = (f) => anims.map((a, i) => a?.[f] && { ...a[f], url: ex.anims[i] }).filter(Boolean);
+    return { trails: trails.flatMap((l, i) => (l || []).map((t) => ({ ...t, url: ex.trails[i] }))), 1: of('nat1'), 20: of('nat20'), mid: of('mid') };
 })());
-// what's chosen for each set: { trail, anim1, anim20 } keys, or none for the set's own
+// what's chosen for each set: { trail, anim1, anim20, animmid } keys, or none for the set's own
 const pick = () => (state.picks ||= {})[state.set] ||= {};
 
 // ---- dice set ----
@@ -122,7 +122,7 @@ async function choice(only = null) {
         sound: state.sound === 'own' ? null : { key: state.sound, url: DATA.sounds },
         nat: { 1: ref(all[1].find((s) => s.key === state.nat1)), 20: ref(all[20].find((s) => s.key === state.nat20)) },
         trails: (only || trailsOf(p)).map((t) => ref(ex.trails.find((x) => x.key === t))).filter(Boolean),
-        anims: { 1: ref(ex[1].find((a) => a.key === p.anim1)), 20: ref(ex[20].find((a) => a.key === p.anim20)) },
+        anims: { 1: ref(ex[1].find((a) => a.key === p.anim1)), 20: ref(ex[20].find((a) => a.key === p.anim20)), mid: ref(ex.mid.find((a) => a.key === p.animmid)) },
         coin: state.coin && state.coin !== '50c' ? state.coin : null,
         coinSound: state.coinSound ? (({ key, url }) => ({ key, url }))((await coinSounds).find((s) => s.key === state.coinSound) || {}) : null };
 }
@@ -131,7 +131,7 @@ async function syncChoice() { try { saveChoice(await choice()); } catch (e) { } 
 // the trail and nat animation lists, shown only for a set that has its own
 async function drawExtras() {
     const k = state.set, ex = await extrasOf(k); if (k !== state.set) return;
-    const has = ex.trails.length || ex[1].length || ex[20].length, p = pick();
+    const has = ex.trails.length || ex[1].length || ex[20].length || ex.mid.length, p = pick();
     $('#dd-extras').hidden = !has; if (!has) return;
     const layers = trailsOf(p), isOn = (field, key) => (field === 'trail' ? (key ? layers.includes(key) : !layers.length) : (p[field] || '') === key);
     const rows = (list, field, tryAs) => list.map((s) => { const on = isOn(field, s.key || '');
@@ -149,9 +149,9 @@ async function drawExtras() {
         <button type="button" class="dd-laybtn" data-layer="up" data-i="${i}" aria-label="Move ${esc(t.name)} up" title="Move up"${i ? '' : ' disabled'}>↑</button>
         <button type="button" class="dd-laybtn" data-layer="down" data-i="${i}" aria-label="Move ${esc(t.name)} down" title="Move down"${i < named.length - 1 ? '' : ' disabled'}>↓</button>
         <button type="button" class="dd-laybtn" data-layer="off" data-i="${i}" aria-label="Remove ${esc(t.name)}" title="Remove">×</button></li>`).join('')}</ol>`;
-    for (const n of [1, 20]) {
+    for (const n of [1, 20, 'mid']) {
         $(`#dd-a${n}count`).textContent = ex[n].length + 1;
-        $(`#dd-anim${n}`).innerHTML = rows([{ key: '', name: 'Original', blurb: `The set’s own nat ${n} animation.` }, ...ex[n]], 'anim' + n, n);
+        $(`#dd-anim${n}`).innerHTML = rows([{ key: '', name: 'Original', blurb: n === 'mid' ? 'The set’s own animation for every other roll.' : `The set’s own nat ${n} animation.` }, ...ex[n]], 'anim' + n, n);
     }
 }
 // the page's own audio for listening without dice, built like the engine's: a compressor and a short noise buffer
@@ -176,7 +176,7 @@ function cleanPreset(p) {
     const name = str(p?.name, 60)?.trim(), k = p?.picks || {};
     if (!name || !setInfo(p.set)) return null;
     return { name, set: p.set, sound: str(p.sound) || 'own', nat1: str(p.nat1) || 'orig', nat20: str(p.nat20) || 'orig',
-        picks: { trails: (Array.isArray(k.trails) ? k.trails : []).map((t) => str(t)).filter(Boolean).slice(0, 20), anim1: str(k.anim1), anim20: str(k.anim20) } };
+        picks: { trails: (Array.isArray(k.trails) ? k.trails : []).map((t) => str(t)).filter(Boolean).slice(0, 20), anim1: str(k.anim1), anim20: str(k.anim20), animmid: str(k.animmid) } };
 }
 const cleanAll = (list) => (Array.isArray(list) ? list.map(cleanPreset).filter(Boolean) : []);
 let presets = [];
@@ -199,14 +199,14 @@ async function usePreset(p) {
     const list = await sounds;
     Object.assign(state, { set: p.set, sound: p.sound === 'own' || list.some((x) => x.key === p.sound) ? p.sound : 'own', nat1: p.nat1, nat20: p.nat20 });
     state.tab = (CATS.find(([, , keys]) => keys.includes(state.sound)) || CATS[0])[0];
-    (state.picks ||= {})[p.set] = { trails: [...p.picks.trails], anim1: p.picks.anim1, anim20: p.picks.anim20 };
+    (state.picks ||= {})[p.set] = { trails: [...p.picks.trails], anim1: p.picks.anim1, anim20: p.picks.anim20, animmid: p.picks.animmid };
     save(); drawSets(); drawSounds(); drawNats(); drawExtras();
     pmsg.textContent = `Using ${p.name}.`;
 }
 $('#dd-pform').addEventListener('submit', (e) => {
     e.preventDefault();
     const p = pick(), preset = cleanPreset({ name: $('#dd-pname').value, set: state.set, sound: state.sound, nat1: state.nat1, nat20: state.nat20,
-        picks: { trails: [...trailsOf(p)], anim1: p.anim1, anim20: p.anim20 } });
+        picks: { trails: [...trailsOf(p)], anim1: p.anim1, anim20: p.anim20, animmid: p.animmid } });
     if (!preset) return;
     upsert(preset); storePresets(); drawPresets();
     $('#dd-pname').value = ''; pmsg.textContent = `Saved ${preset.name}.`;
@@ -257,9 +257,10 @@ document.addEventListener('click', async (e) => {
         save(); drawExtras();
     }
     else if (b.dataset.field) {
-        // picking an animation; Try also lands a d20 on 1 or 20 with it
+        // picking an animation; Try also lands a d20 on 1 or 20 with it, or rolls the set for the other-rolls one
         pick()[b.dataset.field] = b.dataset.xkey || undefined; save(); drawExtras();
-        if (b.dataset.xtry) roll([[20, 1]], [[+b.dataset.xtry]]);
+        if (b.dataset.xtry === 'mid') roll([[4, 1], [6, 1], [8, 1], [10, 1], [12, 1], [20, 1]], [[3], [4], [5], [6], [7], [11]]);
+        else if (b.dataset.xtry) roll([[20, 1]], [[+b.dataset.xtry]]);
     }
     else if (b.dataset.layer) {
         const list = trailsOf(pick()), i = +b.dataset.i;
