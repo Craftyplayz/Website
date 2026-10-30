@@ -81,13 +81,13 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
             }
             if (d) {
                 const m = mocks[+d.dataset.dice], k = $('#ds-set').value;
-                d.disabled = true;
                 try {
                     const [eng, set] = await Promise.all([load(), setOf(k)]);
+                    // a new roll takes the last one's dice off the table first, even mid-roll
+                    eng.clearTable(true);
                     // the set as it is, with only its throw and rolling sounds swapped for this mockup
                     await eng.throwDice([[20, 1], [6, 2]], { style: { ...set, key: 'set-' + k, sound: { ...set.sound, throw: m.throw, hit: m.hit } }, sound: true });
                 } catch (err) { d.textContent = "Couldn't roll. Try again"; }
-                d.disabled = false;
             }
         });
     </script>
