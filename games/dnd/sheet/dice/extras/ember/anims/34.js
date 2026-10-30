@@ -31,14 +31,17 @@ const VERT = 'attribute float a; attribute float sz; attribute float sh; varying
 const FRAG = 'varying float va; varying float vs; void main(){ float d=length(gl_PointCoord-.5); if(d>.5) discard; gl_FragColor=vec4(vec3(.55,.53,.5)*vs, va*smoothstep(.5,.15,d)); }';
 const sm = (a, b, k) => { const t = Math.max(0, Math.min(1, (k - a) / (b - a))); return t * t * (3 - 2 * t); };
 const rnd = (a, b) => a + Math.random() * (b - a);
-const NP = 420, W0 = 0.72, W1 = 0.95; // flakes, and when the gust's front crosses the ash
+// flakes, and when the gust's front crosses the ash on the LEN-second melt clock; dur adds time for the last flakes to blow off the screen
+const NP = 420, W0 = 0.72, W1 = 0.95, LEN = 5.4;
+// every die leaving in the same moment gets the same wind
+let windDir = 0, windAt = -1;
 
 // the sound, all scheduled at the start against the animation's clock: a sizzle and bubbling magma as it melts,
 // a few cooling cracks as it hardens, then a gust of wind with a fine hiss of ash. Dice leaving together share one copy.
 let lastSound = -1;
 function sound(x) {
     const a = x.audio; if (!a) return;
-    const { ac, out, noise } = a, t0 = ac.currentTime, D = ash.dur, at = (k) => t0 + k * D;
+    const { ac, out, noise } = a, t0 = ac.currentTime, D = LEN, at = (k) => t0 + k * D;
     if (t0 - lastSound < 0.15) return; lastSound = t0;
     const bus = ac.createGain(); bus.connect(out); const srcs = [];
     x.snd = { bus, srcs };
@@ -63,11 +66,11 @@ function sound(x) {
     c.g.gain.setValueAtTime(0, at(0.5));
     for (let i = 0; i < 9; i++) { const t = at(0.52 + Math.random() * 0.2); c.g.gain.setValueAtTime(0.15 + Math.random() * 0.15, t); c.g.gain.exponentialRampToValueAtTime(0.0005, t + 0.02); }
     // the gust: wind that rises fast, whistles up and falls away, and the ash hissing off with it
-    const w = hiss('bandpass', 400, 1.6, at(0.68), t0 + D + 0.3);
-    w.b.frequency.setValueAtTime(350, at(0.68)); w.b.frequency.exponentialRampToValueAtTime(1100, at(0.8)); w.b.frequency.exponentialRampToValueAtTime(700, at(0.93)); w.b.frequency.exponentialRampToValueAtTime(450, t0 + D + 0.25);
-    w.g.gain.setValueAtTime(0.0001, at(0.68)); w.g.gain.exponentialRampToValueAtTime(0.45, at(0.79)); w.g.gain.linearRampToValueAtTime(0.3, at(0.93)); w.g.gain.exponentialRampToValueAtTime(0.0001, t0 + D + 0.25);
-    const h = hiss('highpass', 5000, 0.7, at(0.72), t0 + D + 0.1);
-    h.g.gain.setValueAtTime(0.0001, at(0.72)); h.g.gain.exponentialRampToValueAtTime(0.07, at(0.82)); h.g.gain.setValueAtTime(0.07, at(0.93)); h.g.gain.exponentialRampToValueAtTime(0.0001, t0 + D);
+    const end = t0 + ash.dur, w = hiss('bandpass', 400, 1.6, at(0.68), end + 0.05);
+    w.b.frequency.setValueAtTime(350, at(0.68)); w.b.frequency.exponentialRampToValueAtTime(1100, at(0.8)); w.b.frequency.exponentialRampToValueAtTime(700, at(0.93)); w.b.frequency.exponentialRampToValueAtTime(450, end);
+    w.g.gain.setValueAtTime(0.0001, at(0.68)); w.g.gain.exponentialRampToValueAtTime(0.45, at(0.79)); w.g.gain.linearRampToValueAtTime(0.3, at(0.97)); w.g.gain.exponentialRampToValueAtTime(0.0001, end);
+    const h = hiss('highpass', 5000, 0.7, at(0.72), end + 0.05);
+    h.g.gain.setValueAtTime(0.0001, at(0.72)); h.g.gain.exponentialRampToValueAtTime(0.07, at(0.82)); h.g.gain.setValueAtTime(0.07, at(0.97)); h.g.gain.exponentialRampToValueAtTime(0.0001, end);
 }
 // a new throw cuts it short with a quick fade, never a click
 function hush(x) {
@@ -80,7 +83,7 @@ function hush(x) {
 
 const ash = {
     key: 'a34-ash-wind', name: 'Ash in the Wind', blurb: 'Magma creeps over the die until it is molten through, it melts into a puddle, hardens into grey ash, then a gust of wind blows the ash away.',
-    dur: 5.4,
+    dur: 7.4,
     start(x) {
         M.start(x);
         const T = x.THREE, poly = { polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 };
@@ -90,11 +93,12 @@ const ash = {
         x.crust = new T.Mesh(x.geo, new T.MeshStandardMaterial({ map: ashTex(T), color: 0xb8b2ac, roughness: 1, metalness: 0, transparent: true, opacity: 0, ...poly }));
         x.crust.renderOrder = 2; x.mesh.add(x.heat, x.crust);
         x.kb = -1; x.snap = null;
-        const wa = rnd(0, 6.283); x.wind = { x: Math.cos(wa), z: Math.sin(wa) };
+        if (!(Math.abs(x.sec - windAt) < 0.3)) windDir = rnd(0, 6.283);
+        windAt = x.sec; x.wind = { x: Math.cos(windDir), z: Math.sin(windDir) };
         sound(x);
     },
-    tick(k, x) {
-        const T = x.THREE;
+    tick(kk, x) {
+        const T = x.THREE, sec = kk * ash.dur, k = Math.min(1, sec / LEN);
         // melt along True Melt's own clock, held once the puddle is spread
         const kb = 0.72 * Math.max(0, Math.min(1, (k - 0.1) / 0.45));
         if (kb !== x.kb) { x.kb = kb; M.tick(kb, x); }
@@ -110,7 +114,7 @@ const ash = {
         for (const m of x.mats.concat(x.kmats)) m.opacity = m.op0 * (1 - gone);
         x.crust.material.opacity = harden * (1 - sm(0.9, 0.97, k));
         x.mesh.castShadow = k < 0.8; x.heat.castShadow = x.crust.castShadow = false;
-        if (k >= 0.7) blow(k, x, T);
+        if (k >= 0.7) blow(k, sec, x, T);
     },
     end(x) {
         x.mesh.remove(x.heat, x.crust); x.heat.material.dispose(); x.lava.dispose(); x.crust.material.dispose();
@@ -120,7 +124,7 @@ const ash = {
 };
 
 // the gust: a ragged front crosses the ash from the upwind side, sweeping it to nothing and lifting it off as flakes
-function blow(k, x, T) {
+function blow(k, sec, x, T) {
         const P = x.geo.attributes.position, pa = P.array;
         if (!x.snap) {
             x.snap = pa.slice();
@@ -139,7 +143,7 @@ function blow(k, x, T) {
             x.fl = [];
             for (let j = 0; j < NP; j++) {
                 const i = Math.random() * n | 0; v.set(pa[i * 3], pa[i * 3 + 1], pa[i * 3 + 2]).applyQuaternion(x.q0).add(x.p0);
-                x.fl.push({ x: v.x, y: v.y, z: v.z, born: W0 + (W1 - W0) * (c[i] - lo) / (hi - lo), sp: rnd(2.5, 6), up: rnd(0.2, 1.2), sw: rnd(0.2, 0.7), f: rnd(4, 9), ph: rnd(0, 6.283), life: rnd(0.12, 0.22) });
+                x.fl.push({ x: v.x, y: v.y, z: v.z, born: W0 + (W1 - W0) * (c[i] - lo) / (hi - lo), sp: rnd(2, 4), acc: rnd(14, 26), up: rnd(0.2, 1.2), sw: rnd(0.2, 0.7), f: rnd(4, 9), ph: rnd(0, 6.283) });
                 sz[j] = rnd(2.5, 6.5); sh[j] = rnd(0.7, 1.5);
             }
             const g = new T.BufferGeometry();
@@ -147,6 +151,8 @@ function blow(k, x, T) {
             g.setAttribute('sz', new T.BufferAttribute(sz, 1)); g.setAttribute('sh', new T.BufferAttribute(sh, 1));
             x.flakes = new T.Points(g, new T.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, depthTest: false }));
             x.flakes.frustumCulled = false; x.scene.add(x.flakes);
+            // the camera, to know when a flake has left the screen
+            x.flakes.onBeforeRender = (r, s, cam) => (x.cam = cam);
         }
         // everything upwind of the front is swept onto it, so the crust shrinks away downwind
         const front = x.clo + (x.chi - x.clo) * sm(W0, W1, k), sn = x.snap, c = x.c, w = x.wo;
@@ -155,14 +161,15 @@ function blow(k, x, T) {
             pa[i * 3] = sn[i * 3] + w.x * push; pa[i * 3 + 1] = sn[i * 3 + 1] + w.y * push; pa[i * 3 + 2] = sn[i * 3 + 2] + w.z * push;
         }
         P.needsUpdate = true;
-        // flakes ride the gust: faster and faster downwind, a sideways flutter, a little lift
-        const g = x.flakes.geometry, pos = g.attributes.position.array, al = g.attributes.a.array, sx = -x.wind.z, sz = x.wind.x;
+        // flakes ride the gust: faster and faster downwind, a sideways flutter, a little lift; each stays until it is off the screen
+        const g = x.flakes.geometry, pos = g.attributes.position.array, al = g.attributes.a.array, sx = -x.wind.z, sz = x.wind.x, ex = (x.cam?.right ?? 40) + 1, ez = (x.cam?.top ?? 40) + 1;
         for (let j = 0; j < NP; j++) {
-            const f = x.fl[j], t = k - f.born;
-            if (t <= 0) { al[j] = 0; continue; }
-            const s = t * ash.dur, run = f.sp * s * (0.4 + s), fl = Math.sin(s * f.f + f.ph) * f.sw * s;
+            const f = x.fl[j], s = sec - f.born * LEN;
+            if (s <= 0) { al[j] = 0; continue; }
+            const run = f.sp * s + 0.5 * f.acc * s * s, fl = Math.sin(s * f.f + f.ph) * f.sw * s;
             pos[j * 3] = f.x + x.wind.x * run + sx * fl; pos[j * 3 + 1] = f.y + f.up * s; pos[j * 3 + 2] = f.z + x.wind.z * run + sz * fl;
-            al[j] = Math.min(1, t / 0.02) * Math.max(0, 1 - t / f.life) * (1 - sm(0.97, 1, k));
+            const px = pos[j * 3], pz = pos[j * 3 + 2];
+            al[j] = Math.abs(px) > ex || Math.abs(pz) > ez ? 0 : Math.min(1, s / 0.1);
         }
         g.attributes.position.needsUpdate = g.attributes.a.needsUpdate = true;
 }
