@@ -1,7 +1,7 @@
 // The dice chosen on the Dice Sets page, kept in this browser so the Homebrew Sheet rolls with them too.
 // A choice names each piece by its module and key (paths relative to this folder), so it can be rebuilt anywhere:
 // { set: { key, url } or { key, builtin: true } (a plain style of dice3d.js), sound: { key, url } or null (the set's own),
-//   nat: { 1, 20: { key, url } }, trails: [{ key, url }] top layer first, anims: { 1, 20: { key, url } } }
+//   nat: { 1, 20: { key, url } }, trails: [{ key, url }] top layer first, anims: { 1, 20: { key, url } }, coin: a model coin's key or none for the 50c }
 const KEY = 'dice-choice';
 export const readChoice = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } };
 export const saveChoice = (c) => { try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) { } };
@@ -39,7 +39,7 @@ export async function styleFrom(c, engine) {
         find(c.anims?.[20], (m) => (m.nat20?.key === c.anims[20].key ? m.nat20 : null)),
     ]);
     const tr = trails.filter(Boolean);
-    return { ...set,
+    return { ...set, coin: c.coin || null,
         ...(snd && { sound: { ...set.sound, throw: snd.throw, hit: snd.hit } }),
         natSounds: { 1: n1 && ((x) => n1.play(x)), 20: n20 && ((x) => n20.play(x)) },
         ...(tr.length && { trail: tr.length === 1 ? tr[0].make : layered(tr) }),

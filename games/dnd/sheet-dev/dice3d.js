@@ -254,6 +254,73 @@ function buildCoin() {
     const fs = [{ n: V(0, 1, 0), value: 'heads', pts: top }, { n: V(0, -1, 0), value: 'tails', pts: bot }];
     return (coinBuilt = { geo, mats, shape, fs, verts: [], d4: false, all, coin: true });
 }
+
+// ---- model coins: "Fantasy Designed Coins - (Gold, Silver, Copper)" by Kigha, CC BY 4.0 (credited on the Dice Sets page) ----
+// /games/dnd/sheet/dice/coins/fantasy-coins.glb: six coins sharing one textured material; keys are the coins' names: gold-new, gold-old,
+// silver-new, silver-old, copper-new, copper-old. Any other key, or a model that won't load, is the 50 cent coin.
+const COIN_GLB = '/games/dnd/sheet/dice/coins/fantasy-coins.glb';
+export const MODEL_COINS = ['gold-new', 'gold-old', 'silver-new', 'silver-old', 'copper-new', 'copper-old'];
+let glbP = null;
+// a small reader for this file: tightly packed float positions, normals and uvs, index list, JPEG textures in the binary chunk
+const coinGlb = () => (glbP ||= fetch(COIN_GLB).then((r) => { if (!r.ok) throw new Error('coin model ' + r.status); return r.arrayBuffer(); }).then(async (buf) => {
+    const dv = new DataView(buf), jl = dv.getUint32(12, true), J = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 20, jl))), bin = 20 + jl + 8;
+    const at = (v) => bin + (J.bufferViews[v].byteOffset || 0);
+    const acc = (i) => { const a = J.accessors[i], T = { 5126: Float32Array, 5125: Uint32Array, 5123: Uint16Array, 5121: Uint8Array }[a.componentType];
+        const n = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4 }[a.type], o = at(a.bufferView) + (a.byteOffset || 0);
+        return { data: new T(buf.slice(o, o + a.count * n * T.BYTES_PER_ELEMENT)), min: a.min, max: a.max }; };
+    const tex = async (i, colour) => { const im = J.images[J.textures[i].source], v = J.bufferViews[im.bufferView];
+        const t = new THREE.Texture(await createImageBitmap(new Blob([new Uint8Array(buf, at(im.bufferView), v.byteLength)], { type: im.mimeType })));
+        // glTF textures aren't flipped
+        t.flipY = false; t.anisotropy = 8; t.needsUpdate = true; if (colour) t.colorSpace = THREE.SRGBColorSpace; return t; };
+    const m = J.materials[0], pbr = m.pbrMetallicRoughness;
+    const [map, mr, normalMap] = await Promise.all([tex(pbr.baseColorTexture.index, true), tex(pbr.metallicRoughnessTexture.index), tex(m.normalTexture.index)]);
+    // reflections turned down a little: at full strength the bright silver coin washes out to white
+    const mat = new THREE.MeshStandardMaterial({ map, metalnessMap: mr, roughnessMap: mr, normalMap, metalness: 1, roughness: 1, envMapIntensity: 0.55 });
+    const coins = {};
+    for (const node of J.nodes) { const child = node.children && J.nodes[node.children[0]];
+        if (!/^Coin_/.test(node.name || '') || child?.mesh == null) continue;
+        const p = J.meshes[child.mesh].primitives[0];
+        coins[node.name.slice(5).toLowerCase()] = { pos: acc(p.attributes.POSITION), nor: acc(p.attributes.NORMAL), uv: acc(p.attributes.TEXCOORD_0), idx: p.indices != null ? acc(p.indices).data : null }; }
+    return { mat, coins };
+}).catch((e) => { glbP = null; throw e; }));
+// a round coin's physics: a 16-sided prism, caps wound outward
+function roundCoin(R, H) {
+    const top = [], bot = [], n = 16;
+    for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; top.push(V(Math.cos(a) * R, H / 2, Math.sin(a) * R)); bot.push(V(Math.cos(a) * R, -H / 2, Math.sin(a) * R)); }
+    const all = [...top, ...bot], shape = new CANNON.ConvexPolyhedron({ vertices: all.map((p) => new CANNON.Vec3(p.x, p.y, p.z)),
+        faces: [Array.from({ length: n }, (_, i) => n - 1 - i), Array.from({ length: n }, (_, i) => n + i), ...Array.from({ length: n }, (_, i) => [i, (i + 1) % n, n + ((i + 1) % n), n + i])] });
+    return { shape, all, fs: [{ n: V(0, 1, 0), value: 'heads', pts: top }, { n: V(0, -1, 0), value: 'tails', pts: bot }] };
+}
+const modelBuilt = {};
+async function modelCoin(key) {
+    if (modelBuilt[key]) return modelBuilt[key];
+    const { mat, coins } = await coinGlb(), c = coins[key];
+    if (!c) return buildCoin();
+    // the model lies flat in x-y with its thickness along z: turn it face up (z to y) and centre it; gold and silver are the 50 cent coin's size,
+    // copper keeps its smaller size from the model
+    const rad = Math.max(c.pos.max[0], c.pos.max[1]), zc = (c.pos.min[2] + c.pos.max[2]) / 2, k = (COIN_R * (rad / 0.026)) / rad;
+    const P = new Float32Array(c.pos.data.length), N = new Float32Array(c.nor.data.length);
+    for (let i = 0; i < P.length; i += 3) { P[i] = c.pos.data[i] * k; P[i + 1] = (c.pos.data[i + 2] - zc) * k; P[i + 2] = -c.pos.data[i + 1] * k;
+        N[i] = c.nor.data[i]; N[i + 1] = c.nor.data[i + 2]; N[i + 2] = -c.nor.data[i + 1]; }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(P, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(N, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(c.uv.data, 2));
+    if (c.idx) geo.setIndex(new THREE.BufferAttribute(c.idx, 1));
+    const body = roundCoin(rad * k, (c.pos.max[2] - c.pos.min[2]) * k);
+    return (modelBuilt[key] = { geo, mats: mat, shape: body.shape, fs: body.fs, verts: [], d4: false, all: body.all, coin: true });
+}
+// the coin a style flips: style.coin is a model coin's key, anything else the 50 cent coin
+const coinFor = (key) => (MODEL_COINS.includes(key) ? modelCoin(key).catch(() => buildCoin()) : Promise.resolve(buildCoin()));
+// a still picture of one coin, heads up and tipped a little so its edge shows
+export async function previewCoin(key, w = 96, h = 96) {
+    const t = await coinFor(key);
+    pvInit();
+    pv.r.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); pv.r.setSize(w, h, false);
+    const r = 1.7; Object.assign(pv.cam, { left: -r, right: r, top: (r * h) / w, bottom: (-r * h) / w }); pv.cam.position.set(0, 50, 0); pv.cam.up.set(0, 0, -1); pv.cam.lookAt(0, 0, 0); pv.cam.updateProjectionMatrix();
+    for (const m of pv.meshes) { pv.s.remove(m); m.fx?.dispose?.(); }
+    const m = new THREE.Mesh(t.geo, t.mats); m.quaternion.setFromEuler(new THREE.Euler(0.45, 0, 0.2)); pv.s.add(m); pv.meshes = [m];
+    pv.r.render(pv.s, pv.cam);
+    return pv.r.domElement.toDataURL('image/png');
+}
 // a coin rings when it lands: a bright, slowly fading metal tone (dice on a table only clack)
 function coinRing(speed, onTable) {
     const vol = Math.min(1, speed / 12) ** 1.3;
@@ -488,7 +555,9 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
     const a = Math.random() * Math.PI * 2, cx = Math.cos(a), cz = Math.sin(a), s = Math.min(hw / Math.abs(cx || 1e-9), hd / Math.abs(cz || 1e-9));
     const fit = (v, h) => Math.max(-h + 1.5, Math.min(h - 1.5, v));
     // a coin (groups: [['coin', 1]]) is the same in every style and lands heads or tails
-    const build = (kind) => (kind === 'coin' ? buildCoin() : buildDie(kind, st));
+    // which coin: style.coin, a model coin's key (MODEL_COINS) or the 50 cent coin
+    const coinT = kinds.includes('coin') ? await coinFor(st.coin) : null;
+    const build = (kind) => (kind === 'coin' ? coinT : buildDie(kind, st));
     // how each die starts: spread along the edge (i % 4) and inward (i % 3), then thrown at a spot near the middle;
     // a coin is flipped instead: tossed up from near the bottom of the screen, spinning end over end
     const starts = kinds.map((kind, i) => {
@@ -558,15 +627,18 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
 // ---- previews: one still picture per style, the whole set in a row (d4 d6 d8 d10 d12 d20 and the percentile die) ----
 let pv = null;
 // kinds: which dice, left to right; one die (the sheet's picker shows a d20) gets a roomier frame so its moving parts fit
+// one small renderer for every preview picture
+function pvInit() {
+    if (pv) return;
+    const r = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
+    const s = new THREE.Scene();
+    s.add(new THREE.HemisphereLight(0xffffff, 0x404040, 1.6));
+    const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(-8, 30, -6); s.add(sun);
+    s.environment = roomEnv(r);
+    pv = { r, s, cam: new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 100), meshes: [] };
+}
 export function previewStyle(style, accent = '#5b3f8f', w = 336, h = 56, kinds = [4, 6, 8, 10, 12, 20, 't']) {
-    if (!pv) {
-        const r = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
-        const s = new THREE.Scene();
-        s.add(new THREE.HemisphereLight(0xffffff, 0x404040, 1.6));
-        const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(-8, 30, -6); s.add(sun);
-        s.environment = roomEnv(r);
-        pv = { r, s, cam: new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 100), meshes: [] };
-    }
+    pvInit();
     const st = styleOf(style, accent);
     const gap = kinds.length === 1 ? 3.6 : 2.6, hw = (kinds.length * gap) / 2, hd = (hw * h) / w;
     pv.r.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); pv.r.setSize(w, h, false);

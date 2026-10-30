@@ -53,17 +53,23 @@ const pick = () => (state.picks ||= {})[state.set] ||= {};
 
 // ---- dice set ----
 function drawSets() {
-    for (const b of $$('.dd-set')) b.setAttribute('aria-pressed', b.dataset.set === state.set);
+    for (const b of $$('[data-set]')) b.setAttribute('aria-pressed', b.dataset.set === state.set);
     const s = DATA.sets.find((x) => x.key === state.set);
     $('#dd-setline').textContent = s.name + ': ' + s.look;
 }
 // each set's d20 with the 20 on top, one at a time so the page stays responsive
 load().then(async (m) => {
-    for (const b of $$('.dd-set')) {
+    for (const b of $$('[data-set]')) {
         try { $('img', b).src = m.previewStyle(await setOf(b.dataset.set), '#5b3f8f', 96, 96, [20]); } catch (e) { $('img', b).hidden = true; }
         await new Promise((r) => setTimeout(r, 0));
     }
+    // then each coin, heads up
+    for (const b of $$('.dd-coin')) {
+        try { $('img', b).src = await m.previewCoin(b.dataset.coin, 96, 96); } catch (e) { $('img', b).hidden = true; }
+    }
 }, () => { out.textContent = "Couldn't load the 3D dice. Check your connection and reload."; });
+// ---- coin: the 50 cent coin, or one of the model coins (coins/fantasy-coins.glb) ----
+const drawCoins = () => { for (const b of $$('.dd-coin')) b.setAttribute('aria-pressed', b.dataset.coin === (state.coin || '50c')); };
 
 // ---- sound ----
 async function drawSounds() {
@@ -104,7 +110,8 @@ async function choice(only = null) {
         sound: state.sound === 'own' ? null : { key: state.sound, url: DATA.sounds },
         nat: { 1: ref(all[1].find((s) => s.key === state.nat1)), 20: ref(all[20].find((s) => s.key === state.nat20)) },
         trails: (only || trailsOf(p)).map((t) => ref(ex.trails.find((x) => x.key === t))).filter(Boolean),
-        anims: { 1: ref(ex[1].find((a) => a.key === p.anim1)), 20: ref(ex[20].find((a) => a.key === p.anim20)) } };
+        anims: { 1: ref(ex[1].find((a) => a.key === p.anim1)), 20: ref(ex[20].find((a) => a.key === p.anim20)) },
+        coin: state.coin && state.coin !== '50c' ? state.coin : null };
 }
 // the Homebrew Sheet reads this
 async function syncChoice() { try { saveChoice(await choice()); } catch (e) { } }
@@ -225,6 +232,7 @@ document.addEventListener('click', async (e) => {
     const b = e.target.closest('button'); if (!b) return;
     // the set's own sound row names the set, so it redraws too
     if (b.dataset.set) { state.set = b.dataset.set; save(); drawSets(); drawSounds(); drawNats(); drawExtras(); }
+    else if (b.dataset.coin) { state.coin = b.dataset.coin; save(); drawCoins(); roll([['coin', 1]]); }
     else if (b.dataset.field === 'trail') {
         // a trail row adds that trail as the top layer, or takes it off again; None takes them all off; Try rolls the set with just that trail
         const key = b.dataset.xkey, list = trailsOf(pick());
@@ -270,4 +278,4 @@ document.addEventListener('click', async (e) => {
         roll([[coin ? 'coin' : +die, 1]], [[coin ? $('#dd-num').value : +$('#dd-num').value]]); }
 });
 $('#dd-die').addEventListener('change', fillNums);
-fillNums(); drawSets(); drawSounds(); drawNats(); drawExtras(); drawPresets();
+fillNums(); drawSets(); drawCoins(); drawSounds(); drawNats(); drawExtras(); drawPresets();
