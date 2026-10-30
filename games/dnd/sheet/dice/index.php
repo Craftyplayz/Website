@@ -57,11 +57,12 @@ $data = [
             <button type="button" class="btn" data-roll="4x1,6x1,8x1,10x1,12x1,20x1">Roll the set</button>
             <button type="button" class="btn" id="dd-coin">Flip a coin</button>
             <span class="dd-land">
-                <label>Land on <select class="field" id="dd-die" aria-label="Die">
+                <label>Land <input type="number" class="field dd-count" id="dd-count" min="1" max="30" value="1" inputmode="numeric" aria-label="How many dice"></label>
+                <select class="field" id="dd-die" aria-label="Die">
                     <?php foreach ([4, 6, 8, 10, 12, 20, 100] as $d): ?><option value="<?= $d ?>"<?= $d === 20 ? ' selected' : '' ?>>d<?= $d ?></option><?php endforeach; ?>
                     <option value="coin">Coin</option>
-                </select></label>
-                <select class="field" id="dd-num" aria-label="Number to land on"></select>
+                </select>
+                <label>all on <select class="field" id="dd-num" aria-label="Number to land on"></select></label>
                 <button type="button" class="btn" id="dd-landgo">Roll it</button>
             </span>
             <label class="check"><input type="checkbox" id="dd-sound" checked> Sound</label>
