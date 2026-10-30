@@ -1,5 +1,5 @@
 <?php
-// Dice sound mockups: ten throw-and-roll sound designs (sounds.js) to listen to and try on real dice, so the owner can pick one
+// Dice sound mockups: twenty throw-and-roll sound designs (sounds.js) to listen to and try on real dice, so the owner can pick one
 $site_page = ['components' => true, 'css' => ['/assets/css/pages/games-dnd-sheet-dice.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 $sets = ['ember' => 'Ember Cage', 'frost' => 'Frostbound', 'arcane' => 'Arcane Orrery', 'clockwork' => 'Clockwork', 'storm' => 'Stormcaller',
@@ -21,7 +21,7 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
     <main class="page dd" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">Dice Sound Mockups</h1>
-        <p class="page-lede">Ten ideas for the sound when dice are thrown and while they roll. Listen to each, try it on real dice, and pick the one you like.</p>
+        <p class="page-lede">Twenty ideas for the sound when dice are thrown and while they roll. Listen to each, try it on real dice, and pick the one you like.</p>
 
         <div class="bar dd-bar">
             <label>Dice to try them on <select class="field" id="ds-set">

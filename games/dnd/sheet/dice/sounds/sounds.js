@@ -1,4 +1,4 @@
-// Ten sound mockups for the dice: each has throw (as the dice leave the hand) and hit (every bump while they roll), in the same shape as a set's sound.
+// Twenty sound mockups for the dice: each has throw (as the dice leave the hand) and hit (every bump while they roll), in the same shape as a set's sound.
 // hit ctx: { ac, out, noise, vol 0-1, onTable, t }; throw ctx: { ac, out, noise, t, count }. Everything is scheduled from ctx.t.
 const env = (ac, at, peak, a, d) => { const g = ac.createGain(); g.gain.setValueAtTime(0.0001, at); g.gain.linearRampToValueAtTime(Math.max(0.0002, peak), at + a); g.gain.exponentialRampToValueAtTime(0.0001, at + a + d); return g; };
 const nz = (ac, noise, at, dur) => { const s = ac.createBufferSource(); s.buffer = noise; s.loop = true; s.start(at, Math.random() * 0.3); s.stop(at + dur + 0.02); return s; };
@@ -20,6 +20,16 @@ const sweep = (c, at, type, f1, f2, q, peak, d) => { const f = filt(c.ac, type, 
 const rattle = (c, at, n, span, f1, f2, peak, lp) => { for (let i = 0; i < n; i++) { const tt = at + Math.random() * span;
     const s = nz(c.ac, c.noise, tt, 0.03), b = filt(c.ac, 'bandpass', r(f1, f2), 3), g = env(c.ac, tt, peak * r(0.5, 1), 0.001, 0.025);
     lp ? chain(s, b, filt(c.ac, 'lowpass', lp), g, c.out) : chain(s, b, g, c.out); } };
+
+// a room: one short reverb per audio context, made once from decaying noise
+const rooms = new WeakMap();
+const room = (c) => { if (!rooms.has(c.ac)) { const ac = c.ac, n = ac.sampleRate * 1.1, ir = ac.createBuffer(2, n, ac.sampleRate);
+        for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n) ** 3; }
+        const cv = ac.createConvolver(), wet = ac.createGain(); cv.buffer = ir; wet.gain.value = 0.5; cv.connect(wet).connect(c.out); rooms.set(ac, cv); }
+    return { ...c, out: rooms.get(c.ac) }; };
+// metal grinding: noise through a few narrow inharmonic resonances
+const grind = (c, at, base, peak, d) => { const g = env(c.ac, at, peak, d * 0.3, d * 0.7); g.connect(c.out);
+    for (const m of [1, 1.47, 2.09, 2.83]) { const f = filt(c.ac, 'bandpass', base * m, 30); chain(nz(c.ac, c.noise, at, d), f, g); } };
 
 export default [
     {
@@ -76,5 +86,67 @@ export default [
         throw: (c) => { rattle(c, c.t, 4, 0.08, 3000, 4200, 0.3); sweep(c, c.t + 0.05, 'bandpass', 600, 1800, 0.8, 0.18, 0.2); },
         hit: (c) => { click(c, c.t, r(3200, 3900), 1, c.vol * 0.5, 0.02); click(c, c.t, 420, 1, c.vol * (c.onTable ? 0.35 : 0.1), 0.05);
             if (c.onTable) thump(c, c.t, 115, 85, c.vol * 0.25, 0.09); },
+    },
+    {
+        key: 'steel', name: 'Heavy steel', blurb: 'Dense steel dice: a deep, weighty thunk with a short dull clank, no long ring; two heavy clunks in the hand on the throw.',
+        throw: (c) => { for (const dt of [0, 0.11]) { ring(c, c.t + dt, r(380, 440), [[1, 1], [2.4, 0.5], [4.1, 0.2]], 0.16, 0.09); thump(c, c.t + dt, 110, 70, 0.25, 0.06); } },
+        hit: (c) => { thump(c, c.t, c.onTable ? 85 : 140, c.onTable ? 45 : 90, c.vol * 0.6, 0.14);
+            ring(c, c.t, r(320, 400) * (c.onTable ? 1 : 1.8), [[1, 1], [2.4, 0.6], [4.1, 0.3], [6.3, 0.12]], c.vol * 0.32, c.onTable ? 0.1 : 0.16);
+            click(c, c.t, 1800, 1.5, c.vol * 0.25, 0.02); },
+    },
+    {
+        key: 'brass', name: 'Heavy brass bells', blurb: 'Big solid-brass dice that clang and ring out with a slow shimmer; metal grinding against metal as they leave the hand.',
+        throw: (c) => { grind(c, c.t, r(900, 1100), 0.7, 0.4); ring(c, c.t + 0.38, 820, [[1, 1], [2.76, 0.4]], 0.08, 0.6); },
+        hit: (c) => { const b = r(260, 330) * (c.onTable ? 1 : 1.6);
+            // two slightly detuned copies beat against each other like a big bell
+            ring(c, c.t, b, [[1, 1], [2.32, 0.55], [3.98, 0.3], [5.85, 0.15]], c.vol * 0.24, c.onTable ? 0.9 : 1.2);
+            ring(c, c.t, b * 1.006, [[1, 0.7], [2.32, 0.3]], c.vol * 0.16, c.onTable ? 0.9 : 1.2);
+            thump(c, c.t, 100, 55, c.vol * 0.45, 0.1); },
+    },
+    {
+        key: 'bone', name: 'Bone dice', blurb: 'Dry, hollow little clicks like carved bone; a light bony rattle on the throw.',
+        throw: (c) => rattle(c, c.t, 8, 0.3, 1800, 2600, 0.3),
+        hit: (c) => { click(c, c.t, r(1700, 2300) * (c.onTable ? 1 : 1.4), 6, c.vol * 1.5, 0.04); click(c, c.t, 600, 2, c.vol * 0.15, 0.03); },
+    },
+    {
+        key: 'stone', name: 'Carved stone', blurb: 'Gritty, solid stone knocks with a bit of scrape; a rough grind as they slide off the hand.',
+        throw: (c) => sweep(c, c.t, 'bandpass', 900, 500, 1.5, 0.25, 0.3),
+        hit: (c) => { click(c, c.t, r(1200, 1500), 2, c.vol * 0.5, 0.05); sweep(c, c.t, 'bandpass', 2500, 1200, 2, c.vol * 0.15, 0.08);
+            if (c.onTable) thump(c, c.t, 130, 80, c.vol * 0.3, 0.07); },
+    },
+    {
+        key: 'chime', name: 'Crystal chimes', blurb: 'Every bump plays a soft note from a gentle scale, so a roll becomes a little tune; a rising sparkle on the throw.',
+        throw: (c) => [0, 0.06, 0.12, 0.18].forEach((dt, i) => ring(c, c.t + dt, [1046.5, 1318.5, 1568, 2093][i], [[1, 1], [2, 0.2]], 0.08, 0.4)),
+        hit: (c) => { const n = [523.25, 587.33, 659.25, 783.99, 880, 1046.5][(Math.random() * 6) | 0] * (c.onTable ? 1 : 2);
+            ring(c, c.t, n, [[1, 1], [2.01, 0.25], [3.01, 0.08]], c.vol * 0.2, 0.7); },
+    },
+    {
+        key: 'bouncy', name: 'Bouncy rubber', blurb: 'Soft rubbery boings that bend up in pitch; a springy twang on the throw.',
+        throw: (c) => { const o = osc(c.ac, c.t, 140, 0.35, 'triangle'); o.frequency.exponentialRampToValueAtTime(420, c.t + 0.3); chain(o, env(c.ac, c.t, 0.18, 0.01, 0.32), c.out); },
+        hit: (c) => { const o = osc(c.ac, c.t, (c.onTable ? 110 : 220) * (1 + c.vol * 0.5), 0.14, 'sine'); o.frequency.exponentialRampToValueAtTime((c.onTable ? 260 : 480) * (1 + c.vol * 0.3), c.t + 0.1);
+            chain(o, env(c.ac, c.t, c.vol * 0.4, 0.003, 0.13), c.out); },
+    },
+    {
+        key: 'sparkle', name: 'Magic sparkle', blurb: 'A soft click with a twinkle of fairy dust on each bump; a whoosh full of sparkles on the throw.',
+        throw: (c) => { sweep(c, c.t, 'bandpass', 800, 4000, 1, 0.15, 0.35); for (let i = 0; i < 8; i++) ring(c, c.t + r(0.05, 0.4), r(3000, 6000), [[1, 1]], 0.04, 0.15); },
+        hit: (c) => { click(c, c.t, 3000, 1.2, c.vol * 0.3, 0.02); for (let i = 0; i < 3; i++) ring(c, c.t + r(0, 0.12), r(3500, 7000), [[1, 1]], c.vol * 0.06, 0.12); },
+    },
+    {
+        key: 'tavern', name: 'Tavern table', blurb: 'Solid knocks on a thick oak table with the echo of a busy room around them; a rattle and swish that echo too.',
+        throw: (c) => { const w = room(c); rattle(w, c.t, 6, 0.15, 2500, 3500, 0.3); rattle(c, c.t, 6, 0.15, 2500, 3500, 0.2); sweep(c, c.t + 0.1, 'bandpass', 700, 1600, 0.8, 0.12, 0.2); },
+        hit: (c) => { const w = room(c), f = c.onTable ? r(700, 850) : r(2600, 3100);
+            click(c, c.t, f, 3, c.vol * 0.5, 0.05); click(w, c.t, f, 3, c.vol * 0.4, 0.05); if (c.onTable) thump(c, c.t, 140, 90, c.vol * 0.3, 0.08); },
+    },
+    {
+        key: 'ice', name: 'Ice cubes', blurb: 'Clinks and crunches like ice cubes knocking in a glass; a cold rattle on the throw.',
+        throw: (c) => { rattle(c, c.t, 7, 0.25, 3500, 5500, 0.25); },
+        hit: (c) => { ring(c, c.t, r(1800, 2400) * (c.onTable ? 1 : 1.4), [[1, 1], [2.3, 0.3]], c.vol * 0.15, 0.12);
+            if (c.onTable) sweep(c, c.t, 'highpass', 3000, 6000, 0.8, c.vol * 0.25, 0.07); },
+    },
+    {
+        key: 'cinema', name: 'Cinematic', blurb: 'Big, deep booms on the hard hits like a film trailer, softer taps on the small ones; a long, low whoosh on the throw.',
+        throw: (c) => { sweep(c, c.t, 'lowpass', 200, 1500, 0.7, 0.35, 0.7); thump(c, c.t + 0.1, 60, 35, 0.3, 0.6); },
+        hit: (c) => { if (c.vol > 0.4) { thump(c, c.t, 75, 32, c.vol * 0.7, 0.45); sweep(c, c.t, 'lowpass', 900, 150, 0.7, c.vol * 0.35, 0.4); }
+            click(c, c.t, c.onTable ? 1200 : 2600, 2, c.vol * 0.35, 0.04); },
     },
 ];
