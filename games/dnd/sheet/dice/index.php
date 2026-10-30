@@ -85,6 +85,17 @@ $data = [
         </div>
         <p class="muted dd-setline" id="dd-setline"></p>
 
+        <h2 class="sec-h">Coin <span class="n">7</span></h2>
+        <div class="dd-sets" role="group" aria-label="Coin">
+            <?php foreach (['50c' => '50 cent', 'gold-new' => 'Gold', 'gold-old' => 'Old gold', 'silver-new' => 'Silver', 'silver-old' => 'Old silver', 'copper-new' => 'Copper', 'copper-old' => 'Old copper'] as $k => $name): ?>
+                <button type="button" class="dd-set dd-coin" data-coin="<?= h($k) ?>" aria-pressed="false"><img alt="" width="96" height="96"><span><?= h($name) ?></span></button>
+            <?php endforeach; ?>
+        </div>
+        <p class="muted dd-setline">What Flip a coin throws, here and on the Homebrew Sheet. The gold, silver and copper coins are
+            <a href="https://sketchfab.com/3d-models/fantasy-designed-coins-gold-silver-copper-71a3526b3403419f97717865afb27a41" target="_blank" rel="noopener">Fantasy Designed Coins</a>
+            by <a href="https://sketchfab.com/Kigha" target="_blank" rel="noopener">Kigha</a>, licensed under
+            <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> (textures resized).</p>
+
         <h2 class="sec-h">Sound <span class="n" id="dd-scount"></span></h2>
         <div class="stabs dd-cats" id="dd-cats" role="group" aria-label="Kind of sound"></div>
         <div class="dd-sounds" id="dd-sounds"><p class="note">Loading sounds...</p></div>
