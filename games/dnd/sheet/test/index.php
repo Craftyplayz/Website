@@ -30,8 +30,17 @@ $dice = [4, 6, 8, 10, 12, 20, 100];
                 <?php for ($n = 1; $n <= 6; $n++): ?><option<?= $n === 1 ? ' selected' : '' ?>><?= $n ?></option><?php endfor; ?>
             </select></span></label>
             <label>Style <select class="field" id="dt-style">
-                <option value="purple">Purple</option><option value="gold">Gold</option><option value="silver">Silver</option><option value="obsidian">Obsidian</option>
-                <option value="ruby">Ruby</option><option value="wood">Wood</option><option value="marble">Marble</option><option value="ivory">Ivory</option>
+                <optgroup label="Classic">
+                    <option value="purple">Purple</option><option value="gold">Gold</option><option value="silver">Silver</option><option value="obsidian">Obsidian</option>
+                    <option value="ruby">Ruby</option><option value="wood">Wood</option><option value="marble">Marble</option><option value="ivory">Ivory</option>
+                </optgroup>
+                <?php // the Dice Sets page's sets (../dice/sets/<key>.js), which the rollers load themselves ?>
+                <optgroup label="Dice sets">
+                    <?php foreach (['ember' => 'Ember Cage', 'frost' => 'Frostbound', 'arcane' => 'Arcane Orrery', 'clockwork' => 'Clockwork', 'storm' => 'Stormcaller',
+                        'wildwood' => 'Wildwood', 'abyss' => 'Abyssal Tide', 'starfall' => 'Starfall', 'venom' => 'Viper Venom', 'spectral' => 'Spectral'] as $k => $n): ?>
+                        <option value="<?= $k ?>"><?= $n ?></option>
+                    <?php endforeach; ?>
+                </optgroup>
             </select></label>
             <label>Speed <select class="field" id="dt-speed">
                 <option value="1">1× (real time)</option><option value="2">2×</option><option value="4" selected>4×</option><option value="8">8×</option>
