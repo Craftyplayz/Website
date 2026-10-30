@@ -20,6 +20,11 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
 $data = [
     'engine' => '../dice3d.js?v=' . filemtime(__DIR__ . '/../dice3d.js'),
     'sounds' => './sounds.js?v=' . $v('sounds.js'),
+    // things made for one set only, in extras/<set>/trails/ and extras/<set>/anims/ (nat 1 and nat 20 animations)
+    'extras' => array_filter(array_combine(array_keys($sets), array_map(fn($k) => array_filter([
+        'trails' => array_map(fn($f) => "./extras/$k/trails/" . basename($f) . '?v=' . filemtime($f), glob(__DIR__ . "/extras/$k/trails/*.js") ?: []),
+        'anims' => array_map(fn($f) => "./extras/$k/anims/" . basename($f) . '?v=' . filemtime($f), glob(__DIR__ . "/extras/$k/anims/*.js") ?: []),
+    ]), array_keys($sets)))),
     // nat 1 and nat 20 sounds, a few to a file in natsounds/
     'nat' => array_map(fn($f) => './natsounds/' . basename($f) . '?v=' . filemtime($f), glob(__DIR__ . '/natsounds/*.js') ?: []),
     'sets' => array_map(fn($k, $s) => ['key' => $k, 'name' => $s[0], 'look' => $s[1], 'sound' => $s[2], 'v' => $v("sets/$k.js")], array_keys($sets), $sets),
@@ -66,6 +71,21 @@ $data = [
         <h2 class="sec-h">Sound <span class="n" id="dd-scount"></span></h2>
         <div class="stabs dd-cats" id="dd-cats" role="group" aria-label="Kind of sound"></div>
         <div class="dd-sounds" id="dd-sounds"><p class="note">Loading sounds...</p></div>
+
+        <div id="dd-extras" hidden>
+            <h2 class="sec-h">Trail <span class="n" id="dd-trailcount"></span></h2>
+            <p class="muted dd-natline">What each die leaves on the table as it rolls.</p>
+            <div class="dd-sounds" id="dd-trails"></div>
+            <div class="dd-nats">
+                <?php foreach ([1 => 'Nat 1 animation', 20 => 'Nat 20 animation'] as $n => $title): ?>
+                    <section>
+                        <h2 class="sec-h"><?= $title ?> <span class="n" id="dd-a<?= $n ?>count"></span></h2>
+                        <p class="muted dd-natline"><?= $n === 1 ? 'How a d20 that lands on 1 leaves the table.' : 'How a d20 that lands on 20 leaves the table.' ?></p>
+                        <div class="dd-sounds" id="dd-anim<?= $n ?>"></div>
+                    </section>
+                <?php endforeach; ?>
+            </div>
+        </div>
 
         <div class="dd-nats" id="dd-nats" hidden>
             <?php foreach ([1 => 'Nat 1 sound', 20 => 'Nat 20 sound'] as $n => $title): ?>

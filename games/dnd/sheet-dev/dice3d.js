@@ -8,7 +8,7 @@ const [THREE, CANNON] = await Promise.all([
 // ---- shapes: triangles grouped into faces by their normal, each face numbered ----
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 function trisOf(geo) {
-    const g = geo.toNonIndexed(), p = g.attributes.position, out = [];
+    const g = geo.index ? geo.toNonIndexed() : geo, p = g.attributes.position, out = [];
     for (let i = 0; i < p.count; i += 3) out.push([V(p.getX(i), p.getY(i), p.getZ(i)), V(p.getX(i + 1), p.getY(i + 1), p.getZ(i + 1)), V(p.getX(i + 2), p.getY(i + 2), p.getZ(i + 2))]);
     return out;
 }
@@ -227,7 +227,7 @@ function walls(hw, hd) {
     return w;
 }
 // takes a die off the table, and anything its style added to the scene
-const drop = (d) => { scene.remove(d.mesh); d.fx?.dispose?.(); };
+const drop = (d) => { scene.remove(d.mesh); d.fx?.dispose?.(); d.trail?.dispose?.(); };
 function clear() {
     cancelAnimationFrame(raf); raf = 0;
     for (const d of live) drop(d);
@@ -286,6 +286,11 @@ function table() {
     camera.position.set(0, 60, 0); camera.up.set(0, 0, -1); camera.lookAt(0, 0, 0); camera.updateProjectionMatrix();
     world = walls(hw - 0.3, hd - 0.3);
 }
+// glows (additive materials) brighten the page under the see-through table without touching its alpha; plain additive also writes alpha,
+// which darkens the page around faint glows. Checked each frame because styles, trails and exits add glows as they go.
+const glowOver = (root) => root.traverse((o) => { for (const m of [].concat(o.material || [])) if (m.blending === THREE.AdditiveBlending) {
+    Object.assign(m, { blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.SrcAlphaFactor, blendDst: THREE.OneFactor,
+        blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor }); m.needsUpdate = true; } });
 const asleep = (d) => d.body.sleepState === CANNON.Body.SLEEPING || (d.body.velocity.length() < 0.15 && d.body.angularVelocity.length() < 0.15);
 // one loop for every throw on the table; each throw resolves when its own dice stop, the table clears when all have
 // how many times faster than real time the table runs: the same 1/120 s physics steps, just more of them per frame
@@ -294,10 +299,10 @@ export function setSpeed(x) { speed = Math.max(1, Math.min(16, +x || 1)); }
 function frame(now) {
     const real = Math.min(0.05, (now - (frame.last || now)) / 1000), dt = real * speed; frame.last = now;
     world.step(1 / 120, dt, Math.ceil(8 * speed));
-    for (const d of live) { d.mesh.position.copy(d.body.position); d.mesh.quaternion.copy(d.body.quaternion); if (d.S) d.mesh.quaternion.multiply(d.S); d.fx?.tick?.(now / 1000, dt, d.body); }
+    for (const d of live) { d.mesh.position.copy(d.body.position); d.mesh.quaternion.copy(d.body.quaternion); if (d.S) d.mesh.quaternion.multiply(d.S); d.fx?.tick?.(now / 1000, dt, d.body); d.trail?.tick?.(now / 1000, dt, d.body); }
     // exits run in real time, after the physics placed the die, so they can move, scale or hide it
     if (exiting && !runExits(now / 1000, real)) { exiting = false; fade(); }
-    renderer.render(scene, camera);
+    glowOver(scene); renderer.render(scene, camera);
     for (const t of throws) {
         // both counted in table time, so they hold at any speed
         t.age += dt; t.quiet = t.dice.every(asleep) ? t.quiet + dt : 0;
@@ -377,7 +382,9 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
         world.addBody(b);
         const d = { kind, t, mesh, body: b, st, sound, want: wants[i] ?? null };
         if (d.want != null && landed) force(d, landed[i]);
-        d.fx = decorate(st, d); live.push(d); return d;
+        // a trail: what a die leaves on the table as it rolls, made like decorate() but given the table size; its marks go when the dice do
+        d.fx = decorate(st, d); d.trail = st.trail?.({ THREE, scene, mesh, body: b, kind, sides: kind === 't' || kind === 'u' ? 10 : kind, hw, hd, rnd }) || null;
+        live.push(d); return d;
     });
     if (sound && audio) st.sound?.throw?.({ ac: audio, out: audio.out, noise, t: audio.currentTime, count: dice.length });
     cv.style.transition = 'none'; cv.style.opacity = '1';

@@ -33,6 +33,21 @@ const nats = Promise.all(DATA.nat.map((u) => import(u).then((m) => m.default, ()
     1: mods.flatMap((m) => m.nat1 || []), 20: mods.flatMap((m) => m.nat20 || []) }));
 // when the die blows up or flares, after the exit starts (Ember Cage's fireball and phoenix)
 const HIT = { 1: 1.7 * 0.28, 20: 2.1 * 0.42 };
+// a set's own trails and nat 1 / nat 20 animations (extras/<set>/), loaded when the set is chosen; a file that fails is left out
+const extras = {};
+const extrasOf = (k) => (extras[k] ||= (async () => {
+    const ex = DATA.extras?.[k] || {}, load = (urls) => Promise.all((urls || []).map((u) => import(u).then((m) => m.default, () => null)));
+    const [trails, anims] = await Promise.all([load(ex.trails), load(ex.anims)]);
+    return { trails: trails.filter(Boolean).flat(), 1: anims.filter(Boolean).map((a) => a.nat1).filter(Boolean), 20: anims.filter(Boolean).map((a) => a.nat20).filter(Boolean) };
+})());
+// what's chosen for each set: { trail, anim1, anim20 } keys, or none for the set's own
+const pick = () => (state.picks ||= {})[state.set] ||= {};
+// a chosen nat animation, with the chosen nat sound (or the set's original one) played at its impact
+const withSound = (a, n) => ({ ...a, start(x) {
+    a.start?.(x);
+    const s = x.audio && (x.st.natSounds?.[n] || x.st.natOriginal?.[n]);
+    if (s) { const t0 = x.audio.ac.currentTime; s({ ...x.audio, t0, hit: t0 + (a.impact ?? 0) }); }
+} });
 
 // ---- dice set ----
 function drawSets() {
@@ -77,6 +92,22 @@ async function drawNats() {
     }
 }
 const natOf = async (n, k) => (await nats)[n].find((s) => s.key === k);
+// the trail and nat animation lists, shown only for a set that has its own
+async function drawExtras() {
+    const k = state.set, ex = await extrasOf(k); if (k !== state.set) return;
+    const has = ex.trails.length || ex[1].length || ex[20].length, p = pick();
+    $('#dd-extras').hidden = !has; if (!has) return;
+    const rows = (list, field, tryAs) => list.map((s) => { const on = (p[field] || '') === (s.key || '');
+        return `<div class="dd-snd${on ? ' on' : ''}">
+            <button type="button" class="dd-pick" data-field="${field}" data-xkey="${esc(s.key || '')}" aria-pressed="${on}"><b>${esc(s.name)}</b><span>${esc(s.blurb)}</span></button>
+            <button type="button" class="btn small" data-field="${field}" data-xkey="${esc(s.key || '')}" data-xtry="${tryAs}">Try</button></div>`; }).join('');
+    $('#dd-trailcount').textContent = ex.trails.length + 1;
+    $('#dd-trails').innerHTML = rows([{ key: '', name: 'None', blurb: 'No trail.' }, ...ex.trails], 'trail', 'set');
+    for (const n of [1, 20]) {
+        $(`#dd-a${n}count`).textContent = ex[n].length + 1;
+        $(`#dd-anim${n}`).innerHTML = rows([{ key: '', name: 'Original', blurb: `The set’s own nat ${n} animation.` }, ...ex[n]], 'anim' + n, n);
+    }
+}
 // the page's own audio for listening without dice, built like the engine's: a compressor and a short noise buffer
 let A = null;
 const audio = () => {
@@ -98,10 +129,14 @@ const fillNums = () => { const d = +$('#dd-die').value, cur = +$('#dd-num').valu
 async function roll(groups, land = null) {
     out.textContent = 'Rolling...';
     try {
-        const [m, set, snd, n1, n20] = await Promise.all([load(), setOf(state.set), soundOf(state.sound), natOf(1, state.nat1), natOf(20, state.nat20)]);
-        // the set as it is, with its throw and rolling sounds swapped when another sound is chosen, and the chosen nat 1 and nat 20 sounds
+        const [m, set, snd, n1, n20, ex] = await Promise.all([load(), setOf(state.set), soundOf(state.sound), natOf(1, state.nat1), natOf(20, state.nat20), extrasOf(state.set)]);
+        const p = pick(), trail = ex.trails.find((t) => t.key === p.trail), a1 = ex[1].find((a) => a.key === p.anim1), a20 = ex[20].find((a) => a.key === p.anim20);
+        // the set as it is, with its throw and rolling sounds swapped when another sound is chosen, the chosen nat 1 and nat 20 sounds,
+        // and the set's chosen trail and nat animations
         const style = { ...set, ...(state.sound !== 'own' && { sound: { ...set.sound, throw: snd.throw, hit: snd.hit } }),
-            natSounds: { 1: n1 && ((c) => n1.play(c)), 20: n20 && ((c) => n20.play(c)) } };
+            natSounds: { 1: n1 && ((c) => n1.play(c)), 20: n20 && ((c) => n20.play(c)) },
+            ...(trail && { trail: trail.make }),
+            ...((a1 || a20) && { exits: { ...set.exits, ...(a1 && { 'd20:1': withSound(a1, 1) }), ...(a20 && { 'd20:20': withSound(a20, 20) }) } }) };
         // a new roll takes the last one's dice off the table first, even mid-roll
         m.clearTable(true);
         const res = await m.throwDice(groups, { style, sound: soundBox.checked, land });
@@ -112,7 +147,13 @@ async function roll(groups, land = null) {
 document.addEventListener('click', async (e) => {
     const b = e.target.closest('button'); if (!b) return;
     // the set's own sound row names the set, so it redraws too
-    if (b.dataset.set) { state.set = b.dataset.set; save(); drawSets(); drawSounds(); drawNats(); }
+    if (b.dataset.set) { state.set = b.dataset.set; save(); drawSets(); drawSounds(); drawNats(); drawExtras(); }
+    else if (b.dataset.field) {
+        // picking a trail or an animation; Try also rolls with it (the set for a trail, a d20 landing on 1 or 20 for an animation)
+        pick()[b.dataset.field] = b.dataset.xkey || undefined; save(); drawExtras();
+        if (b.dataset.xtry === 'set') roll([[4, 1], [6, 1], [8, 1], [10, 1], [12, 1], [20, 1]]);
+        else if (b.dataset.xtry) roll([[20, 1]], [[+b.dataset.xtry]]);
+    }
     else if (b.dataset.nat) { state['nat' + b.dataset.nat] = b.dataset.natkey; save(); drawNats(); }
     else if (b.dataset.natplay) { const n = +b.dataset.natplay, s = await natOf(n, b.dataset.natkey), a = audio(), t0 = a.ac.currentTime + 0.05;
         s.play({ ...a, t0, hit: t0 + HIT[n] }); }
@@ -128,4 +169,4 @@ document.addEventListener('click', async (e) => {
     else if (b.id === 'dd-landgo') roll([[+$('#dd-die').value, 1]], [[+$('#dd-num').value]]);
 });
 $('#dd-die').addEventListener('change', fillNums);
-fillNums(); drawSets(); drawSounds(); drawNats();
+fillNums(); drawSets(); drawSounds(); drawNats(); drawExtras();
