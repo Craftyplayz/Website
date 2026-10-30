@@ -1,5 +1,5 @@
 // Ember Cage exits 34, Ash in the Wind: the die heats up glowing like magma, melts into a puddle (True Melt's shape, 33.js),
-// cools and hardens into grey ash, then a gust sweeps across it from one side and blows the ash away in flakes.
+// cools and hardens into grey ash, then a gust sweeps across it from one side and blows the ash away in flakes, with its own sound.
 import base from './33.js';
 const M = base.mid;
 
@@ -33,6 +33,51 @@ const sm = (a, b, k) => { const t = Math.max(0, Math.min(1, (k - a) / (b - a)));
 const rnd = (a, b) => a + Math.random() * (b - a);
 const NP = 420, W0 = 0.72, W1 = 0.95; // flakes, and when the gust's front crosses the ash
 
+// the sound, all scheduled at the start against the animation's clock: a sizzle and bubbling magma as it melts,
+// a few cooling cracks as it hardens, then a gust of wind with a fine hiss of ash. Dice leaving together share one copy.
+let lastSound = -1;
+function sound(x) {
+    const a = x.audio; if (!a) return;
+    const { ac, out, noise } = a, t0 = ac.currentTime, D = ash.dur, at = (k) => t0 + k * D;
+    if (t0 - lastSound < 0.15) return; lastSound = t0;
+    const bus = ac.createGain(); bus.connect(out); const srcs = [];
+    x.snd = { bus, srcs };
+    const hiss = (type, f, q, from, to) => { const s = ac.createBufferSource(); s.buffer = noise; s.loop = true; s.playbackRate.value = 0.8 + Math.random() * 0.4;
+        const b = ac.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = q; const g = ac.createGain(); g.gain.value = 0;
+        s.connect(b).connect(g).connect(bus); s.start(from); s.stop(to); srcs.push(s); return { b, g }; };
+    // the sizzle swells as the magma covers it, and dies away as it cools
+    const z = hiss('bandpass', 4200, 0.8, t0, at(0.68));
+    z.g.gain.setValueAtTime(0.0001, t0); z.g.gain.exponentialRampToValueAtTime(0.1, at(0.2)); z.g.gain.setValueAtTime(0.1, at(0.45)); z.g.gain.exponentialRampToValueAtTime(0.0001, at(0.66));
+    // a deep molten rumble under it while it slumps
+    const r = hiss('lowpass', 220, 0.7, t0, at(0.66));
+    r.g.gain.setValueAtTime(0.0001, t0); r.g.gain.exponentialRampToValueAtTime(0.3, at(0.3)); r.g.gain.exponentialRampToValueAtTime(0.0001, at(0.64));
+    // thick bubbles popping, quickest while it runs out
+    for (let i = 0; i < 26; i++) {
+        const k = 0.1 + Math.random() * 0.48, t = at(k), o = ac.createOscillator(), g = ac.createGain(), f = 110 + Math.random() * 160;
+        o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * (1.8 + Math.random()), t + 0.07);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12 + Math.random() * 0.1, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+        o.connect(g).connect(bus); o.start(t); o.stop(t + 0.1); srcs.push(o);
+    }
+    // cooling cracks as the crust sets
+    const c = hiss('highpass', 2500, 0.7, at(0.5), at(0.74));
+    c.g.gain.setValueAtTime(0, at(0.5));
+    for (let i = 0; i < 9; i++) { const t = at(0.52 + Math.random() * 0.2); c.g.gain.setValueAtTime(0.15 + Math.random() * 0.15, t); c.g.gain.exponentialRampToValueAtTime(0.0005, t + 0.02); }
+    // the gust: wind that rises fast, whistles up and falls away, and the ash hissing off with it
+    const w = hiss('bandpass', 400, 1.6, at(0.68), t0 + D + 0.3);
+    w.b.frequency.setValueAtTime(350, at(0.68)); w.b.frequency.exponentialRampToValueAtTime(1100, at(0.8)); w.b.frequency.exponentialRampToValueAtTime(700, at(0.93)); w.b.frequency.exponentialRampToValueAtTime(450, t0 + D + 0.25);
+    w.g.gain.setValueAtTime(0.0001, at(0.68)); w.g.gain.exponentialRampToValueAtTime(0.45, at(0.79)); w.g.gain.linearRampToValueAtTime(0.3, at(0.93)); w.g.gain.exponentialRampToValueAtTime(0.0001, t0 + D + 0.25);
+    const h = hiss('highpass', 5000, 0.7, at(0.72), t0 + D + 0.1);
+    h.g.gain.setValueAtTime(0.0001, at(0.72)); h.g.gain.exponentialRampToValueAtTime(0.07, at(0.82)); h.g.gain.setValueAtTime(0.07, at(0.93)); h.g.gain.exponentialRampToValueAtTime(0.0001, t0 + D);
+}
+// a new throw cuts it short with a quick fade, never a click
+function hush(x) {
+    if (!x.snd) return;
+    const { bus, srcs } = x.snd, t = x.audio.ac.currentTime; x.snd = null;
+    bus.gain.setValueAtTime(bus.gain.value, t); bus.gain.linearRampToValueAtTime(0, t + 0.05);
+    for (const s of srcs) try { s.stop(t + 0.06); } catch (e) { }
+    setTimeout(() => bus.disconnect(), 400);
+}
+
 const ash = {
     key: 'a34-ash-wind', name: 'Ash in the Wind', blurb: 'Magma creeps over the die until it is molten through, it melts into a puddle, hardens into grey ash, then a gust of wind blows the ash away.',
     dur: 5.4,
@@ -46,6 +91,7 @@ const ash = {
         x.crust.renderOrder = 2; x.mesh.add(x.heat, x.crust);
         x.kb = -1; x.snap = null;
         const wa = rnd(0, 6.283); x.wind = { x: Math.cos(wa), z: Math.sin(wa) };
+        sound(x);
     },
     tick(k, x) {
         const T = x.THREE;
@@ -69,7 +115,7 @@ const ash = {
     end(x) {
         x.mesh.remove(x.heat, x.crust); x.heat.material.dispose(); x.lava.dispose(); x.crust.material.dispose();
         if (x.flakes) { x.scene.remove(x.flakes); x.flakes.geometry.dispose(); x.flakes.material.dispose(); x.flakes = null; }
-        M.end(x);
+        hush(x); M.end(x);
     },
 };
 
