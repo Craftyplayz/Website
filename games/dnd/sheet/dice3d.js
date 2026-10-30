@@ -358,7 +358,8 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
 
 // ---- previews: one still picture per style, the whole set in a row (d4 d6 d8 d10 d12 d20 and the percentile die) ----
 let pv = null;
-export function previewStyle(style, accent = '#5b3f8f', w = 336, h = 56) {
+// kinds: which dice, left to right; one die (the sheet's picker shows a d20) gets a roomier frame so its moving parts fit
+export function previewStyle(style, accent = '#5b3f8f', w = 336, h = 56, kinds = [4, 6, 8, 10, 12, 20, 't']) {
     if (!pv) {
         const r = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
         const s = new THREE.Scene();
@@ -368,7 +369,7 @@ export function previewStyle(style, accent = '#5b3f8f', w = 336, h = 56) {
         pv = { r, s, cam: new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 100), meshes: [] };
     }
     const st = styleOf(style, accent);
-    const kinds = [4, 6, 8, 10, 12, 20, 't'], gap = 2.6, hw = (kinds.length * gap) / 2, hd = (hw * h) / w;
+    const gap = kinds.length === 1 ? 3.6 : 2.6, hw = (kinds.length * gap) / 2, hd = (hw * h) / w;
     pv.r.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); pv.r.setSize(w, h, false);
     Object.assign(pv.cam, { left: -hw, right: hw, top: hd, bottom: -hd }); pv.cam.position.set(0, 50, 0); pv.cam.up.set(0, 0, -1); pv.cam.lookAt(0, 0, 0); pv.cam.updateProjectionMatrix();
     for (const m of pv.meshes) { pv.s.remove(m); m.fx?.dispose?.(); }
@@ -376,7 +377,12 @@ export function previewStyle(style, accent = '#5b3f8f', w = 336, h = 56) {
         const t = buildDie(kind, st), m = new THREE.Mesh(t.geo, t.mats);
         // the top number faces the camera, tipped a little so the edges show
         const top = t.d4 ? t.verts[3].clone().normalize() : t.fs[t.fs.length - 1].n;
-        m.quaternion.setFromUnitVectors(top, UP).premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(0.35, 0, -0.25)));
+        m.quaternion.setFromUnitVectors(top, UP);
+        if (kinds.length === 1 && !t.d4) {
+            // a lone die: its top number faces the camera, turned upright (the text's up is the face's v, the screen's up is -z)
+            const v = t.fs[t.fs.length - 1].v.clone().applyQuaternion(m.quaternion);
+            m.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(UP, Math.PI - Math.atan2(v.x, v.z)));
+        } else m.quaternion.premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(0.35, 0, -0.25)));
         m.position.set(-hw + gap / 2 + i * gap, 0, 0);
         // moving parts drawn once, part way into their motion
         pv.s.add(m); m.fx = st.decorate?.({ THREE, scene: pv.s, mesh: m, kind, sides: kind === 't' ? 10 : kind, faces: t.fs, rnd }) || null; m.fx?.tick?.(1.5, 0, null);
