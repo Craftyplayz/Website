@@ -92,17 +92,38 @@ async function drawNats() {
     }
 }
 const natOf = async (n, k) => (await nats)[n].find((s) => s.key === k);
+// a set's chosen trails, top layer first (older picks kept one trail as p.trail)
+const trailsOf = (p) => { if (!p.trails) { p.trails = p.trail ? [p.trail] : []; delete p.trail; } return p.trails; };
+// several trails at once: each die gets every chosen trail, and what a higher layer adds to the scene is drawn over the layers below it
+const layered = (list) => (ctx) => {
+    const parts = list.map((t, i) => { const order = 10 + (list.length - i) * 10;
+        const scene = Object.assign(Object.create(ctx.scene), {
+            add: (...o) => { for (const obj of o) obj.traverse((c) => { c.renderOrder = order; }); return ctx.scene.add(...o); },
+            remove: (...o) => ctx.scene.remove(...o) });
+        return t.make({ ...ctx, scene }); });
+    return { tick: (...a) => parts.forEach((q) => q?.tick?.(...a)), dispose: () => parts.forEach((q) => q?.dispose?.()) };
+};
 // the trail and nat animation lists, shown only for a set that has its own
 async function drawExtras() {
     const k = state.set, ex = await extrasOf(k); if (k !== state.set) return;
     const has = ex.trails.length || ex[1].length || ex[20].length, p = pick();
     $('#dd-extras').hidden = !has; if (!has) return;
-    const rows = (list, field, tryAs) => list.map((s) => { const on = (p[field] || '') === (s.key || '');
+    const layers = trailsOf(p), isOn = (field, key) => (field === 'trail' ? (key ? layers.includes(key) : !layers.length) : (p[field] || '') === key);
+    const rows = (list, field, tryAs) => list.map((s) => { const on = isOn(field, s.key || '');
         return `<div class="dd-snd${on ? ' on' : ''}">
             <button type="button" class="dd-pick" data-field="${field}" data-xkey="${esc(s.key || '')}" aria-pressed="${on}"><b>${esc(s.name)}</b><span>${esc(s.blurb)}</span></button>
             <button type="button" class="btn small" data-field="${field}" data-xkey="${esc(s.key || '')}" data-xtry="${tryAs}">Try</button></div>`; }).join('');
     $('#dd-trailcount').textContent = ex.trails.length + 1;
     $('#dd-trails').innerHTML = rows([{ key: '', name: 'None', blurb: 'No trail.' }, ...ex.trails], 'trail', 'set');
+    // the chosen trails as layers, top first: move up or down, or take one off
+    const named = layers.map((key) => ex.trails.find((t) => t.key === key)).filter(Boolean);
+    $('#dd-layers').hidden = !named.length;
+    $('#dd-layers').innerHTML = `<div class="dd-layhead"><b>Layers</b><span class="muted">top first</span>
+        <button type="button" class="btn small" data-layer="roll">Roll with these</button></div><ol>${named.map((t, i) => `<li>
+        <span class="dd-layname">${esc(t.name)}</span>
+        <button type="button" class="dd-laybtn" data-layer="up" data-i="${i}" aria-label="Move ${esc(t.name)} up" title="Move up"${i ? '' : ' disabled'}>↑</button>
+        <button type="button" class="dd-laybtn" data-layer="down" data-i="${i}" aria-label="Move ${esc(t.name)} down" title="Move down"${i < named.length - 1 ? '' : ' disabled'}>↓</button>
+        <button type="button" class="dd-laybtn" data-layer="off" data-i="${i}" aria-label="Remove ${esc(t.name)}" title="Remove">×</button></li>`).join('')}</ol>`;
     for (const n of [1, 20]) {
         $(`#dd-a${n}count`).textContent = ex[n].length + 1;
         $(`#dd-anim${n}`).innerHTML = rows([{ key: '', name: 'Original', blurb: `The set’s own nat ${n} animation.` }, ...ex[n]], 'anim' + n, n);
@@ -126,11 +147,14 @@ const HITS = [[0.38, 1, 1], [0.52, 0.8, 1], [0.6, 0.55, 0], [0.7, 0.6, 1], [0.79
 const NUMS = (d) => Array.from({ length: d }, (_, i) => i + 1);
 const fillNums = () => { const d = +$('#dd-die').value, cur = +$('#dd-num').value || d;
     $('#dd-num').innerHTML = NUMS(d).map((n) => `<option${n === Math.min(cur, d) ? ' selected' : ''}>${n}</option>`).join(''); };
-async function roll(groups, land = null) {
+// only: trail keys to use instead of the chosen layers (a trail's Try shows it on its own)
+async function roll(groups, land = null, only = null) {
     out.textContent = 'Rolling...';
     try {
         const [m, set, snd, n1, n20, ex] = await Promise.all([load(), setOf(state.set), soundOf(state.sound), natOf(1, state.nat1), natOf(20, state.nat20), extrasOf(state.set)]);
-        const p = pick(), trail = ex.trails.find((t) => t.key === p.trail), a1 = ex[1].find((a) => a.key === p.anim1), a20 = ex[20].find((a) => a.key === p.anim20);
+        const p = pick(), a1 = ex[1].find((a) => a.key === p.anim1), a20 = ex[20].find((a) => a.key === p.anim20);
+        const trails = (only || trailsOf(p)).map((k) => ex.trails.find((t) => t.key === k)).filter(Boolean);
+        const trail = trails.length === 1 ? trails[0] : trails.length ? { make: layered(trails) } : null;
         // the set as it is, with its throw and rolling sounds swapped when another sound is chosen, the chosen nat 1 and nat 20 sounds,
         // and the set's chosen trail and nat animations
         const style = { ...set, ...(state.sound !== 'own' && { sound: { ...set.sound, throw: snd.throw, hit: snd.hit } }),
@@ -148,11 +172,24 @@ document.addEventListener('click', async (e) => {
     const b = e.target.closest('button'); if (!b) return;
     // the set's own sound row names the set, so it redraws too
     if (b.dataset.set) { state.set = b.dataset.set; save(); drawSets(); drawSounds(); drawNats(); drawExtras(); }
+    else if (b.dataset.field === 'trail') {
+        // a trail row adds that trail as the top layer, or takes it off again; None takes them all off; Try rolls the set with just that trail
+        const key = b.dataset.xkey, list = trailsOf(pick());
+        if (b.dataset.xtry) return roll([[4, 1], [6, 1], [8, 1], [10, 1], [12, 1], [20, 1]], null, key ? [key] : []);
+        if (!key) list.length = 0; else if (list.includes(key)) list.splice(list.indexOf(key), 1); else list.unshift(key);
+        save(); drawExtras();
+    }
     else if (b.dataset.field) {
-        // picking a trail or an animation; Try also rolls with it (the set for a trail, a d20 landing on 1 or 20 for an animation)
+        // picking an animation; Try also lands a d20 on 1 or 20 with it
         pick()[b.dataset.field] = b.dataset.xkey || undefined; save(); drawExtras();
-        if (b.dataset.xtry === 'set') roll([[4, 1], [6, 1], [8, 1], [10, 1], [12, 1], [20, 1]]);
-        else if (b.dataset.xtry) roll([[20, 1]], [[+b.dataset.xtry]]);
+        if (b.dataset.xtry) roll([[20, 1]], [[+b.dataset.xtry]]);
+    }
+    else if (b.dataset.layer) {
+        const list = trailsOf(pick()), i = +b.dataset.i;
+        if (b.dataset.layer === 'roll') return roll([[4, 1], [6, 1], [8, 1], [10, 1], [12, 1], [20, 1]]);
+        if (b.dataset.layer === 'off') list.splice(i, 1);
+        else { const j = b.dataset.layer === 'up' ? i - 1 : i + 1; if (j < 0 || j >= list.length) return; [list[i], list[j]] = [list[j], list[i]]; }
+        save(); drawExtras();
     }
     else if (b.dataset.nat) { state['nat' + b.dataset.nat] = b.dataset.natkey; save(); drawNats(); }
     else if (b.dataset.natplay) { const n = +b.dataset.natplay, s = await natOf(n, b.dataset.natkey), a = audio(), t0 = a.ac.currentTime + 0.05;
