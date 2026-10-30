@@ -154,6 +154,13 @@ function fanfare({ ac, out, noise }, when) {
     // the echo loop is cut once everything has rung out, so it can't hang on
     setTimeout(() => { try { fb.disconnect(); echo.disconnect(); bells.disconnect(); } catch (e) { } }, (when + 3.2) * 1000);
 }
+// a nat 1 or nat 20 plays the style's chosen sound for it (natSounds, set by the Dice Sets page) or the original;
+// a chosen one gets { ac, out, noise, t0: now, hit: when the die blows up or flares }
+function natSound(x, n, when, original) {
+    const s = x.st?.natSounds?.[n];
+    if (!s) return original(x.audio, when);
+    const t0 = x.audio.ac.currentTime; s({ ...x.audio, t0, hit: t0 + when });
+}
 
 const EXITS = {
     // nat 1: it heats up and shakes, then blows apart in a fireball with a shockwave across the table
@@ -162,7 +169,7 @@ const EXITS = {
         start(x) {
             x.own = []; x.home = x.mesh.position.clone();
             x.heat = sprite(x, 0xff6a10); x.heat.scale.setScalar(0.1);
-            if (x.audio) boom(x.audio, 1.7 * 0.28);
+            if (x.audio) natSound(x, 1, 1.7 * 0.28, boom);
         },
         tick(k, x) {
             const pre = at(k, 0, 0.28), post = at(k, 0.28, 1);
@@ -196,7 +203,7 @@ const EXITS = {
         start(x) {
             x.own = []; x.spin = 0;
             x.halo = sprite(x, 0xffc830); x.halo.scale.setScalar(0.1);
-            if (x.audio) fanfare(x.audio, 2.1 * 0.42);
+            if (x.audio) natSound(x, 20, 2.1 * 0.42, fanfare);
         },
         tick(k, x) {
             const rise = ease(at(k, 0, 0.42)), out = at(k, 0.42, 1);
