@@ -5,7 +5,7 @@ $site_page = ['components' => true, 'css' => ['/assets/css/pages/games-dnd-sheet
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 // key => [name, what it looks like, what its own sound is like]; the look and sound live in sets/<key>.js
 $sets = [
-    'ember' => ['Ember Cage', 'A dark iron lattice over a molten core that churns, with sparks drifting up off each die.', 'Iron clanks with a crackle of embers; a whoosh of flame on the throw and a hiss as they settle.'],
+    'ember' => ['Ember Cage', 'A dark iron lattice over a molten core that churns, with sparks drifting up off each die.', 'Iron clanks with a crackle of embers; a whoosh of flame on the throw.'],
     'frost' => ['Frostbound', 'Pale blue ice with silver filigree, frost creeping across the faces and snowflakes circling.', 'Glassy ice clinks and crunches; a cold gust on the throw and a wind-chime shimmer at rest.'],
     'arcane' => ['Arcane Orrery', 'Violet glass inside spinning gold rings, like a tiny orrery, with runes that pulse with light.', 'Bell-like tings tuned to a scale; a rising shimmer on the throw and a soft chord when they settle.'],
     'clockwork' => ['Clockwork', 'Brass faces etched with gears, with small gears turning around each die.', 'Ratchet clicks and metal ticks; a winding sound on the throw and a tick-tock that winds down to a ding.'],
@@ -13,7 +13,7 @@ $sets = [
     'wildwood' => ['Wildwood', 'Living wood wrapped in vines, with leaves swaying on the faces and fireflies drifting round.', 'Hollow woody knocks; a rustle of leaves on the throw and a soft birdlike chirp at rest.'],
     'abyss' => ['Abyssal Tide', 'Deep-sea teal with light rippling across the faces and bubbles rising from each die.', 'Muffled underwater thuds and bubble pops; a wave swelling on the throw and a burst of bubbles at rest.'],
     'starfall' => ['Starfall', 'Midnight blue with a slowly turning galaxy inside, silver constellations and stars in orbit.', 'Soft glassy pings that ring out; a whoosh on the throw and a twinkling run of notes when they settle.'],
-    'venom' => ['Viper Venom', 'A bone-white frame over toxic green liquid that bubbles, with drips falling from each die.', 'Dry bone clacks and wet gurgles; a hiss on the throw and a final hiss as they settle.'],
+    'venom' => ['Viper Venom', 'A bone-white frame over toxic green liquid that bubbles, with drips falling from each die.', 'Dry bone clacks and wet gurgles; a hiss on the throw and a last gurgle as they settle.'],
     'spectral' => ['Spectral', 'Ghostly see-through dice with a glowing wisp circling each one and leaving a trail.', 'Hollow, echoing knocks; a breathy rush on the throw and a low moan that fades at rest.'],
 ];
 // the classic plain styles built into dice3d.js (its STYLES), with the standard knock sound

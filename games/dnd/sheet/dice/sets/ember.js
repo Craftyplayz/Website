@@ -328,11 +328,5 @@ export default {
             const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.5, t + 0.2); g.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
             s.connect(bp).connect(g).connect(out); s.start(t); s.stop(t + 0.65);
         },
-        settle({ ac, out, noise, t }) {
-            const s = ac.createBufferSource(); s.buffer = noise; s.loop = true;
-            const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 5000;
-            const g = ac.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.2, t + 0.08); g.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
-            s.connect(hp).connect(g).connect(out); s.start(t); s.stop(t + 0.95);
-        },
     },
 };
