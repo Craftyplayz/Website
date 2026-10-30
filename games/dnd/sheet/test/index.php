@@ -37,6 +37,8 @@ $dice = [4, 6, 8, 10, 12, 20, 100];
                 <option value="1">1× (real time)</option><option value="2">2×</option><option value="4" selected>4×</option><option value="8">8×</option>
             </select></label>
             <button type="button" class="btn primary" id="dt-go">Start rolling</button>
+            <label>Dice to roll <input type="number" class="field dt-amount" id="dt-amount" min="1" step="1" value="1000"></label>
+            <button type="button" class="btn" id="dt-batch">Roll this many, then stop</button>
             <button type="button" class="btn" id="dt-reset">Reset all counts</button>
             <span class="muted" id="dt-count"></span>
         </div>
@@ -76,7 +78,8 @@ $dice = [4, 6, 8, 10, 12, 20, 100];
             const frames = [...document.querySelectorAll('.dt-panel iframe')], caps = [...document.querySelectorAll('[data-cap]')], picks = [...document.querySelectorAll('.dt-pdie')];
             const per = frames.map(() => ({ n: 0, last: '' }));
             const KEY = 'dice-test-counts';
-            let running = false, counts = {}, shown = 0;
+            // left: dice still to roll before stopping on its own (0 = keep going)
+            let running = false, counts = {}, shown = 0, left = 0;
             try { counts = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { }
             const store = () => { try { localStorage.setItem(KEY, JSON.stringify(counts)); } catch (e) { } };
             // a table's die: its own pick, or the page's
@@ -107,7 +110,7 @@ $dice = [4, 6, 8, 10, 12, 20, 100];
                 $('#dt-tabs').innerHTML = kinds.map((n) => `<button type="button" data-n="${n}" class="${n === shown ? 'on' : ''}" aria-pressed="${n === shown}">d${n} <span class="muted">${total(n).toLocaleString()}</span></button>`).join('');
                 const f = tally(shown), n = total(shown), exp = n / f.length, max = Math.max(1, ...f, exp);
                 $('#dt-n').textContent = n.toLocaleString() + ' d' + shown + ' rolled';
-                $('#dt-count').textContent = running ? 'Rolling…' : Object.keys(counts).some((k) => total(+k)) ? 'Paused' : '';
+                $('#dt-count').textContent = running ? (left ? `Rolling… ${left.toLocaleString()} to go` : 'Rolling…') : Object.keys(counts).some((k) => total(+k)) ? 'Paused' : '';
                 const every = f.length > 20 ? 10 : 1;
                 $('#dt-chart').style.setProperty('--faces', f.length);
                 $('#dt-chart').setAttribute('aria-label', `How often each face of a d${f.length} came up in ${n} rolls`);
@@ -134,16 +137,26 @@ $dice = [4, 6, 8, 10, 12, 20, 100];
                 if (e.data.ready) { if (running) start(i); return; }
                 // only results for the die that table has now count
                 if (!running || e.data.sides !== dieOf(i) || !Array.isArray(e.data.results)) return;
-                const t = tally(e.data.sides);
-                for (const v of e.data.results) t[v - 1]++;
-                per[i].n += e.data.results.length; per[i].last = e.data.results.join(', ');
+                // with a set amount, extra dice from throws already in the air are dropped
+                const res = left ? e.data.results.slice(0, left) : e.data.results, t = tally(e.data.sides);
+                for (const v of res) t[v - 1]++;
+                per[i].n += res.length; per[i].last = res.join(', ');
+                if (left && !(left -= res.length)) setRunning(false);
                 store(); draw(); capt();
             });
-            $('#dt-go').addEventListener('click', () => {
-                running = !running;
+            const setRunning = (on) => {
+                running = on;
+                if (!on) left = 0;
                 $('#dt-go').textContent = running ? 'Pause' : 'Start rolling';
                 frames.forEach((fr, i) => (running ? start(i) : send(fr, { cmd: 'stop' })));
                 draw();
+            };
+            $('#dt-go').addEventListener('click', () => setRunning(!running));
+            $('#dt-batch').addEventListener('click', () => {
+                const n = Math.floor(+$('#dt-amount').value);
+                if (!(n >= 1)) { $('#dt-amount').focus(); return; }
+                left = n;
+                if (running) draw(); else setRunning(true);
             });
             const restart = () => { if (running) frames.forEach((_, i) => start(i)); per.forEach((p) => { p.last = ''; }); draw(); capt(); };
             for (const el of ['#dt-sides', '#dt-style', '#dt-speed', '#dt-min', '#dt-max']) $(el).addEventListener('change', restart);
