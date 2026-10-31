@@ -1,27 +1,36 @@
-// Ember Cage exit 37: nat 1 Frostbite. The fire slowly goes out, frost grows from the middle of each face out to the corners until the die is
-// frozen through, then the die's own model shatters into about 50 icy pieces that bounce across the table, melt into water and drain away.
+// Ember Cage exit 37: nat 1 Frostbite. The fire slowly goes out, then ice takes hold at one spot and spreads over the die, crazing it with thousands
+// of fine cracks. Frozen through, it simply falls apart under its own weight into about 50 pieces of the die itself, and each one melts and drains away where it lies.
 let FX = null;
 function fx(T) {
     if (FX) return FX;
     const mk = (f) => { const c = document.createElement('canvas'); c.width = c.height = 64; f(c.getContext('2d')); return new T.CanvasTexture(c); };
     const soft = mk((g) => { const r = g.createRadialGradient(32, 32, 0, 32, 32, 32); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0, 0, 64, 64); });
-    // a soft pool of water; overlapping pools run together into one puddle
-    const water = mk((g) => { const r = g.createRadialGradient(32, 32, 0, 32, 32, 31); r.addColorStop(0, 'rgba(150,200,245,.5)'); r.addColorStop(0.55, 'rgba(160,210,250,.42)');
-        r.addColorStop(0.8, 'rgba(200,232,255,.2)'); r.addColorStop(1, 'rgba(200,232,255,0)'); g.fillStyle = r; g.fillRect(0, 0, 64, 64); });
-    return (FX = { soft, water, plane: new T.PlaneGeometry(1, 1) });
+    return (FX = { soft, plane: new T.PlaneGeometry(1, 1) });
 }
-// frost on the die's own surface: it covers what lies within `front` of the middle of each face (0 = face centres, 1 = corners),
-// with a bright freezing edge, crystal streaks and a cold sheen
+// ice on the die's own surface. It spreads from uS (a spot on the die) as uT grows, with a ragged edge; behind it the surface frosts over
+// and fine cracks appear, a few at first and then more and more, at two sizes (Voronoi cell edges, so thousands of small cells).
 const VERT = `uniform vec3 uC; varying vec3 vP; varying vec3 vN;
 void main(){ vP = position + uC; vN = normalize(normalMatrix * normal); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`;
-const FRAG = `uniform float uFront, uR, uIn, uOp; varying vec3 vP; varying vec3 vN;
+const FRAG = `uniform float uT, uOp, uSpan, uF; uniform vec3 uS; varying vec3 vP; varying vec3 vN;
+vec3 h3(vec3 p){ p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6))); return fract(sin(p) * 43758.5453); }
+// distance to the nearest cell edge, and a random number for the cell
+vec2 cells(vec3 x){ vec3 p = floor(x), f = fract(x); float d1 = 9., d2 = 9., id = 0.;
+    for (int k = -1; k <= 1; k++) for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) { vec3 b = vec3(i, j, k), h = h3(p + b), r = b + h - f; float d = dot(r, r);
+        if (d < d1) { d2 = d1; d1 = d; id = h.x; } else if (d < d2) d2 = d; }
+    return vec2(sqrt(d2) - sqrt(d1), id); }
+float line(vec2 c, float on, float w){ float e = c.x / max(fwidth(c.x), 1e-4); return (1. - smoothstep(w * .5, w, e)) * step(c.y, on); }
 void main(){
-    float rr = clamp((length(vP) - uIn) / (uR - uIn), 0., 1.);
-    float cover = 1. - smoothstep(uFront - 0.1, uFront, rr), band = smoothstep(uFront - 0.14, uFront - 0.03, rr) * cover;
-    vec3 n = normalize(vN); float fres = pow(1. - abs(n.z), 2.), lit = .55 + .45 * max(0., dot(n, normalize(vec3(-.3, .8, .5))));
-    float f = sin(dot(vP, vec3(37., 11., 23.)) + 3. * sin(dot(vP, vec3(-13., 29., 7.)))), streak = smoothstep(.7, 1., f);
-    vec3 c = mix(vec3(.5, .72, .92), vec3(.93, .98, 1.), .35 * lit + .4 * fres + .3 * streak) + band * vec3(.5, .8, 1.);
-    gl_FragColor = vec4(c, uOp * cover * (.86 + .14 * band));
+    float wob = sin(vP.x * 5. + sin(vP.z * 4.)) * sin(vP.y * 6. + sin(vP.x * 3.)) + .5 * sin(dot(vP, vec3(9., -7., 11.)));
+    float lp = clamp((uT - length(vP - uS) / uSpan + wob * .06) * 3., 0., 1.);
+    if (lp <= 0.) discard;
+    vec3 n = normalize(vN); float lit = .6 + .4 * max(0., dot(n, normalize(vec3(-.3, .8, .5)))), fres = pow(1. - abs(n.z), 2.);
+    float big = line(cells(vP * uF), lp * 1.05 - .1, 1.1), fine = line(cells(vP * uF * 2.4 + 7.), lp * .55 - .1, .9);
+    float edge = (1. - smoothstep(0., .25, lp));
+    vec3 c = mix(vec3(.55, .74, .92), vec3(.85, .94, 1.), .4 * lit + .5 * fres);
+    float crack = max(big, fine * .7);
+    c = mix(c, vec3(.97, .99, 1.), crack) + edge * .2;
+    // clear ice over the die, milky toward the edges, with the cracks standing out white
+    gl_FragColor = vec4(c, uOp * clamp(.1 + .3 * lp + .25 * fres * lp + crack * .75 + edge * .15, 0., 1.));
 }`;
 // a copy of the geometry with every triangle split into 4^n, so it can break into many pieces
 function subdivide(geo, n) {
@@ -74,11 +83,11 @@ const ease = (k) => 1 - (1 - k) ** 3;
 const at = (k, a, b) => Math.max(0, Math.min(1, (k - a) / (b - a)));
 const rnd = (a, b) => a + Math.random() * (b - a);
 const add = (x, o) => (x.scene.add(o), x.own.push(o), o);
-const NP = 50, BREAK = 0.56;
+const NP = 50, BREAK = 0.62;
 
 const nat1 = {
-    key: 'a37-frostbite', name: 'Frostbite', dur: 4.8,
-    blurb: 'The fire slowly dies and the die freezes from the inside out, then its own model shatters into fifty icy pieces that melt into water and drain away.',
+    key: 'a37-frostbite', name: 'Frostbite', dur: 5.4,
+    blurb: 'The fire slowly dies, ice spreads over the die and crazes it with thousands of fine cracks, then it falls apart into pieces that melt and drain away where they lie.',
     start(x) {
         const T = x.THREE, F = fx(T), m = x.mesh;
         x.own = []; x.p0 = m.position.clone(); x.q0 = m.quaternion.clone(); x.vis0 = m.visible; x.cast0 = m.castShadow; x.kb = -1;
@@ -87,62 +96,72 @@ const nat1 = {
         m.material = Array.isArray(m.material) ? x.mats : x.mats[0];
         x.c0 = x.mats.map((a) => a.color.clone()); x.e0 = x.mats.map((a) => a.emissive?.clone()); x.ei0 = x.mats.map((a) => a.emissiveIntensity);
         x.kids = m.children.map((c) => { const cm = c.material.clone(); cm.transparent = true; cm.op0 = cm.opacity; const k = { c, m0: c.material, cm }; c.material = cm; return k; });
-        // how far the die reaches from its middle: to its corners (uR) and to its face centres (uIn)
-        const P = m.geometry.attributes.position, idx = m.geometry.index, v = [new T.Vector3(), new T.Vector3(), new T.Vector3()], pl = new T.Plane();
-        let R = 0, In = Infinity; const nt = (idx ? idx.count : P.count) / 3;
-        for (let t = 0; t < nt; t++) { for (let j = 0; j < 3; j++) v[j].fromBufferAttribute(P, idx ? idx.getX(t * 3 + j) : t * 3 + j); pl.setFromCoplanarPoints(...v);
-            if (pl.normal.lengthSq() > 0.5) In = Math.min(In, Math.abs(pl.constant)); for (const p of v) R = Math.max(R, p.length()); }
+        // how far the die reaches, and where the ice takes hold: a corner on the upper side, so it is seen spreading from the start
+        const P = m.geometry.attributes.position, nt = (m.geometry.index ? m.geometry.index.count : P.count) / 3, v = new T.Vector3();
+        let R = 0, S = null, sy = -Infinity;
+        for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); R = Math.max(R, v.length()); const y = v.clone().applyQuaternion(x.q0).y + Math.random() * R * 0.8; if (y > sy) { sy = y; S = v.clone(); } }
         x.R = R;
         const ice = (c) => new T.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, side: T.DoubleSide,
-            polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1, uniforms: { uFront: { value: -0.2 }, uR: { value: R }, uIn: { value: In }, uOp: { value: 1 }, uC: { value: c } } });
+            polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
+            uniforms: { uT: { value: 0 }, uOp: { value: 1 }, uSpan: { value: 2 * R }, uF: { value: 4 / R }, uS: { value: S }, uC: { value: c } } });
         x.frost = new T.Mesh(m.geometry, ice(new T.Vector3())); x.frost.renderOrder = 1; m.add(x.frost);
-        x.glint = add(x, new T.Sprite(new T.SpriteMaterial({ map: F.soft, color: 0xe8f8ff, transparent: true, opacity: 0, depthWrite: false, blending: T.AdditiveBlending })));
-        x.glint.position.copy(x.p0).add(new T.Vector3(rnd(-0.3, 0.3) * R, R, rnd(-0.3, 0.3) * R));
         // the pieces, cut now from a fine copy of the die, each with its own frost; they wait hidden until the break
-        const tris = nt; let L = 0; while (tris * 4 ** L < NP * 14 && L < 4) L++;
+        let L = 0; while (nt * 4 ** L < NP * 14 && L < 4) L++;
         x.fine = subdivide(m.geometry, L);
         x.bits = shatter(T, x.fine, NP).map(({ g, c, r }) => {
-            const p = add(x, new T.Mesh(g, m.material)), f = new T.Mesh(g, ice(c)); f.renderOrder = 1; f.material.uniforms.uFront.value = 2; p.add(f); p.visible = false; p.castShadow = true;
+            const p = add(x, new T.Mesh(g, m.material)), f = new T.Mesh(g, ice(c)); f.renderOrder = 1; f.material.uniforms.uT.value = 2; p.add(f); p.visible = false; p.castShadow = true;
             const w = c.clone().applyQuaternion(x.q0), out = new T.Vector3(w.x, 0, w.z); if (out.lengthSq() < 1e-4) out.set(rnd(-1, 1), 0, rnd(-1, 1)); out.normalize();
-            const pool = add(x, new T.Mesh(F.plane, new T.MeshBasicMaterial({ map: F.water, transparent: true, opacity: 0, depthWrite: false })));
-            pool.rotation.x = -Math.PI / 2; pool.visible = false;
-            return { p, f, g, w, r, pool, v: out.multiplyScalar(rnd(1.5, 4.5)).setY(rnd(2, 5)), ax: new T.Vector3(rnd(-1, 1), rnd(-1, 1), rnd(-1, 1)).normalize(), spin: rnd(4, 12), lag: rnd(0, 0.06) };
+            const up = (w.y + R) / (2 * R); // 0 at the bottom of the die, 1 at the top
+            // nothing throws them: each just tips a little outward as the piece below gives way, and falls
+            return { p, f, g, w, r, ell: rnd(0.75, 1), rot: rnd(0, 3.14), v: out.multiplyScalar(rnd(0.15, 0.6) * up), ax: new T.Vector3(-out.z, 0, out.x).add(new T.Vector3(rnd(-.3, .3), rnd(-.3, .3), rnd(-.3, .3))).normalize(),
+                spin: rnd(1, 3.5) * up, go: BREAK + (1 - up) * 0.03 + rnd(0, 0.015), lag: rnd(0, 0.06) };
         });
-        x.flash = add(x, new T.Sprite(new T.SpriteMaterial({ map: F.soft, color: 0xdff4ff, transparent: true, opacity: 0, depthWrite: false, blending: T.AdditiveBlending })));
-        x.flash.position.copy(x.p0); x.dq = new T.Quaternion();
+        // the water: every melting piece's pool is painted into one canvas, so the pools run together into one puddle with one wet edge
+        const cv = document.createElement('canvas'); cv.width = cv.height = 256; x.pg = cv.getContext('2d'); x.pt = new T.CanvasTexture(cv); x.pw = 9 * R;
+        x.puddle = add(x, new T.Mesh(F.plane, new T.MeshBasicMaterial({ map: x.pt, transparent: true, opacity: 0.4, depthWrite: false })));
+        x.puddle.rotation.x = -Math.PI / 2; x.puddle.position.set(x.p0.x, 0.03, x.p0.z); x.puddle.scale.setScalar(x.pw); x.puddle.visible = false;
+        x.dq = new T.Quaternion();
     },
     tick(k, x) {
         const m = x.mesh, T = x.THREE, dt = Math.max(0, k - Math.max(0, x.kb)) * nat1.dur; x.kb = k;
         // the fire slowly goes out: the glow and churn fade and the iron turns cold blue-grey
-        const cool = at(k, 0, 0.3), cold = new T.Color(0x5a6f86);
+        const cool = at(k, 0, 0.3), cold = new T.Color(0x4f6a8a);
         x.mats.forEach((a, i) => { a.color.copy(x.c0[i]).lerp(cold, cool * 0.6); if (a.emissive) a.emissiveIntensity = x.ei0[i] * (1 - cool); });
         for (const kd of x.kids) kd.cm.opacity = kd.cm.op0 * (1 - at(k, 0, 0.22));
-        // the frost grows from the middle of each face out to the corners
-        const fr = at(k, 0.06, 0.5); x.frost.material.uniforms.uFront.value = -0.15 + 1.35 * fr * fr * (3 - 2 * fr);
-        // frozen through: a glint, a shiver, then it breaks
-        x.glint.scale.setScalar(x.R * 2.2 * Math.sin(Math.PI * at(k, 0.47, 0.55))); x.glint.material.opacity = Math.sin(Math.PI * at(k, 0.47, 0.55));
-        const shiver = at(k, 0.51, BREAK) * 0.04 * x.R; m.position.set(x.p0.x + (Math.random() - 0.5) * shiver, x.p0.y, x.p0.z + (Math.random() - 0.5) * shiver); m.quaternion.copy(x.q0);
+        // the ice takes hold at one spot and spreads over the die, cracking as it goes
+        x.frost.material.uniforms.uT.value = 1.4 * at(k, 0.12, 0.6);
+        m.position.copy(x.p0); m.quaternion.copy(x.q0);
         const broke = k >= BREAK; m.visible = !broke; m.castShadow = !broke && x.cast0;
-        x.flash.scale.setScalar(x.R * (1.5 + 5 * at(k, BREAK, BREAK + 0.08))); x.flash.material.opacity = 0.8 * (broke ? 1 - at(k, BREAK, BREAK + 0.08) : 0);
         if (!broke) return;
-        const melt = (b) => at(k, 0.7 + b.lag, 0.85 + b.lag), drain = at(k, 0.84, 0.97);
+        const melt = (b) => at(k, 0.72 + b.lag, 0.86 + b.lag), drain = (b) => at(k, 0.84 + b.lag * 0.5, 0.97);
         for (const b of x.bits) {
-            if (!b.p.visible && !b.started) { b.started = true; b.p.visible = true; b.p.position.copy(x.p0).add(b.w); b.p.quaternion.copy(x.q0); }
-            // fly, fall, bounce, skid to a stop
-            const floor = b.r * 0.35 * (1 - melt(b));
+            // every piece is where it was in the die until its hold gives way
+            if (!b.started) { b.started = true; b.p.visible = true; b.p.position.copy(x.p0).add(b.w); b.p.quaternion.copy(x.q0); }
+            if (k < b.go) continue;
+            // then gravity: it falls, lands with a little bounce and comes to rest
+            const mt = melt(b), floor = b.r * 0.3 * (1 - mt);
             b.v.y -= 22 * dt; b.p.position.addScaledVector(b.v, dt);
-            if (b.p.position.y < floor) { b.p.position.y = floor; if (b.v.y < 0) { b.v.y *= -0.3; b.v.x *= 0.6; b.v.z *= 0.6; b.spin *= 0.5; } }
-            if (b.p.position.y <= floor + 0.01) { const fr = Math.max(0, 1 - 4 * dt); b.v.x *= fr; b.v.z *= fr; b.spin *= fr; }
+            if (b.p.position.y < floor) { b.p.position.y = floor; if (b.v.y < 0) { b.v.y *= -0.2; b.v.x *= 0.5; b.v.z *= 0.5; b.spin *= 0.4; } }
+            if (b.p.position.y <= floor + 0.01) { const fr = Math.max(0, 1 - 6 * dt); b.v.x *= fr; b.v.z *= fr; b.spin *= fr; }
             b.p.quaternion.premultiply(x.dq.setFromAxisAngle(b.ax, b.spin * dt));
-            // melt: the piece shrinks away as a pool of water spreads under it
-            const mt = melt(b); b.p.scale.setScalar(Math.max(0.001, 1 - ease(mt))); b.p.visible = mt < 1; b.f.material.uniforms.uOp.value = 1 - 0.5 * mt;
-            if (mt > 0 && !b.pool.visible) { b.pool.visible = true; b.px = b.p.position.x; b.pz = b.p.position.z; }
-            if (!b.pool.visible) continue;
-            // drain: every pool slides into a swirl toward where the die stood and goes down
-            const d = ease(drain), a = drain * 2.4, dx = b.px - x.p0.x, dz = b.pz - x.p0.z, s = 1 - d;
-            b.pool.position.set(x.p0.x + (dx * Math.cos(a) - dz * Math.sin(a)) * s, 0.04, x.p0.z + (dx * Math.sin(a) + dz * Math.cos(a)) * s);
-            b.pool.scale.setScalar(b.r * 4.5 * Math.sqrt(mt) * (1 - 0.75 * d) + 0.001); b.pool.material.opacity = 0.75 * Math.min(1, mt * 2) * (1 - at(k, 0.9, 0.97));
+            // it melts where it lies: the ice shrinks as its water spreads out under it
+            b.p.scale.setScalar(Math.max(0.001, 1 - ease(mt))); b.p.visible = mt < 1; b.f.material.uniforms.uOp.value = 1 - 0.5 * mt;
+            if (mt > 0 && b.px == null) { b.px = b.p.position.x; b.pz = b.p.position.z; }
         }
+        // paint the puddle: wet edges first, then the water over them, so only the outside edge of the joined pools shows
+        const g = x.pg, sc = 256 / x.pw, wet = x.bits.filter((b) => b.px != null);
+        x.puddle.visible = wet.length > 0; if (!wet.length) return;
+        g.clearRect(0, 0, 256, 256);
+        for (const [pad, col] of [[2, '#eaf6ff'], [0, '#3f73a8']]) {
+            g.fillStyle = col; g.beginPath();
+            for (const b of wet) { const r = b.r * 1.6 * Math.sqrt(melt(b)) * (1 - 0.85 * ease(drain(b))) * sc; if (r < 0.5) continue;
+                const cx = 128 + (b.px - x.p0.x) * sc, cy = 128 + (b.pz - x.p0.z) * sc; g.moveTo(cx + (r + pad) * Math.cos(b.rot), cy + (r + pad) * Math.sin(b.rot)); g.ellipse(cx, cy, r + pad, r * b.ell + pad, b.rot, 0, 6.283); }
+            g.fill();
+        }
+        // a few glints of light on the water
+        g.fillStyle = 'rgba(255,255,255,.9)';
+        for (const b of wet.slice(0, 8)) { const r = b.r * 0.5 * Math.sqrt(melt(b)) * (1 - ease(drain(b))) * sc; if (r > 1) { g.beginPath(); g.ellipse(128 + (b.px - x.p0.x) * sc - r, 128 + (b.pz - x.p0.z) * sc - r * 0.6, r, r * 0.3, -0.5, 0, 6.283); g.fill(); } }
+        x.pt.needsUpdate = true; x.puddle.material.opacity = 0.4 * (1 - at(k, 0.93, 0.98));
     },
     end(x) {
         const m = x.mesh;
@@ -152,7 +171,7 @@ const nat1 = {
         for (const b of x.bits) { b.g.dispose(); b.f.material.dispose(); }
         x.mats.forEach((a) => a.dispose()); x.fine.dispose();
         for (const o of x.own) { x.scene.remove(o); if (o.material !== m.material && !Array.isArray(o.material)) o.material?.dispose(); } // the pieces share x.mats, already gone
-        x.own = [];
+        x.pt?.dispose(); x.own = [];
     },
 };
 
