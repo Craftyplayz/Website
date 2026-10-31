@@ -14,7 +14,7 @@
 <body>
     <script type="module">
         // shortcut: bump ?v= when dice3d.js changes, so browsers don't keep an old copy
-        import { throwDice, clearTable, setSpeed } from '../dice3d.js?v=5';
+        import { throwDice, clearTable, setSpeed } from '../dice3d.js?v=6';
         const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         let run = 0;
         // the page sends { cmd: 'start', sides, style, coin, speed, min, max } or { cmd: 'stop' }; each throw goes back as { results, sides }
