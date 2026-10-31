@@ -415,6 +415,15 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (m && has(V, m[1]) && !isNaN(V[m[1]])) return V[m[1]] + m[2];
         return /^d\d+$/.test(k) || !has(V, k) || isNaN(V[k]) ? w : String(V[k]); })
         .replace(/\+\s*-\s*(\d)/g, '− $1').replace(/\s+/g, ' ').trim();
+    // the formula tester: dice stay dice and the rest is worked out ("ceil(LEVEL / 4) + 1 + 1d8" -> "1d8 + 2"); dice inside brackets or functions aren't supported
+    function diceCalc(src, V) {
+        const parts = hbTerms(resolve(src, V)), dice = parts.filter((t) => /^\d*d\d+$/i.test(t.src));
+        if (!dice.length) return { ...ev(src, V), why: why(src, V) };
+        const r = ev(parts.filter((t) => !dice.includes(t)).map((t) => `${t.sign} (${t.src})`).join(' ') || '0', V);
+        if (r.err) return r;
+        const d = dice.map((t, n) => (t.sign === '-' ? '− ' : n ? '+ ' : '') + t.src).join(' ');
+        return { v: r.v ? `${d} ${r.v < 0 ? '−' : '+'} ${Math.abs(r.v)}` : d };
+    }
     const dmgText = (list, V) => list.filter((d) => d.dice || d.type).map((d) => `${resolve(d.dice, V)} ${d.type}`.trim()).join(' + ');
     const ordinal = (n) => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
     const dateText = (ms) => new Date(ms).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -533,6 +542,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             case 'skill': { const s = C.skills[a]; return { ...profT(s.ab, s.p, s.b, V), signed: true }; }
             case 'tool': { const s = C.profs.tools[a]; return { ...profT(s.ab, s.p, '', V), signed: true }; }
             case 'fx': return { ...ev(get(a), V), why: why(get(a), V) };
+            case 'fb': return diceCalc(get(a), V);
             case 'fs': return { ...ev(get(a), V), signed: true, why: why(get(a), V) };
             case 'asum': return { html: actSum(get(a), V, a) };
             case 'ssum': return { html: spellSum(get(a), panelOf(a), V, a) };
@@ -1444,8 +1454,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         return `<h3>Formulas</h3>
             <div class="hb-fbuild">
                 <label class="hb-lbl hb-wide">Try a formula ${f('view.fb', 'Formula to try', { cls: 'hb-formula', ph: '10 + DEX + 2 [Shield]' })}</label>
-                <p class="hb-result">= <b class="hb-big" data-c="fx:view.fb"></b> <small class="hb-err" data-e="fx:view.fb"></small></p>
-                <p class="muted hb-hint" data-w="fx:view.fb"></p>
+                <p class="hb-result">= <b class="hb-big" data-c="fb:view.fb"></b> <small class="hb-err" data-e="fb:view.fb"></small></p>
+                <p class="muted hb-hint" data-w="fb:view.fb"></p>
                 <p class="muted hb-hint">Only for trying things out; nothing on the sheet uses it. Click any word below to add it, then copy the formula into any box on the sheet.</p>
             </div>
             <h4>For this monster</h4>${tbl(rows)}
