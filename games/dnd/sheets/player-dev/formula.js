@@ -56,6 +56,72 @@
         return { v: Math.floor(v) };
     }
 
+    // a formula with dice in it, kept as dice: "4 * (1d12 + 10)" -> { text: '4d12 + 40', dice: [[12, 4]], k: 40 }.
+    // A value is { k, d: Map(sides -> count) }; multiplying repeats the whole thing, so 4 * (4d12 + 10) is 16d12 + 40 (owner's rule).
+    // Dice can be added, subtracted and multiplied or divided by a plain number, never by dice.
+    // A name straight before a die is its count ("CANTRIPd10"). Throws Error with a plain message on a bad formula.
+    function dice(src, vars) {
+        const toks = String(src == null ? '' : src).match(TOK) || [];
+        let i = 0;
+        const peek = () => toks[i];
+        const need = (t) => { if (toks[i++] !== t) throw Error('Missing ' + t); };
+        const num = (k) => ({ k, d: new Map() });
+        const plain = (v, why) => { if (v.d.size) throw Error(why); return v.k; };
+        const comb = (a, b, s) => { const d = new Map(a.d); for (const [n, c] of b.d) d.set(n, (d.get(n) || 0) + s * c); return { k: a.k + s * b.k, d }; };
+        const scale = (a, f) => ({ k: a.k * f, d: new Map([...a.d].map(([n, c]) => [n, c * f])) });
+        const roll = (c, n) => ({ k: 0, d: new Map([[n, c]]) });
+        function expr() {
+            let v = term();
+            while (peek() === '+' || peek() === '-') { const op = toks[i++]; v = comb(v, term(), op === '+' ? 1 : -1); }
+            return v;
+        }
+        function term() {
+            let v = unary();
+            while (peek() === '*' || peek() === '/') {
+                const op = toks[i++], b = unary();
+                if (op === '*') v = v.d.size ? scale(v, plain(b, "Dice can't be multiplied by dice")) : scale(b, v.k);
+                else v = scale(v, 1 / plain(b, "Can't divide by dice"));
+            }
+            return v;
+        }
+        function unary() {
+            if (peek() === '-') { i++; return scale(unary(), -1); }
+            if (peek() === '+') { i++; return unary(); }
+            const v = atom();
+            while (peek() && peek()[0] === '[') i++;
+            return v;
+        }
+        function atom() {
+            const t = toks[i++];
+            if (t === undefined) throw Error('The formula ends too early');
+            if (t === '(') { const v = expr(); need(')'); return v; }
+            if (/^\d/.test(t)) return /^d\d+$/i.test(peek() || '') ? roll(+t, +toks[i++].slice(1)) : num(+t);
+            if (/^[A-Za-z_]/.test(t)) {
+                const k = t.toLowerCase(), m = /^(.*?)d(\d+)$/.exec(k);
+                if (FN[k] && peek() === '(') {
+                    i++;
+                    const args = [plain(expr(), "Dice can't go inside " + k + '()')];
+                    while (peek() === ',') { i++; args.push(plain(expr(), "Dice can't go inside " + k + '()')); }
+                    need(')');
+                    return num(FN[k](...args));
+                }
+                if (Object.prototype.hasOwnProperty.call(vars, k)) return num(vars[k]);
+                if (m && m[1] === '') return roll(1, +m[2]);
+                if (m && Object.prototype.hasOwnProperty.call(vars, m[1])) return roll(vars[m[1]], +m[2]);
+                throw Error('Unknown name ' + t);
+            }
+            throw Error('Unexpected ' + t);
+        }
+        const v = toks.length ? expr() : num(0);
+        if (i < toks.length) throw Error('Unexpected ' + toks[i]);
+        const list = [...v.d].filter(([, c]) => c);
+        if (list.some(([, c]) => c !== Math.floor(c))) throw Error("Dice can't be split into parts");
+        if (!isFinite(v.k)) throw Error('The result is not a number');
+        const k = Math.floor(v.k);
+        const text = list.map(([n, c], j) => (c < 0 ? (j ? '− ' : '−') : j ? '+ ' : '') + Math.abs(c) + 'd' + n).join(' ') + (k && list.length ? (k < 0 ? ' − ' : ' + ') + Math.abs(k) : list.length ? '' : String(k));
+        return { text, dice: list.map(([n, c]) => [n, c]), k };
+    }
+
     // split a formula at its top-level + and -: [{ sign: '+'|'-', src, label }] for the builder and breakdowns
     function terms(src) {
         const str = String(src == null ? '' : src), out = [];
@@ -113,5 +179,6 @@
 
     g.hbCoins = coins;
     g.hbCalc = calc;
+    g.hbDice = dice;
     g.hbTerms = terms;
 })(typeof window !== 'undefined' ? window : globalThis);
