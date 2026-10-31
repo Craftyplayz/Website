@@ -7,9 +7,12 @@ const KEY = 'dice-choice';
 export const readChoice = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } };
 export const saveChoice = (c) => { try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) { } };
 
-// modules load once; one that fails counts as missing, so the rest of the choice still works
+// modules load once; one that fails counts as missing, so the rest of the choice still works.
+// A saved choice keeps the ?v= its files had when it was picked; versions.php gives each file's current one, so a changed file is never an old cached copy.
+const vers = fetch(new URL('versions.php', import.meta.url)).then((r) => r.json()).catch(() => ({}));
 const mods = {};
-const mod = (u) => (mods[u] ||= import(new URL(u, import.meta.url).href).then((m) => m.default, () => null));
+const mod = (u) => (mods[u] ||= vers.then((V) => { const p = u.split('?')[0], v = V[p.replace(/^\.\//, '')];
+    return import(new URL(v ? p + '?v=' + v : u, import.meta.url).href); }).then((m) => m.default, () => null));
 
 // several trails at once: each die gets every trail, and what a higher layer adds to the scene is drawn over the layers below it
 export const layered = (list) => (ctx) => {
