@@ -123,8 +123,8 @@ function drawCracks(x, p) {
 
 export default {
     nat1: {
-        key: 'n08-shatter', name: 'Shatter', blurb: 'Glowing cracks spread across the die, then it bursts into white-hot faces that tumble, cool and fall away.',
-        dur: 2.0, impact: 0.6,
+        key: 'n08-shatter', name: 'Shatter', blurb: 'Glowing cracks spread across the die, then it bursts into white-hot faces that tumble, land, cool and fade away.',
+        dur: 2.4, impact: 0.6,
         start(x) {
             setupFx(x, 0xff7a20, 0xffb050); makeCracks(x);
             x.glow = spr(x, tex(x.THREE).soft, 0xff5a10); x.glow.scale.setScalar(0.1);
@@ -134,7 +134,7 @@ export default {
             x.sp = sparks(x, 160, 0xffb040, 6); x.sp2 = sparks(x, 40, 0xffffff, 9);
         },
         tick(k, x) {
-            const sec = k * 2.0, pre = at(sec, 0, 0.6), t = Math.max(0, sec - 0.6);
+            const sec = k * 2.4, pre = at(sec, 0, 0.6), t = Math.max(0, sec - 0.6);
             if (sec < 0.6) {
                 const sh = pre * pre * 0.3;
                 x.mesh.position.set(x.home.x + (Math.random() - 0.5) * sh, x.home.y, x.home.z + (Math.random() - 0.5) * sh);
@@ -155,14 +155,15 @@ export default {
             x.ring.scale.setScalar(1 + ease(at(t, 0, 0.9)) * 22); x.ring.material.opacity = Math.max(0, 0.95 - t * 1.1);
             x.ring2.scale.setScalar(1 + ease(at(t, 0, 0.5)) * 13); x.ring2.material.opacity = Math.max(0, 0.9 - t * 2.1);
             // faces: fly out with drag, rise and fall in height (shown as scale), tumble, heat cools from white to red to nothing
-            const heat = Math.exp(-t * 2.2), h4 = at(t, 0.9, 1.4);
+            const heat = Math.exp(-t * 2.2);
             x.heatMat.opacity = heat * 0.8; x.heatMat.color.setRGB(1, 0.35 + 0.65 * heat * heat, 0.1 + 0.8 * heat ** 4);
-            x.edgeMat.opacity = Math.max(0, 1 - t * 0.55); x.edgeMat.color.setRGB(1, 0.4 + 0.5 * heat, 0.1 + 0.4 * heat * heat);
+            x.edgeMat.opacity = Math.max(0, 1 - t * 0.6); x.edgeMat.color.setRGB(1, 0.4 + 0.5 * heat, 0.1 + 0.4 * heat * heat);
             for (const s of x.shards) {
-                const run = (1 - Math.exp(-t * 2.4)) / 2.4 * s.sp, h = Math.max(0, s.vy * t - 7 * t * t * 0.9);
+                // they fall back and land (by t = vy / 10), and only fade once they are lying on the table
+                const run = (1 - Math.exp(-t * 2.4)) / 2.4 * s.sp, h = Math.max(0, s.vy * t - 10 * t * t), land = s.vy / 10, h4 = at(t, land + 0.15, land + 0.6);
                 s.mesh.position.set(s.cx + s.dx * run, s.cy + h, s.cz + s.dz * run);
                 s.mesh.quaternion.setFromAxisAngle(s.axis, s.spin * (1 - Math.exp(-t * 2)) * 0.6 + t * s.spin * 0.4 * (h > 0 ? 1 : 0.1));
-                s.mesh.scale.setScalar(Math.max(0.001, (1 + h * 0.07) * (1 - h4 * h4 * (0.7 + 0.3 * s.ph))));
+                s.mesh.scale.setScalar(Math.max(0.001, (1 + h * 0.07) * (1 - h4 * h4))); s.mesh.visible = h4 < 1;
             }
             sparkMove(x.sp, x.dt || 0.016, 1.6, 0); x.sp.material.opacity = Math.max(0, 1 - t * 0.6);
             sparkMove(x.sp2, x.dt || 0.016, 3.5, 0); x.sp2.material.opacity = Math.max(0, 1 - t * 2.2);

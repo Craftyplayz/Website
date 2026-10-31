@@ -77,7 +77,7 @@ function place(x, p, off, ang, s) {
     p.m.quaternion.setFromAxisAngle(p.ax, ang).multiply(x.q0);
 }
 function dim(x, c, e, o) {
-    for (const m of x.mats) { m.color.setRGB(c[0], c[1], c[2]); if (m.emissive) m.emissive.setRGB(e[0], e[1], e[2]); if (o < 1) { m.transparent = true; m.opacity = o; } }
+    for (const m of x.mats) { m.color.setRGB(c[0], c[1], c[2]); if (m.emissive) m.emissive.setRGB(e[0], e[1], e[2]); if (o < 1) { if (!m.transparent) { m.transparent = true; m.needsUpdate = true; } m.opacity = o; } }
 }
 function save(x) { x.own = []; x.p0 = x.mesh.position.clone(); x.q0 = x.mesh.quaternion.clone(); x.s0 = x.mesh.scale.clone(); x.vis0 = x.mesh.visible; }
 function cleanup(x) {
@@ -91,8 +91,8 @@ function cleanup(x) {
 
 // cracks: the die is already its own chunks, they shudder and open, glow leaks through, then they fly apart, tumbling and dimming
 const nat1 = {
-    key: 'a21-shatter', name: 'Shatter', impact: 0.6, dur: 2.0,
-    blurb: 'Cracks split the die into chunks of its own faces that fly apart sideways, tumbling and going dark.',
+    key: 'a21-shatter', name: 'Shatter', impact: 0.6, dur: 2.4,
+    blurb: 'Cracks split the die into chunks of its own faces that fly apart, tumble down onto the table, go dark and fade.',
     start(x) {
         save(x);
         const T = x.THREE, g = subdivide(x.mesh.geometry, 1), tri = g.attributes.position.count / 3, P = g.attributes.position, cen = [], seeds = [];
@@ -105,14 +105,20 @@ const nat1 = {
         x.glow = sprite(x, 0xff5a10); x.glow.scale.setScalar(0.1); x.heat = sprite(x, 0xffb050); x.heat.scale.setScalar(0.1);
     },
     tick(k, x) {
-        const crack = at(k, 0, 0.3), b = at(k, 0.3, 1), e = ease(b), off = new x.THREE.Vector3();
+        const crack = at(k, 0, 0.25), b = at(k, 0.25, 1), e = ease(at(k, 0.25, 0.7)), t = Math.max(0, k - 0.25) * 2.4, off = new x.THREE.Vector3();
+        x.R ??= (x.mesh.geometry.computeBoundingSphere(), x.mesh.geometry.boundingSphere.radius);
         x.parts.forEach((p, i) => {
             // cracking: shudder in place while the seams open a little; then the burst
             const shake = (1 - b) * 0.04 * Math.sin(k * 120 + i * 2.1);
             off.copy(p.d).multiplyScalar(crack * 0.12 + e * (1.5 + 2.5 * p.sp) + shake);
-            place(x, p, off, e * 7 * p.sp, 1 - 0.3 * b);
+            // a little hop, then gravity brings every piece down onto the table, where it stops tumbling
+            p.vy ??= 1 + 2.5 * Math.random();
+            const y0 = x.p0.y + p.c.y, y = Math.max(x.R * 0.25, y0 + p.vy * t - 14 * t * t);
+            off.y = y - y0;
+            place(x, p, off, e * 7 * p.sp, 1);
         });
-        dim(x, [1 - 0.85 * b, 1 - 0.9 * b, 1 - 0.9 * b], [0.5 * (1 - b), 0.1 * (1 - b), 0], 1 - at(k, 0.75, 1));
+        // they go dark as they fly, and fade only once they have all landed
+        dim(x, [1 - 0.85 * b, 1 - 0.9 * b, 1 - 0.9 * b], [0.5 * (1 - b), 0.1 * (1 - b), 0], 1 - at(k, 0.72, 0.97));
         x.glow.scale.setScalar(1.5 + crack * 2 + e * 5); x.glow.material.opacity = 0.7 * crack * (1 - at(k, 0.45, 0.9));
         x.heat.scale.setScalar(1 + e * 3); x.heat.material.opacity = 0.9 * Math.sin(Math.PI * at(k, 0.25, 0.55));
     },
