@@ -375,6 +375,7 @@ dialog.hb-dlg { width: min(760px, calc(100vw - 32px)); max-height: calc(100dvh -
 .hb-rollhead small, .hb-rolldice { color: var(--muted); font-size: 13px; }
 .hb-rolldice { grid-area: dice; overflow-wrap: anywhere; }
 .hb-rolltot { grid-area: tot; font-size: 34px; font-weight: 700; line-height: 1; }
+.hb-rollcard.hb-each .hb-rolltot, .hb-logt.hb-each { font-size: 20px; }
 .hb-rollcard.hb-nat20 { border-left-color: var(--gold-line); background: var(--gold-bg); }
 .hb-rollcard.hb-nat1 { border-left-color: var(--danger-line); background: var(--danger-bg); }
 /* 3D dice layer over the page, under the roll card and tray; clicks go through it */

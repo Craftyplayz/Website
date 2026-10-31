@@ -446,11 +446,18 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         });
         return !rest && g.length && !g.includes(null) ? { g: g.join(','), m } : null;
     }
+    // what a dice box rolls: { g: '12x4', m: 40, x: 4 }; x > 1 is that many separate results ("4 × (1d12 + 10)")
+    function diceRoll(s, V) {
+        let r;
+        try { r = hbDice(s, V); } catch (e) { return parseRoll(resolve(s, V)); }
+        if (!r.dice.length || r.dice.some(([n, c]) => c < 0 || !DICE.includes(n))) return null;
+        return { g: r.dice.map(([n, c]) => `${n}x${c}`).join(','), m: r.k, x: r.each || 1 };
+    }
     // a boxed roll button, or the plain rule link when click to roll is off
     const rollBtn = (text, roll, title, fallback) => (C.view.noRoll || !roll ? fallback
-        : `<button type="button" class="hb-rollbtn" data-act="roll2" data-g="${roll.g}" data-m="${roll.m}" data-t="${esc(title)}" title="Roll ${esc(title.toLowerCase())}">${esc(text)}</button>`);
+        : `<button type="button" class="hb-rollbtn" data-act="roll2" data-g="${roll.g}" data-m="${roll.m}" data-x="${roll.x || 1}" data-t="${esc(title)}" title="Roll ${esc(title.toLowerCase())}">${esc(text)}</button>`);
     const dmgLinks = (dmg, V, name = '') => dmg.filter((d) => d.dice || d.type).map((d) => { const txt = d.dice ? diceText(d.dice, V) : '';
-        return [d.dice && rollBtn(txt, parseRoll(txt), `${name || 'Damage'}${d.type ? ' ' + d.type.toLowerCase() : ''} damage`, ruleLink('act', 'damage rolls', txt, 'Damage rolls', 'Damage')),
+        return [d.dice && rollBtn(txt, diceRoll(d.dice, V), `${name || 'Damage'}${d.type ? ' ' + d.type.toLowerCase() : ''} damage`, ruleLink('act', 'damage rolls', txt, 'Damage rolls', 'Damage')),
             d.type && ruleLink('dmg', d.type, d.type, d.type + ' damage', 'Damage type')].filter(Boolean).join(' '); }).join(' + ');
     const hitLink = (v, name, kind, rl, title) => { const txt = show({ ...v, signed: true }) + ' to hit';
         return rollBtn(txt, Number.isFinite(+v.v) ? { g: '20x1', m: +v.v } : null, `${name || 'Attack'} to hit`, ruleLink(kind, rl, txt, title, 'To hit')); };
@@ -1516,18 +1523,24 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     let rollTimer = 0;
     // groups: [[sides, count]], mod: number added on top
     // groups [['coin', 1]] flips a coin: the card shows Heads or Tails instead of a total
-    function rollShow(title, groups, mod = 0) {
+    // each > 1 splits the dice into that many separate results, e.g. one per target ("4 × (1d12 + 10)"); mod covers them all
+    function rollShow(title, groups, mod = 0, each = 1) {
         const coin = groups[0]?.[0] === 'coin', side = (v) => (v === 'heads' ? 'Heads' : 'Tails');
         const card = (rolls) => {
-            const total = coin ? side(rolls[0][1][0]) : rolls.reduce((t, [, r]) => t + r.reduce((a, b) => a + b, 0), 0) + mod;
-            const expr = coin ? 'Coin' : groups.map(([n, c]) => `${c}d${n}`).join(' + ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
-            const shown = coin ? '' : rolls.map(([, r]) => r.join(', ')).join(' | ') + (mod ? ` ${mod < 0 ? '−' : '+'} ${Math.abs(mod)}` : '');
+            const tail = (m) => (m ? ` ${m < 0 ? '−' : '+'} ${Math.abs(m)}` : '');
+            // separate results: result i takes its share of every group's dice
+            const hits = each > 1 && !coin ? Array.from({ length: each }, (_, i) => rolls.flatMap(([, r]) => r.slice(i * r.length / each, (i + 1) * r.length / each))) : null;
+            const total = coin ? side(rolls[0][1][0]) : hits ? hits.map((v) => v.reduce((a, b) => a + b, mod / each)).join(', ')
+                : rolls.reduce((t, [, r]) => t + r.reduce((a, b) => a + b, 0), 0) + mod;
+            const expr = coin ? 'Coin' : hits ? `${each} × (${groups.map(([n, c]) => `${c / each}d${n}`).join(' + ')}${tail(mod / each)})`
+                : groups.map(([n, c]) => `${c}d${n}`).join(' + ') + tail(mod);
+            const shown = coin ? '' : hits ? hits.map((v) => v.join(' + ') + tail(mod / each)).join(' | ') : rolls.map(([, r]) => r.join(', ')).join(' | ') + tail(mod);
             // a lone d20 shows a natural 20 or 1
             const nat = groups.length === 1 && groups[0][0] === 20 && groups[0][1] === 1 ? (rolls[0][1][0] === 20 ? ' hb-nat20' : rolls[0][1][0] === 1 ? ' hb-nat1' : '') : '';
             // just under the sticky sheet bar, which wraps taller on phones
             const hbBar = $('#hb-bar');
             $('#hb-rolls').style.top = (getComputedStyle(hbBar).position === 'sticky' ? Math.max(76, hbBar.offsetHeight + 12) : 16) + 'px';
-            $('#hb-rolls').innerHTML = `<button type="button" class="hb-rollcard${nat}" data-act="rollx" aria-label="Dismiss roll">
+            $('#hb-rolls').innerHTML = `<button type="button" class="hb-rollcard${nat}${hits ? ' hb-each' : ''}" data-act="rollx" aria-label="Dismiss roll">
                 <span class="hb-rollhead"><b>${esc(title)}</b><small>${esc(expr)}</small></span>
                 <span class="hb-rolldice">${esc(shown)}</span><span class="hb-rolltot">${total}</span></button>`;
             clearTimeout(rollTimer); rollTimer = setTimeout(() => { $('#hb-rolls').innerHTML = ''; }, 12000);
@@ -1565,7 +1578,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const logTime = (ms) => { const d = new Date(ms); return d.toDateString() === new Date().toDateString() ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : dateText(ms); };
     const logRows = (n) => `<ol class="hb-logl">${(C.rolls || []).slice(0, n).map((r) => `<li class="hb-logi${r.nat ? ' ' + r.nat : ''}">
         <span class="hb-logh"><b>${esc(r.title)}</b><small title="${esc(new Date(r.at).toLocaleString())}">${esc(logTime(r.at))}</small></span>
-        <span class="hb-logd">${esc(r.expr)} · ${esc(r.shown)}</span><span class="hb-logt">${r.total}</span></li>`).join('')}</ol>`;
+        <span class="hb-logd">${esc(r.expr)} · ${esc(r.shown)}</span><span class="hb-logt${String(r.total).includes(',') ? ' hb-each' : ''}">${esc(String(r.total))}</span></li>`).join('')}</ol>`;
     function drawLog() {
         const box = $('#hb-log'), left = root.getBoundingClientRect().left;
         box.hidden = !!C.view.noRoll || !logSide();
@@ -1973,7 +1986,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             else { C.hp.temp = amt; toast(`${name}: ${amt} temp HP (${rolled}).`, 'ok'); }
             saveNow(); return draw();
         }
-        if (act === 'roll2') return rollShow(b.dataset.t, b.dataset.g.split(',').map((x) => x.split('x').map(Number)), +b.dataset.m || 0);
+        if (act === 'roll2') return rollShow(b.dataset.t, b.dataset.g.split(',').map((x) => x.split('x').map(Number)), +b.dataset.m || 0, +b.dataset.x || 1);
         if (act === 'roll') { const v = value(b.dataset.k, vars()); return rollShow(b.dataset.t, [[20, 1]], Number.isFinite(+v.v) ? +v.v : 0); }
         if (act === 'rollx') { clearTimeout(rollTimer); $('#hb-rolls').innerHTML = ''; return; }
         if (act === 'tray') { tray.open = !tray.open; return drawTray(); }
