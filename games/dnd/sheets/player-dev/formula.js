@@ -56,9 +56,10 @@
         return { v: Math.floor(v) };
     }
 
-    // a formula with dice in it, kept as dice: "4 * (1d12 + 10)" -> { text: '4d12 + 40', dice: [[12, 4]], k: 40 }.
-    // A value is { k, d: Map(sides -> count) }; multiplying repeats the whole thing, so 4 * (4d12 + 10) is 16d12 + 40 (owner's rule).
-    // Dice can be added, subtracted and multiplied or divided by a plain number, never by dice.
+    // a formula with dice in it, kept as dice: "1d12 + 2 * 5" -> { text: '1d12 + 10', dice: [[12, 1]], k: 10 }.
+    // A whole formula of N * (dice) is N separate results, one per target (owner's rule): "4 * (1d12 + 10)" ->
+    // { text: '4 × (1d12 + 10)', dice: [[12, 4]], k: 40, each: 4 }, where dice and k cover all four together.
+    // A value is { k, d: Map(sides -> count) }; dice can be added, subtracted and multiplied or divided by a plain number, never by dice.
     // A name straight before a die is its count ("CANTRIPd10"). Throws Error with a plain message on a bad formula.
     function dice(src, vars) {
         const toks = String(src == null ? '' : src).match(TOK) || [];
@@ -79,7 +80,11 @@
             let v = unary();
             while (peek() === '*' || peek() === '/') {
                 const op = toks[i++], b = unary();
-                if (op === '*') v = v.d.size ? scale(v, plain(b, "Dice can't be multiplied by dice")) : scale(b, v.k);
+                if (op === '*') {
+                    const [dv, f] = v.d.size ? [v, plain(b, "Dice can't be multiplied by dice")] : [b, v.k];
+                    v = scale(dv, f);
+                    if (dv.d.size && f >= 2 && Number.isInteger(f)) v.each = { n: f, base: dv };
+                }
                 else v = scale(v, 1 / plain(b, "Can't divide by dice"));
             }
             return v;
@@ -114,12 +119,17 @@
         }
         const v = toks.length ? expr() : num(0);
         if (i < toks.length) throw Error('Unexpected ' + toks[i]);
-        const list = [...v.d].filter(([, c]) => c);
-        if (list.some(([, c]) => c !== Math.floor(c))) throw Error("Dice can't be split into parts");
-        if (!isFinite(v.k)) throw Error('The result is not a number');
-        const k = Math.floor(v.k);
-        const text = list.map(([n, c], j) => (c < 0 ? (j ? '− ' : '−') : j ? '+ ' : '') + Math.abs(c) + 'd' + n).join(' ') + (k && list.length ? (k < 0 ? ' − ' : ' + ') + Math.abs(k) : list.length ? '' : String(k));
-        return { text, dice: list.map(([n, c]) => [n, c]), k };
+        const fmt = (x) => {
+            const list = [...x.d].filter(([, c]) => c);
+            if (list.some(([, c]) => c !== Math.floor(c))) throw Error("Dice can't be split into parts");
+            if (!isFinite(x.k)) throw Error('The result is not a number');
+            const k = Math.floor(x.k);
+            const text = list.map(([n, c], j) => (c < 0 ? (j ? '− ' : '−') : j ? '+ ' : '') + Math.abs(c) + 'd' + n).join(' ') + (k && list.length ? (k < 0 ? ' − ' : ' + ') + Math.abs(k) : list.length ? '' : String(k));
+            return { text, dice: list.map(([n, c]) => [n, c]), k };
+        };
+        const out = fmt(v);
+        if (v.each) { const b = fmt(v.each.base); Object.assign(out, { text: `${v.each.n} × (${b.text})`, k: b.k * v.each.n, each: v.each.n }); }
+        return out;
     }
 
     // split a formula at its top-level + and -: [{ sign: '+'|'-', src, label }] for the builder and breakdowns
