@@ -39,7 +39,7 @@ $data = ['list' => $list, 'done' => (object)$done, 'edit' => $mc_edit];
     <main class="page mcc" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title"><?= $mc_edit ? 'Edit Collection Checklist' : 'Collection Checklist' ?></h1>
-        <p class="page-lede">Every item, smithing template and pottery sherd I want in my collection, and how many I have so far.</p>
+        <p class="page-lede">Every item, smithing template and pottery sherd I want in my collection, and how many I have so far. <a href="/minecraft/projects/collection/hallway/">Walk the chests in 3D</a>.</p>
 
         <div class="stat-row">
             <?php foreach ($secs as $s => $label): ?>
