@@ -35,6 +35,8 @@ function variant(name, id) {
     if ((m = name.match(/^Goat Horn \((.+)\)$/))) return ['goat_horn', [slug(m[1]) + '_goat_horn']];
     if ((m = name.match(/^Music Disc \((.+)\)$/))) return ['music_disc_' + (m[1] === 'Precipe' ? 'precipice' : slug(m[1])), []];
     if ((m = name.match(/^(.+) Map$/)) && MAP[m[1]]) return ['filled_map', ['filled_map.' + MAP[m[1]]]];
+    // level I is the plain bottle, so it's also where a bottle without a stored level goes
+    if ((m = name.match(/^Ominous Bottle( II| III| IV| V)?$/))) return ['ominous_bottle', m[1] ? [`ominous_bottle_amplifier":${['II', 'III', 'IV', 'V'].indexOf(m[1].trim()) + 1}`] : []];
     if (name === 'Lodestone Compass') return ['compass', ['lodestone']];
     if (name === 'Ominous Banner') return ['white_banner', ['ominous_banner']];
     const base = name.replace(/ \[JE\]$/, '');
