@@ -446,14 +446,11 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (m && has(V, m[1]) && !isNaN(V[m[1]])) return V[m[1]] + m[2];
         return /^d\d+$/.test(k) || !has(V, k) || isNaN(V[k]) ? w : String(V[k]); })
         .replace(/\+\s*-\s*(\d)/g, '− $1').replace(/\s+/g, ' ').trim();
-    // the formula tester: dice stay dice and the rest is worked out ("ceil(LEVEL / 4) + 1 + 1d8" -> "1d8 + 2"); dice inside brackets or functions aren't supported
+    // the formula tester and dice boxes: dice stay dice and the rest is worked out ("4 * (4d12 + 10)" -> "16d12 + 40", formula.js hbDice)
     function diceCalc(src, V) {
-        const parts = hbTerms(resolve(src, V)), dice = parts.filter((t) => /^\d*d\d+$/i.test(t.src));
-        if (!dice.length) return { ...ev(src, V), why: why(src, V) };
-        const r = ev(parts.filter((t) => !dice.includes(t)).map((t) => `${t.sign} (${t.src})`).join(' ') || '0', V);
-        if (r.err) return r;
-        const d = dice.map((t, n) => (t.sign === '-' ? '− ' : n ? '+ ' : '') + t.src).join(' ');
-        return { v: r.v ? `${d} ${r.v < 0 ? '−' : '+'} ${Math.abs(r.v)}` : d };
+        let r;
+        try { r = hbDice(src, V); } catch (e) { return { v: NaN, err: e.message }; }
+        return r.dice.length ? { v: r.text } : { ...ev(src, V), why: why(src, V) };
     }
     // dice for display and roll buttons: names filled in and the plain-number part worked out ("4d12 + (10 * 4)" -> "4d12 + 40")
     const diceText = (s, V) => { const r = diceCalc(s, V); return r.err || r.v === undefined ? resolve(s, V) : String(r.v); };
@@ -1912,8 +1909,12 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         if (act === 'rinfo') return ruleInfo(b.dataset.k, b.dataset.n, b.dataset.t, b.dataset.s);
         if (act === 'fxapply') {
             const e = get(b.dataset.p), name = get(b.dataset.p.split('.').slice(0, -2).join('.')).name || (e.k === 'heal' ? 'Healing' : 'Temp HP'), V = vars();
-            const rolled = resolve(e.dice, V).replace(/−/g, '-').replace(/(\d*)d(\d+)/gi, (x, c, n) => String(Array.from({ length: +c || 1 }, () => die(+n)).reduce((s, d) => s + d, 0)));
-            const amt = Math.floor(ev(rolled, V).v);
+            // the same dice maths as the boxes (formula.js hbDice): each die rolled, then the flat bonus added
+            let d = null;
+            try { d = hbDice(e.dice, V); } catch (x) { }
+            const rolls = d ? d.dice.flatMap(([n, c]) => Array.from({ length: Math.abs(c) }, () => Math.sign(c) * die(n))) : [];
+            const amt = d ? rolls.reduce((t, x) => t + x, d.k) : NaN;
+            const rolled = rolls.join(' + ').replace(/\+ -/g, '− ') + (d && d.k ? (rolls.length ? (d.k < 0 ? ' − ' : ' + ') : '') + (rolls.length ? Math.abs(d.k) : d.k) : '');
             if (!Number.isFinite(amt)) return toast(`Couldn't work out ${name}: check its formula.`, 'err');
             if (e.k === 'heal') { C.hp.cur = Math.min(hpMax(), nm(C.hp.cur) + Math.max(0, amt)); toast(`${name}: healed ${Math.max(0, amt)} (${rolled}).`, 'ok'); }
             else if (amt <= nm(C.hp.temp)) toast(`${name}: ${amt} temp HP, but temp HP doesn't stack, so you keep ${C.hp.temp}.`, 'note');

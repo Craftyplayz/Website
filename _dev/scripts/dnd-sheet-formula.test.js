@@ -22,4 +22,16 @@ assert.deepStrictEqual(terms('10 + min(DEX, 2) - 1 [Curse] + 2 [Shield]'), [
 assert.deepStrictEqual(terms('-DEX * 2 + PROF'), [{ sign: '-', src: 'DEX * 2', label: '' }, { sign: '+', src: 'PROF', label: '' }]);
 assert.deepStrictEqual(terms('2 * -1'), [{ sign: '+', src: '2 * -1', label: '' }]);
 assert.deepStrictEqual(terms(''), []);
+const dice = (f) => globalThis.hbDice(f, vars).text;
+assert.strictEqual(dice('4 * (1d12 + 10)'), '4d12 + 40');
+assert.strictEqual(dice('4 * (4d12 + 10)'), '16d12 + 40');
+assert.strictEqual(dice('4d12 + (10 * 4)'), '4d12 + 40');
+assert.strictEqual(dice('ceil(LEVEL / 4) + 1 + 1d8'), '1d8 + 3');
+assert.strictEqual(dice('1d6 + DEX - 1d6 + 2d6'), '2d6 + 3');
+assert.strictEqual(dice('2d8 - 1'), '2d8 − 1');
+assert.strictEqual(dice('2 * (1d4 + 3)'), '2d4 + 6');
+assert.strictEqual(dice('(4d12) / 2'), '2d12');
+assert.throws(() => dice('1d12 / 2'), /split/);
+assert.throws(() => dice('1d8 * 1d6'), /multiplied by dice/);
+assert.throws(() => dice('max(1d8, 2)'), /inside max/);
 console.log('dnd sheet formula ok');
