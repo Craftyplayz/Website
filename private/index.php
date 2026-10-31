@@ -14,6 +14,7 @@ $sections = [
     'minecraft/farms' => 'Tick off farms built',
     'minecraft/collection' => 'Tick off collected items',
     'dnd' => 'D&D sheet backups',
+    'dnd/monsters' => 'Monster sheet backups',
 ];
 ?>
 <!DOCTYPE html>

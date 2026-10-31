@@ -2,7 +2,9 @@
 // Server backups for the homebrew sheet: the sheet POSTs a whole character after each edit and it is kept as a new version in
 //   private/dnd/backups/<ip>/<character name>/<ip>-<version>.json
 // private/ is behind basic auth, the folder is gitignored, and deploy.sh never touches untracked server files.
-const HB_BACKUPS = __DIR__ . '/../../../../private/dnd/backups';
+// The Monster Sheet's backup.php sets its own folder and name, then includes this file.
+if (!defined('HB_BACKUPS')) define('HB_BACKUPS', __DIR__ . '/../../../../private/dnd/backups');
+if (!defined('HB_UNNAMED')) define('HB_UNNAMED', 'Unnamed character');
 const HB_MAX = 3 * 1024 * 1024; // art is stored inline as a data URL, so a character can be a few hundred KB
 
 function hb_out($code, $data)
@@ -31,7 +33,7 @@ $c = json_decode($body, true);
 if (!is_array($c) || !isset($c['abilities']) || !is_array($c['abilities'])) hb_out(400, ['error' => "That isn't a character from the sheet."]);
 
 $ip = hb_name($_SERVER['REMOTE_ADDR'] ?? 'unknown', 'unknown');
-$dir = HB_BACKUPS . '/' . $ip . '/' . hb_name($c['name'] ?? '', 'Unnamed character');
+$dir = HB_BACKUPS . '/' . $ip . '/' . hb_name($c['name'] ?? '', HB_UNNAMED);
 if (!is_dir($dir) && !@mkdir($dir, 0750, true) && !is_dir($dir)) hb_out(500, ['error' => "Couldn't make the backup folder."]);
 
 // one writer at a time per character folder, so two quick saves can't take the same version number

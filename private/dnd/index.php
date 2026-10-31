@@ -1,10 +1,13 @@
 <?php
 // Browse the homebrew sheet's server backups (written by games/dnd/sheets/player*/backup.php) and download any version to restore it.
 // backups/<ip>/<character name>/<ip>-<version>.json; the folder is gitignored and only exists on the server.
-$site_page = ['components' => true, 'title' => 'D&D Sheet Backups'];
+// private/dnd/monsters/ sets $bk (folder, link, wording) and includes this page for the Monster Sheet's backups.
+$bk = ($bk ?? []) + ['dir' => __DIR__ . '/backups', 'url' => '/private/dnd/', 'title' => 'D&D Sheet Backups', 'crumb' => 'D&D sheet backups',
+    'sheet' => 'homebrew sheet', 'who' => 'Character', 'other' => ['/private/dnd/monsters/', 'Monster sheet backups']];
+$site_page = ['components' => true, 'title' => $bk['title']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
-const BK = __DIR__ . '/backups';
+define('BK', $bk['dir']);
 $subdirs = function ($p) {
     return is_dir($p) ? array_values(array_filter(scandir($p), function ($n) use ($p) { return $n[0] !== '.' && is_dir("$p/$n"); })) : [];
 };
@@ -17,10 +20,11 @@ $versionsIn = function ($dir) {
 };
 $load = function ($file) { return $file ? (json_decode((string)@file_get_contents($file), true) ?: []) : null; };
 $classText = function ($c) {
+    if (isset($c['cr'])) return trim('CR ' . $c['cr'] . ' · ' . ($c['race'] ?? ''), ' ·');
     return implode(' / ', array_filter(array_map(function ($k) { return ($k['name'] ?? '') !== '' ? trim($k['name'] . ' ' . ($k['level'] ?? '')) : 'Level ' . ($k['level'] ?? '?'); }, (array)($c['classes'] ?? []))));
 };
 $when = function ($t) { return date('j M Y, H:i:s', $t); };
-$link = function ($q) { return '/private/dnd/?' . http_build_query($q); };
+$link = function ($q) use ($bk) { return $bk['url'] . '?' . http_build_query($q); };
 
 // what changed since the previous version, in sheet terms
 $labels = ['name' => 'Name', 'classes' => 'Class', 'race' => 'Race', 'alignment' => 'Alignment', 'age' => 'Age', 'art' => 'Art', 'abilities' => 'Ability scores', 'skills' => 'Skills',
@@ -72,13 +76,13 @@ $allVersions = function ($onlyIp) use ($ips, $subdirs, $versionsIn) {
     return $out;
 };
 // the same version list as a table: recent changes, search results
-$versionTable = function ($rows, $showWho) use ($load, $classText, $when, $changes, $link) {
+$versionTable = function ($rows, $showWho) use ($load, $classText, $when, $changes, $link, $bk) {
     if (!$rows) return '';
-    $html = '<div class="table-wrap"><table class="table"><thead><tr>' . ($showWho ? '<th>Character</th><th>Player IP</th>' : '') . '<th class="num">Version</th><th>Saved</th>' . ($showWho ? '' : '<th>Character</th>') . '<th>Changed</th><th></th></tr></thead><tbody>';
+    $html = '<div class="table-wrap"><table class="table"><thead><tr>' . ($showWho ? '<th>' . $bk['who'] . '</th><th>Player IP</th>' : '') . '<th class="num">Version</th><th>Saved</th>' . ($showWho ? '' : '<th>' . $bk['who'] . '</th>') . '<th>Changed</th><th></th></tr></thead><tbody>';
     foreach ($rows as $r) {
         $data = $load($r['file']);
         $hp = $data['hp'] ?? [];
-        $sub = trim($classText($data) . ' · HP ' . ($hp['cur'] ?? '?') . '/' . ($hp['max'] ?? '?'), ' ·');
+        $sub = trim($classText($data) . ' · HP ' . ($hp['cur'] ?? '?') . '/' . ($hp['max'] ?? $hp['base'] ?? '?'), ' ·');
         $preview = $data;
         if (!empty($preview['art'])) $preview['art'] = '(picture, ' . number_format(strlen($preview['art']) / 1024) . ' KB)';
         $who = '<td><a href="' . h($link(['ip' => $r['ip'], 'c' => $r['c']])) . '">' . h($r['c']) . '</a><br><small class="muted">' . h($sub) . '</small></td><td class="mono"><a href="' . h($link(['ip' => $r['ip']])) . '">' . h($r['ip']) . '</a></td>';
@@ -113,16 +117,16 @@ $q = trim((string)($_GET['q'] ?? ''));
     <?php site_header(); ?>
 
     <main class="page bk" id="main">
-        <nav class="crumbs" aria-label="Breadcrumb"><a href="/private/">Private</a> <span class="crumbs-sep">›</span> <?php if ($ip === '' && $q === ''): ?><span aria-current="page">D&amp;D sheet backups</span><?php else: ?><a href="/private/dnd/">D&amp;D sheet backups</a> <span class="crumbs-sep">›</span> <span aria-current="page"><?= h($ch !== '' ? $ch : ($ip !== '' ? $ip : 'Search')) ?></span><?php endif; ?></nav>
+        <nav class="crumbs" aria-label="Breadcrumb"><a href="/private/">Private</a> <span class="crumbs-sep">›</span> <?php if ($ip === '' && $q === ''): ?><span aria-current="page"><?= h($bk['crumb']) ?></span><?php else: ?><a href="<?= h($bk['url']) ?>"><?= h($bk['crumb']) ?></a> <span class="crumbs-sep">›</span> <span aria-current="page"><?= h($ch !== '' ? $ch : ($ip !== '' ? $ip : 'Search')) ?></span><?php endif; ?></nav>
 
         <?php if ($ch === ''): ?>
-            <h1 class="page-title">D&amp;D Sheet Backups</h1>
-            <p class="page-lede">Every edit on the homebrew sheet is kept here as a version. Download one and load it with Import on the sheet to restore it.</p>
-            <form class="bar bk-search" method="get" action="/private/dnd/" role="search">
+            <h1 class="page-title"><?= h($bk['title']) ?></h1>
+            <p class="page-lede">Every edit on the <?= h($bk['sheet']) ?> is kept here as a version. Download one and load it with Import on the sheet to restore it. <a href="<?= h($bk['other'][0]) ?>"><?= h($bk['other'][1]) ?></a></p>
+            <form class="bar bk-search" method="get" action="<?= h($bk['url']) ?>" role="search">
                 <?php if ($ip !== ''): ?><input type="hidden" name="ip" value="<?= h($ip) ?>"><?php endif; ?>
-                <input class="field" type="search" name="q" value="<?= h($q) ?>" placeholder="Character, class, IP or date (28 Oct 2026, 2026-10-28)" aria-label="Search backups">
+                <input class="field" type="search" name="q" value="<?= h($q) ?>" placeholder="<?= h($bk['who']) ?>, <?= $bk['who'] === 'Monster' ? 'CR, type' : 'class' ?>, IP or date (28 Oct 2026, 2026-10-28)" aria-label="Search backups">
                 <button class="btn small primary" type="submit">Search</button>
-                <?php if ($q !== ''): ?><a class="btn small" href="<?= h($ip !== '' ? $link(['ip' => $ip]) : '/private/dnd/') ?>">Clear</a><?php endif; ?>
+                <?php if ($q !== ''): ?><a class="btn small" href="<?= h($ip !== '' ? $link(['ip' => $ip]) : $bk['url']) ?>">Clear</a><?php endif; ?>
             </form>
             <?php
             $all = $allVersions($ip);
@@ -141,7 +145,7 @@ $q = trim((string)($_GET['q'] ?? ''));
                 <?= $hits ? $versionTable($shown, true) : '<p class="note">No versions match. Try a character name, a class, an IP, or a date like 28 Oct 2026.</p>' ?>
                 <?php if (count($hits) > count($shown)): ?><p class="muted">Showing the newest 200. Add more to the search to narrow it down.</p><?php endif; ?>
             <?php elseif (!$all): ?>
-                <p class="note">No backups yet. They appear once someone edits a character on the sheet.</p>
+                <p class="note">No backups yet. They appear once someone edits a <?= h(strtolower($bk['who'])) ?> on the sheet.</p>
             <?php else:
                 // one row per character folder, most recently saved first
                 $byChar = [];
@@ -149,9 +153,9 @@ $q = trim((string)($_GET['q'] ?? ''));
             ?>
                 <h2 class="sec-h">Recent changes <span class="n">last <?= min(10, count($all)) ?></span></h2>
                 <?= $versionTable(array_slice($all, 0, 10), true) ?>
-                <h2 class="sec-h">Characters <span class="n"><?= count($byChar) ?></span></h2>
+                <h2 class="sec-h"><?= h($bk['who']) ?>s <span class="n"><?= count($byChar) ?></span></h2>
                 <div class="table-wrap"><table class="table">
-                    <thead><tr><th>Character</th><th>Player IP</th><th class="num">Versions</th><th>Last saved</th></tr></thead>
+                    <thead><tr><th><?= h($bk['who']) ?></th><th>Player IP</th><th class="num">Versions</th><th>Last saved</th></tr></thead>
                     <tbody>
                         <?php foreach ($byChar as $r): $data = $load($r['file']); ?>
                             <tr>
