@@ -487,11 +487,35 @@ function fade() { cv.style.transition = 'opacity .3s'; cv.style.opacity = '0'; f
 // An animation is { dur (seconds), start(x), tick(k, x) with k from 0 to 1, end(x) }; x is { THREE, scene, st (the style), mesh, body, die, value, audio, sec, dt },
 // and an animation can keep its own things on x. The die is hidden when its animation ends.
 const dieName = (kind) => (kind === 't' ? 'd100' : kind === 'u' ? 'd100u' : 'd' + kind);
+// a coin's default exit: blobby holes open in it until it is gone, the same dissolve as the Ember dice (extras/ember/anims/14.js)
+const COIN_DISSOLVE = `float h1(vec3 p){ return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
+float vn(vec3 p){ vec3 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+    return mix(mix(mix(h1(i), h1(i + vec3(1, 0, 0)), f.x), mix(h1(i + vec3(0, 1, 0)), h1(i + vec3(1, 1, 0)), f.x), f.y),
+               mix(mix(h1(i + vec3(0, 0, 1)), h1(i + vec3(1, 0, 1)), f.x), mix(h1(i + vec3(0, 1, 1)), h1(i + vec3(1, 1, 1)), f.x), f.y), f.z); }
+float fbm(vec3 p){ return .6 * vn(p) + .3 * vn(p * 2.1 + 5.) + .1 * vn(p * 4.3 + 9.); }`;
+const coinExit = {
+    dur: 0.9,
+    start(x) {
+        x.u = { dis: { value: -0.1 } }; x.swap = [];
+        // its shadow would stay as a dark disc under the holes, so it goes as the coin starts to dissolve
+        x.mesh.traverse((o) => { if (!o.isMesh) return; x.swap.push([o, o.material, o.castShadow]); o.castShadow = false;
+            o.material = [].concat(o.material).map((m0) => { const m = m0.clone();
+                m.onBeforeCompile = (sh) => { sh.uniforms.uDis = x.u.dis;
+                    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWp;').replace('#include <project_vertex>', '#include <project_vertex>\nvWp = (modelMatrix * vec4(transformed, 1.)).xyz;');
+                    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWp; uniform float uDis;\n' + COIN_DISSOLVE)
+                        .replace('void main() {', 'void main() {\n    if (fbm(vWp * 2.5) < uDis) discard;'); };
+                m.customProgramCacheKey = () => 'coin-dissolve'; return m; });
+            if (!Array.isArray(x.swap.at(-1)[1])) o.material = o.material[0]; });
+    },
+    tick(k, x) { x.u.dis.value = 0.15 + 0.75 * k; }, // the noise sits mostly between 0.15 and 0.9
+    end(x) { for (const [o, m, sh] of x.swap) { [].concat(o.material).forEach((c) => c.dispose()); o.material = m; o.castShadow = sh; } },
+};
 function exitFor(st, d) {
     const x = st?.exits, die = dieName(d.kind), v = d.value;
-    if (!x || v == null) return null;
+    if (v == null) return null;
     // a coin only leaves with an exit made for coins, never a set's catch-all
-    if (d.kind === 'coin') return x.coin || null;
+    if (d.kind === 'coin') return x?.coin || coinExit;
+    if (!x) return null;
     if (x[die + ':' + v]) return x[die + ':' + v];
     for (const k in x) { const m = /^(d\w+):(\d+)-(\d+)$/.exec(k); if (m && m[1] === die && v >= +m[2] && v <= +m[3]) return x[k]; }
     return x[die] || x['*'] || null;
