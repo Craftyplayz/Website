@@ -41,7 +41,7 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
                 at('t05-smoke-plume', './extras/ember/trails/05.js'), at('t01-scorch-brands', './extras/ember/trails/01.js')],
             anims: { 1: at('a21-shatter', './extras/ember/anims/21.js'), 20: at('a14-exploded-view', './extras/ember/anims/14.js'), mid: at('a34-ash-wind', './extras/ember/anims/34.js') },
             coin: 'gold-new', coinSound: at('c05-doubloon', './coinsounds/05.js') };
-        const engine = import('../../dice3d.js?v=<?= $v('../../dice3d.js') ?>'), choice = import('../choice.js?v=<?= $v('../choice.js') ?>');
+        const engine = import('../dice3d.js?v=<?= $v('../dice3d.js') ?>'), choice = import('../choice.js?v=<?= $v('../choice.js') ?>');
         const out = document.getElementById('qr-out');
         document.getElementById('qr-bar').addEventListener('click', async (e) => {
             const b = e.target.closest('button'); if (!b) return;

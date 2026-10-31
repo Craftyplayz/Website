@@ -1,5 +1,5 @@
 <?php
-// Browse the homebrew sheet's server backups (written by games/dnd/sheet*/backup.php) and download any version to restore it.
+// Browse the homebrew sheet's server backups (written by games/dnd/sheets/player*/backup.php) and download any version to restore it.
 // backups/<ip>/<character name>/<ip>-<version>.json; the folder is gitignored and only exists on the server.
 $site_page = ['components' => true, 'title' => 'D&D Sheet Backups'];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';

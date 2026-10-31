@@ -1,12 +1,11 @@
-// Homebrew character sheet (/games/dnd/sheet/). Characters live in this browser's localStorage; export/import moves them.
+// Homebrew character sheet (/games/dnd/sheets/player/). Characters live in this browser's localStorage; export/import moves them.
 // Every input carries data-k="path.in.character"; typing updates the character, saves, and refreshes the [data-c] numbers.
 // Clicks that change structure (add/remove rows, conditions, tabs) redraw the sheet.
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
     const { $, esc, toast, debounce } = UI;
     // test copy: its own storage, seeded once from the live sheet so testing never rewrites live characters
-    const KEY = 'hb-sheet-dev';
-    try { if (localStorage.getItem(KEY) === null && localStorage.getItem('hb-sheet')) localStorage.setItem(KEY, localStorage.getItem('hb-sheet')); } catch (e) { }
+    const KEY = 'hb-sheet';
     const root = $('#hb-sheet'), dlg = $('#hb-dlg'), dlgBody = $('#hb-dlg-body'), drawer = $('#hb-drawer');
 
     const ABIL = [['STR', 'Strength'], ['DEX', 'Dexterity'], ['CON', 'Constitution'], ['INT', 'Intelligence'], ['WIS', 'Wisdom'], ['CHA', 'Charisma']];
@@ -335,7 +334,20 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     try { db = JSON.parse(localStorage.getItem(KEY)); } catch (e) { db = null; }
     if (!isObj(db) || !isObj(db.chars)) db = { cur: '', chars: {} };
     for (const id in db.chars) db.chars[id] = normalise(db.chars[id]);
-    if (!db.chars[db.cur]) db.cur = Object.keys(db.chars)[0] || '';
+    // once: characters made on the test copy (/games/dnd/sheets/player-dev/) come across; one edited there is kept as a second copy
+    try {
+        if (!localStorage.getItem('hb-sheet-merged')) {
+            const dev = JSON.parse(localStorage.getItem('hb-sheet-dev') || 'null');
+            const plain = (o) => JSON.stringify(o, (k, v) => (['id', 'created', 'updated', 'open', 'sub', 'view'].includes(k) ? undefined : v));
+            for (const [id, raw] of Object.entries(isObj(dev) && isObj(dev.chars) ? dev.chars : {})) {
+                const c = normalise(raw);
+                if (!db.chars[id]) db.chars[id] = c;
+                else if (plain(db.chars[id]) !== plain(c)) { c.id = uid(); c.name = (c.name || 'Unnamed character') + ' (from test sheet)'; db.chars[c.id] = c; }
+            }
+            localStorage.setItem(KEY, JSON.stringify(db));
+            localStorage.setItem('hb-sheet-merged', '1');
+        }
+    } catch (e) { }    if (!db.chars[db.cur]) db.cur = Object.keys(db.chars)[0] || '';
     if (!db.cur) { const c = blank(); db.chars[c.id] = c; db.cur = c.id; }
     let C = db.chars[db.cur];
     let warned = false;
@@ -1534,7 +1546,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <h3>Dice</h3>
             <label class="check">${f('view.noRoll', 'Turn off click to roll', { check: true })} Roll your own dice: don't roll when an ability, save, skill or tool bonus is clicked</label>
             <label class="check">${f('view.noTray', 'Hide the dice button', { check: true })} Hide the dice button in the bottom-left corner</label>
-            <p class="hb-dicelink"><a class="btn" href="/games/dnd/sheet/dice/">Customise dice</a> <span class="muted">Pick the dice, their sounds, trails and nat 1 and nat 20 effects on the Dice Sets page; they apply here straight away.</span></p>
+            <p class="hb-dicelink"><a class="btn" href="/games/dnd/dice/">Customise dice</a> <span class="muted">Pick the dice, their sounds, trails and nat 1 and nat 20 effects on the Dice Sets page; they apply here straight away.</span></p>
             <label class="check">${f('view.noSound', 'Turn off dice sounds', { check: true })} No sound when the dice land</label>
             <label class="check">${f('view.noAnim', 'Turn off thrown dice', { check: true })} Show results straight away instead of throwing 3D dice across the page</label>
             <h3>Panels</h3>
@@ -1568,10 +1580,10 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     const dlgHTML = () => (dlgMode === 'custom' ? customDlg() : dlgMode.kind === 'crop' ? cropDlg() : dlgMode.kind === 'rest' ? restDlg(dlgMode.r) : dlgMode.kind === 'ddb' ? ddbDlg() : formulaDlg(dlgMode));
     // ---- dice: a card for each roll and the dice tray in the bottom-left corner ----
     const DICE = [4, 6, 8, 10, 12, 20, 100], tray = { open: false, pool: {} };
-    // the dice chosen on the Dice Sets page (/games/dnd/sheet/dice/, choice.js), read at every roll so a change there applies here straight away;
+    // the dice chosen on the Dice Sets page (/games/dnd/dice/, choice.js), read at every roll so a change there applies here straight away;
     // with no choice yet, the style this sheet had picked before (C.view.diceStyle). Plain purple if any of it fails to load.
     let choiceP = null;
-    const chosenStyle = (m) => (choiceP ||= import(`/games/dnd/sheet/dice/choice.js${(($('script[src*="/sheet.js"]')?.src || '').match(/\?v=\d+/) || [''])[0]}`)
+    const chosenStyle = (m) => (choiceP ||= import(`/games/dnd/dice/choice.js${(($('script[src*="/sheet.js"]')?.src || '').match(/\?v=\d+/) || [''])[0]}`)
         .catch((e) => { choiceP = null; throw e; }))
         .then((c) => { const k = C.view.diceStyle || 'purple';
             return c.styleFrom(c.readChoice() || { set: m.STYLES[k] ? { key: k, builtin: true } : { key: k, url: `./sets/${k}.js` } }, m); })
@@ -1608,9 +1620,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         dice3d().then(async (m) => m.throwDice(groups, { style: await chosenStyle(m), accent: css.getPropertyValue('--btn').trim() || '#5b3f8f', sound: !C.view.noSound }))
             .then(card, () => { dice3dP = null; quick(); });
     }
-    // shortcut: dice3d.js reuses sheet.js's ?v= version, so a change to dice3d.js alone needs sheet.js touched too (last: quiet coins, 30 Oct 2026)
+    // shortcut: dice3d.js and dice/choice.js reuse sheet.js's ?v= version, so a change to either alone needs sheet.js touched too (last: choice.js loads current versions of the chosen files, 31 Oct 2026)
     let dice3dP = null;
-    const dice3d = () => dice3dP || (dice3dP = import(new URL('dice3d.js' + (($('script[src*="/sheet.js"]')?.src || '').match(/\?v=\d+/) || [''])[0], location.href).href));
+    const dice3d = () => dice3dP || (dice3dP = import(new URL('/games/dnd/dice/dice3d.js' + (($('script[src*="/sheet.js"]')?.src || '').match(/\?v=\d+/) || [''])[0], location.href).href));
     function drawTray() {
         const box = $('#hb-dice');
         box.hidden = !!C.view.noTray;

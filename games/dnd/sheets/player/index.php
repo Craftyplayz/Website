@@ -1,6 +1,5 @@
 <?php
-// Test copy of /games/dnd/sheet/ for trying changes before they go live. Not in site.json, not indexed.
-$site_page = ['title' => 'Homebrew Sheet (test copy)', 'components' => true, 'ui' => true, 'css' => ['/assets/css/pages/games-dnd-sheet-dev.css']];
+$site_page = ['components' => true, 'ui' => true, 'css' => ['/assets/css/pages/games-dnd-sheet.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>
@@ -8,14 +7,12 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 <head>
     <?php page_head(); ?>
-    <meta name="robots" content="noindex">
 </head>
 
 <body>
     <?php // no site header or footer here: the sheet and its dice use the whole screen (owner's choice) ?>
 
     <main class="page hb" id="main">
-        <p class="hb-devwarn" role="alert">Dev sheet: testing only, do not use</p>
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="hb-sr">Homebrew Character Sheet</h1>
 
@@ -33,10 +30,10 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
         <input type="file" id="hb-artfile" accept="image/*" hidden>
     </main>
 
-    <script src="<?= h(asset('/games/dnd/sheet-dev/formula.js')) ?>" defer></script>
-    <script src="<?= h(asset('/games/dnd/sheet-dev/ddb.js')) ?>" defer></script>
-    <script src="<?= h(asset('/games/dnd/sheet-dev/rules.js')) ?>" defer></script>
-    <script src="<?= h(asset('/games/dnd/sheet-dev/sheet.js')) ?>" defer></script>
+    <script src="<?= h(asset('/games/dnd/sheets/player/formula.js')) ?>" defer></script>
+    <script src="<?= h(asset('/games/dnd/sheets/player/ddb.js')) ?>" defer></script>
+    <script src="<?= h(asset('/games/dnd/sheets/player/rules.js')) ?>" defer></script>
+    <script src="<?= h(asset('/games/dnd/sheets/player/sheet.js')) ?>" defer></script>
 </body>
 
 </html>
