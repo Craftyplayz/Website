@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function draw() {
         const m = cur();
         if (!m) {
-            root.innerHTML = `<section class="card mon-empty"><h2>No monsters yet</h2><p class="muted">Import one from the monster list, or start a blank one and type in your own.</p>
+            root.innerHTML = `<section class="card mon-empty"><h2>No monsters created</h2><p class="muted">Import one from the monster list, or start a blank one and type in your own.</p>
                 <div class="actions"><button type="button" class="btn" data-act="find">Import from the monster list</button><button type="button" class="btn" data-act="new">New monster</button></div></section>`;
             return;
         }
