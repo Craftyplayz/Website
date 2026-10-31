@@ -173,9 +173,9 @@ const nat1 = {
             const { geo, shape, c, r } = solid(T, polys), m = add(x, new T.Mesh(geo, mats)); m.visible = false; m.castShadow = true;
             const b = new CANNON.Body({ mass: Math.max(0.03, r ** 3), shape, sleepSpeedLimit: 0.2, sleepTimeLimit: 0.4, angularDamping: 0.2, linearDamping: 0.1 });
             // where it sits in the die now, and its kick: outward from the middle and up
-            const w = c.clone().applyQuaternion(x.q0), dir = w.clone().normalize(), sp = 3 + Math.random() * 5;
+            const w = c.clone().applyQuaternion(x.q0), dir = w.clone().normalize(), sp = 6 + Math.random() * 8;
             b.position.set(x.p0.x + w.x, x.p0.y + w.y, x.p0.z + w.z); b.quaternion.set(x.q0.x, x.q0.y, x.q0.z, x.q0.w);
-            b.velocity.set(dir.x * sp, Math.abs(dir.y) * sp * 0.5 + 3 + Math.random() * 4, dir.z * sp);
+            b.velocity.set(dir.x * sp, Math.abs(dir.y) * sp * 0.5 + 5 + Math.random() * 6, dir.z * sp);
             b.angularVelocity.set((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16);
             return { m, b, geo };
         });
