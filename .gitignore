@@ -23,3 +23,4 @@ minecraft/projects/collection/done.json
 
 # homebrew sheet server backups - written on the server, never committed (they hold visitor IPs)
 private/dnd/backups/
+private/dnd/monster-backups/

@@ -1,5 +1,6 @@
 // Monster Sheet (/games/dnd/sheets/monster/): a copy of the player sheet (sheet.js) for monsters. Creature type is kept in the player sheet's race field,
-// there are no classes (one hidden row keeps the monster's hit dice) and CR stands in for level. Monsters live in this browser's localStorage.
+// there are no classes (one hidden row keeps the monster's hit dice) and CR stands in for level. Monsters live in this browser's localStorage,
+// and every edit is backed up on the server (backup.php, browsed at /private/dnd/monsters/).
 // The search list is monsters.json (built by _dev/scripts/build-monsters.js); monsters.php fetches one stat block.
 // Every input carries data-k="path.in.character"; typing updates the character, saves, and refreshes the [data-c] numbers.
 // Clicks that change structure (add/remove rows, conditions, tabs) redraw the sheet.
@@ -341,14 +342,30 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         try { localStorage.setItem(KEY, JSON.stringify(db)); warned = false; }
         catch (e) { if (!warned) toast("Couldn't save: this browser's storage is full or blocked. Export the monster so you don't lose it.", 'err'); warned = true; }
     }
+    // every edit is also backed up on the server as a new version (backup.php -> private/dnd/monster-backups/), a few seconds after typing stops
+    const dirty = new Set();
+    let backupTimer = 0;
+    function flushBackups() {
+        clearTimeout(backupTimer);
+        for (const id of [...dirty]) {
+            const c = db.chars[id];
+            dirty.delete(id);
+            if (!c) continue;
+            const body = JSON.stringify(c);
+            // keepalive lets a backup finish while the page closes (browsers allow it for bodies up to 64 KB)
+            fetch('backup.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: body.length < 60000 })
+                .then((r) => { if (!r.ok && r.status >= 500) dirty.add(id); }).catch(() => dirty.add(id));
+        }
+    }
     let undoSnap = null, undoTimer = 0; // undo for deletes, see snap()
     function saveNow() {
         if (undoSnap && Date.now() - undoSnap.at > 1000) dropUndo();
         store();
         drawSide();
+        if (C) { dirty.add(C.id); clearTimeout(backupTimer); backupTimer = setTimeout(flushBackups, 4000); }
     }
     const save = debounce(saveNow, 250);
-    addEventListener('pagehide', store);
+    addEventListener('pagehide', () => { store(); flushBackups(); });
 
     const get = (path) => path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), C);
     function set(path, val) {
