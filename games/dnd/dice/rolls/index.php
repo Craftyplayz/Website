@@ -1,5 +1,5 @@
 <?php
-// Quick Rolls: four buttons that throw the Crafty Fire Dice preset (built here as a choice.js choice) to land on a nat 1, a 10 or a nat 20, or flip the coin,
+// Quick Rolls: four buttons that throw the Crafty Fire Dice preset (built here as a choice.js choice) to land on a nat 1, anything from 2 to 19 or a nat 20, or flip the coin,
 // for watching the exit animations without the rest of the Dice Sets page.
 $site_page = ['components' => true];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
@@ -23,7 +23,7 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
     <main class="page" id="main">
         <div class="bar" id="qr-bar">
             <button type="button" class="btn" data-land="1">Nat 1</button>
-            <button type="button" class="btn" data-land="10">Roll a 10</button>
+            <button type="button" class="btn" data-land="mid">2-19</button>
             <button type="button" class="btn" data-land="20">Nat 20</button>
             <button type="button" class="btn" data-coin>Flip a coin</button>
             <span class="muted" id="qr-out" aria-live="polite"></span>
@@ -51,7 +51,7 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
                 const style = await c.styleFrom(PRESET, m);
                 // a new roll takes the last one's dice off the table first, even mid-animation
                 m.clearTable(true);
-                const res = 'coin' in b.dataset ? await m.throwDice([['coin', 1]], { style }) : await m.throwDice([[20, 1]], { style, land: [[+b.dataset.land]] });
+                const res = 'coin' in b.dataset ? await m.throwDice([['coin', 1]], { style }) : await m.throwDice([[20, 1]], { style, land: [[b.dataset.land === 'mid' ? 2 + Math.floor(Math.random() * 18) : +b.dataset.land]] });
                 const v = res[0][1][0];
                 out.textContent = v === 'heads' ? 'Heads' : v === 'tails' ? 'Tails' : 'd20 ' + v;
             } catch (err) { out.textContent = "Couldn't roll. Try again."; }
