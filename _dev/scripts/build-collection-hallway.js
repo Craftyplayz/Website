@@ -5,6 +5,7 @@
 const fs = require('fs'), path = require('path'), os = require('os');
 const ROOT = path.join(__dirname, '../..'), OUT = path.join(ROOT, 'minecraft/projects/collection/hallway');
 const ICONS = path.join(ROOT, 'minecraft/tools/item-list');
+const { stackSize } = require('../../minecraft/tools/shulker-calculator/schematic.js');
 const MC = '26.1', SRC = `https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/${MC}/`;
 
 async function mcData(file) {
@@ -20,7 +21,6 @@ async function mcData(file) {
 // list names that aren't an item id on their own -> [real id, substrings the item's data must contain]
 const DYE = { white: 15790320, orange: 15435844, magenta: 12801229, light_blue: 6719955, yellow: 14602026, lime: 4312372, pink: 14188952, gray: 4408131, light_gray: 11250603, cyan: 2651799, purple: 8073150, blue: 2437522, brown: 5320730, green: 3887386, red: 11743532, black: 1973019 };
 const PATTERN = { 'Bordure Indented': 'bordure_indented', 'Creeper Charge': 'creeper', 'Field Masoned': 'field_masoned', Flow: 'flow', 'Flower Charge': 'flower', Globe: 'globe', Gust: 'guster', 'Skull Charge': 'skull', Snout: 'piglin', Thing: 'mojang' };
-const MAP = { 'Buried Treasure': 'buried_treasure', 'Desert Village': 'village_desert', 'Plains Village': 'village_plains', 'Savanna Village': 'village_savanna', 'Snowy Village': 'village_snowy', 'Taiga Village': 'village_taiga', 'Jungle Explorer': 'explorer_jungle', 'Swamp Explorer': 'explorer_swamp', 'Woodland Explorer': 'mansion', 'Ocean Explorer': 'monument', 'Trial Explorer': 'trial_chambers' };
 const FIXED = { 'Gold Nautilus Armor': 'golden_nautilus_armor', 'Minecart with Furnace': 'furnace_minecart', 'Petrified Oak Slab': 'petrified_oak_slab', 'Short Grass (Grass)': 'short_grass', 'Spectral Arrow': 'spectral_arrow' };
 const slug = (s) => s.toLowerCase().replace(/^the /, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
 function variant(name, id) {
@@ -34,7 +34,8 @@ function variant(name, id) {
     if ((m = name.match(/^Firework (Rocket|Star) (.+)$/))) return ['firework_' + m[1].toLowerCase(), [String(DYE[slug(m[2])])]];
     if ((m = name.match(/^Goat Horn \((.+)\)$/))) return ['goat_horn', [slug(m[1]) + '_goat_horn']];
     if ((m = name.match(/^Music Disc \((.+)\)$/))) return ['music_disc_' + (m[1] === 'Precipe' ? 'precipice' : slug(m[1])), []];
-    if ((m = name.match(/^(.+) Map$/)) && MAP[m[1]]) return ['filled_map', ['filled_map.' + MAP[m[1]]]];
+    // 26.3: explorer maps are their own items; the eight camp maps share one id and differ by name
+    if ((m = name.match(/^(.+) Camp Map$/))) return ['abandoned_camp_map', [slug(m[1]) + '_camp_map']];
     // level I is the plain bottle, so it's also where a bottle without a stored level goes
     if ((m = name.match(/^Ominous Bottle( II| III| IV| V)?$/))) return ['ominous_bottle', m[1] ? [`ominous_bottle_amplifier":${['II', 'III', 'IV', 'V'].indexOf(m[1].trim()) + 1}`] : []];
     if (name === 'Lodestone Compass') return ['compass', ['lodestone']];
@@ -92,7 +93,8 @@ const RAW = new Set(['white_wool', 'string', 'slime_ball', 'honeycomb', 'snow_bl
     for (const e of all) {
         const name = e.name.replace(/‌/g, '').replace(/(\S)\[/, '$1 [');
         const [id, need] = variant(name, e.id), it = byName[id];
-        entries.push({ name, id, need, stack: it ? it.stackSize : 64, icon: icon(e.id, id) });
+        // shortcut: items newer than the recipe data (26.3) get the Shulker Calculator's stack guess and no recipe; rerun when minecraft-data has 26.3
+        entries.push({ name, id, need, stack: it ? it.stackSize : stackSize(id), icon: icon(e.id, id, /_map$/.test(id) ? 'filled_map' : '') });
         const r = it && recFor(id), out = {};
         if (r) {
             out.r = { g: r.inShape ? [0, 1, 2].flatMap((y) => [0, 1, 2].map((x) => r.inShape[y]?.[x] ?? null)).map((b) => (b == null ? '' : nm(b))) : ings(r).map(nm), s: !r.inShape, c: r.result.count };
@@ -120,5 +122,5 @@ const RAW = new Set(['white_wool', 'string', 'slime_ball', 'honeycomb', 'snow_bl
     const kb = (f) => Math.round(fs.statSync(path.join(OUT, f)).size / 1024) + ' KB';
     console.log(`${entries.length} chests, ${recs.filter((r) => r.r).length} recipes · hallway.json ${kb('hallway.json')} · hallway-recipes.json ${kb('hallway-recipes.json')}`);
     const bad = entries.filter((e) => !byName[e.id]);
-    if (bad.length) console.log('No item id for:', bad.map((e) => e.name).join(', '));
+    if (bad.length) console.log(`${bad.length} items aren't in the ${MC} data (stack size guessed, no recipe):`, bad.map((e) => e.name).join(', '));
 })().catch((e) => { console.error(e.message); process.exit(1); });
