@@ -1,3 +1,4 @@
+import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
 // Ember Cage exits 21: nat 1 Shatter (the die's own faces crack apart and dim), nat 20 Supernova (it implodes to a point, then its faces blast out in gold), mid Twist out (it wrings itself into a fading swirl).
 let FX = null;
 function fx(T) {
@@ -89,42 +90,130 @@ function cleanup(x) {
     x.own = []; x.parts = x.mats = null;
 }
 
-// cracks: the die is already its own chunks, they shudder and open, glow leaks through, then they fly apart, tumbling and dimming
+// Shatter: the die cracks, then breaks into solid chunks cut right through it (Voronoi cells of the die itself, so each has a piece of the
+// real faces outside and raw glowing rock where it broke). Every chunk is its own rigid body on the dice table: they fly, bounce off each other
+// and the walls, and settle; a few seconds after the last one stops they fade.
+const NB = 45;
+// clip a convex solid (polygons with uvs and a material each) to the side n·p <= d; the cut is closed with a cap of material `inner`
+function clip(T, polys, n, d, inner) {
+    const out = [], cut = [];
+    for (const f of polys) {
+        const P = [], U = [], L = f.p.length;
+        for (let i = 0; i < L; i++) {
+            const a = f.p[i], b = f.p[(i + 1) % L], ua = f.uv[i], ub = f.uv[(i + 1) % L], da = a.dot(n) - d, db = b.dot(n) - d;
+            if (da <= 1e-7) { P.push(a); U.push(ua); if (da > -1e-7) cut.push(a); }
+            if ((da < -1e-7 && db > 1e-7) || (da > 1e-7 && db < -1e-7)) { const t = da / (da - db), q = a.clone().lerp(b, t); P.push(q); U.push([ua[0] + (ub[0] - ua[0]) * t, ua[1] + (ub[1] - ua[1]) * t]); cut.push(q); }
+        }
+        if (P.length >= 3) out.push({ p: P, uv: U, mi: f.mi });
+    }
+    const pts = []; for (const q of cut) if (!pts.some((r) => r.distanceToSquared(q) < 1e-10)) pts.push(q);
+    if (pts.length >= 3) {
+        // the cap, wound to face outward along n
+        const c = pts.reduce((s, q) => s.add(q), new T.Vector3()).divideScalar(pts.length);
+        const u = new T.Vector3().crossVectors(n, Math.abs(n.x) < 0.9 ? new T.Vector3(1, 0, 0) : new T.Vector3(0, 1, 0)).normalize(), v = new T.Vector3().crossVectors(n, u);
+        const ang = (q) => { const r = q.clone().sub(c); return Math.atan2(r.dot(v), r.dot(u)); };
+        pts.sort((a, b) => ang(a) - ang(b));
+        out.push({ p: pts, uv: pts.map(() => [0.5, 0.5]), mi: inner });
+    }
+    return out;
+}
+// the chunks: the die's own triangles as a solid, cut into the Voronoi cell of each random point inside it
+function chunks(T, geo, n) {
+    const g = geo.index ? geo.toNonIndexed() : geo, P = g.attributes.position, U = g.attributes.uv, tm = [];
+    const inner = g.groups.length ? Math.max(...g.groups.map((r) => r.materialIndex)) + 1 : 1;
+    for (const gr of g.groups) for (let t = gr.start / 3; t < (gr.start + gr.count) / 3; t++) tm[t] = gr.materialIndex;
+    const die = [];
+    for (let t = 0; t < P.count / 3; t++) die.push({ p: [0, 1, 2].map((i) => new T.Vector3().fromBufferAttribute(P, t * 3 + i)), uv: [0, 1, 2].map((i) => (U ? [U.getX(t * 3 + i), U.getY(t * 3 + i)] : [0, 0])), mi: tm[t] ?? 0 });
+    const planes = die.map((f) => { const nn = new T.Vector3().subVectors(f.p[1], f.p[0]).cross(new T.Vector3().subVectors(f.p[2], f.p[0])).normalize(); return [nn, nn.dot(f.p[0])]; });
+    let R = 0; for (const f of die) for (const q of f.p) R = Math.max(R, q.length());
+    const seeds = [];
+    while (seeds.length < n) { const s = new T.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).multiplyScalar(R); if (planes.every(([nn, d]) => nn.dot(s) < d - 0.02)) seeds.push(s); }
+    const out = [];
+    for (const s of seeds) {
+        let polys = die;
+        for (const o of seeds) { if (o === s) continue; const nn = o.clone().sub(s).normalize(); polys = clip(T, polys, nn, nn.dot(o.clone().add(s).multiplyScalar(0.5)), inner); if (polys.length < 4) break; }
+        if (polys.length >= 4) out.push(polys);
+    }
+    if (g !== geo) g.dispose();
+    return { out, inner, R };
+}
+// a chunk's mesh geometry (centred on itself, faces grouped by material) and its cannon shape
+function solid(T, polys) {
+    const c = new T.Vector3(); let k = 0; for (const f of polys) for (const q of f.p) { c.add(q); k++; } c.divideScalar(k);
+    const pos = [], uv = [], nor = [], geo = new T.BufferGeometry(), verts = [], faces = [];
+    const id = (q) => { let i = verts.findIndex((r) => r.distanceToSquared(q) < 1e-9); if (i < 0) { i = verts.length; verts.push(q); } return i; };
+    let r = 0;
+    for (const f of polys.slice().sort((a, b) => a.mi - b.mi)) {
+        const L = f.p.map((q) => q.clone().sub(c)), nn = new T.Vector3();
+        for (let i = 0; i < L.length; i++) { const a = L[i], b = L[(i + 1) % L.length]; nn.x += (a.y - b.y) * (a.z + b.z); nn.y += (a.z - b.z) * (a.x + b.x); nn.z += (a.x - b.x) * (a.y + b.y); }
+        nn.normalize();
+        const start = pos.length / 3;
+        for (let i = 1; i < L.length - 1; i++) for (const j of [0, i, i + 1]) { pos.push(L[j].x, L[j].y, L[j].z); uv.push(...f.uv[j]); nor.push(nn.x, nn.y, nn.z); }
+        if (geo.groups.length && geo.groups.at(-1).materialIndex === f.mi) geo.groups.at(-1).count += pos.length / 3 - start; else geo.addGroup(start, pos.length / 3 - start, f.mi);
+        const fi = []; for (const q of L) { const i = id(q); if (fi.at(-1) !== i && fi[0] !== i) fi.push(i); r = Math.max(r, q.length()); }
+        if (fi.length >= 3) faces.push(fi);
+    }
+    geo.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new T.Float32BufferAttribute(uv, 2)); geo.setAttribute('normal', new T.Float32BufferAttribute(nor, 3));
+    const shape = new CANNON.ConvexPolyhedron({ vertices: verts.map((q) => new CANNON.Vec3(q.x, q.y, q.z)), faces });
+    return { geo, shape, c, r };
+}
 const nat1 = {
-    key: 'a21-shatter', name: 'Shatter', impact: 0.6, dur: 3.2,
-    blurb: 'Cracks split the die into chunks of its own faces that fly apart, tumble down onto the table, go dark and fade.',
+    key: 'a21-shatter', name: 'Shatter', impact: 0.55, dur: 9,
+    blurb: 'Cracks split the die into dozens of solid chunks of itself that fly apart, tumble, bounce off each other and settle, then fade a few seconds later.',
     start(x) {
         save(x);
-        const T = x.THREE, g = subdivide(x.mesh.geometry, 2), tri = g.attributes.position.count / 3, P = g.attributes.position, cen = [], seeds = [];
-        for (let t = 0; t < tri; t++) cen.push(new T.Vector3().fromBufferAttribute(P, t * 3).add(new T.Vector3().fromBufferAttribute(P, t * 3 + 1)).add(new T.Vector3().fromBufferAttribute(P, t * 3 + 2)).divideScalar(3));
-        while (seeds.length < 28) seeds.push(cen[Math.floor(Math.random() * tri)]);
-        const lists = seeds.map(() => []);
-        cen.forEach((c, t) => { let b = 0, bd = 1e9; seeds.forEach((s, i) => { const d = c.distanceToSquared(s); if (d < bd) { bd = d; b = i; } }); lists[b].push(t); });
-        pieces(x, g, lists.filter((l) => l.length)); g.dispose();
-        x.parts.forEach((p) => (p.m.visible = true)); x.mesh.visible = false;
-        x.glow = sprite(x, 0xff5a10); x.glow.scale.setScalar(0.1); x.heat = sprite(x, 0xffb050); x.heat.scale.setScalar(0.1);
+        const T = x.THREE, { out, inner, R } = chunks(T, x.mesh.geometry, NB);
+        x.R = R; x.world = x.body.world;
+        // our own copies of the die's materials, plus raw rock for the broken insides, glowing at first
+        const mats = [].concat(x.mesh.material).map((m) => { const c = m.clone(); c.transparent = true; return c; });
+        while (mats.length < inner) mats.push(mats[0]);
+        x.rock = new T.MeshStandardMaterial({ color: 0x24201d, roughness: 0.95, metalness: 0.1, emissive: 0xff5410, emissiveIntensity: 1.4, flatShading: true, transparent: true });
+        mats[inner] = x.rock; x.mats = [...new Set(mats)];
+        x.parts = out.map((polys) => {
+            const { geo, shape, c, r } = solid(T, polys), m = add(x, new T.Mesh(geo, mats)); m.visible = false; m.castShadow = true;
+            const b = new CANNON.Body({ mass: Math.max(0.03, r ** 3), shape, sleepSpeedLimit: 0.2, sleepTimeLimit: 0.4, angularDamping: 0.2, linearDamping: 0.1 });
+            // where it sits in the die now, and its kick: outward from the middle and up
+            const w = c.clone().applyQuaternion(x.q0), dir = w.clone().normalize(), sp = 3 + Math.random() * 5;
+            b.position.set(x.p0.x + w.x, x.p0.y + w.y, x.p0.z + w.z); b.quaternion.set(x.q0.x, x.q0.y, x.q0.z, x.q0.w);
+            b.velocity.set(dir.x * sp, Math.abs(dir.y) * sp * 0.5 + 3 + Math.random() * 4, dir.z * sp);
+            b.angularVelocity.set((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16);
+            return { m, b, geo };
+        });
+        x.glow = sprite(x, 0xff5a10); x.glow.scale.setScalar(0.1);
     },
     tick(k, x) {
-        const crack = at(k, 0, 0.2), b = at(k, 0.2, 1), e = ease(at(k, 0.2, 0.5)), t = Math.max(0, k - 0.2) * nat1.dur, off = new x.THREE.Vector3();
-        x.R ??= (x.mesh.geometry.computeBoundingSphere(), x.mesh.geometry.boundingSphere.radius);
-        x.parts.forEach((p, i) => {
-            // cracking: shudder in place while the seams open a little; then the burst, and no more shaking
-            const shake = k < 0.2 ? 0.04 * Math.sin(k * 120 + i * 2.1) : 0;
-            off.copy(p.d).multiplyScalar(crack * 0.12 + e * (3 + 4 * p.sp) + shake);
-            // a little hop, then gravity brings every piece down onto the table, where it stops tumbling
-            p.vy ??= 2.5 + 2.5 * Math.random();
-            const y0 = x.p0.y + p.c.y, floor = x.R * 0.25, y = Math.max(floor, y0 + p.vy * t - 14 * t * t);
-            off.y = y - y0;
-            // tumbling while in the air; once down it lies still
-            if (y > floor || p.ang == null) p.ang = e * 7 * p.sp;
-            place(x, p, off, p.ang, 1);
-        });
-        // they go dark as they fly, and fade only once they have all landed
-        dim(x, [1 - 0.85 * b, 1 - 0.9 * b, 1 - 0.9 * b], [0.5 * (1 - b), 0.1 * (1 - b), 0], 1 - at(k, 0.8, 0.97));
-        x.glow.scale.setScalar(1.5 + crack * 2 + e * 5); x.glow.material.opacity = 0.7 * crack * (1 - at(k, 0.45, 0.9));
-        x.heat.scale.setScalar(1 + e * 3); x.heat.material.opacity = 0.9 * Math.sin(Math.PI * at(k, 0.25, 0.55));
+        x.t0 ??= x.sec; const t = x.sec - x.t0, BREAK = 0.55;
+        if (t < BREAK) {
+            // cracking: the die shudders as the glow builds inside it
+            const c = t / BREAK, j = 0.05 * x.R * c; x.mesh.position.set(x.p0.x + (Math.random() - 0.5) * j, x.p0.y, x.p0.z + (Math.random() - 0.5) * j);
+            x.glow.scale.setScalar(x.R * (1 + 2.5 * c)); x.glow.material.opacity = 0.8 * c;
+            return;
+        }
+        if (!x.broke && x.world) {
+            // the break: the die's own body steps aside (asleep, colliding with nothing) and the chunks take its place
+            x.broke = true; x.mesh.visible = false; x.mask0 = x.body.collisionFilterMask; x.body.collisionFilterMask = 0; x.body.sleep();
+            for (const p of x.parts) { x.world.addBody(p.b); p.m.visible = true; }
+        }
+        const s = t - BREAK;
+        x.glow.scale.setScalar(x.R * (3.5 + 3 * s)); x.glow.material.opacity = Math.max(0, 0.8 - s * 2.5);
+        x.rock.emissiveIntensity = 1.4 * Math.exp(-s * 1.6);
+        let still = true;
+        for (const p of x.parts) {
+            p.m.position.copy(p.b.position); p.m.quaternion.copy(p.b.quaternion);
+            if (p.b.sleepState !== CANNON.Body.SLEEPING && (p.b.velocity.length() > 0.3 || p.b.angularVelocity.length() > 0.8)) still = false;
+        }
+        // all settled: wait two and a half seconds, then fade (and always be gone before the exit ends)
+        // (a chunk that never quite stops jittering counts as settled four seconds after the break)
+        if ((!still || s < 0.4) && s < 4) x.calm = null; else x.calm ??= t;
+        const fade = Math.max(x.calm == null ? 0 : at(t, x.calm + 2.5, x.calm + 3.3), at(k, 0.9, 0.98));
+        for (const m of x.mats) m.opacity = 1 - fade;
+        if (fade >= 1 && !x.gone) { x.gone = true; for (const p of x.parts) { p.m.visible = false; x.world.removeBody(p.b); } }
     },
-    end: cleanup,
+    end(x) {
+        if (x.world) for (const p of x.parts || []) x.world.removeBody(p.b);
+        if (x.broke) { x.body.collisionFilterMask = x.mask0; x.body.wakeUp(); }
+        cleanup(x);
+    },
 };
 
 // the die squeezes into a bright point, holds, then its faces burst out as an expanding gold shell and shockwave
