@@ -1,0 +1,83 @@
+/* Collection Hallway (/minecraft/projects/collection/hallway/) */
+.hw [hidden], .hw-drawer [hidden] { display: none !important; }
+.hw-bar { flex-wrap: wrap; align-items: center; gap: 10px; }
+.hw-help { font-size: 13px; }
+.hw-stats button.stat-card { font: inherit; text-align: left; cursor: pointer; }
+.hw-stats button.stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.hw-stats button.stat-card[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--btn-line); }
+.hw-dot { display: inline-block; flex: none; width: 10px; height: 10px; margin-right: 6px; border-radius: 2px; vertical-align: 0; }
+.hw-dot.complete { background: var(--ok-line); }
+.hw-dot.partial { background: var(--series-2); }
+.hw-dot.wrong { background: var(--danger-line); }
+.hw-dot.missing { background: var(--line-strong); }
+
+/* 3D view */
+.hw-view { position: relative; height: clamp(360px, 68vh, 760px); overflow: hidden; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.hw-view canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+.hw-view canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.hw-load { position: absolute; left: 16px; right: 16px; top: 50%; transform: translateY(-50%); margin: 0; text-align: center; }
+.hw-hud { position: absolute; inset: 0; pointer-events: none; padding: 12px; display: grid; grid-template-rows: auto 1fr auto; gap: 10px; }
+.hw-hud > * { pointer-events: auto; }
+.hw-search { width: min(360px, 100%); display: grid; gap: 6px; align-content: start; }
+.hw-search .field { width: 100%; background: rgb(0 0 0 / .7); }
+.hw-step { display: flex; align-items: center; gap: 8px; width: fit-content; padding: 4px 8px; background: rgb(0 0 0 / .7); border-radius: var(--radius); font-size: 13px; font-variant-numeric: tabular-nums; }
+.hw-res { list-style: none; margin: 0; padding: 0; max-height: 40vh; overflow: auto; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius); }
+.hw-res:empty { display: none; }
+.hw-res li { display: flex; align-items: center; gap: 8px; padding: 6px 10px; font-size: 14px; cursor: pointer; }
+.hw-res li .mono { min-width: 3em; color: var(--muted); font-size: 12px; }
+.hw-res li img, .hw-res li > i:not(.hw-dot) { flex: none; width: 20px; height: 20px; image-rendering: pixelated; }
+.hw-res li .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hw-res li[aria-selected="true"], .hw-res li[data-i]:hover { background: var(--accent-soft); }
+.hw-cross { place-self: center; width: 18px; height: 18px; pointer-events: none; opacity: .8; background: linear-gradient(var(--text), var(--text)) center / 2px 100% no-repeat, linear-gradient(var(--text), var(--text)) center / 100% 2px no-repeat; }
+.hw-target { display: flex; align-items: center; gap: 10px; width: fit-content; max-width: 100%; padding: 8px 12px; background: rgb(0 0 0 / .7); border-radius: var(--radius); }
+.hw-target img { flex: none; image-rendering: pixelated; }
+.hw-tn { display: grid; min-width: 0; }
+.hw-tn b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hw-tn small { color: var(--muted); font-size: 13px; }
+.hw-s { font-weight: 600; }
+.hw-s.complete { color: var(--ok-line); }
+.hw-s.partial { color: var(--series-2); }
+.hw-s.wrong { color: var(--danger-line); }
+.hw-s.missing { color: var(--muted); }
+.hw-touch { display: none; position: absolute; right: 12px; bottom: 12px; gap: 8px; }
+.hw-touch .btn { width: 48px; height: 48px; padding: 0; }
+@media (pointer: coarse) { .hw-touch { display: flex; } }
+
+.hw-strip { margin-top: 8px; }
+.hw-strip canvas { display: block; width: 100%; height: 24px; image-rendering: pixelated; cursor: pointer; border-radius: 4px; }
+.hw-strip-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; margin-top: 4px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.hw-keys { font-size: 13px; margin: 8px 0 20px; }
+.hw-keys kbd { font-family: var(--mono); font-size: 12px; padding: 0 4px; background: var(--card2); border: 1px solid var(--line); border-radius: 4px; color: var(--text); }
+.hw-lists { grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); }
+.hw-lists .table td .btn { margin-right: 6px; }
+
+/* drawer */
+.hw-drawer h2 { margin: 0; font-size: 20px; padding-right: 28px; }
+.hw-drawer h3 { margin: 0 0 8px; font-size: 15px; }
+.hw-drawer img { image-rendering: pixelated; }
+.hw-head { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+.hw-head p { margin: 2px 0 0; font-size: 13px; }
+.hw-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.hw-tp { display: block; margin: 10px 0 16px; padding: 6px 8px; overflow-x: auto; white-space: nowrap; font-size: 12px; color: var(--accent); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; user-select: all; }
+.hw-sec { margin-bottom: 20px; }
+.hw-sec h3 .hw-s { margin-left: 6px; font-size: 13px; }
+.hw-sec .rowi img { image-rendering: pixelated; }
+.hw-wrongin { display: block; color: var(--danger-line); font-size: 12px; }
+.hw-slots { font-size: 13px; margin: 6px 0 0; }
+.hw-craft { display: flex; align-items: center; gap: 12px; }
+.hw-grid3 { display: grid; grid-template-columns: repeat(3, 40px); gap: 2px; }
+/* the crafting-table slot look, Minecraft GUI colours */
+.hw-slot { position: relative; display: grid; place-items: center; width: 40px; height: 40px; background: #8b8b8b; border: 2px solid; border-color: #373737 #fff #fff #373737; box-sizing: border-box; }
+.hw-out { width: 52px; height: 52px; }
+.hw-out b { position: absolute; right: 2px; bottom: 0; color: #fff; text-shadow: 2px 2px 0 #3f3f3f; font-size: 14px; }
+.hw-arrow { font-size: 20px; color: var(--muted); }
+.hw-raw summary { cursor: pointer; font-weight: 600; padding: 4px 0 10px; }
+.hw-raw .rows { margin-bottom: 16px; }
+.hw-node { margin-left: 14px; }
+.hw-node > summary, .hw-leaf { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 14px; cursor: pointer; }
+.hw-leaf { margin-left: 28px; cursor: default; }
+.hw-node b, .hw-leaf b { min-width: 4.5em; text-align: right; font-variant-numeric: tabular-nums; }
+.hw-node .grow, .hw-leaf .grow { flex: 1; min-width: 0; }
+.hw-how { font-size: 12px; padding: 1px 6px; border-radius: 999px; background: var(--card2); color: var(--muted); }
+.hw-how.smelt { background: var(--gold-bg); color: var(--highlight); }
+.hw-how.raw { background: var(--ok-bg); color: var(--text); }

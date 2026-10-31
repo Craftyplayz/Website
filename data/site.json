@@ -39,6 +39,7 @@
                         { "title": "Map Art", "url": "/minecraft/projects/map-art/", "description": "Map art I have made" },
                         { "title": "All Possible Farms", "url": "/minecraft/projects/farms/", "description": "How to farm every item, and which farms I have built", "keywords": ["farm", "items", "renewable", "automatic", "afk", "checklist"] },
                         { "title": "Collection Checklist", "url": "/minecraft/projects/collection/", "description": "Every item, smithing template and pottery sherd I have collected", "keywords": ["collection", "checklist", "templates", "sherds", "all items"] },
+                        { "title": "Collection Hallway", "url": "/minecraft/projects/collection/hallway/", "description": "Walk the collection chests in 3D and check a schematic of them", "keywords": ["collection", "hallway", "chests", "3d", "schematic", "litematica", "worldedit", "recipe"], "nav": false },
                         { "title": "Frame Extractor", "url": "/minecraft/projects/map-art/frame-extractor/", "description": "Extract frames from a GIF for map art", "nav": false },
                         { "title": "Stonecrest", "url": "/minecraft/projects/stonecrest/", "description": "Stonecrest world downloads" },
                         { "title": "Life Series", "url": "/minecraft/projects/life-series/", "description": "Life Series session notes" },
