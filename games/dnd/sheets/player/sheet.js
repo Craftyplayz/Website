@@ -143,7 +143,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     // read a number out of whatever was typed ("30 ft" -> 30)
     const nm = (x) => parseFloat(x) || 0;
     const ROW = {
-        attack: () => ({ id: uid(), name: '', time: 'Action', range: '', props: [], mode: 'hit', hit: 'STR + PROF', save: 'DEX', dc: '8 + PROF + STR', dmg: [{ dice: '1d6 + STR', type: 'Slashing' }], fx: [], desc: '' }),
+        attack: () => ({ id: uid(), name: '', time: 'Action', range: '', props: [], mode: 'hit', hit: 'STR + PROF', save: 'DEX', dc: '8 + PROF + STR', dmg: [{ dice: '1d6 + STR', type: 'Slashing' }], fx: [], uses: '', used: 0, reset: '', desc: '' }),
         spell: () => ({ id: uid(), lvl: 0, name: '', school: '', time: 'Action', trig: '', range: '', comp: '', dur: '', conc: false, ritual: false, prep: false, mode: 'none', save: 'DEX', dc: '', dmg: [], fx: [], desc: '', higher: '', srd: '' }),
         item: () => ({ id: uid(), cat: 'Gear', eq: false, att: '', name: '', qty: 1, wt: 0, gp: '', props: [], notes: '' }),
         list: () => ({ id: uid(), name: '', src: '', text: '', uses: '', used: 0, reset: '', grp: '' }),
@@ -781,6 +781,13 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         </div>`;
     }
 
+    // "x uses, back on a rest": the editor row and the boxes ticked off in play
+    const usesEdit = (rp, extra = '') => `<div class="hb-uses">
+                    <label>Uses ${f(rp + '.uses', 'Uses (number or formula)', { cls: 'hb-n hb-formula', ph: 'none' })}</label><small class="muted" data-c="tmax:${rp}.uses"></small>
+                    ${sel(rp + '.reset', 'Resets on', RESETS)}${extra}
+                </div>`;
+    const usesBoxes = (rp, r, V) => (String(r.uses ?? '').trim() ? `<div class="hb-uses">${pips(rp + '.used', maxOf(r.uses, V))}<small class="muted">${esc(r.reset ? RESETS.find(([k]) => k === r.reset)[1] : '')}</small></div>` : '');
+
     function actionEditor(rp, r) {
         return `<div class="hb-grid">
             <label>Name ${f(rp + '.name', 'Name', { list: 'hb-dl-attack', ph: 'Longsword' })}</label>
@@ -792,6 +799,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         </div>
         <h4>Effects</h4>${dmgEdit(rp)}${fxEdit(rp, r, SPELL_FX, 'sfx')}
         <h4>Properties</h4>${tags(rp + '.props', [], 'Finesse', 'hb-dl-props', 'prop')}
+        <h4>Uses</h4>${usesEdit(rp)}
         <label class="hb-wide">Description ${f(rp + '.desc', 'Description', { area: true })}</label>
         <div class="actions">${del(panelPath(rp) + '.rows', rp.split('.').pop(), r.name || 'action', 'Remove action')}</div>`;
     }
@@ -853,13 +861,14 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         },
 
         attacks: (p, path, pi) => {
+            const V = vars();
             // the four combat timings always get a tab; any other timing only once something uses it
             const always = ['Action', 'Bonus action', 'Reaction', 'Free'];
             const times = uniq([...always, ...L('time'), ...p.rows.map((r) => r.time)]).filter((t) => always.includes(t) || p.rows.some((r) => r.time === t));
             const opts = [['all', 'All', p.rows.length], ...times.map((t) => [t, t, p.rows.filter((r) => r.time === t).length])];
             const cur = pickSub(p, opts);
             const list = p.rows.map((r, i) => [r, `${path}.rows.${i}`]).filter(([r]) => cur === 'all' || r.time === cur)
-                .map(([r, rp]) => entry(rp, r, 'asum', () => actionEditor(rp, r))).join('');
+                .map(([r, rp]) => entry(rp, r, 'asum', () => actionEditor(rp, r), '', usesBoxes(rp, r, V))).join('');
             // what every character can do, per timing tab; each name opens its rule (rules.js)
             const basics = COMBAT.filter(([t]) => cur === 'all' || cur === t).map(([t, names]) => `<p><span class="muted">${t}</span> ${names.split('|')
                 .map((n) => ruleLink('act', n.toLowerCase(), n, n, t + (n === 'Grapple' || n === 'Shove' ? ', part of an Unarmed Strike' : ''))).join(', ')}</p>`).join('');
@@ -941,14 +950,10 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             const opts = p.split ? LIST_GROUPS.map(([g, label]) => [g, label, p.rows.filter((r) => r.grp === g).length]) : null, cur = opts && pickSub(p, opts);
             // the name opens the description; uses stay out so they can be ticked off in play
             return (opts ? subtabs(path + '.sub', opts, cur) : '') + `<div class="hb-list">${p.rows.map((r, i) => [r, i]).filter(([r]) => !cur || r.grp === cur).map(([r, i]) => { const rp = `${path}.rows.${i}`; return entry(rp, r, 'lsum', () => `<div class="hb-entry-h">${f(rp + '.name', 'Name', { cls: 'hb-strong', list: 'hb-dl-feat', ph: 'Darkvision' })}${f(rp + '.src', 'Source (optional)', { cls: 'hb-src', list: 'hb-dl-src', ph: 'Elf' })}</div>
-                <div class="hb-uses">
-                    <label>Uses ${f(rp + '.uses', 'Uses (number or formula)', { cls: 'hb-n hb-formula', ph: 'none' })}</label><small class="muted" data-c="tmax:${rp}.uses"></small>
-                    ${sel(rp + '.reset', 'Resets on', RESETS)}
-                    ${cur ? `<label>Tab ${sel(rp + '.grp', 'Tab', LIST_GROUPS.map(([g, label]) => [g, label]))}</label>` : ''}
-                </div>
+                ${usesEdit(rp, cur ? `<label>Tab ${sel(rp + '.grp', 'Tab', LIST_GROUPS.map(([g, label]) => [g, label]))}</label>` : '')}
                 <label class="hb-wide">Description ${f(rp + '.text', 'Description', { area: true })}</label>
                 <div class="actions">${del(path + '.rows', i, r.name || 'entry', 'Remove entry')}</div>`, '',
-                String(r.uses).trim() ? `<div class="hb-uses">${pips(rp + '.used', maxOf(r.uses, V))}<small class="muted">${esc(r.reset ? RESETS.find(([k]) => k === r.reset)[1] : '')}</small></div>` : ''); }).join('') || (cur ? `<p class="muted">No ${LIST_GROUPS.find(([g]) => g === cur)[1].toLowerCase()} yet.</p>` : '')}</div><div class="actions">${add(path + '.rows', 'list', 'Add entry', cur ? ` data-grp="${cur}"` : '')}</div>`;
+                usesBoxes(rp, r, V)); }).join('') || (cur ? `<p class="muted">No ${LIST_GROUPS.find(([g]) => g === cur)[1].toLowerCase()} yet.</p>` : '')}</div><div class="actions">${add(path + '.rows', 'list', 'Add entry', cur ? ` data-grp="${cur}"` : '')}</div>`;
         },
 
         // resources in your own sub-tabs: counters, boxes, or slots by level
@@ -1179,7 +1184,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
                 else if (r.kind === 'pips') r.used = 0;
                 else r.cur = maxOf(r.max);
             }
-            if (p.type === 'list') for (const r of p.rows.filter(due)) r.used = 0;
+            if (p.type === 'list' || p.type === 'attacks') for (const r of p.rows.filter(due)) r.used = 0;
             if (kind !== 'long') continue;
             if (p.type === 'trackers') for (const r of p.rows) { r.extra = 0; for (const l of r.levels) l.extra = 0; }
             if (p.type === 'spells') { for (const s of p.slots) { s.used = 0; s.extra = 0; } p.sp.used = 0; p.sp.extra = 0; }
@@ -1383,8 +1388,8 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             ${kv([['Quantity', String(nm(r.qty))], ['Weight', nm(r.wt) ? `${nm(r.wt)} lb each` : ''], ['Cost', nm(r.gp) ? `${nm(r.gp)} gp each` : ''], ['Attunement', r.att ? ITEM_ATT.find(([k]) => k === r.att)?.[1] : '']])}
             ${r.props.length ? `<h4>Attributes</h4><p>${r.props.map((n) => `<button type="button" class="hb-prop" data-act="attr" data-n="${esc(n)}">${esc(n)}</button>`).join(', ')}</p>` : ''}
             <div class="hb-desc">${paras(r.notes) || '<p class="muted">No notes yet. Add some with the edit button.</p>'}</div>`);
+        const uses = String(r.uses ?? '').trim() ? `${maxOf(r.uses, V)}${r.reset ? ', back on a ' + RESETS.find(([k]) => k === r.reset)[1].toLowerCase() : ''}` : '';
         if (!('time' in r)) {
-            const uses = String(r.uses ?? '').trim() ? `${maxOf(r.uses, V)}${r.reset ? ', back on a ' + RESETS.find(([k]) => k === r.reset)[1].toLowerCase() : ''}` : '';
             return openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(r.src || '')}</p>
                 ${kv([['Cost', 'cost' in r && r.cost !== '' ? r.cost + ' sorcery points' : ''], ['Uses', uses]])}
                 <div class="hb-desc">${paras(r.text ?? r.desc) || '<p class="muted">No description yet. Add one with the edit button.</p>'}</div>`);
@@ -1398,7 +1403,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             <div class="hb-desc">${paras(r.desc)}</div>`);
         openDrawer(`<h2>${esc(r.name || 'Unnamed')}</h2><p class="muted">${esc(head || '')}</p>
             ${kv(spell ? [['Casting time', r.time + (r.trig ? ', ' + r.trig : '')], ['Range', r.range], ['Components', r.comp], ['Duration', (r.conc ? 'Concentration, ' : '') + r.dur], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)], ['Effects', r.fx.map((e) => fxOne(e, V)).filter(Boolean).join(' · ')]]
-                : [['Timing', r.time], ['Range', r.range], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)], ['Effects', r.fx.map((e) => fxOne(e, V)).filter(Boolean).join(' · ')], ['Properties', r.props.filter((n) => !rule('prop', n)).join(', ')]])}
+                : [['Timing', r.time], ['Range', r.range], ['Resolves with', res], ['Damage', dmgText(r.dmg, V)], ['Effects', r.fx.map((e) => fxOne(e, V)).filter(Boolean).join(' · ')], ['Properties', r.props.filter((n) => !rule('prop', n)).join(', ')], ['Uses', uses]])}
             <div class="hb-desc">${paras(r.desc) || '<p class="muted">No description yet. Add one with the edit button.</p>'}
             ${spell && r.higher ? `<p><b>At higher levels.</b></p>${paras(r.higher)}` : ''}</div>
             ${spell ? '' : rulesBlock('prop', r.props, 'Properties')}
