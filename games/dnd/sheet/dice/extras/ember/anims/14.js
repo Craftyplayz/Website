@@ -59,10 +59,27 @@ const nat1 = {
     end(x) { x.mesh.position.copy(x.p0); x.mesh.quaternion.copy(x.q0); x.mesh.scale.setScalar(1); clean(x); },
 };
 
+// the dissolve at the end, like D&D Beyond's dice: blobby holes open in the surface (3D noise in table space) and grow until nothing is left
+const DISSOLVE = `float h1(vec3 p){ return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
+float vn(vec3 p){ vec3 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+    return mix(mix(mix(h1(i), h1(i + vec3(1, 0, 0)), f.x), mix(h1(i + vec3(0, 1, 0)), h1(i + vec3(1, 1, 0)), f.x), f.y),
+               mix(mix(h1(i + vec3(0, 0, 1)), h1(i + vec3(1, 0, 1)), f.x), mix(h1(i + vec3(0, 1, 1)), h1(i + vec3(1, 1, 1)), f.x), f.y), f.z); }
+float fbm(vec3 p){ return .6 * vn(p) + .3 * vn(p * 2.1 + 5.) + .1 * vn(p * 4.3 + 9.); }`;
+function dissolving(m, u) {
+    m.onBeforeCompile = (sh) => {
+        sh.uniforms.uDis = u.dis; sh.uniforms.uF = u.f;
+        sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWp;').replace('#include <project_vertex>', '#include <project_vertex>\nvWp = (modelMatrix * vec4(transformed, 1.)).xyz;');
+        sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWp; uniform float uDis, uF;\n' + DISSOLVE)
+            .replace('void main() {', 'void main() {\n    if (fbm(vWp * uF) < uDis) discard;');
+    };
+    m.customProgramCacheKey = () => 'a14-dissolve';
+    return m;
+}
+
 // nat20: every face slides out along its own normal and turns, edges glowing, then snaps back together in a gold burst
 const nat20 = {
     key: 'a14-exploded-view', name: 'Exploded View', blurb: 'Every face slides out along its own normal and slowly turns like a diagram, glowing at the seams, then snaps back together and bursts into gold.',
-    dur: 2.4, impact: 1.45,
+    dur: 2.9, impact: 1.45,
     start(x) {
         const T = x.THREE; x.own = []; x.R = radius(x);
         const g = x.mesh.geometry.index ? x.mesh.geometry.toNonIndexed() : x.mesh.geometry, P = g.attributes.position, U = g.attributes.uv, mat = x.mesh.material;
@@ -76,7 +93,9 @@ const nat20 = {
             buckets.get(key).tris.push(t);
         }
         x.grp = new T.Group(); x.grp.position.copy(x.mesh.position); x.grp.quaternion.copy(x.mesh.quaternion); x.grp.scale.copy(x.mesh.scale); add(x, x.grp);
-        x.edgeMat = new T.LineBasicMaterial({ color: 0xff8a20, transparent: true, depthWrite: false, blending: T.AdditiveBlending }); x.pieces = []; x.geos = [];
+        // our own copies of the die's materials, so they can dissolve at the end
+        x.u = { dis: { value: -0.1 }, f: { value: 1.8 / x.R } }; x.dm = [].concat(mat).map((m) => dissolving(m.clone(), x.u));
+        x.edgeMat = dissolving(new T.LineBasicMaterial({ color: 0xff8a20, transparent: true, depthWrite: false, blending: T.AdditiveBlending }), x.u); x.pieces = []; x.geos = [];
         // the die's churning molten overlay goes with every face (our own copy, same live texture), and fades away while they turn
         const ov = x.mesh.children.find((c) => c.isMesh)?.material;
         if (ov) { x.churn = ov.clone(); x.churn.op0 = ov.opacity; Object.assign(x.churn, { polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }); }
@@ -85,7 +104,7 @@ const nat20 = {
             for (const t of f.tris) for (let i = 0; i < 3; i++) { c.fromBufferAttribute(P, t * 3 + i); pos.push(c.x, c.y, c.z); if (U) uv.push(U.getX(t * 3 + i), U.getY(t * 3 + i)); nor.push(f.n.x, f.n.y, f.n.z); }
             const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); geo.setAttribute('normal', new T.Float32BufferAttribute(nor, 3)); if (U) geo.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
             geo.computeBoundingBox(); const cen = geo.boundingBox.getCenter(new T.Vector3()); geo.translate(-cen.x, -cen.y, -cen.z);
-            const piece = new T.Mesh(geo, Array.isArray(mat) ? mat[f.mi] : mat), eg = new T.EdgesGeometry(geo, 5);
+            const piece = new T.Mesh(geo, x.dm[Array.isArray(mat) ? f.mi : 0]), eg = new T.EdgesGeometry(geo, 5);
             piece.add(new T.LineSegments(eg, x.edgeMat)); if (x.churn) piece.add(new T.Mesh(geo, x.churn)); piece.userData = { cen, n: f.n, dir: Math.random() < 0.5 ? 1 : -1 }; x.grp.add(piece); x.pieces.push(piece); x.geos.push(geo, eg);
         }
         if (g !== x.mesh.geometry) x.geos.push(g);
@@ -110,9 +129,10 @@ const nat20 = {
         // the snap: a gold flash, an expanding ring and sparks
         x.gold.scale.setScalar(R * (1 + 4 * ease(bang))); x.gold.material.opacity = k > 0.6 ? 0.9 * Math.sin(Math.PI * Math.min(1, bang * 1.3)) : 0;
         x.ring.scale.setScalar(Math.max(0.01, R * (0.8 + 4.5 * ease(bang)))); x.ring.material.opacity = k > 0.6 ? 1 - bang : 0;
+        const dis = at(k, 0.74, 0.97); x.u.dis.value = 0.15 + 0.75 * dis; // the noise sits mostly between 0.15 and 0.9, so this spreads the holes over the whole fade
         x.sparks.move(bang * nat20.dur * 0.4); x.sparks.material.opacity = k > 0.6 ? 1 - bang : 0;
     },
-    end(x) { x.mesh.visible = true; for (const g of x.geos || []) g.dispose(); x.edgeMat.dispose(); x.churn?.dispose(); x.grp.clear(); clean(x); },
+    end(x) { x.mesh.visible = true; for (const g of x.geos || []) g.dispose(); x.edgeMat.dispose(); x.dm?.forEach((m) => m.dispose()); x.churn?.dispose(); x.grp.clear(); clean(x); },
 };
 
 // mid: shrinks inside a narrowing ring of fire on the table that closes over it
