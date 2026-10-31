@@ -35,6 +35,7 @@ Azure Bluet
 Baked Potato
 Bamboo
 Bamboo Button
+Bamboo Camp Map
 Bamboo Door
 Bamboo Fence
 Bamboo Fence Gate
@@ -75,6 +76,7 @@ Birch Button
 Birch Door
 Birch Fence
 Birch Fence Gate
+Birch Forest Camp Map
 Birch Hanging Sign
 Birch Leaves
 Birch Log
@@ -94,6 +96,9 @@ Black Candle
 Black Carpet
 Black Concrete
 Black Concrete Powder
+Black Concrete Slab
+Black Concrete Stairs
+Black Cushion
 Black Dye
 Black Glazed Terracotta
 Black Harness
@@ -101,6 +106,8 @@ Black Stained Glass
 Black Stained Glass Pane
 Black Terracotta
 Black Wool
+Black Wool Slab
+Black Wool Stairs
 Blackstone
 Blackstone Slab
 Blackstone Stairs
@@ -132,6 +139,9 @@ Blue Candle
 Blue Carpet
 Blue Concrete
 Blue Concrete Powder
+Blue Concrete Slab
+Blue Concrete Stairs
+Blue Cushion
 Blue Dye
 Blue Egg
 Blue Glazed Terracotta
@@ -142,6 +152,8 @@ Blue Stained Glass
 Blue Stained Glass Pane
 Blue Terracotta
 Blue Wool
+Blue Wool Slab
+Blue Wool Stairs
 Bone
 Bone Block
 Bone Meal
@@ -169,6 +181,9 @@ Brown Candle
 Brown Carpet
 Brown Concrete
 Brown Concrete Powder
+Brown Concrete Slab
+Brown Concrete Stairs
+Brown Cushion
 Brown Dye
 Brown Egg
 Brown Glazed Terracotta
@@ -179,6 +194,8 @@ Brown Stained Glass
 Brown Stained Glass Pane
 Brown Terracotta
 Brown Wool
+Brown Wool Slab
+Brown Wool Stairs
 Brush
 Bubble Coral
 Bubble Coral Block
@@ -191,6 +208,8 @@ Bucket of Salmon
 Bucket of Tadpole
 Bucket of Tropical Fish
 Bundle
+Buried Ancient City Map
+Buried Mineshaft Map
 Buried Treasure Map 
 Bush
 Cactus
@@ -215,6 +234,7 @@ Cherry Button
 Cherry Door
 Cherry Fence
 Cherry Fence Gate
+Cherry Grove Camp Map
 Cherry Hanging Sign
 Cherry Leaves
 Cherry Log
@@ -338,6 +358,9 @@ Cyan Candle
 Cyan Carpet
 Cyan Concrete
 Cyan Concrete Powder
+Cyan Concrete Slab
+Cyan Concrete Stairs
+Cyan Cushion
 Cyan Dye
 Cyan Glazed Terracotta
 Cyan Harness
@@ -345,8 +368,11 @@ Cyan Stained Glass
 Cyan Stained Glass Pane
 Cyan Terracotta
 Cyan Wool
+Cyan Wool Slab
+Cyan Wool Stairs
 Damaged Anvil
 Dandelion
+Dappled Forest Camp Map
 Dark Oak Boat
 Dark Oak Button
 Dark Oak Door
@@ -401,6 +427,7 @@ Deepslate Tile Slab
 Deepslate Tile Stairs
 Deepslate Tile Wall
 Deepslate Tiles
+Desert Pyramid Map
 Desert Village Map
 Detector Rail
 Diamond
@@ -511,6 +538,7 @@ Fishing Rod
 Fletching Table
 Flint
 Flint and Steel
+Flower Forest Camp Map
 Flower Pot
 Flowering Azalea
 Flowering Azalea Leaves
@@ -566,6 +594,9 @@ Gray Candle
 Gray Carpet
 Gray Concrete
 Gray Concrete Powder
+Gray Concrete Slab
+Gray Concrete Stairs
+Gray Cushion
 Gray Dye
 Gray Glazed Terracotta
 Gray Harness
@@ -573,6 +604,8 @@ Gray Stained Glass
 Gray Stained Glass Pane
 Gray Terracotta
 Gray Wool
+Gray Wool Slab
+Gray Wool Stairs
 Green Banner
 Green Bed
 Green Bundle
@@ -580,6 +613,9 @@ Green Candle
 Green Carpet
 Green Concrete
 Green Concrete Powder
+Green Concrete Slab
+Green Concrete Stairs
+Green Cushion
 Green Dye
 Green Glazed Terracotta
 Green Harness
@@ -587,6 +623,8 @@ Green Stained Glass
 Green Stained Glass Pane
 Green Terracotta
 Green Wool
+Green Wool Slab
+Green Wool Stairs
 Grindstone
 Gunpowder
 Hanging Roots
@@ -629,7 +667,7 @@ Jukebox
 Jungle Boat
 Jungle Button
 Jungle Door
-Jungle Explorer Map
+Jungle Pyramid Map
 Jungle Fence
 Jungle Fence Gate
 Jungle Hanging Sign
@@ -669,6 +707,9 @@ Light Blue Candle
 Light Blue Carpet
 Light Blue Concrete
 Light Blue Concrete Powder
+Light Blue Concrete Slab
+Light Blue Concrete Stairs
+Light Blue Cushion
 Light Blue Dye
 Light Blue Glazed Terracotta
 Light Blue Harness
@@ -676,6 +717,8 @@ Light Blue Stained Glass
 Light Blue Stained Glass Pane
 Light Blue Terracotta
 Light Blue Wool
+Light Blue Wool Slab
+Light Blue Wool Stairs
 Light Gray Banner
 Light Gray Bed
 Light Gray Bundle
@@ -683,6 +726,9 @@ Light Gray Candle
 Light Gray Carpet
 Light Gray Concrete
 Light Gray Concrete Powder
+Light Gray Concrete Slab
+Light Gray Concrete Stairs
+Light Gray Cushion
 Light Gray Dye
 Light Gray Glazed Terracotta
 Light Gray Harness
@@ -690,6 +736,8 @@ Light Gray Stained Glass
 Light Gray Stained Glass Pane
 Light Gray Terracotta
 Light Gray Wool
+Light Gray Wool Slab
+Light Gray Wool Stairs
 Light Weighted Pressure Plate
 Lightning Rod
 Lilac
@@ -702,6 +750,9 @@ Lime Candle
 Lime Carpet
 Lime Concrete
 Lime Concrete Powder
+Lime Concrete Slab
+Lime Concrete Stairs
+Lime Cushion
 Lime Dye
 Lime Glazed Terracotta
 Lime Harness
@@ -709,6 +760,8 @@ Lime Stained Glass
 Lime Stained Glass Pane
 Lime Terracotta
 Lime Wool
+Lime Wool Slab
+Lime Wool Stairs
 Lodestone
 Lodestone Compass
 Loom
@@ -720,6 +773,9 @@ Magenta Candle
 Magenta Carpet
 Magenta Concrete
 Magenta Concrete Powder
+Magenta Concrete Slab
+Magenta Concrete Stairs
+Magenta Cushion
 Magenta Dye
 Magenta Glazed Terracotta
 Magenta Harness
@@ -727,6 +783,8 @@ Magenta Stained Glass
 Magenta Stained Glass Pane
 Magenta Terracotta
 Magenta Wool
+Magenta Wool Slab
+Magenta Wool Stairs
 Magma Block
 Magma Cream
 Mangrove Boat
@@ -848,7 +906,7 @@ Oak Trapdoor
 Oak Wood
 Observer
 Obsidian
-Ocean Explorer Map
+Ocean Monument Map
 Ochre Froglight
 Ominous Banner
 Ominous Trial Key
@@ -860,14 +918,20 @@ Orange Candle
 Orange Carpet
 Orange Concrete
 Orange Concrete Powder
+Orange Concrete Slab
+Orange Concrete Stairs
+Orange Cushion
 Orange Dye
 Orange Glazed Terracotta
 Orange Harness
+Orange Poplar Leaves
 Orange Stained Glass
 Orange Stained Glass Pane
 Orange Terracotta
 Orange Tulip
 Orange Wool
+Orange Wool Slab
+Orange Wool Stairs
 Oxeye Daisy
 Oxidized Chiseled Copper
 Oxidized Copper
@@ -887,6 +951,7 @@ Oxidized Lightning Rod
 Packed Ice
 Packed Mud
 Painting
+Pale Garden Camp Map
 Pale Hanging Moss
 Pale Moss Block
 Pale Moss Carpet
@@ -920,6 +985,9 @@ Pink Candle
 Pink Carpet
 Pink Concrete
 Pink Concrete Powder
+Pink Concrete Slab
+Pink Concrete Stairs
+Pink Cushion
 Pink Dye
 Pink Glazed Terracotta
 Pink Harness
@@ -929,6 +997,8 @@ Pink Stained Glass Pane
 Pink Terracotta
 Pink Tulip
 Pink Wool
+Pink Wool Slab
+Pink Wool Stairs
 Piston
 Pitcher Plant
 Pitcher Pod
@@ -964,6 +1034,23 @@ Polished Tuff
 Polished Tuff Slab
 Polished Tuff Stairs
 Polished Tuff Wall
+Poplar Boat
+Poplar Boat with Chest
+Poplar Button
+Poplar Door
+Poplar Fence
+Poplar Fence Gate
+Poplar Hanging Sign
+Poplar Log
+Poplar Planks
+Poplar Pressure Plate
+Poplar Sapling
+Poplar Shelf
+Poplar Sign
+Poplar Slab
+Poplar Stairs
+Poplar Trapdoor
+Poplar Wood
 Popped Chorus Fruit
 Poppy
 Potato
@@ -989,6 +1076,9 @@ Purple Candle
 Purple Carpet
 Purple Concrete
 Purple Concrete Powder
+Purple Concrete Slab
+Purple Concrete Stairs
+Purple Cushion
 Purple Dye
 Purple Glazed Terracotta
 Purple Harness
@@ -996,6 +1086,8 @@ Purple Stained Glass
 Purple Stained Glass Pane
 Purple Terracotta
 Purple Wool
+Purple Wool Slab
+Purple Wool Stairs
 Purpur Block
 Purpur Pillar
 Purpur Slab
@@ -1026,6 +1118,9 @@ Red Candle
 Red Carpet
 Red Concrete
 Red Concrete Powder
+Red Concrete Slab
+Red Concrete Stairs
+Red Cushion
 Red Dye
 Red Glazed Terracotta
 Red Harness
@@ -1035,16 +1130,20 @@ Red Nether Brick Slab
 Red Nether Brick Stairs
 Red Nether Brick Wall
 Red Nether Bricks
+Red Poplar Leaves
 Red Sand
 Red Sandstone
 Red Sandstone Slab
 Red Sandstone Stairs
 Red Sandstone Wall
+Red Shrub
 Red Stained Glass
 Red Stained Glass Pane
 Red Terracotta
 Red Tulip
 Red Wool
+Red Wool Slab
+Red Wool Stairs
 Redstone Comparator
 Redstone Dust
 Redstone Lamp
@@ -1078,6 +1177,7 @@ Sea Lantern
 Sea Pickle
 Seagrass
 Shears
+Shelf Mushroom
 Shield
 Short Dry Grass
 Short Grass (Grass)
@@ -1153,6 +1253,7 @@ Stone Spear
 Stone Stairs
 Stone Sword
 Stonecutter
+Straw Bed
 String
 Stripped Acacia Log
 Stripped Acacia Wood
@@ -1172,6 +1273,8 @@ Stripped Oak Log
 Stripped Oak Wood
 Stripped Pale Oak Log
 Stripped Pale Oak Wood
+Stripped Poplar Log
+Stripped Poplar Wood
 Stripped Spruce Log
 Stripped Spruce Wood
 Stripped Warped Hyphae
@@ -1180,7 +1283,8 @@ Sugar
 Sugar Cane
 Sunflower
 Suspicious Stew
-Swamp Explorer Map
+Swamp Camp Map
+Swamp Hut Map
 Sweet Berries
 Taiga Village Map
 Tall Dry Grass
@@ -1197,7 +1301,7 @@ Torchflower
 Torchflower Seeds
 Totem of Undying
 Trapped Chest
-Trial Explorer Map
+Buried Trial Chambers Map
 Trial Key
 Trident
 Tripwire Hook
@@ -1219,6 +1323,7 @@ Turtle Shell
 Twisting Vines
 Verdant Froglight
 Vines
+Warm Ocean Ruins Map
 Warped Button
 Warped Door
 Warped Fence
@@ -1325,6 +1430,9 @@ White Candle
 White Carpet
 White Concrete
 White Concrete Powder
+White Concrete Slab
+White Concrete Stairs
+White Cushion
 White Dye
 White Glazed Terracotta
 White Harness
@@ -1333,8 +1441,11 @@ White Stained Glass Pane
 White Terracotta
 White Tulip
 White Wool
+White Wool Slab
+White Wool Stairs
 Wildflowers
 Wind Charge
+Windswept Forest Camp Map
 Wither Rose
 Wither Skeleton Skull
 Wolf Armor
@@ -1344,7 +1455,7 @@ Wooden Pickaxe
 Wooden Shovel
 Wooden Spear
 Wooden Sword
-Woodland Explorer Map
+Woodland Mansion Map
 Written Book
 Yellow Banner
 Yellow Bed
@@ -1353,13 +1464,19 @@ Yellow Candle
 Yellow Carpet
 Yellow Concrete
 Yellow Concrete Powder
+Yellow Concrete Slab
+Yellow Concrete Stairs
+Yellow Cushion
 Yellow Dye
 Yellow Glazed Terracotta
 Yellow Harness
+Yellow Poplar Leaves
 Yellow Stained Glass
 Yellow Stained Glass Pane
 Yellow Terracotta
 Yellow Wool
+Yellow Wool Slab
+Yellow Wool Stairs
 Zombie Head
 Bolt Armor Trim
 Coast Armor Trim
