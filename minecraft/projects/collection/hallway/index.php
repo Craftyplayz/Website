@@ -21,14 +21,16 @@ $n = count($data['entries']);
     <main class="page hw" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">Collection Hallway</h1>
-        <p class="page-lede">Walk the <?= number_format($n) ?> chests of the <a href="/minecraft/projects/collection/">collection</a> in 3D, find any item and check a schematic against the layout.</p>
+        <p class="page-lede">Walk the <?= number_format($n) ?> chests of the <a href="/minecraft/projects/collection/">collection</a> in 3D, find any item and check a schematic or your world save against the layout.</p>
 
         <div class="bar hw-bar">
             <button type="button" class="btn primary" id="hw-pick">Check a schematic</button>
-            <input type="file" id="hw-file" accept=".schem,.litematic,.nbt" hidden>
+            <input type="file" id="hw-file" accept=".schem,.litematic,.nbt,.mca" multiple hidden>
+            <button type="button" class="btn" id="hw-world">Check a world folder</button>
+            <input type="file" id="hw-dir" webkitdirectory hidden>
             <span class="muted" id="hw-checked" hidden></span>
             <button type="button" class="btn small" id="hw-clear" hidden>Clear</button>
-            <span class="muted hw-help">.schem, .litematic or structure .nbt, made standing at -636 36 -626. It's read in your browser, nothing is uploaded.</span>
+            <span class="muted hw-help">A .schem, .litematic or structure .nbt made standing at -636 36 -626, or the world folder (the one with level.dat; save or close the world first). Everything is read in your browser, nothing is uploaded.</span>
         </div>
         <p class="note" id="hw-note" hidden></p>
 

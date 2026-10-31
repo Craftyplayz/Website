@@ -71,6 +71,36 @@
         return { format, containers: out, note };
     }
 
+    // world saves: the hallway's box for n chests, and the region files (r.X.Z.mca, 512 x 512 blocks) it crosses
+    function bounds(n) { return { x0: -629, x1: layoutPos(n - 1).x + 1, y0: 36, y1: 39, z0: -630, z1: -622 }; }
+    function regionsFor(n) {
+        const b = bounds(n), out = [];
+        for (let rx = Math.floor(b.x0 / 512); rx <= Math.floor(b.x1 / 512); rx++) for (let rz = Math.floor(b.z0 / 512); rz <= Math.floor(b.z1 / 512); rz++) out.push([rx, rz]);
+        return out;
+    }
+    // a region file: 1,024 four-byte slots (sector offset, sector count), then each chunk as length, compression type, NBT
+    // only the chunks under the hallway are unpacked; block entity x, y, z are world positions
+    async function readRegion(buf, rx, rz, n) {
+        const Reader = nbtReader(), v = new DataView(buf), b = bounds(n), out = [], zip = { 1: 'gzip', 2: 'deflate' };
+        if (buf.byteLength < 8192) throw Error(`r.${rx}.${rz}.mca isn't a region file.`);
+        for (let cx = Math.max(b.x0 >> 4, rx * 32); cx <= Math.min(b.x1 >> 4, rx * 32 + 31); cx++) {
+            for (let cz = Math.max(b.z0 >> 4, rz * 32); cz <= Math.min(b.z1 >> 4, rz * 32 + 31); cz++) {
+                const off = (v.getUint32(4 * ((cx & 31) + (cz & 31) * 32)) >>> 8) * 4096;
+                if (!off) continue; // never generated
+                const len = v.getUint32(off), type = v.getUint8(off + 4);
+                if (type === 4) throw Error("This world saves chunks with LZ4, which the browser can't read. Set region-file-compression=deflate in server.properties, or open the world in single player once.");
+                if (!zip[type] && type !== 3) throw Error(`Chunk ${cx} ${cz} in r.${rx}.${rz}.mca uses an unknown compression (${type}).`);
+                let data = buf.slice(off + 5, off + 4 + len);
+                if (zip[type]) data = await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream(zip[type]))).arrayBuffer();
+                const tag = new Reader(data).read(), level = tag.Level || tag; // before 1.18 everything sat under Level
+                for (const t of level.block_entities || level.TileEntities || []) {
+                    if (t.x >= b.x0 && t.x <= b.x1 && t.y >= b.y0 && t.y <= b.y1 && t.z >= b.z0 && t.z <= b.z1) add(out, t.x, t.y, t.z, t.id, t);
+                }
+            }
+        }
+        return out;
+    }
+
     function check(containers, entries) {
         const key = (x, y, z) => x + ',' + y + ',' + z;
         const at = new Map(containers.map((c) => [key(c.x, c.y, c.z), c]));
@@ -117,6 +147,6 @@
         return { chests, extra, counts };
     }
 
-    const api = { readContainers, check, layoutPos, ANCHOR };
+    const api = { readContainers, readRegion, regionsFor, check, layoutPos, ANCHOR };
     if (typeof module !== 'undefined') module.exports = api; else root.HallwayCheck = api;
 })(typeof window !== 'undefined' ? window : globalThis);

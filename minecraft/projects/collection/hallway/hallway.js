@@ -319,21 +319,41 @@ function showResult() {
 }
 $('#hw-lists').addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) { go(+b.dataset.go); $('#hw-view').scrollIntoView({ behavior: 'smooth', block: 'center' }); } });
 $('#hw-pick').addEventListener('click', () => $('#hw-file').click());
-$('#hw-file').addEventListener('change', async (e) => {
-    const f = e.target.files[0]; e.target.value = '';
-    if (!f) return;
-    const b = $('#hw-pick'); b.disabled = true; b.textContent = 'Checking...';
+$('#hw-world').addEventListener('click', () => $('#hw-dir').click());
+// overworld region files only: the nether and end have their own region folders, entities/ and poi/ reuse the r.X.Z.mca names
+const overworld = (f) => /^r\.-?\d+\.-?\d+\.mca$/.test(f.name) && !/(^|\/)(DIM-?1|the_nether|the_end|entities|poi)\//i.test(f.webkitRelativePath || '');
+async function readFiles(files) {
+    const mca = files.filter(overworld);
+    if (!mca.length) {
+        if (files.length > 1) throw Error('There are no region files (r.X.Z.mca) in there. Pick the world folder, the one with level.dat in it.');
+        return { file: files[0].name, ...await HallwayCheck.readContainers(await files[0].arrayBuffer()) };
+    }
+    const need = HallwayCheck.regionsFor(E.length), containers = [], miss = [];
+    for (const [rx, rz] of need) {
+        const f = mca.find((f) => f.name === `r.${rx}.${rz}.mca`);
+        if (f) containers.push(...await HallwayCheck.readRegion(await f.arrayBuffer(), rx, rz, E.length));
+        else miss.push(`r.${rx}.${rz}.mca`);
+    }
+    if (miss.length === need.length) throw Error(`The hallway's region files aren't there (${miss.join(', ')}).`);
+    return { file: (mca[0].webkitRelativePath || '').split('/')[0] || 'region files', format: 'world', containers, note: miss.length ? `${miss.join(', ')} ${miss.length > 1 ? "weren't there, so the chests in them" : "wasn't there, so the chests in it"} show as missing.` : '' };
+}
+async function run(input, b) {
+    const files = [...input.files]; input.value = '';
+    if (!files.length) return;
+    const was = b.textContent; b.disabled = true; b.textContent = 'Checking...';
     try {
-        const { format, containers, note } = await HallwayCheck.readContainers(await f.arrayBuffer());
+        const { file, format, containers, note } = await readFiles(files);
         const r = HallwayCheck.check(containers, E);
-        result = { when: Date.now(), file: f.name, format, note, ...r };
+        result = { when: Date.now(), file, format, note, ...r };
         store.set(KEY, result);
         showResult();
         toast(`Checked ${containers.length.toLocaleString()} chests: ${r.counts.complete.toLocaleString()} complete.`, 'ok');
     } catch (err) {
         toast(err.message || "Couldn't read that file.", 'err');
-    } finally { b.disabled = false; b.textContent = 'Check a schematic'; }
-});
+    } finally { b.disabled = false; b.textContent = was; }
+}
+$('#hw-file').addEventListener('change', (e) => run(e.target, $('#hw-pick')));
+$('#hw-dir').addEventListener('change', (e) => run(e.target, $('#hw-world')));
 $('#hw-clear').addEventListener('click', () => { result = null; try { localStorage.removeItem(KEY); } catch (e) { } showResult(); target(look >= 0 ? look : sel); });
 
 /* ---------- controls ---------- */
