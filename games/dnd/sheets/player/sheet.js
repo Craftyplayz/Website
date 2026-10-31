@@ -1620,7 +1620,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         dice3d().then(async (m) => m.throwDice(groups, { style: await chosenStyle(m), accent: css.getPropertyValue('--btn').trim() || '#5b3f8f', sound: !C.view.noSound }))
             .then(card, () => { dice3dP = null; quick(); });
     }
-    // shortcut: dice3d.js and dice/choice.js reuse sheet.js's ?v= version, so a change to either alone needs sheet.js touched too (last: coins dissolve, 31 Oct 2026)
+    // shortcut: dice3d.js and dice/choice.js reuse sheet.js's ?v= version, so a change to either alone needs sheet.js touched too (last: coins fly in from any side, 31 Oct 2026)
     let dice3dP = null;
     const dice3d = () => dice3dP || (dice3dP = import(new URL('/games/dnd/dice/dice3d.js' + (($('script[src*="/sheet.js"]')?.src || '').match(/\?v=\d+/) || [''])[0], location.href).href));
     function drawTray() {

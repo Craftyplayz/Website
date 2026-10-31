@@ -625,11 +625,14 @@ export async function throwDice(groups, { style = 'purple', accent = '#5b3f8f', 
     const coinT = kinds.includes('coin') ? await coinFor(st.coin) : null;
     const build = (kind) => (kind === 'coin' ? coinT : buildDie(kind, st));
     // how each die starts: spread along the edge (i % 4) and inward (i % 3), then thrown at a spot near the middle;
-    // a coin is flipped instead: tossed up from near the bottom of the screen, spinning end over end
+    // a coin is flipped instead: tossed up from the same random edge spot, flying across to land past the middle, spinning end over end
     const starts = kinds.map((kind, i) => {
-        if (kind === 'coin') { const x = (Math.random() - 0.5) * hw * 0.4 + (i - (kinds.length - 1) / 2) * 3, z = hd - 3, sp = Math.random() < 0.5 ? -1 : 1;
-            return { pos: [x, 1.5, z], vel: [(Math.random() - 0.5) * 3, 24 + Math.random() * 5, -(hd * 0.55 + Math.random() * 3)],
-                spin: [sp * (32 + Math.random() * 14), (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3], turn: [Math.random() < 0.5 ? 0 : Math.PI, Math.random() * 6, 0] }; }
+        if (kind === 'coin') { const along = (i - (kinds.length - 1) / 2) * 3, x = fit(cx * s - cx * 3 - cz * along, hw), z = fit(cz * s - cz * 3 + cx * along, hd);
+            const vy = 24 + Math.random() * 5, air = (2 * vy) / 50, far = 0.1 + Math.random() * 0.35; // air: seconds up and down again under the table's gravity
+            const tx = -cx * s * far + (Math.random() - 0.5) * hw * 0.3, tz = -cz * s * far + (Math.random() - 0.5) * hd * 0.3;
+            const dx = tx - x, dz = tz - z, d = Math.hypot(dx, dz) || 1, sp = Math.random() < 0.5 ? -1 : 1, flip = sp * (32 + Math.random() * 14);
+            return { pos: [x, 1.5, z], vel: [dx / air, vy, dz / air],
+                spin: [(dz / d) * flip + (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3, (-dx / d) * flip + (Math.random() - 0.5) * 3], turn: [Math.random() < 0.5 ? 0 : Math.PI, Math.random() * 6, 0] }; }
         const along = ((i % 4) - 1.5) * 1.6, inward = 2 + (i % 3) * 1.2;
         const x = fit(cx * s - cx * inward - cz * along, hw), z = fit(cz * s - cz * inward + cx * along, hd);
         const sp = 0.9 + Math.random() * 0.5, tx = (Math.random() - 0.5) * hw * 0.5, tz = (Math.random() - 0.5) * hd * 0.5;
