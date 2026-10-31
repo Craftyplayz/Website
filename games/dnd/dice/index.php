@@ -20,7 +20,7 @@ $sets = [
 $classic = ['purple' => 'Purple', 'gold' => 'Gold', 'silver' => 'Silver', 'obsidian' => 'Obsidian', 'ruby' => 'Ruby', 'wood' => 'Wood', 'marble' => 'Marble', 'ivory' => 'Ivory'];
 $v = fn($f) => filemtime(__DIR__ . '/' . $f);
 $data = [
-    'engine' => '../dice3d.js?v=' . filemtime(__DIR__ . '/../dice3d.js'),
+    'engine' => './dice3d.js?v=' . filemtime(__DIR__ . '/dice3d.js'),
     'choice' => './choice.js?v=' . $v('choice.js'),
     'sounds' => './sounds.js?v=' . $v('sounds.js'),
     // coin sound profiles (flip, bounces and settle), a couple to a file

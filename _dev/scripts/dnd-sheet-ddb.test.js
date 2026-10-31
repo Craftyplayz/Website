@@ -1,6 +1,6 @@
-// Checks games/dnd/sheet-dev/ddb.js with a tiny made-up D&D Beyond character.   usage: node _dev/scripts/dnd-sheet-ddb.test.js
+// Checks games/dnd/sheets/player-dev/ddb.js with a tiny made-up D&D Beyond character.   usage: node _dev/scripts/dnd-sheet-ddb.test.js
 const assert = require('assert');
-require('../../games/dnd/sheet-dev/ddb.js');
+require('../../games/dnd/sheets/player-dev/ddb.js');
 const stat = (id, value) => ({ id, value });
 const C = {
     id: 1, name: 'Test', readonlyUrl: 'https://dndbeyond.com/characters/1', alignmentId: 1, age: 30,

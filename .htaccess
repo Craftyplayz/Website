@@ -33,7 +33,14 @@ RedirectMatch 301 ^/php/layout\.js$ /assets/js/site.js
 RedirectMatch 301 ^/plan(\.html)?$ /design/
 RedirectMatch 301 ^/games/kelly-pool(/.*)?$ /games/pub-games/kelly-pool$1
 # The dice sound mockups joined the Dice Sets page
-RedirectMatch 301 ^/games/dnd/sheet/dice/sounds(/(index\.php)?)?$ /games/dnd/sheet/dice/
+RedirectMatch 301 ^/games/dnd/sheet/dice/sounds(/(index\.php)?)?$ /games/dnd/dice/
+# D&D sheets and dice got their own folders (2026-10-31); dice before sheet so the longer paths win
+RedirectMatch 301 ^/games/dnd/sheet/dice(/.*)?$ /games/dnd/dice$1
+RedirectMatch 301 ^/games/dnd/sheet/test(/.*)?$ /games/dnd/dice/test$1
+RedirectMatch 301 ^/games/dnd/sheet/dice3d\.js$ /games/dnd/dice/dice3d.js
+RedirectMatch 301 ^/games/dnd/sheet-dev(/.*)?$ /games/dnd/sheets/player-dev$1
+RedirectMatch 301 ^/games/dnd/sheet(/.*)?$ /games/dnd/sheets/player$1
+RedirectMatch 301 ^/games/dnd/sheets/?$ /games/dnd/
 # Duplicate folders that were removed
 RedirectMatch 301 ^/(Code/)?minecraft/items_1\.21\.11/(.*)$ /minecraft/tools/item-list/$2
 RedirectMatch 301 ^/Code/minecraft/(.*)$ /minecraft/$1
