@@ -159,6 +159,34 @@ function expectLayout(r, label) {
     expectLayout(H.check(moved.containers, entries), 'moved v2');
     console.log('collection-hallway: v2 copied at another spot gives a note');
 
+    // a world save: region file r.-2.-2.mca, one chunk zlib (type 2), the other gzip (type 1), block entities at world positions
+    assert.deepStrictEqual(H.regionsFor(entries.length), [[-2, -2]]);
+    assert.deepStrictEqual(H.regionsFor(1596), [[-2, -2], [-1, -2], [0, -2], [1, -2]], 'the full hallway crosses four regions');
+    const chunks = new Map();
+    for (const b of world) {
+        const k = (b[0][0] >> 4) + ',' + (b[0][2] >> 4);
+        if (!chunks.has(k)) chunks.set(k, []);
+        chunks.get(k).push(C({ x: I(b[0][0]), y: I(b[0][1]), z: I(b[0][2]), ...(b[1] ? { id: Str(b[1]) } : {}), Items: items(b) }));
+    }
+    const head = Buffer.alloc(8192), body = [];
+    let sector = 2, type = 2;
+    for (const [k, list_] of chunks) {
+        const [cx, cz] = k.split(',').map(Number), nbt = Buffer.concat([Buffer.from([10]), payload(['string', '']), payload(C({ DataVersion: I(4440), block_entities: list(list_) }))]);
+        const z = type === 2 ? zlib.deflateSync(nbt) : zlib.gzipSync(nbt), n = Math.ceil((z.length + 5) / 4096), c = Buffer.alloc(n * 4096);
+        c.writeUInt32BE(z.length + 1); c[4] = type; z.copy(c, 5);
+        head.writeUInt32BE((sector << 8) | n, 4 * ((cx & 31) + (cz & 31) * 32));
+        body.push(c); sector += n; type = type === 2 ? 1 : 2;
+    }
+    const mca = Buffer.concat([head, ...body]);
+    fs.writeFileSync(path.join(out, 'r.-2.-2.mca'), mca);
+    const fromWorld = await H.readRegion(mca.buffer.slice(mca.byteOffset, mca.byteOffset + mca.length), -2, -2, entries.length);
+    assert.strictEqual(fromWorld.length, world.length - 2, 'the furnace and the chest outside the hallway are skipped');
+    const rw = H.check(fromWorld, entries);
+    assert.deepStrictEqual(rw.extra, []);
+    expectLayout({ ...rw, extra: [{ x: -640, y: 36, z: -640, id: 'minecraft:chest', items: [[-1, 'dirt', 64], [4, 'firework_rocket', 16]] }] }, 'region');
+    await assert.rejects(H.readRegion(new ArrayBuffer(100), -2, -2, entries.length), /isn't a region file/);
+    console.log('collection-hallway: world region file passed');
+
     await assert.rejects(H.readContainers(file(C({ Hello: Str('world') }))), { message: "This file isn't a .schem, .litematic or structure .nbt schematic." });
     await assert.rejects(H.readContainers(new TextEncoder().encode('not nbt at all').buffer), /isn't a \.schem/);
     console.log('collection-hallway: unknown files are refused; all tests passed');
