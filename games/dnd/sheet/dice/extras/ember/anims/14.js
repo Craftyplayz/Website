@@ -80,7 +80,7 @@ export function dissolving(m, u) {
 // nat20: every face slides out along its own normal and turns, edges glowing, then snaps back together in a gold burst
 const nat20 = {
     key: 'a14-exploded-view', name: 'Exploded View', blurb: 'Every face slides out along its own normal and slowly turns like a diagram, glowing at the seams, then snaps back together and bursts into gold.',
-    dur: 3.4, impact: 1.45,
+    dur: 4.0, impact: 1.45,
     start(x) {
         const T = x.THREE; x.own = []; x.R = radius(x);
         const g = x.mesh.geometry.index ? x.mesh.geometry.toNonIndexed() : x.mesh.geometry, P = g.attributes.position, U = g.attributes.uv, mat = x.mesh.material;
@@ -132,7 +132,7 @@ const nat20 = {
         // the snap: a gold flash, an expanding ring and sparks
         x.gold.scale.setScalar(R * (1 + 4 * ease(bang))); x.gold.material.opacity = k > 0.6 ? 0.9 * Math.sin(Math.PI * Math.min(1, bang * 1.3)) : 0;
         x.ring.scale.setScalar(Math.max(0.01, R * (0.8 + 4.5 * ease(bang)))); x.ring.material.opacity = k > 0.6 ? 1 - bang : 0;
-        const dis = at(sec, 2.6, 3.3); x.u.dis.value = 0.15 + 0.75 * dis; // the noise sits mostly between 0.15 and 0.9, so this spreads the holes over the whole fade
+        const dis = at(sec, 3.2, 3.9); x.u.dis.value = 0.15 + 0.75 * dis; // the noise sits mostly between 0.15 and 0.9, so this spreads the holes over the whole fade
         x.sparks.move(bang * 2.9 * 0.4); x.sparks.material.opacity = k > 0.6 ? 1 - bang : 0;
     },
     end(x) { x.mesh.visible = true; for (const g of x.geos || []) g.dispose(); x.edgeMat.dispose(); x.dm?.forEach((m) => m.dispose()); x.churn?.dispose(); x.grp.clear(); clean(x); },
