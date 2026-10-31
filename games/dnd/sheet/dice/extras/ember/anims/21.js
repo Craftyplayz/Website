@@ -205,10 +205,10 @@ const nat1 = {
             p.m.position.copy(p.b.position); p.m.quaternion.copy(p.b.quaternion);
             if (p.b.sleepState !== CANNON.Body.SLEEPING && (p.b.velocity.length() > 0.3 || p.b.angularVelocity.length() > 0.8)) still = false;
         }
-        // all settled: wait two and a half seconds, then fade (and always be gone before the exit ends)
+        // all settled: wait a second and a quarter, then dissolve (and always be gone before the exit ends)
         // (a chunk that never quite stops jittering counts as settled four seconds after the break)
         if ((!still || s < 0.4) && s < 4) x.calm = null; else x.calm ??= t;
-        const fade = Math.max(x.calm == null ? 0 : at(t, x.calm + 2.5, x.calm + 3.3), at(k, 0.9, 0.98));
+        const fade = Math.max(x.calm == null ? 0 : at(t, x.calm + 1.25, x.calm + 2.05), at(k, 0.9, 0.98));
         x.u.dis.value = fade > 0 ? 0.15 + 0.75 * fade : 0;
         if (fade > 0) for (const p of x.parts) p.m.castShadow = false; // a shadow can't show the holes, so it goes as they open
         if (fade >= 1 && !x.gone) { x.gone = true; for (const p of x.parts) { p.m.visible = false; x.world.removeBody(p.b); } }
