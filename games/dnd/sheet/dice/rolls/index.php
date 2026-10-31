@@ -28,8 +28,6 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
             <button type="button" class="btn" data-coin>Flip a coin</button>
             <span class="muted" id="qr-out" aria-live="polite"></span>
         </div>
-        <h1 class="page-title">Quick Rolls</h1>
-        <p class="page-lede">Rolls the Crafty Fire Dice preset from <a href="../">Dice Sets</a>, with its animations and sounds.</p>
     </main>
 
     <?php site_footer(null, false); ?>
