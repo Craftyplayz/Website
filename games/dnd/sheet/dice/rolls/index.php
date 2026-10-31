@@ -33,13 +33,14 @@ $v = fn($f) => filemtime(__DIR__ . '/' . $f);
     <?php site_footer(null, false); ?>
 
     <script type="module">
-        // the same engine and choice code the Dice Sets page and the Homebrew Sheet use, always with the Crafty Fire Dice preset (paths from dice/)
+        // the same engine and choice code the Dice Sets page and the Homebrew Sheet use, always with the Crafty Fire Dice preset, plus the gold coin and Pirate Doubloon sound (paths from dice/)
         const at = (key, url) => ({ key, url });
         const PRESET = { set: at('ember', './sets/ember.js'), sound: at('tungsten3', './sounds.js'),
             nat: { 1: at('a09-doom-bell', './natsounds/09.js'), 20: at('a02-bar-chime-bloom', './natsounds/02.js') },
             trails: [at('t06-glyph-prints', './extras/ember/trails/06.js'), at('t05-ash-fall', './extras/ember/trails/05.js'), at('t02-spark-spray', './extras/ember/trails/02.js'),
                 at('t05-smoke-plume', './extras/ember/trails/05.js'), at('t01-scorch-brands', './extras/ember/trails/01.js')],
-            anims: { 1: at('a21-shatter', './extras/ember/anims/21.js'), 20: at('a14-exploded-view', './extras/ember/anims/14.js'), mid: at('a34-ash-wind', './extras/ember/anims/34.js') } };
+            anims: { 1: at('a21-shatter', './extras/ember/anims/21.js'), 20: at('a14-exploded-view', './extras/ember/anims/14.js'), mid: at('a34-ash-wind', './extras/ember/anims/34.js') },
+            coin: 'gold-new', coinSound: at('c05-doubloon', './coinsounds/05.js') };
         const engine = import('../../dice3d.js?v=<?= $v('../../dice3d.js') ?>'), choice = import('../choice.js?v=<?= $v('../choice.js') ?>');
         const out = document.getElementById('qr-out');
         document.getElementById('qr-bar').addEventListener('click', async (e) => {
