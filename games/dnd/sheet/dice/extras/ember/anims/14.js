@@ -65,7 +65,8 @@ float vn(vec3 p){ vec3 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
     return mix(mix(mix(h1(i), h1(i + vec3(1, 0, 0)), f.x), mix(h1(i + vec3(0, 1, 0)), h1(i + vec3(1, 1, 0)), f.x), f.y),
                mix(mix(h1(i + vec3(0, 0, 1)), h1(i + vec3(1, 0, 1)), f.x), mix(h1(i + vec3(0, 1, 1)), h1(i + vec3(1, 1, 1)), f.x), f.y), f.z); }
 float fbm(vec3 p){ return .6 * vn(p) + .3 * vn(p * 2.1 + 5.) + .1 * vn(p * 4.3 + 9.); }`;
-function dissolving(m, u) {
+// m: a material to dissolve; u: { dis, f } uniforms, dis from about 0.15 (whole) to 0.9 (gone), f the noise scale. Shatter (21.js) uses it too.
+export function dissolving(m, u) {
     m.onBeforeCompile = (sh) => {
         sh.uniforms.uDis = u.dis; sh.uniforms.uF = u.f;
         sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWp;').replace('#include <project_vertex>', '#include <project_vertex>\nvWp = (modelMatrix * vec4(transformed, 1.)).xyz;');
@@ -79,7 +80,7 @@ function dissolving(m, u) {
 // nat20: every face slides out along its own normal and turns, edges glowing, then snaps back together in a gold burst
 const nat20 = {
     key: 'a14-exploded-view', name: 'Exploded View', blurb: 'Every face slides out along its own normal and slowly turns like a diagram, glowing at the seams, then snaps back together and bursts into gold.',
-    dur: 2.9, impact: 1.45,
+    dur: 3.4, impact: 1.45,
     start(x) {
         const T = x.THREE; x.own = []; x.R = radius(x);
         const g = x.mesh.geometry.index ? x.mesh.geometry.toNonIndexed() : x.mesh.geometry, P = g.attributes.position, U = g.attributes.uv, mat = x.mesh.material;
@@ -114,7 +115,9 @@ const nat20 = {
         x.ring.rotation.x = -Math.PI / 2; x.ring.position.set(x.mesh.position.x, 0.06, x.mesh.position.z); x.ring.scale.setScalar(0.01);
         x.sparks = rise(x, 40, 0xffd24a, 6, 4);
     },
-    tick(k, x) {
+    tick(K, x) {
+        // the burst runs on its own 2.9 s clock; the die then holds a moment before it dissolves
+        const sec = K * nat20.dur, k = Math.min(1, sec / 2.9);
         const R = x.R, out = ease(at(k, 0.05, 0.4)) * (1 - ease(at(k, 0.6, 0.66))), turn = io(at(k, 0.1, 0.6)), bang = at(k, 0.6, 1);
         for (const p of x.pieces) {
             const d = p.userData; p.position.copy(d.cen).addScaledVector(d.n, out * R * 0.9);
@@ -129,8 +132,8 @@ const nat20 = {
         // the snap: a gold flash, an expanding ring and sparks
         x.gold.scale.setScalar(R * (1 + 4 * ease(bang))); x.gold.material.opacity = k > 0.6 ? 0.9 * Math.sin(Math.PI * Math.min(1, bang * 1.3)) : 0;
         x.ring.scale.setScalar(Math.max(0.01, R * (0.8 + 4.5 * ease(bang)))); x.ring.material.opacity = k > 0.6 ? 1 - bang : 0;
-        const dis = at(k, 0.74, 0.97); x.u.dis.value = 0.15 + 0.75 * dis; // the noise sits mostly between 0.15 and 0.9, so this spreads the holes over the whole fade
-        x.sparks.move(bang * nat20.dur * 0.4); x.sparks.material.opacity = k > 0.6 ? 1 - bang : 0;
+        const dis = at(sec, 2.6, 3.3); x.u.dis.value = 0.15 + 0.75 * dis; // the noise sits mostly between 0.15 and 0.9, so this spreads the holes over the whole fade
+        x.sparks.move(bang * 2.9 * 0.4); x.sparks.material.opacity = k > 0.6 ? 1 - bang : 0;
     },
     end(x) { x.mesh.visible = true; for (const g of x.geos || []) g.dispose(); x.edgeMat.dispose(); x.dm?.forEach((m) => m.dispose()); x.churn?.dispose(); x.grp.clear(); clean(x); },
 };
