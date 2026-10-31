@@ -455,7 +455,9 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
         const d = dice.map((t, n) => (t.sign === '-' ? '− ' : n ? '+ ' : '') + t.src).join(' ');
         return { v: r.v ? `${d} ${r.v < 0 ? '−' : '+'} ${Math.abs(r.v)}` : d };
     }
-    const dmgText = (list, V) => list.filter((d) => d.dice || d.type).map((d) => `${resolve(d.dice, V)} ${d.type}`.trim()).join(' + ');
+    // dice for display and roll buttons: names filled in and the plain-number part worked out ("4d12 + (10 * 4)" -> "4d12 + 40")
+    const diceText = (s, V) => { const r = diceCalc(s, V); return r.err || r.v === undefined ? resolve(s, V) : String(r.v); };
+    const dmgText = (list, V) => list.filter((d) => d.dice || d.type).map((d) => `${diceText(d.dice, V)} ${d.type}`.trim()).join(' + ');
     const ordinal = (n) => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
     const dateText = (ms) => new Date(ms).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     let noteQ = '';
@@ -481,7 +483,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
     // a boxed roll button, or the plain rule link when click to roll is off
     const rollBtn = (text, roll, title, fallback) => (C.view.noRoll || !roll ? fallback
         : `<button type="button" class="hb-rollbtn" data-act="roll2" data-g="${roll.g}" data-m="${roll.m}" data-t="${esc(title)}" title="Roll ${esc(title.toLowerCase())}">${esc(text)}</button>`);
-    const dmgLinks = (dmg, V, name = '') => dmg.filter((d) => d.dice || d.type).map((d) => { const txt = d.dice ? resolve(d.dice, V) : '';
+    const dmgLinks = (dmg, V, name = '') => dmg.filter((d) => d.dice || d.type).map((d) => { const txt = d.dice ? diceText(d.dice, V) : '';
         return [d.dice && rollBtn(txt, parseRoll(txt), `${name || 'Damage'}${d.type ? ' ' + d.type.toLowerCase() : ''} damage`, ruleLink('act', 'damage rolls', txt, 'Damage rolls', 'Damage')),
             d.type && ruleLink('dmg', d.type, d.type, d.type + ' damage', 'Damage type')].filter(Boolean).join(' '); }).join(' + ');
     const hitLink = (v, name, kind, rl, title) => { const txt = show({ ...v, signed: true }) + ' to hit';
@@ -497,7 +499,7 @@ Longbow|1d8|Piercing|Ammunition, Heavy, Two-handed|150/600 ft|2`.split('\n').map
             dmgLinks(r.dmg, V, r.name), ...fxHtml(r.fx, V, rp),
             r.props.map((n) => ruleLink('prop', n, n, n, 'Weapon property')).join(', ')].filter(Boolean).join(' · ');
     }
-    const fxOne = (e, V) => (e.k === 'heal' ? 'Heals ' + resolve(e.dice, V) : e.k === 'temp' ? resolve(e.dice, V) + ' temp HP' : e.k === 'dmg' ? dmgText([e], V) : e.text || (SPELL_FX.find(([k]) => k === e.k) || [])[1] || '').trim();
+    const fxOne = (e, V) => (e.k === 'heal' ? 'Heals ' + diceText(e.dice, V) : e.k === 'temp' ? diceText(e.dice, V) + ' temp HP' : e.k === 'dmg' ? dmgText([e], V) : e.text || (SPELL_FX.find(([k]) => k === e.k) || [])[1] || '').trim();
     const hasFx = (r, k) => (k === 'dmg' ? r.dmg.some((d) => d.dice) : r.fx.some((e) => e.k === k));
     const costText = (r) => [String(r.cost.amt).trim(), String(r.cost.what).trim()].filter(Boolean).join(' ');
     function hbSum(r, V, rp) {
