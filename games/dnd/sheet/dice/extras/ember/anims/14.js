@@ -77,13 +77,16 @@ const nat20 = {
         }
         x.grp = new T.Group(); x.grp.position.copy(x.mesh.position); x.grp.quaternion.copy(x.mesh.quaternion); x.grp.scale.copy(x.mesh.scale); add(x, x.grp);
         x.edgeMat = new T.LineBasicMaterial({ color: 0xff8a20, transparent: true, depthWrite: false, blending: T.AdditiveBlending }); x.pieces = []; x.geos = [];
+        // the die's churning molten overlay goes with every face (our own copy, same live texture), and fades away while they turn
+        const ov = x.mesh.children.find((c) => c.isMesh)?.material;
+        if (ov) { x.churn = ov.clone(); x.churn.op0 = ov.opacity; Object.assign(x.churn, { polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }); }
         for (const f of buckets.values()) {
             const pos = [], uv = [], nor = [], c = new T.Vector3();
             for (const t of f.tris) for (let i = 0; i < 3; i++) { c.fromBufferAttribute(P, t * 3 + i); pos.push(c.x, c.y, c.z); if (U) uv.push(U.getX(t * 3 + i), U.getY(t * 3 + i)); nor.push(f.n.x, f.n.y, f.n.z); }
             const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); geo.setAttribute('normal', new T.Float32BufferAttribute(nor, 3)); if (U) geo.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
             geo.computeBoundingBox(); const cen = geo.boundingBox.getCenter(new T.Vector3()); geo.translate(-cen.x, -cen.y, -cen.z);
             const piece = new T.Mesh(geo, Array.isArray(mat) ? mat[f.mi] : mat), eg = new T.EdgesGeometry(geo, 5);
-            piece.add(new T.LineSegments(eg, x.edgeMat)); piece.userData = { cen, n: f.n, dir: Math.random() < 0.5 ? 1 : -1 }; x.grp.add(piece); x.pieces.push(piece); x.geos.push(geo, eg);
+            piece.add(new T.LineSegments(eg, x.edgeMat)); if (x.churn) piece.add(new T.Mesh(geo, x.churn)); piece.userData = { cen, n: f.n, dir: Math.random() < 0.5 ? 1 : -1 }; x.grp.add(piece); x.pieces.push(piece); x.geos.push(geo, eg);
         }
         if (g !== x.mesh.geometry) x.geos.push(g);
         x.mesh.visible = false;
@@ -98,7 +101,10 @@ const nat20 = {
             const d = p.userData; p.position.copy(d.cen).addScaledVector(d.n, out * R * 0.9);
             p.quaternion.setFromAxisAngle(d.n, d.dir * turn * 1.2 * (1 - at(k, 0.58, 0.66)));
         }
-        x.edgeMat.opacity = 0.35 + 0.65 * out + 0.5 * Math.sin(Math.PI * bang);
+        // the change to the finished look is gradual: the churn fades out and the gold seams fade in as the faces move apart and turn
+        const look = io(at(k, 0.05, 0.55));
+        if (x.churn) x.churn.opacity = x.churn.op0 * (1 - look);
+        x.edgeMat.opacity = look * (0.35 + 0.65 * out) + 0.5 * Math.sin(Math.PI * bang);
         x.edgeMat.color.setRGB(1, 0.5 + 0.4 * bang, 0.1 + 0.3 * bang);
         x.core.scale.setScalar(R * (0.5 + 2 * out)); x.core.material.opacity = 0.7 * out * (1 - bang);
         // the snap: a gold flash, an expanding ring and sparks
@@ -106,7 +112,7 @@ const nat20 = {
         x.ring.scale.setScalar(Math.max(0.01, R * (0.8 + 4.5 * ease(bang)))); x.ring.material.opacity = k > 0.6 ? 1 - bang : 0;
         x.sparks.move(bang * nat20.dur * 0.4); x.sparks.material.opacity = k > 0.6 ? 1 - bang : 0;
     },
-    end(x) { x.mesh.visible = true; for (const g of x.geos || []) g.dispose(); x.edgeMat.dispose(); x.grp.clear(); clean(x); },
+    end(x) { x.mesh.visible = true; for (const g of x.geos || []) g.dispose(); x.edgeMat.dispose(); x.churn?.dispose(); x.grp.clear(); clean(x); },
 };
 
 // mid: shrinks inside a narrowing ring of fire on the table that closes over it
