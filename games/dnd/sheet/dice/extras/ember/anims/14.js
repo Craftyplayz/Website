@@ -61,14 +61,11 @@ const nat1 = {
 
 // nat20: every face slides out along its own normal and turns, edges glowing, then snaps back together in a gold burst
 const nat20 = {
-    key: 'a14-exploded-view', name: 'Exploded View', blurb: 'Every face slides out along its own normal and slowly turns like a diagram, turning to gold as it goes, then snaps back together as a golden die.',
-    dur: 3.0, impact: 1.45,
+    key: 'a14-exploded-view', name: 'Exploded View', blurb: 'Every face slides out along its own normal and slowly turns like a diagram, glowing at the seams, then snaps back together and bursts into gold.',
+    dur: 2.4, impact: 1.45,
     start(x) {
         const T = x.THREE; x.own = []; x.R = radius(x);
-        const g = x.mesh.geometry.index ? x.mesh.geometry.toNonIndexed() : x.mesh.geometry, P = g.attributes.position, U = g.attributes.uv;
-        // our own copies of the die's materials, which turn to gold while the faces are apart
-        const mat0 = x.mesh.material, mat = Array.isArray(mat0) ? mat0.map((m) => m.clone()) : mat0.clone();
-        x.gm = [].concat(mat).map((m) => ({ m, c: m.color.clone(), e: m.emissive?.clone(), mt: m.metalness, r: m.roughness }));
+        const g = x.mesh.geometry.index ? x.mesh.geometry.toNonIndexed() : x.mesh.geometry, P = g.attributes.position, U = g.attributes.uv, mat = x.mesh.material;
         const mi = (t) => { for (const gr of g.groups) if (t * 3 >= gr.start && t * 3 < gr.start + gr.count) return gr.materialIndex; return 0; };
         // bucket the triangles by face (same facing, same material)
         const buckets = new Map(), v = new T.Vector3(), a = new T.Vector3(), b = new T.Vector3();
@@ -80,15 +77,13 @@ const nat20 = {
         }
         x.grp = new T.Group(); x.grp.position.copy(x.mesh.position); x.grp.quaternion.copy(x.mesh.quaternion); x.grp.scale.copy(x.mesh.scale); add(x, x.grp);
         x.edgeMat = new T.LineBasicMaterial({ color: 0xff8a20, transparent: true, depthWrite: false, blending: T.AdditiveBlending }); x.pieces = []; x.geos = [];
-        // a polished gold skin over every face, faded in so the numbers still show faintly through it
-        x.goldMat = new T.MeshStandardMaterial({ color: 0xffc845, metalness: 0.6, roughness: 0.32, emissive: 0x6a4300, transparent: true, opacity: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
         for (const f of buckets.values()) {
             const pos = [], uv = [], nor = [], c = new T.Vector3();
             for (const t of f.tris) for (let i = 0; i < 3; i++) { c.fromBufferAttribute(P, t * 3 + i); pos.push(c.x, c.y, c.z); if (U) uv.push(U.getX(t * 3 + i), U.getY(t * 3 + i)); nor.push(f.n.x, f.n.y, f.n.z); }
             const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); geo.setAttribute('normal', new T.Float32BufferAttribute(nor, 3)); if (U) geo.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
             geo.computeBoundingBox(); const cen = geo.boundingBox.getCenter(new T.Vector3()); geo.translate(-cen.x, -cen.y, -cen.z);
             const piece = new T.Mesh(geo, Array.isArray(mat) ? mat[f.mi] : mat), eg = new T.EdgesGeometry(geo, 5);
-            piece.add(new T.LineSegments(eg, x.edgeMat), new T.Mesh(geo, x.goldMat)); piece.userData = { cen, n: f.n, dir: Math.random() < 0.5 ? 1 : -1 }; x.grp.add(piece); x.pieces.push(piece); x.geos.push(geo, eg);
+            piece.add(new T.LineSegments(eg, x.edgeMat)); piece.userData = { cen, n: f.n, dir: Math.random() < 0.5 ? 1 : -1 }; x.grp.add(piece); x.pieces.push(piece); x.geos.push(geo, eg);
         }
         if (g !== x.mesh.geometry) x.geos.push(g);
         x.mesh.visible = false;
@@ -98,24 +93,20 @@ const nat20 = {
         x.sparks = rise(x, 40, 0xffd24a, 6, 4);
     },
     tick(k, x) {
-        const R = x.R, out = ease(at(k, 0.05, 0.35)) * (1 - ease(at(k, 0.6, 0.68))), turn = io(at(k, 0.08, 0.62)), bang = at(k, 0.68, 1);
-        // while the faces are apart and turning, they change smoothly to gold, finishing as they come back together
-        const gold = io(at(k, 0.15, 0.64)), G = x.gc ??= { c: new x.THREE.Color(0xffd36a), e: new x.THREE.Color(0x7a4a00) };
-        for (const g of x.gm) { g.m.color.copy(g.c).lerp(G.c, gold); g.m.emissive?.copy(g.e).lerp(G.e, gold); if (g.mt != null) g.m.metalness = g.mt + (1 - g.mt) * gold; if (g.r != null) g.m.roughness = g.r + (0.28 - g.r) * gold; }
-        x.goldMat.opacity = 0.8 * gold;
+        const R = x.R, out = ease(at(k, 0.05, 0.4)) * (1 - ease(at(k, 0.6, 0.66))), turn = io(at(k, 0.1, 0.6)), bang = at(k, 0.6, 1);
         for (const p of x.pieces) {
             const d = p.userData; p.position.copy(d.cen).addScaledVector(d.n, out * R * 0.9);
-            p.quaternion.setFromAxisAngle(d.n, d.dir * turn * 1.2 * (1 - at(k, 0.58, 0.68)));
+            p.quaternion.setFromAxisAngle(d.n, d.dir * turn * 1.2 * (1 - at(k, 0.58, 0.66)));
         }
         x.edgeMat.opacity = 0.35 + 0.65 * out + 0.5 * Math.sin(Math.PI * bang);
-        x.edgeMat.color.setRGB(1, 0.5 + 0.35 * gold + 0.1 * bang, 0.1 + 0.15 * gold + 0.2 * bang);
+        x.edgeMat.color.setRGB(1, 0.5 + 0.4 * bang, 0.1 + 0.3 * bang);
         x.core.scale.setScalar(R * (0.5 + 2 * out)); x.core.material.opacity = 0.7 * out * (1 - bang);
         // the snap: a gold flash, an expanding ring and sparks
-        x.gold.scale.setScalar(R * (1 + 4 * ease(bang))); x.gold.material.opacity = k > 0.68 ? 0.45 * Math.sin(Math.PI * Math.min(1, bang * 1.3)) : 0;
-        x.ring.scale.setScalar(Math.max(0.01, R * (0.8 + 4.5 * ease(bang)))); x.ring.material.opacity = k > 0.68 ? 0.8 * (1 - bang) : 0;
-        x.sparks.move(bang * nat20.dur * 0.4); x.sparks.material.opacity = k > 0.68 ? 1 - bang : 0;
+        x.gold.scale.setScalar(R * (1 + 4 * ease(bang))); x.gold.material.opacity = k > 0.6 ? 0.9 * Math.sin(Math.PI * Math.min(1, bang * 1.3)) : 0;
+        x.ring.scale.setScalar(Math.max(0.01, R * (0.8 + 4.5 * ease(bang)))); x.ring.material.opacity = k > 0.6 ? 1 - bang : 0;
+        x.sparks.move(bang * nat20.dur * 0.4); x.sparks.material.opacity = k > 0.6 ? 1 - bang : 0;
     },
-    end(x) { x.mesh.visible = true; for (const g of x.geos || []) g.dispose(); x.edgeMat.dispose(); x.goldMat.dispose(); for (const g of x.gm || []) g.m.dispose(); x.grp.clear(); clean(x); },
+    end(x) { x.mesh.visible = true; for (const g of x.geos || []) g.dispose(); x.edgeMat.dispose(); x.grp.clear(); clean(x); },
 };
 
 // mid: shrinks inside a narrowing ring of fire on the table that closes over it
