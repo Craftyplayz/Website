@@ -47,6 +47,40 @@ function faces(tris) {
     }
     return list;
 }
+// numbers laid out like a real set, returned as the faces sorted by number (index i is the face showing i + 1; a d10's index is its digit):
+// opposite faces add to N + 1 (a d10's digits to 9), d6 1-2-3 run counter-clockwise, d8/d10 odds round the top tip, d12/d20 highs and lows spread out
+function realLayout(fs, sides) {
+    if (sides === 4) return fs;
+    const opp = fs.map((f) => fs.findIndex((g) => g.n.dot(f.n) < -0.999));
+    const top = fs.map((f, i) => i).filter((i) => sides === 6 || sides === 12 || sides === 20 ? i < opp[i] : fs[i].n.y > 0);
+    const num = new Array(fs.length), d10 = sides === 10, hi = d10 ? 9 : sides + 1;
+    if (sides === 6) {
+        top.forEach((i, k) => { num[i] = k + 1; num[opp[i]] = 6 - k; });
+        if (fs[top[0]].n.clone().cross(fs[top[1]].n).dot(fs[top[2]].n) < 0) [num[top[2]], num[opp[top[2]]]] = [4, 3];
+    } else if (sides === 8 || d10) {
+        top.sort((a, b) => Math.atan2(fs[a].n.z, fs[a].n.x) - Math.atan2(fs[b].n.z, fs[b].n.x))
+            .forEach((i, k) => { num[i] = 2 * k + 1; num[opp[i]] = hi - num[i]; });
+    } else {
+        // d12/d20: search pair placements for the most even sums round each corner
+        const key = (p) => `${Math.round(p.x * 1e3)},${Math.round(p.y * 1e3)},${Math.round(p.z * 1e3)}`, corners = {};
+        fs.forEach((f, i) => f.pts.forEach((p) => (corners[key(p)] ||= []).push(i)));
+        const cs = Object.values(corners), cost = () => cs.reduce((s, c) => { const t = c.reduce((a, i) => a + num[i], 0); return s + t * t; }, 0);
+        let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+        const place = (o) => top.forEach((i, k) => { num[i] = o[k] > 0 ? o[k] : hi + o[k]; num[opp[i]] = hi - num[i]; });
+        let best = null, bestC = Infinity;
+        for (let r = 0; r < 20; r++) {
+            const o = top.map((_, k) => (rnd() < 0.5 ? k + 1 : -(k + 1))); place(o); let c = cost();
+            for (let it = 0; it < 3000; it++) {
+                const a = (rnd() * o.length) | 0, b = (rnd() * o.length) | 0, was = o.slice();
+                if (a === b) o[a] = -o[a]; else [o[a], o[b]] = [o[b], o[a]];
+                place(o); const n = cost(); if (n <= c) c = n; else o.splice(0, o.length, ...was);
+            }
+            if (c < bestC) { bestC = c; best = o.slice(); }
+        }
+        place(best);
+    }
+    return fs.map((f, i) => [num[i], f]).sort((a, b) => a[0] - b[0]).map(([, f]) => f);
+}
 // ---- styles: a surface painted behind the numbers, number colour, and how shiny or metal it is ----
 const grad = (a, b) => (g, S) => { const r = g.createRadialGradient(S * 0.35, S * 0.3, S * 0.05, S / 2, S / 2, S * 0.75); r.addColorStop(0, a); r.addColorStop(1, b); g.fillStyle = r; g.fillRect(0, 0, S, S); };
 // a small seeded random, so a face looks the same every time it's drawn
@@ -98,7 +132,9 @@ function buildDie(kind, st) {
     const key = kind + st.key;
     if (built[key]) return built[key];
     const sides = kind === 't' || kind === 'u' ? 10 : kind;
-    const fs = faces(SHAPES[sides]()), d4 = sides === 4;
+    const d4 = sides === 4;
+    let fs = realLayout(faces(SHAPES[sides]()), sides);
+    if (kind === 10) fs = [...fs.slice(1), fs[0]]; // a 1-10 die reads its 0 as 10
     const pos = [], uv = [], mats = [];
     // d4: each corner has a value; a face shows the three values of its corners
     const verts = []; if (d4) for (const f of fs) for (const p of f.pts) if (!verts.some((q) => q.distanceTo(p) < 1e-4)) verts.push(p);
