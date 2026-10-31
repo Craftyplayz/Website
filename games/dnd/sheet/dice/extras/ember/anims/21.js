@@ -1,4 +1,5 @@
 import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
+import { dissolving } from './14.js';
 // Ember Cage exits 21: nat 1 Shatter (the die's own faces crack apart and dim), nat 20 Supernova (it implodes to a point, then its faces blast out in gold), mid Twist out (it wrings itself into a fading swirl).
 let FX = null;
 function fx(T) {
@@ -165,9 +166,11 @@ const nat1 = {
         const T = x.THREE, { out, inner, R } = chunks(T, x.mesh.geometry, NB);
         x.R = R; x.world = x.body.world;
         // our own copies of the die's materials, plus raw rock for the broken insides, glowing at first
-        const mats = [].concat(x.mesh.material).map((m) => { const c = m.clone(); c.transparent = true; return c; });
+        // they dissolve away at the end in growing holes, the same way as Exploded View
+        x.u = { dis: { value: 0 }, f: { value: 4 / R } };
+        const mats = [].concat(x.mesh.material).map((m) => dissolving(m.clone(), x.u));
         while (mats.length < inner) mats.push(mats[0]);
-        x.rock = new T.MeshStandardMaterial({ color: 0x24201d, roughness: 0.95, metalness: 0.1, emissive: 0xff5410, emissiveIntensity: 1.4, flatShading: true, transparent: true });
+        x.rock = dissolving(new T.MeshStandardMaterial({ color: 0x24201d, roughness: 0.95, metalness: 0.1, emissive: 0xff5410, emissiveIntensity: 1.4, flatShading: true }), x.u);
         mats[inner] = x.rock; x.mats = [...new Set(mats)];
         x.parts = out.map((polys) => {
             const { geo, shape, c, r } = solid(T, polys), m = add(x, new T.Mesh(geo, mats)); m.visible = false; m.castShadow = true;
@@ -206,7 +209,8 @@ const nat1 = {
         // (a chunk that never quite stops jittering counts as settled four seconds after the break)
         if ((!still || s < 0.4) && s < 4) x.calm = null; else x.calm ??= t;
         const fade = Math.max(x.calm == null ? 0 : at(t, x.calm + 2.5, x.calm + 3.3), at(k, 0.9, 0.98));
-        for (const m of x.mats) m.opacity = 1 - fade;
+        x.u.dis.value = fade > 0 ? 0.15 + 0.75 * fade : 0;
+        if (fade > 0) for (const p of x.parts) p.m.castShadow = false; // a shadow can't show the holes, so it goes as they open
         if (fade >= 1 && !x.gone) { x.gone = true; for (const p of x.parts) { p.m.visible = false; x.world.removeBody(p.b); } }
     },
     end(x) {
