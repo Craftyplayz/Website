@@ -77,7 +77,7 @@ if (!is_array($all)) {
 // "Entertainment: Video Games" -> group "Entertainment", name "Video Games"
 function cat_split(string $c): array
 {
-    return str_contains($c, ': ') ? explode(': ', $c, 2) : ['General', $c];
+    return str_contains($c, ': ') ? explode(': ', $c, 2) : ['Topics', $c];
 }
 
 // Turn an answer into grid letters. Returns null when it can't go in a crossword.
@@ -90,6 +90,7 @@ function grid_answer(string $a): ?array
     if (preg_match('/[^A-Za-z \'\-.&]/', $ascii)) return null; // brackets, slashes, commas, symbols
     $ascii = str_replace('&', ' and ', $ascii);
     $words = preg_split('/[ \-]+/', trim(str_replace(['\'', '.'], '', $ascii)), -1, PREG_SPLIT_NO_EMPTY);
+    if (count($words) > 1 && in_array(strtolower($words[0]), ['a', 'an'], true)) array_shift($words); // "A crowbar"
     if (!$words || count($words) > 3) return null;
     $letters = strtoupper(implode('', $words));
     $len = strlen($letters);
@@ -131,7 +132,7 @@ foreach ($all as $q) {
 $counts = array_count_values(array_column($keep, 'c'));
 foreach ($cats as $id => &$c) $c['n'] = $counts[$id];
 unset($c);
-uasort($cats, fn ($x, $y) => [$x['group'] === 'General' ? 0 : 1, $x['group'], $x['name']] <=> [$y['group'] === 'General' ? 0 : 1, $y['group'], $y['name']]);
+uasort($cats, fn ($x, $y) => [$x['group'] === 'Topics' ? 0 : 1, $x['group'], $x['name']] <=> [$y['group'] === 'Topics' ? 0 : 1, $y['group'], $y['name']]);
 $cats = array_values($cats);
 
 @mkdir(dirname($out_file), 0775, true);
