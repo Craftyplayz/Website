@@ -65,7 +65,7 @@ if ($puz) {
             <label>Size
                 <select class="field" name="size">
                     <?php foreach (CQ_SIZES as $k => $s): ?>
-                        <option value="<?= $k ?>" <?= $k === $o['size'] ? 'selected' : '' ?>><?= h($s['name']) ?> (about <?= $s['words'] ?> clues)</option>
+                        <option value="<?= $k ?>" <?= $k === $o['size'] ? 'selected' : '' ?>><?= h($s['name']) ?> (about <?= $s['clues'] ?> clues)</option>
                     <?php endforeach; ?>
                 </select>
             </label>
