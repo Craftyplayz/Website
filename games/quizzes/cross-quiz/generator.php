@@ -4,9 +4,10 @@
 // _dev/scripts/opentdb-import.php).
 
 const CQ_SIZES = [
-    's' => ['name' => 'Small', 'words' => 8, 'max' => 11],
-    'm' => ['name' => 'Medium', 'words' => 14, 'max' => 15],
-    'l' => ['name' => 'Large', 'words' => 20, 'max' => 19],
+    // words: answers placed before gap-filling adds more; clues: what a puzzle usually ends up with
+    's' => ['name' => 'Small', 'words' => 8, 'max' => 10, 'clues' => 9],
+    'm' => ['name' => 'Medium', 'words' => 14, 'max' => 13, 'clues' => 15],
+    'l' => ['name' => 'Large', 'words' => 20, 'max' => 16, 'clues' => 21],
 ];
 const CQ_DIFFS = [0 => 'Any difficulty', 1 => 'Easy', 2 => 'Medium', 3 => 'Hard'];
 
@@ -105,54 +106,176 @@ function cq_place(array &$grid, array &$box, string $word, int $x, int $y, int $
     $box = [min($box[0], $x), min($box[1], $y), max($box[2], $x + $dx * ($len - 1)), max($box[3], $y + $dy * ($len - 1))];
 }
 
-// One attempt at a layout from a shuffled list of candidate questions.
-function cq_layout(array $cands, int $want, int $max): array
+// One attempt at a layout. Each step tries every unused answer in every spot that crosses the
+// grid and places the one that crosses the most words, so answers share as many letters as
+// possible and solved words give letters for the clues around them.
+function cq_layout(array $cands, int $want, int $max, array $all, array $index): array
 {
+    $used = [];
     $grid = [];
+    $at = [];      // letter => cells holding it, so only matching squares are tried
     $placed = [];
-    $first = $cands[0];
     $box = [0, 0, 0, 0];
-    cq_place($grid, $box, $first['a'], 0, 0, 0);
-    $placed[] = ['q' => $first, 'x' => 0, 'y' => 0, 'dir' => 0];
-    $box = [0, 0, strlen($first['a']) - 1, 0];
+    $put = function (array $q, int $x, int $y, int $dir) use (&$grid, &$at, &$box, &$placed, &$used) {
+        [$dx, $dy] = $dir ? [0, 1] : [1, 0];
+        foreach (str_split($q['a']) as $i => $l) {
+            if (!isset($grid[($x + $dx * $i) . ',' . ($y + $dy * $i)])) $at[$l][] = [$x + $dx * $i, $y + $dy * $i];
+        }
+        cq_place($grid, $box, $q['a'], $x, $y, $dir);
+        $placed[] = ['q' => $q, 'x' => $x, 'y' => $y, 'dir' => $dir];
+        $used[$q['a']] = true;
+    };
+    $put($cands[0], 0, 0, 0);
+    $box = [0, 0, strlen($cands[0]['a']) - 1, 0];
     $left = array_slice($cands, 1);
     $crossings = 0;
 
-    for ($pass = 0; $pass < 3 && count($placed) < $want; $pass++) {
-        $next = [];
-        foreach ($left as $q) {
-            if (count($placed) >= $want) break;
+    // Fill to the target, then keep adding answers that cross two or more words, then
+    // take out answers that cross only one (they touch the grid at a single square).
+    $extra = intdiv($want, 2);
+    while (count($placed) < $want + $extra && $left) {
+        $need = count($placed) < $want ? 1 : 2;
+        $area = ($box[2] - $box[0] + 1) * ($box[3] - $box[1] + 1);
+        // first look for a gap that crosses two or more letters and an answer that fits it
+        $slot = cq_best_slot($grid, $box, $max, $all, $index, $used, $area);
+        if ($slot) {
+            $put($all[$slot[1]], $slot[2], $slot[3], $slot[4]);
+            $crossings += $slot[5];
+            continue;
+        }
+        if ($need > 1) break;
+        $best = null;
+        foreach ($left as $ci => $q) {
+            if (isset($used[$q['a']])) continue;
             $word = $q['a'];
-            $best = null;
-            foreach ($grid as $k => $cell) {
-                [$gx, $gy] = array_map('intval', explode(',', $k));
-                for ($i = 0, $len = strlen($word); $i < $len; $i++) {
-                    if ($word[$i] !== $cell['l']) continue;
+            $len = strlen($word);
+            for ($i = 0; $i < $len; $i++) {
+                foreach ($at[$word[$i]] ?? [] as [$gx, $gy]) {
+                    $cell = $grid["$gx,$gy"];
                     foreach ([0, 1] as $dir) {
                         if ($cell['d'][$dir]) continue;
                         $x = $dir ? $gx : $gx - $i;
                         $y = $dir ? $gy - $i : $gy;
                         $cross = cq_fits($grid, $word, $x, $y, $dir, $box, $max);
-                        if ($cross < 1) continue;
+                        if ($cross < $need) continue;
                         $w = max($box[2], $x + ($dir ? 0 : $len - 1)) - min($box[0], $x) + 1;
                         $h = max($box[3], $y + ($dir ? $len - 1 : 0)) - min($box[1], $y) + 1;
-                        // more crossings first, then a squarer, smaller grid, then chance
-                        $score = $cross * 1000 - $w * $h - abs($w - $h) * 4 + cq_rand(20);
-                        if (!$best || $score > $best[0]) $best = [$score, $x, $y, $dir, $cross];
+                        // crossings count most, then keeping the grid small and square, then chance
+                        $score = $cross * 60 + min($len, 9) * 2 - ($w * $h - $area) * 2 - abs($w - $h) * 3 + cq_rand(12);
+                        if (!$best || $score > $best[0]) $best = [$score, $ci, $x, $y, $dir, $cross];
                     }
                 }
             }
-            if ($best) {
-                cq_place($grid, $box, $word, $best[1], $best[2], $best[3]);
-                $placed[] = ['q' => $q, 'x' => $best[1], 'y' => $best[2], 'dir' => $best[3]];
-                $crossings += $best[4];
-            } else {
-                $next[] = $q;
+        }
+        if (!$best) break;
+        $put($left[$best[1]], $best[2], $best[3], $best[4]);
+        $crossings += $best[5];
+        unset($left[$best[1]]);
+    }
+
+    // Take out answers that cross only one other, longest first, while there are too many.
+    // Such an answer touches one other word, so taking it out never splits the grid.
+    while (count($placed) > $want) {
+        $use = cq_cell_use($placed);
+        $drop = null;
+        foreach ($placed as $pi => $p) {
+            $cross = 0;
+            foreach (cq_cells($p) as $k) if ($use[$k] > 1) $cross++;
+            if ($cross > 1 || $pi === 0) continue;
+            if ($drop === null || strlen($p['q']['a']) > strlen($placed[$drop]['q']['a'])) $drop = $pi;
+        }
+        if ($drop === null) break;
+        array_splice($placed, $drop, 1);
+    }
+
+    // rebuild the grid from what's left
+    $grid = [];
+    $box = [PHP_INT_MAX, PHP_INT_MAX, PHP_INT_MIN, PHP_INT_MIN];
+    foreach ($placed as $p) cq_place($grid, $box, $p['q']['a'], $p['x'], $p['y'], $p['dir']);
+    $use = cq_cell_use($placed);
+    $crossings = count(array_filter($use, fn ($n) => $n > 1));
+    $singles = 0;
+    foreach ($placed as $p) {
+        $cross = 0;
+        foreach (cq_cells($p) as $k) if ($use[$k] > 1) $cross++;
+        if ($cross < 2) $singles++;
+    }
+    return ['grid' => $grid, 'box' => $box, 'placed' => $placed, 'crossings' => $crossings, 'singles' => $singles];
+}
+
+// Find the gap that crosses the most placed letters (at least two) and that some unused
+// answer fits. Walks every row and column of the grid; a gap ends where a square beside it
+// is taken or a word in the same direction is in the way.
+function cq_best_slot(array $grid, array $box, int $max, array $all, array $index, array $used, int $area): ?array
+{
+    $best = null;
+    foreach ([0, 1] as $dir) {
+        // across: lines are rows (b = y), positions run along x (a); down: the other way round
+        [$b0, $b1, $a0, $a1] = $dir ? [$box[0], $box[2], $box[1], $box[3]] : [$box[1], $box[3], $box[0], $box[2]];
+        $key = $dir ? fn ($a, $b) => "$b,$a" : fn ($a, $b) => "$a,$b";
+        $side = $dir ? fn ($a, $b) => [($b + 1) . ",$a", ($b - 1) . ",$a"] : fn ($a, $b) => ["$a," . ($b + 1), "$a," . ($b - 1)];
+        for ($b = $b0; $b <= $b1; $b++) {
+            for ($start = $a1 - $max + 1; $start <= $a0 + $max - 3; $start++) {
+                if (isset($grid[$key($start - 1, $b)])) continue;
+                $pattern = [];
+                $cross = 0;
+                for ($len = 1; $len <= 13; $len++) {
+                    $a = $start + $len - 1;
+                    if (max($a1, $a) - min($a0, $start) + 1 > $max) break;
+                    $cell = $grid[$key($a, $b)] ?? null;
+                    if ($cell) {
+                        if ($cell['d'][$dir]) break;
+                        $pattern[$len - 1] = $cell['l'];
+                        $cross++;
+                    } else {
+                        [$s1, $s2] = $side($a, $b);
+                        if (isset($grid[$s1]) || isset($grid[$s2])) break;
+                    }
+                    if ($len < 3 || $cross < 2 || $cross === $len || isset($grid[$key($a + 1, $b)]) || !isset($index[$len])) continue;
+                    // answers of this length with these letters in these places
+                    $sets = [];
+                    foreach ($pattern as $pos => $l) {
+                        $set = $index[$len][$pos][$l] ?? null;
+                        if (!$set) continue 2;
+                        $sets[] = $set;
+                    }
+                    usort($sets, fn ($x, $y) => count($x) <=> count($y));
+                    $fit = $sets[0];
+                    for ($k = 1; $k < count($sets) && $fit; $k++) $fit = array_intersect_key($fit, $sets[$k]);
+                    foreach ($fit as $ai => $_) if (isset($used[$all[$ai]['a']])) unset($fit[$ai]);
+                    if (!$fit) continue;
+                    $x = $dir ? $b : $start;
+                    $y = $dir ? $start : $b;
+                    $w = max($box[2], $x + ($dir ? 0 : $len - 1)) - min($box[0], $x) + 1;
+                    $h = max($box[3], $y + ($dir ? $len - 1 : 0)) - min($box[1], $y) + 1;
+                    $score = $cross * 60 + min($len, 9) * 2 - ($w * $h - $area) * 2 - abs($w - $h) * 3 + cq_rand(12);
+                    if (!$best || $score > $best[0]) {
+                        $ids = array_keys($fit);
+                        $best = [$score, $ids[cq_rand(count($ids))], $x, $y, $dir, $cross];
+                    }
+                }
             }
         }
-        $left = $next;
     }
-    return ['grid' => $grid, 'box' => $box, 'placed' => $placed, 'crossings' => $crossings];
+    return $best;
+}
+
+// "x,y" keys of the squares a placed answer covers
+function cq_cells(array $p): array
+{
+    $out = [];
+    for ($i = 0, $len = strlen($p['q']['a']); $i < $len; $i++) {
+        $out[] = ($p['dir'] ? $p['x'] : $p['x'] + $i) . ',' . ($p['dir'] ? $p['y'] + $i : $p['y']);
+    }
+    return $out;
+}
+
+// how many answers use each square
+function cq_cell_use(array $placed): array
+{
+    $use = [];
+    foreach ($placed as $p) foreach (cq_cells($p) as $k) $use[$k] = ($use[$k] ?? 0) + 1;
+    return $use;
 }
 
 // Build the puzzle: grid size, cells, numbered clues.
@@ -172,15 +295,27 @@ function cq_build(array $pool, array $o): ?array
     $cands = array_values($cands);
     if (count($cands) < 4) return null;
 
+    // every answer that fits, indexed by length, position and letter, for filling gaps
+    $all = [];
+    $index = [];
+    $seen = [];
+    foreach ($pool as $q) {
+        if (strlen($q['a']) > $size['max'] || isset($seen[$q['a']])) continue;
+        $seen[$q['a']] = true;
+        $ai = count($all);
+        $all[] = $q;
+        foreach (str_split($q['a']) as $pos => $l) $index[strlen($q['a'])][$pos][$l][$ai] = true;
+    }
+
     $best = null;
     for ($try = 0; $try < 16; $try++) {
         $list = cq_shuffle($cands);
         // start from one of the longer answers so the rest have something to cross
         usort($list, fn ($a, $b) => (strlen($b['a']) > 6) <=> (strlen($a['a']) > 6));
-        $l = cq_layout($list, $size['words'], $size['max']);
+        $l = cq_layout($list, $size['words'], $size['max'], $all, $index);
         $w = $l['box'][2] - $l['box'][0] + 1;
         $h = $l['box'][3] - $l['box'][1] + 1;
-        $score = count($l['placed']) * 10000 + $l['crossings'] * 100 + intdiv(count($l['grid']) * 100, $w * $h);
+        $score = count($l['placed']) * 10000 + $l['crossings'] * 100 - $l['singles'] * 150 + intdiv(count($l['grid']) * 100, $w * $h);
         if (!$best || $score > $best[0]) $best = [$score, $l];
         if (count($l['placed']) >= $size['words'] && $try >= 5) break;
     }
