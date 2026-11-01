@@ -25,6 +25,7 @@
 | Factorio Saves | `games/factorio/index.php` | A thumbnail gallery from `assets.craftyplayz.com`. |
 | Factorio Command Generator | `games/factorio/commands/index.php` | A plain text tool. |
 | HP Quiz index | `games/quizzes/harry-potter/index.php` | Links the 4 levels. |
+| Cross Quiz | `games/quizzes/cross-quiz/index.php` | Built 2026-11-01. A crossword whose clues are Open Trivia DB questions. `generator.php` builds the grid in PHP from `?seed=` (same seed and options, same puzzle); `cross-quiz.js` handles typing, hints, checking, the timer and saved progress. Questions live in `questions.json` (2,365 crossword-friendly ones, CC BY-SA 4.0, credited on the page). Refresh them with `php _dev/scripts/opentdb-import.php` (about 20 min, OpenTDB allows one call per 5 s); `--no-download` re-filters the last download. |
 | HP Quiz Easy, Medium, Hard, Extra Hard | `games/quizzes/harry-potter/<level>/index.php` | The 4 pages share the same markup. Each loads jQuery 3.3.1 plus its own `assets/js/scripts.js` and `assets/css/styles.css` through relative paths, so the URL must end in `/`. Extra Hard has tests in `tests/`. Rework one level, then copy it to the rest. |
 | Yu-Gi-Oh Guide, Next Packs, Sets, Extra Rules | `games/yugioh/{,next-packs/,sets/,extra-rules/}index.php` | Text guides; one shared style fits all 4. |
 | Skyrim Mods | `games/skyrim/index.php` | A link list. |

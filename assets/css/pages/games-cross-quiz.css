@@ -40,7 +40,7 @@
 /* grid: squares shrink to fit narrow screens */
 .cq-grid-wrap { position: relative; justify-self: start; max-width: 100%; }
 .cq-grid {
-    --cell: min(40px, calc((100vw - 34px) / var(--cols)));
+    --cell: min(36px, calc((100vw - 34px - (var(--cols) - 1) * 1px) / var(--cols)));
     display: grid; grid-template-columns: repeat(var(--cols), var(--cell)); grid-auto-rows: var(--cell);
     gap: 1px; user-select: none; -webkit-user-select: none;
 }
