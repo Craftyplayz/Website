@@ -4,7 +4,7 @@
 
 ## Your files
 - **Folders you may edit:** `extras/` (everything below it).
-- **Stylesheets that are yours:** `assets/css/pages/dnd.css` and `assets/css/pages/win10.css`, plus any new `assets/css/pages/extras-*.css`.
+- **Stylesheets that are yours:** `assets/css/pages/win10.css`, plus any new `assets/css/pages/extras-*.css`.
 - **Shared, don't edit:** `assets/css/pages/gallery.css` (Minecraft uses it too) and `assets/css/pages/hero.css` (home page and Minecraft). Copy what you need into an `extras-*.css`.
 
 ## Don't touch
@@ -29,5 +29,4 @@
 | Fake Update Screens index | `extras/fake-updates/index.php` | Links to `windows10/`. |
 | Windows 10 Screens index | `extras/fake-updates/windows10/index.php` | Preview tiles of the 2 screens. |
 | Cyberpunk 2077 | `extras/cyberpunk/index.php` | A small page. |
-| D&D Character | `games/dnd/characters/index.php` | Uses `dnd.css`. It reads `/extras/examples/dndcharacter.json`, which has never existed; ask the user. |
 | Bee Movie | `extras/bee-movie/index.php` | The whole script, about 4,000 lines. Only the surrounding layout needs restyling. |

@@ -29,6 +29,8 @@ function site_data()
 // "/extras/trump.php", "/extras/trump" and "/Extras/Trump/" all become "/extras/trump"
 function site_norm($path)
 {
+    // links to another site (dnd.craftyplayz.com) never match a page here
+    if (parse_url((string)$path, PHP_URL_HOST)) return strtolower((string)$path);
     $path = strtolower(rawurldecode((string)parse_url($path, PHP_URL_PATH)));
     $path = preg_replace('#/index\.(php|html?)$#', '/', $path);
     $path = preg_replace('#\.(php|html?)$#', '', $path);

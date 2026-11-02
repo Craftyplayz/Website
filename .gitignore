@@ -24,3 +24,12 @@ minecraft/projects/collection/done.json
 # homebrew sheet server backups - written on the server, never committed (they hold visitor IPs)
 private/dnd/backups/
 private/dnd/monster-backups/
+# the same D&D data after the move to dnd.craftyplayz.com (2026-11-02): archived, never committed
+_dev/archive/dnd/private/dnd/backups/
+_dev/archive/dnd/private/dnd/monster-backups/
+_dev/archive/dnd/private/transcripts/*.ogg
+_dev/archive/dnd/private/transcripts/transcripts/
+_dev/archive/dnd/games/dnd/transcripts/data/*
+!_dev/archive/dnd/games/dnd/transcripts/data/.gitignore
+!_dev/archive/dnd/games/dnd/transcripts/data/.htaccess
+_dev/archive/dnd/games/dnd/characters/cache/*.json

@@ -32,15 +32,19 @@ RedirectMatch 301 ^/php/layout\.js$ /assets/js/site.js
 # The reorg plan became the design guide
 RedirectMatch 301 ^/plan(\.html)?$ /design/
 RedirectMatch 301 ^/games/kelly-pool(/.*)?$ /games/pub-games/kelly-pool$1
-# The dice sound mockups joined the Dice Sets page
-RedirectMatch 301 ^/games/dnd/sheet/dice/sounds(/(index\.php)?)?$ /games/dnd/dice/
-# D&D sheets and dice got their own folders (2026-10-31); dice before sheet so the longer paths win
-RedirectMatch 301 ^/games/dnd/sheet/dice(/.*)?$ /games/dnd/dice$1
-RedirectMatch 301 ^/games/dnd/sheet/test(/.*)?$ /games/dnd/dice/test$1
-RedirectMatch 301 ^/games/dnd/sheet/dice3d\.js$ /games/dnd/dice/dice3d.js
-RedirectMatch 301 ^/games/dnd/sheet-dev(/.*)?$ /games/dnd/sheets/player-dev$1
-RedirectMatch 301 ^/games/dnd/sheet(/.*)?$ /games/dnd/sheets/player$1
-RedirectMatch 301 ^/games/dnd/sheets/?$ /games/dnd/
+# D&D moved to its own site (2026-11-02): /games/dnd/X is now https://dnd.craftyplayz.com/X; the old files are in /_dev/archive/dnd
+# older D&D URLs first so the longer paths win, then everything else under /games/dnd
+RedirectMatch 301 ^/games/dnd/sheet/dice/sounds(/(index\.php)?)?$ https://dnd.craftyplayz.com/dice/
+RedirectMatch 301 ^/games/dnd/sheet/dice(/.*)?$ https://dnd.craftyplayz.com/dice$1
+RedirectMatch 301 ^/games/dnd/sheet/test(/.*)?$ https://dnd.craftyplayz.com/dice/test$1
+RedirectMatch 301 ^/games/dnd/sheet/dice3d\.js$ https://dnd.craftyplayz.com/dice/dice3d.js
+RedirectMatch 301 ^/games/dnd/sheet-dev(/.*)?$ https://dnd.craftyplayz.com/sheets/player-dev$1
+RedirectMatch 301 ^/games/dnd/sheet(/.*)?$ https://dnd.craftyplayz.com/sheets/player$1
+RedirectMatch 301 ^/games/dnd/sheets/?$ https://dnd.craftyplayz.com/
+RedirectMatch 301 ^/games/dnd(/.*)?$ https://dnd.craftyplayz.com$1
+RedirectMatch 301 ^/private/(dnd|transcripts)(/.*)?$ https://dnd.craftyplayz.com/private/$1$2
+RedirectMatch 301 ^/Code/transcripts(/.*)?$ https://dnd.craftyplayz.com/private/transcripts/
+RedirectMatch 301 ^/extras/dnd(/.*)?$ https://dnd.craftyplayz.com/characters$1
 # Duplicate folders that were removed
 RedirectMatch 301 ^/(Code/)?minecraft/items_1\.21\.11/(.*)$ /minecraft/tools/item-list/$2
 RedirectMatch 301 ^/Code/minecraft/(.*)$ /minecraft/$1
@@ -70,12 +74,10 @@ RedirectMatch 301 ^/books/index2(\.php)?$ /books/
 RedirectMatch 301 ^/steam/(steam2|newgame)(\.php)?(/.*)?$ /games/steam/
 RedirectMatch 301 ^/steam/gamer(/.*)?$ /games/steam/
 RedirectMatch 301 ^/tools/random/image2(\.php)?$ /tools/random/image/
-RedirectMatch 301 ^/Code/transcripts/index2(\.php)?$ /private/transcripts/
 RedirectMatch 301 ^/extras/thegame/temp(/.*)?$ /games/the-game/
-RedirectMatch 301 ^/extras/dnd(/.*)?$ /games/dnd/characters$1
 RedirectMatch 301 ^/books/hannah(\.php)?$ /books/
 # Personal pages moved to the password-protected /private/
-RedirectMatch 301 ^/Code/(bs|transcripts|downloads)(/.*)?$ /private/$1$2
+RedirectMatch 301 ^/Code/(bs|downloads)(/.*)?$ /private/$1$2
 RedirectMatch 301 ^/Code/booru(\.php)?$ /private/booru/
 RedirectMatch 301 ^/Code/(timesince\.php|redirect\.html)$ /private/scripts/$1
 RedirectMatch 301 ^/books/kindlecontrol(\.html)?$ /private/kindle/
