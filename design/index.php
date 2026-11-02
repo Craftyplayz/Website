@@ -422,7 +422,7 @@ JSON;
                         <tr><td>Plain text / info</td><td><a href="/about.php">About</a></td><td>Template, <code>.grid</code> of <code>.card</code>s, <code>.kv</code> facts</td></tr>
                         <tr><td>Section landing</td><td><a href="/minecraft/">Minecraft</a></td><td>Hero plus <code>site_hub()</code> cards from <code>site.json</code></td></tr>
                         <tr><td>Long text</td><td><a href="/minecraft/projects/life-series/season-1/session-1/">Life Series session</a></td><td>One <code>&lt;pre&gt;</code> in a page stylesheet, a link back in the lede</td></tr>
-                        <tr><td>Server-fetched API</td><td><a href="/games/steam/">Steam</a>, <a href="/games/dnd/characters/">D&amp;D</a></td><td>Disk cache, stale fallback, parallel <code>curl_multi</code>, keys server-side</td></tr>
+                        <tr><td>Server-fetched API</td><td><a href="/games/steam/">Steam</a></td><td>Disk cache, stale fallback, parallel <code>curl_multi</code>, keys server-side</td></tr>
                         <tr><td>Browser-fetched API</td><td><a href="/games/free/">Free Games</a>, <a href="/minecraft/servers/">Server Status</a></td><td>Loading note, then grid, sticky <code>.bar</code> filters, drawer details</td></tr>
                     </table>
                 </div>
@@ -701,7 +701,7 @@ JSON;
                 <ul>
                     <li><b>Plain HTML, CSS and JS.</b> No framework, no build step, no jQuery. A library only for one job, loaded on first use, and the page still works if it fails.</li>
                     <li><b>Scripts are deferred</b> or at the end of <code>&lt;body&gt;</code>. Event delegation on <code>data-act</code> / <code>data-id</code>, no inline <code>onclick</code>.</li>
-                    <li><b>External APIs:</b> keyed, rate-limited or no-CORS APIs are fetched in PHP with a disk cache and a stale fallback (copy <code>steam_fetch()</code> or <code>dnd_get()</code>). Public CORS APIs can be fetched from the browser. Pass PHP data to JS with <code>json_encode</code>, not a second fetch.</li>
+                    <li><b>External APIs:</b> keyed, rate-limited or no-CORS APIs are fetched in PHP with a disk cache and a stale fallback (copy <code>steam_fetch()</code>). Public CORS APIs can be fetched from the browser. Pass PHP data to JS with <code>json_encode</code>, not a second fetch.</li>
                     <li><b>Big lists</b> render in chunks of about 250 with "Show more"; hidden content is built when it opens; filters debounce about 80ms and filter in memory.</li>
                     <li><b>Art:</b> the hero image gets <code>fetchpriority="high"</code> (and a <code>srcset</code> when there are sizes) plus a <code>&lt;link rel="preconnect"&gt;</code> to its host. The first ~6 covers load eagerly, the rest <code>loading="lazy" decoding="async"</code>. WebP or AVIF for our own images. Galleries show about 400px thumbnails.</li>
                     <li><b>Escape everything</b> from an API or user: <code>h()</code> in PHP, <code>UI.esc()</code> in JS. Keys stay server-side. User files are read in the browser and only uploaded on an explicit action.</li>
