@@ -88,7 +88,7 @@ const RAW = new Set(['white_wool', 'string', 'slime_ball', 'honeycomb', 'snow_bl
 
     const icon = (...ids) => ids.find((id) => id && fs.existsSync(path.join(ICONS, `minecraft_${id}.png`))) || '';
     const used = new Set();
-    const all = [...list.items, ...list.templates, ...list.sherds].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+    const all = [...list.items].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
     const entries = [], recs = [];
     for (const e of all) {
         const name = e.name.replace(/‌/g, '').replace(/(\S)\[/, '$1 [');
