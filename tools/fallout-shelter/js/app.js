@@ -30,6 +30,7 @@
                 loaded[name] = new Promise((res, rej) => {
                     const s = document.createElement('script');
                     s.src = urls[name];
+                    s.async = false; // fetched together, but they run in order: model and views need core first
                     s.onload = res;
                     s.onerror = () => { delete loaded[name]; rej(new Error('script')); };
                     document.head.appendChild(s);
