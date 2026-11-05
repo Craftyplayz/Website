@@ -24,8 +24,11 @@
     const RARITIES = ['Common', 'Normal', 'Rare', 'Legendary'];
     const GRID_COLS = 26, GRID_ROWS = 25; // the largest seen on real saves; a save with more just draws more
 
-    const roomName = (type) => ROOM_NAMES[type] || type;
+    const roomName = (type) => (Object.prototype.hasOwnProperty.call(ROOM_NAMES, type) ? ROOM_NAMES[type] : String(type));
     const roomWidth = (type, merge) => (type === 'Elevator' ? 1 : merge * 3); // no overlaps with this on every real save tried
+    const ROCK_WIDTH = 2; // rocks sit 2 apart at their tightest and never touch a Room at this width, on a real save
+    const LIMIT = 500; // grid values from a hostile file can't make the page draw or walk millions of cells
+    const gridInt = (x, max = LIMIT) => (Number.isInteger(x) ? Math.min(Math.max(x, 0), max) : 0);
     const ints = (node) => items(node).map((e) => val(e.v));
 
     /* ---------- which file is this ---------- */
@@ -44,10 +47,10 @@
     function readVault(doc) {
         const r = doc.root, vault = get(r, 'vault');
         const rooms = items(get(vault, 'rooms')).map((e) => {
-            const n = e.v, type = val(get(n, 'type')), merge = val(get(n, 'mergeLevel')) || 1;
+            const n = e.v, type = val(get(n, 'type')), merge = gridInt(val(get(n, 'mergeLevel')), 3) || 1;
             return {
                 n, type, name: roomName(type), cls: val(get(n, 'class')), merge, level: val(get(n, 'level')),
-                row: val(get(n, 'row')), col: val(get(n, 'col')), width: roomWidth(type, merge),
+                row: gridInt(val(get(n, 'row'))), col: gridInt(val(get(n, 'col'))), width: roomWidth(type, merge),
                 id: val(get(n, 'deserializeID')), dwellerIds: ints(get(n, 'dwellers')), deadIds: ints(get(n, 'deadDwellers')),
                 state: val(get(n, 'currentStateName')), power: val(get(n, 'power')), broken: val(get(n, 'broken')) === true,
                 storage: get(n, 'storage'),
@@ -69,8 +72,8 @@
             };
         });
         const dwellerById = new Map(dwellers.map((x) => [x.id, x]));
-        const rocks = items(get(vault, 'rocks')).map((e) => ({ row: val(get(e.v, 'r')), col: val(get(e.v, 'c')) }));
-        const cols = Math.max(GRID_COLS, ...rooms.map((x) => x.col + x.width), ...rocks.map((x) => x.col + 1));
+        const rocks = items(get(vault, 'rocks')).map((e) => ({ row: gridInt(val(get(e.v, 'r'))), col: gridInt(val(get(e.v, 'c'))) }));
+        const cols = Math.max(GRID_COLS, ...rooms.map((x) => x.col + x.width), ...rocks.map((x) => x.col + ROCK_WIDTH));
         const gridRows = Math.max(GRID_ROWS, ...rooms.map((x) => x.row + 1), ...rocks.map((x) => x.row + 1));
         return { doc, rooms, roomById, dwellers, dwellerById, rocks, cols, rows: gridRows, wastelandIds };
     }
@@ -144,7 +147,7 @@
     // every id the save itself knows about, so pickers can suggest them before the catalogue exists
     function knownIds(doc) {
         const out = { Weapon: new Set(), Outfit: new Set(), Pet: new Set(), Junk: new Set() };
-        const r = doc.root, add = (t, id) => { if (out[t] && typeof id === 'string') out[t].add(id); };
+        const r = doc.root, add = (t, id) => { if (Object.prototype.hasOwnProperty.call(out, t) && typeof id === 'string') out[t].add(id); };
         for (const e of items(get(r, 'vault', 'inventory', 'items'))) add(val(get(e.v, 'type')), val(get(e.v, 'id')));
         for (const e of items(get(r, 'dwellers', 'dwellers'))) {
             for (const [k, t] of [['equipedOutfit', 'Outfit'], ['equipedWeapon', 'Weapon'], ['equippedPet', 'Pet']]) add(t, val(get(e.v, k, 'id')));
@@ -192,7 +195,7 @@
             else occ.set(k, what);
         };
         for (const r of v.rooms) for (let c = r.col; c < r.col + r.width; c++) place(r.row, c, r.name, { room: r.id });
-        for (const s of v.rocks) place(s.row, s.col, 'A rock', null);
+        for (const s of v.rocks) for (let c = s.col; c < s.col + ROCK_WIDTH; c++) place(s.row, c, 'A rock', null);
         return out;
     }
     function checkDoc(doc, kind) {

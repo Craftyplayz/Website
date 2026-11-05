@@ -187,6 +187,7 @@
                         { "title": "Minecraft Name Colours", "url": "/tools/name-colours/", "description": "Make a gradient or coloured Minecraft name and copy the colour codes", "keywords": ["minecraft", "gradient", "nickname", "nick", "hex", "colour codes", "color codes", "minimessage", "rgb", "chat colours"] },
                         { "title": "Reading Speed Test", "url": "/tools/reading-speed/", "description": "How fast do you read?", "keywords": ["wpm", "speedtest"] },
                         { "title": "Secret Santa", "url": "/tools/secret-santa/", "description": "Encrypted Secret Santa pairings", "keywords": ["christmas"] },
+                        { "title": "Fallout Shelter Save Editor", "url": "/tools/fallout-shelter/", "description": "View and edit your Fallout Shelter saves in the browser", "keywords": ["fallout", "shelter", "save", "editor", "vault", "dwellers", "sav"], "nav": false },
                         { "title": "Secret Santa Pairing", "url": "/tools/secret-santa/pairing.html", "nav": false, "search": false }
                     ]
                 },
