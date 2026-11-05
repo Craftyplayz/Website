@@ -19,6 +19,7 @@
                         { "title": "Item List", "url": "/minecraft/tools/item-list/", "description": "Every Minecraft item texture", "keywords": ["textures", "icons"] },
                         { "title": "Piglin Bartering", "url": "/minecraft/tools/bartering/", "description": "Items and gold per hour from a bartering farm", "keywords": ["piglin", "barter", "gold", "farm", "hoppers"] },
                         { "title": "Enchanting Guide", "url": "/minecraft/tools/enchanting/", "description": "Best enchants and the cheapest anvil order for every item", "keywords": ["anvil", "enchant", "books", "levels", "xp"] },
+                        { "title": "Disguise Items", "url": "/minecraft/tools/disguise-items/", "description": "Which renamed item turns you into each mob or object", "keywords": ["transform entity", "disguise", "mob", "helmet", "anvil", "rename"], "nav": false },
                         { "title": "Day Calculator", "url": "/minecraft/tools/day-calculator/", "description": "Work out the in-game day", "nav": false },
                         { "title": "Dynmap Marker Creator", "url": "/minecraft/tools/dynmap-marker/", "description": "Build Dynmap marker commands", "nav": false },
                         { "title": "Book Generator", "url": "/minecraft/tools/book-generator/", "description": "Generate written book commands", "nav": false },
