@@ -59,15 +59,75 @@ document.addEventListener('DOMContentLoaded', () => {
         const candies = ids.reduce((s, id) => s + (Number(save.starterData[id].$x) || 0), 0);
         const hours = Math.round((save.gameStats?.playTime || 0) / 3600);
         const cards = [
-            [`${num(nCaught)}<small> / ${num(ids.length)}</small>`, 'starters caught'],
-            [num(ids.filter(shiny).length), 'shiny starters'],
-            [num(candies), 'candies'],
-            [num((save.eggs || []).length), 'eggs'],
-            [num(Number(save.voucherCounts?.[0]) || 0), 'egg vouchers'],
-            [num(hours) + ' h', 'played'],
+            ['caught', `${num(nCaught)}<small> / ${num(ids.length)}</small>`, 'starters caught'],
+            ['shiny', num(ids.filter(shiny).length), 'shiny starters'],
+            ['candies', num(candies), 'candies'],
+            ['eggs', num((save.eggs || []).length), 'eggs'],
+            ['vouchers', num(Number(save.voucherCounts?.[0]) || 0), 'egg vouchers'],
+            ['played', num(hours) + ' h', 'played'],
         ];
-        $('#prgStats').innerHTML = cards.map(([b, s]) => `<div class="stat-card"><b>${b}</b><span>${s}</span></div>`).join('');
+        $('#prgStats').innerHTML = cards.map(([k, b, s]) => `<button class="stat-card" type="button" data-stat="${k}" title="Edit ${s}"><b>${b}</b><span>${s}</span><small>Edit</small></button>`).join('');
     }
+
+    // ---------- stat card editors (one dialog, content per card) ----------
+    const EGG_WAVES = [10, 25, 50, 100];
+    const MAX_EGGS = 99; // shortcut: assumed in-game egg cap, raise if PokeRogue allows more
+    const field = (label, k, val, min, max) => `<label>${label} <input class="field" type="number" inputmode="numeric" min="${min}" max="${max}" name="${k}" value="${val}" required></label>`;
+    const EDITORS = {
+        caught: () => [`Catch every starter`, `<p>Every starter becomes caught with shiny, all abilities, passive, natures, egg moves, perfect IVs and the full cost reduction. Genders and forms stay as they are.</p>`, 'Unlock all'],
+        shiny: () => [`Shiny starters`, `<p>Every caught starter gets its shiny unlocked.</p>`, 'Make all shiny'],
+        candies: () => [`Candies`, field('Candies for every starter', 'n', 0, 0, 9999) + `<label class="check"><input type="checkbox" name="add" checked> Add to what each starter has (untick to replace)</label>`, 'Give candies'],
+        eggs: () => {
+            const opts = ids.slice().sort((a, b) => name(a).localeCompare(name(b))).map(id => `<option value="${id}">${esc(name(id))}</option>`).join('');
+            const room = MAX_EGGS - (save.eggs || []).length;
+            return [`Add eggs`, `<p class="muted prg-small">You have ${num((save.eggs || []).length)} eggs; up to ${num(Math.max(0, room))} more fit.</p>
+                <label>Pokémon <select class="field" name="species">${opts}</select></label>
+                <div class="cols"><label>Rarity <select class="field" name="tier">${TIERS.map((t, i) => `<option value="${i}">${t}</option>`).join('')}</select></label>
+                ${field('How many', 'n', 1, 1, Math.max(1, room))}</div>
+                <label class="check"><input type="checkbox" name="shiny"> Shiny</label>`, 'Add eggs'];
+        },
+        vouchers: () => [`Vouchers`, `<div class="cols">${VOUCHERS.map((v, i) => field(v, 'v' + i, Number(save.voucherCounts?.[i]) || 0, 0, 999)).join('')}</div>`, 'Save vouchers'],
+        played: () => [`Play time`, field('Hours played', 'n', Math.round((save.gameStats?.playTime || 0) / 3600), 0, 99999), 'Save play time'],
+    };
+    const APPLY = {
+        caught: () => { ids.forEach(id => P.unlock(save, id)); return `Unlocked ${num(ids.length)} Pokémon.`; },
+        shiny: () => {
+            const list = ids.filter(caught);
+            list.forEach(id => { const d = save.dexData[id]; d.$ca = Number(d.$ca) | P.DEX.SHINY | P.DEX.VARIANT_1; d.$sa = Number(d.$sa) | d.$ca; });
+            return `${num(list.length)} starters are now shiny.`;
+        },
+        candies: f => {
+            const n = Number(f.n.value), add = f.add.checked;
+            ids.forEach(id => { const st = save.starterData[id]; st.$x = Math.min(9999, (add ? Number(st.$x) || 0 : 0) + n); });
+            return add ? `Added ${num(n)} candies to every starter.` : `Every starter has ${num(n)} candies.`;
+        },
+        eggs: f => {
+            save.eggs = save.eggs || [];
+            const tier = Number(f.tier.value), n = Math.min(Number(f.n.value), MAX_EGGS - save.eggs.length);
+            for (let i = 0; i < n; i++) save.eggs.push({
+                id: crypto.getRandomValues(new Uint32Array(1))[0] >>> 1, gachaType: 0, hatchWaves: EGG_WAVES[tier], timestamp: Date.now(),
+                tier, sourceType: 0, variantTier: 0, isShiny: f.shiny.checked, species: Number(f.species.value),
+                eggMoveIndex: Math.floor(Math.random() * 4), overrideHiddenAbility: false,
+            });
+            return n > 0 ? `Added ${num(n)} eggs.` : 'No room for more eggs.';
+        },
+        vouchers: f => { save.voucherCounts = save.voucherCounts || {}; VOUCHERS.forEach((v, i) => { save.voucherCounts[i] = Number(f['v' + i].value); }); return 'Vouchers saved.'; },
+        played: f => { save.gameStats = save.gameStats || {}; save.gameStats.playTime = Number(f.n.value) * 3600; return 'Play time saved.'; },
+    };
+    let editing = null;
+    $('#prgStats').addEventListener('click', e => {
+        const b = e.target.closest('[data-stat]'); if (!b) return;
+        editing = b.dataset.stat;
+        const [h2, body, btn] = EDITORS[editing]();
+        $('#prgEdit').innerHTML = `<h2>${h2}</h2><form class="form" method="dialog">${body}<div class="actions"><button class="btn primary" value="ok">${btn}</button><button class="btn" value="cancel" formnovalidate>Cancel</button></div></form>`;
+        $('#prgEdit').showModal();
+    });
+    $('#prgEdit').addEventListener('submit', e => {
+        if (e.submitter?.value !== 'ok') return;
+        toast(APPLY[editing](e.target), 'ok');
+        renderAll(); edited();
+        if (openId) renderDetail(openId);
+    });
 
     function visible() {
         const q = $('#prgQ').value.trim().toLowerCase();
@@ -207,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('#prgMore').addEventListener('click', () => { shown += CHUNK; renderGrid(); });
     $('#prgClose').addEventListener('click', closeDrawer);
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && !$('#prgDlg').open) closeDrawer();
+        if (e.key === 'Escape' && !$('#prgEdit').open) closeDrawer();
         if (e.key === '/' && save && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); $('#prgQ').focus(); }
     });
     // missing sprite: hide it so the name shows, never a broken-image icon
@@ -227,16 +287,6 @@ document.addEventListener('DOMContentLoaded', () => {
         edited();
     });
     $('.prg-raw').addEventListener('toggle', e => { if (e.target.open) renderRaw(); });
-
-    $('#prgUnlockAll').addEventListener('click', () => $('#prgDlg').showModal());
-    $('#prgDlgNo').addEventListener('click', () => $('#prgDlg').close());
-    $('#prgDlgYes').addEventListener('click', () => {
-        ids.forEach(id => P.unlock(save, id));
-        $('#prgDlg').close();
-        renderAll(); edited();
-        if (openId) renderDetail(openId);
-        toast(`Unlocked ${num(ids.length)} Pokémon.`, 'ok');
-    });
 
     $('#prgDownload').addEventListener('click', async () => {
         const b = $('#prgDownload');

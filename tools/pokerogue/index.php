@@ -35,7 +35,6 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
                     <button class="on" data-f="all">All</button><button data-f="caught">Caught</button><button data-f="missing">Not caught</button><button data-f="shiny">Shiny</button>
                 </div>
                 <span class="muted" id="prgCount"></span>
-                <button class="btn small" id="prgUnlockAll">Unlock all</button>
                 <button class="btn small" id="prgOpen">Open another</button>
                 <button class="btn small primary" id="prgDownload">Download save</button>
             </div>
@@ -68,11 +67,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
             <button class="close" id="prgClose" aria-label="Close" title="Close">&times;</button>
             <div id="prgDetail"></div>
         </aside>
-        <dialog class="dlg" id="prgDlg">
-            <h2>Unlock all Pokémon</h2>
-            <p>Every starter becomes caught with shiny, all abilities, passive, natures, egg moves, perfect IVs and the full cost reduction. Genders and forms stay as they are.</p>
-            <div class="actions"><button class="btn primary" id="prgDlgYes">Unlock all</button><button class="btn" id="prgDlgNo">Cancel</button></div>
-        </dialog>
+        <dialog class="dlg" id="prgEdit" aria-label="Edit"></dialog>
 
         <p class="muted prg-small">Names and sprites from PokeAPI; egg moves from the PokeRogue source. PokeRogue is made by Pagefault Games; this tool isn't affiliated with it.</p>
     </main>

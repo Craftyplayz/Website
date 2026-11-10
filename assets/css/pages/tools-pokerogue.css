@@ -5,6 +5,9 @@
 .prg-q { flex: 1 1 200px; min-width: 0; }
 .prg-putback { margin-bottom: 16px; }
 .stat-card b small { font-size: 14px; color: var(--muted); font-weight: 400; }
+.prg :where(button.stat-card) { font: inherit; text-align: left; cursor: pointer; }
+.prg button.stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.prg button.stat-card > small { font-size: 12px; color: var(--accent); }
 
 .prg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(110px, 28vw, 140px), 1fr)); gap: 10px; }
 .prg :where(button.prg-tile) {
