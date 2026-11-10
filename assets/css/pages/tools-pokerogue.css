@@ -1,0 +1,41 @@
+/* PokeRogue Save Editor (/tools/pokerogue/) */
+.prg [hidden] { display: none !important; }
+.prg-small { font-size: 13px; }
+.prg-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 16px; }
+.prg-q { flex: 1 1 200px; min-width: 0; }
+.prg-putback { margin-bottom: 16px; }
+.stat-card b small { font-size: 14px; color: var(--muted); font-weight: 400; }
+
+.prg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(110px, 28vw, 140px), 1fr)); gap: 10px; }
+.prg :where(button.prg-tile) {
+    display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; padding: 8px 8px 10px;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); color: var(--text);
+    font: inherit; cursor: pointer; transition: border-color var(--fast), transform var(--fast);
+}
+.prg-tile:hover { border-color: var(--accent); transform: translateY(-2px); }
+.prg-tile img { width: 96px; height: 96px; image-rendering: pixelated; }
+.prg-tile b, .prg-tile small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prg-tile b { font-size: 14px; font-weight: 600; }
+.prg-tile small { font-size: 12px; color: var(--muted); }
+.prg-tile.missing img { filter: grayscale(1) brightness(.45); }
+.prg-tile.missing b { color: var(--muted); }
+.prg-shiny { font-style: normal; color: var(--highlight); }
+.prg-more { text-align: center; margin: 16px 0 0; }
+
+.prg-cards { margin-top: 28px; }
+.prg-eggs { max-height: 420px; overflow-y: auto; }
+.prg-eggs img { image-rendering: pixelated; }
+.prg-egg-icon { width: 40px; height: 40px; flex: none; }
+.prg-wave { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.prg-wave .field { width: 72px; }
+.prg-raw { margin-top: 28px; }
+.prg-raw summary { cursor: pointer; font-weight: 600; }
+.prg-pre { max-height: 480px; overflow: auto; margin: 12px 0 0; white-space: pre; }
+
+.prg-head { display: flex; align-items: center; gap: 12px; margin: 0 28px 12px 0; }
+.prg-head img { image-rendering: pixelated; }
+.prg-head h2 { margin: 0; font-size: 20px; }
+.prg #prgDetail .actions { margin-bottom: 12px; }
+.prg-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px 12px; }
+.prg-natures { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+.prg-ivs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }

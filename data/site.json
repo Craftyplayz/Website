@@ -189,6 +189,7 @@
                         { "title": "Reading Speed Test", "url": "/tools/reading-speed/", "description": "How fast do you read?", "keywords": ["wpm", "speedtest"] },
                         { "title": "Secret Santa", "url": "/tools/secret-santa/", "description": "Encrypted Secret Santa pairings", "keywords": ["christmas"] },
                         { "title": "Fallout Shelter Save Editor", "url": "/tools/fallout-shelter/", "description": "View and edit your Fallout Shelter saves in the browser", "keywords": ["fallout", "shelter", "save", "editor", "vault", "dwellers", "sav"], "nav": false },
+                        { "title": "PokeRogue Save Editor", "url": "/tools/pokerogue/", "description": "View and edit your PokeRogue save in the browser", "keywords": ["pokerogue", "pokemon", "save", "editor", "prsv", "starters", "candy", "shiny"], "nav": false },
                         { "title": "Secret Santa Pairing", "url": "/tools/secret-santa/pairing.html", "nav": false, "search": false }
                     ]
                 },
