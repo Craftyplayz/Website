@@ -33,18 +33,10 @@
 .pbn-name { overflow: hidden; font-size: 14px; font-weight: 600; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
 .pbn-name mark { background: none; color: var(--highlight); }
 
-/* score pill and meter, coloured by verdict */
-.pbn-score { padding: 1px 8px; background: var(--card2); border: 1px solid var(--line); border-radius: 999px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.pbn-score.pbn-top { background: var(--gold-bg); border-color: var(--gold-line); }
-.pbn-score.pbn-good { background: var(--ok-bg); border-color: var(--ok-line); }
-.pbn-score.pbn-mid { background: var(--info-bg); border-color: var(--info-line); }
-.pbn-score.pbn-cruel { border-color: var(--danger-line); }
-.pbn-score.pbn-ban { background: var(--danger-bg); border-color: var(--danger-line); }
+/* score pill and meter: --sc is set inline per score, 0 pure red through to 10 pure green */
+.pbn-score { padding: 1px 8px; background: var(--sc, var(--card2)); color: #000; border-radius: 999px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .pbn-meter { display: block; height: 4px; overflow: hidden; background: rgb(255 255 255 / .08); border-radius: 999px; }
-.pbn-meter i { display: block; height: 100%; background: linear-gradient(90deg, var(--btn), var(--accent)); }
-.pbn-meter.pbn-top i { background: var(--gold-line); }
-.pbn-meter.pbn-good i { background: var(--ok-line); }
-.pbn-meter.pbn-cruel i, .pbn-meter.pbn-ban i { background: var(--danger-line); }
+.pbn-meter i { display: block; height: 100%; background: var(--sc, var(--accent)); }
 
 .pbn-empty { padding: 28px 0; }
 .pbn-credit { margin: 28px 0 0; font-size: 13px; }

@@ -129,10 +129,10 @@ foreach ($pbn as $p) {
             <div class="pbn-grid">
                 <?php foreach ($pbn as $p): $b = pbn_band($p['score'], $pbn_bands); ?>
                     <button type="button" class="pbn-tile" data-n="<?= (int) $p['number'] ?>">
-                        <span class="pbn-top"><span class="mono pbn-num">#<?= str_pad($p['number'], 4, '0', STR_PAD_LEFT) ?></span><span class="pbn-score pbn-<?= $b['id'] ?>"><?= (int) $p['score'] ?></span></span>
+                        <span class="pbn-top"><span class="mono pbn-num">#<?= str_pad($p['number'], 4, '0', STR_PAD_LEFT) ?></span><span class="pbn-score" style="--sc:hsl(<?= $p['score'] * 12 ?> 100% 50%)"><?= (int) $p['score'] ?></span></span>
                         <span class="pbn-spr" style="background-position:<?= pbn_sprite_pos($p['number']) ?>" aria-hidden="true"></span>
                         <span class="pbn-name"><?= h($p['name']) ?></span>
-                        <span class="pbn-meter pbn-<?= $b['id'] ?>" aria-hidden="true"><i style="width:<?= $p['score'] * 10 ?>%"></i></span>
+                        <span class="pbn-meter" style="--sc:hsl(<?= $p['score'] * 12 ?> 100% 50%)" aria-hidden="true"><i style="width:<?= $p['score'] * 10 ?>%"></i></span>
                     </button>
                 <?php endforeach; ?>
             </div>

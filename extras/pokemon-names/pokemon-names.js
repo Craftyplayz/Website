@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
 
     const band = (s) => BANDS.find((b) => s >= b.min && s <= b.max) || BANDS[BANDS.length - 1];
+    const col = (s) => `style="--sc:hsl(${s * 12} 100% 50%)"`; // 0 = red, 10 = green
     const pad = (n) => '#' + String(n).padStart(4, '0');
     const fold = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/’/g, "'");
     const pos = (n) => `-${((n - 1) % 32) * 64}px -${Math.floor((n - 1) / 32) * 64}px`;
@@ -51,10 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const tile = (p) =>
         `<button type="button" class="pbn-tile" data-n="${p.number}">` +
-        `<span class="pbn-top"><span class="mono pbn-num">${pad(p.number)}</span><span class="pbn-score pbn-${p.band.id}">${p.score}</span></span>` +
+        `<span class="pbn-top"><span class="mono pbn-num">${pad(p.number)}</span><span class="pbn-score" ${col(p.score)}>${p.score}</span></span>` +
         `<span class="pbn-spr" style="background-position:${pos(p.number)}" aria-hidden="true"></span>` +
         `<span class="pbn-name">${highlight(p.name)}</span>` +
-        `<span class="pbn-meter pbn-${p.band.id}" aria-hidden="true"><i style="width:${p.score * 10}%"></i></span></button>`;
+        `<span class="pbn-meter" ${col(p.score)} aria-hidden="true"><i style="width:${p.score * 10}%"></i></span></button>`;
 
     const setChips = (box, attr, current, counts) => {
         let total = 0;
@@ -113,8 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
             `<div class="pbn-tip-head"><span class="pbn-spr" style="background-position:${pos(p.number)}"></span>` +
             `<div class="pbn-tip-name"><b>${esc(p.name)}</b><span>${pad(p.number)} · Gen ${ROMAN[p.generation]} · ${REG[p.generation]}</span></div>` +
             `<div class="pbn-tip-score"><b>${p.score}</b><span> / 10</span></div></div>` +
-            `<span class="pbn-score pbn-${p.band.id}">${esc(p.band.label)}</span>` +
-            `<span class="pbn-meter pbn-${p.band.id}"><i style="width:${p.score * 10}%"></i></span>` +
+            `<span class="pbn-score" ${col(p.score)}>${esc(p.band.label)}</span>` +
+            `<span class="pbn-meter" ${col(p.score)}><i style="width:${p.score * 10}%"></i></span>` +
             (SHOW_REASONING ? `<p>${esc(p.reasoning)}</p>` : '');
         tip.hidden = false;
         const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect();
