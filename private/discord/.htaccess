@@ -1,7 +1,0 @@
-# Recap pages and data.js are personal and change on every rebuild: never in shared caches,
-# always revalidated. FilesMatch so it outranks the root .htaccess's "public, max-age" for .js.
-<IfModule mod_headers.c>
-    <FilesMatch "\.(js|php|html)$">
-        Header set Cache-Control "private, no-cache"
-    </FilesMatch>
-</IfModule>

@@ -26,6 +26,11 @@ RedirectMatch 301 ^/php/layout\.js$ /assets/js/site.js
     <FilesMatch "^site\.json$">
         Header set Cache-Control "public, max-age=300"
     </FilesMatch>
+    # Logged-in files must never say "public": the IONOS edge cache then stores them and serves
+    # them to anyone without a login. <If> is merged after <FilesMatch>, so this wins.
+    <If "%{REQUEST_URI} =~ m#^/private/#">
+        Header set Cache-Control "private, no-cache"
+    </If>
 </IfModule>
 
 # ---- Old URLs from the reorganisation ----
