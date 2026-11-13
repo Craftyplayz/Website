@@ -225,6 +225,7 @@
                         { "title": "Insults", "url": "/extras/insults/", "description": "Random insult generator" },
                         { "title": "Random Fact", "url": "/extras/facts/", "description": "A random fact" },
                         { "title": "Live Laugh Love", "url": "/extras/live-laugh-love/", "description": "Live Laugh Love alternatives" },
+                        { "title": "Pokémon Baby Names", "url": "/extras/pokemon-names/", "description": "Every Pokémon scored from 0 to 10 on how well it would work as a baby name", "keywords": ["pokemon", "pokedex", "baby", "names", "rating", "generation"] },
                         { "title": "Random Quote", "url": "/extras/quotes/", "description": "A random screenshot quote", "nav": false }
                     ]
                 },
