@@ -1,14 +1,15 @@
-"""Read a Discord data package and write private/discord/data.js (window.RECAP) for private/discord/index.html.
-Update the live page with:  bash _dev/discord-recap/update.sh <unzipped package folder>
+"""Read a Discord data package and write private/discord/<name>/data.js (window.RECAP) for private/discord/recap.html.
+Update the live page with:  bash _dev/discord-recap/update.sh <unzipped package folder> <name>
 
-Usage:  py -I build.py D:/package            (full: messages + activity logs, a few minutes)
-        py -I build.py D:/package --quick    (messages + account only, seconds)
+Usage:  py -I build.py D:/package crafty     (full: messages + activity logs, a few minutes)
+        py -I build.py D:/package crafty --quick  (messages + account only, seconds)
 """
 import collections, datetime as dt, json, os, re, sys
 
 PKG = sys.argv[1]
 QUICK = '--quick' in sys.argv
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'private', 'discord', 'data.js')  # gitignored: personal, server-only
+NAME = sys.argv[2]  # recap folder: private/discord/<NAME>/
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'private', 'discord', NAME, 'data.js')  # gitignored: personal, server-only
 TOP = 10
 
 # ---------- time: UTC -> UK local (no tzdata on this machine) ----------

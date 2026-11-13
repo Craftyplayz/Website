@@ -35,4 +35,6 @@ _dev/archive/dnd/games/dnd/transcripts/data/*
 _dev/archive/dnd/games/dnd/characters/cache/*.json
 
 # Discord recap stats (personal: message text, who I talk to) - built by _dev/discord-recap, server only
-private/discord/data.js
+private/discord/*/data.js
+# per-person login for each recap folder except crafty (server only: holds the real server path)
+private/discord/*/.ht*
