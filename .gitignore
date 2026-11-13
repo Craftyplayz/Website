@@ -38,3 +38,6 @@ _dev/archive/dnd/games/dnd/characters/cache/*.json
 private/discord/*/data.js
 # per-person login for each recap folder except crafty (server only: holds the real server path)
 private/discord/*/.ht*
+
+# booru saved groups/presets - written by /private/booru/ on the server
+private/booru/booru_data.json

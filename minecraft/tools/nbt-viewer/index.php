@@ -4060,7 +4060,9 @@ $kinds = [
             input.value = '';
             msg.textContent = 'Creating link…';
             try {
-                const payload = { v: 1, players: list.map((p) => ({ file: p.file, name: p.name, data: p.P.d, extras: shareExtras(p) })) };
+                // privacy rule: values under private keys (passwords, seeds, IPs) never leave the browser, not even masked
+                const strip = (d) => JSON.parse(JSON.stringify(d, (k, v) => PRIVATE_KEY.test(k) && v !== '' && v !== null && typeof v !== 'boolean' && (typeof v !== 'object' || Array.isArray(v)) ? undefined : v));
+                const payload = { v: 1, players: list.map((p) => ({ file: p.file, name: p.name, data: strip(p.P.d), extras: shareExtras(p) })) };
                 if (all) payload.active = active;
                 // the packs the items are drawn with travel with the link (ids only - the packs live on minecraftitems.xyz)
                 const packs = rpUsed().map((p) => ({ id: p.id, name: p.name }));

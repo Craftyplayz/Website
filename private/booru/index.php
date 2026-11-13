@@ -1,8 +1,8 @@
 <?php
 header('X-Robots-Tag: noindex, nofollow');
 
-// Saved groups and presets (php/ is gitignored, so this never reaches GitHub)
-$dataFile = $_SERVER['DOCUMENT_ROOT'] . '/php/booru_data.json';
+// Saved groups and presets: behind the /private/ login, gitignored so it never reaches GitHub
+$dataFile = __DIR__ . '/booru_data.json';
 
 if (isset($_GET['save'])) {
     header('Content-Type: application/json');

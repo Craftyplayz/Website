@@ -1,7 +1,7 @@
 <?php
 $site_page = [
     'title' => 'Minecraft Projects',
-    'description' => 'Things built on the server: the rail network, map art, milestones and more',
+    'description' => 'Things built on the server: the rail network, map art and more',
 ];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>

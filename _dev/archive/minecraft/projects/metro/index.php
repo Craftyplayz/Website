@@ -672,19 +672,22 @@ header('Content-Type: text/html; charset=UTF-8');
                 const row = document.createElement('div');
                 row.className = 'station-row';
 
-                const nameHighlighted = q ?
-                    s.name.replace(new RegExp(`(${q})`, 'gi'), '<mark style="background:rgba(255,255,255,0.25);color:inherit;border-radius:2px;padding:0 1px">$1</mark>') :
-                    s.name;
+                // every stored field is escaped: anyone could POST a station
+                const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+                const hex = v => /^#[0-9a-f]{3,8}$/i.test(v) ? v : 'transparent';
+                const i = q ? s.name.toLowerCase().indexOf(q) : -1;
+                const nameHighlighted = i < 0 ? esc(s.name) :
+                    esc(s.name.slice(0, i)) + '<mark style="background:rgba(255,255,255,0.25);color:inherit;border-radius:2px;padding:0 1px">' + esc(s.name.slice(i, i + q.length)) + '</mark>' + esc(s.name.slice(i + q.length));
 
                 row.innerHTML = `
       <div class="swatches">
-        <div class="swatch" style="background:${s.region.hex}"   title="Region: ${s.region.label}"></div>
-        <div class="swatch" style="background:${s.district.hex}" title="District: ${s.district.label}"></div>
-        <div class="swatch" style="background:${s.local.hex}"    title="Local: ${s.local.label}"></div>
+        <div class="swatch" style="background:${hex(s.region.hex)}"   title="Region: ${esc(s.region.label)}"></div>
+        <div class="swatch" style="background:${hex(s.district.hex)}" title="District: ${esc(s.district.label)}"></div>
+        <div class="swatch" style="background:${hex(s.local.hex)}"    title="Local: ${esc(s.local.label)}"></div>
       </div>
       <div class="station-info">
         <div class="station-name">${nameHighlighted}</div>
-        <div class="station-addr">${s.region.label} · ${s.district.label} · ${s.local.label}</div>
+        <div class="station-addr">${esc(s.region.label)} · ${esc(s.district.label)} · ${esc(s.local.label)}</div>
       </div>
       <button class="del-btn" title="Remove"></button>
     `;

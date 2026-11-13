@@ -102,10 +102,7 @@ RedirectMatch 301 ^/minecraft/chatfilter(\.php)?$ /minecraft/tools/json-viewer/
 RedirectMatch 301 ^/minecraft/minigames(/battleships(\.html)?)?/?$ /minecraft/tools/tnt-cannon/
 RedirectMatch 301 ^/minecraft/playtime/(index\.html)?$ /minecraft/tools/playtime/
 RedirectMatch 301 ^/minecraft/playtime(/.*)?$ /minecraft/tools/playtime$1
-RedirectMatch 301 ^/minecraft/network/(index\.php)?$ /minecraft/projects/metro/
-RedirectMatch 301 ^/minecraft/network(/.*)?$ /minecraft/projects/metro$1
 RedirectMatch 301 ^/minecraft/boltnetwork(\.php)?$ /minecraft/projects/rail-router/
-RedirectMatch 301 ^/minecraft/milestones(\.php)?$ /minecraft/projects/milestones/
 RedirectMatch 301 ^/minecraft/stonecrest(\.php)?$ /minecraft/projects/stonecrest/
 RedirectMatch 301 ^/minecraft/mapart/code(/.*)?$ /minecraft/projects/map-art/frame-extractor/
 RedirectMatch 301 ^/minecraft/mapart(/.*)?$ /minecraft/projects/map-art/

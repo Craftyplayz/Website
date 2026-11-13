@@ -19,7 +19,7 @@ tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 
 # compare git blob hashes, not files on disk: the PC checks out CRLF, the server has the committed LF
 # never upload: skip-worktree files, plus tracked files the live site writes to itself
-{ git ls-files -v | sed -n 's/^S //p'; echo minecraft/projects/metro/stations.json; } > "$tmp/skip"
+git ls-files -v | sed -n 's/^S //p' > "$tmp/skip"
 # shortcut: paths with quotes, backslashes or newlines come out quoted and get skipped; use -z if one appears
 git -c core.quotepath=false ls-tree -r --format='%(objecttype)%x09%(objectname)%x09%(path)' HEAD |
   awk -F'\t' 'NR==FNR{s[$0];next} $1=="blob" && !($3 in s){print $2"\t"$3}' "$tmp/skip" - | sort > "$tmp/local"

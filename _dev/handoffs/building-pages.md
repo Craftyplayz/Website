@@ -533,7 +533,7 @@ Full procedure: README §5 (portable PHP, your own port and Chrome debug port). 
 
 ## 17. Known gaps (fix when touching these files)
 
-- Pages that still hard-code the old green (`#4a9033`, `#2d4a24`, `#4f8a3a`) in their own `<style>`: `minecraft/projects/metro/`, `minecraft/projects/milestones/`, `minecraft/projects/rail-router/`, `minecraft/projects/map-art/frame-extractor/`. When you edit one, switch those to the blue tokens (`--btn`, `--btn-hover`, `--accent-soft`) or `--ok-*` where it means success.
+- Pages that still hard-code the old green (`#4a9033`, `#2d4a24`, `#4f8a3a`) in their own `<style>`: `minecraft/projects/rail-router/`, `minecraft/projects/map-art/frame-extractor/`. When you edit one, switch those to the blue tokens (`--btn`, `--btn-hover`, `--accent-soft`) or `--ok-*` where it means success.
 - `.htaccess` has no long-cache rule for `/assets` yet; it caches CSS/JS for a day. `asset()` already versions URLs, so `Cache-Control: public, max-age=31536000, immutable` on `/assets/` is safe to add.
 
 ---

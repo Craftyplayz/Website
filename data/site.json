@@ -34,9 +34,7 @@
                     "title": "Projects",
                     "url": "/minecraft/projects/",
                     "pages": [
-                        { "title": "Metro Network", "url": "/minecraft/projects/metro/", "description": "Metro stations on the server", "keywords": ["rail", "stations"] },
                         { "title": "Rail Router", "url": "/minecraft/projects/rail-router/", "description": "Find a route across the rail network", "keywords": ["rail", "route"] },
-                        { "title": "Milestones", "url": "/minecraft/projects/milestones/", "description": "Milestone tracker" },
                         { "title": "Map Art", "url": "/minecraft/projects/map-art/", "description": "Map art I have made" },
                         { "title": "All Possible Farms", "url": "/minecraft/projects/farms/", "description": "How to farm every item, and which farms I have built", "keywords": ["farm", "items", "renewable", "automatic", "afk", "checklist"] },
                         { "title": "Collection Checklist", "url": "/minecraft/projects/collection/", "description": "Every item, smithing template and pottery sherd I have collected", "keywords": ["collection", "checklist", "templates", "sherds", "all items"] },
