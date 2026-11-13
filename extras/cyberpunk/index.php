@@ -12,7 +12,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 <body>
     <?php site_header(); ?>
 
-    <main class="page" id="main">
+    <main class="page xr-full" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">I wanna play Cyberpunk 2077 but I have a question</h1>
 
