@@ -123,6 +123,7 @@
                     "url": "/games/quizzes/",
                     "pages": [
                         { "title": "Harry Potter Quiz", "url": "/games/quizzes/harry-potter/", "description": "Four difficulty levels", "keywords": ["hp"] },
+                        { "title": "Cross Quiz", "url": "/games/quizzes/cross-quiz/", "description": "A crossword generator where every clue is a trivia question", "keywords": ["crossword", "trivia", "quiz", "puzzle", "generator", "opentdb", "general knowledge"] },
                         { "title": "HP Quiz: Easy", "url": "/games/quizzes/harry-potter/easy/", "nav": false, "hub_skip": true },
                         { "title": "HP Quiz: Medium", "url": "/games/quizzes/harry-potter/medium/", "nav": false, "hub_skip": true },
                         { "title": "HP Quiz: Hard", "url": "/games/quizzes/harry-potter/hard/", "nav": false, "hub_skip": true },
