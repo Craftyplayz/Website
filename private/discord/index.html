@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Discord Recap</title>
+<style>
+:root{--bg:#0f1020;--panel:#1a1b2e;--fg:#f4f4fb;--mut:#a3a6c4;--acc:#7c83ff}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+header{flex:none;padding:8px 12px;background:#0b0c18;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;z-index:5}
+.brand{font-weight:900;letter-spacing:.02em;background:linear-gradient(90deg,#ff3cac,#7c83ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-right:auto}
+.seg{display:flex;background:#1d1e33;border-radius:99px;padding:3px}
+.seg button,.chips button,.mchips button,.ctl{border:0;background:none;border-radius:99px;padding:5px 12px;font-size:14px;font-weight:600}
+.seg button[aria-pressed=true]{background:#fff;color:#111}
+.ctl{background:#1d1e33}
+.chips{order:5;flex-basis:100%;display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+.chips button{flex:none;background:#1d1e33;color:var(--mut)}
+.chips button[aria-pressed=true]{background:var(--acc);color:#fff}
+button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+main{flex:1;min-height:0;position:relative}
+section[hidden]{display:none}
+/* story */
+#story{--s1:#fff;--s2:#ffe14d;--hcol:#fff;position:absolute;inset:0;color:#fff;transition:background .4s}
+.pb{position:absolute;top:8px;left:12px;right:12px;display:flex;gap:4px;z-index:3}
+.pb i{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden}
+.pb b{display:block;height:100%;width:0;background:#fff}
+.pb i.done b{width:100%}
+.pb i.on b{animation:fill 9s linear forwards}
+body.paused .pb i.on b{animation-play-state:paused}
+@keyframes fill{to{width:100%}}
+.card{position:absolute;inset:0;overflow-y:auto;padding:28px 20px 24px;display:flex;flex-direction:column}
+.card>.in{margin:auto;width:100%;max-width:640px;animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.k{margin:0 0 6px;text-transform:uppercase;letter-spacing:.12em;font-size:13px;font-weight:700;opacity:.85}
+.huge{margin:0;font-size:clamp(44px,13vw,96px);line-height:1;font-weight:900;letter-spacing:-.02em}
+.big{font-size:clamp(64px,23vw,168px);line-height:1;font-weight:900;letter-spacing:-.04em;font-variant-numeric:tabular-nums;margin:0}
+.big.small{font-size:clamp(32px,10vw,60px)}
+.sub{margin:6px 0 16px;font-size:clamp(18px,4.5vw,26px);font-weight:700}
+.cap,.cap2,.note{font-size:13px;opacity:.85;margin:6px 0 0}
+.note{background:rgba(0,0,0,.25);padding:6px 10px;border-radius:8px;display:inline-block}
+.nd{opacity:.8;font-style:italic;margin:4px 0}
+.quote{font-size:clamp(24px,6vw,40px);font-weight:800;line-height:1.2;margin:8px 0}
+.go{border:0;background:#fff;color:#111;font-weight:800;padding:10px 18px;border-radius:99px;margin:6px 8px 0 0}
+.go.alt{background:rgba(255,255,255,.2);color:#fff}
+.two{display:grid;gap:18px;grid-template-columns:1fr 1fr}
+@media(max-width:520px){.two{grid-template-columns:1fr}}
+h3{margin:0 0 8px;font-size:15px}
+/* lists */
+.list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.r{display:flex;gap:8px;align-items:baseline;font-weight:600}
+.r b{width:1.2em;opacity:.7;font-size:13px}
+.r span{flex:1;min-width:0;overflow-wrap:anywhere}
+.r em{font-style:normal;font-variant-numeric:tabular-nums}
+.meter{height:6px;border-radius:3px;background:rgba(255,255,255,.2);margin-top:3px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--s1);border-radius:3px;transform-origin:left;animation:grow .7s ease both}
+@keyframes grow{from{transform:scaleX(0)}}
+.split{display:flex;border-radius:8px;overflow:hidden;font-size:13px;font-weight:700}
+.split i{font-style:normal;padding:6px 8px;background:var(--s2);color:#111;white-space:nowrap}
+.split i+i{flex:1;background:var(--s1);color:#111}
+/* charts */
+.chart{width:100%;height:auto;display:block;color:inherit;overflow:visible}
+.bar{fill:var(--s1);animation:grow2 .6s ease both;transform-box:fill-box;transform-origin:bottom}
+.bar.sel{fill:var(--s2)}
+@keyframes grow2{from{transform:scaleY(0)}}
+.lbl{fill:currentColor;opacity:.75;font-size:10px}
+.chart .nd{fill:currentColor;font-size:14px}
+.hit{fill:transparent;cursor:pointer}
+.hit:hover{fill:rgba(255,255,255,.12)}
+.grid line{stroke:currentColor;opacity:.2}
+.shade{fill:currentColor;opacity:.1}
+.ln{fill:none;stroke-width:2.5;stroke-linejoin:round}
+.ln.a{stroke:var(--s1)}.ln.b{stroke:var(--s2);stroke-dasharray:6 3}
+.dot.a{fill:var(--s1)}.dot.b{fill:var(--s2)}
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;margin-bottom:4px}
+.leg span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:6px}
+.heat{display:grid;grid-template-columns:2.4em repeat(24,1fr);gap:2px;align-items:center;font-size:10px}
+.heat i{aspect-ratio:1;border-radius:2px;background:var(--hcol);opacity:var(--a)}
+.heat span{white-space:nowrap;opacity:.8}
+/* dashboard */
+#dash{--s1:#7c83ff;--s2:#3ddc97;--hcol:#7c83ff;position:absolute;inset:0;overflow-y:auto;padding:14px 16px 40px}
+#dash .wrap{max-width:1100px;margin:0 auto}
+#dash h2{margin:4px 0 8px;font-size:26px}
+.mchips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.mchips button{background:#1d1e33;color:var(--mut);padding:4px 10px;font-size:13px}
+.mchips button[aria-pressed=true]{background:var(--acc);color:#fff}
+.notes p{margin:4px 0;font-size:13px;color:#ffd479}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0}
+.tile{background:linear-gradient(135deg,#25274a,#1a1b2e);border-radius:14px;padding:12px;display:flex;flex-direction:column}
+.tile span{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+.tile b{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums}
+.tile small{font-size:15px;font-style:italic;color:var(--mut);padding:6px 0}
+.tile em{font-style:normal;font-size:12px;color:var(--mut)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.panel{background:var(--panel);border-radius:16px;padding:14px;min-width:0}
+.panel.wide{grid-column:1/-1}
+.panel .meter{background:#2c2e50}
+.panel .cap2,.panel .cap{color:var(--mut)}
+.foot{margin-top:24px;font-size:12px;color:var(--mut)}
+#tip{position:fixed;z-index:20;pointer-events:none;background:#000;color:#fff;font-size:13px;padding:5px 9px;border-radius:8px;max-width:260px;box-shadow:0 2px 10px rgba(0,0,0,.5)}
+#tip[hidden]{display:none}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+.tile small.nd{font-size:15px}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">RECAP ✦ Discord</span>
+  <div class="seg" role="group" aria-label="View">
+    <button id="vStory" aria-pressed="true">Story</button>
+    <button id="vDash" aria-pressed="false">Dashboard</button>
+  </div>
+  <button class="ctl" id="pause">Pause</button>
+  <div class="chips" id="years" role="group" aria-label="Year"></div>
+</header>
+<main>
+  <section id="story"><div class="pb" id="pb"></div><div class="card" id="card"></div></section>
+  <section id="dash" hidden></section>
+</main>
+<div id="tip" hidden></div>
+<script src="data.js"></script>
+<script>
+"use strict";
+(function(){
+const $=id=>document.getElementById(id);
+const R=window.RECAP;
+if(!R||!R.periods){
+  document.body.style.overflow='auto';
+  document.body.innerHTML='<p style="padding:24px;font-size:18px">data.js not found \u2014 run: <code>py -I build.py D:/package</code></p>';
+  return;
+}
+const YEARS=R.years;
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const GRAD=['#ff3cac,#784ba0,#2b86c5','#ff512f,#dd2476','#0052d4,#4364f7,#2a5298','#0f9b8e,#0b6e4f','#fc466b,#3f5efb','#f7797d,#c33764','#5f2c82,#49a09d','#b24592,#f15f79'];
+const ACT=['react','voice_h','streamed_h','watched_h','opens'];
+const LASTM=R.last_day.slice(0,7);
+
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;');
+const fin=n=>typeof n==='number'&&isFinite(n);
+const fmt=n=>fin(n)?Math.round(n).toLocaleString('en-US'):'\u2013';
+const fh=n=>!fin(n)?'\u2013':n>=100?fmt(n):(Math.round(n*10)/10).toLocaleString('en-US');
+const hf=v=>fh(v)+' h';
+const nd=t=>`<p class="nd">${esc(t)}</p>`;
+const fd=s=>{const [y,m,d]=s.split('-');return `${MN[+m-1]} ${+d}, ${y}`};
+
+// ---- data access ----
+const key=(y,m)=>y==='all'?'all':m<0?String(y):y+'-'+String(m+1).padStart(2,'0');
+function per(y,m){
+  const k=key(y,m),p=R.periods[k];
+  if(p)return p;
+  if(k.length===7&&k>LASTM)return {future:true};
+  // month with no activity: zero, but keep the year's "not tracked" nulls
+  const yp=R.periods[String(y)]||{},o={};
+  ['msgs','att','react','voice_h','voice_sessions','streamed_h','watched_h','opens','speak','listen'].forEach(n=>{o[n]=yp[n]==null?null:0});
+  o.msgs=0;o.att=0;
+  return o;
+}
+const why=(k,p)=>p.future?'no data yet':k==='msgs'||k==='att'?'no data':R.quick&&ACT.includes(k)?'not built yet':'not tracked';
+const lst=(p,k)=>Array.isArray(p[k])?p[k]:[];
+const series=(y,k)=>y==='all'?YEARS.map(yy=>per(yy,-1)[k]):MN.map((_,i)=>per(y,i)[k]);
+const whyAt=(k,y,i)=>y==='all'?why(k,per(YEARS[i],-1)):why(k,per(y,i));
+const lbls=y=>y==='all'?YEARS.map(v=>"'"+String(v).slice(2)):MN;
+const full=y=>y==='all'?YEARS:MF;
+const label=(y,m)=>y==='all'?'All time':m<0?String(y):MF[m]+' '+y;
+const voiceNote=y=>y==='all'||y<2020?'Voice logs incomplete before 2020. Gaps show "no data", not 0.':'';
+
+function rows(items,f){
+  const mx=Math.max(1,...items.map(i=>+i[1]||0));
+  return '<ul class="list">'+items.map((it,i)=>`<li data-tip="${esc(it[0])}: ${esc(f(it[1]))}"><div class="r"><b>${i+1}</b><span>${esc(it[0])}</span><em>${esc(f(it[1]))}</em></div><div class="meter"><i style="width:${Math.max(3,(+it[1]||0)/mx*100)}%"></i></div></li>`).join('')+'</ul>';
+}
+// list section; dep = the p field that must be tracked for the list to mean anything
+function listSec(p,k,dep,f,n){
+  if(p[dep]==null)return nd(why(dep,p));
+  const l=lst(p,k).slice(0,n||5);
+  return l.length?rows(l,f):nd('no data');
+}
+
+// ---- charts ----
+function bars(vals,o){
+  const W=320,H=140,pb=18,pt=6,n=vals.length,bw=W/n,mx=Math.max(1,...vals.map(v=>fin(v)?v:0)),lb=lbls(o.y),fl=full(o.y);
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria)}">`;
+  vals.forEach((v,i)=>{
+    const x=i*bw,h=!fin(v)?0:Math.max(2,(H-pb-pt)*v/mx);
+    const tip=esc(`${fl[i]}: ${!fin(v)?whyAt(o.k,o.y,i):(o.f||fmt)(v)+' '+o.unit}`);
+    s+=!fin(v)?`<text class="nd" x="${x+bw/2}" y="${H-pb-5}" text-anchor="middle">\u2013</text>`
+      :`<rect class="bar${o.sel===i?' sel':''}" x="${x+bw*.15}" y="${H-pb-h}" width="${bw*.7}" height="${h}" rx="3"/>`;
+    s+=`<text class="lbl" x="${x+bw/2}" y="${H-4}" text-anchor="middle">${lb[i]}</text><rect class="hit" data-m="${i}" data-tip="${tip}" x="${x}" y="0" width="${bw}" height="${H}"/>`;
+  });
+  return s+'</svg>';
+}
+function lines(y,sel){
+  const a=series(y,'streamed_h'),b=series(y,'watched_h'),lb=lbls(y),fl=full(y),n=lb.length;
+  const W=320,H=170,pl=30,pr=4,pt=10,pb=20,step=(W-pl-pr)/n,mx=Math.max(1,...a.concat(b).map(v=>fin(v)?v:0));
+  const X=i=>pl+step*(i+.5),Yy=v=>pt+(H-pt-pb)*(1-v/mx);
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Hours streamed and watched over time"><g class="grid">`;
+  [0,.5,1].forEach(f=>{const yy=Yy(mx*f);s+=`<line x1="${pl}" x2="${W-pr}" y1="${yy}" y2="${yy}"/><text class="lbl" x="${pl-4}" y="${yy+3}" text-anchor="end">${fh(mx*f)}</text>`});
+  s+='</g>';
+  for(let i=0;i<n;i++){
+    if(!fin(a[i])&&!fin(b[i]))s+=`<rect class="shade" x="${pl+step*i}" y="${pt}" width="${step}" height="${H-pt-pb}"/>`;
+    if(sel===i)s+=`<rect x="${pl+step*i}" y="${pt}" width="${step}" height="${H-pt-pb}" fill="var(--s2)" opacity=".18"/>`;
+  }
+  [[a,'a'],[b,'b']].forEach(([v,c])=>{
+    let d='',pen=false;
+    v.forEach((x,i)=>{if(!fin(x)){pen=false;return}d+=(pen?'L':'M')+X(i)+' '+Yy(x);pen=true});
+    if(d)s+=`<path class="ln ${c}" d="${d}"/>`;
+    v.forEach((x,i)=>{if(fin(x))s+=`<circle class="dot ${c}" cx="${X(i)}" cy="${Yy(x)}" r="3"/>`});
+  });
+  for(let i=0;i<n;i++){
+    const tip=!fin(a[i])&&!fin(b[i])?whyAt('streamed_h',y,i):`streamed ${fh(a[i]||0)} h \u00b7 watched ${fh(b[i]||0)} h`;
+    s+=`<text class="lbl" x="${X(i)}" y="${H-5}" text-anchor="middle">${lb[i]}</text><rect class="hit" data-m="${i}" data-tip="${esc(fl[i]+': '+tip)}" x="${pl+step*i}" y="0" width="${step}" height="${H}"/>`;
+  }
+  return s+'</svg>';
+}
+const legend='<div class="leg"><span style="--c:var(--s1)">You streamed (h)</span><span style="--c:var(--s2)">You watched others (h)</span></div>';
+const hasStream=(y)=>series(y,'streamed_h').concat(series(y,'watched_h')).some(v=>fin(v)&&v>0);
+
+// ---- sections: (y,m,p) -> html ----
+const SEC={
+  react:(y,m,p)=>listSec(p,'react_emoji','react',fmt,5),
+  ppl:(y,m,p)=>listSec(p,'people','voice_h',hf,5),
+  grp:(y,m,p)=>listSec(p,'groups','voice_h',hf,3)+(lst(p,'groups').length?'<p class="cap2">group DMs (members not tracked per call)</p>':''),
+  srv:(y,m,p)=>listSec(p,'vc','voice_h',hf,5)+(lst(p,'vc').length?'<p class="cap2">no per-person data for server voice channels</p>':''),
+  chan:(y,m,p)=>lst(p,'places').length?rows(lst(p,'places').slice(0,5),fmt):nd(why('msgs',p)),
+  words:(y,m,p)=>lst(p,'words').length?rows(lst(p,'words').slice(0,5),v=>fmt(v)+' msgs'):nd('no data'),
+  emoji:(y,m,p)=>lst(p,'emoji').length?rows(lst(p,'emoji').slice(0,5),v=>fmt(v)+' msgs'):nd('no data'),
+  games:(y,m,p)=>lst(p,'games').length?rows(lst(p,'games').slice(0,5),hf):nd(p.future?'no data yet':'no game data'),
+  files:(y,m,p)=>{
+    if(p.att==null)return nd(why('att',p));
+    const f=p.files||{},l=[['Images',f.Images||0],['Videos',f.Videos||0],['Other',f.Other||0]].filter(r=>r[1]>0);
+    return l.length?rows(l,fmt):nd('no data');
+  },
+  ratio:(y,m,p)=>{
+    if(p.voice_h==null)return nd(why('voice_h',p));
+    const t=(p.speak||0)+(p.listen||0);
+    if(!t)return nd('no data');
+    const sp=Math.round((p.speak||0)/t*100);
+    return `<div class="split"><i style="width:${sp}%">Started speaking ${sp}%</i><i>Listening ${100-sp}%</i></div><p class="cap2">${fmt(p.speak)} times you started speaking, ${fmt(p.listen)} times you started listening (counts, not durations)</p>`;
+  },
+  heat:(y,m,p)=>{
+    const H=p.heat;
+    if(!Array.isArray(H)||H.length!==7||!(p.msgs>0))return nd(why('msgs',p));
+    let mx=0,pk=0;
+    for(let d=0;d<7;d++)for(let h=0;h<24;h++){const x=+H[d][h]||0;if(x>mx){mx=x;pk=d*24+h}}
+    if(!mx)return nd('no data');
+    let s='<div class="heat"><span></span>'+[...Array(24).keys()].map(h=>`<span>${h%6===0?h:''}</span>`).join('');
+    for(let d=0;d<7;d++){
+      s+=`<span>${DAYS[d]}</span>`;
+      for(let h=0;h<24;h++){const x=+H[d][h]||0;s+=`<i style="--a:${Math.max(.08,x/mx).toFixed(2)}" data-tip="${DAYS[d]} ${h}:00 \u00b7 ${fmt(x)} messages"></i>`}
+    }
+    return s+`</div><p class="cap2">Busiest: ${DAYS[Math.floor(pk/24)]} at ${pk%24}:00 (UK time)</p>`;
+  },
+  first:(y,m,p)=>{
+    const f=p.first;
+    if(!f)return nd(why('msgs',p));
+    const t=String(f.text||'').trim().slice(0,300);
+    const ts=String(f.ts||'');
+    return `<p class="quote">${t?'\u201c'+esc(t)+'\u201d':'(no text, attachment only)'}</p><p class="cap2">${esc(fd(ts.slice(0,10)))} ${esc(ts.slice(11))} \u00b7 ${esc(f.where)}</p>`;
+  },
+  stream:(y,m,p)=>hasStream(y)?legend+lines(y,m):nd(R.quick?'not built yet':'not tracked (streaming starts Mar 2020)')
+};
+const sec=(n,y,m)=>SEC[n](y,m,per(y,m));
+
+// ---- state / story ----
+const S={y:YEARS[YEARS.length-1],view:'story',m:-1,idx:0,cards:[],paused:matchMedia('(prefers-reduced-motion: reduce)').matches};
+const gradFor=i=>`linear-gradient(rgba(0,0,0,.22),rgba(0,0,0,.22)),linear-gradient(135deg,${GRAD[i%GRAD.length]})`;
+function cards(y){
+  const p=per(y,-1),unit=y==='all'?'year':'month',ms=series(y,'msgs'),fl=full(y);
+  const big=(v,f)=>`<p class="big" data-n="${v}">${(f||fmt)(v)}</p>`;
+  const mini=(k,u,f)=>bars(series(y,k),{y,k,unit:u,f,aria:k+' per '+unit})+`<p class="cap">Tap a bar for that ${unit}</p>`;
+  const top=ms.indexOf(Math.max(...ms.map(v=>fin(v)?v:0)));
+  const pos=k=>fin(p[k])&&p[k]>0;
+  const C=[];
+  const notes=[voiceNote(y),R.quick?'Quick build: voice, streaming, reactions and app opens are not built yet.':'',y==='all'||y<2021?'Streaming is tracked from Mar 2020.':''].filter(Boolean);
+  C.push(`<p class="k">${esc(R.username||'')}</p><h1 class="huge">${y==='all'?'Your Discord,<br>all time':`Your ${y}<br>on Discord`}</h1><p class="sub">${y==='all'?`${YEARS[0]} to ${esc(fd(R.last_day))}`:y===YEARS[YEARS.length-1]?`January to ${esc(fd(R.last_day))}`:'Tap or press \u2192 to begin'}</p>${notes.map(n=>`<p class="note">${esc(n)}</p> `).join('')}`);
+  if(pos('msgs'))C.push(`<p class="k">You sent</p>${big(p.msgs)}<p class="sub">messages${top>=0&&ms[top]>0?` \u00b7 busiest ${unit}: ${fl[top]}`:''}</p>${mini('msgs','messages')}`);
+  if(pos('att'))C.push(`<p class="k">You shared</p>${big(p.att)}<p class="sub">attachment files</p><h3>File types</h3>${sec('files',y,-1)}`);
+  if(pos('react'))C.push(`<p class="k">You reacted</p>${big(p.react)}<p class="sub">times</p>${lst(p,'react_emoji').length?`<h3>Top 5 reaction emoji</h3>${sec('react',y,-1)}`:''}`);
+  if(pos('voice_h')){
+    C.push(`<p class="k">You talked for</p>${big(p.voice_h,fh)}<p class="sub">hours in voice chat${pos('voice_sessions')?` \u00b7 ${fmt(p.voice_sessions)} sessions`:''}</p>${voiceNote(y)?`<p class="note">${esc(voiceNote(y))}</p>`:''}${(p.speak||0)+(p.listen||0)?`<h3 style="margin-top:14px">Speaking vs listening</h3>${sec('ratio',y,-1)}`:''}${mini('voice_h','h',fh)}`);
+  }
+  if(lst(p,'people').length)C.push(`<p class="k">Most-called people</p><p class="sub">Top 5 by DM voice time</p>${sec('ppl',y,-1)}`);
+  if(lst(p,'groups').length)C.push(`<p class="k">Group DM hangouts</p><p class="sub">Top 3 by voice time</p>${sec('grp',y,-1)}`);
+  if(lst(p,'vc').length)C.push(`<p class="k">Favourite voice spots</p><p class="sub">Top 5 servers / channels</p>${sec('srv',y,-1)}`);
+  if(hasStream(y))C.push(`<p class="k">Streaming</p><p class="sub">${fh(p.streamed_h||0)} h streamed \u00b7 ${fh(p.watched_h||0)} h watched</p>${sec('stream',y,-1)}<p class="cap">Tap a column for ${unit} numbers</p>`);
+  if(lst(p,'words').length||lst(p,'emoji').length)C.push(`<div class="two">${lst(p,'words').length?`<div><p class="k">Your words</p>${sec('words',y,-1)}</div>`:''}${lst(p,'emoji').length?`<div><p class="k">Your emoji</p>${sec('emoji',y,-1)}</div>`:''}</div>`);
+  if(pos('msgs')&&p.heat)C.push(`<p class="k">When you're online</p><p class="sub">Busiest hour \u00d7 weekday (UK time)</p>${sec('heat',y,-1)}`);
+  if(p.streak&&p.streak.days>0||pos('opens')){
+    const st=p.streak;
+    C.push(`<p class="k">${st?'Longest daily messaging streak':'App opens'}</p>${st?`${big(st.days)}<p class="sub">days in a row${st.start?` \u00b7 ${esc(fd(st.start))} to ${esc(fd(st.end))}`:''}</p>`:`${big(p.opens)}<p class="sub">times</p>`}${st&&pos('opens')?`<p class="sub">App opens: ${fmt(p.opens)}</p>${mini('opens','opens')}`:''}`);
+  }
+  if(lst(p,'places').length)C.push(`<p class="k">Where you talk</p><p class="sub">Top servers, channels and DMs by messages</p>${sec('chan',y,-1)}`);
+  if(lst(p,'games').length)C.push(`<p class="k">Games and activities</p><p class="sub">Top 5 by hours</p>${sec('games',y,-1)}`);
+  if(p.first)C.push(`<p class="k">${y==='all'?'Your very first message':`First message of ${y}`}</p>${sec('first',y,-1)}`);
+  C.push(`<p class="k">That's a wrap</p><h1 class="huge">${y==='all'?`${YEARS.length} years`:y}<br>done.</h1><p class="sub" style="margin-top:14px"><button class="go" data-act="dash">See dashboard</button><button class="go alt" data-act="replay">Replay</button></p><p class="cap2">Only your own messages are included. Deleted messages are missing. Times are UK local.</p>`);
+  return C;
+}
+function showCard(){
+  const c=$('card');
+  $('story').style.background=gradFor(S.idx);
+  c.innerHTML=`<div class="in">${S.cards[S.idx]}</div>`;c.scrollTop=0;
+  $('pb').innerHTML=S.cards.map((_,i)=>`<i class="${i<S.idx?'done':i===S.idx?'on':''}"><b></b></i>`).join('');
+  c.querySelectorAll('[data-n]').forEach(el=>{
+    const end=+el.dataset.n,txt=el.textContent,t0=performance.now();
+    (function f(t){const k=Math.min(1,(t-t0)/900),v=end*(1-Math.pow(1-k,3));el.textContent=k<1?(end%1?fh(v):fmt(v)):txt;if(k<1)requestAnimationFrame(f)})(t0);
+  });
+}
+const go=i=>{S.idx=Math.max(0,Math.min(S.cards.length-1,i));showCard()};
+
+// ---- dashboard ----
+function renderDash(){
+  const y=S.y,m=S.m,p=per(y,m),d=$('dash'),sc=d.scrollTop,yr=y==='all';
+  const tile=(t,k,f,u)=>`<div class="tile"><span>${t}</span>${!fin(p[k])?`<small>${why(k,p)}</small>`:`<b>${f(p[k])}</b>`}<em>${u}</em></div>`;
+  const pan=(t,h,w)=>`<section class="panel${w?' wide':''}"><h3>${t}</h3>${h}</section>`;
+  const ch=(t,k,u,f)=>pan(t,bars(series(y,k),{y,k,unit:u,f,sel:m,aria:t})+(k==='voice_h'&&voiceNote(y)?`<p class="cap2">${esc(voiceNote(y))}</p>`:''));
+  const st=p.streak;
+  const notes=[voiceNote(y),R.quick?'Quick build: voice, streaming, reactions and app opens are not built yet.':'',y==='all'||y<2021?'Streaming is tracked from Mar 2020.':'',y===YEARS[YEARS.length-1]?`Data runs to ${fd(R.last_day)}. Later months show "no data yet".`:''].filter(Boolean);
+  d.innerHTML=`<div class="wrap"><h2>${esc(label(y,m))}</h2>
+  ${yr?'<p class="cap2">Click a year bar to open that year.</p>':`<div class="mchips" role="group" aria-label="Month">${['Whole year',...MN].map((n,i)=>`<button data-mc="${i-1}" aria-pressed="${m===i-1}">${n}</button>`).join('')}</div>`}
+  <div class="notes">${notes.map(n=>`<p>\u26a0 ${esc(n)}</p>`).join('')}</div>
+  <div class="tiles">${tile('Messages','msgs',fmt,'sent')}${tile('Attachments','att',fmt,'files sent')}${tile('Reactions','react',fmt,'added')}${tile('Voice time','voice_h',fh,'hours')}${tile('Voice sessions','voice_sessions',fmt,'joined')}${tile('Streamed','streamed_h',fh,'hours')}${tile('Watched','watched_h',fh,'hours')}${tile('App opens','opens',fmt,'times')}<div class="tile"><span>Longest streak</span>${st?`<b>${fmt(st.days)}</b>`:`<small>${why('msgs',p)}</small>`}<em>${st&&st.start?esc(fd(st.start))+' to '+esc(fd(st.end)):'days in a row'}</em></div></div>
+  <div class="pgrid">
+  ${pan(`Messages per ${yr?'year':'month'} (click to select)`,bars(series(y,'msgs'),{y,k:'msgs',unit:'messages',sel:m,aria:'Messages'}),1)}
+  ${ch('Attachments','att','files')}${ch('Reactions','react','reactions')}${ch('Voice hours','voice_h','h',fh)}${ch('App opens','opens','opens')}
+  ${pan('Streaming over time',sec('stream',y,m),1)}
+  ${pan('Top reaction emoji',sec('react',y,m))}${pan('Top people by voice time (DM calls)',sec('ppl',y,m))}
+  ${pan('Top group DMs by voice time',sec('grp',y,m))}${pan('Top servers / voice channels by voice time',sec('srv',y,m))}
+  ${pan('Speaking vs listening',sec('ratio',y,m))}${pan('File types sent',sec('files',y,m))}
+  ${pan('Top words',sec('words',y,m))}${pan('Top emoji in messages',sec('emoji',y,m))}
+  ${pan('Top servers, channels and DMs by messages',sec('chan',y,m))}${pan('Games and activities',sec('games',y,m))}
+  ${pan('Busiest hour \u00d7 weekday (UK time)',sec('heat',y,m),1)}
+  ${pan(yr?'First message ever':m<0?`First message of ${y}`:`First message of ${MF[m]}`,sec('first',y,m))}
+  </div><p class="foot">Only your own messages are included; deleted messages are missing; times are UK local. Generated ${esc(R.generated)}.</p></div>`;
+  d.scrollTop=sc;
+}
+
+// ---- wiring ----
+function render(){
+  document.querySelectorAll('#years button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.y===String(S.y))));
+  $('vStory').setAttribute('aria-pressed',String(S.view==='story'));
+  $('vDash').setAttribute('aria-pressed',String(S.view==='dash'));
+  $('story').hidden=S.view!=='story';$('dash').hidden=S.view!=='dash';$('pause').hidden=S.view!=='story';
+  S.cards=cards(S.y);
+  if(S.view==='story')showCard();else renderDash();
+}
+function setYear(y){S.y=y;S.m=-1;S.idx=0;render()}
+$('years').innerHTML=['all',...YEARS].map(y=>`<button data-y="${y}" aria-pressed="false">${y==='all'?'All time':y}</button>`).join('');
+$('years').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setYear(b.dataset.y==='all'?'all':+b.dataset.y)});
+$('vStory').onclick=()=>{S.view='story';render()};
+$('vDash').onclick=()=>{S.view='dash';render()};
+$('pause').onclick=()=>{S.paused=!S.paused;document.body.classList.toggle('paused',S.paused);$('pause').textContent=S.paused?'Play':'Pause'};
+$('pb').addEventListener('animationend',()=>{if(S.idx<S.cards.length-1)go(S.idx+1)});
+$('story').addEventListener('click',e=>{
+  const a=e.target.closest('[data-act]');
+  if(a){if(a.dataset.act==='dash'){S.view='dash';render()}else go(0);return}
+  if(e.target.closest('button,a,[data-m]'))return;
+  const r=$('story').getBoundingClientRect();
+  go(e.clientX-r.left<r.width/3?S.idx-1:S.idx+1);
+});
+$('dash').addEventListener('click',e=>{const b=e.target.closest('[data-mc]');if(b){S.m=+b.dataset.mc;renderDash()}});
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-m]');if(!t)return;const i=+t.dataset.m;
+  if(S.view==='dash'){if(S.y==='all')setYear(YEARS[i]);else{S.m=S.m===i?-1:i;renderDash()}}
+  else{const c=t.closest('.in').querySelector('.cap');if(c)c.textContent=t.dataset.tip}
+});
+document.addEventListener('keydown',e=>{
+  if(S.view!=='story')return;
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(S.idx+1)}
+  else if(e.key==='ArrowLeft'){go(S.idx-1)}
+});
+const tip=$('tip');let tt;
+function showTip(e){
+  const t=e.target.closest&&e.target.closest('[data-tip]');
+  if(!t){tip.hidden=true;return}
+  tip.textContent=t.dataset.tip;tip.hidden=false;
+  tip.style.left=Math.max(4,Math.min(innerWidth-tip.offsetWidth-8,e.clientX+12))+'px';
+  tip.style.top=Math.min(innerHeight-tip.offsetHeight-4,e.clientY+16)+'px';
+  if(e.type==='click'){clearTimeout(tt);tt=setTimeout(()=>{tip.hidden=true},1800)}
+}
+document.addEventListener('mousemove',showTip);
+document.addEventListener('click',showTip);
+document.body.classList.toggle('paused',S.paused);$('pause').textContent=S.paused?'Play':'Pause';
+render();
+})();
+</script>
+</body>
+</html>

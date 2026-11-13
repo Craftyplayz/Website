@@ -33,3 +33,6 @@ _dev/archive/dnd/games/dnd/transcripts/data/*
 !_dev/archive/dnd/games/dnd/transcripts/data/.gitignore
 !_dev/archive/dnd/games/dnd/transcripts/data/.htaccess
 _dev/archive/dnd/games/dnd/characters/cache/*.json
+
+# Discord recap stats (personal: message text, who I talk to) - built by _dev/discord-recap, server only
+private/discord/data.js

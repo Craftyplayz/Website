@@ -11,6 +11,7 @@ $sections = [
     'downloads' => 'Files for download',
     'scripts' => 'Small test scripts',
     'gifs' => 'Meme GIF maker',
+    'discord' => 'Discord recap',
     'minecraft/farms' => 'Tick off farms built',
     'minecraft/collection' => 'Tick off collected items',
     'dnd' => 'D&D sheet backups',
