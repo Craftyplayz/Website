@@ -102,7 +102,7 @@ def scan_messages():
                     p['files'][file_kind(f)] += 1
                 p['places'][where] += 1
                 p['words'].update(words)
-                p['emoji'].update(set(emo))  # once per message, like words, so emoji spam can't inflate counts
+                p['emoji'].update(emo)
                 p['heat'][t.weekday()][t.hour] += 1
                 p['days'].add(t.date())
                 if p['first'] is None or t < p['first'][0]:

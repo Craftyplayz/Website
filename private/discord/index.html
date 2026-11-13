@@ -145,6 +145,7 @@ const fin=n=>typeof n==='number'&&isFinite(n);
 const fmt=n=>fin(n)?Math.round(n).toLocaleString('en-US'):'\u2013';
 const fh=n=>!fin(n)?'\u2013':n>=100?fmt(n):(Math.round(n*10)/10).toLocaleString('en-US');
 const hf=v=>fh(v)+' h';
+const xf=v=>fmt(v)+'\u00d7';
 const nd=t=>`<p class="nd">${esc(t)}</p>`;
 const fd=s=>{const [y,m,d]=s.split('-');return `${MN[+m-1]} ${+d}, ${y}`};
 
@@ -227,7 +228,7 @@ const SEC={
   srv:(y,m,p)=>listSec(p,'vc','voice_h',hf,5)+(lst(p,'vc').length?'<p class="cap2">no per-person data for server voice channels</p>':''),
   chan:(y,m,p)=>lst(p,'places').length?rows(lst(p,'places').slice(0,5),fmt):nd(why('msgs',p)),
   words:(y,m,p)=>lst(p,'words').length?rows(lst(p,'words').slice(0,5),v=>fmt(v)+' msgs'):nd('no data'),
-  emoji:(y,m,p)=>lst(p,'emoji').length?rows(lst(p,'emoji').slice(0,5),v=>fmt(v)+' msgs'):nd('no data'),
+  emoji:(y,m,p)=>lst(p,'emoji').length?rows(lst(p,'emoji').slice(0,5),xf):nd('no data'),
   games:(y,m,p)=>lst(p,'games').length?rows(lst(p,'games').slice(0,5),hf):nd(p.future?'no data yet':'no game data'),
   files:(y,m,p)=>{
     if(p.att==null)return nd(why('att',p));
