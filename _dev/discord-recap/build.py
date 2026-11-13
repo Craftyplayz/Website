@@ -12,7 +12,7 @@ NAME = sys.argv[2]  # recap folder: private/discord/<NAME>/
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'private', 'discord', NAME, 'data.js')  # gitignored: personal, server-only
 TOP = 10
 
-# ---------- time: UTC -> UK local (no tzdata on this machine) ----------
+# ---------- time: UTC -> local clock (UK, or ZONES below; no tzdata on this machine) ----------
 def _last_sunday(y, m):
     d = dt.date(y, m, 31)
     return d - dt.timedelta(days=(d.weekday() + 1) % 7)
@@ -24,6 +24,24 @@ def uk(t):  # t: naive UTC datetime
         _BST[y] = (dt.datetime.combine(_last_sunday(y, 3), dt.time(1)), dt.datetime.combine(_last_sunday(y, 10), dt.time(1)))
     s, e = _BST[y]
     return t + dt.timedelta(hours=1) if s <= t < e else t
+
+def _nth_sunday(y, m, n):
+    d = dt.date(y, m, 1)
+    return d + dt.timedelta(days=(6 - d.weekday()) % 7 + 7 * (n - 1))
+
+_EDT = {}
+def us_east(t):  # t: naive UTC datetime; EDT from 2nd Sunday of March 02:00 EST to 1st Sunday of November 02:00 EDT
+    y = t.year
+    if y not in _EDT:
+        _EDT[y] = (dt.datetime.combine(_nth_sunday(y, 3, 2), dt.time(7)), dt.datetime.combine(_nth_sunday(y, 11, 1), dt.time(6)))
+    s, e = _EDT[y]
+    return t - dt.timedelta(hours=4 if s <= t < e else 5)
+
+# whose recap uses which clock (default UK)
+ZONES = {'spooky': ('US Eastern', us_east)}
+TZ_NAME, local = ZONES.get(NAME, ('UK', uk))
+assert us_east(dt.datetime(2026, 7, 1, 12)) == dt.datetime(2026, 7, 1, 8) and us_east(dt.datetime(2026, 1, 1, 12)) == dt.datetime(2026, 1, 1, 7)
+assert us_east(dt.datetime(2026, 3, 8, 6, 59)).hour == 1 and us_east(dt.datetime(2026, 3, 8, 7)).hour == 3  # spring forward
 
 def parse_iso(s):  # '2021-12-21T21:11:46.354Z' or '2021-12-21T21:11:46Z'
     return dt.datetime.strptime(s.strip('"')[:19], '%Y-%m-%dT%H:%M:%S')
@@ -89,7 +107,7 @@ def scan_messages():
         else:
             where = clean_channel_name(cid) or ('Group DM' if ch.get('type') == 'GROUP_DM' else 'Unknown channel')
         for m in load(os.path.join(cdir, 'messages.json'), []):
-            t = uk(dt.datetime.strptime(m['Timestamp'][:19], '%Y-%m-%d %H:%M:%S'))
+            t = local(dt.datetime.strptime(m['Timestamp'][:19], '%Y-%m-%d %H:%M:%S'))
             text = m.get('Contents') or ''
             files = (m.get('Attachments') or '').split()
             body = URL.sub(' ', text)
@@ -127,7 +145,7 @@ def scan_modeling():
     path = os.path.join(PKG, 'Activity', 'modeling', 'events-2026-00000-of-00001.json')
     wanted = ('add_reaction', 'leave_voice_channel', 'video_stream_ended', 'app_opened', 'start_speaking', 'start_listening')
     for e in events(path, wanted):
-        et, t = e['event_type'], uk(parse_iso(e['timestamp']))
+        et, t = e['event_type'], local(parse_iso(e['timestamp']))
         for k in keys(t):
             p = P[k]
             if et == 'add_reaction':
@@ -172,7 +190,7 @@ def scan_games():
     for e in events(path, ('activity_updated',)):
         if str(e.get('type')) != '0' or not e.get('name'):
             continue
-        t = uk(parse_iso(e['timestamp']))
+        t = local(parse_iso(e['timestamp']))
         sid = e.get('activity_session_id') or (e['name'], t.date())
         s = sess.get(sid)
         if s is None:
@@ -232,7 +250,7 @@ def main():
     for y in years:
         assert sum(data[k]['msgs'] for k in data if k.startswith(f'{y}-')) == data[str(y)]['msgs']
     user = load(os.path.join(PKG, 'Account', 'user.json'), {})
-    recap = {'generated': dt.datetime.now().strftime('%Y-%m-%d %H:%M'), 'quick': QUICK, 'username': user.get('global_name') or user.get('username'),
+    recap = {'generated': dt.datetime.now().strftime('%Y-%m-%d %H:%M'), 'quick': QUICK, 'username': user.get('global_name') or user.get('username'), 'tz': TZ_NAME,
              'years': years, 'last_day': max(d for p in P.values() for d in p['days']).isoformat(), 'periods': data}
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write('window.RECAP=' + json.dumps(recap, ensure_ascii=False, separators=(',', ':')) + ';\n')

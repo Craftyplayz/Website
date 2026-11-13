@@ -253,7 +253,7 @@ const SEC={
       s+=`<span>${DAYS[d]}</span>`;
       for(let h=0;h<24;h++){const x=+H[d][h]||0;s+=`<i style="--a:${Math.max(.08,x/mx).toFixed(2)}" data-tip="${DAYS[d]} ${h}:00 \u00b7 ${fmt(x)} messages"></i>`}
     }
-    return s+`</div><p class="cap2">Busiest: ${DAYS[Math.floor(pk/24)]} at ${pk%24}:00 (UK time)</p>`;
+    return s+`</div><p class="cap2">Busiest: ${DAYS[Math.floor(pk/24)]} at ${pk%24}:00 (${esc(R.tz||'UK')} time)</p>`;
   },
   first:(y,m,p)=>{
     const f=p.first;
@@ -289,7 +289,7 @@ function cards(y){
   if(lst(p,'vc').length)C.push(`<p class="k">Favourite voice spots</p><p class="sub">Top 5 servers / channels</p>${sec('srv',y,-1)}`);
   if(hasStream(y))C.push(`<p class="k">Streaming</p><p class="sub">${fh(p.streamed_h||0)} h streamed \u00b7 ${fh(p.watched_h||0)} h watched</p>${sec('stream',y,-1)}<p class="cap">Tap a column for ${unit} numbers</p>`);
   if(lst(p,'words').length||lst(p,'emoji').length)C.push(`<div class="two">${lst(p,'words').length?`<div><p class="k">Your words</p>${sec('words',y,-1)}</div>`:''}${lst(p,'emoji').length?`<div><p class="k">Your emoji</p>${sec('emoji',y,-1)}</div>`:''}</div>`);
-  if(pos('msgs')&&p.heat)C.push(`<p class="k">When you're online</p><p class="sub">Busiest hour \u00d7 weekday (UK time)</p>${sec('heat',y,-1)}`);
+  if(pos('msgs')&&p.heat)C.push(`<p class="k">When you're online</p><p class="sub">Busiest hour \u00d7 weekday (${esc(R.tz||'UK')} time)</p>${sec('heat',y,-1)}`);
   if(p.streak&&p.streak.days>0||pos('opens')){
     const st=p.streak;
     C.push(`<p class="k">${st?'Longest daily messaging streak':'App opens'}</p>${st?`${big(st.days)}<p class="sub">days in a row${st.start?` \u00b7 ${esc(fd(st.start))} to ${esc(fd(st.end))}`:''}</p>`:`${big(p.opens)}<p class="sub">times</p>`}${st&&pos('opens')?`<p class="sub">App opens: ${fmt(p.opens)}</p>${mini('opens','opens')}`:''}`);
@@ -333,9 +333,9 @@ function renderDash(){
   ${pan('Speaking vs listening',sec('ratio',y,m))}${pan('File types sent',sec('files',y,m))}
   ${pan('Top words',sec('words',y,m))}${pan('Top emoji in messages',sec('emoji',y,m))}
   ${pan('Top servers, channels and DMs by messages',sec('chan',y,m))}${pan('Games and activities',sec('games',y,m))}
-  ${pan('Busiest hour \u00d7 weekday (UK time)',sec('heat',y,m),1)}
+  ${pan(`Busiest hour \u00d7 weekday (${esc(R.tz||'UK')} time)`,sec('heat',y,m),1)}
   ${pan(yr?'First message ever':m<0?`First message of ${y}`:`First message of ${MF[m]}`,sec('first',y,m))}
-  </div><p class="foot">Only your own messages are included; deleted messages are missing; times are UK local. Generated ${esc(R.generated)}.</p></div>`;
+  </div><p class="foot">Only your own messages are included; deleted messages are missing; times are ${esc(R.tz||'UK')} local. Generated ${esc(R.generated)}.</p></div>`;
   d.scrollTop=sc;
 }
 
