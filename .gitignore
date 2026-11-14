@@ -41,3 +41,6 @@ private/discord/*/.ht*
 
 # booru saved groups/presets - written by /private/booru/ on the server
 private/booru/booru_data.json
+
+# pet videos: not shown on the site, and one is over GitHub's 100 MB limit - kept on disk and server only
+media/pets/!videos/
