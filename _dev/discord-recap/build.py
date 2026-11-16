@@ -38,7 +38,7 @@ def us_east(t):  # t: naive UTC datetime; EDT from 2nd Sunday of March 02:00 EST
     return t - dt.timedelta(hours=4 if s <= t < e else 5)
 
 # whose recap uses which clock (default UK)
-ZONES = {'spooky': ('US Eastern', us_east)}
+ZONES = {'spooky': ('US Eastern', us_east), 'prometheus': ('US Eastern', us_east)}
 TZ_NAME, local = ZONES.get(NAME, ('UK', uk))
 assert us_east(dt.datetime(2026, 7, 1, 12)) == dt.datetime(2026, 7, 1, 8) and us_east(dt.datetime(2026, 1, 1, 12)) == dt.datetime(2026, 1, 1, 7)
 assert us_east(dt.datetime(2026, 3, 8, 6, 59)).hour == 1 and us_east(dt.datetime(2026, 3, 8, 7)).hour == 3  # spring forward
