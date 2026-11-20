@@ -4,7 +4,7 @@
 
 ## Your files
 - **Folders you may edit:** `minecraft/` (everything below it).
-- **Stylesheets that are yours:** `assets/css/pages/minecraft.css`, `minecraft/shop/styles.css`, and any new `assets/css/pages/minecraft-*.css`.
+- **Stylesheets that are yours:** `assets/css/pages/minecraft.css`, `shop/styles.css`, and any new `assets/css/pages/minecraft-*.css`.
 - **Shared, don't edit:** `assets/css/pages/gallery.css` (Extras uses it too) and `assets/css/pages/hero.css` (home page and BRB). Copy what you need into a `minecraft-*.css`.
 
 ## Don't touch
@@ -31,7 +31,7 @@
 | Map Art | `minecraft/projects/map-art/index.php` | A gallery from `media/minecraft/mapart/`. |
 | Stonecrest | `minecraft/projects/stonecrest/index.php` | Download links. |
 | Life Series index and Sessions 1–3 | `minecraft/projects/life-series/**/index.php` | One shared style for all 4. |
-| Shop, Enchanted Books, Special Requests, Casino | `minecraft/shop/**/index.php` | They share `minecraft/shop/styles.css` (yours). The header shows the shop logo and tabs automatically. |
+| Shop, Enchanted Books, Special Requests, Casino | `shop/**/index.php` (at /shop/ since 2026-11-20) | They share `shop/styles.css` (yours) and read prices/books from `shop/data.json`. The header shows the shop logo and tabs automatically. Standalone Lord of the Rings theme candidates are in `shop/themes/`. |
 
 **Close (own dark style; polish it to the site tokens and fonts):** Nether Portal Converter, Storage Sorter, TNT Cannon Targeting, Metro Network, Milestones, Rail Router, Shulker Calculator, Litematica Converter, Instance Playtime, Frame Extractor, all in `minecraft/tools/*` and `minecraft/projects/*`.
 - Several load the Roboto font from Google Fonts, but the design guide wants the system font.

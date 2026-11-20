@@ -59,14 +59,14 @@
                 },
                 {
                     "title": "Captainalism Shop",
-                    "url": "/minecraft/shop/",
+                    "url": "/shop/",
                     "subnav": true,
                     "logo": "/assets/img/shoplogo.png",
                     "pages": [
-                        { "title": "Shop", "url": "/minecraft/shop/", "description": "Captainalism price lists" },
-                        { "title": "Enchanted Books", "url": "/minecraft/shop/enchanted-books/", "description": "Enchanted books for sale" },
-                        { "title": "Special Requests", "url": "/minecraft/shop/requests/", "description": "Request something special" },
-                        { "title": "Casino", "url": "/minecraft/shop/casino/", "description": "Coming soon" }
+                        { "title": "Shop", "url": "/shop/", "description": "Captainalism price lists" },
+                        { "title": "Enchanted Books", "url": "/shop/enchanted-books/", "description": "Enchanted books for sale" },
+                        { "title": "Special Requests", "url": "/shop/requests/", "description": "Request something special" },
+                        { "title": "Casino", "url": "/shop/casino/", "description": "Coming soon" }
                     ]
                 }
             ]

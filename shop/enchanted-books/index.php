@@ -1,13 +1,9 @@
 <?php
-$site_page = ['components' => true, 'css' => ['/minecraft/shop/styles.css']];
+$site_page = ['components' => true, 'css' => ['/shop/styles.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
-$books = [
-    'Mending', 'Unbreaking 3', 'Protection 4', 'Fortune 3', 'Efficiency 5',
-    'Depth Strider 3', 'Silk Touch', 'Aqua Affinity', 'Feather Falling 4', 'Sharpness 5',
-    'Smite 5', 'Respiration 3', 'Looting 3', 'Punch 2', 'Thorns 3',
-    'Blast Protection 4', 'Veinminer',
-];
+$shop = json_decode(file_get_contents(__DIR__ . '/../data.json'), true);
+$books = $shop['books']['list'];
 ?>
 <!DOCTYPE html>
 <html lang="en">

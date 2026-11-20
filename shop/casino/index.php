@@ -1,5 +1,5 @@
 <?php
-$site_page = ['components' => true, 'css' => ['/minecraft/shop/styles.css']];
+$site_page = ['components' => true, 'css' => ['/shop/styles.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 ?>
 <!DOCTYPE html>

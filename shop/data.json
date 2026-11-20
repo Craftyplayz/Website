@@ -1,0 +1,210 @@
+{
+  "shop": "Captainalism",
+  "currency": "diamonds",
+  "icons": "/minecraft/tools/item-list/minecraft_{id}.png",
+  "products": [
+    {
+      "id": "iron_block",
+      "name": "Block of Iron",
+      "price": "2 diamonds for 32 blocks"
+    },
+    {
+      "id": "gold_block",
+      "name": "Block of Gold",
+      "price": "2 diamonds per 32"
+    },
+    {
+      "id": "enchanted_book",
+      "name": "Enchanted Books",
+      "price": "1 diamond each, or 5 books for 3 diamonds"
+    },
+    {
+      "id": "golden_carrot",
+      "name": "Golden Carrot",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "prismarine",
+      "name": "Prismarine",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "prismarine_bricks",
+      "name": "Prismarine Bricks",
+      "price": "2 diamonds per stack"
+    },
+    {
+      "id": "sea_lantern",
+      "name": "Sea Lantern",
+      "price": "2 diamonds per stack"
+    },
+    {
+      "id": "bone",
+      "name": "Bone",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "string",
+      "name": "String",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "gunpowder",
+      "name": "Gunpowder",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "arrow",
+      "name": "Arrow",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "leather",
+      "name": "Leather",
+      "price": "2 diamonds per stack"
+    },
+    {
+      "id": "slime_block",
+      "name": "Slime Block",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "light_gray_wool",
+      "name": "Wool",
+      "price": "1 diamond per stack, all colours available"
+    },
+    {
+      "id": "redstone",
+      "name": "Redstone Dust",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "lapis_lazuli",
+      "name": "Lapis Lazuli",
+      "price": "2 diamonds per stack"
+    },
+    {
+      "id": "item_frame",
+      "name": "Item Frame",
+      "price": "2 diamonds per stack"
+    },
+    {
+      "id": "glowstone",
+      "name": "Glowstone",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "bricks",
+      "name": "Bricks",
+      "price": "2 stacks per diamond"
+    },
+    {
+      "id": "glass",
+      "name": "Glass",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "name_tag",
+      "name": "Name Tag",
+      "price": "2 diamonds per 16"
+    },
+    {
+      "id": "bookshelf",
+      "name": "Bookshelf",
+      "price": "2 diamonds per stack"
+    },
+    {
+      "id": "beacon",
+      "name": "Beacon",
+      "price": "4 diamonds each, or 12 diamonds for a full kit"
+    },
+    {
+      "id": "shulker_box",
+      "name": "Shulker Box",
+      "price": "1 diamond each"
+    },
+    {
+      "id": "elytra",
+      "name": "Elytra",
+      "price": "6 diamonds each"
+    },
+    {
+      "id": "diamond_pickaxe",
+      "name": "Diamond Tools",
+      "price": "8 diamonds per tool, fully enchanted"
+    },
+    {
+      "id": "diamond_helmet",
+      "name": "Diamond Armour",
+      "price": "8 diamonds per piece, fully enchanted"
+    },
+    {
+      "id": "experience_bottle",
+      "name": "Bottle o' Enchanting",
+      "price": "4 diamonds per stack"
+    },
+    {
+      "id": "quartz",
+      "name": "Nether Quartz",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "obsidian",
+      "name": "Obsidian",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "crying_obsidian",
+      "name": "Crying Obsidian",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "soul_sand",
+      "name": "Soul Sand",
+      "price": "1 diamond per stack"
+    },
+    {
+      "id": "gravel",
+      "name": "Gravel",
+      "price": "2 stacks per diamond"
+    },
+    {
+      "id": "blackstone",
+      "name": "Blackstone",
+      "price": "2 stacks per diamond"
+    }
+  ],
+  "books": {
+    "price": "Every book is 1 diamond, or 5 books for 3 diamonds.",
+    "list": [
+      "Mending",
+      "Unbreaking 3",
+      "Protection 4",
+      "Fortune 3",
+      "Efficiency 5",
+      "Depth Strider 3",
+      "Silk Touch",
+      "Aqua Affinity",
+      "Feather Falling 4",
+      "Sharpness 5",
+      "Smite 5",
+      "Respiration 3",
+      "Looting 3",
+      "Punch 2",
+      "Thorns 3",
+      "Blast Protection 4",
+      "Veinminer"
+    ]
+  },
+  "requests": {
+    "contacts": [
+      "Chewy",
+      "Crafty"
+    ],
+    "text": "For special requests, contact Chewy or Crafty on Discord with your request.",
+    "examples": "For example bulk purchases, partnership offers, or asking for a new item to be stocked."
+  },
+  "casino": {
+    "status": "Coming soon!"
+  }
+}
