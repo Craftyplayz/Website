@@ -6,7 +6,7 @@ body{margin:0;background:radial-gradient(ellipse at 50% 0,#1a1214 0,transparent 
 .skip:focus{top:8px}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 [hidden]{display:none!important}
-.tower{max-width:980px;margin:0 auto;padding:0 16px;
+.tower{max-width:1600px;margin:0 auto;padding:0 16px;
  background:linear-gradient(90deg,transparent 0,rgba(255,255,255,.035) 49.8%,rgba(217,165,78,.07) 50%,transparent 50.2%),
  repeating-linear-gradient(90deg,#08080b 0 46px,#0c0c11 46px 48px);
  border-left:1px solid #1d1d25;border-right:1px solid #1d1d25;box-shadow:0 0 80px #000}
