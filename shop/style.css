@@ -7,8 +7,7 @@ body{margin:0;background:radial-gradient(ellipse at 50% 0,#1a1214 0,transparent 
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 [hidden]{display:none!important}
 .tower{max-width:1600px;margin:0 auto;padding:0 16px;
- background:linear-gradient(90deg,transparent 0,rgba(255,255,255,.035) 49.8%,rgba(217,165,78,.07) 50%,transparent 50.2%),
- repeating-linear-gradient(90deg,#08080b 0 46px,#0c0c11 46px 48px);
+ background:repeating-linear-gradient(90deg,#08080b 0 46px,#0c0c11 46px 48px);
  border-left:1px solid #1d1d25;border-right:1px solid #1d1d25;box-shadow:0 0 80px #000}
 .top{text-align:center;padding:24px 0 8px}
 h1,h2,h3{font-family:Cinzel,Georgia,serif;margin:0}
@@ -39,8 +38,8 @@ footer a{color:var(--gold,#e0a24a)}
 /* hero: the render of the build (from its schematic), sharp in front of a blurred dark copy */
 .build{margin:0 auto 18px;position:relative;line-height:0}
 .build img{display:block;margin:0 auto;height:auto;max-height:62vh;width:auto;max-width:90vw;image-rendering:pixelated;-webkit-mask:radial-gradient(ellipse 60% 55% at 50% 45%,#000 60%,transparent 100%);mask:radial-gradient(ellipse 60% 55% at 50% 45%,#000 60%,transparent 100%)}
-.top{position:relative;isolation:isolate;overflow:hidden;border-radius:0 0 14px 14px}
-.top::before{content:"";position:absolute;inset:-40px;z-index:-1;background:url(orthanc.webp) center 35%/cover;filter:blur(22px) brightness(.32) saturate(.7)}
+.top{position:relative;isolation:isolate;overflow:hidden}
+.top::before{content:"";position:absolute;inset:-40px;z-index:-1;background:url(orthanc.webp) center 35%/cover;filter:blur(22px) brightness(.32) saturate(.7);-webkit-mask:linear-gradient(#000 65%,transparent 92%);mask:linear-gradient(#000 65%,transparent 92%)}
 /* the name sits over the lower part of the tower: same grid cell, anchored to the bottom */
 .top{display:grid;place-items:center;padding-bottom:24px}
 .top>.build,.top>h1{grid-area:1/1}
