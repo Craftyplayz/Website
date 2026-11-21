@@ -172,6 +172,401 @@
       "id": "blackstone",
       "name": "Blackstone",
       "price": "2 stacks per diamond"
+    },
+    {
+      "id": "totem_of_undying",
+      "name": "Totem of Undying",
+      "price": "1 diamond each"
+    },
+    {
+      "id": "netherite_chestplate",
+      "name": "Maxed Armour",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "netherite_sword",
+      "name": "Maxed Weapons",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "redstone_block",
+      "name": "Block of Redstone",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "redstone_torch",
+      "name": "Redstone Torch",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "repeater",
+      "name": "Redstone Repeater",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "comparator",
+      "name": "Redstone Comparator",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "piston",
+      "name": "Piston",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "sticky_piston",
+      "name": "Sticky Piston",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "observer",
+      "name": "Observer",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "hopper",
+      "name": "Hopper",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "dropper",
+      "name": "Dropper",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "dispenser",
+      "name": "Dispenser",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "lever",
+      "name": "Lever",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "stone_button",
+      "name": "Button",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "stone_pressure_plate",
+      "name": "Pressure Plate",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "tripwire_hook",
+      "name": "Tripwire Hook",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "daylight_detector",
+      "name": "Daylight Detector",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "target",
+      "name": "Target",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "redstone_lamp",
+      "name": "Redstone Lamp",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "note_block",
+      "name": "Note Block",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "crafter",
+      "name": "Crafter",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "sculk_sensor",
+      "name": "Sculk Sensor",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "calibrated_sculk_sensor",
+      "name": "Calibrated Sculk Sensor",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "trapped_chest",
+      "name": "Trapped Chest",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "lightning_rod",
+      "name": "Lightning Rod",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "honey_block",
+      "name": "Honey Block",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "tnt",
+      "name": "TNT",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "rail",
+      "name": "Rail",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "powered_rail",
+      "name": "Powered Rail",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "detector_rail",
+      "name": "Detector Rail",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "activator_rail",
+      "name": "Activator Rail",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "shulker_shell",
+      "name": "Shulker Shell",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "cobblestone",
+      "name": "Cobblestone",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "stone",
+      "name": "Stone",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "smooth_stone",
+      "name": "Smooth Stone",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "stone_bricks",
+      "name": "Stone Bricks",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "andesite",
+      "name": "Andesite",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "diorite",
+      "name": "Diorite",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "granite",
+      "name": "Granite",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "cobbled_deepslate",
+      "name": "Cobbled Deepslate",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "deepslate",
+      "name": "Deepslate",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "tuff",
+      "name": "Tuff",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "calcite",
+      "name": "Calcite",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "dripstone_block",
+      "name": "Dripstone Block",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "quartz_block",
+      "name": "Block of Quartz",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "ender_pearl",
+      "name": "Ender Pearl",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "iron_nugget",
+      "name": "Iron Nugget",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "nether_brick",
+      "name": "Nether Brick",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "potion",
+      "name": "Potion of Fire Resistance",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "splash_potion",
+      "name": "Splash Potion of Fire Resistance",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "spectral_arrow",
+      "name": "Spectral Arrow",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "iron_boots",
+      "name": "Iron Boots with Soul Speed",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "oak_log",
+      "name": "Oak Log",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "spruce_log",
+      "name": "Spruce Log",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "birch_log",
+      "name": "Birch Log",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "jungle_log",
+      "name": "Jungle Log",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "acacia_log",
+      "name": "Acacia Log",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "dark_oak_log",
+      "name": "Dark Oak Log",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "mangrove_log",
+      "name": "Mangrove Log",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "cherry_log",
+      "name": "Cherry Log",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "pale_oak_log",
+      "name": "Pale Oak Log",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "bamboo_block",
+      "name": "Block of Bamboo",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "crimson_stem",
+      "name": "Crimson Stem",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "warped_stem",
+      "name": "Warped Stem",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "white_concrete",
+      "name": "Concrete",
+      "price": "Price coming soon, all colours available"
+    },
+    {
+      "id": "white_stained_glass",
+      "name": "Stained Glass",
+      "price": "Price coming soon, all colours available"
+    },
+    {
+      "id": "terracotta",
+      "name": "Terracotta",
+      "price": "Price coming soon, all colours available"
+    },
+    {
+      "id": "ochre_froglight",
+      "name": "Ochre Froglight",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "verdant_froglight",
+      "name": "Verdant Froglight",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "pearlescent_froglight",
+      "name": "Pearlescent Froglight",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "ice",
+      "name": "Ice",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "packed_ice",
+      "name": "Packed Ice",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "blue_ice",
+      "name": "Blue Ice",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "wheat",
+      "name": "Wheat",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "carrot",
+      "name": "Carrot",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "potato",
+      "name": "Potato",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "beetroot",
+      "name": "Beetroot",
+      "price": "Price coming soon"
+    },
+    {
+      "id": "filled_map",
+      "name": "Custom Map Art",
+      "price": "Price coming soon"
     }
   ],
   "books": {
