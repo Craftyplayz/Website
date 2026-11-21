@@ -12,7 +12,7 @@ from litematic import load
 
 DIRS = {'north': (0, 0, -1), 'south': (0, 0, 1), 'east': (1, 0, 0), 'west': (-1, 0, 0), 'up': (0, 1, 0), 'down': (0, -1, 0)}
 SHADE = {'up': 1.0, 'down': 0.5, 'north': 0.8, 'south': 0.8, 'east': 0.6, 'west': 0.6}
-SIDE_YAW = {'south': 0, 'west': 90, 'north': 180, 'east': 270}  # camera on that side, looking at it
+SIDE_YAW = {'south': 0, 'east': 90, 'north': 180, 'west': 270}  # camera on that side (yaw 90 puts it at +x = east)
 
 
 class Assets:
