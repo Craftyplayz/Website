@@ -137,7 +137,7 @@ Structure: `sections[] → groups[] → pages[]`, plus top-level `links[]` (Abou
 | Group field | Meaning |
 |---|---|
 | `url` | Makes the group heading a link (to a group hub page). |
-| `"subnav": true` | Every page in the group gets a second nav bar under the header (the Castle Crafty shop). |
+| `"subnav": true` | Every page in the group gets a second nav bar under the header (no group uses it now; the shop did until it became a standalone page). |
 | `logo` | Swaps the header logo on that group's pages. |
 
 When you **add** a page: add it to the right group with title, url, description, keywords. When you **move** a page: change `url` here and add a `RedirectMatch 301` in `.htaccess` for the old URL. When you **retire** a page: remove it here, move the files to `_dev/archive/`, and redirect the old URL. Keep each group's visible (`nav` ≠ false) list short — about 4 to 8 items; the rest go `"nav": false`.

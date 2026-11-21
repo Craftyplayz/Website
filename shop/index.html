@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Castle Crafty · Minecraft shop</title>
+<meta name="description" content="Castle Crafty, the shop in the black tower on Crafty's Minecraft server: price list, enchanted books and special requests.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the price list</a>
+<div class="tower">
+  <header class="top">
+    <figure class="build"><img id="build" src="orthanc.webp" alt="The Castle Crafty shop: a black Orthanc tower built in Minecraft" width="370" height="1600" fetchpriority="high"></figure>
+    <p class="eyebrow">Isengard · Middle-earth</p>
+    <h1 id="shop-name">Castle Crafty</h1>
+    <p class="tag">Climb the black tower. Every storey holds something to buy.</p>
+  </header>
+  <main id="main">
+    <div id="status" class="status" role="status">Climbing the stair…</div>
+    <section class="storey" id="prices" aria-labelledby="h-prices" hidden>
+      <p class="level">First storey</p>
+      <h2 id="h-prices">The price list</h2>
+      <ul class="niches" id="products"></ul>
+    </section>
+    <section class="storey" id="books" aria-labelledby="h-books" hidden>
+      <p class="level">Second storey</p>
+      <h2 id="h-books">Enchanted books</h2>
+      <p class="lead" id="book-price"></p>
+      <ul class="books" id="book-list"></ul>
+    </section>
+    <section class="storey" id="requests" aria-labelledby="h-req" hidden>
+      <p class="level">Third storey</p>
+      <h2 id="h-req">Special requests</h2>
+      <p class="lead" id="req-text"></p>
+      <p id="req-ex"></p>
+      <ul class="contacts" id="contacts"></ul>
+    </section>
+    <section class="storey" id="casino" aria-labelledby="h-casino" hidden>
+      <p class="level">The summit</p>
+      <h2 id="h-casino">The casino</h2>
+      <p class="soon" id="casino-status"></p>
+    </section>
+  </main>
+  <footer><p>Castle Crafty · all prices in diamonds · <a href="/">craftyplayz.com</a></p></footer>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

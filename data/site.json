@@ -60,13 +60,9 @@
                 {
                     "title": "Castle Crafty",
                     "url": "/shop/",
-                    "subnav": true,
                     "logo": "/assets/img/shoplogo.png",
                     "pages": [
-                        { "title": "Shop", "url": "/shop/", "description": "Castle Crafty price lists" },
-                        { "title": "Enchanted Books", "url": "/shop/enchanted-books/", "description": "Enchanted books for sale" },
-                        { "title": "Special Requests", "url": "/shop/requests/", "description": "Request something special" },
-                        { "title": "Casino", "url": "/shop/casino/", "description": "Coming soon" }
+                        { "title": "Castle Crafty shop", "url": "/shop/", "description": "Prices, enchanted books and special requests at the black tower", "keywords": ["shop", "orthanc", "captainalism", "prices", "enchanted books", "casino"] }
                     ]
                 }
             ]
