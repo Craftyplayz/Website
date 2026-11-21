@@ -52,7 +52,7 @@ html:not([data-v="0"]) .spire{display:none}
 [data-v="3"] .top::before{content:"";position:absolute;inset:-40px;z-index:-1;background:var(--bg) center 35%/cover;filter:blur(22px) brightness(.32) saturate(.7)}
 [data-v="3"] .build img{width:min(280px,66vw);-webkit-mask:radial-gradient(ellipse 60% 55% at 50% 45%,#000 60%,transparent 100%);mask:radial-gradient(ellipse 60% 55% at 50% 45%,#000 60%,transparent 100%)}
 /* 4 nightfall grade */
-[data-v="4"] .build img{width:min(320px,74vw);filter:brightness(.55) contrast(1.2) saturate(.45);-webkit-mask:radial-gradient(ellipse 70% 60% at 50% 40%,#000 55%,transparent 100%);mask:radial-gradient(ellipse 70% 60% at 50% 40%,#000 55%,transparent 100%)}
+[data-v="4"] .build img{width:min(320px,74vw);filter:brightness(1.15) contrast(1.15) saturate(.5);-webkit-mask:radial-gradient(ellipse 70% 60% at 50% 40%,#000 55%,transparent 100%);mask:radial-gradient(ellipse 70% 60% at 50% 40%,#000 55%,transparent 100%)}
 [data-v="4"] .build::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(20,28,60,.45),rgba(5,5,7,.2) 60%,rgba(5,5,7,.9));pointer-events:none}
 /* 5 ember duotone */
 [data-v="5"] .build{display:table;isolation:isolate}
