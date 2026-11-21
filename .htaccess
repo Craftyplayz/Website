@@ -116,7 +116,7 @@ RedirectMatch 301 ^/minecraft/life(/.*)?$ /minecraft/projects/life-series/
 RedirectMatch 301 ^/minecraft/screenshot(\.php)?$ /minecraft/screenshots/
 RedirectMatch 301 ^/minecraft/(skins|tips)(\.php)?$ /minecraft/$1/
 RedirectMatch 301 "^/minecraft/Invisible Bossbar \(all\)\.zip$" "/minecraft/downloads/Invisible Bossbar (all).zip"
-# the Captainalism shop lives at /shop/ (it was under /minecraft/shop/ from the reorg until 2026-11-20)
+# the Castle Crafty shop lives at /shop/ (it was under /minecraft/shop/ from the reorg until 2026-11-20)
 RedirectMatch 301 ^/minecraft/shop(/.*)?$ /shop$1
 RedirectMatch 301 ^/shop/books(\.php)?$ /shop/enchanted-books/
 RedirectMatch 301 ^/shop/(requests|casino)\.php$ /shop/$1/

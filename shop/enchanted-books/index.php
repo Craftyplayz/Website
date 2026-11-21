@@ -16,7 +16,7 @@ $books = $shop['books']['list'];
     <?php site_header(); ?>
     <main class="page" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
-        <h1 class="page-title">Captainalism Enchanted Books</h1>
+        <h1 class="page-title">Castle Crafty Enchanted Books</h1>
         <p class="page-lede">Every book is 1 diamond, or 5 books for 3 diamonds.</p>
 
         <section class="card shop-card">

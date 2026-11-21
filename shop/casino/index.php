@@ -13,7 +13,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
     <?php site_header(); ?>
     <main class="page" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
-        <h1 class="page-title">Captainalism Casino</h1>
+        <h1 class="page-title">Castle Crafty Casino</h1>
         <p class="page-lede">Coming soon!</p>
     </main>
     <?php site_footer(); ?>

@@ -16,7 +16,7 @@ $products = array_map(fn($p) => [$p['id'], $p['name'], $p['price']], $shop['prod
     <?php site_header(); ?>
     <main class="page" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
-        <h1 class="page-title">Captainalism</h1>
+        <h1 class="page-title">Castle Crafty</h1>
         <p class="page-lede">Price list. <?= count($products) ?> items, paid in diamonds.</p>
 
         <div class="products">

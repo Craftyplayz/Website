@@ -167,7 +167,7 @@ function site_header($path = null)
     echo '<button class="sh-burger" type="button" aria-expanded="false" aria-controls="sh-menu" aria-label="Menu"><span></span><span></span><span></span></button>';
     echo '</div>';
 
-    // section sub-nav (e.g. the Captainalism shop) when the group asks for one
+    // section sub-nav (e.g. the Castle Crafty shop) when the group asks for one
     if ($found && $found['group'] && !empty($found['group']['subnav'])) {
         echo '<nav class="sh-sub" aria-label="' . h($found['group']['title']) . '"><span class="sh-sub-title">' . h($found['group']['title']) . '</span>';
         foreach ($found['group']['pages'] as $page) {
