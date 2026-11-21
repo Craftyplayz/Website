@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Captainalism · The Ring of Isengard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Source+Serif+4:wght@400;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the price list</a>
+<header class="hero">
+  <svg class="ring" viewBox="0 0 400 400" role="img" aria-label="Top-down view of a great circular wall with a black tower at its centre">
+    <defs>
+      <radialGradient id="lawn"><stop offset="0" stop-color="#4f6b4a"/><stop offset="1" stop-color="#2f4430"/></radialGradient>
+      <radialGradient id="glow"><stop offset="0" stop-color="#d9a441" stop-opacity=".55"/><stop offset="1" stop-color="#d9a441" stop-opacity="0"/></radialGradient>
+    </defs>
+    <circle cx="200" cy="200" r="196" fill="#1b1e1d"/>
+    <circle cx="200" cy="200" r="190" fill="#8a9190"/>
+    <circle cx="200" cy="200" r="174" fill="#3b403f"/>
+    <circle cx="200" cy="200" r="168" fill="url(#lawn)"/>
+    <g fill="none" stroke="#a9b3a6" stroke-opacity=".35">
+      <circle cx="200" cy="200" r="140" stroke-dasharray="2 5"/>
+      <circle cx="200" cy="200" r="105" stroke-width="6" stroke="#6f7876" stroke-opacity=".7"/>
+      <circle cx="200" cy="200" r="70" stroke-dasharray="2 5"/>
+    </g>
+    <g stroke="#b9bfb8" stroke-width="5" stroke-opacity=".7">
+      <path d="M200 10V390M10 200H390M65 65L335 335M335 65L65 335"/>
+    </g>
+    <g fill="#2b2f2e">
+      <rect x="196" y="4" width="8" height="16"/><rect x="196" y="380" width="8" height="16"/>
+      <rect x="4" y="196" width="16" height="8"/><rect x="380" y="196" width="16" height="8"/>
+    </g>
+    <circle cx="200" cy="200" r="60" fill="url(#glow)"/>
+    <circle cx="200" cy="200" r="34" fill="#202423" stroke="#8a9190" stroke-width="3"/>
+    <path d="M200 160 214 186 240 200 214 214 200 240 186 214 160 200 186 186Z" fill="#0d0f0f" stroke="#5c6462" stroke-width="2"/>
+    <path d="M200 176 207 193 224 200 207 207 200 224 193 207 176 200 193 193Z" fill="#161918"/>
+    <circle cx="200" cy="200" r="4" fill="#e0a43a"/>
+  </svg>
+  <div class="title">
+    <p class="kicker">The shop at the black tower</p>
+    <h1 id="shopname">Captainalism</h1>
+    <p class="sub">Stone, iron and fair prices, all paid in diamonds.</p>
+  </div>
+</header>
+
+<main id="main">
+  <p id="status" class="status" role="status">Opening the gates of Isengard…</p>
+
+  <section id="prices" hidden aria-labelledby="h-prices">
+    <h2 id="h-prices" class="rune-h">The Price List</h2>
+    <ul class="tablets" id="products"></ul>
+  </section>
+
+  <section id="books" hidden aria-labelledby="h-books">
+    <h2 id="h-books" class="rune-h">Enchanted Books</h2>
+    <p class="lead" id="bookprice"></p>
+    <ul class="tags" id="booklist"></ul>
+  </section>
+
+  <div class="pair">
+    <section id="requests" hidden aria-labelledby="h-req" class="slab">
+      <h2 id="h-req" class="rune-h">Special Requests</h2>
+      <p id="reqtext"></p>
+      <p id="reqex" class="muted"></p>
+      <ul class="tags" id="contacts"></ul>
+    </section>
+    <section id="casino" hidden aria-labelledby="h-cas" class="slab">
+      <h2 id="h-cas" class="rune-h">The Casino</h2>
+      <p class="big" id="casinostatus"></p>
+      <p class="muted">The palantír is still being polished.</p>
+    </section>
+  </div>
+</main>
+<footer><p>Draft theme · Captainalism, a player-run shop</p></footer>
+<script src="app.js"></script>
+</body>
+</html>

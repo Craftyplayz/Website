@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Captainalism · The tower by moonlight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Cinzel:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="vine" viewBox="0 0 400 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+        <path d="M0 12 H150 M250 12 H400"/>
+        <path d="M150 12 C165 2 175 2 185 12 S205 22 215 12 S235 2 250 12"/>
+        <path d="M60 12 c6-9 14-9 18 0 c-6 9-14 9-18 0 z M320 12 c6-9 14-9 18 0 c-6 9-14 9-18 0 z M105 12 c4-6 10-6 13 0 c-4 6-10 6-13 0 z M282 12 c4-6 10-6 13 0 c-4 6-10 6-13 0 z"/>
+      </g>
+      <path d="M200 6 l5 6 -5 6 -5 -6z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="hero">
+  <div class="stars" aria-hidden="true"></div>
+  <svg class="moon" viewBox="0 0 100 100" aria-hidden="true">
+    <defs><mask id="cres"><rect width="100" height="100" fill="#fff"/><circle cx="62" cy="40" r="34" fill="#000"/></mask></defs>
+    <circle cx="46" cy="50" r="36" fill="#eef1f8" mask="url(#cres)"/>
+  </svg>
+  <svg class="tower" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+    <path d="M150 300 C175 290 188 270 191 238 L193 150 L190 96 L186 60 L188 40 L193 22 L196 40 L199 14 L202 40 L205 22 L210 40 L212 60 L208 96 L207 150 L209 238 C212 270 225 290 250 300 Z" fill="#05070f"/>
+  </svg>
+  <div class="ground"></div>
+  <div class="hero-text">
+    <p class="kicker">Isengard · Middle-earth</p>
+    <h1 id="shop-name">Captainalism</h1>
+    <p class="sub">A catalogue of the tower's wares, written by moonlight</p>
+    <svg class="vine" aria-hidden="true"><use href="#vine"/></svg>
+  </div>
+</header>
+
+<main>
+  <div id="status" class="status" role="status">Unrolling the scroll…</div>
+
+  <section id="wares" aria-labelledby="h-wares" hidden>
+    <h2 id="h-wares">The Price List</h2>
+    <svg class="vine" aria-hidden="true"><use href="#vine"/></svg>
+    <ul id="grid" class="grid"></ul>
+  </section>
+
+  <section id="books" aria-labelledby="h-books" hidden>
+    <h2 id="h-books">Enchanted Books</h2>
+    <svg class="vine" aria-hidden="true"><use href="#vine"/></svg>
+    <p id="books-price" class="lede"></p>
+    <ul id="book-list" class="books"></ul>
+  </section>
+
+  <section id="requests" aria-labelledby="h-req" hidden>
+    <h2 id="h-req">Special Requests</h2>
+    <svg class="vine" aria-hidden="true"><use href="#vine"/></svg>
+    <p id="req-text" class="lede"></p>
+    <p id="req-ex" class="note"></p>
+    <ul id="contacts" class="contacts"></ul>
+  </section>
+
+  <section id="casino" aria-labelledby="h-casino" hidden>
+    <h2 id="h-casino">The Casino</h2>
+    <svg class="vine" aria-hidden="true"><use href="#vine"/></svg>
+    <p id="casino-status" class="soon"></p>
+  </section>
+</main>
+
+<footer><svg class="vine" aria-hidden="true"><use href="#vine"/></svg><p>Draft theme · The tower by moonlight</p></footer>
+<script src="app.js"></script>
+</body>
+</html>

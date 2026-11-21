@@ -1,0 +1,40 @@
+:root{--bg:#050507;--stone:#0f0f14;--stone2:#17171e;--text:#d9d5cc;--dim:#a9a49a;--gold:#d9a54e;--ember:#e0674a;--line:#2a2a33}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:radial-gradient(ellipse at 50% 0,#1a1214 0,transparent 55%),var(--bg);color:var(--text);font:400 1rem/1.55 Inter,system-ui,sans-serif;overflow-x:hidden}
+.skip{position:absolute;left:8px;top:-60px;background:var(--gold);color:#000;padding:8px 12px;z-index:9}
+.skip:focus{top:8px}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+[hidden]{display:none!important}
+.tower{max-width:980px;margin:0 auto;padding:0 16px;
+ background:linear-gradient(90deg,transparent 0,rgba(255,255,255,.035) 49.8%,rgba(217,165,78,.07) 50%,transparent 50.2%),
+ repeating-linear-gradient(90deg,#08080b 0 46px,#0c0c11 46px 48px);
+ border-left:1px solid #1d1d25;border-right:1px solid #1d1d25;box-shadow:0 0 80px #000}
+.top{text-align:center;padding:24px 0 8px}
+.spire{width:min(240px,60vw);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 0 18px rgba(217,87,58,.25))}
+.eyebrow{font:500 .8rem Cinzel,serif;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin:12px 0 0}
+h1,h2,h3{font-family:Cinzel,Georgia,serif;margin:0}
+h1{font-size:clamp(1.5rem,7vw,4rem);letter-spacing:.08em;text-transform:uppercase;background:linear-gradient(180deg,#f2e3c4,#9c7a45 60%,#7a5238);-webkit-background-clip:text;background-clip:text;color:transparent;overflow-wrap:anywhere}
+.tag{font:italic 600 1.2rem 'Cormorant Garamond',serif;color:var(--dim);margin:6px 0 0}
+.storey{margin:32px 0;padding:24px 20px 28px;background:linear-gradient(180deg,var(--stone2),var(--stone));border:1px solid var(--line);border-top:2px solid #4a2a22;border-radius:4px 4px 0 0;box-shadow:inset 0 1px 0 rgba(217,165,78,.35),0 12px 30px #000}
+.level{margin:0;font:500 .75rem Cinzel,serif;letter-spacing:.25em;text-transform:uppercase;color:var(--ember)}
+h2{font-size:clamp(1.5rem,5vw,2.1rem);color:#f0e6d0;margin:2px 0 16px;letter-spacing:.06em}
+.lead{font:600 1.3rem/1.4 'Cormorant Garamond',serif;font-variant-numeric:lining-nums;color:#efe4cc}
+.niches{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px}
+.niche{display:flex;gap:12px;align-items:center;padding:10px 12px;background:#050507;border:1px solid #23232b;border-top-color:#000;border-radius:3px 3px 14px 14px;box-shadow:inset 0 6px 14px #000,inset 0 -1px 0 rgba(217,165,78,.18);min-width:0}
+.niche:hover{border-color:#5a3a2c}
+.icon{flex:none;width:52px;height:52px;display:grid;place-items:center;background:#15151c;border:1px solid #2c2c36;border-radius:2px}
+.icon img{image-rendering:pixelated;width:40px;height:40px}
+.txt{min-width:0}
+.name{font-size:.95rem;letter-spacing:.04em;color:#f0e6d0;overflow-wrap:anywhere}
+.price{margin:2px 0 0;font-weight:500;color:var(--gold);font-size:.93rem;overflow-wrap:anywhere}
+.books{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:8px}
+.books li{padding:8px 12px;background:#050507;border:1px solid #23232b;border-left:3px solid #8e2a22;overflow-wrap:anywhere}
+.contacts{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.contacts li{padding:8px 16px;border:1px solid #5a3a2c;color:var(--gold);background:#050507;border-radius:20px}
+.soon{font:700 clamp(1.5rem,6vw,2.4rem) Cinzel,serif;color:var(--ember);margin:0;text-shadow:0 0 22px rgba(217,87,58,.4)}
+.status{text-align:center;color:var(--dim);padding:40px 0}
+.status.error{color:#ff9a86;border:1px solid #8e2a22;background:#1a0c0b;padding:20px;margin:24px 0}
+footer{text-align:center;color:var(--dim);padding:24px 0 40px;font-size:.9rem}
+@media (prefers-reduced-motion:no-preference){.spire{animation:glow 6s ease-in-out infinite}.niche{transition:border-color .2s}}
+@keyframes glow{50%{filter:drop-shadow(0 0 28px rgba(217,87,58,.45))}}

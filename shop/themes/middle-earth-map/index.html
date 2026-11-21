@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Captainalism · A Traveller's Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Crimson+Pro:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="mtn" viewBox="0 0 60 36"><path d="M2 34 L18 8 L26 20 L34 4 L58 34 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M18 8 L16 22 M34 4 L30 18 L38 30 M34 4 L40 20 M10 26 L16 22 M44 22 L48 30" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></symbol>
+    <symbol id="tree" viewBox="0 0 24 30"><path d="M12 2 L4 14 H9 L2 24 H22 L15 14 H20 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 24 V29" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="wave" viewBox="0 0 40 10"><path d="M1 6 Q6 0 11 6 T21 6 T31 6 T39 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+    <symbol id="tower" viewBox="0 0 30 50"><path d="M6 48 L9 14 L7 10 L10 4 L13 9 L15 2 L17 9 L20 4 L23 10 L21 14 L24 48 Z" fill="#2a2018" stroke="#2a2018" stroke-width="1.5" stroke-linejoin="round"/><path d="M15 20 V30" stroke="#d9a441" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<main class="map">
+  <header class="title">
+    <svg class="compass" viewBox="-100 -104 200 204" role="img" aria-label="Compass rose">
+      <circle r="62" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <circle r="52" fill="none" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 4"/>
+      <path d="M0 -92 L9 -9 L92 0 L9 9 L0 92 L-9 9 L-92 0 L-9 -9 Z" fill="#f1e2bd" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M0 -92 L9 -9 L0 0 Z M92 0 L9 9 L0 0 Z M0 92 L-9 9 L0 0 Z M-92 0 L-9 -9 L0 0 Z" fill="currentColor"/>
+      <path d="M0 -44 L5 -5 L44 0 L5 5 L0 44 L-5 5 L-44 0 L-5 -5 Z" transform="rotate(45)" fill="none" stroke="currentColor" stroke-width="1.1"/>
+      <circle r="4" fill="#f1e2bd" stroke="currentColor" stroke-width="1.4"/>
+      <text y="-95" text-anchor="middle" font-family="IM Fell English SC, serif" font-size="16" fill="currentColor">N</text>
+    </svg>
+    <div class="cartouche big">
+      <p class="eyebrow">A traveller's map of the</p>
+      <h1 id="shopname">Captainalism</h1>
+      <p class="sub">Provisions, enchantments and wares, beneath the black tower</p>
+    </div>
+    <div class="orthanc">
+      <svg viewBox="0 0 30 50" width="38" height="63" aria-hidden="true"><use href="#tower"/></svg>
+      <span class="flag">Orthanc</span>
+    </div>
+  </header>
+
+  <div id="status" class="status" role="status" aria-live="polite">Unrolling the map&hellip;</div>
+
+  <div id="content" hidden>
+    <section class="region" aria-labelledby="h-wares">
+      <svg class="doodle d1" viewBox="0 0 60 36" aria-hidden="true"><use href="#mtn"/></svg>
+      <svg class="doodle d2" viewBox="0 0 24 30" aria-hidden="true"><use href="#tree"/></svg>
+      <div class="cartouche"><h2 id="h-wares">The Marketplace of Isengard</h2></div>
+      <p class="legend-key">Legend: each ware, its name, and its price in <span id="currency">diamonds</span>.</p>
+      <ul id="products" class="legend"></ul>
+    </section>
+
+    <div class="path" aria-hidden="true"><svg viewBox="0 0 40 10"><use href="#wave"/></svg></div>
+
+    <section class="region" aria-labelledby="h-books">
+      <svg class="doodle d1" viewBox="0 0 24 30" aria-hidden="true"><use href="#tree"/></svg>
+      <svg class="doodle d2" viewBox="0 0 24 30" aria-hidden="true"><use href="#tree"/></svg>
+      <div class="cartouche"><h2 id="h-books">The Enchanted Library</h2></div>
+      <p id="books-price" class="priceline"></p>
+      <ul id="books" class="books"></ul>
+    </section>
+
+    <div class="path" aria-hidden="true"><svg viewBox="0 0 40 10"><use href="#wave"/></svg></div>
+
+    <section class="region" aria-labelledby="h-req">
+      <svg class="doodle d1" viewBox="0 0 60 36" aria-hidden="true"><use href="#mtn"/></svg>
+      <div class="cartouche"><h2 id="h-req">The Road of Special Requests</h2></div>
+      <p id="req-text" class="lead"></p>
+      <p id="req-ex"></p>
+      <ul id="contacts" class="contacts"></ul>
+    </section>
+
+    <div class="path" aria-hidden="true"><svg viewBox="0 0 40 10"><use href="#wave"/></svg></div>
+
+    <section class="region unmapped" aria-labelledby="h-casino">
+      <svg class="doodle d1" viewBox="0 0 40 10" aria-hidden="true"><use href="#wave"/></svg>
+      <svg class="doodle d2" viewBox="0 0 40 10" aria-hidden="true"><use href="#wave"/></svg>
+      <div class="cartouche"><h2 id="h-casino">The Unmapped Lands: Casino</h2></div>
+      <p id="casino" class="lead"></p>
+      <p class="note">Here be dice. The surveyors are still at work.</p>
+    </section>
+  </div>
+  <footer>Drawn by hand for travellers. Prices as set by the shopkeepers.</footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Captainalism · The Forges of Isengard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="embers" id="embers" aria-hidden="true"></div>
+<a class="skip" href="#main">Skip to the price list</a>
+
+<header class="hero">
+  <svg class="tower" viewBox="0 0 120 220" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="tg" x1="0" x2="1"><stop offset="0" stop-color="#0b0a0a"/><stop offset=".55" stop-color="#26211f"/><stop offset="1" stop-color="#0b0a0a"/></linearGradient>
+      <radialGradient id="eg" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#ff4d12" stop-opacity="0"/></radialGradient>
+    </defs>
+    <circle cx="60" cy="32" r="30" fill="url(#eg)" opacity=".55"/>
+    <path d="M30 220 L38 90 L34 60 L42 58 L44 20 L50 52 L56 6 L60 50 L64 6 L70 52 L76 20 L78 58 L86 60 L82 90 L90 220Z" fill="url(#tg)" stroke="#3a322e" stroke-width="1.5"/>
+    <path d="M52 120h16v30H52z M56 70h8v14h-8z" fill="#ff7a1f"/>
+  </svg>
+  <div class="plate plate-title">
+    <p class="kicker">The forges of Isengard</p>
+    <h1 id="shop-name">Captainalism</h1>
+    <p class="sub">Goods hammered out beneath the black tower. Prices are in diamonds.</p>
+  </div>
+  <div class="chain" aria-hidden="true"></div>
+</header>
+
+<main id="main">
+  <p id="status" class="status" role="status" aria-live="polite"><span class="spinner" aria-hidden="true"></span> Stoking the furnaces&hellip;</p>
+
+  <section id="s-prices" class="sec" aria-labelledby="h-prices" hidden>
+    <h2 class="plate" id="h-prices"><span class="gear" aria-hidden="true"></span>Price list</h2>
+    <ul id="products" class="grid"></ul>
+  </section>
+
+  <section id="s-books" class="sec" aria-labelledby="h-books" hidden>
+    <h2 class="plate" id="h-books"><span class="gear" aria-hidden="true"></span>Enchanted books</h2>
+    <p id="books-price" class="stamp"></p>
+    <ul id="books" class="books"></ul>
+  </section>
+
+  <section id="s-req" class="sec" aria-labelledby="h-req" hidden>
+    <h2 class="plate" id="h-req"><span class="gear" aria-hidden="true"></span>Special requests</h2>
+    <div class="panel">
+      <p id="req-text"></p>
+      <p id="req-ex" class="muted"></p>
+      <ul id="contacts" class="contacts"></ul>
+    </div>
+  </section>
+
+  <section id="s-casino" class="sec" aria-labelledby="h-casino" hidden>
+    <h2 class="plate" id="h-casino"><span class="gear" aria-hidden="true"></span>Casino</h2>
+    <div class="panel casino"><p id="casino-status" class="big"></p><p class="muted">The dice are still cooling in the mould.</p></div>
+  </section>
+</main>
+
+<footer class="foot"><p>Draft theme: the forges of Isengard. An unofficial fan design.</p></footer>
+<script src="app.js"></script>
+</body>
+</html>

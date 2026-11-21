@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Captainalism · Under the White Hand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@700;900&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="hand" viewBox="0 0 100 120">
+    <g fill="currentColor">
+      <rect x="21" y="16" width="12" height="52" rx="6"/>
+      <rect x="36" y="4" width="12" height="62" rx="6"/>
+      <rect x="51" y="8" width="12" height="58" rx="6"/>
+      <rect x="66" y="22" width="12" height="46" rx="6"/>
+      <rect x="6" y="50" width="12" height="40" rx="6" transform="rotate(-32 12 90)"/>
+      <path d="M19 56h60v26c0 18-12 30-30 32-18-2-30-14-30-32z"/>
+    </g>
+  </symbol>
+</svg>
+
+<div class="banners" aria-hidden="true">
+  <div class="banner b1"><svg><use href="#hand"/></svg></div>
+  <div class="banner b2"><svg><use href="#hand"/></svg></div>
+  <div class="banner b3"><svg><use href="#hand"/></svg></div>
+  <div class="banner b4"><svg><use href="#hand"/></svg></div>
+  <div class="banner b5"><svg><use href="#hand"/></svg></div>
+</div>
+
+<header class="hero">
+  <p class="kicker">The black tower stands open</p>
+  <h1 id="shopname">Captainalism</h1>
+  <p class="sub">Trade at Orthanc. All prices in diamonds, and the haggling is short.</p>
+  <nav aria-label="Sections"><a href="#wares">Wares</a><a href="#books">Books</a><a href="#requests">Requests</a><a href="#casino">Casino</a></nav>
+</header>
+
+<main>
+  <div id="status" class="status" role="status">Summoning the price list from Isengard&hellip;</div>
+
+  <section id="wares" aria-labelledby="h-wares" hidden>
+    <h2 id="h-wares"><span>I</span> The Wares</h2>
+    <ul id="grid" class="grid"></ul>
+  </section>
+
+  <section id="books" aria-labelledby="h-books" hidden>
+    <h2 id="h-books"><span>II</span> Enchanted Books</h2>
+    <p id="bookprice" class="lead"></p>
+    <ul id="booklist" class="books"></ul>
+  </section>
+
+  <section id="requests" aria-labelledby="h-req" hidden>
+    <h2 id="h-req"><span>III</span> Special Requests</h2>
+    <div class="req">
+      <svg class="reqhand" aria-hidden="true"><use href="#hand"/></svg>
+      <div>
+        <p id="reqtext" class="lead"></p>
+        <p id="reqex"></p>
+        <ul id="contacts" class="contacts"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="casino" aria-labelledby="h-casino" hidden>
+    <h2 id="h-casino"><span>IV</span> The Casino</h2>
+    <div class="gate">
+      <p id="casinostatus" class="gate-status"></p>
+      <p>The doors of the lower hall remain barred. Fortune will be dealt soon.</p>
+    </div>
+  </section>
+</main>
+
+<footer><svg aria-hidden="true"><use href="#hand"/></svg><p>Captainalism &middot; Orthanc Trading Hall</p></footer>
+<script src="app.js"></script>
+</body>
+</html>
