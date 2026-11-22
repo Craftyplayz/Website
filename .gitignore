@@ -44,3 +44,7 @@ private/booru/booru_data.json
 
 # pet videos: not shown on the site, and one is over GitHub's 100 MB limit - kept on disk and server only
 media/pets/!videos/
+
+# card pack: third-party card art (Mattel/IvoryRed) and the built pack never go in the public repo
+_dev/card-pack/art/
+_dev/card-pack/build/
