@@ -749,6 +749,13 @@
       "section": "Weapons and tools"
     },
     {
+      "id": "fire_charge",
+      "name": "Fire Charge",
+      "price": "1 diamond per stack",
+      "floor": "Gear and rare items",
+      "section": "Weapons and tools"
+    },
+    {
       "id": "elytra",
       "name": "Elytra",
       "price": "6 diamonds each",
