@@ -125,7 +125,7 @@
             return text;
         }).then(text => {
             if (m !== logMonth) return; // another month was picked meanwhile
-            log = text.split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch (e) { return null; } }).filter(Boolean).reverse();
+            log = text.split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch (e) { return null; } }).filter(Boolean).reverse().sort((a, b) => b.t - a.t); // newest first; backfilled lines sit after newer ones in the file
             drawLog(true);
             if (m === (data.ledger[0] || {}).month) {
                 $('#latest').innerHTML = log.length ? `<ul class="list">${log.slice(0, 8).map((e, k) => `<li><button type="button" data-latest="${k}">${tag(e.kind)}<span class="grow">${e.user ? `<b>${esc(e.user)}</b> ` : ''}${e.items && !ALERTS.includes(e.kind) ? esc(itemsText(e.items)) : md(e.text)}</span><small>${esc(ago(e.t * 1000))}</small></button></li>`).join('')}</ul>` : '<p class="empty">Nothing logged yet.</p>';
