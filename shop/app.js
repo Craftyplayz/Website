@@ -12,8 +12,13 @@
     return r.json();
   }).then(function (d) {
     $('shop-name').textContent = d.shop;
-    var ul = $('products');
+    var lists = {};
+    d.floors.forEach(function (name, n) {
+      $('products').appendChild(el('h3', 'floor', 'Floor ' + (n + 1) + ' · ' + name));
+      lists[name] = $('products').appendChild(el('ul', 'niches'));
+    });
     d.products.forEach(function (p, i) {
+      var ul = lists[p.floor] || lists[d.floors[d.floors.length - 1]]; // an item with a typo in its floor still shows
       var li = el('li', 'niche');
       var img = new Image(40, 40);
       img.alt = '';
@@ -21,7 +26,7 @@
       img.src = d.icons.replace('{id}', encodeURIComponent(p.id));
       var box = el('div', 'icon'); box.appendChild(img);
       var t = el('div', 'txt');
-      t.appendChild(el('h3', 'name', p.name));
+      t.appendChild(el('h4', 'name', p.name));
       t.appendChild(el('p', 'price', p.price));
       li.appendChild(box); li.appendChild(t);
       ul.appendChild(li);
