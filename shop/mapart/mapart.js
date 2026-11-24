@@ -244,6 +244,6 @@
         for (const [id, set] of Object.entries(d.sets)) {
             CJ[id] = { tonesRGB: set.tones, blocks: Object.fromEntries(Object.entries(set.blocks).map(([k, b]) => [k, { supportBlockMandatory: b.support }])) };
         }
-        loadUrl('pick-image.png', '', false);
+        loadUrl('pick-image.png?v=1', '', false);
     }).catch(() => { $('psub').textContent = "The block colours couldn't be loaded. Refresh the page to try again."; });
 })();
