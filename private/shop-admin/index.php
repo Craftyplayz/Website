@@ -22,7 +22,17 @@ header('X-Robots-Tag: noindex, nofollow');
 
         <div id="sa-body" hidden>
             <div class="stat-row" id="sa-stats"></div>
-            <nav class="jump"><a href="#sa-takings">Takings</a><a href="#sa-alerts">Alerts</a><a href="#sa-prices">Prices</a><a href="#sa-stock">Stock</a><a href="#sa-customers">Customers</a><a href="#sa-chests">Chests</a></nav>
+            <nav class="jump"><a href="#sa-log">Log</a><a href="#sa-takings">Takings</a><a href="#sa-alerts">Alerts</a><a href="#sa-prices">Prices</a><a href="#sa-stock">Stock</a><a href="#sa-customers">Customers</a><a href="#sa-chests">Chests</a></nav>
+
+            <h2 class="sec-h" id="sa-log">Log <span class="n" id="sa-log-n"></span></h2>
+            <div class="bar sa-logbar">
+                <select class="field" id="sa-month" aria-label="Month"></select>
+                <div class="stabs" id="sa-kinds" role="group" aria-label="Show"></div>
+                <input class="field" type="search" id="sa-lq" placeholder="Player or item" aria-label="Filter by player or item">
+            </div>
+            <p class="muted sa-lognote">Every sale, theft, restock and alert, kept for good. Click an entry for the details and the CoreProtect actions behind it.</p>
+            <div class="rows" id="sa-logrows"></div>
+            <p><button class="btn" id="sa-more" hidden>Show more</button></p>
 
             <h2 class="sec-h" id="sa-takings">Takings <span class="n">last 90 days</span></h2>
             <section class="card" id="sa-chart"></section>

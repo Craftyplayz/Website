@@ -31,3 +31,16 @@
 .sa-chest.empty { background: var(--sunken); }
 .sa-chest.wrong { background: var(--danger-bg); border-color: var(--danger-line); }
 .sa-cap { margin: 0 0 8px; font-size: 13px; }
+.sa-logbar { flex-wrap: wrap; }
+.sa-logbar .stabs { margin: 0; }
+.sa-logbar select.field { width: auto; }
+.sa-lognote { margin: 0 0 10px; font-size: 13px; }
+.sa :where(button.sa-logrow) { width: 100%; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.sa-logrow { align-items: flex-start; }
+.sa-logrow:hover { border-color: var(--accent); }
+.sa-logrow .badge { flex: none; }
+.sa-logrow .grow { min-width: 0; overflow-wrap: anywhere; }
+.sa-logrow small { flex: none; color: var(--muted); }
+.sa-amt { flex: none; font-size: 14px; }
+.sa-chestlist { font-size: 13px; }
+.sa :where(button.sa-logrow) { border: 1px solid transparent; }

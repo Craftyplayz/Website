@@ -31,12 +31,104 @@ document.addEventListener('DOMContentLoaded', () => {
         const stat = (b, s, href) => `<a class="stat-card" href="${href}"><b>${b}</b><span>${s}</span></a>`;
         $('#sa-stats').innerHTML = stat(d2(t.all), 'diamonds all time', '#sa-takings') + stat(d2(t.today), 'today', '#sa-takings') + stat(d2(t.week), 'last 7 days', '#sa-takings')
             + (t.uncollected === null ? '' : stat(d2(t.uncollected), 'uncollected in chests', '#sa-chests')) + stat(num(data.customers.length), 'customers', '#sa-customers');
+        logInit();
         chart(t.daily);
         events();
         suggestions();
         stock();
         customers();
         chests();
+    }
+
+    // --- log: the permanent ledger, one month at a time ---
+    const KINDS = { all: 'All', sale: 'Sales', theft: 'Thefts', restock: 'Restocks', alert: 'Alerts' };
+    const ALERTS = ['loss', 'hopper', 'low', 'wrong'];
+    const BADGE = { sale: ['Sale', 'g'], theft: ['Theft', 'r'], restock: ['Restock', 'b'], loss: ['Missing stock', 'r'], hopper: ['Hopper', 'r'], low: ['Low stock', ''], wrong: ['Wrong chest', 'p'] };
+    let log = [], shown = 0, kind = 'all';
+    const PAGE = 200;
+    const itemsText = (items, sign) => { const l = (items || []).map(i => `${sign && i.n > 0 ? '+' : ''}${num(i.n)} ${i.name}`); return l.slice(0, 8).join(', ') + (l.length > 8 ? ` and ${l.length - 8} more` : ''); };
+    function summary(e) {
+        if (e.kind === 'sale') return [`<b>${esc(e.user)}</b> bought ${esc(itemsText(e.items))}`, e.earned ? `+${d2(e.earned)}` : ''];
+        if (e.kind === 'theft') return [`<b>${esc(e.user)}</b> paid short: ${esc(itemsText(e.items) || 'took diamonds')}`, `${d2(e.short)} short`];
+        if (e.kind === 'restock') {
+            const add = (e.items || []).filter(i => i.n > 0), out = (e.items || []).filter(i => i.n < 0);
+            const bits = [add.length ? `restocked ${itemsText(add)}` : '', out.length ? `took out ${itemsText(out.map(i => ({ ...i, n: -i.n })))}` : ''].filter(Boolean).join('; ');
+            return [`<b>${esc(e.user)}</b> ${esc(bits || 'collected diamonds')}`, e.collected ? `${e.collected > 0 ? '+' : ''}${d2(e.collected)} collected` : ''];
+        }
+        return [md((e.text || '').replace(/^⚠️ /, '')), ''];
+    }
+    function logInit() {
+        const months = data.ledger || [];
+        $('#sa-log-n').textContent = months.length ? `${num(months.reduce((s, m) => s + m.count, 0))} entries` : '';
+        $('#sa-month').innerHTML = months.map(m => `<option value="${esc(m.month)}">${esc(new Date(m.month + '-01T12:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }))} (${num(m.count)})</option>`).join('');
+        $('#sa-kinds').innerHTML = Object.entries(KINDS).map(([k, l]) => `<button type="button" data-k="${k}" class="${k === kind ? 'on' : ''}" aria-pressed="${k === kind}">${l}</button>`).join('');
+        if (!months.length) { $('#sa-logrows').innerHTML = '<p class="muted">Nothing logged yet. Sales, thefts and restocks appear here about 15 minutes after they happen.</p>'; return; }
+        loadMonth(months[0].month);
+    }
+    function loadMonth(m) {
+        $('#sa-logrows').innerHTML = '<p class="note">Loading the log...</p>';
+        fetch('/shop/admin/data?ledger=' + encodeURIComponent(m), { cache: 'no-store' }).then(async r => {
+            const text = await r.text();
+            if (!r.ok) throw Error((JSON.parse(text || '{}').error) || `The data page answered ${r.status}.`);
+            return text;
+        }).then(text => {
+            log = text.split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch (e) { return null; } }).filter(Boolean).reverse(); // newest first
+            drawLog(true);
+        }).catch(e => { $('#sa-logrows').innerHTML = `<p class="err">Couldn't load that month. ${esc(e.message)}</p>`; });
+    }
+    const matches = e => {
+        if (kind === 'alert' ? !ALERTS.includes(e.kind) : kind !== 'all' && e.kind !== kind) return false;
+        const q = $('#sa-lq').value.trim().toLowerCase();
+        return !q || [e.user, e.text, ...(e.items || []).map(i => i.name + ' ' + i.id)].some(s => s && s.toLowerCase().includes(q));
+    };
+    function drawLog(reset) {
+        const list = log.filter(matches);
+        if (reset) { shown = 0; $('#sa-logrows').innerHTML = ''; }
+        const next = list.slice(shown, shown + PAGE);
+        $('#sa-logrows').insertAdjacentHTML('beforeend', next.map(e => {
+            const [label, cls] = BADGE[e.kind] || [e.kind, ''];
+            const [what, amount] = summary(e);
+            return `<button type="button" class="rowi sa-logrow" data-id="${esc(e.id)}"><span class="badge ${cls}">${esc(label)}</span><span class="grow">${what}</span>${amount ? `<b class="sa-amt">${esc(amount)}</b>` : ''}<small title="${esc(date(e.t))}">${esc(date(e.t))}</small></button>`;
+        }).join(''));
+        shown += next.length;
+        if (!list.length) $('#sa-logrows').innerHTML = '<p class="muted">Nothing matches in this month.</p>';
+        $('#sa-more').hidden = shown >= list.length;
+        $('#sa-more').textContent = `Show more (${num(list.length - shown)} left)`;
+    }
+    $('#sa-month').addEventListener('change', e => loadMonth(e.target.value));
+    $('#sa-kinds').addEventListener('click', e => {
+        const b = e.target.closest('button[data-k]');
+        if (!b) return;
+        kind = b.dataset.k;
+        $('#sa-kinds').querySelectorAll('button').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+        drawLog(true);
+    });
+    $('#sa-lq').addEventListener('input', debounce(() => drawLog(true), 120));
+    $('#sa-more').addEventListener('click', () => drawLog(false));
+    $('#sa-logrows').addEventListener('click', e => {
+        const b = e.target.closest('[data-id]');
+        if (b) openEntry(log.find(x => x.id === b.dataset.id));
+    });
+    function openEntry(e) {
+        if (!e) return;
+        const [label] = BADGE[e.kind] || [e.kind];
+        const range = e.start && e.end && e.start !== e.end ? `${date(e.start)} – ${new Date(e.end * 1000).toLocaleTimeString('en-GB', { timeStyle: 'short' })}` : date(e.t);
+        const kv = [['When', range], e.user ? ['Player', e.user] : null,
+            e.owed !== undefined ? ['Owed', dia(e.owed)] : null, e.paidIn !== undefined ? ['Paid in', dia(e.paidIn)] : null,
+            e.paidOut ? ['Diamonds taken out', dia(e.paidOut)] : null, e.short ? ['Short by', dia(e.short)] : null,
+            e.collected ? ['Collected', dia(e.collected)] : null].filter(Boolean);
+        const items = (e.items || []).length ? `<h3>Items</h3><div class="table-wrap"><table class="table"><thead><tr><th>Item</th><th class="num">Amount</th>${e.kind === 'sale' || e.kind === 'theft' ? '<th class="num">Diamonds</th>' : ''}<th class="num">Stock</th></tr></thead><tbody>
+            ${e.items.map(i => `<tr><td>${icon(i.id, 16)} ${esc(i.name)}${i.price ? `<br><small class="muted">${esc(i.price)}</small>` : ''}</td><td class="num">${e.kind === 'restock' && i.n > 0 ? '+' : ''}${num(i.n)}</td>
+            ${e.kind === 'sale' || e.kind === 'theft' ? `<td class="num">${i.diamonds === null || i.diamonds === undefined ? 'no price' : d2(i.diamonds)}</td>` : ''}<td class="num">${i.before === null || i.before === undefined ? '' : `${num(i.before)} > ${num(i.after)}`}</td></tr>`).join('')}</tbody></table></div>` : '';
+        const acts = (e.actions || []).length ? `<details><summary class="muted">CoreProtect actions (${num(e.actions.length)})</summary><div class="table-wrap"><table class="table"><thead><tr><th>Time</th><th>Chest</th><th>Item</th><th class="num">Amount</th></tr></thead><tbody>
+            ${e.actions.map(([t, x, y, z, id, n, a]) => `<tr><td>${esc(new Date(t * 1000).toLocaleTimeString('en-GB'))}</td><td class="mono">${x} ${y} ${z}</td><td>${esc(id.replace(/_/g, ' '))}</td><td class="num">${a ? '+' : '−'}${num(n)}</td></tr>`).join('')}</tbody></table></div></details>` : '';
+        $('#sa-detail').innerHTML = `<h2 class="sa-dh">${esc(label)}</h2>${e.text ? `<p>${md(e.text.replace(/^⚠️ /, ''))}</p>` : ''}
+            <div class="kv">${kv.map(([k, v]) => `<span>${esc(k)}</span><span>${esc(v)}</span>`).join('')}</div>${items}
+            ${(e.chests || []).length ? `<h3>Chests</h3><p class="mono sa-chestlist">${e.chests.map(esc).join('<br>')}</p>` : ''}${acts}
+            <p class="muted sa-cap">Log entry ${esc(e.id)}</p>`;
+        drawer.classList.add('open');
+        drawer.setAttribute('aria-hidden', 'false');
+        drawer.focus();
     }
 
     // --- takings: one bar per day ---
