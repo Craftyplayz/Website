@@ -36,17 +36,8 @@
         r.forEach(function (s) { ul.appendChild(el('li', null, s)); });
       } else last = $('rules').appendChild(el('li', null, r));
     });
-    if (!g.coords.length) $('where').appendChild(el('p', 'lead', 'Coming soon: this game is still being built.'));
-    g.coords.forEach(function (c) {
-      $('where').appendChild(el('p', null, c.label + ': ' + c.xyz + ' in the ' + c.dimension));
-      var row = $('where').appendChild(el('div', 'tp'));
-      row.appendChild(el('code', null, c.tp));
-      var b = row.appendChild(el('button', null, 'Copy teleport command'));
-      b.type = 'button';
-      b.onclick = function () {
-        navigator.clipboard.writeText(c.tp).then(function () { b.textContent = 'Copied'; }, function () { b.textContent = 'Copy failed: select the command instead'; });
-      };
-    });
+    $('where').appendChild(el('p', 'lead', d.casino.where));
+    if (!g.open) $('where').appendChild(el('p', null, 'This game is still being built.'));
     document.querySelectorAll('.storey').forEach(function (s) { s.hidden = false; });
     st.hidden = true;
   }).catch(function (e) {

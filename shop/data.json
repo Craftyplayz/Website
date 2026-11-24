@@ -836,14 +836,6 @@
         "open": true,
         "price": "Free",
         "players": "2–8",
-        "coords": [
-          {
-            "label": "Poker table",
-            "xyz": "161 44 23",
-            "dimension": "Overworld",
-            "tp": "/execute in minecraft:overworld run tp @s 161.42 44.00 23.42 316.93 90.00"
-          }
-        ],
         "intro": "Texas Hold’em on a working table.",
         "rules": [
           "Each player gets 2 private cards. The two players left of the dealer post the small and big blinds.",
@@ -863,7 +855,6 @@
         "open": false,
         "price": "Free",
         "players": "2–10",
-        "coords": [],
         "rules": [
           "Each player is dealt 7 cards. Turn over the top card of the deck to start the discard pile.",
           "On your turn, play a card that matches the top card by colour, number or symbol, or play a Wild.",
@@ -882,7 +873,6 @@
         "open": false,
         "price": "Free",
         "players": "2",
-        "coords": [],
         "rules": [
           "White moves first. Players take turns moving one piece.",
           "King: one square any way. Queen: any distance in a straight line or diagonal. Rook: straight lines. Bishop: diagonals. Knight: an L shape, and it can jump over pieces.",
@@ -901,7 +891,6 @@
         "open": false,
         "price": "Free",
         "players": "2",
-        "coords": [],
         "rules": [
           "Two players stand on opposite sides of the platform, facing each other.",
           "Each gets one Knockback stick. No armour, no food, no other items.",
@@ -919,7 +908,6 @@
         "open": false,
         "price": "Free",
         "players": "2",
-        "coords": [],
         "rules": [
           "The writer secretly writes the name of one block on a sign, out of the guesser’s sight. Any block in the Creative inventory counts.",
           "The writer hides the sign (behind a wall or facing away) until the game ends.",
@@ -938,7 +926,6 @@
         "open": false,
         "price": "Free",
         "players": "2–8",
-        "coords": [],
         "rules": [
           "One player fills the dispenser at the top of the tube with 9 wool, one of each colour.",
           "They dispense all 9 onto the floor below, then join the others.",
@@ -956,7 +943,6 @@
         "open": false,
         "price": "Free",
         "players": "3–9",
-        "coords": [],
         "rules": [
           "3–9 players each take a stack of one wool colour.",
           "Take turns picking a starting square by its coordinates. Take a banner for your row and one for your column.",
@@ -975,7 +961,6 @@
         "open": false,
         "price": "Free",
         "players": "2",
-        "coords": [],
         "intro": "Each player has a wall of the same 25 blocks, each with a trapdoor in front to flip down when ruled out.",
         "rules": [
           "Each player secretly picks one block and puts it in their hidden chest.",
@@ -994,7 +979,6 @@
         "open": false,
         "price": "Free",
         "players": "2",
-        "coords": [],
         "rules": [
           "Each player takes their wool and a stack of sand to their own side.",
           "Bury your wool in your sand any way you like. The first player to finish building goes first.",
@@ -1018,7 +1002,6 @@
         "open": false,
         "paid": true,
         "price": "1 diamond per game",
-        "coords": [],
         "rules": [
           "Put 1 diamond in the dropper on the left.",
           "Press the button to clear the board and start a new game.",
@@ -1037,7 +1020,6 @@
         "open": false,
         "paid": true,
         "price": "1 diamond per go",
-        "coords": [],
         "rules": [
           "Put your diamonds in the dropper.",
           "Press the button. Each press wagers 1 diamond.",
@@ -1057,7 +1039,6 @@
           "Standard machine: 1 diamond per spin",
           "High-stakes machine: 1 diamond block per spin"
         ],
-        "coords": [],
         "rules": [
           "Put your diamonds (or diamond blocks) in the shulker box in the floor.",
           "Press the button to spin the slots.",
@@ -1082,7 +1063,6 @@
           "High stakes: 1 diamond block per play",
           "Standard: 1 diamond per play"
         ],
-        "coords": [],
         "rules": [
           "Bet on red, black or green.",
           "The wheel spins and stops on one space.",
@@ -1107,7 +1087,6 @@
           "High stakes: 1 diamond block per play",
           "Standard: 1 diamond per play"
         ],
-        "coords": [],
         "rules": [
           "Pay your stake and press the button.",
           "The lights spin for a random amount of time, then stop on one lamp.",
@@ -1128,7 +1107,6 @@
           "High stakes: 1 diamond block per play",
           "Standard: 1 diamond per play"
         ],
-        "coords": [],
         "rules": [
           "Put your diamonds (or diamond blocks) in the shulker box and press the button.",
           "There is a 50% chance nothing happens and the house keeps your stake.",
@@ -1156,6 +1134,7 @@
         "players": "1",
         "intro": "Your stake climbs a tower. Every floor it reaches has a better prize, but each climb is a gamble."
       }
-    ]
+    ],
+    "where": "In Crafty’s shop, Castle Crafty: take the elevators down to the casino in the basement."
   }
 }
