@@ -22,7 +22,10 @@
     $('name').textContent = g.name;
     $('floor').textContent = d.casino.floor;
     $('price').textContent = g.price;
-    $('players').textContent = g.players;
+    if (g.players) $('players').textContent = g.players; else $('players').parentNode.hidden = true;
+    (g.pricing || []).forEach(function (p) { $('pricing').appendChild(el('li', null, p)); });
+    $('pricing').hidden = !g.pricing;
+    if (!g.rules.length) $('rules').appendChild(el('li', null, 'Rules coming soon.'));
     $('open').appendChild(el('b', g.open ? 'note open' : 'note', g.open ? 'Open now' : 'Coming soon'));
     if (g.intro) { $('intro').textContent = g.intro; $('intro').hidden = false; }
     // a nested array is the sub-list of the rule before it

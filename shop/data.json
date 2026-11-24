@@ -827,7 +827,7 @@
   },
   "casino": {
     "floor": "The basement",
-    "lead": "These games are free: they are played between friends, so the house takes no cut. Paid games are coming soon. Pick a game to read its rules and find where it is.",
+    "lead": "Free games are played between friends, so the house takes no cut. Paid games are run by the house. Pick a game to read its rules and find where it is.",
     "games": [
       {
         "slug": "poker",
@@ -853,7 +853,8 @@
           "Hands from best to worst: royal flush, straight flush, four of a kind, full house, flush, straight, three of a kind, two pair, one pair, high card.",
           "The best hand at the showdown wins the pot, or the last player who hasn’t folded wins it.",
           "The dealer button moves one seat left after every hand."
-        ]
+        ],
+        "paid": false
       },
       {
         "slug": "uno",
@@ -871,7 +872,8 @@
           "Wild: choose the next colour. Wild Draw Four: choose the colour, and the next player draws 4 and misses a turn.",
           "Say “Uno” when you have one card left. If someone catches you first, draw 2.",
           "The first player with no cards left wins."
-        ]
+        ],
+        "paid": false
       },
       {
         "slug": "chess",
@@ -889,7 +891,8 @@
           "Check means the king is under attack. You must get out of check on your next move.",
           "Checkmate (the king is in check and can’t escape) wins the game.",
           "If the player to move isn’t in check but has no legal move, it’s a draw (stalemate)."
-        ]
+        ],
+        "paid": false
       },
       {
         "slug": "sumo",
@@ -906,7 +909,8 @@
           "Knock the other player off the platform. Hits do no real damage, only knockback.",
           "Touching the water or ground below means you lose the round.",
           "Best of 3 rounds wins the match."
-        ]
+        ],
+        "paid": false
       },
       {
         "slug": "10-questions",
@@ -924,7 +928,8 @@
           "A guess (“Is it a crafting table?”) counts as a question.",
           "Guess the exact block within 10 questions and the guesser wins. Otherwise the writer reveals the sign and wins.",
           "Swap roles each game. Play an even number of games; most wins takes the match."
-        ]
+        ],
+        "paid": false
       },
       {
         "slug": "pick-up-blocks",
@@ -941,7 +946,8 @@
           "Walk over it to pick it up. If you pick up any other wool too, you are out and spectate.",
           "When the floor is empty, refill the dispenser and drop all 9 again.",
           "Last player still in wins."
-        ]
+        ],
+        "paid": false
       },
       {
         "slug": "land-rush",
@@ -959,7 +965,8 @@
           "Wall off land for yourself and block other players. Alliances are allowed. So is breaking them.",
           "When every region is closed off, each player fills in their own region with wool.",
           "Count your blocks. The largest region wins."
-        ]
+        ],
+        "paid": false
       },
       {
         "slug": "guess-who",
@@ -977,7 +984,8 @@
           "Flip down the trapdoors of blocks you have ruled out.",
           "On your turn, instead of a question, you may guess the block.",
           "A right guess wins. A wrong guess loses."
-        ]
+        ],
+        "paid": false
       },
       {
         "slug": "castle-crumble",
@@ -1000,7 +1008,84 @@
           "Once you find the opponent’s wool, keep taking turns to clear the sand above it and dig a staircase out.",
           "You cannot win while you are stuck inside the castle.",
           "The first player to take the opponent’s wool out of their castle wins."
-        ]
+        ],
+        "paid": false
+      },
+      {
+        "slug": "connect-4",
+        "name": "Connect 4",
+        "icon": "yellow_concrete",
+        "open": false,
+        "paid": true,
+        "price": "1 diamond per game",
+        "coords": [],
+        "rules": []
+      },
+      {
+        "slug": "mini-slots",
+        "name": "Mini Slot Machines",
+        "icon": "gold_ingot",
+        "open": false,
+        "paid": true,
+        "price": "1 diamond per go",
+        "coords": [],
+        "rules": []
+      },
+      {
+        "slug": "slot-machine",
+        "name": "Slot Machine",
+        "icon": "diamond_block",
+        "open": false,
+        "paid": true,
+        "price": "Variable pricing",
+        "pricing": [
+          "High stakes: 1 diamond block per play",
+          "Standard: 1 diamond per play"
+        ],
+        "coords": [],
+        "rules": []
+      },
+      {
+        "slug": "roulette",
+        "name": "Roulette",
+        "icon": "red_concrete",
+        "open": false,
+        "paid": true,
+        "price": "Variable pricing",
+        "pricing": [
+          "High stakes: 1 diamond block per play",
+          "Standard: 1 diamond per play"
+        ],
+        "coords": [],
+        "rules": []
+      },
+      {
+        "slug": "spin-the-lights",
+        "name": "Spin the Lights",
+        "icon": "redstone_lamp",
+        "open": false,
+        "paid": true,
+        "price": "Variable pricing",
+        "pricing": [
+          "High stakes: 1 diamond block per play",
+          "Standard: 1 diamond per play"
+        ],
+        "coords": [],
+        "rules": []
+      },
+      {
+        "slug": "tower-of-luck",
+        "name": "Tower of Luck",
+        "icon": "ladder",
+        "open": false,
+        "paid": true,
+        "price": "Variable pricing",
+        "pricing": [
+          "High stakes: 1 diamond block per play",
+          "Standard: 1 diamond per play"
+        ],
+        "coords": [],
+        "rules": []
       }
     ]
   }

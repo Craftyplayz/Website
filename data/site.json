@@ -72,7 +72,13 @@
                         { "title": "Pick Up Blocks (casino)", "url": "/shop/pick-up-blocks/", "description": "Rules and location for Pick Up Blocks in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
                         { "title": "Land Rush (casino)", "url": "/shop/land-rush/", "description": "Rules and location for Land Rush in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
                         { "title": "Guess Who (casino)", "url": "/shop/guess-who/", "description": "Rules and location for Guess Who in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
-                        { "title": "Castle Crumble (casino)", "url": "/shop/castle-crumble/", "description": "Rules and location for Castle Crumble in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] }
+                        { "title": "Castle Crumble (casino)", "url": "/shop/castle-crumble/", "description": "Rules and location for Castle Crumble in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
+                        { "title": "Connect 4 (casino)", "url": "/shop/connect-4/", "description": "Rules, prices and location for Connect 4 in the Castle Crafty casino", "keywords": ["casino", "gambling", "rules"] },
+                        { "title": "Mini Slot Machines (casino)", "url": "/shop/mini-slots/", "description": "Rules, prices and location for Mini Slot Machines in the Castle Crafty casino", "keywords": ["casino", "gambling", "rules"] },
+                        { "title": "Slot Machine (casino)", "url": "/shop/slot-machine/", "description": "Rules, prices and location for Slot Machine in the Castle Crafty casino", "keywords": ["casino", "gambling", "rules"] },
+                        { "title": "Roulette (casino)", "url": "/shop/roulette/", "description": "Rules, prices and location for Roulette in the Castle Crafty casino", "keywords": ["casino", "gambling", "rules"] },
+                        { "title": "Spin the Lights (casino)", "url": "/shop/spin-the-lights/", "description": "Rules, prices and location for Spin the Lights in the Castle Crafty casino", "keywords": ["casino", "gambling", "rules"] },
+                        { "title": "Tower of Luck (casino)", "url": "/shop/tower-of-luck/", "description": "Rules, prices and location for Tower of Luck in the Castle Crafty casino", "keywords": ["casino", "gambling", "rules"] }
                     ]
                 }
             ]

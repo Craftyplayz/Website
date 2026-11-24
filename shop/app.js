@@ -46,6 +46,11 @@
     });
     $('casino-floor').textContent = d.casino.floor;
     $('casino-lead').textContent = d.casino.lead;
+    var groups = {};
+    [[false, 'Free games'], [true, 'Paid games']].forEach(function (p) {
+      $('games').appendChild(el('h3', 'floor', p[1]));
+      groups[p[0]] = $('games').appendChild(el('ul', 'niches'));
+    });
     d.casino.games.forEach(function (g) {
       var link = el('a', 'niche');
       link.href = '/shop/' + g.slug + '/';
@@ -54,10 +59,10 @@
       var box = el('div', 'icon'); box.appendChild(img);
       var t = el('div', 'txt');
       t.appendChild(el('h3', 'name', g.name));
-      t.appendChild(el('p', 'price', g.price + ' · ' + g.players + ' players'));
+      t.appendChild(el('p', 'price', g.price + (g.players ? ' · ' + g.players + ' players' : '')));
       t.appendChild(el('p', g.open ? 'note open' : 'note', g.open ? 'Open now' : 'Coming soon'));
       link.appendChild(box); link.appendChild(t);
-      $('games').appendChild(el('li')).appendChild(link);
+      groups[!!g.paid].appendChild(el('li')).appendChild(link);
     });
     document.querySelectorAll('.storey').forEach(function (s) { s.hidden = false; });
     st.hidden = true;
