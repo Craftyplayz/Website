@@ -758,9 +758,10 @@
     {
       "id": "firework_rocket",
       "name": "Firework Rocket",
-      "price": "Price coming soon",
+      "price": "3 stacks per diamond",
       "floor": "Gear and rare items",
-      "section": "Travel and storage"
+      "section": "Travel and storage",
+      "note": "Flight duration 1"
     },
     {
       "id": "shulker_box",
