@@ -1,245 +1,324 @@
-// Castle Crafty admin: renders /shop/admin/data (admin.json from the home server's shop-log container)
-document.addEventListener('DOMContentLoaded', () => {
-    const { $, esc, debounce, num, ago } = UI;
+// Castle Crafty admin: renders /shop/admin/data (admin.json) and the monthly ledger (?ledger=YYYY-MM)
+(function () {
+    const { $, $$, esc, debounce, num, ago } = UI;
     const ICON = id => `/minecraft/tools/item-list/minecraft_${encodeURIComponent(id)}.png`;
+    const ic = id => `<img class="ic" src="${ICON(id)}" alt="" width="16" height="16" loading="lazy" onerror="this.style.visibility='hidden'">`;
     const d2 = n => (n > 0 && n < 0.01 ? '<0.01' : (Math.round(n * 100) / 100).toLocaleString('en-GB'));
     const dia = n => `${d2(n)} diamond${Math.round(n * 100) === 100 ? '' : 's'}`;
     const date = t => new Date(t * 1000).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
-    const md = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>'); // Discord bold → HTML
-    const icon = (id, size = 24) => `<img src="${ICON(id)}" alt="" width="${size}" height="${size}" loading="lazy" onerror="this.style.visibility='hidden'">`;
-    let data;
+    const short = t => new Date(t * 1000).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const md = t => esc(t || '').replace(/^⚠️ /, '').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+    const TAG = { sale: 'Sale', theft: 'Theft', restock: 'Restock', loss: 'Missing stock', hopper: 'Hopper', low: 'Low stock', wrong: 'Wrong chest', short: 'Theft' };
+    const tag = k => `<span class="tag t-${k === 'short' ? 'theft' : esc(k)}">${esc(TAG[k] || k)}</span>`;
+    const ALERTS = ['loss', 'hopper', 'low', 'wrong'];
+    const VIEWS = { overview: 'Overview', log: 'Log', alerts: 'Alerts', stock: 'Stock', chests: 'Chests', customers: 'Customers', prices: 'Prices' };
+    let data, log = [], logMonth = null;
 
+    // ---------- load ----------
     fetch('/shop/admin/data', { cache: 'no-store' }).then(async r => {
         const j = await r.json().catch(() => ({}));
         if (!r.ok) throw Error(j.error || `The data page answered ${r.status}.`);
-        if (r.headers.get('X-Stale')) $('#sa-lede').textContent += ' The home server is offline: this is the last copy.';
-        return j;
-    }).then(d => {
-        data = d;
-        $('#sa-status').remove();
-        $('#sa-body').hidden = false;
-        render();
+        data = j;
+        data.stale = !!r.headers.get('X-Stale');
+        $('#status').hidden = true;
+        renderAll();
+        route();
     }).catch(e => {
-        const s = $('#sa-status');
-        s.className = 'err';
+        const s = $('#status');
+        s.className = 'status err';
         s.textContent = `Couldn't load the shop data. ${e.message}`;
     });
 
-    function render() {
+    // ---------- views (#hash) ----------
+    function route() {
+        const v = VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : 'overview';
+        $$('.view').forEach(s => (s.hidden = s.dataset.view !== v));
+        $$('#nav a').forEach(a => (a.getAttribute('data-view') === v ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
+        $('#title').textContent = VIEWS[v];
+        document.title = `${VIEWS[v]} · Castle Crafty admin`;
+        closePanel();
+        if (v === 'log' && !logMonth && data.ledger && data.ledger.length) loadMonth(data.ledger[0].month);
+    }
+    window.addEventListener('hashchange', () => { if (data) { route(); $('#main').focus({ preventScroll: true }); window.scrollTo(0, 0); } });
+
+    function renderAll() {
         const t = data.takings;
-        $('#sa-lede').innerHTML = `Takings, stock, chests and alerts from the shop's chest log. Updated <span title="${esc(date(data.updated))}">${esc(ago(data.updated * 1000))}</span>; stock as of the last world save, <span title="${esc(date(data.saved))}">${esc(ago(data.saved * 1000))}</span>.`;
-        const stat = (b, s, href) => `<a class="stat-card" href="${href}"><b>${b}</b><span>${s}</span></a>`;
-        $('#sa-stats').innerHTML = stat(d2(t.all), 'diamonds all time', '#sa-takings') + stat(d2(t.today), 'today', '#sa-takings') + stat(d2(t.week), 'last 7 days', '#sa-takings')
-            + (t.uncollected === null ? '' : stat(d2(t.uncollected), 'uncollected in chests', '#sa-chests')) + stat(num(data.customers.length), 'customers', '#sa-customers');
+        $('#updated').innerHTML = `Updated <span title="${esc(date(data.updated))}">${esc(ago(data.updated * 1000))}</span><br>Stock from the world save <span title="${esc(date(data.saved))}">${esc(ago(data.saved * 1000))}</span>${data.stale ? '<br><span class="low">Home server offline: last copy</span>' : ''}`;
+        const kpi = (b, s) => `<div class="kpi"><b>${b}</b><span>${s}</span></div>`;
+        $('#kpis').innerHTML = kpi(d2(t.today), 'diamonds today') + kpi(d2(t.week), 'last 7 days') + kpi(d2(t.all), 'all time') + (t.uncollected === null ? '' : kpi(d2(t.uncollected), 'uncollected'));
+        const lows = data.products.filter(p => p.price && p.each !== null && p.stock !== null && p.stock < data.low && p.history.length && p.history.some(h => h[1] >= data.low));
+        const wrong = data.chests.filter(c => c.misplaced.length);
+        const sugg = data.products.filter(p => p.suggestion);
+        const recentAlerts = data.events.filter(e => data.updated - e.t < 7 * 86400 && e.kind !== 'low');
+        $('#n-alerts').textContent = recentAlerts.length || '';
+        $('#n-low').textContent = lows.length || '';
+        $('#n-wrong').textContent = wrong.length || '';
+        $('#n-prices').textContent = sugg.length || '';
+        overview(lows, wrong, sugg, recentAlerts);
+        alertsView();
+        stockView();
+        chestsView();
+        customersView();
+        pricesView(sugg);
         logInit();
-        chart(t.daily);
-        events();
-        suggestions();
-        stock();
-        customers();
-        chests();
     }
 
-    // --- log: the permanent ledger, one month at a time ---
+    // ---------- overview ----------
+    function overview(lows, wrong, sugg, recentAlerts) {
+        chart(data.takings.daily);
+        const att = [
+            ...recentAlerts.slice(0, 5).map(e => `<li>${tag(e.kind)}<span class="grow">${md(e.text)}</span><small>${esc(ago(e.t * 1000))}</small></li>`),
+            ...lows.slice(0, 5).map(p => `<li>${tag('low')}<span class="grow">${ic(p.id)}${esc(p.name)}: ${p.stock ? `${num(p.stock)} left` : 'sold out'}</span></li>`),
+            wrong.length ? `<li>${tag('wrong')}<span class="grow">${num(wrong.length)} chest${wrong.length > 1 ? 's hold' : ' holds'} another item's stock</span><a href="#chests">Chests</a></li>` : '',
+        ].filter(Boolean);
+        $('#attention').innerHTML = att.length ? `<ul class="list">${att.join('')}</ul>` : '<p class="empty">Nothing needs attention.</p>';
+        const best = data.products.filter(p => p.sold14).sort((a, b) => b.sold14 * (b.each || 0) - a.sold14 * (a.each || 0)).slice(0, 6);
+        $('#best').innerHTML = best.length ? `<ul class="list">${best.map(p => `<li><span class="grow">${ic(p.id)}${esc(p.name)}</span><small>${num(p.sold14)} sold · ${d2(p.sold14 * (p.each || 0))} diamonds</small></li>`).join('')}</ul>` : '<p class="empty">No sales in the last 14 days.</p>';
+        $('#ov-prices').innerHTML = sugg.length ? `<ul class="list">${sugg.slice(0, 5).map(p => `<li><span class="grow">${ic(p.id)}${esc(p.name)}</span><small>${esc(p.suggestion)}</small></li>`).join('')}</ul>` : '<p class="empty">Nothing to change yet.</p>';
+        $('#latest').innerHTML = '<p class="empty">Loading…</p>';
+    }
+    function chart(daily) {
+        const max = Math.max(1, ...daily.map(d => d[1]));
+        const W = 900, H = 150, bw = W / daily.length;
+        const total = daily.reduce((s, d) => s + d[1], 0);
+        const bars = daily.map(([day, v], k) => {
+            const h = Math.max(v ? 2 : 0, (v / max) * (H - 10));
+            const label = `${new Date(day + 'T12:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}: ${dia(v)}`;
+            return `<rect x="${(k * bw + 1).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${h.toFixed(1)}"><title>${esc(label)}</title></rect>`;
+        }).join('');
+        $('#chart').innerHTML = `<svg class="bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Diamonds per day for 90 days, ${esc(dia(total))} in total">${bars}</svg>
+            <div class="axis"><span>${esc(new Date(daily[0][0] + 'T12:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }))}</span><span>${esc(dia(total))} in 90 days · best day ${esc(dia(total ? max : 0))}</span><span>Today</span></div>`;
+    }
+
+    // ---------- log (permanent ledger) ----------
     const KINDS = { all: 'All', sale: 'Sales', theft: 'Thefts', restock: 'Restocks', alert: 'Alerts' };
-    const ALERTS = ['loss', 'hopper', 'low', 'wrong'];
-    const BADGE = { sale: ['Sale', 'g'], theft: ['Theft', 'r'], restock: ['Restock', 'b'], loss: ['Missing stock', 'r'], hopper: ['Hopper', 'r'], low: ['Low stock', ''], wrong: ['Wrong chest', 'p'] };
-    let log = [], shown = 0, kind = 'all';
+    let kind = 'all', shown = 0, filtered = [];
     const PAGE = 200;
-    const itemsText = (items, sign) => { const l = (items || []).map(i => `${sign && i.n > 0 ? '+' : ''}${num(i.n)} ${i.name}`); return l.slice(0, 8).join(', ') + (l.length > 8 ? ` and ${l.length - 8} more` : ''); };
-    function summary(e) {
-        if (e.kind === 'sale') return [`<b>${esc(e.user)}</b> bought ${esc(itemsText(e.items))}`, e.earned ? `+${d2(e.earned)}` : ''];
-        if (e.kind === 'theft') return [`<b>${esc(e.user)}</b> paid short: ${esc(itemsText(e.items) || 'took diamonds')}`, `${d2(e.short)} short`];
-        if (e.kind === 'restock') {
+    const itemsText = items => { const l = (items || []).map(i => `${num(Math.abs(i.n))} ${i.name}`); return l.slice(0, 6).join(', ') + (l.length > 6 ? ` +${l.length - 6} more` : ''); };
+    function entryRow(e, k) {
+        let who = e.user ? esc(e.user) : '', what = '', amt = '';
+        if (e.kind === 'sale') { what = esc(itemsText(e.items)) || 'paid, took nothing'; amt = e.earned ? `<span class="amt-pos">+${d2(e.earned)}</span>` : ''; }
+        else if (e.kind === 'theft') { what = esc(itemsText(e.items) || 'took diamonds'); amt = `<span class="amt-neg">${d2(e.short)} short</span>`; }
+        else if (e.kind === 'restock') {
             const add = (e.items || []).filter(i => i.n > 0), out = (e.items || []).filter(i => i.n < 0);
-            const bits = [add.length ? `restocked ${itemsText(add)}` : '', out.length ? `took out ${itemsText(out.map(i => ({ ...i, n: -i.n })))}` : ''].filter(Boolean).join('; ');
-            return [`<b>${esc(e.user)}</b> ${esc(bits || 'collected diamonds')}`, e.collected ? `${e.collected > 0 ? '+' : ''}${d2(e.collected)} collected` : ''];
-        }
-        return [md((e.text || '').replace(/^⚠️ /, '')), ''];
+            what = [add.length ? `<span class="amt-pos">+</span> ${esc(itemsText(add))}` : '', out.length ? `<span class="amt-neg">−</span> ${esc(itemsText(out))}` : ''].filter(Boolean).join('<br>') || 'collected diamonds';
+            amt = e.collected ? `<span class="amt-pos">${e.collected > 0 ? '+' : ''}${d2(e.collected)}</span>` : '';
+        } else { what = md(e.text); if (!who && e.user) who = esc(e.user); }
+        return `<tr data-i="${k}"><td class="when" title="${esc(date(e.t))}">${esc(short(e.t))}</td><td>${tag(e.kind)}</td><td>${who}</td><td class="items">${what}</td><td class="num">${amt}</td></tr>`;
     }
     function logInit() {
+        $('#kinds').innerHTML = Object.entries(KINDS).map(([k, l]) => `<button type="button" data-k="${k}" aria-pressed="${k === kind}">${l}</button>`).join('');
         const months = data.ledger || [];
-        $('#sa-log-n').textContent = months.length ? `${num(months.reduce((s, m) => s + m.count, 0))} entries` : '';
-        $('#sa-month').innerHTML = months.map(m => `<option value="${esc(m.month)}">${esc(new Date(m.month + '-01T12:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }))} (${num(m.count)})</option>`).join('');
-        $('#sa-kinds').innerHTML = Object.entries(KINDS).map(([k, l]) => `<button type="button" data-k="${k}" class="${k === kind ? 'on' : ''}" aria-pressed="${k === kind}">${l}</button>`).join('');
-        if (!months.length) { $('#sa-logrows').innerHTML = '<p class="muted">Nothing logged yet. Sales, thefts and restocks appear here about 15 minutes after they happen.</p>'; return; }
-        loadMonth(months[0].month);
+        $('#month').innerHTML = months.map(m => `<option value="${esc(m.month)}">${esc(new Date(m.month + '-01T12:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }))} · ${num(m.count)}</option>`).join('') || '<option>No entries yet</option>';
+        if (months.length) loadMonth(months[0].month, true);
+        else {
+            $('#log-t').innerHTML = '<tbody><tr><td class="empty">Nothing logged yet. Sales, thefts and restocks appear here about 15 minutes after they happen.</td></tr></tbody>';
+            $('#latest').innerHTML = '<p class="empty">Nothing logged yet.</p>';
+        }
     }
-    function loadMonth(m) {
-        $('#sa-logrows').innerHTML = '<p class="note">Loading the log...</p>';
+    function loadMonth(m, quiet) {
+        logMonth = m;
+        if (!quiet) $('#log-t').innerHTML = '<tbody><tr><td class="empty">Loading…</td></tr></tbody>';
         fetch('/shop/admin/data?ledger=' + encodeURIComponent(m), { cache: 'no-store' }).then(async r => {
             const text = await r.text();
-            if (!r.ok) throw Error((JSON.parse(text || '{}').error) || `The data page answered ${r.status}.`);
+            if (!r.ok) { let msg = `The data page answered ${r.status}.`; try { msg = JSON.parse(text).error || msg; } catch (e) { } throw Error(msg); }
             return text;
         }).then(text => {
-            log = text.split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch (e) { return null; } }).filter(Boolean).reverse(); // newest first
+            if (m !== logMonth) return; // another month was picked meanwhile
+            log = text.split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch (e) { return null; } }).filter(Boolean).reverse();
             drawLog(true);
-        }).catch(e => { $('#sa-logrows').innerHTML = `<p class="err">Couldn't load that month. ${esc(e.message)}</p>`; });
+            if (m === (data.ledger[0] || {}).month) {
+                $('#latest').innerHTML = log.length ? `<ul class="list">${log.slice(0, 8).map((e, k) => `<li><button type="button" data-latest="${k}">${tag(e.kind)}<span class="grow">${e.user ? `<b>${esc(e.user)}</b> ` : ''}${e.items && !ALERTS.includes(e.kind) ? esc(itemsText(e.items)) : md(e.text)}</span><small>${esc(ago(e.t * 1000))}</small></button></li>`).join('')}</ul>` : '<p class="empty">Nothing logged yet.</p>';
+            }
+        }).catch(e => { $('#log-t').innerHTML = `<tbody><tr><td class="low">Couldn't load that month. ${esc(e.message)}</td></tr></tbody>`; });
     }
-    const matches = e => {
-        if (kind === 'alert' ? !ALERTS.includes(e.kind) : kind !== 'all' && e.kind !== kind) return false;
-        const q = $('#sa-lq').value.trim().toLowerCase();
-        return !q || [e.user, e.text, ...(e.items || []).map(i => i.name + ' ' + i.id)].some(s => s && s.toLowerCase().includes(q));
-    };
     function drawLog(reset) {
-        const list = log.filter(matches);
-        if (reset) { shown = 0; $('#sa-logrows').innerHTML = ''; }
-        const next = list.slice(shown, shown + PAGE);
-        $('#sa-logrows').insertAdjacentHTML('beforeend', next.map(e => {
-            const [label, cls] = BADGE[e.kind] || [e.kind, ''];
-            const [what, amount] = summary(e);
-            return `<button type="button" class="rowi sa-logrow" data-id="${esc(e.id)}"><span class="badge ${cls}">${esc(label)}</span><span class="grow">${what}</span>${amount ? `<b class="sa-amt">${esc(amount)}</b>` : ''}<small title="${esc(date(e.t))}">${esc(date(e.t))}</small></button>`;
-        }).join(''));
+        if (reset) {
+            const q = $('#lq').value.trim().toLowerCase();
+            filtered = log.map((e, k) => [e, k]).filter(([e]) => (kind === 'all' || (kind === 'alert' ? ALERTS.includes(e.kind) : e.kind === kind))
+                && (!q || [e.user, e.text, ...(e.items || []).map(i => i.name + ' ' + i.id)].some(s => s && s.toLowerCase().includes(q))));
+            shown = 0;
+            $('#log-t').innerHTML = '<thead><tr><th>When</th><th>Type</th><th>Player</th><th>Items</th><th class="num">Diamonds</th></tr></thead><tbody></tbody>';
+        }
+        const next = filtered.slice(shown, shown + PAGE);
+        $('#log-t tbody').insertAdjacentHTML('beforeend', next.map(([e, k]) => entryRow(e, k)).join('') || (shown ? '' : '<tr><td colspan="5" class="empty">Nothing matches.</td></tr>'));
         shown += next.length;
-        if (!list.length) $('#sa-logrows').innerHTML = '<p class="muted">Nothing matches in this month.</p>';
-        $('#sa-more').hidden = shown >= list.length;
-        $('#sa-more').textContent = `Show more (${num(list.length - shown)} left)`;
+        $('#log-n').textContent = `${num(filtered.length)} of ${num(log.length)}`;
+        $('#more').hidden = shown >= filtered.length;
+        $('#more').textContent = `Show more (${num(filtered.length - shown)} left)`;
     }
-    $('#sa-month').addEventListener('change', e => loadMonth(e.target.value));
-    $('#sa-kinds').addEventListener('click', e => {
+    $('#month').addEventListener('change', e => loadMonth(e.target.value));
+    $('#kinds').addEventListener('click', e => {
         const b = e.target.closest('button[data-k]');
         if (!b) return;
         kind = b.dataset.k;
-        $('#sa-kinds').querySelectorAll('button').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+        $$('#kinds button').forEach(x => x.setAttribute('aria-pressed', x === b));
         drawLog(true);
     });
-    $('#sa-lq').addEventListener('input', debounce(() => drawLog(true), 120));
-    $('#sa-more').addEventListener('click', () => drawLog(false));
-    $('#sa-logrows').addEventListener('click', e => {
-        const b = e.target.closest('[data-id]');
-        if (b) openEntry(log.find(x => x.id === b.dataset.id));
-    });
+    $('#lq').addEventListener('input', debounce(() => drawLog(true), 120));
+    $('#more').addEventListener('click', () => drawLog(false));
+    $('#log-t').addEventListener('click', e => { const tr = e.target.closest('tr[data-i]'); if (tr) { select(tr); openEntry(log[tr.dataset.i]); } });
+    $('#latest').addEventListener('click', e => { const b = e.target.closest('[data-latest]'); if (b) openEntry(log[b.dataset.latest]); });
+
     function openEntry(e) {
         if (!e) return;
-        const [label] = BADGE[e.kind] || [e.kind];
         const range = e.start && e.end && e.start !== e.end ? `${date(e.start)} – ${new Date(e.end * 1000).toLocaleTimeString('en-GB', { timeStyle: 'short' })}` : date(e.t);
-        const kv = [['When', range], e.user ? ['Player', e.user] : null,
-            e.owed !== undefined ? ['Owed', dia(e.owed)] : null, e.paidIn !== undefined ? ['Paid in', dia(e.paidIn)] : null,
-            e.paidOut ? ['Diamonds taken out', dia(e.paidOut)] : null, e.short ? ['Short by', dia(e.short)] : null,
-            e.collected ? ['Collected', dia(e.collected)] : null].filter(Boolean);
-        const items = (e.items || []).length ? `<h3>Items</h3><div class="table-wrap"><table class="table"><thead><tr><th>Item</th><th class="num">Amount</th>${e.kind === 'sale' || e.kind === 'theft' ? '<th class="num">Diamonds</th>' : ''}<th class="num">Stock</th></tr></thead><tbody>
-            ${e.items.map(i => `<tr><td>${icon(i.id, 16)} ${esc(i.name)}${i.price ? `<br><small class="muted">${esc(i.price)}</small>` : ''}</td><td class="num">${e.kind === 'restock' && i.n > 0 ? '+' : ''}${num(i.n)}</td>
-            ${e.kind === 'sale' || e.kind === 'theft' ? `<td class="num">${i.diamonds === null || i.diamonds === undefined ? 'no price' : d2(i.diamonds)}</td>` : ''}<td class="num">${i.before === null || i.before === undefined ? '' : `${num(i.before)} > ${num(i.after)}`}</td></tr>`).join('')}</tbody></table></div>` : '';
-        const acts = (e.actions || []).length ? `<details><summary class="muted">CoreProtect actions (${num(e.actions.length)})</summary><div class="table-wrap"><table class="table"><thead><tr><th>Time</th><th>Chest</th><th>Item</th><th class="num">Amount</th></tr></thead><tbody>
-            ${e.actions.map(([t, x, y, z, id, n, a]) => `<tr><td>${esc(new Date(t * 1000).toLocaleTimeString('en-GB'))}</td><td class="mono">${x} ${y} ${z}</td><td>${esc(id.replace(/_/g, ' '))}</td><td class="num">${a ? '+' : '−'}${num(n)}</td></tr>`).join('')}</tbody></table></div></details>` : '';
-        $('#sa-detail').innerHTML = `<h2 class="sa-dh">${esc(label)}</h2>${e.text ? `<p>${md(e.text.replace(/^⚠️ /, ''))}</p>` : ''}
+        const kv = [['When', range], e.user && ['Player', e.user], e.owed !== undefined && ['Owed', dia(e.owed)], e.paidIn !== undefined && ['Paid in', dia(e.paidIn)],
+            e.paidOut && ['Diamonds taken out', dia(e.paidOut)], e.short && ['Short by', dia(e.short)], e.collected && ['Diamonds collected', dia(e.collected)]].filter(Boolean);
+        const sale = e.kind === 'sale' || e.kind === 'theft';
+        const items = (e.items || []).length ? `<h3>Items</h3><div class="table-wrap"><table class="grid-t"><thead><tr><th>Item</th><th class="num">Amount</th>${sale ? '<th class="num">Diamonds</th>' : ''}<th class="num">Stock</th></tr></thead><tbody>
+            ${e.items.map(i => `<tr><td>${ic(i.id)}${esc(i.name)}${i.price ? `<br><small class="dim">${esc(i.price)}</small>` : ''}</td><td class="num">${e.kind === 'restock' && i.n > 0 ? '+' : ''}${num(i.n)}</td>
+            ${sale ? `<td class="num">${i.diamonds === null || i.diamonds === undefined ? 'no price' : d2(i.diamonds)}</td>` : ''}<td class="num">${i.before === null || i.before === undefined ? '' : `${num(i.before)} → ${num(i.after)}`}</td></tr>`).join('')}</tbody></table></div>` : '';
+        const acts = (e.actions || []).length ? `<details><summary>CoreProtect actions (${num(e.actions.length)})</summary><div class="table-wrap"><table class="grid-t"><thead><tr><th>Time</th><th>Chest</th><th>Item</th><th class="num">Amount</th></tr></thead><tbody>
+            ${e.actions.map(([t, x, y, z, id, n, a]) => `<tr><td>${esc(new Date(t * 1000).toLocaleTimeString('en-GB'))}</td><td class="mono">${x} ${y} ${z}</td><td>${esc(id.replace(/_/g, ' '))}</td><td class="num ${a ? 'amt-pos' : 'amt-neg'}">${a ? '+' : '−'}${num(n)}</td></tr>`).join('')}</tbody></table></div></details>` : '';
+        openPanel(`<h2>${tag(e.kind)} ${e.user ? esc(e.user) : ''}</h2>${e.text && !sale && e.kind !== 'restock' ? `<p>${md(e.text)}</p>` : ''}
             <div class="kv">${kv.map(([k, v]) => `<span>${esc(k)}</span><span>${esc(v)}</span>`).join('')}</div>${items}
-            ${(e.chests || []).length ? `<h3>Chests</h3><p class="mono sa-chestlist">${e.chests.map(esc).join('<br>')}</p>` : ''}${acts}
-            <p class="muted sa-cap">Log entry ${esc(e.id)}</p>`;
-        drawer.classList.add('open');
-        drawer.setAttribute('aria-hidden', 'false');
-        drawer.focus();
+            ${(e.chests || []).length ? `<h3>Chests</h3><p class="mono">${e.chests.map(esc).join('<br>')}</p>` : ''}${acts}
+            ${e.user ? `<p><button class="btn" data-player="${esc(e.user)}">Everything by ${esc(e.user)} this month</button></p>` : ''}
+            <p class="dim mono">${esc(e.id)}</p>`);
     }
 
-    // --- takings: one bar per day ---
-    function chart(daily) {
-        const max = Math.max(1, ...daily.map(d => d[1]));
-        const W = 900, H = 160, bw = W / daily.length;
-        const bars = daily.map(([day, v], k) => {
-            const h = Math.max(v ? 2 : 0, (v / max) * (H - 20));
-            const label = `${new Date(day + 'T12:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}: ${dia(v)}`;
-            return `<rect x="${(k * bw + 1).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${h.toFixed(1)}" rx="1"><title>${esc(label)}</title></rect>`;
-        }).join('');
-        const total = daily.reduce((s, d) => s + d[1], 0);
-        $('#sa-chart').innerHTML = `<svg class="sa-bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Diamonds earned per day, last 90 days: ${esc(dia(total))} in total">${bars}</svg>
-            <div class="sa-axis muted"><span>${esc(daily[0][0])}</span><span>most in a day: ${esc(dia(max === 1 && !total ? 0 : max))}</span><span>today</span></div>
-            <details><summary class="muted">Numbers</summary><div class="table-wrap"><table class="table"><thead><tr><th>Day</th><th class="num">Diamonds</th></tr></thead><tbody>
-            ${daily.filter(d => d[1]).reverse().map(d => `<tr><td>${esc(d[0])}</td><td class="num">${d2(d[1])}</td></tr>`).join('') || '<tr><td colspan="2" class="muted">No sales yet.</td></tr>'}</tbody></table></div></details>`;
+    // ---------- alerts ----------
+    function alertsView() {
+        $('#alerts-t').innerHTML = data.events.length ? `<thead><tr><th>When</th><th>Type</th><th>What happened</th></tr></thead><tbody>
+            ${data.events.map(e => `<tr><td class="when" title="${esc(date(e.t))}">${esc(short(e.t))}</td><td>${tag(e.kind)}</td><td>${md(e.text)}</td></tr>`).join('')}</tbody>`
+            : '<tbody><tr><td class="empty">No alerts yet.</td></tr></tbody>';
     }
 
-    // --- alerts: short payments, losses, hoppers, low stock, wrong chests ---
-    function events() {
-        const kinds = { short: ['Paid short', 'r'], loss: ['Missing stock', 'r'], hopper: ['Hopper', 'r'], low: ['Low stock', 'b'], wrong: ['Wrong chest', 'p'] };
-        $('#sa-alerts-n').textContent = data.events.length ? num(data.events.length) : '';
-        $('#sa-events').innerHTML = data.events.map(e => {
-            const [label, cls] = kinds[e.kind] || [e.kind, ''];
-            return `<div class="rowi sa-ev"><span class="badge ${cls}">${esc(label)}</span><span class="grow">${md(e.text.replace(/^⚠️ /, ''))}</span><small title="${esc(date(e.t))}">${esc(ago(e.t * 1000))}</small></div>`;
-        }).join('') || '<p class="muted">No alerts yet.</p>';
-    }
-
-    // --- price suggestions ---
-    function suggestions() {
-        const list = data.products.filter(p => p.suggestion);
-        $('#sa-prices-n').textContent = list.length ? num(list.length) : '';
-        $('#sa-suggest').innerHTML = list.length ? `<div class="table-wrap"><table class="table"><thead><tr><th>Item</th><th>Now</th><th class="num">Sold (14 days)</th><th class="num">In stock</th><th>Suggestion</th></tr></thead><tbody>
-            ${list.map(p => `<tr><td>${icon(p.id, 16)} ${esc(p.name)}</td><td>${esc(p.price)}</td><td class="num">${num(p.sold14)}</td><td class="num">${num(p.stock)}</td><td>${esc(p.suggestion)}</td></tr>`).join('')}</tbody></table></div>`
-            : '<p class="muted">Nothing to change yet. Suggestions start once items have sold for a while.</p>';
-    }
-
-    // --- stock table with a sparkline per item; click a row for its full history ---
-    function spark(h, w = 120, hgt = 28) {
+    // ---------- stock ----------
+    const SF = { shop: 'Shop items', low: 'Low or sold out', selling: 'Selling', all: 'Everything in the chests' };
+    let sf = 'shop', ssort = { k: null, dir: 1 };
+    function spark(h, w = 110, hgt = 24) {
         if (!h.length) return '';
-        const now = data.updated, t0 = Math.min(h[0][0], now - 7 * 86400);
-        const pts = [...h, [now, h[h.length - 1][1]]];
-        const max = Math.max(1, ...pts.map(p => p[1]));
-        const x = t => ((t - t0) / (now - t0)) * w, y = v => hgt - 2 - (v / max) * (hgt - 4);
+        const now = data.updated, t0 = Math.min(h[0][0], now - 7 * 86400), pts = [...h, [now, h[h.length - 1][1]]];
+        const max = Math.max(1, ...pts.map(p => p[1])), x = t => ((t - t0) / (now - t0)) * w, y = v => hgt - 2 - (v / max) * (hgt - 4);
         let d = `M${x(pts[0][0]).toFixed(1)},${y(pts[0][1]).toFixed(1)}`;
-        for (let k = 1; k < pts.length; k++) d += `H${x(pts[k][0]).toFixed(1)}V${y(pts[k][1]).toFixed(1)}`; // steps: stock changes in jumps
-        return `<svg class="sa-spark" viewBox="0 0 ${w} ${hgt}" width="${w}" height="${hgt}" aria-hidden="true"><path d="${d}"/></svg>`;
+        for (let k = 1; k < pts.length; k++) d += `H${x(pts[k][0]).toFixed(1)}V${y(pts[k][1]).toFixed(1)}`;
+        return `<svg class="spark" viewBox="0 0 ${w} ${hgt}" width="${w}" height="${hgt}" aria-hidden="true"><path d="${d}"/></svg>`;
     }
-    function stock() {
-        const rows = data.products.map((p, k) => `<tr data-k="${k}" data-q="${esc((p.name + ' ' + p.id).toLowerCase())}" data-listed="${p.price ? 1 : 0}">
-            <td>${icon(p.id, 16)} ${esc(p.name)}</td><td class="num${p.stock ? '' : ' sa-zero'}">${p.stock ? num(p.stock) : '0'}</td><td class="num">${p.sold14 ? num(p.sold14) : ''}</td>
-            <td class="num">${p.daysLeft !== null ? Math.round(p.daysLeft) : ''}</td><td>${spark(p.history)}</td></tr>`).join('');
-        $('#sa-stock-table').innerHTML = `<thead><tr><th>Item</th><th class="num">Stock</th><th class="num">Sold (14 days)</th><th class="num">Days left</th><th>Last 7+ days</th></tr></thead><tbody>${rows}</tbody>`;
-        filter();
+    function stockView() {
+        $('#sfilter').innerHTML = Object.entries(SF).map(([k, l]) => `<button type="button" data-k="${k}" aria-pressed="${k === sf}">${l}</button>`).join('');
+        drawStock();
     }
-    const filter = () => {
-        const q = $('#sa-q').value.trim().toLowerCase(), only = $('#sa-listed').checked;
-        document.querySelectorAll('#sa-stock-table tbody tr').forEach(tr => { tr.hidden = !tr.dataset.q.includes(q) || (only && tr.dataset.listed !== '1'); });
-    };
-    $('#sa-q').addEventListener('input', debounce(filter, 80));
-    $('#sa-listed').addEventListener('change', filter);
-
-    // drawer: one item's stock history, bigger
-    const drawer = $('#sa-drawer');
-    $('#sa-stock-table').addEventListener('click', e => {
-        const tr = e.target.closest('tr[data-k]');
+    function drawStock() {
+        const q = $('#sq').value.trim().toLowerCase();
+        let rows = data.products.map((p, k) => [p, k]).filter(([p]) => {
+            if (q && !(p.name + ' ' + p.id).toLowerCase().includes(q)) return false;
+            if (sf === 'shop') return !!p.price;
+            if (sf === 'low') return p.price && p.each !== null && p.stock < data.low;
+            if (sf === 'selling') return p.sold14 > 0;
+            return true;
+        });
+        if (ssort.k) rows.sort((a, b) => ((a[0][ssort.k] ?? -1) > (b[0][ssort.k] ?? -1) ? 1 : (a[0][ssort.k] ?? -1) < (b[0][ssort.k] ?? -1) ? -1 : 0) * ssort.dir);
+        const th = (k, l, cls = '') => `<th class="${cls}" data-sort="${k}" aria-sort="${ssort.k === k ? (ssort.dir > 0 ? 'ascending' : 'descending') : 'none'}">${l}</th>`;
+        $('#stock-t').innerHTML = `<thead><tr>${th('name', 'Item')}<th>Price</th>${th('stock', 'Stock', 'num')}${th('sold14', 'Sold, 14 days', 'num')}${th('daysLeft', 'Days left', 'num')}<th>Trend</th><th>Suggestion</th></tr></thead><tbody>
+            ${rows.map(([p, k]) => `<tr data-i="${k}"><td>${ic(p.id)}${esc(p.name)}</td><td class="dim">${esc(p.price || '')}</td><td class="num ${!p.stock ? 'zero' : p.price && p.stock < data.low ? 'low' : ''}">${num(p.stock || 0)}</td>
+            <td class="num">${p.sold14 ? num(p.sold14) : ''}</td><td class="num">${p.daysLeft !== null ? Math.round(p.daysLeft) : ''}</td><td>${spark(p.history)}</td><td class="dim">${esc(p.suggestion || '')}</td></tr>`).join('')
+            || '<tr><td colspan="7" class="empty">Nothing matches.</td></tr>'}</tbody>`;
+        $('#stock-n').textContent = `${num(rows.length)} items`;
+    }
+    $('#sq').addEventListener('input', debounce(drawStock, 80));
+    $('#sfilter').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (!b) return; sf = b.dataset.k; $$('#sfilter button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawStock(); });
+    $('#stock-t').addEventListener('click', e => {
+        const h = e.target.closest('th[data-sort]');
+        if (h) { ssort = { k: h.dataset.sort, dir: ssort.k === h.dataset.sort ? -ssort.dir : (h.dataset.sort === 'name' ? 1 : -1) }; return drawStock(); }
+        const tr = e.target.closest('tr[data-i]');
         if (!tr) return;
-        const p = data.products[tr.dataset.k];
-        const h = p.history;
-        $('#sa-detail').innerHTML = `<h2 class="sa-dh">${icon(p.id, 32)} ${esc(p.name)}</h2>
-            <div class="kv"><span>Price</span><span>${esc(p.price || 'not on the price list')}</span><span>In stock</span><span>${num(p.stock)}</span>
-            <span>Sold, 14 days</span><span>${num(p.sold14)}</span>${p.suggestion ? `<span>Suggestion</span><span>${esc(p.suggestion)}</span>` : ''}</div>
-            <h3>Stock history</h3>${h.length ? spark(h, 420, 140).replace('class="sa-spark"', 'class="sa-spark big"')
-                + `<p class="muted sa-cap">From ${esc(date(Math.min(h[0][0], data.updated - 7 * 86400)))} to now · highest ${num(Math.max(...h.map(e => e[1])))}, lowest ${num(Math.min(...h.map(e => e[1])))}</p>` : '<p class="muted">No history yet.</p>'}
-            ${h.length ? `<details><summary class="muted">Every change (${num(h.length)})</summary><div class="rows">${h.slice().reverse().map(([t, n]) => `<div class="rowi"><span class="grow">${esc(date(t))}</span><small>${num(n)}</small></div>`).join('')}</div></details>` : ''}`;
-        drawer.classList.add('open');
-        drawer.setAttribute('aria-hidden', 'false');
-        drawer.focus();
+        select(tr);
+        const p = data.products[tr.dataset.i], hs = p.history;
+        openPanel(`<h2>${ic(p.id)}${esc(p.name)}</h2>
+            <div class="kv"><span>Price</span><span>${esc(p.price || 'not on the price list')}</span><span>In stock</span><span>${num(p.stock || 0)}</span>
+            <span>Sold, 14 days</span><span>${num(p.sold14)}</span>${p.daysLeft !== null ? `<span>Days of stock</span><span>about ${Math.round(p.daysLeft)}</span>` : ''}${p.suggestion ? `<span>Suggestion</span><span>${esc(p.suggestion)}</span>` : ''}</div>
+            <h3>Stock history</h3>${hs.length ? spark(hs, 380, 130) + `<p class="dim">Highest ${num(Math.max(...hs.map(e => e[1])))}, lowest ${num(Math.min(...hs.map(e => e[1])))}, since ${esc(date(hs[0][0]))}</p>
+            <details><summary>Every change (${num(hs.length)})</summary><table class="grid-t"><tbody>${hs.slice().reverse().map(([t, n]) => `<tr><td>${esc(date(t))}</td><td class="num">${num(n)}</td></tr>`).join('')}</tbody></table></details>` : '<p class="dim">No history yet.</p>'}
+            <h3>Chests</h3>${chestList(p.id)}
+            <p><button class="btn" data-item="${esc(p.name)}">Sales and restocks of ${esc(p.name)} this month</button></p>`);
     });
-    const close = () => { drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); };
-    $('.close', drawer).onclick = close;
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    const chestList = id => {
+        const cs = data.chests.filter(c => c.items[id]);
+        return cs.length ? `<p class="mono">${cs.map(c => `${c.x} ${c.y} ${c.z}: ${num(c.items[id])}${c.main !== id ? ' (wrong chest)' : ''}`).join('<br>')}</p>` : '<p class="dim">Not in any chest.</p>';
+    };
 
-    // --- customers ---
-    function customers() {
-        const c = data.customers;
-        $('#sa-customers-n').textContent = c.length ? num(c.length) : '';
-        $('#sa-cust').innerHTML = c.length ? `<div class="table-wrap"><table class="table"><thead><tr><th>Player</th><th class="num">Visits</th><th class="num">Spent</th><th class="num">Paid short</th><th>Last visit</th></tr></thead><tbody>
-            ${c.map(k => `<tr><td>${esc(k.name)}</td><td class="num">${num(k.visits)}</td><td class="num">${d2(k.spent)}</td>
-            <td class="num">${k.shorts ? `<span class="badge r">${num(k.shorts)}× · ${d2(k.shortBy)}</span>` : ''}</td><td title="${esc(date(k.last))}">${esc(ago(k.last * 1000))}</td></tr>`).join('')}</tbody></table></div>`
-            : '<p class="muted">No customers yet.</p>';
+    // ---------- chests ----------
+    const CF = { problems: 'Wrong item', used: 'In use', all: 'All, with empty' };
+    let cf = 'used';
+    function chestsView() {
+        $('#cfilter').innerHTML = Object.entries(CF).map(([k, l]) => `<button type="button" data-k="${k}" aria-pressed="${k === cf}">${l}</button>`).join('');
+        drawChests();
     }
-
-    // --- chest map: one row of chests per height, the chest's item as its icon ---
-    function chests() {
-        const all = data.chests, showEmpty = $('#sa-empty').checked;
-        const byY = {};
-        for (const c of all) {
-            const empty = !Object.keys(c.items).length;
-            if (empty && !showEmpty) continue;
-            (byY[c.y] = byY[c.y] || []).push(c);
-        }
+    function drawChests() {
+        const all = data.chests, byY = {};
+        all.forEach((c, k) => {
+            const used = Object.keys(c.items).length > 0;
+            if ((cf === 'used' && !used) || (cf === 'problems' && !c.misplaced.length)) return;
+            (byY[c.y] = byY[c.y] || []).push([c, k]);
+        });
         const used = all.filter(c => Object.keys(c.items).length).length, wrong = all.filter(c => c.misplaced.length).length;
-        $('#sa-chests-n').textContent = `${num(used)} in use of ${num(all.length)}${wrong ? ` · ${num(wrong)} with the wrong item` : ''}`;
-        $('#sa-map').innerHTML = Object.keys(byY).sort((a, b) => b - a).map(y => `<div class="sa-level"><span class="sa-y">y ${esc(y)}</span><div class="sa-chests">
-            ${byY[y].sort((a, b) => a.x - b.x || a.z - b.z).map(c => {
-                const ids = Object.entries(c.items).sort((a, b) => b[1] - a[1]);
-                const title = `${c.type.replace(/_/g, ' ')} at ${c.x} ${c.y} ${c.z}\n` + (ids.length ? ids.map(([id, n]) => `${num(n)} ${id.replace(/_/g, ' ')}`).join('\n') : 'empty');
-                const main = c.main || (ids[0] && ids[0][0]);
-                return `<span class="sa-chest${c.misplaced.length ? ' wrong' : ''}${ids.length ? '' : ' empty'}" title="${esc(title)}">${main ? icon(main, 24) : ''}<small>${ids.length ? num(ids.reduce((s, e) => s + e[1], 0)) : ''}</small></span>`;
-            }).join('')}</div></div>`).join('') || '<p class="muted">No chests in use.</p>';
+        $('#chests-n').textContent = `${num(used)} in use of ${num(all.length)}${wrong ? ` · ${num(wrong)} with the wrong item` : ''}`;
+        $('#map').innerHTML = Object.keys(byY).sort((a, b) => b - a).map(y => `<div class="level"><span>y ${esc(y)}</span><div class="chests">
+            ${byY[y].sort((a, b) => a[0].x - b[0].x || a[0].z - b[0].z).map(([c, k]) => {
+                const ids = Object.entries(c.items).sort((a, b) => b[1] - a[1]), main = c.main || (ids[0] && ids[0][0]);
+                return `<button type="button" class="chest${c.misplaced.length ? ' wrong' : ''}${ids.length ? '' : ' empty'}" data-c="${k}" title="${esc(`${c.x} ${c.y} ${c.z}` + (main ? ': ' + main.replace(/_/g, ' ') : ': empty'))}">${main ? `<img src="${ICON(main)}" alt="" width="24" height="24" loading="lazy">` : ''}<span>${ids.length ? num(ids.reduce((s, e) => s + e[1], 0)) : ''}</span></button>`;
+            }).join('')}</div></div>`).join('') || `<p class="empty">${cf === 'problems' ? 'No chests hold the wrong item.' : 'No chests to show.'}</p>`;
     }
-    $('#sa-empty').addEventListener('change', chests);
-});
+    $('#cfilter').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (!b) return; cf = b.dataset.k; $$('#cfilter button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawChests(); });
+    $('#map').addEventListener('click', e => {
+        const b = e.target.closest('[data-c]');
+        if (!b) return;
+        const c = data.chests[b.dataset.c], ids = Object.entries(c.items).sort((a, b) => b[1] - a[1]);
+        openPanel(`<h2>${esc(c.type.replace(/_/g, ' '))}</h2><p class="mono">${c.x} ${c.y} ${c.z}</p>
+            ${c.misplaced.length ? `<p class="low">Holds another item's stock: ${c.misplaced.map(id => esc(id.replace(/_/g, ' '))).join(', ')}</p>` : ''}
+            <h3>Contents</h3>${ids.length ? `<table class="grid-t"><tbody>${ids.map(([id, n]) => `<tr><td>${ic(id)}${esc(id.replace(/_/g, ' '))}${id === c.main ? ' <span class="dim">(this chest\'s item)</span>' : ''}</td><td class="num">${num(n)}</td></tr>`).join('')}</tbody></table>` : '<p class="dim">Empty.</p>'}`);
+    });
+
+    // ---------- customers ----------
+    let csort = { k: 'spent', dir: -1 };
+    function customersView() {
+        const th = (k, l, cls = '') => `<th class="${cls}" data-sort="${k}" aria-sort="${csort.k === k ? (csort.dir > 0 ? 'ascending' : 'descending') : 'none'}">${l}</th>`;
+        const c = data.customers.map((x, k) => [x, k]).sort((a, b) => (a[0][csort.k] > b[0][csort.k] ? 1 : a[0][csort.k] < b[0][csort.k] ? -1 : 0) * csort.dir);
+        $('#cust-t').innerHTML = c.length ? `<thead><tr>${th('name', 'Player')}${th('visits', 'Visits', 'num')}${th('spent', 'Spent', 'num')}${th('shorts', 'Paid short', 'num')}${th('shortBy', 'Short by', 'num')}${th('first', 'First visit')}${th('last', 'Last visit')}</tr></thead><tbody>
+            ${c.map(([k, i]) => `<tr data-i="${i}"><td><b>${esc(k.name)}</b></td><td class="num">${num(k.visits)}</td><td class="num">${d2(k.spent)}</td><td class="num ${k.shorts ? 'low' : 'zero'}">${num(k.shorts)}</td><td class="num ${k.shortBy ? 'low' : 'zero'}">${k.shortBy ? d2(k.shortBy) : ''}</td>
+            <td class="when">${esc(short(k.first))}</td><td class="when" title="${esc(date(k.last))}">${esc(ago(k.last * 1000))}</td></tr>`).join('')}</tbody>`
+            : '<tbody><tr><td class="empty">No customers yet.</td></tr></tbody>';
+    }
+    $('#cust-t').addEventListener('click', e => {
+        const h = e.target.closest('th[data-sort]');
+        if (h) { csort = { k: h.dataset.sort, dir: csort.k === h.dataset.sort ? -csort.dir : (h.dataset.sort === 'name' ? 1 : -1) }; return customersView(); }
+        const tr = e.target.closest('tr[data-i]');
+        if (!tr) return;
+        select(tr);
+        const k = data.customers[tr.dataset.i];
+        openPanel(`<h2>${esc(k.name)}</h2><div class="kv"><span>Visits</span><span>${num(k.visits)}</span><span>Spent</span><span>${dia(k.spent)}</span>
+            <span>Paid short</span><span>${k.shorts ? `${num(k.shorts)} time${k.shorts > 1 ? 's' : ''}, ${dia(k.shortBy)} in total` : 'never'}</span>
+            <span>First visit</span><span>${esc(date(k.first))}</span><span>Last visit</span><span>${esc(date(k.last))}</span></div>
+            <p><button class="btn" data-player="${esc(k.name)}">Their log this month</button></p>`);
+    });
+
+    // ---------- prices ----------
+    function pricesView(sugg) {
+        $('#prices-t').innerHTML = sugg.length ? `<thead><tr><th>Item</th><th>Price now</th><th class="num">Sold, 14 days</th><th class="num">In stock</th><th class="num">Days left</th><th>Suggestion</th></tr></thead><tbody>
+            ${sugg.map(p => `<tr><td>${ic(p.id)}${esc(p.name)}</td><td>${esc(p.price)}</td><td class="num">${num(p.sold14)}</td><td class="num">${num(p.stock || 0)}</td><td class="num">${p.daysLeft !== null ? Math.round(p.daysLeft) : ''}</td><td><b>${esc(p.suggestion)}</b></td></tr>`).join('')}</tbody>`
+            : '<tbody><tr><td class="empty">Nothing to change yet. Suggestions start once items have sold for a week or so.</td></tr></tbody>';
+    }
+
+    // ---------- details panel ----------
+    const panel = $('#panel');
+    function openPanel(html) {
+        $('#panel-body').innerHTML = html;
+        panel.hidden = false;
+        panel.focus({ preventScroll: true });
+    }
+    function closePanel() { panel.hidden = true; $$('tr.sel').forEach(r => r.classList.remove('sel')); }
+    function select(tr) { $$('tr.sel').forEach(r => r.classList.remove('sel')); tr.classList.add('sel'); }
+    $('#panel-x').onclick = closePanel;
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden) closePanel(); });
+    // "show in log" buttons: jump to the log filtered by a player or item
+    panel.addEventListener('click', e => {
+        const b = e.target.closest('[data-player],[data-item]');
+        if (!b) return;
+        $('#lq').value = b.dataset.player || b.dataset.item;
+        kind = 'all';
+        location.hash = '#log';
+        setTimeout(() => { $$('#kinds button').forEach(x => x.setAttribute('aria-pressed', x.dataset.k === 'all')); drawLog(true); }, 0);
+    });
+})();

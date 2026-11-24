@@ -1,70 +1,107 @@
 <?php
 // Castle Crafty shop admin (/shop/admin/ → here via the root .htaccess, so /private/'s password applies).
-// Everything is rendered by admin.js from /shop/admin/data (data.php).
-$site_page = ['title' => 'Shop Admin', 'components' => true, 'ui' => true, 'css' => ['/assets/css/pages/shop-admin.css']];
-require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+// Standalone like /shop/ (same stone-and-gold look), laid out as an admin tool. admin.js renders everything
+// from /shop/admin/data (data.php).
 header('X-Robots-Tag: noindex, nofollow');
+$v = function ($f) { return $f . '?v=' . @filemtime(__DIR__ . '/' . $f); };
 ?>
-<!DOCTYPE html>
-<html lang="en">
-
+<!doctype html>
+<html lang="en-GB">
 <head>
-    <?php page_head(); ?>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin · Castle Crafty</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/private/shop-admin/<?= $v('admin.css') ?>">
 </head>
-
 <body>
-    <?php site_header(); ?>
+<a class="skip" href="#main">Skip to the content</a>
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="/shop/" title="Open the shop">Castle Crafty<small>Admin</small></a>
+    <nav class="nav" id="nav" aria-label="Views">
+      <a href="#overview" data-view="overview">Overview</a>
+      <a href="#log" data-view="log">Log</a>
+      <a href="#alerts" data-view="alerts">Alerts <span class="count" id="n-alerts"></span></a>
+      <a href="#stock" data-view="stock">Stock <span class="count" id="n-low"></span></a>
+      <a href="#chests" data-view="chests">Chests <span class="count" id="n-wrong"></span></a>
+      <a href="#customers" data-view="customers">Customers</a>
+      <a href="#prices" data-view="prices">Prices <span class="count" id="n-prices"></span></a>
+    </nav>
+    <p class="sidefoot" id="updated"></p>
+  </aside>
 
-    <main class="page sa" id="main">
-        <h1 class="page-title">Castle Crafty admin</h1>
-        <p class="page-lede" id="sa-lede">Takings, stock, chests and alerts from the shop's chest log.</p>
-        <p class="note" id="sa-status">Loading the shop data...</p>
+  <main class="main" id="main" tabindex="-1">
+    <header class="top">
+      <h1 id="title">Overview</h1>
+      <div class="kpis" id="kpis"></div>
+    </header>
+    <p class="status" id="status" role="status">Loading the shop data…</p>
 
-        <div id="sa-body" hidden>
-            <div class="stat-row" id="sa-stats"></div>
-            <nav class="jump"><a href="#sa-log">Log</a><a href="#sa-takings">Takings</a><a href="#sa-alerts">Alerts</a><a href="#sa-prices">Prices</a><a href="#sa-stock">Stock</a><a href="#sa-customers">Customers</a><a href="#sa-chests">Chests</a></nav>
+    <section class="view" data-view="overview" hidden>
+      <div class="cards">
+        <article class="card wide"><h2>Takings <small>last 90 days</small></h2><div id="chart"></div></article>
+        <article class="card"><h2>Needs attention</h2><div id="attention"></div></article>
+        <article class="card"><h2>Latest activity <a class="more" href="#log">Full log</a></h2><div id="latest"></div></article>
+        <article class="card"><h2>Best sellers <small>14 days</small></h2><div id="best"></div></article>
+        <article class="card"><h2>Price suggestions <a class="more" href="#prices">All</a></h2><div id="ov-prices"></div></article>
+      </div>
+    </section>
 
-            <h2 class="sec-h" id="sa-log">Log <span class="n" id="sa-log-n"></span></h2>
-            <div class="bar sa-logbar">
-                <select class="field" id="sa-month" aria-label="Month"></select>
-                <div class="stabs" id="sa-kinds" role="group" aria-label="Show"></div>
-                <input class="field" type="search" id="sa-lq" placeholder="Player or item" aria-label="Filter by player or item">
-            </div>
-            <p class="muted sa-lognote">Every sale, theft, restock and alert, kept for good. Click an entry for the details and the CoreProtect actions behind it.</p>
-            <div class="rows" id="sa-logrows"></div>
-            <p><button class="btn" id="sa-more" hidden>Show more</button></p>
+    <section class="view" data-view="log" hidden>
+      <div class="bar">
+        <select id="month" aria-label="Month"></select>
+        <div class="chips" id="kinds" role="group" aria-label="Show"></div>
+        <input type="search" id="lq" placeholder="Player or item" aria-label="Filter by player or item">
+        <span class="dim" id="log-n"></span>
+      </div>
+      <div class="table-wrap"><table class="grid-t" id="log-t"></table></div>
+      <p><button class="btn" id="more" hidden>Show more</button></p>
+    </section>
 
-            <h2 class="sec-h" id="sa-takings">Takings <span class="n">last 90 days</span></h2>
-            <section class="card" id="sa-chart"></section>
+    <section class="view" data-view="alerts" hidden>
+      <p class="hint">The last 100 alerts. Every alert is also kept for good in the log.</p>
+      <div class="table-wrap"><table class="grid-t" id="alerts-t"></table></div>
+    </section>
 
-            <h2 class="sec-h" id="sa-alerts">Alerts <span class="n" id="sa-alerts-n"></span></h2>
-            <section class="card"><div class="rows" id="sa-events"></div></section>
+    <section class="view" data-view="stock" hidden>
+      <div class="bar">
+        <input type="search" id="sq" placeholder="Search items" aria-label="Search items">
+        <div class="chips" id="sfilter" role="group" aria-label="Show"></div>
+        <span class="dim" id="stock-n"></span>
+      </div>
+      <div class="table-wrap"><table class="grid-t sortable" id="stock-t"></table></div>
+    </section>
 
-            <h2 class="sec-h" id="sa-prices">Price suggestions <span class="n" id="sa-prices-n"></span></h2>
-            <section class="card" id="sa-suggest"></section>
+    <section class="view" data-view="chests" hidden>
+      <div class="bar">
+        <div class="chips" id="cfilter" role="group" aria-label="Show"></div>
+        <span class="dim" id="chests-n"></span>
+      </div>
+      <p class="hint">One row per height, highest first. Red: holds another item's stock. Click a chest for what's in it.</p>
+      <div id="map"></div>
+    </section>
 
-            <h2 class="sec-h" id="sa-stock">Stock</h2>
-            <div class="bar"><input class="field" type="search" id="sa-q" placeholder="Search items" aria-label="Search items">
-                <label class="check"><input type="checkbox" id="sa-listed" checked> Shop items only</label></div>
-            <div class="table-wrap tall"><table class="table" id="sa-stock-table"></table></div>
+    <section class="view" data-view="customers" hidden>
+      <div class="table-wrap"><table class="grid-t sortable" id="cust-t"></table></div>
+    </section>
 
-            <h2 class="sec-h" id="sa-customers">Customers <span class="n" id="sa-customers-n"></span></h2>
-            <section class="card" id="sa-cust"></section>
+    <section class="view" data-view="prices" hidden>
+      <p class="hint">From the last 14 days of sales: raise prices on items that sell out fast, lower them on items that don't move.</p>
+      <div class="table-wrap"><table class="grid-t" id="prices-t"></table></div>
+    </section>
+  </main>
 
-            <h2 class="sec-h" id="sa-chests">Chests <span class="n" id="sa-chests-n"></span></h2>
-            <div class="bar"><label class="check"><input type="checkbox" id="sa-empty"> Show empty chests</label>
-                <span class="muted">Red border: holds another item's stock.</span></div>
-            <div id="sa-map"></div>
-        </div>
-
-        <aside class="drawer" id="sa-drawer" aria-label="Item details" aria-hidden="true" tabindex="-1">
-            <button class="close" aria-label="Close" title="Close">&times;</button>
-            <div id="sa-detail"></div>
-        </aside>
-    </main>
-
-    <?php site_footer(null, false); ?>
-    <script src="<?= asset('/private/shop-admin/admin.js') ?>" defer></script>
+  <aside class="panel" id="panel" aria-label="Details" hidden tabindex="-1">
+    <button class="x" id="panel-x" aria-label="Close details" title="Close (Esc)">&times;</button>
+    <div id="panel-body"></div>
+  </aside>
+</div>
+<script src="/assets/js/ui.js?v=<?= @filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/ui.js') ?>"></script>
+<script src="/private/shop-admin/<?= $v('admin.js') ?>"></script>
 </body>
-
 </html>
