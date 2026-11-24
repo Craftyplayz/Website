@@ -1133,7 +1133,23 @@
           "Put your diamonds (or diamond blocks) in the shulker box and press the button.",
           "There is a 50% chance nothing happens and the house keeps your stake.",
           "Otherwise it reaches floor 1. From each floor there is a 50% chance to climb to the next, up to the top floor.",
-          "Your prize is the one on the floor where it stops. Prize table coming soon."
+          "You win the prize of every floor you reach, not just the one where it stops.",
+          "Diamond machine prizes:",
+          [
+            "Floor 1 (1 in 2 chance to reach): a Shulker Box",
+            "Floor 2 (1 in 4): a Diamond",
+            "Floor 3 (1 in 8): a Shulker Box",
+            "Floor 4 (1 in 16): a Beacon",
+            "Floor 5 (1 in 32): a Diamond Block"
+          ],
+          "Diamond block machine prizes:",
+          [
+            "Floor 1 (1 in 2): a Diamond Block",
+            "Floor 2 (1 in 4): a Diamond Block",
+            "Floor 3 (1 in 8): an Elytra",
+            "Floor 4 (1 in 16): a Diamond Block",
+            "Floor 5 (1 in 32): a Diamond Block"
+          ]
         ],
         "players": "1",
         "intro": "Your stake climbs a tower. Every floor it reaches has a better prize, but each climb is a gamble."
