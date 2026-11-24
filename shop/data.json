@@ -798,7 +798,7 @@
       "id": "enchanted_book",
       "name": "All books available*",
       "price": "1 diamond each, or 5 books for 3 diamonds",
-      "note": "*Except Swift Sneak",
+      "note": "*Except Swift Sneak and Wind Burst",
       "floor": "Enchanting and map art",
       "section": "Enchanted books"
     },
