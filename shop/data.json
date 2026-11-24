@@ -629,6 +629,13 @@
       "section": "Metals"
     },
     {
+      "id": "emerald_block",
+      "name": "Block of Emerald",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Metals"
+    },
+    {
       "id": "quartz",
       "name": "Nether Quartz",
       "price": "1 diamond per stack",
@@ -795,6 +802,13 @@
       "id": "shulker_box",
       "name": "Shulker Box",
       "price": "4 diamonds per 16",
+      "floor": "Gear and rare items",
+      "section": "Travel and storage"
+    },
+    {
+      "id": "chest",
+      "name": "Chest",
+      "price": "Price coming soon",
       "floor": "Gear and rare items",
       "section": "Travel and storage"
     },
