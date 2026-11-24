@@ -64,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
             mv.setAttribute('camera-controls', '');
             mv.setAttribute('touch-action', 'pan-y');
             mv.setAttribute('interaction-prompt', 'none');
+            // start from the model's front, same angle as the previews (_dev/scripts/render-model-previews.js)
+            mv.setAttribute('camera-orbit', (str(i.category) === 'Rat' ? '35deg' : '215deg') + ' 65deg auto');
             if (url(i.image)) mv.setAttribute('poster', url(i.image));
             mv.addEventListener('load', () => {
                 // pixel art: nearest-neighbour (GL 9728) on every texture
