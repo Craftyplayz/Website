@@ -118,6 +118,20 @@
       "section": "Stone and bricks"
     },
     {
+      "id": "dirt",
+      "name": "Dirt",
+      "price": "2 stacks per diamond",
+      "floor": "Building blocks",
+      "section": "Stone and bricks"
+    },
+    {
+      "id": "grass_block",
+      "name": "Grass Block",
+      "price": "1 stack per diamond",
+      "floor": "Building blocks",
+      "section": "Stone and bricks"
+    },
+    {
       "id": "andesite",
       "name": "Andesite",
       "price": "2 stacks per diamond",
