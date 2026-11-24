@@ -1,6 +1,7 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var st = $('status');
+  var COLOURS = ['white', 'light_gray', 'gray', 'black', 'brown', 'red', 'orange', 'yellow', 'lime', 'green', 'cyan', 'light_blue', 'blue', 'purple', 'magenta', 'pink'];
   function el(tag, cls, text) {
     var e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -36,6 +37,7 @@
       if (p.link) { var a = t.appendChild(el('a', 'note', p.link.text)); a.href = p.link.url; }
       li.appendChild(box); li.appendChild(t);
       li.dataset.id = p.id;
+      if (p.colours) li.dataset.colours = p.colours;
       ul.appendChild(li);
     });
     $('req-text').textContent = d.requests.text;
@@ -72,10 +74,25 @@
     }).then(function (st) {
       var when = 'Counted ' + new Date(st.updated).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
       document.querySelectorAll('.niche[data-id]').forEach(function (li) {
-        var n = st.items[li.dataset.id] || 0;
+        // "all colours" products ("colours": "{c}_wool") get the total plus one count per dye colour
+        var ids = li.dataset.colours ? COLOURS.map(function (c) { return li.dataset.colours.replace('{c}', c); }) : [li.dataset.id];
+        var n = ids.reduce(function (sum, id) { return sum + (st.items[id] || 0); }, 0);
         var p = el('p', n ? 'stock' : 'stock out', n ? n.toLocaleString('en-GB') + ' in stock' : 'Sold out');
         p.title = when;
-        li.querySelector('.txt').insertBefore(p, li.querySelector('.price').nextSibling);
+        var txt = li.querySelector('.txt');
+        txt.insertBefore(p, li.querySelector('.price').nextSibling);
+        if (!li.dataset.colours || !n) return;
+        var grid = el('ul', 'colours');
+        ids.forEach(function (id, k) {
+          var c = st.items[id] || 0, name = COLOURS[k].replace('_', ' ');
+          var cell = grid.appendChild(el('li', c ? '' : 'out'));
+          var img = new Image(16, 16); img.alt = ''; img.loading = 'lazy';
+          img.src = d.icons.replace('{id}', encodeURIComponent(id));
+          cell.appendChild(img);
+          cell.appendChild(el('span', '', c ? c.toLocaleString('en-GB') : '0'));
+          cell.title = name.charAt(0).toUpperCase() + name.slice(1) + ': ' + (c ? c.toLocaleString('en-GB') + ' in stock' : 'sold out');
+        });
+        txt.appendChild(grid);
       });
     }).catch(function () { });
     document.querySelectorAll('.storey').forEach(function (s) { s.hidden = false; });

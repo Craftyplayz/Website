@@ -266,6 +266,7 @@
     },
     {
       "id": "light_gray_wool",
+      "colours": "{c}_wool",
       "name": "Wool",
       "price": "2 stacks per diamond, all colours",
       "floor": "Colours",
@@ -273,6 +274,7 @@
     },
     {
       "id": "white_concrete",
+      "colours": "{c}_concrete",
       "name": "Concrete",
       "price": "2 stacks per diamond, all colours",
       "floor": "Colours",
@@ -287,6 +289,7 @@
     },
     {
       "id": "white_stained_glass",
+      "colours": "{c}_stained_glass",
       "name": "Stained Glass",
       "price": "2 diamonds per stack, all colours",
       "floor": "Colours",
@@ -301,6 +304,7 @@
     },
     {
       "id": "orange_terracotta",
+      "colours": "{c}_terracotta",
       "name": "Coloured Terracotta",
       "price": "2 diamonds per stack, all colours (coming soon)",
       "floor": "Colours",
