@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casino game · Castle Crafty</title>
+<meta name="description" content="Rules and location for a game in the Castle Crafty casino.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shop/style.css?v=11">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the rules</a>
+<div class="tower">
+  <header class="top"><h1 id="name">The casino</h1></header>
+  <main id="main">
+    <div id="status" class="status" role="status">Going down to the basement…</div>
+    <section class="storey" aria-labelledby="h-rules" hidden>
+      <p class="level">The casino · <span id="floor"></span></p>
+      <h2 id="h-rules">Rules</h2>
+      <p class="facts"><span>Price: <b id="price"></b></span><span>Players: <b id="players"></b></span><span id="open"></span></p>
+      <p class="lead" id="intro" hidden></p>
+      <ol class="rules" id="rules"></ol>
+    </section>
+    <section class="storey" aria-labelledby="h-where" hidden>
+      <h2 id="h-where">Where to find it</h2>
+      <div id="where"></div>
+    </section>
+  </main>
+  <footer><p><a href="/shop/#casino">Back to the casino</a> · <a href="/">craftyplayz.com</a></p></footer>
+</div>
+<script src="/shop/game.js?v=1"></script>
+</body>
+</html>

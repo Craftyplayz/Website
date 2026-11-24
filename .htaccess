@@ -122,6 +122,10 @@ RedirectMatch 301 ^/shop/upcoming(\.php)?$ /shop/
 # since 2026-11-21 the shop is one standalone page; the old sub-pages jump to its sections (NE keeps the #)
 RewriteRule ^shop/(enchanted-books|books)(/|\.php)?$ /shop/#enchanted-books [NE,R=301,L]
 RewriteRule ^shop/(requests|casino)(/|\.php)?$ /shop/#$1 [NE,R=301,L]
+# casino games: one page, /shop/game.html, reads the slug from the URL and the rules from shop/data.json
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^shop/([a-z0-9-]+)/?$ /shop/game.html [L]
 # Phase 6: everything game-related moved under /games/
 RedirectMatch 301 ^/steam/?$ /games/steam/
 RedirectMatch 301 ^/steam/index(\.php)?$ /games/steam/

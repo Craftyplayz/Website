@@ -44,7 +44,21 @@
       link.href = c.url; link.target = '_blank'; link.rel = 'noopener';
       $('contacts').appendChild(el('li')).appendChild(link);
     });
-    $('casino-status').textContent = d.casino.status;
+    $('casino-floor').textContent = d.casino.floor;
+    $('casino-lead').textContent = d.casino.lead;
+    d.casino.games.forEach(function (g) {
+      var link = el('a', 'niche');
+      link.href = '/shop/' + g.slug + '/';
+      var img = new Image(40, 40); img.alt = ''; img.loading = 'lazy';
+      img.src = d.icons.replace('{id}', encodeURIComponent(g.icon));
+      var box = el('div', 'icon'); box.appendChild(img);
+      var t = el('div', 'txt');
+      t.appendChild(el('h3', 'name', g.name));
+      t.appendChild(el('p', 'price', g.price + ' · ' + g.players + ' players'));
+      t.appendChild(el('p', g.open ? 'note open' : 'note', g.open ? 'Open now' : 'Coming soon'));
+      link.appendChild(box); link.appendChild(t);
+      $('games').appendChild(el('li')).appendChild(link);
+    });
     document.querySelectorAll('.storey').forEach(function (s) { s.hidden = false; });
     st.hidden = true;
   }).catch(function (e) {

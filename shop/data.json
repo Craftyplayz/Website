@@ -833,6 +833,182 @@
     "examples": "For example bulk purchases, partnership offers, or asking for a new item to be stocked."
   },
   "casino": {
-    "status": "Coming soon!"
+    "floor": "The basement",
+    "lead": "Every game in the casino is free to play. Pick a game to read its rules and find where it is.",
+    "games": [
+      {
+        "slug": "poker",
+        "name": "Poker",
+        "icon": "gold_nugget",
+        "open": true,
+        "price": "Free",
+        "players": "2–8",
+        "coords": [
+          {
+            "label": "Poker table",
+            "xyz": "161 44 23",
+            "dimension": "Overworld",
+            "tp": "/execute in minecraft:overworld run tp @s 161.42 44.00 23.42 316.93 90.00"
+          }
+        ],
+        "intro": "Texas Hold’em on a working table.",
+        "rules": [
+          "Each player gets 2 private cards. The two players left of the dealer post the small and big blinds.",
+          "Betting round, then 3 shared cards (the flop), betting, 1 more card (the turn), betting, 1 last card (the river), and a final betting round.",
+          "On your turn you can fold, check (if nobody has bet), call, or raise.",
+          "Make your best 5-card hand from your 2 cards and the 5 shared cards.",
+          "Hands from best to worst: royal flush, straight flush, four of a kind, full house, flush, straight, three of a kind, two pair, one pair, high card.",
+          "The best hand at the showdown wins the pot, or the last player who hasn’t folded wins it.",
+          "The dealer button moves one seat left after every hand."
+        ]
+      },
+      {
+        "slug": "uno",
+        "name": "Uno",
+        "icon": "red_wool",
+        "open": false,
+        "price": "Free",
+        "players": "2–10",
+        "coords": [],
+        "rules": [
+          "Each player is dealt 7 cards. Turn over the top card of the deck to start the discard pile.",
+          "On your turn, play a card that matches the top card by colour, number or symbol, or play a Wild.",
+          "If you can’t play, draw one card. If it can be played, you may play it straight away.",
+          "Skip: the next player misses a turn. Reverse: play changes direction. Draw Two: the next player draws 2 and misses a turn.",
+          "Wild: choose the next colour. Wild Draw Four: choose the colour, and the next player draws 4 and misses a turn.",
+          "Say “Uno” when you have one card left. If someone catches you first, draw 2.",
+          "The first player with no cards left wins."
+        ]
+      },
+      {
+        "slug": "chess",
+        "name": "Chess",
+        "icon": "armor_stand",
+        "open": false,
+        "price": "Free",
+        "players": "2",
+        "coords": [],
+        "rules": [
+          "White moves first. Players take turns moving one piece.",
+          "King: one square any way. Queen: any distance in a straight line or diagonal. Rook: straight lines. Bishop: diagonals. Knight: an L shape, and it can jump over pieces.",
+          "Pawns move one square forward (two on their first move) and capture one square diagonally forward. A pawn that reaches the far side becomes any piece you choose.",
+          "Capture by moving onto an enemy piece. You can’t move onto your own pieces.",
+          "Check means the king is under attack. You must get out of check on your next move.",
+          "Checkmate (the king is in check and can’t escape) wins the game.",
+          "If the player to move isn’t in check but has no legal move, it’s a draw (stalemate)."
+        ]
+      },
+      {
+        "slug": "sumo",
+        "name": "Sumo Arena",
+        "icon": "stick",
+        "open": false,
+        "price": "Free",
+        "players": "2",
+        "coords": [],
+        "rules": [
+          "Two players stand on opposite sides of the platform, facing each other.",
+          "Each gets one Knockback stick. No armour, no food, no other items.",
+          "The host counts down.",
+          "Knock the other player off the platform. Hits do no real damage, only knockback.",
+          "Touching the water or ground below means you lose the round.",
+          "Best of 3 rounds wins the match."
+        ]
+      },
+      {
+        "slug": "10-questions",
+        "name": "10 Questions",
+        "icon": "oak_sign",
+        "open": false,
+        "price": "Free",
+        "players": "2",
+        "coords": [],
+        "rules": [
+          "The writer secretly writes the name of one block on a sign, out of the guesser’s sight. Any block in the Creative inventory counts.",
+          "The writer hides the sign (behind a wall or facing away) until the game ends.",
+          "The guesser asks yes/no questions, one at a time. Examples: “Can you mine it with a pickaxe?”, “Is it found in the Overworld?”, “Is it a wood block?”",
+          "Answers must be honest: yes, no, or “sometimes” if it truly depends. Every answer uses up one question.",
+          "A guess (“Is it a crafting table?”) counts as a question.",
+          "Guess the exact block within 10 questions and the guesser wins. Otherwise the writer reveals the sign and wins.",
+          "Swap roles each game. Play an even number of games; most wins takes the match."
+        ]
+      },
+      {
+        "slug": "pick-up-blocks",
+        "name": "Pick Up Blocks",
+        "icon": "lime_wool",
+        "open": false,
+        "price": "Free",
+        "players": "2–8",
+        "coords": [],
+        "rules": [
+          "One player fills the dispenser at the top of the tube with 9 wool, one of each colour.",
+          "They dispense all 9 onto the floor below, then join the others.",
+          "Take turns clockwise. On your turn, say which wool colour you will pick up.",
+          "Walk over it to pick it up. If you pick up any other wool too, you are out and spectate.",
+          "When the floor is empty, refill the dispenser and drop all 9 again.",
+          "Last player still in wins."
+        ]
+      },
+      {
+        "slug": "land-rush",
+        "name": "Land Rush",
+        "icon": "white_banner",
+        "open": false,
+        "price": "Free",
+        "players": "3–9",
+        "coords": [],
+        "rules": [
+          "3–9 players each take a stack of one wool colour.",
+          "Take turns picking a starting square by its coordinates. Take a banner for your row and one for your column.",
+          "No two players may start on the same row or column, so the banners show what is taken.",
+          "Take turns placing one wool next to (touching) your own colour.",
+          "Wall off land for yourself and block other players. Alliances are allowed. So is breaking them.",
+          "When every region is closed off, each player fills in their own region with wool.",
+          "Count your blocks. The largest region wins."
+        ]
+      },
+      {
+        "slug": "guess-who",
+        "name": "Guess Who",
+        "icon": "oak_trapdoor",
+        "open": false,
+        "price": "Free",
+        "players": "2",
+        "coords": [],
+        "intro": "Each player has a wall of the same 25 blocks, each with a trapdoor in front to flip down when ruled out.",
+        "rules": [
+          "Each player secretly picks one block and puts it in their hidden chest.",
+          "Take turns asking one yes/no question about the other player’s block. Examples: “Is it found in the Nether?”, “Is it orange?”, “Can you craft it?”, “Does gravity affect it?”",
+          "Answers must be honest. If a question is unclear, the answerer may say “skip” and the asker asks again.",
+          "Flip down the trapdoors of blocks you have ruled out.",
+          "On your turn, instead of a question, you may guess the block.",
+          "A right guess wins. A wrong guess loses."
+        ]
+      },
+      {
+        "slug": "castle-crumble",
+        "name": "Castle Crumble",
+        "icon": "sand",
+        "open": false,
+        "price": "Free",
+        "players": "2",
+        "coords": [],
+        "rules": [
+          "Each player takes their wool and a stack of sand to their own side.",
+          "Bury your wool in your sand any way you like. The first player to finish building goes first.",
+          "On your turn, press the dispenser. The item you get decides your move:",
+          [
+            "Stick: break one sand on the opponent’s side. It must be the top sand of a pillar.",
+            "Carpet: place it on top of one of your own pillars. No block in that pillar can be broken.",
+            "Torch: break an entire pillar of the opponent’s sand.",
+            "Sand: place one sand anywhere on your side."
+          ],
+          "Once you find the opponent’s wool, keep taking turns to clear the sand above it and dig a staircase out.",
+          "You cannot win while you are stuck inside the castle.",
+          "The first player to take the opponent’s wool out of their castle wins."
+        ]
+      }
+    ]
   }
 }
