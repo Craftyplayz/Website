@@ -792,6 +792,13 @@
       "section": "Rare items"
     },
     {
+      "id": "nether_star",
+      "name": "Nether Star",
+      "price": "3 diamonds each",
+      "floor": "Gear and rare items",
+      "section": "Rare items"
+    },
+    {
       "id": "name_tag",
       "name": "Name Tag",
       "price": "2 diamonds per 16",
