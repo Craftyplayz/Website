@@ -756,6 +756,13 @@
       "section": "Travel and storage"
     },
     {
+      "id": "firework_rocket",
+      "name": "Firework Rocket",
+      "price": "Price coming soon",
+      "floor": "Gear and rare items",
+      "section": "Travel and storage"
+    },
+    {
       "id": "shulker_box",
       "name": "Shulker Box",
       "price": "4 diamonds per 16",
