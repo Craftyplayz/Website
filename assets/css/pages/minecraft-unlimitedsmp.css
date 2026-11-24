@@ -1,0 +1,50 @@
+/* UnlimitedSMP server info page (/minecraft/unlimitedsmp/) */
+.smp [hidden] { display: none !important; }
+
+.smp-join { display: flex; flex-wrap: wrap; gap: 8px; }
+.smp-join img { vertical-align: -3px; }
+
+.smp-players { display: flex; flex-wrap: wrap; gap: 8px; }
+.smp-player { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); font-size: 14px; }
+.smp-player img, .smp .rank-row > img, .smp .rowi img { border-radius: 4px; image-rendering: pixelated; }
+.smp-players .muted { margin: 0; }
+
+.smp-charts { grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); }
+.smp-charts .smp-wide { grid-column: 1 / -1; }
+.smp-charts .muted { margin: -6px 0 10px; font-size: 13px; }
+.smp-line { display: block; width: 100%; height: auto; }
+.smp-line text { fill: var(--muted); font: 11px var(--font); }
+.smp-line .grid { stroke: var(--line); }
+.smp-line polyline { fill: none; stroke: var(--series-1); stroke-width: 2; stroke-linejoin: round; }
+.smp-line .hit { fill: transparent; }
+.smp-line .hit:hover { fill: rgb(255 255 255 / .06); }
+
+.smp-heat { display: grid; grid-template-columns: 32px repeat(24, minmax(0, 1fr)); gap: 2px; font-size: 12px; }
+.smp-heat i { height: 16px; background: var(--card2); border-radius: 2px; position: relative; }
+.smp-heat i::after { content: ""; position: absolute; inset: 0; background: var(--accent); border-radius: inherit; opacity: var(--a); }
+.smp-heat-day { color: var(--muted); align-self: center; }
+.smp-heat-hr { color: var(--muted); }
+
+.smp .rank-row { grid-template-columns: 24px 24px minmax(0, 1fr) auto; }
+.smp .rank-row > img { width: 24px; height: 24px; }
+.smp .rank-row .grow { min-width: 0; }
+@media (max-width: 480px) {
+    .smp .rank-row { grid-template-columns: 24px minmax(0, 1fr) auto; }
+}
+
+.smp .rowi .grow { min-width: 0; }
+.smp .rowi b { font-weight: 600; }
+
+.smp-map { aspect-ratio: 16 / 9; max-height: 80vh; overflow: hidden; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.smp-map iframe { display: block; width: 100%; height: 100%; border: 0; }
+
+.smp-rules { margin: 0 0 12px; padding-left: 20px; }
+.smp-rules li { margin: 4px 0; }
+
+.smp-feats { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 12px; }
+.smp-feat { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); color: var(--text); transition: border-color var(--fast), transform var(--fast); }
+.smp-feat span { color: var(--muted); font-size: 13px; }
+.page a.smp-feat { color: var(--text); text-decoration: none; }
+a.smp-feat:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+.smp-src { margin-top: 28px; font-size: 13px; }

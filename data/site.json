@@ -59,27 +59,28 @@
                     ]
                 },
                 {
-                    "title": "Castle Crafty",
-                    "url": "/shop/",
-                    "logo": "/assets/img/shoplogo.png",
+                    "title": "UnlimitedSMP",
+                    "url": "/minecraft/unlimitedsmp/",
                     "pages": [
-                        { "title": "Castle Crafty shop", "url": "/shop/", "description": "Prices, enchanted books and special requests at the black tower", "keywords": ["shop", "orthanc", "captainalism", "prices", "enchanted books", "casino"] },
-                        { "title": "Map art quotes", "url": "/shop/mapart/", "description": "Custom Minecraft map art from Castle Crafty: quote creator coming soon", "keywords": ["map art", "mapart", "quote", "shop"] },
-                        { "title": "Poker (casino)", "url": "/shop/poker/", "description": "Rules and location for Poker in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
-                        { "title": "Uno (casino)", "url": "/shop/uno/", "description": "Rules and location for Uno in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
-                        { "title": "Chess (casino)", "url": "/shop/chess/", "description": "Rules and location for Chess in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
-                        { "title": "Sumo Arena (casino)", "url": "/shop/sumo/", "description": "Rules and location for Sumo Arena in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
-                        { "title": "10 Questions (casino)", "url": "/shop/10-questions/", "description": "Rules and location for 10 Questions in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
-                        { "title": "Pick Up Blocks (casino)", "url": "/shop/pick-up-blocks/", "description": "Rules and location for Pick Up Blocks in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
-                        { "title": "Land Rush (casino)", "url": "/shop/land-rush/", "description": "Rules and location for Land Rush in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
-                        { "title": "Guess Who (casino)", "url": "/shop/guess-who/", "description": "Rules and location for Guess Who in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
-                        { "title": "Castle Crumble (casino)", "url": "/shop/castle-crumble/", "description": "Rules and location for Castle Crumble in the Castle Crafty casino", "keywords": ["casino", "minigame", "rules"] },
-                        { "title": "Connect 4 (casino)", "url": "/shop/connect-4/", "description": "Rules, prices and location for Connect 4 in the Castle Crafty casino", "keywords": ["casino", "gambling", "rules"] },
-                        { "title": "Mini Slot Machines (casino)", "url": "/shop/mini-slots/", "description": "Rules, prices and location for Mini Slot Machines in the Castle Crafty casino", "keywords": ["casino", "gambling", "rules"] },
-                        { "title": "Slot Machine (casino)", "url": "/shop/slot-machine/", "description": "Rules, prices and location for Slot Machine in the Castle Crafty casino", "keywords": ["casino", "gambling", "rules"] },
-                        { "title": "Roulette (casino)", "url": "/shop/roulette/", "description": "Rules, prices and location for Roulette in the Castle Crafty casino", "keywords": ["casino", "gambling", "rules"] },
-                        { "title": "Spin the Lights (casino)", "url": "/shop/spin-the-lights/", "description": "Rules, prices and location for Spin the Lights in the Castle Crafty casino", "keywords": ["casino", "gambling", "rules"] },
-                        { "title": "Tower of Luck (casino)", "url": "/shop/tower-of-luck/", "description": "Rules, prices and location for Tower of Luck in the Castle Crafty casino", "keywords": ["casino", "gambling", "rules"] }
+                        { "title": "Server Info", "url": "/minecraft/unlimitedsmp/", "description": "Live players, leaderboards, map and rules for the UnlimitedSMP Minecraft server", "keywords": ["unlimitedsmp", "unlimited", "smp", "server", "online", "leaderboard", "stats", "map", "dynmap", "rules", "join"] },
+                        { "title": "Castle Crafty Shop", "url": "/shop/", "description": "Prices, enchanted books and special requests at the black tower", "keywords": ["shop", "orthanc", "captainalism", "prices", "enchanted books", "unlimitedsmp"] },
+                        { "title": "Casino", "url": "/shop/#casino", "description": "Minigames and gambling in the Castle Crafty basement", "keywords": ["casino", "minigames", "gambling", "unlimitedsmp"] },
+                        { "title": "Map art quotes", "url": "/shop/mapart/", "description": "Custom Minecraft map art from Castle Crafty: quote creator coming soon", "nav": false, "keywords": ["map art", "mapart", "quote", "shop"] },
+                        { "title": "Poker (casino)", "url": "/shop/poker/", "description": "Rules and location for Poker in the Castle Crafty casino", "nav": false, "keywords": ["casino", "minigame", "rules"] },
+                        { "title": "Uno (casino)", "url": "/shop/uno/", "description": "Rules and location for Uno in the Castle Crafty casino", "nav": false, "keywords": ["casino", "minigame", "rules"] },
+                        { "title": "Chess (casino)", "url": "/shop/chess/", "description": "Rules and location for Chess in the Castle Crafty casino", "nav": false, "keywords": ["casino", "minigame", "rules"] },
+                        { "title": "Sumo Arena (casino)", "url": "/shop/sumo/", "description": "Rules and location for Sumo Arena in the Castle Crafty casino", "nav": false, "keywords": ["casino", "minigame", "rules"] },
+                        { "title": "10 Questions (casino)", "url": "/shop/10-questions/", "description": "Rules and location for 10 Questions in the Castle Crafty casino", "nav": false, "keywords": ["casino", "minigame", "rules"] },
+                        { "title": "Pick Up Blocks (casino)", "url": "/shop/pick-up-blocks/", "description": "Rules and location for Pick Up Blocks in the Castle Crafty casino", "nav": false, "keywords": ["casino", "minigame", "rules"] },
+                        { "title": "Land Rush (casino)", "url": "/shop/land-rush/", "description": "Rules and location for Land Rush in the Castle Crafty casino", "nav": false, "keywords": ["casino", "minigame", "rules"] },
+                        { "title": "Guess Who (casino)", "url": "/shop/guess-who/", "description": "Rules and location for Guess Who in the Castle Crafty casino", "nav": false, "keywords": ["casino", "minigame", "rules"] },
+                        { "title": "Castle Crumble (casino)", "url": "/shop/castle-crumble/", "description": "Rules and location for Castle Crumble in the Castle Crafty casino", "nav": false, "keywords": ["casino", "minigame", "rules"] },
+                        { "title": "Connect 4 (casino)", "url": "/shop/connect-4/", "description": "Rules, prices and location for Connect 4 in the Castle Crafty casino", "nav": false, "keywords": ["casino", "gambling", "rules"] },
+                        { "title": "Mini Slot Machines (casino)", "url": "/shop/mini-slots/", "description": "Rules, prices and location for Mini Slot Machines in the Castle Crafty casino", "nav": false, "keywords": ["casino", "gambling", "rules"] },
+                        { "title": "Slot Machine (casino)", "url": "/shop/slot-machine/", "description": "Rules, prices and location for Slot Machine in the Castle Crafty casino", "nav": false, "keywords": ["casino", "gambling", "rules"] },
+                        { "title": "Roulette (casino)", "url": "/shop/roulette/", "description": "Rules, prices and location for Roulette in the Castle Crafty casino", "nav": false, "keywords": ["casino", "gambling", "rules"] },
+                        { "title": "Spin the Lights (casino)", "url": "/shop/spin-the-lights/", "description": "Rules, prices and location for Spin the Lights in the Castle Crafty casino", "nav": false, "keywords": ["casino", "gambling", "rules"] },
+                        { "title": "Tower of Luck (casino)", "url": "/shop/tower-of-luck/", "description": "Rules, prices and location for Tower of Luck in the Castle Crafty casino", "nav": false, "keywords": ["casino", "gambling", "rules"] }
                     ]
                 }
             ]
