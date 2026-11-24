@@ -27,7 +27,8 @@ for (const it of items) {
   const blob = await mv.toBlob({ mimeType: 'image/png', idealAspect: true });
   const img = await createImageBitmap(blob);
   const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d');
-  x.fillStyle = bg; x.fillRect(0, 0, 256, 256); x.drawImage(img, 0, 0, 256, 256);
+  x.fillStyle = bg; x.fillRect(0, 0, 256, 256); const k = Math.min(256 / img.width, 256 / img.height), w = img.width * k, h = img.height * k; // keep proportions
+  x.drawImage(img, (256 - w) / 2, (256 - h) / 2, w, h);
   const jpg = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
   await fetch('/save?f=' + encodeURIComponent(it.jpg), { method: 'POST', body: jpg });
   mv.remove();
