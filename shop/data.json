@@ -3,682 +3,839 @@
   "currency": "diamonds",
   "icons": "/minecraft/tools/item-list/minecraft_{id}.png",
   "floors": [
-    "Stone and building",
-    "Colour and light",
-    "Wood",
-    "Redstone",
-    "Materials and mob drops",
-    "Food and farming",
-    "Gear and rare items",
-    "Enchanted books"
+    {
+      "name": "Building blocks",
+      "sections": [
+        "Stone and bricks",
+        "Natural stone",
+        "Ocean and ice",
+        "Nether blocks"
+      ]
+    },
+    {
+      "name": "Colour and wood",
+      "sections": [
+        "Colours",
+        "Light",
+        "Overworld wood",
+        "Nether wood"
+      ]
+    },
+    {
+      "name": "Redstone",
+      "sections": [
+        "Wiring",
+        "Inputs",
+        "Machines",
+        "Rails"
+      ]
+    },
+    {
+      "name": "Materials and food",
+      "sections": [
+        "Metals",
+        "Mob drops",
+        "Piglin bartering",
+        "Food and farming"
+      ]
+    },
+    {
+      "name": "Gear and rare items",
+      "sections": [
+        "Armour",
+        "Weapons and tools",
+        "Travel and storage",
+        "Rare items"
+      ]
+    },
+    {
+      "name": "Enchanting and map art",
+      "sections": [
+        "Enchanted books",
+        "Enchanting supplies",
+        "Decoration",
+        "Map art"
+      ]
+    }
   ],
   "products": [
-    {
-      "id": "iron_block",
-      "name": "Block of Iron",
-      "price": "2 diamonds for 32 blocks",
-      "floor": "Materials and mob drops"
-    },
-    {
-      "id": "gold_block",
-      "name": "Block of Gold",
-      "price": "2 diamonds per 32",
-      "floor": "Materials and mob drops"
-    },
-    {
-      "id": "enchanted_book",
-      "name": "All books available*",
-      "price": "1 diamond each, or 5 books for 3 diamonds",
-      "floor": "Enchanted books",
-      "note": "*Except Swift Sneak"
-    },
-    {
-      "id": "golden_carrot",
-      "name": "Golden Carrot",
-      "price": "1 diamond per stack",
-      "floor": "Food and farming"
-    },
-    {
-      "id": "prismarine",
-      "name": "Prismarine",
-      "price": "1 diamond per stack",
-      "floor": "Stone and building"
-    },
-    {
-      "id": "prismarine_bricks",
-      "name": "Prismarine Bricks",
-      "price": "2 diamonds per stack",
-      "floor": "Stone and building"
-    },
-    {
-      "id": "sea_lantern",
-      "name": "Sea Lantern",
-      "price": "2 diamonds per stack",
-      "floor": "Colour and light"
-    },
-    {
-      "id": "bone",
-      "name": "Bone",
-      "price": "1 diamond per stack",
-      "floor": "Materials and mob drops"
-    },
-    {
-      "id": "string",
-      "name": "String",
-      "price": "1 diamond per stack",
-      "floor": "Materials and mob drops"
-    },
-    {
-      "id": "gunpowder",
-      "name": "Gunpowder",
-      "price": "1 diamond per stack",
-      "floor": "Materials and mob drops"
-    },
-    {
-      "id": "arrow",
-      "name": "Arrow",
-      "price": "1 diamond per stack",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "leather",
-      "name": "Leather",
-      "price": "2 diamonds per stack",
-      "floor": "Materials and mob drops"
-    },
-    {
-      "id": "slime_block",
-      "name": "Slime Block",
-      "price": "1 diamond per stack",
-      "floor": "Redstone"
-    },
-    {
-      "id": "light_gray_wool",
-      "name": "Wool",
-      "price": "1 diamond per stack, all colours available",
-      "floor": "Colour and light"
-    },
-    {
-      "id": "redstone",
-      "name": "Redstone Dust",
-      "price": "1 diamond per stack",
-      "floor": "Redstone"
-    },
-    {
-      "id": "lapis_lazuli",
-      "name": "Lapis Lazuli",
-      "price": "2 diamonds per stack",
-      "floor": "Materials and mob drops"
-    },
-    {
-      "id": "item_frame",
-      "name": "Item Frame",
-      "price": "2 diamonds per stack",
-      "floor": "Colour and light"
-    },
-    {
-      "id": "glowstone",
-      "name": "Glowstone",
-      "price": "1 diamond per stack",
-      "floor": "Colour and light"
-    },
-    {
-      "id": "bricks",
-      "name": "Bricks",
-      "price": "2 stacks per diamond",
-      "floor": "Stone and building"
-    },
-    {
-      "id": "glass",
-      "name": "Glass",
-      "price": "1 diamond per stack",
-      "floor": "Colour and light"
-    },
-    {
-      "id": "name_tag",
-      "name": "Name Tag",
-      "price": "2 diamonds per 16",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "bookshelf",
-      "name": "Bookshelf",
-      "price": "2 diamonds per stack",
-      "floor": "Colour and light"
-    },
-    {
-      "id": "beacon",
-      "name": "Beacon",
-      "price": "4 diamonds each, or 12 diamonds for a full kit",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "shulker_box",
-      "name": "Shulker Box",
-      "price": "1 diamond each",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "elytra",
-      "name": "Elytra",
-      "price": "6 diamonds each",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "diamond_pickaxe",
-      "name": "Diamond Tools",
-      "price": "8 diamonds per tool, fully enchanted",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "diamond_helmet",
-      "name": "Diamond Armour",
-      "price": "8 diamonds per piece, fully enchanted",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "experience_bottle",
-      "name": "Bottle o' Enchanting",
-      "price": "4 diamonds per stack",
-      "floor": "Materials and mob drops"
-    },
-    {
-      "id": "quartz",
-      "name": "Nether Quartz",
-      "price": "1 diamond per stack",
-      "floor": "Materials and mob drops"
-    },
-    {
-      "id": "obsidian",
-      "name": "Obsidian",
-      "price": "1 diamond per stack",
-      "floor": "Stone and building"
-    },
-    {
-      "id": "crying_obsidian",
-      "name": "Crying Obsidian",
-      "price": "1 diamond per stack",
-      "floor": "Stone and building"
-    },
-    {
-      "id": "soul_sand",
-      "name": "Soul Sand",
-      "price": "1 diamond per stack",
-      "floor": "Stone and building"
-    },
-    {
-      "id": "gravel",
-      "name": "Gravel",
-      "price": "2 stacks per diamond",
-      "floor": "Stone and building"
-    },
-    {
-      "id": "blackstone",
-      "name": "Blackstone",
-      "price": "2 stacks per diamond",
-      "floor": "Stone and building"
-    },
-    {
-      "id": "totem_of_undying",
-      "name": "Totem of Undying",
-      "price": "1 diamond each",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "netherite_chestplate",
-      "name": "Maxed Armour",
-      "price": "Price coming soon",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "netherite_sword",
-      "name": "Maxed Weapons",
-      "price": "Price coming soon",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "redstone_block",
-      "name": "Block of Redstone",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "redstone_torch",
-      "name": "Redstone Torch",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "repeater",
-      "name": "Redstone Repeater",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "comparator",
-      "name": "Redstone Comparator",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "piston",
-      "name": "Piston",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "sticky_piston",
-      "name": "Sticky Piston",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "observer",
-      "name": "Observer",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "hopper",
-      "name": "Hopper",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "dropper",
-      "name": "Dropper",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "dispenser",
-      "name": "Dispenser",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "lever",
-      "name": "Lever",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "stone_button",
-      "name": "Button",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "stone_pressure_plate",
-      "name": "Pressure Plate",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "tripwire_hook",
-      "name": "Tripwire Hook",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "daylight_detector",
-      "name": "Daylight Detector",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "target",
-      "name": "Target",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "redstone_lamp",
-      "name": "Redstone Lamp",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "note_block",
-      "name": "Note Block",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "crafter",
-      "name": "Crafter",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "trapped_chest",
-      "name": "Trapped Chest",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "lightning_rod",
-      "name": "Lightning Rod",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "honey_block",
-      "name": "Honey Block",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "tnt",
-      "name": "TNT",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "rail",
-      "name": "Rail",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "powered_rail",
-      "name": "Powered Rail",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "detector_rail",
-      "name": "Detector Rail",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "activator_rail",
-      "name": "Activator Rail",
-      "price": "Price coming soon",
-      "floor": "Redstone"
-    },
-    {
-      "id": "shulker_shell",
-      "name": "Shulker Shell",
-      "price": "Price coming soon",
-      "floor": "Materials and mob drops"
-    },
     {
       "id": "cobblestone",
       "name": "Cobblestone",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Stone and bricks"
     },
     {
       "id": "stone",
       "name": "Stone",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Stone and bricks"
     },
     {
       "id": "smooth_stone",
       "name": "Smooth Stone",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Stone and bricks"
     },
     {
       "id": "stone_bricks",
       "name": "Stone Bricks",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Stone and bricks"
+    },
+    {
+      "id": "bricks",
+      "name": "Bricks",
+      "price": "2 stacks per diamond",
+      "floor": "Building blocks",
+      "section": "Stone and bricks"
+    },
+    {
+      "id": "gravel",
+      "name": "Gravel",
+      "price": "2 stacks per diamond",
+      "floor": "Building blocks",
+      "section": "Stone and bricks"
     },
     {
       "id": "andesite",
       "name": "Andesite",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Natural stone"
     },
     {
       "id": "diorite",
       "name": "Diorite",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Natural stone"
     },
     {
       "id": "granite",
       "name": "Granite",
       "price": "Price coming soon",
-      "floor": "Stone and building"
-    },
-    {
-      "id": "cobbled_deepslate",
-      "name": "Cobbled Deepslate",
-      "price": "Price coming soon",
-      "floor": "Stone and building"
-    },
-    {
-      "id": "deepslate",
-      "name": "Deepslate",
-      "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Natural stone"
     },
     {
       "id": "tuff",
       "name": "Tuff",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Natural stone"
     },
     {
       "id": "calcite",
       "name": "Calcite",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Natural stone"
     },
     {
       "id": "dripstone_block",
       "name": "Dripstone Block",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Natural stone"
     },
     {
-      "id": "quartz_block",
-      "name": "Block of Quartz",
+      "id": "cobbled_deepslate",
+      "name": "Cobbled Deepslate",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Natural stone"
     },
     {
-      "id": "ender_pearl",
-      "name": "Ender Pearl",
+      "id": "deepslate",
+      "name": "Deepslate",
       "price": "Price coming soon",
-      "floor": "Materials and mob drops"
+      "floor": "Building blocks",
+      "section": "Natural stone"
     },
     {
-      "id": "iron_nugget",
-      "name": "Iron Nugget",
-      "price": "Price coming soon",
-      "floor": "Materials and mob drops"
+      "id": "prismarine",
+      "name": "Prismarine",
+      "price": "1 diamond per stack",
+      "floor": "Building blocks",
+      "section": "Ocean and ice"
     },
     {
-      "id": "nether_brick",
-      "name": "Nether Brick",
-      "price": "Price coming soon",
-      "floor": "Materials and mob drops"
+      "id": "prismarine_bricks",
+      "name": "Prismarine Bricks",
+      "price": "2 diamonds per stack",
+      "floor": "Building blocks",
+      "section": "Ocean and ice"
     },
     {
-      "id": "potion",
-      "name": "Potion of Fire Resistance",
-      "price": "Price coming soon",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "splash_potion",
-      "name": "Splash Potion of Fire Resistance",
-      "price": "Price coming soon",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "spectral_arrow",
-      "name": "Spectral Arrow",
-      "price": "Price coming soon",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "iron_boots",
-      "name": "Iron Boots with Soul Speed",
-      "price": "Price coming soon",
-      "floor": "Gear and rare items"
-    },
-    {
-      "id": "oak_log",
-      "name": "Oak Log",
-      "price": "Price coming soon",
-      "floor": "Wood"
-    },
-    {
-      "id": "spruce_log",
-      "name": "Spruce Log",
-      "price": "Price coming soon",
-      "floor": "Wood"
-    },
-    {
-      "id": "birch_log",
-      "name": "Birch Log",
-      "price": "Price coming soon",
-      "floor": "Wood"
-    },
-    {
-      "id": "jungle_log",
-      "name": "Jungle Log",
-      "price": "Price coming soon",
-      "floor": "Wood"
-    },
-    {
-      "id": "acacia_log",
-      "name": "Acacia Log",
-      "price": "Price coming soon",
-      "floor": "Wood"
-    },
-    {
-      "id": "dark_oak_log",
-      "name": "Dark Oak Log",
-      "price": "Price coming soon",
-      "floor": "Wood"
-    },
-    {
-      "id": "mangrove_log",
-      "name": "Mangrove Log",
-      "price": "Price coming soon",
-      "floor": "Wood"
-    },
-    {
-      "id": "cherry_log",
-      "name": "Cherry Log",
-      "price": "Price coming soon",
-      "floor": "Wood"
-    },
-    {
-      "id": "pale_oak_log",
-      "name": "Pale Oak Log",
-      "price": "Price coming soon",
-      "floor": "Wood"
-    },
-    {
-      "id": "bamboo_block",
-      "name": "Block of Bamboo",
-      "price": "Price coming soon",
-      "floor": "Wood"
-    },
-    {
-      "id": "crimson_stem",
-      "name": "Crimson Stem",
-      "price": "Price coming soon",
-      "floor": "Wood"
-    },
-    {
-      "id": "warped_stem",
-      "name": "Warped Stem",
-      "price": "Price coming soon",
-      "floor": "Wood"
-    },
-    {
-      "id": "white_concrete",
-      "name": "Concrete",
-      "price": "Price coming soon, all colours available",
-      "floor": "Colour and light"
-    },
-    {
-      "id": "white_stained_glass",
-      "name": "Stained Glass",
-      "price": "Price coming soon, all colours available",
-      "floor": "Colour and light"
-    },
-    {
-      "id": "terracotta",
-      "name": "Terracotta",
-      "price": "Price coming soon, all colours available",
-      "floor": "Colour and light"
-    },
-    {
-      "id": "ochre_froglight",
-      "name": "Ochre Froglight",
-      "price": "Price coming soon",
-      "floor": "Colour and light"
-    },
-    {
-      "id": "verdant_froglight",
-      "name": "Verdant Froglight",
-      "price": "Price coming soon",
-      "floor": "Colour and light"
-    },
-    {
-      "id": "pearlescent_froglight",
-      "name": "Pearlescent Froglight",
-      "price": "Price coming soon",
-      "floor": "Colour and light"
+      "id": "sea_lantern",
+      "name": "Sea Lantern",
+      "price": "2 diamonds per stack",
+      "floor": "Building blocks",
+      "section": "Ocean and ice"
     },
     {
       "id": "ice",
       "name": "Ice",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Ocean and ice"
     },
     {
       "id": "packed_ice",
       "name": "Packed Ice",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Ocean and ice"
     },
     {
       "id": "blue_ice",
       "name": "Blue Ice",
       "price": "Price coming soon",
-      "floor": "Stone and building"
+      "floor": "Building blocks",
+      "section": "Ocean and ice"
+    },
+    {
+      "id": "obsidian",
+      "name": "Obsidian",
+      "price": "1 diamond per stack",
+      "floor": "Building blocks",
+      "section": "Nether blocks"
+    },
+    {
+      "id": "crying_obsidian",
+      "name": "Crying Obsidian",
+      "price": "1 diamond per stack",
+      "floor": "Building blocks",
+      "section": "Nether blocks"
+    },
+    {
+      "id": "blackstone",
+      "name": "Blackstone",
+      "price": "2 stacks per diamond",
+      "floor": "Building blocks",
+      "section": "Nether blocks"
+    },
+    {
+      "id": "soul_sand",
+      "name": "Soul Sand",
+      "price": "1 diamond per stack",
+      "floor": "Building blocks",
+      "section": "Nether blocks"
+    },
+    {
+      "id": "quartz_block",
+      "name": "Block of Quartz",
+      "price": "Price coming soon",
+      "floor": "Building blocks",
+      "section": "Nether blocks"
+    },
+    {
+      "id": "light_gray_wool",
+      "name": "Wool",
+      "price": "1 diamond per stack, all colours available",
+      "floor": "Colour and wood",
+      "section": "Colours"
+    },
+    {
+      "id": "white_concrete",
+      "name": "Concrete",
+      "price": "Price coming soon, all colours available",
+      "floor": "Colour and wood",
+      "section": "Colours"
+    },
+    {
+      "id": "terracotta",
+      "name": "Terracotta",
+      "price": "Price coming soon, all colours available",
+      "floor": "Colour and wood",
+      "section": "Colours"
+    },
+    {
+      "id": "glass",
+      "name": "Glass",
+      "price": "1 diamond per stack",
+      "floor": "Colour and wood",
+      "section": "Colours"
+    },
+    {
+      "id": "white_stained_glass",
+      "name": "Stained Glass",
+      "price": "Price coming soon, all colours available",
+      "floor": "Colour and wood",
+      "section": "Colours"
+    },
+    {
+      "id": "glowstone",
+      "name": "Glowstone",
+      "price": "1 diamond per stack",
+      "floor": "Colour and wood",
+      "section": "Light"
+    },
+    {
+      "id": "ochre_froglight",
+      "name": "Ochre Froglight",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Light"
+    },
+    {
+      "id": "verdant_froglight",
+      "name": "Verdant Froglight",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Light"
+    },
+    {
+      "id": "pearlescent_froglight",
+      "name": "Pearlescent Froglight",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Light"
+    },
+    {
+      "id": "oak_log",
+      "name": "Oak Log",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Overworld wood"
+    },
+    {
+      "id": "spruce_log",
+      "name": "Spruce Log",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Overworld wood"
+    },
+    {
+      "id": "birch_log",
+      "name": "Birch Log",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Overworld wood"
+    },
+    {
+      "id": "dark_oak_log",
+      "name": "Dark Oak Log",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Overworld wood"
+    },
+    {
+      "id": "jungle_log",
+      "name": "Jungle Log",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Overworld wood"
+    },
+    {
+      "id": "acacia_log",
+      "name": "Acacia Log",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Overworld wood"
+    },
+    {
+      "id": "mangrove_log",
+      "name": "Mangrove Log",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Overworld wood"
+    },
+    {
+      "id": "cherry_log",
+      "name": "Cherry Log",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Overworld wood"
+    },
+    {
+      "id": "pale_oak_log",
+      "name": "Pale Oak Log",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Overworld wood"
+    },
+    {
+      "id": "bamboo_block",
+      "name": "Block of Bamboo",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Overworld wood"
+    },
+    {
+      "id": "crimson_stem",
+      "name": "Crimson Stem",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Nether wood"
+    },
+    {
+      "id": "warped_stem",
+      "name": "Warped Stem",
+      "price": "Price coming soon",
+      "floor": "Colour and wood",
+      "section": "Nether wood"
+    },
+    {
+      "id": "redstone",
+      "name": "Redstone Dust",
+      "price": "1 diamond per stack",
+      "floor": "Redstone",
+      "section": "Wiring"
+    },
+    {
+      "id": "redstone_block",
+      "name": "Block of Redstone",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Wiring"
+    },
+    {
+      "id": "redstone_torch",
+      "name": "Redstone Torch",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Wiring"
+    },
+    {
+      "id": "repeater",
+      "name": "Redstone Repeater",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Wiring"
+    },
+    {
+      "id": "comparator",
+      "name": "Redstone Comparator",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Wiring"
+    },
+    {
+      "id": "lever",
+      "name": "Lever",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Inputs"
+    },
+    {
+      "id": "stone_button",
+      "name": "Button",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Inputs"
+    },
+    {
+      "id": "stone_pressure_plate",
+      "name": "Pressure Plate",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Inputs"
+    },
+    {
+      "id": "tripwire_hook",
+      "name": "Tripwire Hook",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Inputs"
+    },
+    {
+      "id": "trapped_chest",
+      "name": "Trapped Chest",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Inputs"
+    },
+    {
+      "id": "daylight_detector",
+      "name": "Daylight Detector",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Inputs"
+    },
+    {
+      "id": "target",
+      "name": "Target",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Inputs"
+    },
+    {
+      "id": "lightning_rod",
+      "name": "Lightning Rod",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Inputs"
+    },
+    {
+      "id": "observer",
+      "name": "Observer",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Inputs"
+    },
+    {
+      "id": "piston",
+      "name": "Piston",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Machines"
+    },
+    {
+      "id": "sticky_piston",
+      "name": "Sticky Piston",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Machines"
+    },
+    {
+      "id": "slime_block",
+      "name": "Slime Block",
+      "price": "1 diamond per stack",
+      "floor": "Redstone",
+      "section": "Machines"
+    },
+    {
+      "id": "honey_block",
+      "name": "Honey Block",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Machines"
+    },
+    {
+      "id": "hopper",
+      "name": "Hopper",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Machines"
+    },
+    {
+      "id": "dropper",
+      "name": "Dropper",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Machines"
+    },
+    {
+      "id": "dispenser",
+      "name": "Dispenser",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Machines"
+    },
+    {
+      "id": "crafter",
+      "name": "Crafter",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Machines"
+    },
+    {
+      "id": "note_block",
+      "name": "Note Block",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Machines"
+    },
+    {
+      "id": "redstone_lamp",
+      "name": "Redstone Lamp",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Machines"
+    },
+    {
+      "id": "tnt",
+      "name": "TNT",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Machines"
+    },
+    {
+      "id": "rail",
+      "name": "Rail",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Rails"
+    },
+    {
+      "id": "powered_rail",
+      "name": "Powered Rail",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Rails"
+    },
+    {
+      "id": "detector_rail",
+      "name": "Detector Rail",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Rails"
+    },
+    {
+      "id": "activator_rail",
+      "name": "Activator Rail",
+      "price": "Price coming soon",
+      "floor": "Redstone",
+      "section": "Rails"
+    },
+    {
+      "id": "iron_block",
+      "name": "Block of Iron",
+      "price": "2 diamonds for 32 blocks",
+      "floor": "Materials and food",
+      "section": "Metals"
+    },
+    {
+      "id": "gold_block",
+      "name": "Block of Gold",
+      "price": "2 diamonds per 32",
+      "floor": "Materials and food",
+      "section": "Metals"
+    },
+    {
+      "id": "quartz",
+      "name": "Nether Quartz",
+      "price": "1 diamond per stack",
+      "floor": "Materials and food",
+      "section": "Metals"
+    },
+    {
+      "id": "bone",
+      "name": "Bone",
+      "price": "1 diamond per stack",
+      "floor": "Materials and food",
+      "section": "Mob drops"
+    },
+    {
+      "id": "string",
+      "name": "String",
+      "price": "1 diamond per stack",
+      "floor": "Materials and food",
+      "section": "Mob drops"
+    },
+    {
+      "id": "gunpowder",
+      "name": "Gunpowder",
+      "price": "1 diamond per stack",
+      "floor": "Materials and food",
+      "section": "Mob drops"
+    },
+    {
+      "id": "leather",
+      "name": "Leather",
+      "price": "2 diamonds per stack",
+      "floor": "Materials and food",
+      "section": "Mob drops"
+    },
+    {
+      "id": "shulker_shell",
+      "name": "Shulker Shell",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Mob drops"
+    },
+    {
+      "id": "ender_pearl",
+      "name": "Ender Pearl",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Piglin bartering"
+    },
+    {
+      "id": "iron_nugget",
+      "name": "Iron Nugget",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Piglin bartering"
+    },
+    {
+      "id": "nether_brick",
+      "name": "Nether Brick",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Piglin bartering"
+    },
+    {
+      "id": "potion",
+      "name": "Potion of Fire Resistance",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Piglin bartering"
+    },
+    {
+      "id": "splash_potion",
+      "name": "Splash Potion of Fire Resistance",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Piglin bartering"
+    },
+    {
+      "id": "spectral_arrow",
+      "name": "Spectral Arrow",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Piglin bartering"
+    },
+    {
+      "id": "iron_boots",
+      "name": "Iron Boots with Soul Speed",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Piglin bartering"
+    },
+    {
+      "id": "golden_carrot",
+      "name": "Golden Carrot",
+      "price": "1 diamond per stack",
+      "floor": "Materials and food",
+      "section": "Food and farming"
     },
     {
       "id": "wheat",
       "name": "Wheat",
       "price": "Price coming soon",
-      "floor": "Food and farming"
+      "floor": "Materials and food",
+      "section": "Food and farming"
     },
     {
       "id": "carrot",
       "name": "Carrot",
       "price": "Price coming soon",
-      "floor": "Food and farming"
+      "floor": "Materials and food",
+      "section": "Food and farming"
     },
     {
       "id": "potato",
       "name": "Potato",
       "price": "Price coming soon",
-      "floor": "Food and farming"
+      "floor": "Materials and food",
+      "section": "Food and farming"
     },
     {
       "id": "beetroot",
       "name": "Beetroot",
       "price": "Price coming soon",
-      "floor": "Food and farming"
+      "floor": "Materials and food",
+      "section": "Food and farming"
+    },
+    {
+      "id": "netherite_chestplate",
+      "name": "Maxed Armour",
+      "price": "Price coming soon",
+      "floor": "Gear and rare items",
+      "section": "Armour"
+    },
+    {
+      "id": "diamond_helmet",
+      "name": "Diamond Armour",
+      "price": "8 diamonds per piece, fully enchanted",
+      "floor": "Gear and rare items",
+      "section": "Armour"
+    },
+    {
+      "id": "netherite_sword",
+      "name": "Maxed Weapons",
+      "price": "Price coming soon",
+      "floor": "Gear and rare items",
+      "section": "Weapons and tools"
+    },
+    {
+      "id": "diamond_pickaxe",
+      "name": "Diamond Tools",
+      "price": "8 diamonds per tool, fully enchanted",
+      "floor": "Gear and rare items",
+      "section": "Weapons and tools"
+    },
+    {
+      "id": "arrow",
+      "name": "Arrow",
+      "price": "1 diamond per stack",
+      "floor": "Gear and rare items",
+      "section": "Weapons and tools"
+    },
+    {
+      "id": "elytra",
+      "name": "Elytra",
+      "price": "6 diamonds each",
+      "floor": "Gear and rare items",
+      "section": "Travel and storage"
+    },
+    {
+      "id": "shulker_box",
+      "name": "Shulker Box",
+      "price": "1 diamond each",
+      "floor": "Gear and rare items",
+      "section": "Travel and storage"
+    },
+    {
+      "id": "totem_of_undying",
+      "name": "Totem of Undying",
+      "price": "1 diamond each",
+      "floor": "Gear and rare items",
+      "section": "Rare items"
+    },
+    {
+      "id": "beacon",
+      "name": "Beacon",
+      "price": "4 diamonds each, or 12 diamonds for a full kit",
+      "floor": "Gear and rare items",
+      "section": "Rare items"
+    },
+    {
+      "id": "name_tag",
+      "name": "Name Tag",
+      "price": "2 diamonds per 16",
+      "floor": "Gear and rare items",
+      "section": "Rare items"
+    },
+    {
+      "id": "enchanted_book",
+      "name": "All books available*",
+      "price": "1 diamond each, or 5 books for 3 diamonds",
+      "note": "*Except Swift Sneak",
+      "floor": "Enchanting and map art",
+      "section": "Enchanted books"
+    },
+    {
+      "id": "experience_bottle",
+      "name": "Bottle o' Enchanting",
+      "price": "4 diamonds per stack",
+      "floor": "Enchanting and map art",
+      "section": "Enchanting supplies"
+    },
+    {
+      "id": "lapis_lazuli",
+      "name": "Lapis Lazuli",
+      "price": "2 diamonds per stack",
+      "floor": "Enchanting and map art",
+      "section": "Enchanting supplies"
+    },
+    {
+      "id": "bookshelf",
+      "name": "Bookshelf",
+      "price": "2 diamonds per stack",
+      "floor": "Enchanting and map art",
+      "section": "Enchanting supplies"
+    },
+    {
+      "id": "item_frame",
+      "name": "Item Frame",
+      "price": "2 diamonds per stack",
+      "floor": "Enchanting and map art",
+      "section": "Decoration"
     },
     {
       "id": "filled_map",
       "name": "Custom Map Art",
       "price": "Price coming soon",
-      "floor": "Colour and light"
+      "floor": "Enchanting and map art",
+      "section": "Map art"
     }
   ],
   "requests": {
