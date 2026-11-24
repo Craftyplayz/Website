@@ -63,7 +63,7 @@ $img = function ($p) { return is_string($p) && $p !== '' ? '/minecraft/models/' 
             </div>
 
             <div class="bar">
-                <input class="field" type="search" id="mdl-q" placeholder="Search names and descriptions" aria-label="Search items">
+                <input class="field" type="search" id="mdl-q" placeholder="Search items" aria-label="Search items">
                 <span class="muted" id="mdl-count"><?= count($items) ?> items</span>
             </div>
             <p class="note" id="mdl-none" hidden>No items match that search.</p>
