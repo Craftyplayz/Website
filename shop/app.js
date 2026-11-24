@@ -14,7 +14,7 @@
     $('shop-name').textContent = d.shop;
     var lists = {};
     d.floors.forEach(function (name, n) {
-      $('products').appendChild(el('h3', 'floor', 'Floor ' + (n + 1) + ' · ' + name));
+      $('products').appendChild(el('h3', 'floor', 'Floor ' + (n + 1) + ' · ' + name)).id = name.toLowerCase().replace(/W+/g, '-');
       lists[name] = $('products').appendChild(el('ul', 'niches'));
     });
     d.products.forEach(function (p, i) {
@@ -28,14 +28,17 @@
       var t = el('div', 'txt');
       t.appendChild(el('h4', 'name', p.name));
       t.appendChild(el('p', 'price', p.price));
+      if (p.note) t.appendChild(el('p', 'note', p.note));
       li.appendChild(box); li.appendChild(t);
       ul.appendChild(li);
     });
-    $('book-price').textContent = d.books.price;
-    d.books.list.forEach(function (b) { $('book-list').appendChild(el('li', null, b)); });
     $('req-text').textContent = d.requests.text;
     $('req-ex').textContent = d.requests.examples;
-    d.requests.contacts.forEach(function (c) { $('contacts').appendChild(el('li', null, c + ' on Discord')); });
+    d.requests.contacts.forEach(function (c) {
+      var link = el('a', null, c.name + ' on Discord');
+      link.href = c.url; link.target = '_blank'; link.rel = 'noopener';
+      $('contacts').appendChild(el('li')).appendChild(link);
+    });
     $('casino-status').textContent = d.casino.status;
     document.querySelectorAll('.storey').forEach(function (s) { s.hidden = false; });
     st.hidden = true;

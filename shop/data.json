@@ -9,7 +9,8 @@
     "Redstone",
     "Materials and mob drops",
     "Food and farming",
-    "Gear and rare items"
+    "Gear and rare items",
+    "Enchanted books"
   ],
   "products": [
     {
@@ -26,9 +27,10 @@
     },
     {
       "id": "enchanted_book",
-      "name": "Enchanted Books",
+      "name": "All books available*",
       "price": "1 diamond each, or 5 books for 3 diamonds",
-      "floor": "Gear and rare items"
+      "floor": "Enchanted books",
+      "note": "*Except Swift Sneak"
     },
     {
       "id": "golden_carrot",
@@ -679,31 +681,12 @@
       "floor": "Colour and light"
     }
   ],
-  "books": {
-    "price": "Every book is 1 diamond, or 5 books for 3 diamonds.",
-    "list": [
-      "Mending",
-      "Unbreaking 3",
-      "Protection 4",
-      "Fortune 3",
-      "Efficiency 5",
-      "Depth Strider 3",
-      "Silk Touch",
-      "Aqua Affinity",
-      "Feather Falling 4",
-      "Sharpness 5",
-      "Smite 5",
-      "Respiration 3",
-      "Looting 3",
-      "Punch 2",
-      "Thorns 3",
-      "Blast Protection 4",
-      "Veinminer"
-    ]
-  },
   "requests": {
     "contacts": [
-      "Crafty"
+      {
+        "name": "Crafty",
+        "url": "https://discord.com/users/331336320096010240"
+      }
     ],
     "text": "For special requests, contact Crafty on Discord with your request.",
     "examples": "For example bulk purchases, partnership offers, or asking for a new item to be stocked."
