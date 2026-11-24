@@ -703,10 +703,9 @@
   },
   "requests": {
     "contacts": [
-      "Chewy",
       "Crafty"
     ],
-    "text": "For special requests, contact Chewy or Crafty on Discord with your request.",
+    "text": "For special requests, contact Crafty on Discord with your request.",
     "examples": "For example bulk purchases, partnership offers, or asking for a new item to be stocked."
   },
   "casino": {
