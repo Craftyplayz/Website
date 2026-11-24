@@ -15,7 +15,7 @@
     var lists = {}, last;
     function slug(s) { return s.toLowerCase().replace(/W+/g, '-'); }
     d.floors.forEach(function (f, n) {
-      $('products').appendChild(el('h3', 'floor', 'Floor ' + (n + 1) + ' · ' + f.name)).id = slug(f.name);
+      $('products').appendChild(el('h3', 'floor', f.label || 'Floor ' + (n + 1) + ' · ' + f.name)).id = slug(f.name);
       f.sections.forEach(function (s) {
         $('products').appendChild(el('h4', 'shelf', s)).id = slug(s);
         last = lists[f.name + '/' + s] = $('products').appendChild(el('ul', 'niches'));
