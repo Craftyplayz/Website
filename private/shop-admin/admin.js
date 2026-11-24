@@ -200,7 +200,10 @@
         $('#sfilter').innerHTML = Object.entries(SF).map(([k, l]) => `<button type="button" data-k="${k}" aria-pressed="${k === sf}">${l}</button>`).join('');
         drawStock();
     }
+    const stacks = n => { const v = n / 64; return v === Math.floor(v) ? num(v) : v < 10 ? (Math.round(v * 10) / 10).toLocaleString('en-GB') : num(v); }; // 64 a stack
+    const backTag = p => (p.backstock ? `<span class="tag t-back" title="In the stock room: ${num(p.backstock)} (${stacks(p.backstock)} stacks)">${num(p.backstock)} backstock</span>` : '');
     function drawStock() {
+        data.products.forEach(p => { p.stacks = (p.stock || 0) / 64; p.value = p.each === null ? null : (p.stock || 0) * p.each; p.backValue = p.each === null || !p.backstock ? null : p.backstock * p.each; });
         const q = $('#sq').value.trim().toLowerCase();
         let rows = data.products.map((p, k) => [p, k]).filter(([p]) => {
             if (q && !(p.name + ' ' + p.id).toLowerCase().includes(q)) return false;
@@ -211,11 +214,12 @@
         });
         if (ssort.k) rows.sort((a, b) => ((a[0][ssort.k] ?? -1) > (b[0][ssort.k] ?? -1) ? 1 : (a[0][ssort.k] ?? -1) < (b[0][ssort.k] ?? -1) ? -1 : 0) * ssort.dir);
         const th = (k, l, cls = '') => `<th class="${cls}" data-sort="${k}" aria-sort="${ssort.k === k ? (ssort.dir > 0 ? 'ascending' : 'descending') : 'none'}">${l}</th>`;
-        $('#stock-t').innerHTML = `<thead><tr>${th('name', 'Item')}<th>Price</th>${th('stock', 'Stock', 'num')}${th('sold14', 'Sold, 14 days', 'num')}${th('daysLeft', 'Days left', 'num')}<th>Trend</th><th>Suggestion</th></tr></thead><tbody>
-            ${rows.map(([p, k]) => `<tr data-i="${k}"><td>${ic(p.id)}${esc(p.name)}</td><td class="dim">${esc(p.price || '')}</td><td class="num ${!p.stock ? 'zero' : p.price && p.stock < data.low ? 'low' : ''}">${num(p.stock || 0)}</td>
+        $('#stock-t').innerHTML = `<thead><tr>${th('name', 'Item')}<th>Price</th>${th('stock', 'Stock', 'num')}${th('stacks', 'Stacks', 'num')}${th('value', 'Value', 'num')}${th('backstock', 'Backstock')}${th('sold14', 'Sold, 14 days', 'num')}${th('daysLeft', 'Days left', 'num')}<th>Trend</th><th>Suggestion</th></tr></thead><tbody>
+            ${rows.map(([p, k]) => `<tr data-i="${k}"><td>${ic(p.id)}${esc(p.name)}</td><td class="dim price">${esc(p.price || '')}</td><td class="num ${!p.stock ? 'zero' : p.price && p.stock < data.low ? 'low' : ''}">${num(p.stock || 0)}</td><td class="num">${p.stock ? stacks(p.stock) : ''}</td><td class="num" title="Diamonds if all of it sells">${p.value ? d2(p.value) : ''}</td><td>${backTag(p)}</td>
             <td class="num">${p.sold14 ? num(p.sold14) : ''}</td><td class="num">${p.daysLeft !== null ? Math.round(p.daysLeft) : ''}</td><td>${spark(p.history)}</td><td class="dim">${esc(p.suggestion || '')}</td></tr>`).join('')
-            || '<tr><td colspan="7" class="empty">Nothing matches.</td></tr>'}</tbody>`;
-        $('#stock-n').textContent = `${num(rows.length)} items`;
+            || '<tr><td colspan="10" class="empty">Nothing matches.</td></tr>'}</tbody>`;
+        const worth = rows.reduce((t, [p]) => t + (p.value || 0), 0), back = rows.reduce((t, [p]) => t + (p.backValue || 0), 0);
+        $('#stock-n').textContent = `${num(rows.length)} items · on sale worth ${dia(worth)}${back ? ` · backstock worth ${dia(back)}` : ''}`;
     }
     $('#sq').addEventListener('input', debounce(drawStock, 80));
     $('#sfilter').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (!b) return; sf = b.dataset.k; $$('#sfilter button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawStock(); });
@@ -227,7 +231,7 @@
         select(tr);
         const p = data.products[tr.dataset.i], hs = p.history;
         openPanel(`<h2>${ic(p.id)}${esc(p.name)}</h2>
-            <div class="kv"><span>Price</span><span>${esc(p.price || 'not on the price list')}</span><span>In stock</span><span>${num(p.stock || 0)}</span>
+            <div class="kv"><span>Price</span><span>${esc(p.price || 'not on the price list')}</span><span>In stock</span><span>${num(p.stock || 0)} (${stacks(p.stock || 0)} stacks)</span>${p.value !== null ? `<span>Value</span><span>${dia(p.value)} if it all sells</span>` : ''}<span>Backstock</span><span>${p.backstock ? `${num(p.backstock)} (${stacks(p.backstock)} stacks)${p.backValue ? `, worth ${dia(p.backValue)}` : ''}` : 'none in the stock room'}</span>
             <span>Sold, 14 days</span><span>${num(p.sold14)}</span>${p.daysLeft !== null ? `<span>Days of stock</span><span>about ${Math.round(p.daysLeft)}</span>` : ''}${p.suggestion ? `<span>Suggestion</span><span>${esc(p.suggestion)}</span>` : ''}</div>
             <h3>Stock history</h3>${hs.length ? spark(hs, 380, 130) + `<p class="dim">Highest ${num(Math.max(...hs.map(e => e[1])))}, lowest ${num(Math.min(...hs.map(e => e[1])))}, since ${esc(date(hs[0][0]))}</p>
             <details><summary>Every change (${num(hs.length)})</summary><table class="grid-t"><tbody>${hs.slice().reverse().map(([t, n]) => `<tr><td>${esc(date(t))}</td><td class="num">${num(n)}</td></tr>`).join('')}</tbody></table></details>` : '<p class="dim">No history yet.</p>'}
@@ -235,8 +239,9 @@
             <p><button class="btn" data-item="${esc(p.name)}">Sales and restocks of ${esc(p.name)} this month</button></p>`);
     });
     const chestList = id => {
-        const cs = data.chests.filter(c => c.items[id]);
-        return cs.length ? `<p class="mono">${cs.map(c => `${c.x} ${c.y} ${c.z}: ${num(c.items[id])}${c.main !== id ? ' (wrong chest)' : ''}`).join('<br>')}</p>` : '<p class="dim">Not in any chest.</p>';
+        const cs = data.chests.filter(c => c.items[id]), rs = (data.room || []).filter(c => c.items[id]);
+        return (cs.length ? `<p class="mono">${cs.map(c => `${c.x} ${c.y} ${c.z}: ${num(c.items[id])}${c.main !== id ? ' (wrong chest)' : ''}`).join('<br>')}</p>` : '<p class="dim">Not in any shop chest.</p>')
+            + (rs.length ? `<p class="dim">Stock room:</p><p class="mono">${rs.map(c => `${c.x} ${c.y} ${c.z}: ${num(c.items[id])}`).join('<br>')}</p>` : '');
     };
 
     // ---------- chests ----------
@@ -255,18 +260,22 @@
         });
         const used = all.filter(c => Object.keys(c.items).length).length, wrong = all.filter(c => c.misplaced.length).length;
         $('#chests-n').textContent = `${num(used)} in use of ${num(all.length)}${wrong ? ` · ${num(wrong)} with the wrong item` : ''}`;
-        $('#map').innerHTML = Object.keys(byY).sort((a, b) => b - a).map(y => `<div class="level"><span>y ${esc(y)}</span><div class="chests">
+        const roomY = {};
+        (data.room || []).forEach((c, k) => { if (cf === 'problems' || (cf === 'used' && !Object.keys(c.items).length)) return; (roomY[c.y] = roomY[c.y] || []).push([c, k]); });
+        const tile = (c, attr) => { const ids = Object.entries(c.items).sort((a, b) => b[1] - a[1]), main = c.main || (ids[0] && ids[0][0]); return `<button type="button" class="chest${c.misplaced && c.misplaced.length ? ' wrong' : ''}${ids.length ? '' : ' empty'}" ${attr} title="${esc(`${c.x} ${c.y} ${c.z}` + (main ? ': ' + main.replace(/_/g, ' ') : ': empty'))}">${main ? `<img src="${ICON(main)}" alt="" width="24" height="24" loading="lazy">` : ''}<span>${ids.length ? num(ids.reduce((s, e) => s + e[1], 0)) : ''}</span></button>`; };
+        const roomHtml = Object.keys(roomY).length ? `<h2 class="maph">Stock room <small>backstock, not for sale</small></h2>` + Object.keys(roomY).sort((a, b) => b - a).map(y => `<div class="level"><span>y ${esc(y)}</span><div class="chests">${roomY[y].sort((a, b) => a[0].x - b[0].x || a[0].z - b[0].z).map(([c, k]) => tile(c, `data-r="${k}"`)).join('')}</div></div>`).join('') : '';
+        $('#map').innerHTML = (Object.keys(byY).length ? '<h2 class="maph">Shop</h2>' : '') + Object.keys(byY).sort((a, b) => b - a).map(y => `<div class="level"><span>y ${esc(y)}</span><div class="chests">
             ${byY[y].sort((a, b) => a[0].x - b[0].x || a[0].z - b[0].z).map(([c, k]) => {
                 const ids = Object.entries(c.items).sort((a, b) => b[1] - a[1]), main = c.main || (ids[0] && ids[0][0]);
                 return `<button type="button" class="chest${c.misplaced.length ? ' wrong' : ''}${ids.length ? '' : ' empty'}" data-c="${k}" title="${esc(`${c.x} ${c.y} ${c.z}` + (main ? ': ' + main.replace(/_/g, ' ') : ': empty'))}">${main ? `<img src="${ICON(main)}" alt="" width="24" height="24" loading="lazy">` : ''}<span>${ids.length ? num(ids.reduce((s, e) => s + e[1], 0)) : ''}</span></button>`;
-            }).join('')}</div></div>`).join('') || `<p class="empty">${cf === 'problems' ? 'No chests hold the wrong item.' : 'No chests to show.'}</p>`;
+            }).join('')}</div></div>`).join('') + roomHtml || `<p class="empty">${cf === 'problems' ? 'No chests hold the wrong item.' : 'No chests to show.'}</p>`;
     }
     $('#cfilter').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (!b) return; cf = b.dataset.k; $$('#cfilter button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawChests(); });
     $('#map').addEventListener('click', e => {
-        const b = e.target.closest('[data-c]');
+        const b = e.target.closest('[data-c],[data-r]');
         if (!b) return;
-        const c = data.chests[b.dataset.c], ids = Object.entries(c.items).sort((a, b) => b[1] - a[1]);
-        openPanel(`<h2>${esc(c.type.replace(/_/g, ' '))}</h2><p class="mono">${c.x} ${c.y} ${c.z}</p>
+        const c = b.dataset.r !== undefined ? { ...data.room[b.dataset.r], misplaced: [], main: null } : data.chests[b.dataset.c], ids = Object.entries(c.items).sort((a, b) => b[1] - a[1]);
+        openPanel(`<h2>${esc(c.type.replace(/_/g, ' '))}${b.dataset.r !== undefined ? ' <span class="tag t-back">stock room</span>' : ''}</h2><p class="mono">${c.x} ${c.y} ${c.z}</p>
             ${c.misplaced.length ? `<p class="low">Holds another item's stock: ${c.misplaced.map(id => esc(id.replace(/_/g, ' '))).join(', ')}</p>` : ''}
             <h3>Contents</h3>${ids.length ? `<table class="grid-t"><tbody>${ids.map(([id, n]) => `<tr><td>${ic(id)}${esc(id.replace(/_/g, ' '))}${id === c.main ? ' <span class="dim">(this chest\'s item)</span>' : ''}</td><td class="num">${num(n)}</td></tr>`).join('')}</tbody></table>` : '<p class="dim">Empty.</p>'}`);
     });

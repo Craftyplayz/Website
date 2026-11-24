@@ -139,3 +139,8 @@ details summary { cursor: pointer; color: var(--dim); margin: 14px 0 6px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 #stock-t td, #cust-t td, #prices-t td { white-space: nowrap; }
+.t-back { color: #c9b8ff; border-color: #3d3560; background: #120f1f; }
+.maph { margin: 14px 0 4px; font-size: 15px; color: #f0e6d0; }
+.maph small { font: 400 12px Inter, sans-serif; color: var(--dim); letter-spacing: 0; }
+#stock-t td.price { white-space: normal; min-width: 120px; max-width: 170px; font-size: 13px; }
+#stock-t td:last-child { white-space: normal; min-width: 140px; font-size: 13px; }
