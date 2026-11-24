@@ -1019,7 +1019,16 @@
         "paid": true,
         "price": "1 diamond per game",
         "coords": [],
-        "rules": []
+        "rules": [
+          "Put 1 diamond in the dropper on the left.",
+          "Press the button to clear the board and start a new game.",
+          "Take turns pressing a column button to drop your colour of concrete powder into that column.",
+          "The first player to get 4 in a row (across, up and down, or diagonally) wins.",
+          "To play again, press the button to send another diamond through and clear the board.",
+          "If you don’t want another game, leave the board as it is and take back any diamonds left in the dropper."
+        ],
+        "players": "2",
+        "intro": "A wall grid with a button under each column. The light on the left, above the payment dropper, shows whose turn it is (blue or red)."
       },
       {
         "slug": "mini-slots",
@@ -1029,7 +1038,13 @@
         "paid": true,
         "price": "1 diamond per go",
         "coords": [],
-        "rules": []
+        "rules": [
+          "Put your diamonds in the dropper.",
+          "Press the button. Each press wagers 1 diamond.",
+          "Win and you get 2 diamonds back. Lose and the house keeps your diamond."
+        ],
+        "players": "1",
+        "intro": "A tiny machine that uses pure chance. Diamonds only."
       },
       {
         "slug": "slot-machine",
@@ -1039,11 +1054,22 @@
         "paid": true,
         "price": "Variable pricing",
         "pricing": [
-          "High stakes: 1 diamond block per play",
-          "Standard: 1 diamond per play"
+          "Standard machine: 1 diamond per spin",
+          "High-stakes machine: 1 diamond block per spin"
         ],
         "coords": [],
-        "rules": []
+        "rules": [
+          "Put your diamonds (or diamond blocks) in the shulker box in the floor.",
+          "Press the button to spin the slots.",
+          "Get 3 of the same block to win:",
+          [
+            "3 gold blocks: 5× your stake",
+            "3 emerald blocks: 5× your stake",
+            "3 diamond blocks: 12× your stake"
+          ]
+        ],
+        "players": "1",
+        "intro": "The standard and high-stakes slots are separate machines. Payouts are paid in whatever you play with: diamonds on the standard machine, diamond blocks on the high-stakes one."
       },
       {
         "slug": "roulette",
