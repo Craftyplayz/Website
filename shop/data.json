@@ -1023,7 +1023,7 @@
           "Put 1 diamond in the dropper on the left.",
           "Press the button to clear the board and start a new game.",
           "Take turns pressing a column button to drop your colour of concrete powder into that column.",
-          "The first player to get 4 in a row (across, up and down, or diagonally) wins.",
+          "The first player to get 4 in a row (across, up and down, or diagonally) wins. The diamond pays for the game, so the prize is bragging rights.",
           "To play again, press the button to send another diamond through and clear the board.",
           "If you don’t want another game, leave the board as it is and take back any diamonds left in the dropper."
         ],
@@ -1061,7 +1061,7 @@
         "rules": [
           "Put your diamonds (or diamond blocks) in the shulker box in the floor.",
           "Press the button to spin the slots.",
-          "Get 3 of the same block to win:",
+          "The reels only show gold, emerald and diamond blocks. Get 3 of the same to win:",
           [
             "3 gold blocks: 5× your stake",
             "3 emerald blocks: 5× your stake",
@@ -1083,7 +1083,18 @@
           "Standard: 1 diamond per play"
         ],
         "coords": [],
-        "rules": []
+        "rules": [
+          "Bet on red, black or green.",
+          "The wheel spins and stops on one space.",
+          "Win on the colour you picked:",
+          [
+            "Red or black: 2× your stake",
+            "Green: 10× your stake"
+          ],
+          "Any other colour and the house keeps your stake."
+        ],
+        "players": "1+",
+        "intro": "A spinning wheel of 32 spaces with a gold block in the middle: 15 red, 15 black and 2 green."
       },
       {
         "slug": "spin-the-lights",
@@ -1097,7 +1108,14 @@
           "Standard: 1 diamond per play"
         ],
         "coords": [],
-        "rules": []
+        "rules": [
+          "Pay your stake and press the button.",
+          "The lights spin for a random amount of time, then stop on one lamp.",
+          "Stop on the middle lamp and you win 4× your stake.",
+          "Stop on any other lamp and the house keeps your stake."
+        ],
+        "players": "1",
+        "intro": "Five lamps in a row light up in turn for a random amount of time."
       },
       {
         "slug": "tower-of-luck",
@@ -1111,7 +1129,14 @@
           "Standard: 1 diamond per play"
         ],
         "coords": [],
-        "rules": []
+        "rules": [
+          "Put your diamonds (or diamond blocks) in the shulker box and press the button.",
+          "There is a 50% chance nothing happens and the house keeps your stake.",
+          "Otherwise it reaches floor 1. From each floor there is a 50% chance to climb to the next, up to the top floor.",
+          "Your prize is the one on the floor where it stops. Prize table coming soon."
+        ],
+        "players": "1",
+        "intro": "Your stake climbs a tower. Every floor it reaches has a better prize, but each climb is a gamble."
       }
     ]
   }
