@@ -4,25 +4,100 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Map art quotes · Castle Crafty</title>
-<meta name="description" content="Custom Minecraft map art from Castle Crafty. The quote creator is coming soon; for now contact Crafty on Discord.">
+<meta name="description" content="Custom Minecraft map art from Castle Crafty: upload a picture, choose the size and blocks, see the price straight away and send a request.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/shop/style.css?v=10">
+<link rel="stylesheet" href="mapart.css?v=1">
 </head>
 <body>
+<a class="skip" href="#panel">Skip to the map art settings</a>
 <div class="tower">
-  <header class="top"><h1>Map art</h1></header>
-  <main id="main">
-    <section class="storey">
-      <p class="level">Castle Crafty</p>
-      <h2>Map art quote creator</h2>
-      <p class="soon">Coming soon</p>
-      <p class="lead">For now, contact Crafty on Discord for a quote.</p>
-      <ul class="contacts"><li><a href="https://discord.com/users/331336320096010240" target="_blank" rel="noopener">Crafty on Discord</a></li></ul>
-    </section>
-  </main>
-  <footer><p><a href="/shop/">Back to Castle Crafty</a> · <a href="/">craftyplayz.com</a></p></footer>
+<header class="top"><p class="kicker"><a href="/shop/">Castle Crafty</a> · Special requests</p><h1>Map art</h1><p class="lead">Ride the lift and build your map art, floor by floor.</p></header>
+<div class="layout">
+<nav class="shaft" id="shaft" aria-label="Floors"><span class="lift" id="lift" aria-hidden="true"></span></nav>
+
+<main class="panel" id="panel" tabindex="-1">
+
+<section class="storey" data-floor="0" aria-labelledby="h0">
+<p class="level">Floor 1 · Picture</p><h2 id="h0">Your picture</h2>
+<label class="drop" id="drop"><span>Choose a picture, or drag and drop it here</span><input type="file" id="file" accept="image/*"></label>
+<p class="hint" id="fname">PNG, JPG, GIF or WebP. Nothing is sent until you press Request.</p>
+</section>
+
+<section class="storey" data-floor="1" aria-labelledby="h1" hidden>
+<p class="level">Floor 2 · Size</p><h2 id="h1">Size and crop</h2>
+<fieldset><legend>Map size (each map is 128 × 128 blocks)</legend>
+<div class="pair"><div><label for="w">Width in maps</label><input type="number" id="w" min="1" max="10" value="1" inputmode="numeric"></div>
+<div><label for="h">Height in maps</label><input type="number" id="h" min="1" max="10" value="1" inputmode="numeric"></div></div>
+<p class="hint" id="dims"></p></fieldset>
+<fieldset><legend>Crop</legend><div class="opts">
+<label class="opt"><input type="radio" name="crop" value="0"><span>Off (stretch)</span></label>
+<label class="opt"><input type="radio" name="crop" value="1" checked><span>Centre</span></label>
+<label class="opt"><input type="radio" name="crop" value="2"><span>Manual</span></label></div>
+<div id="manual" hidden>
+<div class="row"><label class="lab" for="zoom">Zoom</label><input type="range" id="zoom" min="10" max="50" value="10"></div>
+<div class="row"><label class="lab" for="cx">Left – right</label><input type="range" id="cx" min="0" max="100" value="50"></div>
+<div class="row"><label class="lab" for="cy">Top – bottom</label><input type="range" id="cy" min="0" max="100" value="50"></div></div></fieldset>
+<label class="chk"><input type="checkbox" id="showgrid" checked> Show the map grid on the preview</label>
+</section>
+
+<section class="storey" data-floor="2" aria-labelledby="h2b" hidden>
+<p class="level">Floor 3 · Blocks and build</p><h2 id="h2b">Blocks and build</h2>
+<fieldset><legend>Blocks</legend><div class="opts">
+<label class="opt"><input type="radio" name="blocks" value="carpet" checked><span>Carpet</span></label>
+<label class="opt"><input type="radio" name="blocks" value="better"><span>Better colour</span></label></div>
+<p class="hint" id="blocks-hint"></p></fieldset>
+<fieldset><legend>Build</legend><div class="opts">
+<label class="opt"><input type="radio" name="build" value="flat" checked><span>Flat</span></label>
+<label class="opt"><input type="radio" name="build" value="stairs"><span>Staircase</span></label></div>
+<p class="hint">Staircase gives three shades of every colour, built in steps. It doubles the price.</p></fieldset>
+<label class="chk"><input type="checkbox" id="better" checked> Better colour matching</label>
+<div class="row"><label class="lab" for="dither">Dithering</label>
+<select id="dither"><option value="0">None</option><option value="1" selected>Floyd-Steinberg</option><option value="5">MinAvgErr</option><option value="6">Burkes</option><option value="7">Sierra Lite</option><option value="8">Stucki</option><option value="9">Atkinson</option><option value="2">Bayer (4 × 4)</option><option value="3">Bayer (2 × 2)</option><option value="4">Ordered (3 × 3)</option></select></div>
+<p class="hint">Dithering mixes nearby colours to fake the ones Minecraft doesn't have.</p>
+<fieldset class="pp"><legend>Image preprocessing</legend>
+<label class="chk"><input type="checkbox" id="pp"> Enable</label>
+<div id="ppbox" hidden>
+<div class="row"><label class="lab" for="br">Brightness</label><input type="range" id="br" min="0" max="200" value="100"><input type="number" id="brn" min="0" max="200" value="100" aria-label="Brightness"></div>
+<div class="row"><label class="lab" for="co">Contrast</label><input type="range" id="co" min="0" max="200" value="100"><input type="number" id="con" min="0" max="200" value="100" aria-label="Contrast"></div>
+<div class="row"><label class="lab" for="sa">Saturation</label><input type="range" id="sa" min="0" max="200" value="100"><input type="number" id="san" min="0" max="200" value="100" aria-label="Saturation"></div>
+</div></fieldset>
+</section>
+
+<section class="storey" data-floor="3" aria-labelledby="h3" hidden>
+<p class="level">Floor 4 · Quote</p><h2 id="h3">Your quote</h2>
+<dl class="bd" id="bd"></dl>
+<h3 class="lab">Materials <small id="mat-n"></small></h3>
+<ul class="mats" id="mats"></ul>
+</section>
+
+<div class="step"><button class="btn" id="prev" type="button">Down a floor</button><button class="btn" id="next" type="button">Up a floor</button></div>
+</main>
+
+<aside class="winp" aria-label="Preview and price">
+<div class="frame"><div><canvas id="pv" width="128" height="128" role="img" aria-label="Preview of your map art"></canvas><span id="grid"></span></div><div class="busy" id="busy" hidden><i id="bar"></i></div></div>
+<div class="plaque" aria-live="polite"><b id="price">–</b><small id="psub"></small></div>
+<button class="btn big" id="req" type="button" disabled>Choose a picture first</button>
+<p class="credit">Map art conversion from <a href="https://github.com/rebane2001/mapartcraft" target="_blank" rel="noopener">MapartCraft by rebane2001</a> (<a href="LICENSE-MapartCraft.txt">GPL-3.0</a>)</p>
+</aside>
 </div>
+<footer><a href="/shop/">Back to Castle Crafty</a> · all prices in diamonds · <a href="https://github.com/Craftyplayz/Website/tree/main/shop/mapart" target="_blank" rel="noopener">source of this page</a></footer>
+</div>
+
+<dialog id="dlg" aria-labelledby="dh"><form id="rf" method="dialog" novalidate>
+<p class="level">Request</p><h2 id="dh">Request this map art</h2>
+<img id="dimg" alt="Your map art">
+<p class="dprice"><b id="dprice"></b></p>
+<p class="deposit" id="dnote"></p>
+<div class="f"><label for="mc">Minecraft name (required)</label><input type="text" id="mc" maxlength="16" autocomplete="nickname" spellcheck="false"><p class="err" id="mcerr" hidden>Use 3 to 16 letters, numbers or underscores.</p></div>
+<div class="f"><label for="dc">Discord name (optional)</label><input type="text" id="dc" maxlength="40" autocomplete="off" spellcheck="false"></div>
+<div class="f"><label for="nt">Notes (optional)</label><textarea id="nt" maxlength="800" placeholder="Where to build it, a deadline, anything else"></textarea></div>
+<p class="status" id="sendmsg" role="status"></p>
+<div class="opts"><button class="btn big" type="submit" id="send">Send request</button><button class="btn" type="button" id="cancel">Cancel</button></div>
+</form>
+<div class="done" id="done" hidden><p class="level">Request sent</p><h2>Thank you</h2><p>Crafty has your request and will be in touch on Discord or in game.</p><button class="btn" type="button" id="close">Close</button></div>
+</dialog>
+<script src="mapart.js?v=1"></script>
 </body>
 </html>
