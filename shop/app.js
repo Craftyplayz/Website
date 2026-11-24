@@ -35,6 +35,7 @@
       if (p.note) t.appendChild(el('p', 'note', p.note));
       if (p.link) { var a = t.appendChild(el('a', 'note', p.link.text)); a.href = p.link.url; }
       li.appendChild(box); li.appendChild(t);
+      li.dataset.id = p.id;
       ul.appendChild(li);
     });
     $('req-text').textContent = d.requests.text;
@@ -64,6 +65,19 @@
       link.appendChild(box); link.appendChild(t);
       groups[!!g.paid].appendChild(el('li')).appendChild(link);
     });
+    // live stock: counted from the shop's chests every 5 min by Z:\shop-stock (server); missing file = no stock lines
+    fetch('https://assets.craftyplayz.com/minecraft/shop-stock.json', { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw Error(r.status);
+      return r.json();
+    }).then(function (st) {
+      var when = 'Counted ' + new Date(st.updated).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+      document.querySelectorAll('.niche[data-id]').forEach(function (li) {
+        var n = st.items[li.dataset.id] || 0;
+        var p = el('p', n ? 'stock' : 'stock out', n ? n.toLocaleString('en-GB') + ' in stock' : 'Sold out');
+        p.title = when;
+        li.querySelector('.txt').insertBefore(p, li.querySelector('.price').nextSibling);
+      });
+    }).catch(function () { });
     document.querySelectorAll('.storey').forEach(function (s) { s.hidden = false; });
     st.hidden = true;
   }).catch(function (e) {

@@ -60,3 +60,4 @@ footer a{color:var(--gold,#e0a24a)}
 .top>.build,.top>h1{grid-area:1/1}
 .top>.build{margin:0}
 .top>h1{align-self:end;margin-bottom:7%;position:relative;filter:drop-shadow(0 2px 0 #000) drop-shadow(0 0 14px #000) drop-shadow(0 0 30px #000)}
+.stock{margin:2px 0 0;font-size:.85rem;color:var(--dim)}.stock.out{color:var(--ember)}
