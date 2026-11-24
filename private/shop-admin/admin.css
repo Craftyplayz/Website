@@ -144,3 +144,6 @@ details summary { cursor: pointer; color: var(--dim); margin: 14px 0 6px; }
 .maph small { font: 400 12px Inter, sans-serif; color: var(--dim); letter-spacing: 0; }
 #stock-t td.price { white-space: normal; min-width: 120px; max-width: 170px; font-size: 13px; }
 #stock-t td:last-child { white-space: normal; min-width: 140px; font-size: 13px; }
+/* thin lines between columns */
+.grid-t th, .grid-t td { border-right: 1px solid #23232d; }
+.grid-t th:last-child, .grid-t td:last-child { border-right: 0; }
