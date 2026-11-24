@@ -62,7 +62,8 @@
                     "url": "/shop/",
                     "logo": "/assets/img/shoplogo.png",
                     "pages": [
-                        { "title": "Castle Crafty shop", "url": "/shop/", "description": "Prices, enchanted books and special requests at the black tower", "keywords": ["shop", "orthanc", "captainalism", "prices", "enchanted books", "casino"] }
+                        { "title": "Castle Crafty shop", "url": "/shop/", "description": "Prices, enchanted books and special requests at the black tower", "keywords": ["shop", "orthanc", "captainalism", "prices", "enchanted books", "casino"] },
+                        { "title": "Map art quotes", "url": "/shop/mapart/", "description": "Custom Minecraft map art from Castle Crafty: quote creator coming soon", "keywords": ["map art", "mapart", "quote", "shop"] }
                     ]
                 }
             ]

@@ -33,6 +33,7 @@
       t.appendChild(el('h5', 'name', p.name));
       t.appendChild(el('p', 'price', p.price));
       if (p.note) t.appendChild(el('p', 'note', p.note));
+      if (p.link) { var a = t.appendChild(el('a', 'note', p.link.text)); a.href = p.link.url; }
       li.appendChild(box); li.appendChild(t);
       ul.appendChild(li);
     });
