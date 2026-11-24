@@ -792,6 +792,13 @@
       "section": "Rare items"
     },
     {
+      "id": "dried_ghast",
+      "name": "Dried Ghast",
+      "price": "4 diamonds per stack",
+      "floor": "Gear and rare items",
+      "section": "Rare items"
+    },
+    {
       "id": "enchanted_book",
       "name": "All books available*",
       "price": "1 diamond each, or 5 books for 3 diamonds",
