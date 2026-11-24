@@ -122,6 +122,9 @@ RedirectMatch 301 ^/shop/upcoming(\.php)?$ /shop/
 # since 2026-11-21 the shop is one standalone page; the old sub-pages jump to its sections (NE keeps the #)
 RewriteRule ^shop/(enchanted-books|books)(/|\.php)?$ /shop/#enchanted-books [NE,R=301,L]
 RewriteRule ^shop/(requests|casino)(/|\.php)?$ /shop/#$1 [NE,R=301,L]
+# shop admin lives in /private/ so its password applies; rewritten (not redirected) so the URL stays /shop/admin/
+RewriteRule ^shop/admin/?$ /private/shop-admin/index.php [L]
+RewriteRule ^shop/admin/data$ /private/shop-admin/data.php [L]
 # casino games: one page, /shop/game.html, reads the slug from the URL and the rules from shop/data.json
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

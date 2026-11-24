@@ -16,6 +16,7 @@ $sections = [
     'minecraft/collection' => 'Tick off collected items',
     'dnd' => 'D&D sheet backups',
     'dnd/monsters' => 'Monster sheet backups',
+    'shop-admin' => 'Castle Crafty shop admin (also at /shop/admin/)',
 ];
 ?>
 <!DOCTYPE html>

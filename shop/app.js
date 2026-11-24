@@ -95,6 +95,24 @@
         txt.appendChild(grid);
       });
     }).catch(function () { });
+    // recent sales, no names: written by the shop-log container on the server
+    fetch('https://assets.craftyplayz.com/minecraft/shop-sales.json', { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw Error(r.status);
+      return r.json();
+    }).then(function (j) {
+      var list = j.sales.slice(0, 8);
+      if (!list.length) return;
+      var ago = function (t) {
+        var m = Math.round((Date.now() / 1000 - t) / 60);
+        return m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' days ago';
+      };
+      list.forEach(function (s) {
+        var li = $('sales-list').appendChild(el('li'));
+        li.appendChild(el('span', '', s.items.map(function (i) { return i.n.toLocaleString('en-GB') + ' ' + i.name; }).join(', ')));
+        li.appendChild(el('small', '', ago(s.t)));
+      });
+      $('sales').hidden = false;
+    }).catch(function () { });
     document.querySelectorAll('.storey').forEach(function (s) { s.hidden = false; });
     st.hidden = true;
   }).catch(function (e) {
