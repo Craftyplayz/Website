@@ -35,8 +35,8 @@
       "sections": [
         "Power and logic",
         "Sensors and outputs",
-        "Pistons and rails",
-        "Items and TNT"
+        "Pistons and TNT",
+        "Rails and storage"
       ]
     },
     {
@@ -500,98 +500,98 @@
       "name": "Piston",
       "price": "1 diamond per stack",
       "floor": "Redstone",
-      "section": "Pistons and rails"
+      "section": "Pistons and TNT"
     },
     {
       "id": "sticky_piston",
       "name": "Sticky Piston",
       "price": "2 diamonds per stack",
       "floor": "Redstone",
-      "section": "Pistons and rails"
+      "section": "Pistons and TNT"
     },
     {
       "id": "slime_block",
       "name": "Slime Block",
       "price": "2 diamonds per stack",
       "floor": "Redstone",
-      "section": "Pistons and rails"
+      "section": "Pistons and TNT"
     },
     {
       "id": "honey_block",
       "name": "Honey Block",
       "price": "4 diamonds per stack",
       "floor": "Redstone",
-      "section": "Pistons and rails"
-    },
-    {
-      "id": "rail",
-      "name": "Rail",
-      "price": "1 diamond per 4 stacks",
-      "floor": "Redstone",
-      "section": "Pistons and rails"
-    },
-    {
-      "id": "powered_rail",
-      "name": "Powered Rail",
-      "price": "1 diamond per 2 stacks",
-      "floor": "Redstone",
-      "section": "Pistons and rails"
-    },
-    {
-      "id": "detector_rail",
-      "name": "Detector Rail",
-      "price": "1 diamond per 2 stacks",
-      "floor": "Redstone",
-      "section": "Pistons and rails"
-    },
-    {
-      "id": "activator_rail",
-      "name": "Activator Rail",
-      "price": "1 diamond per stack",
-      "floor": "Redstone",
-      "section": "Pistons and rails"
-    },
-    {
-      "id": "hopper",
-      "name": "Hopper",
-      "price": "2 diamonds per stack",
-      "floor": "Redstone",
-      "section": "Items and TNT"
-    },
-    {
-      "id": "dropper",
-      "name": "Dropper",
-      "price": "1 diamond per stack",
-      "floor": "Redstone",
-      "section": "Items and TNT"
-    },
-    {
-      "id": "dispenser",
-      "name": "Dispenser",
-      "price": "4 diamonds per stack",
-      "floor": "Redstone",
-      "section": "Items and TNT"
-    },
-    {
-      "id": "crafter",
-      "name": "Crafter",
-      "price": "4 diamonds per stack",
-      "floor": "Redstone",
-      "section": "Items and TNT"
-    },
-    {
-      "id": "trapped_chest",
-      "name": "Trapped Chest",
-      "price": "2 diamonds per stack",
-      "floor": "Redstone",
-      "section": "Items and TNT"
+      "section": "Pistons and TNT"
     },
     {
       "id": "tnt",
       "name": "TNT",
       "price": "2 diamonds per stack",
       "floor": "Redstone",
-      "section": "Items and TNT"
+      "section": "Pistons and TNT"
+    },
+    {
+      "id": "dispenser",
+      "name": "Dispenser",
+      "price": "4 diamonds per stack",
+      "floor": "Redstone",
+      "section": "Pistons and TNT"
+    },
+    {
+      "id": "dropper",
+      "name": "Dropper",
+      "price": "1 diamond per stack",
+      "floor": "Redstone",
+      "section": "Pistons and TNT"
+    },
+    {
+      "id": "rail",
+      "name": "Rail",
+      "price": "1 diamond per 4 stacks",
+      "floor": "Redstone",
+      "section": "Rails and storage"
+    },
+    {
+      "id": "powered_rail",
+      "name": "Powered Rail",
+      "price": "1 diamond per 2 stacks",
+      "floor": "Redstone",
+      "section": "Rails and storage"
+    },
+    {
+      "id": "detector_rail",
+      "name": "Detector Rail",
+      "price": "1 diamond per 2 stacks",
+      "floor": "Redstone",
+      "section": "Rails and storage"
+    },
+    {
+      "id": "activator_rail",
+      "name": "Activator Rail",
+      "price": "1 diamond per stack",
+      "floor": "Redstone",
+      "section": "Rails and storage"
+    },
+    {
+      "id": "hopper",
+      "name": "Hopper",
+      "price": "2 diamonds per stack",
+      "floor": "Redstone",
+      "section": "Rails and storage"
+    },
+    {
+      "id": "trapped_chest",
+      "name": "Trapped Chest",
+      "price": "2 diamonds per stack",
+      "floor": "Redstone",
+      "section": "Rails and storage"
+    },
+    {
+      "id": "crafter",
+      "name": "Crafter",
+      "price": "4 diamonds per stack",
+      "floor": "Redstone",
+      "section": "Rails and storage"
     },
     {
       "id": "iron_block",
