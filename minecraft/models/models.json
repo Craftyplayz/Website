@@ -26,7 +26,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the statue stands upright, about as tall as a player. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the statue stands upright, about as tall as a player. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -52,7 +52,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -78,7 +78,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -104,7 +104,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -130,7 +130,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -156,7 +156,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -182,7 +182,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -208,7 +208,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -234,7 +234,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -260,7 +260,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -286,7 +286,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -312,7 +312,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -338,7 +338,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -364,7 +364,7 @@
         "other_players": "Everyone sees the same 3D model.",
         "on_ground": "Small 3D model when dropped.",
         "inventory": "3D icon.",
-        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out.",
+        "item_frame": "Put the frame on the floor: the rat stands on it at about one block long. On a wall frame it sticks straight out. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
         "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
       },
@@ -390,7 +390,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -415,7 +415,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -440,7 +440,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -465,7 +465,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -490,7 +490,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -515,7 +515,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -540,7 +540,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -565,7 +565,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -590,7 +590,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -615,7 +615,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -640,7 +640,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -665,7 +665,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -690,7 +690,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -715,7 +715,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -740,7 +740,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -765,7 +765,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -790,7 +790,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -815,7 +815,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -840,7 +840,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -865,7 +865,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -890,7 +890,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -915,7 +915,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -940,7 +940,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -965,7 +965,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -990,7 +990,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1015,7 +1015,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1040,7 +1040,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1065,7 +1065,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1090,7 +1090,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1115,7 +1115,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1140,7 +1140,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1165,7 +1165,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1190,7 +1190,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1215,7 +1215,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1240,7 +1240,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1265,7 +1265,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1290,7 +1290,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1315,7 +1315,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1340,7 +1340,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1365,7 +1365,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1390,7 +1390,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1415,7 +1415,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1440,7 +1440,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1465,7 +1465,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1490,7 +1490,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1515,7 +1515,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1540,7 +1540,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1565,7 +1565,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1590,7 +1590,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1615,7 +1615,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1640,7 +1640,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1665,7 +1665,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1690,7 +1690,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1715,7 +1715,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_playing.png",
@@ -1740,7 +1740,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -1765,7 +1765,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -1790,7 +1790,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -1815,7 +1815,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -1840,7 +1840,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -1865,7 +1865,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -1890,7 +1890,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -1915,7 +1915,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -1940,7 +1940,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -1965,7 +1965,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -1990,7 +1990,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2015,7 +2015,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2040,7 +2040,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2065,7 +2065,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2090,7 +2090,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2115,7 +2115,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2140,7 +2140,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2165,7 +2165,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2190,7 +2190,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2215,7 +2215,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2240,7 +2240,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2265,7 +2265,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2290,7 +2290,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2315,7 +2315,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2340,7 +2340,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2365,7 +2365,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2390,7 +2390,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2415,7 +2415,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2440,7 +2440,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2465,7 +2465,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2490,7 +2490,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2515,7 +2515,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2540,7 +2540,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2565,7 +2565,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2590,7 +2590,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2615,7 +2615,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2640,7 +2640,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2665,7 +2665,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2690,7 +2690,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2715,7 +2715,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2740,7 +2740,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2765,7 +2765,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2790,7 +2790,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2815,7 +2815,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2840,7 +2840,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2865,7 +2865,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2890,7 +2890,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2915,7 +2915,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2940,7 +2940,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2965,7 +2965,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -2990,7 +2990,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -3015,7 +3015,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -3040,7 +3040,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -3065,7 +3065,7 @@
         "other_players": "Other players see the card back, so they cannot read your hand.",
         "on_ground": "Shows the back.",
         "inventory": "You see the face.",
-        "item_frame": "Shows the face to everyone.",
+        "item_frame": "Shows the face to everyone. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "Shows the back."
       },
       "back_texture_png": "back_uno.png",
@@ -3090,7 +3090,7 @@
         "other_players": "Everyone sees the same piece.",
         "on_ground": "3D piece.",
         "inventory": "3D icon.",
-        "item_frame": "3D piece.",
+        "item_frame": "3D piece. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "3D piece."
       },
       "back_texture_png": null,
@@ -3115,7 +3115,7 @@
         "other_players": "Everyone sees the same piece.",
         "on_ground": "3D piece.",
         "inventory": "3D icon.",
-        "item_frame": "3D piece.",
+        "item_frame": "3D piece. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "3D piece."
       },
       "back_texture_png": null,
@@ -3140,7 +3140,7 @@
         "other_players": "Everyone sees the same piece.",
         "on_ground": "3D piece.",
         "inventory": "3D icon.",
-        "item_frame": "3D piece.",
+        "item_frame": "3D piece. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "3D piece."
       },
       "back_texture_png": null,
@@ -3165,7 +3165,7 @@
         "other_players": "Everyone sees the same piece.",
         "on_ground": "3D piece.",
         "inventory": "3D icon.",
-        "item_frame": "3D piece.",
+        "item_frame": "3D piece. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "3D piece."
       },
       "back_texture_png": null,
@@ -3190,7 +3190,7 @@
         "other_players": "Everyone sees the same piece.",
         "on_ground": "3D piece.",
         "inventory": "3D icon.",
-        "item_frame": "3D piece.",
+        "item_frame": "3D piece. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "3D piece."
       },
       "back_texture_png": null,
@@ -3215,7 +3215,7 @@
         "other_players": "Everyone sees the same piece.",
         "on_ground": "3D piece.",
         "inventory": "3D icon.",
-        "item_frame": "3D piece.",
+        "item_frame": "3D piece. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "3D piece."
       },
       "back_texture_png": null,
@@ -3240,7 +3240,7 @@
         "other_players": "Everyone sees the same piece.",
         "on_ground": "3D piece.",
         "inventory": "3D icon.",
-        "item_frame": "3D piece.",
+        "item_frame": "3D piece. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "3D piece."
       },
       "back_texture_png": null,
@@ -3265,7 +3265,7 @@
         "other_players": "Everyone sees the same piece.",
         "on_ground": "3D piece.",
         "inventory": "3D icon.",
-        "item_frame": "3D piece.",
+        "item_frame": "3D piece. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "3D piece."
       },
       "back_texture_png": null,
@@ -3290,7 +3290,7 @@
         "other_players": "Everyone sees the same piece.",
         "on_ground": "3D piece.",
         "inventory": "3D icon.",
-        "item_frame": "3D piece.",
+        "item_frame": "3D piece. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "3D piece."
       },
       "back_texture_png": null,
@@ -3315,7 +3315,7 @@
         "other_players": "Everyone sees the same piece.",
         "on_ground": "3D piece.",
         "inventory": "3D icon.",
-        "item_frame": "3D piece.",
+        "item_frame": "3D piece. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "3D piece."
       },
       "back_texture_png": null,
@@ -3340,7 +3340,7 @@
         "other_players": "Everyone sees the same piece.",
         "on_ground": "3D piece.",
         "inventory": "3D icon.",
-        "item_frame": "3D piece.",
+        "item_frame": "3D piece. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "3D piece."
       },
       "back_texture_png": null,
@@ -3365,7 +3365,7 @@
         "other_players": "Everyone sees the same piece.",
         "on_ground": "3D piece.",
         "inventory": "3D icon.",
-        "item_frame": "3D piece.",
+        "item_frame": "3D piece. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
         "shelf": "3D piece."
       },
       "back_texture_png": null,
