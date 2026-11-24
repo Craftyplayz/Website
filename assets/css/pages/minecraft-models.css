@@ -14,7 +14,7 @@
 .mdl-drawer > div > h3 { margin-top: 20px; }
 .mdl-view { position: relative; aspect-ratio: 1; max-width: 320px; margin: 28px auto 0; overflow: hidden; background: var(--card); border-radius: var(--radius-lg); }
 .mdl-view img, .mdl-view model-viewer { display: block; width: 100%; height: 100%; }
-.mdl-view model-viewer { --poster-color: transparent; background: var(--card); }
+.mdl-view model-viewer { position: absolute; inset: 0; --poster-color: transparent; }
 .mdl-view img.mdl-px { image-rendering: pixelated; }
 
 .mdl-type { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
