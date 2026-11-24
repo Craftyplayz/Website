@@ -54,7 +54,8 @@
                         { "title": "Screenshots", "url": "/minecraft/screenshots/", "description": "Screenshots from years of playing" },
                         { "title": "Skins", "url": "/minecraft/skins/", "description": "My Minecraft skins" },
                         { "title": "Tips", "url": "/minecraft/tips/", "description": "Minecraft tips and mods" },
-                        { "title": "Downloads", "url": "/minecraft/downloads/", "description": "Data packs and other files" }
+                        { "title": "Downloads", "url": "/minecraft/downloads/", "description": "Data packs and other files" },
+                        { "title": "Rename Items", "url": "/minecraft/models/", "description": "Cards, chess pieces, rats and statues you get by renaming an item in an anvil", "keywords": ["anvil", "rename", "resource pack", "models", "cards", "chess", "rats", "statue", "dravengrad"] }
                     ]
                 },
                 {

@@ -1,0 +1,26 @@
+/* Rename Items (/minecraft/models/) */
+.mdl [hidden] { display: none !important; }
+.mdl-pack { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+
+.mdl-sec { content-visibility: auto; contain-intrinsic-size: auto 400px; }
+.mdl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(110px, 26vw, 150px), 1fr)); gap: 16px; }
+.page a.mdl-card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); color: var(--text); text-decoration: none; transition: transform var(--base) ease-out, box-shadow var(--base) ease-out, border-color var(--fast); }
+.page a.mdl-card:hover { border-color: var(--accent); box-shadow: var(--lift); transform: translateY(-3px); }
+.mdl-card img { display: block; width: 100%; height: auto; aspect-ratio: 1; background: var(--sunken); }
+.mdl-card span { padding: 8px 10px; overflow: hidden; font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+
+.mdl-drawer h2 { margin: 12px 0 0; font-size: 20px; }
+.mdl-drawer h3 { margin: 0 0 8px; font-size: 15px; }
+.mdl-drawer > div > h3 { margin-top: 20px; }
+.mdl-view { position: relative; aspect-ratio: 1; max-width: 320px; margin: 28px auto 0; overflow: hidden; background: var(--card); border-radius: var(--radius-lg); }
+.mdl-view img, .mdl-view model-viewer { display: block; width: 100%; height: 100%; }
+.mdl-view model-viewer { --poster-color: transparent; background: var(--card); }
+.mdl-view img.mdl-px { image-rendering: pixelated; }
+
+.mdl-type { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+.mdl-name { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mdl-name code { flex: 1 1 auto; padding: 6px 10px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius); font-size: 14px; white-space: pre; overflow-x: auto; }
+.mdl-sp { color: var(--muted); }
+.mdl-beh { display: flex; flex-direction: column; gap: 6px; }
+.mdl-beh .kv { padding: 8px 10px; background: var(--card); border-radius: var(--radius); grid-template-columns: minmax(100px, 30%) 1fr; }
+.mdl-credit { margin-top: 20px; font-size: 13px; }
