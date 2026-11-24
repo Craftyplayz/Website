@@ -342,7 +342,7 @@
     {
       "id": "mangrove_log",
       "name": "Mangrove Log",
-      "price": "Price coming soon",
+      "price": "Coming soon",
       "floor": "Colour and wood",
       "section": "Overworld wood"
     },
@@ -363,7 +363,7 @@
     {
       "id": "bamboo_block",
       "name": "Block of Bamboo",
-      "price": "Price coming soon",
+      "price": "1 diamond per stack",
       "floor": "Colour and wood",
       "section": "Overworld wood"
     },
@@ -655,13 +655,6 @@
       "section": "Piglin bartering"
     },
     {
-      "id": "iron_boots",
-      "name": "Iron Boots with Soul Speed",
-      "price": "Price coming soon",
-      "floor": "Materials and food",
-      "section": "Piglin bartering"
-    },
-    {
       "id": "golden_carrot",
       "name": "Golden Carrot",
       "price": "1 diamond per stack",
@@ -699,14 +692,14 @@
     {
       "id": "netherite_chestplate",
       "name": "Maxed Armour",
-      "price": "Coming soon",
+      "price": "Price coming soon",
       "floor": "Gear and rare items",
       "section": "Armour"
     },
     {
       "id": "diamond_helmet",
       "name": "Diamond Armour",
-      "price": "Coming soon",
+      "price": "Price coming soon",
       "floor": "Gear and rare items",
       "section": "Armour"
     },
@@ -721,14 +714,14 @@
     {
       "id": "netherite_sword",
       "name": "Maxed Weapons",
-      "price": "Coming soon",
+      "price": "Price coming soon",
       "floor": "Gear and rare items",
       "section": "Weapons and tools"
     },
     {
       "id": "diamond_pickaxe",
       "name": "Diamond Tools",
-      "price": "Coming soon",
+      "price": "Price coming soon",
       "floor": "Gear and rare items",
       "section": "Weapons and tools"
     },
@@ -806,7 +799,7 @@
     {
       "id": "item_frame",
       "name": "Item Frame",
-      "price": "2 diamonds per 2",
+      "price": "2 diamonds per stack",
       "floor": "Enchanting and map art",
       "section": "Decoration"
     },
@@ -834,7 +827,7 @@
   },
   "casino": {
     "floor": "The basement",
-    "lead": "Every game in the casino is free to play. Pick a game to read its rules and find where it is.",
+    "lead": "These games are free: they are played between friends, so the house takes no cut. Paid games are coming soon. Pick a game to read its rules and find where it is.",
     "games": [
       {
         "slug": "poker",
