@@ -48,3 +48,6 @@ media/pets/!videos/
 private/shop-admin/key.php
 shop/mapart/webhook.php
 _dev/mockups/
+# map art requests (customer pictures, schematics) - written on the server, never committed
+shop/mapart/requests/*
+!shop/mapart/requests/.htaccess

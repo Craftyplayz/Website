@@ -5,6 +5,9 @@
     const $ = id => document.getElementById(id);
     // owner's prices (2026-11-24): 64 diamonds per map for flat carpet; better colour ×1.5 and staircase ×2, multiplied
     const PRICE = { perMap: 64, better: 1.5, stairs: 2 };
+    // MapartCraft's "Block to add" for the schematic. "..." isn't a block, so the NBT leaves support blocks out (owner, 2026-11-25)
+    const SUPPORT_BLOCK = '...';
+    const NBT_VERSION = 3463; // Minecraft 1.20 data version, from MapartCraft's supportedVersions.json
     const FLOORS = ['Picture', 'Size', 'Blocks and build', 'Quote'];
     const num = n => Math.round(n).toLocaleString('en-GB');
     const dia = n => `${num(n)} diamond${n === 1 ? '' : 's'}`;
@@ -123,7 +126,7 @@
             const pv = $('pv');
             pv.width = data.width; pv.height = data.height;
             pv.getContext('2d').putImageData(e.data.body.pixels, 0, 0);
-            result = { s, maps: e.data.body.maps };
+            result = { s, maps: e.data.body.maps, pixels: e.data.body.pixels };
             placeGrid();
             quote();
         };
@@ -134,10 +137,25 @@
             optionValue_modeNBTOrMapdat: 0, // always a schematic (NBT): built block by block
             optionValue_mapSize_x: s.w, optionValue_mapSize_y: s.h,
             optionValue_staircasing: s.stairs ? 1 : 0, // OFF or CLASSIC
-            optionValue_whereSupportBlocks: 2, // MapartCraft's default: all, optimised
+            optionValue_whereSupportBlocks: SUPPORT_MODE,
             optionValue_transparency: false, optionValue_transparencyTolerance: 128,
             optionValue_betterColour: s.better, optionValue_dithering: s.dither,
         } });
+    }
+    const SUPPORT_MODE = 2; // MapartCraft's default: all, optimised
+    // the schematic, made by MapartCraft's own NBT worker from the finished preview, then gzipped like a .nbt file
+    function schematic() {
+        return new Promise((ok, no) => {
+            const w = new Worker('nbt-worker.js?v=1'), s = result.s;
+            w.onmessage = e => { if (e.data.head === 'NBT_ARRAY') { w.terminate(); ok(e.data.body.NBT_Array); } };
+            w.onerror = () => { w.terminate(); no(Error("The schematic couldn't be made in this browser.")); };
+            w.postMessage({ head: 'CREATE_NBT_JOINED', body: {
+                coloursJSON: CJ, MapModes: DATA.worker.mapModes, WhereSupportBlocksModes: DATA.worker.whereSupportBlocksModes,
+                optionValue_version: { MCVersion: DATA.version, NBTVersion: NBT_VERSION },
+                optionValue_staircasing: s.stairs ? 1 : 0, optionValue_whereSupportBlocks: SUPPORT_MODE, optionValue_supportBlock: SUPPORT_BLOCK,
+                pixelsData: result.pixels.data, maps: result.maps, currentSelectedBlocks: selected(s.blocks),
+            } });
+        }).then(bytes => new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'))).blob());
     }
     function placeGrid() {
         const g = $('grid'), pv = $('pv');
@@ -214,19 +232,21 @@
         const fd = new FormData();
         fd.append('map', await blob($('pv'), 'image/png'), 'mapart.png');
         fd.append('original', await blob(o, 'image/jpeg', 0.85), 'original.jpg');
+        try { fd.append('nbt', await schematic(), 'mapart.nbt'); } catch (err) { /* the request still goes; Crafty can make the NBT in MapartCraft */ }
         fd.append('request', JSON.stringify({
             mc, discord: $('dc').value.trim(), notes: $('nt').value.trim(), picture: picName,
             size: [s.w, s.h], blocks: s.blocks, stairs: s.stairs, betterMatching: s.better,
             dither: $('dither').selectedOptions[0].textContent, crop: ['Off', 'Centre', 'Manual'][s.crop], manual: s.crop === 2 ? [s.zoom, s.cx, s.cy] : null,
             preprocessing: s.pp ? [s.br, s.co, s.sa] : null,
             price: p.total, deposit: p.deposit,
-            materials: result.mats.rows.map(r => [r.name, r.n]).concat(result.mats.support ? [['Support blocks', result.mats.support]] : []),
+            materials: result.mats.rows.map(r => [r.name, r.n, r.rgb]), support: result.mats.support,
         }));
         try {
             const r = await fetch('request.php', { method: 'POST', body: fd });
             const j = await r.json().catch(() => ({}));
             if (!r.ok || !j.ok) throw Error(j.error || `The server answered ${r.status}.`);
             $('rf').hidden = true; $('done').hidden = false; $('close').focus();
+            $('rlink').parentElement.hidden = !j.url; if (j.url) $('rlink').href = j.url;
         } catch (err) {
             $('sendmsg').className = 'status err';
             $('sendmsg').textContent = `Your request wasn't sent. ${err.message} Try again, or message Crafty on Discord.`;
@@ -237,12 +257,12 @@
     // ---------- start ----------
     go(0);
     $('blocks-hint').textContent = 'Carpet uses the 16 carpets. Better colour uses full blocks such as concrete, terracotta and planks, and costs 50% more.';
-    fetch('colours.json?v=1').then(r => r.json()).then(d => {
+    fetch('colours.json?v=2').then(r => r.json()).then(d => {
         DATA = d;
         // the worker's colour table: tones, and for each block whether it needs a block under it
         CJ = {};
         for (const [id, set] of Object.entries(d.sets)) {
-            CJ[id] = { tonesRGB: set.tones, blocks: Object.fromEntries(Object.entries(set.blocks).map(([k, b]) => [k, { supportBlockMandatory: b.support }])) };
+            CJ[id] = { tonesRGB: set.tones, blocks: Object.fromEntries(Object.entries(set.blocks).map(([k, b]) => [k, { supportBlockMandatory: b.support, validVersions: { [d.version]: { NBTName: b.nbt, NBTArgs: b.args || {} } } }])) };
         }
         loadUrl('pick-image.png?v=1', '', false);
     }).catch(() => { $('psub').textContent = "The block colours couldn't be loaded. Refresh the page to try again."; });

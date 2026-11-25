@@ -23,20 +23,21 @@ function decode(preset) {
     return out;
 }
 
-// a block's 1.20 NBT name ("&1.13.2" means "same as 1.13.2")
-function nbtName(block) {
+// a block's 1.20 NBT name and properties ("&1.13.2" means "same as 1.13.2")
+function nbtVersion(block) {
     let v = block.validVersions[VERSION];
     while (typeof v === 'string' && v.startsWith('&')) v = block.validVersions[v.slice(1)];
-    return v && v.NBTName;
+    return v;
 }
 
 const sets = {};
 for (const [id, set] of Object.entries(colours)) {
     const blocks = {};
     for (const [bid, b] of Object.entries(set.blocks)) {
-        const nbt = nbtName(b);
-        if (!nbt) continue; // not in 1.20
-        blocks[b.presetIndex] = { name: b.displayName, nbt, support: !!b.supportBlockMandatory };
+        const v = nbtVersion(b);
+        if (!v || !v.NBTName) continue; // not in 1.20
+        blocks[b.presetIndex] = { name: b.displayName, nbt: v.NBTName, support: !!b.supportBlockMandatory };
+        if (Object.keys(v.NBTArgs || {}).length) blocks[b.presetIndex].args = v.NBTArgs; // eg leaves persistent, bamboo axis
     }
     sets[id] = { tones: set.tonesRGB, blocks };
 }
