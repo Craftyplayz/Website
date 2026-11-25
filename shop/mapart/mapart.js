@@ -176,28 +176,26 @@
     }
     function materials() {
         const per = {};
-        let support = 0;
         result.maps.forEach(row => row.forEach(m => {
-            support += m.supportBlockCount;
             for (const [id, n] of Object.entries(m.materials)) if (n) per[id] = (per[id] || 0) + n;
         }));
         const pal = DATA.palettes[result.s.blocks];
         const rows = Object.entries(per).map(([id, n]) => ({ name: DATA.sets[id].blocks[pal[id]].name, rgb: DATA.sets[id].tones.normal, n })).sort((a, b) => b.n - a.n);
-        return { rows, support };
+        return { rows }; // support blocks left out: the map art district already has them (owner, 2026-11-25)
     }
     function quote() {
         const s = result.s, p = price(s), m = materials();
         result.price = p; result.mats = m;
         $('price').textContent = dia(p.total);
-        const blocks = m.rows.reduce((t, r) => t + r.n, 0) + m.support;
+        const blocks = m.rows.reduce((t, r) => t + r.n, 0);
         $('psub').textContent = `${p.maps} map${p.maps > 1 ? 's' : ''} · ${num(blocks)} blocks`;
         const lines = [[`${p.maps} map${p.maps > 1 ? 's' : ''} × ${PRICE.perMap} diamonds`, num(p.base)]];
         if (s.blocks === 'better') lines.push(['Better colour × 1.5', `+${num(p.base * (PRICE.better - 1))}`]);
         if (s.stairs) lines.push(['Staircase × 2', `+${num(p.total - p.base * (s.blocks === 'better' ? PRICE.better : 1))}`]);
         $('bd').innerHTML = lines.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('') + `<dt class="tot">Total</dt><dd class="tot">${dia(p.total)}</dd><dt>Deposit before building (50%)</dt><dd>${dia(p.deposit)}</dd>`;
         $('mat-n').textContent = `${m.rows.length} kinds, ${num(blocks)} blocks`;
-        const li = (rgb, name, n, cls) => `<li${cls ? ` class="${cls}"` : ''}><i style="background:rgb(${rgb})"></i><span>${name}</span><b>${num(n)}</b><small>${num(Math.ceil(n / 64))} stacks</small></li>`;
-        $('mats').innerHTML = m.rows.map(r => li(r.rgb, r.name, r.n)).join('') + (m.support ? li([112, 112, 112], 'Support blocks (any solid block)', m.support, 'sup') : '');
+        const li = (rgb, name, n) => `<li><i style="background:rgb(${rgb})"></i><span>${name}</span><b>${num(n)}</b><small>${num(Math.ceil(n / 64))} stacks</small></li>`;
+        $('mats').innerHTML = m.rows.map(r => li(r.rgb, r.name, r.n)).join('');
         $('req').disabled = !picked;
         $('req').textContent = picked ? 'Request this map art' : 'Choose a picture first';
     }
@@ -239,7 +237,7 @@
             dither: $('dither').selectedOptions[0].textContent, crop: ['Off', 'Centre', 'Manual'][s.crop], manual: s.crop === 2 ? [s.zoom, s.cx, s.cy] : null,
             preprocessing: s.pp ? [s.br, s.co, s.sa] : null,
             price: p.total, deposit: p.deposit,
-            materials: result.mats.rows.map(r => [r.name, r.n, r.rgb]), support: result.mats.support,
+            materials: result.mats.rows.map(r => [r.name, r.n, r.rgb]),
         }));
         try {
             const r = await fetch('request.php', { method: 'POST', body: fd });

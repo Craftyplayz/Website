@@ -112,7 +112,6 @@ h3.lab{margin:18px 0 8px}h3.lab small{font:400 .8rem Inter,sans-serif;letter-spa
 .busy i{display:block;height:100%;width:0;background:var(--gold)}
 .btn:disabled{opacity:.5;cursor:not-allowed;border-color:#3a3a46}
 .mats b{font-weight:500;font-variant-numeric:tabular-nums}
-.mats li.sup{border-style:dashed}
 .dprice b{font:700 1.6rem Cinzel,serif;color:var(--gold)}
 .deposit{padding:8px 10px;background:#1a1409;border:1px solid #5a4320;border-radius:3px;color:#f0e6d0}
 .status{min-height:1.4em;margin:8px 0}.status.err{color:#ff9a86}

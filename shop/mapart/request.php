@@ -59,7 +59,6 @@ foreach (array_slice((array)($q['materials'] ?? []), 0, 80) as $m) {
     $mats[] = [$clean($m[0], 60), min((int)$m[1], 10000000), count($rgb) === 3 ? $rgb : [112, 112, 112]];
 }
 $items = array_sum(array_column($mats, 1));
-$support = max(0, min((int)($q['support'] ?? 0), 10000000));
 
 // the Discord message
 $e = function ($s) { return str_replace(['@', '`', '*', '_', '~', '|', '>'], ['@​', "'", '\*', '\_', '\~', '\|', '\>'], $s); }; // no pings or formatting from player text
@@ -78,7 +77,7 @@ $saved = @mkdir($store, 0700, true)
     && file_put_contents("$store/request.json", json_encode([
         'time' => time(), 'mc' => $mc, 'discord' => $discord, 'notes' => $notes, 'picture' => $clean($q['picture'] ?? '', 120),
         'size' => $size, 'better' => $better, 'stairs' => $stairs, 'style' => $style, 'price' => $price, 'deposit' => $deposit,
-        'materials' => $mats, 'items' => $items, 'support' => $support, 'original' => $hasOrig, 'nbt' => $hasNbt,
+        'materials' => $mats, 'items' => $items, 'original' => $hasOrig, 'nbt' => $hasNbt,
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
 if (!$saved) done(500, "The request couldn't be saved.");
 
@@ -89,7 +88,7 @@ $fields = [
     ['name' => 'Price', 'value' => number_format($price) . ' diamonds', 'inline' => true],
     ['name' => 'Deposit (50%)', 'value' => number_format($deposit) . ' diamonds', 'inline' => true],
     ['name' => 'Style', 'value' => implode("\n", $style)],
-    ['name' => 'Items', 'value' => number_format($items) . ' blocks (' . number_format(ceil($items / 64)) . ' stacks) in ' . count($mats) . ' kinds' . ($support ? ', plus ' . number_format($support) . ' support blocks' : '')],
+    ['name' => 'Items', 'value' => number_format($items) . ' blocks (' . number_format(ceil($items / 64)) . ' stacks) in ' . count($mats) . ' kinds'],
 ];
 if ($notes !== '') $fields[] = ['name' => 'Notes', 'value' => mb_substr($e($notes), 0, 1020)];
 $fields[] = ['name' => 'Request page', 'value' => $link . ($hasNbt ? '' : "\nNo schematic: the browser couldn't make one.")];

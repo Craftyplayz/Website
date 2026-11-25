@@ -71,7 +71,6 @@ $maps = $w * $hh;
 <dt class="tot">Price</dt><dd class="tot"><?= $n($r['price']) ?> diamonds</dd>
 <dt>Deposit (50%)</dt><dd><?= $n($r['deposit']) ?> diamonds</dd>
 <dt>Items</dt><dd><?= $n($r['items']) ?> blocks (<?= $n(ceil($r['items'] / 64)) ?> stacks)</dd>
-<?php if ($r['support']): ?><dt>Support blocks</dt><dd><?= $n($r['support']) ?> (not in the schematic)</dd><?php endif ?>
 </dl>
 <h3 class="lab">Style</h3>
 <ul class="style"><?php foreach ($r['style'] as $s): ?><li><?= $h($s) ?></li><?php endforeach ?></ul>
