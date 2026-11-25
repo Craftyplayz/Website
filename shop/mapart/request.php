@@ -117,4 +117,4 @@ if ($code < 200 || $code >= 300) done(502, "Discord didn't take the request.");
 
 $times[] = time();
 @file_put_contents($rl, json_encode(array_values($times)), LOCK_EX);
-echo json_encode(['ok' => true, 'url' => $link]);
+done(200);

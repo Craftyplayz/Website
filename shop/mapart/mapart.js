@@ -246,7 +246,6 @@
             const j = await r.json().catch(() => ({}));
             if (!r.ok || !j.ok) throw Error(j.error || `The server answered ${r.status}.`);
             $('rf').hidden = true; $('done').hidden = false; $('close').focus();
-            $('rlink').parentElement.hidden = !j.url; if (j.url) $('rlink').href = j.url;
         } catch (err) {
             $('sendmsg').className = 'status err';
             $('sendmsg').textContent = `Your request wasn't sent. ${err.message} Try again, or message Crafty on Discord.`;
