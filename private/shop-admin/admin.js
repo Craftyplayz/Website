@@ -112,8 +112,8 @@
         if (e.kind === 'sale') { what = esc(itemsText(e.items)) || 'paid, took nothing'; amt = e.earned ? `<span class="amt-pos">+${d2(e.earned)}</span>` : ''; }
         else if (e.kind === 'theft') { what = esc(itemsText(e.items) || 'took diamonds'); amt = `<span class="amt-neg">${d2(e.short)} short</span>`; }
         else if (e.kind === 'restock') {
-            const add = (e.items || []).filter(i => i.n > 0), out = (e.items || []).filter(i => i.n < 0);
-            what = [add.length ? `<span class="amt-pos">+</span> ${esc(itemsText(add))}` : '', out.length ? `<span class="amt-neg">−</span> ${esc(itemsText(out))}` : ''].filter(Boolean).join('<br>') || 'collected diamonds';
+            const add = (e.items || []).filter(i => i.n > 0), out = (e.items || []).filter(i => i.n < 0), mv = (e.items || []).filter(i => i.moved);
+            what = [add.length ? `<span class="amt-pos">+</span> ${esc(itemsText(add))}` : '', out.length ? `<span class="amt-neg">−</span> ${esc(itemsText(out))}` : '', mv.length ? `<span class="dim">moved</span> ${esc(itemsText(mv.map(i => ({ ...i, n: i.moved }))))}` : ''].filter(Boolean).join('<br>') || 'collected diamonds';
             amt = e.collected ? `<span class="amt-pos">${e.collected > 0 ? '+' : ''}${d2(e.collected)}</span>` : '';
         } else { what = md(e.text); if (!who && e.user) who = esc(e.user); }
         return `<tr data-i="${k}"><td class="when" title="${esc(date(e.t))}">${esc(short(e.t))}</td><td>${tag(e.kind)}</td><td>${who}</td><td class="items">${what}</td><td class="num">${amt}</td></tr>`;
@@ -179,7 +179,7 @@
             e.paidOut && ['Diamonds taken out', dia(e.paidOut)], e.short && ['Short by', dia(e.short)], e.collected && ['Diamonds collected', dia(e.collected)]].filter(Boolean);
         const sale = e.kind === 'sale' || e.kind === 'theft';
         const items = (e.items || []).length ? `<h3>Items</h3><div class="table-wrap"><table class="grid-t"><thead><tr><th>Item</th><th class="num">Amount</th>${sale ? '<th class="num">Diamonds</th>' : ''}<th class="num">Stock</th></tr></thead><tbody>
-            ${e.items.map(i => `<tr><td>${ic(i.id)}${esc(i.name)}${i.price ? `<br><small class="dim">${esc(i.price)}</small>` : ''}</td><td class="num">${e.kind === 'restock' && i.n > 0 ? '+' : ''}${num(i.n)}</td>
+            ${e.items.map(i => `<tr><td>${ic(i.id)}${esc(i.name)}${i.price ? `<br><small class="dim">${esc(i.price)}</small>` : ''}</td><td class="num">${i.n ? `${e.kind === 'restock' && i.n > 0 ? '+' : ''}${num(i.n)}` : ''}${i.moved ? `${i.n ? '<br>' : ''}<small class="dim">moved ${num(i.moved)}</small>` : ''}</td>
             ${sale ? `<td class="num">${i.diamonds === null || i.diamonds === undefined ? 'no price' : d2(i.diamonds)}</td>` : ''}<td class="num">${i.before === null || i.before === undefined ? '' : `${num(i.before)} → ${num(i.after)}`}</td></tr>`).join('')}</tbody></table></div>` : '';
         const acts = (e.actions || []).length ? `<details><summary>CoreProtect actions (${num(e.actions.length)})</summary><div class="table-wrap"><table class="grid-t"><thead><tr><th>Time</th><th>Chest</th><th>Item</th><th class="num">Amount</th></tr></thead><tbody>
             ${e.actions.map(([t, x, y, z, id, n, a]) => `<tr><td>${esc(new Date(t * 1000).toLocaleTimeString('en-GB'))}</td><td class="mono">${x} ${y} ${z}</td><td>${esc(id.replace(/_/g, ' '))}</td><td class="num ${a ? 'amt-pos' : 'amt-neg'}">${a ? '+' : '−'}${num(n)}</td></tr>`).join('')}</tbody></table></div></details>` : '';
