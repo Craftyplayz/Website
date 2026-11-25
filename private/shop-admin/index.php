@@ -41,6 +41,7 @@ $v = function ($f) { return $f . '?v=' . @filemtime(__DIR__ . '/' . $f); };
       <div class="kpis" id="kpis"></div>
     </header>
     <p class="status" id="status" role="status">Loading the shop data…</p>
+    <div class="stale" id="stale" role="alert" hidden></div>
 
     <section class="view" data-view="overview" hidden>
       <div class="cards">

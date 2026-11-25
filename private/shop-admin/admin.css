@@ -147,3 +147,7 @@ details summary { cursor: pointer; color: var(--dim); margin: 14px 0 6px; }
 /* thin lines between columns */
 .grid-t th, .grid-t td { border-right: 1px solid #23232d; }
 .grid-t th:last-child, .grid-t td:last-child { border-right: 0; }
+/* stopped-service warning */
+.stale { margin: 0 0 16px; padding: 12px 14px; background: #1a0c0b; border: 1px solid #8e2a22; border-left: 4px solid var(--ember); border-radius: 4px; color: #f0e6d0; }
+.stale b { color: var(--bad); }
+.stale code { display: inline-block; margin-top: 4px; padding: 2px 6px; background: var(--bg); border: 1px solid var(--line2); border-radius: 3px; font-size: 12px; overflow-wrap: anywhere; }

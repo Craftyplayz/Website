@@ -41,8 +41,20 @@
     }
     window.addEventListener('hashchange', () => { if (data) { route(); $('#main').focus({ preventScroll: true }); window.scrollTo(0, 0); } });
 
+    // the shop log and stock counter run every minute on the home server; say so loudly when one has stopped
+    function staleCheck() {
+        const now = Date.now() / 1000, log = now - data.updated, save = now - data.saved, mins = s => Math.round(s / 60);
+        const msg = log > 300
+            ? `<b>The shop log has stopped.</b> It last updated ${mins(log)} minutes ago, so sales, thefts and restocks aren't being recorded or posted to Discord. Visits from the last 6 hours are caught up when it starts again. On the server run: <code>cd /home/crafty/shop-stock && docker compose up -d</code>`
+            : save > 900
+                ? `<b>The stock counts are ${mins(save)} minutes old.</b> The stock counter or the Minecraft server's world saves may have stopped. On the server run: <code>cd /home/crafty/shop-stock && docker compose up -d</code>, and check the Minecraft server is running.`
+                : '';
+        $('#stale').innerHTML = msg;
+        $('#stale').hidden = !msg;
+    }
     function renderAll() {
         const t = data.takings;
+        staleCheck();
         $('#updated').innerHTML = `Updated <span title="${esc(date(data.updated))}">${esc(ago(data.updated * 1000))}</span><br>Stock from the world save <span title="${esc(date(data.saved))}">${esc(ago(data.saved * 1000))}</span>${data.stale ? '<br><span class="low">Home server offline: last copy</span>' : ''}`;
         const kpi = (b, s) => `<div class="kpi"><b>${b}</b><span>${s}</span></div>`;
         $('#kpis').innerHTML = kpi(d2(t.today), 'diamonds today') + kpi(d2(t.week), 'last 7 days') + kpi(d2(t.all), 'all time') + (t.uncollected === null ? '' : kpi(d2(t.uncollected), 'uncollected'));
