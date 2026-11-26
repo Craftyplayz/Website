@@ -43,11 +43,12 @@
 
     // the shop log and stock counter run every minute on the home server; say so loudly when one has stopped
     function staleCheck() {
-        const now = Date.now() / 1000, log = now - data.updated, save = now - data.saved, mins = s => Math.round(s / 60);
+        // the world save time isn't checked: the shop's chunks only save while someone is near, so an old save is normal
+        const now = Date.now() / 1000, log = now - data.updated, count = data.counted ? now - data.counted : 0, mins = s => Math.round(s / 60);
         const msg = log > 300
             ? `<b>The shop log has stopped.</b> It last updated ${mins(log)} minutes ago, so sales, thefts and restocks aren't being recorded or posted to Discord. Visits from the last 6 hours are caught up when it starts again. On the server run: <code>cd /home/crafty/shop-stock && docker compose up -d</code>`
-            : save > 900
-                ? `<b>The stock counts are ${mins(save)} minutes old.</b> The stock counter or the Minecraft server's world saves may have stopped. On the server run: <code>cd /home/crafty/shop-stock && docker compose up -d</code>, and check the Minecraft server is running.`
+            : count > 900
+                ? `<b>The stock counter has stopped.</b> It last counted the chests ${mins(count)} minutes ago. On the server run: <code>cd /home/crafty/shop-stock && docker compose up -d</code>`
                 : '';
         $('#stale').innerHTML = msg;
         $('#stale').hidden = !msg;
