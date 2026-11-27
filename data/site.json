@@ -63,6 +63,7 @@
                     "url": "/minecraft/unlimitedsmp/",
                     "pages": [
                         { "title": "Server Info", "url": "/minecraft/unlimitedsmp/", "description": "Live players, leaderboards, map and rules for the UnlimitedSMP Minecraft server", "keywords": ["unlimitedsmp", "unlimited", "smp", "server", "online", "leaderboard", "stats", "map", "dynmap", "rules", "join"] },
+                        { "title": "Ranks", "url": "/minecraft/unlimitedsmp/ranks/", "description": "Playtime ranks on UnlimitedSMP and the hours each one needs", "nav": false, "keywords": ["unlimitedsmp", "rank", "ranks", "playtime", "hours"] },
                         { "title": "Castle Crafty Shop", "url": "/shop/", "description": "Prices, enchanted books and special requests at the black tower", "keywords": ["shop", "orthanc", "captainalism", "prices", "enchanted books", "unlimitedsmp"] },
                         { "title": "Casino", "url": "/shop/#casino", "description": "Minigames and gambling in the Castle Crafty basement", "keywords": ["casino", "minigames", "gambling", "unlimitedsmp"] },
                         { "title": "Map art quotes", "url": "/shop/mapart/", "description": "Custom Minecraft map art from Castle Crafty: upload a picture and get a price straight away", "nav": false, "keywords": ["map art", "mapart", "quote", "shop"] },
