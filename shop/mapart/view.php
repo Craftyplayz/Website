@@ -10,6 +10,14 @@ if (!is_array($r)) {
     header('Content-Type: text/plain; charset=utf-8');
     exit("This map art request doesn't exist. Check the link, or message Crafty on Discord.");
 }
+// Deny / Undo deny: only the Discord channel has the link, so the random id is the key; files are kept either way
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (($_POST['deny'] ?? '') === '1') $r['denied'] = time();
+    else unset($r['denied']);
+    file_put_contents("$dir/request.json", json_encode($r, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), LOCK_EX);
+    header("Location: view.php?id=$id", true, 303);
+    exit;
+}
 $files = [
     'nbt' => ['mapart.nbt', 'application/octet-stream', "{$r['mc']}-{$r['size'][0]}x{$r['size'][1]}.nbt"],
     'png' => ['mapart.png', 'image/png', "{$r['mc']}-{$r['size'][0]}x{$r['size'][1]}.png"],
@@ -49,13 +57,17 @@ $maps = $w * $hh;
 .req .bd dd{overflow-wrap:anywhere}
 .req .style{margin:0;padding:0;list-style:none}
 .req .notes{white-space:pre-wrap;overflow-wrap:anywhere;padding:8px 10px;background:#050507;border:1px solid #23232b;border-radius:3px}
+.req .files form{margin:6px 0 0}.req .files form .btn{width:100%}
+.btn.deny{color:var(--ember);border-color:#5a2a22}.btn.deny:hover{border-color:var(--ember)}
+.denied{margin:10px 0 0;padding:8px 12px;color:var(--ember);border:1px solid #5a2a22;border-radius:3px;background:#140a09}
 @media (max-width:900px){.req{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
 <div class="tower">
 <header class="top"><p class="kicker"><a href="/shop/">Castle Crafty</a> · <a href="./">Map art</a></p><h1>Map art request</h1>
-<p class="lead">From <?= $h($r['mc']) ?> · <?= $h(gmdate('j M Y, H:i', $r['time'])) ?> UTC</p></header>
+<p class="lead">From <?= $h($r['mc']) ?> · <?= $h(gmdate('j M Y, H:i', $r['time'])) ?> UTC</p>
+<?php if (!empty($r['denied'])): ?><p class="denied">Denied on <?= $h(gmdate('j M Y, H:i', $r['denied'])) ?> UTC</p><?php endif ?></header>
 <div class="req">
 <section class="storey" aria-label="Pictures">
 <div class="frame"><img src="<?= $u('png') ?>" width="<?= $w * 128 ?>" height="<?= $hh * 128 ?>" alt="The map art"></div>
@@ -79,6 +91,7 @@ $maps = $w * $hh;
 <?php if (!empty($r['nbt'])): ?><a class="btn big" href="<?= $u('nbt', true) ?>">Download schematic (.nbt)</a><?php else: ?><p class="hint">No schematic: the browser couldn't make one. Remake it in MapartCraft from the original picture.</p><?php endif ?>
 <a class="btn" href="<?= $u('png', true) ?>">Download map art (.png)</a>
 <?php if (!empty($r['original'])): ?><a class="btn" href="<?= $u('jpg', true) ?>">Download original picture</a><?php endif ?>
+<form method="post"><?php if (empty($r['denied'])): ?><button class="btn deny" name="deny" value="1">Deny request</button><?php else: ?><button class="btn" name="deny" value="0">Undo deny</button><?php endif ?></form>
 </div>
 <h3 class="lab">Materials <small><?= count($r['materials']) ?> kinds</small></h3>
 <ul class="mats"><?php foreach ($r['materials'] as $m): ?><li><i style="background:rgb(<?= implode(',', array_map('intval', $m[2] ?? [112, 112, 112])) ?>)"></i><span><?= $h($m[0]) ?></span><b><?= $n($m[1]) ?></b><small><?= $n(ceil($m[1] / 64)) ?> stacks</small></li><?php endforeach ?></ul>
