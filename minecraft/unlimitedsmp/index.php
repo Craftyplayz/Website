@@ -20,7 +20,7 @@ $features = [
     ['Vein miner', 'Mine a whole ore vein or tree at once.', null],
     ['Elevators', 'Jump or crouch on elevator blocks to change floors.', null],
     ['Brewing', 'Brew beer, wine and spirits with BreweryX.', null],
-    ['Renamed items', 'Rename items in an anvil to turn them into cards, statues and more.', '/minecraft/models/'],
+    ['Renamed items', 'Rename items in an anvil to turn them into cards, statues and more.', '/minecraft/unlimitedsmp/models/'],
     ['Live map', 'See the whole world and who is where.', $map_url],
 ];
 ?>

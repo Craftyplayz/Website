@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const items = window.MDL_ITEMS || [];
     const { $, $$, esc, debounce, copy } = UI;
     const drawer = $('#mdl-drawer'), detail = $('#mdl-detail');
-    const base = '/minecraft/models/';
+    const base = '/minecraft/unlimitedsmp/models/';
     const str = v => (typeof v === 'string' ? v : '');
     const url = p => (str(p) ? base + str(p).replace(/^\/+/, '') : '');
     const label = k => (k.charAt(0).toUpperCase() + k.slice(1)).replace(/_/g, ' ');

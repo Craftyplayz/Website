@@ -37,6 +37,8 @@ RedirectMatch 301 ^/php/layout\.js$ /assets/js/site.js
 # The reorg plan became the design guide
 RedirectMatch 301 ^/plan(\.html)?$ /design/
 RedirectMatch 301 ^/games/kelly-pool(/.*)?$ /games/pub-games/kelly-pool$1
+RedirectMatch 301 ^/minecraft/tools/disguise-items(/.*)?$ /minecraft/unlimitedsmp/disguise-items$1
+RedirectMatch 301 ^/minecraft/models(/.*)?$ /minecraft/unlimitedsmp/models$1
 # D&D moved to its own site (2026-11-02): /games/dnd/X is now https://dnd.craftyplayz.com/X; the old files are in /_dev/archive/dnd
 # older D&D URLs first so the longer paths win, then everything else under /games/dnd
 RedirectMatch 301 ^/games/dnd/sheet/dice/sounds(/(index\.php)?)?$ https://dnd.craftyplayz.com/dice/

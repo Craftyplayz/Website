@@ -1,6 +1,6 @@
 // Re-render the 3D item previews (assets/*.jpg) from their .glb with model-viewer in headless Chrome.
 // models.json's own previews draw some models with layers missing, so rerun this after new 3D items are added.
-// Usage: node _dev/scripts/render-model-previews.js minecraft/models   (ONLY=<name> or CAT=<category> to limit; ORBIT="215deg 65deg 110%" to override the angle)
+// Usage: node _dev/scripts/render-model-previews.js minecraft/unlimitedsmp/models   (ONLY=<name> or CAT=<category> to limit; ORBIT="215deg 65deg 110%" to override the angle)
 const http = require('http'), fs = require('fs'), path = require('path'), os = require('os');
 const { spawn } = require('child_process');
 const DIR = path.resolve(process.argv[2]);

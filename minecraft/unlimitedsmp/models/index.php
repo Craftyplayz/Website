@@ -25,7 +25,7 @@ $updated = is_string($data['updated'] ?? null) && strtotime($data['updated']) ? 
 $pack = is_string($data['resource_pack'] ?? null) && preg_match('#^https?://#', $data['resource_pack']) ? $data['resource_pack'] : '';
 $slug = function ($s) { return 'cat-' . strtolower(preg_replace('/[^A-Za-z0-9]+/', '-', $s)); };
 // versioned (?v=mtime) so re-rendered files get past the 30-day Cloudflare cache
-$img = function ($p) { return is_string($p) && $p !== '' ? asset('/minecraft/models/' . ltrim($p, '/')) : ''; };
+$img = function ($p) { return is_string($p) && $p !== '' ? asset('/minecraft/unlimitedsmp/models/' . ltrim($p, '/')) : ''; };
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -98,11 +98,11 @@ $img = function ($p) { return is_string($p) && $p !== '' ? asset('/minecraft/mod
         <?php // give_command is admin-only and the site has no admin mode, so it never reaches the browser ?>
         <script>
             window.MDL_ITEMS = <?= json_encode(array_map(function ($i) use ($img) {
-                foreach (['image', 'model_3d', 'texture'] as $k) if (is_string($i[$k] ?? null) && $i[$k] !== '') $i[$k] = substr($img($i[$k]), strlen('/minecraft/models/'));
+                foreach (['image', 'model_3d', 'texture'] as $k) if (is_string($i[$k] ?? null) && $i[$k] !== '') $i[$k] = substr($img($i[$k]), strlen('/minecraft/unlimitedsmp/models/'));
                 return array_diff_key($i, ['give_command' => 1]);
             }, $items), JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?>;
         </script>
-        <script src="<?= asset('/minecraft/models/models.js') ?>" defer></script>
+        <script src="<?= asset('/minecraft/unlimitedsmp/models/models.js') ?>" defer></script>
     <?php endif; ?>
 </body>
 
