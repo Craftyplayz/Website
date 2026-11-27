@@ -1,10 +1,11 @@
 {
-  "updated": "2026-11-25",
+  "updated": "2026-11-27",
   "resource_pack": "https://assets.craftyplayz.com/minecraft/Dravengrad.respack",
   "categories": [
     "Armor",
     "Card",
     "Chess piece",
+    "Crow",
     "Rat",
     "Statue"
   ],
@@ -372,6 +373,32 @@
       "back_texture_png": null,
       "give_command": "/minecraft:give @p carved_pumpkin[custom_name=\"rat_13\"] 1",
       "credit": "Model from the Rats mod by Alexthe666 (LGPL-3.0)"
+    },
+    {
+      "name": "Crow",
+      "rename_to": "Crow",
+      "rename_item": "carved_pumpkin",
+      "category": "Crow",
+      "image": "assets/crow.jpg",
+      "texture_png": "crow.png",
+      "is_3d": true,
+      "model_3d": "assets/crow.glb",
+      "texture": null,
+      "description": "Black crow. Wear it and it perches on your head.",
+      "how_to_get": "Rename a carved pumpkin to \"Crow\" in an anvil (exact spelling and capitals).",
+      "stacking": "Copies with the same name stack. Add 1 to 3 spaces to the end of the name to keep a copy separate.",
+      "behaviour": {
+        "in_hand": "Small 3D model, shrunk in first person so it does not block your view.",
+        "other_players": "Everyone sees the same 3D model.",
+        "on_ground": "Small 3D model when dropped.",
+        "inventory": "3D icon.",
+        "item_frame": "Shows the crow from the side. On a floor frame it lies on its side. Its name tag is hidden in the frame. Taken back out, it keeps its model but no longer stacks with freshly renamed copies.",
+        "head_and_armor_stand": "It is a carved pumpkin, so it can be worn on a head or put on an armor stand head and shows the model there. The wearer gets the orange pumpkin view overlay.",
+        "placed_as_block": "Placing it puts down a normal carved pumpkin. Breaking that gives back a plain carved pumpkin: the name and model are lost."
+      },
+      "back_texture_png": null,
+      "give_command": "/minecraft:give @p carved_pumpkin[custom_name=\"Crow\"] 1",
+      "credit": "Model from the Vintage Story mod Crow Bros by Ogdred"
     },
     {
       "name": "Ace of Hearts",
