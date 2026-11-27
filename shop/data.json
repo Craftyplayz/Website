@@ -44,6 +44,7 @@
       "sections": [
         "Metals",
         "Mob drops",
+        "Nether",
         "Food and farming"
       ]
     },
@@ -695,6 +696,34 @@
       "section": "Mob drops"
     },
     {
+      "id": "blaze_rod",
+      "name": "Blaze Rod",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Nether"
+    },
+    {
+      "id": "nether_wart",
+      "name": "Nether Wart",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Nether"
+    },
+    {
+      "id": "ghast_tear",
+      "name": "Ghast Tear",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Nether"
+    },
+    {
+      "id": "magma_cream",
+      "name": "Magma Cream",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Nether"
+    },
+    {
       "id": "golden_carrot",
       "name": "Golden Carrot",
       "price": "1 diamond per stack",
@@ -726,6 +755,48 @@
       "id": "beetroot",
       "name": "Beetroot",
       "price": "1 diamond per stack",
+      "floor": "Materials and food",
+      "section": "Food and farming"
+    },
+    {
+      "id": "sugar_cane",
+      "name": "Sugar Cane",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Food and farming"
+    },
+    {
+      "id": "bamboo",
+      "name": "Bamboo",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Food and farming"
+    },
+    {
+      "id": "kelp",
+      "name": "Kelp",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Food and farming"
+    },
+    {
+      "id": "pumpkin",
+      "name": "Pumpkin",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Food and farming"
+    },
+    {
+      "id": "melon",
+      "name": "Melon",
+      "price": "Price coming soon",
+      "floor": "Materials and food",
+      "section": "Food and farming"
+    },
+    {
+      "id": "cactus",
+      "name": "Cactus",
+      "price": "Price coming soon",
       "floor": "Materials and food",
       "section": "Food and farming"
     },
