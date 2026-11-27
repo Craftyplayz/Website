@@ -167,7 +167,6 @@ RedirectMatch 301 ^/extras/qr(\.php)?$ /tools/qr-code/
 RedirectMatch 301 ^/extras/santa(/.*)?$ /tools/secret-santa$1
 RedirectMatch 301 ^/tests/speedtest(\.php)?$ /tools/reading-speed/
 RedirectMatch 301 ^/tests/speedtest/(.*)$ /tools/reading-speed/$1
-RedirectMatch 301 ^/tools/reading-speed/index\.html$ /tools/reading-speed/
 RedirectMatch 301 ^/tests/?$ /tools/
 RedirectMatch 301 ^/Code/docker(\.php)?$ /tools/docker-script/
 RedirectMatch 301 ^/Code/install(\.html)?$ /tools/install-script/
