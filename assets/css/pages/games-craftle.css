@@ -1,0 +1,30 @@
+/* Craftle (/games/craftle/) */
+.craftle [hidden] { display: none !important; }
+.craftle { --cr-s: clamp(48px, 15vw, 72px); }
+.cr-card { max-width: 560px; }
+.cr-craft { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.cr-grid { display: grid; grid-template-columns: repeat(3, var(--cr-s)); gap: 4px; padding: 8px; background: var(--card2); border: 1px solid var(--line); border-radius: var(--radius); }
+.cr-slot { display: flex; align-items: center; justify-content: center; width: var(--cr-s); height: var(--cr-s); background: var(--sunken); border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size: 20px; }
+.cr-slot img, .cr-guess img, .cr-list img { image-rendering: pixelated; }
+.cr-slot img { width: 70%; height: 70%; }
+.cr-result { background: var(--card2); }
+.cr-arrow { color: var(--muted); font-size: 20px; }
+.cr-form { margin-top: 16px; }
+.cr-combo { position: relative; }
+.cr-combo .field { width: 100%; min-width: 0; }
+.cr-list { position: absolute; z-index: 5; left: 0; right: 0; top: 100%; margin: 4px 0 0; padding: 4px; list-style: none; max-height: 320px; overflow-y: auto; background: var(--card2); border: 1px solid var(--line-strong); border-radius: var(--radius); box-shadow: var(--lift); }
+.cr-list li { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 4px 8px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+.cr-list li[aria-selected="true"], .cr-list li:hover { background: var(--accent-soft); }
+.cr-list img { width: 24px; height: 24px; }
+.craftle .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.cr-verdict { margin: 16px 0 0; padding: 12px; border-radius: var(--radius); border: 1px solid var(--ok-line); background: var(--ok-bg); }
+.cr-verdict.err { border-color: var(--danger-line); background: var(--danger-bg); }
+.cr-guesses { display: flex; flex-direction: column; gap: 6px; margin: 16px 0 0; padding: 0; list-style: none; }
+.cr-guesses:empty { display: none; }
+.cr-guess { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--card2); border-left: 3px solid var(--danger-line); border-radius: var(--radius); font-size: 14px; }
+.cr-guess.ok { border-left-color: var(--ok-line); }
+.cr-guess img { width: 24px; height: 24px; }
+.cr-guess .grow { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.cr-guess small { color: var(--muted); font-size: 13px; }
+.cr-stats { margin-top: 16px; max-width: 560px; }
+.cr-foot { margin-top: 12px; font-size: 13px; }

@@ -1,0 +1,19 @@
+/* Higher or Lower: Steam Hours (/games/steam-higher-lower/) */
+.shl [hidden] { display: none !important; }
+.shl-score { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 16px; color: var(--muted); font-size: 14px; }
+.shl-score b { color: var(--text); font-size: 20px; }
+.shl-duel { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: center; }
+.shl-card { position: relative; display: flex; align-items: flex-end; aspect-ratio: 460 / 215; overflow: hidden; background: var(--card2); border-radius: var(--radius-lg); box-shadow: 0 2px 6px rgb(0 0 0 / .4); }
+.shl-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.shl-text { position: relative; display: flex; flex-direction: column; width: 100%; min-width: 0; padding: 40px 14px 12px; background: linear-gradient(transparent, rgb(0 0 0 / .9)); }
+.shl-text b { overflow: hidden; font-size: 17px; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px rgb(0 0 0 / .8); }
+.shl-text span { font-size: clamp(22px, 3vw, 28px); font-weight: 700; color: var(--accent); }
+.shl-in { animation: shl-in 180ms ease-out; }
+@keyframes shl-in { from { opacity: 0; transform: translateX(24px); } }
+.shl-guess, .shl-over { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; text-align: center; }
+.shl-over { flex-direction: column; align-items: center; }
+.shl-over p { margin: 0; max-width: 28ch; }
+@media (min-width: 760px) {
+    .shl-duel { grid-template-columns: minmax(0, 1fr) 160px minmax(0, 1fr); }
+    .shl-guess { flex-direction: column; }
+}
