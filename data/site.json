@@ -138,6 +138,7 @@
                     "pages": [
                         { "title": "Harry Potter Quiz", "url": "/games/quizzes/harry-potter/", "description": "Hard Harry Potter questions where you type the answers yourself", "keywords": ["hp"] },
                         { "title": "Cross Quiz", "url": "/games/quizzes/cross-quiz/", "description": "A crossword generator where every clue is a trivia question", "keywords": ["crossword", "trivia", "quiz", "puzzle", "generator", "opentdb", "general knowledge"] },
+                        { "title": "Pokémon or Medicine", "url": "/games/quizzes/pokemon-or-medicine/", "description": "Guess whether each name is a Pokémon or a prescription drug", "keywords": ["pokemon", "medicine", "drug", "pharmacy", "prescription", "pill", "quiz", "guess"] },
                         { "title": "HP Quiz: Extra Hard", "url": "/games/quizzes/harry-potter/extrahard/", "nav": false, "hub_skip": true }
                     ]
                 },

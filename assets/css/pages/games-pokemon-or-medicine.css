@@ -1,0 +1,17 @@
+/* Pokémon or Medicine (/games/quizzes/pokemon-or-medicine/) */
+.pom [hidden] { display: none !important; }
+.pom-card { max-width: 560px; margin: 0 auto; text-align: center; }
+.pom-top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.pom-name { margin: 28px 0; overflow-wrap: anywhere; font-size: clamp(26px, 5vw, 42px); font-weight: 700; line-height: 1.2; }
+.pom-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pom-pick .btn { min-height: 48px; justify-content: center; }
+.pom-pick .btn.pom-right { background: var(--ok-bg); border-color: var(--ok-line); }
+.pom-pick .btn.pom-wrong { background: var(--danger-bg); border-color: var(--danger-line); }
+.pom-pick .btn:disabled { opacity: 1; cursor: default; }
+.pom-reveal { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 20px; }
+.pom-spr { display: block; width: 64px; height: 64px; background-image: var(--pom-sheet); background-repeat: no-repeat; background-size: 2048px 2112px; image-rendering: pixelated; transform: scale(1.5); margin: 16px 0; }
+.pom-verdict { margin: 0; }
+.pom #pom-end .tiles { justify-content: center; }
+.pom #pom-missed { margin: 12px 0; text-align: left; }
+.pom .actions { justify-content: center; }
+.pom-src { margin-top: 16px; text-align: center; font-size: 13px; }
