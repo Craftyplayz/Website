@@ -24,7 +24,7 @@
     <section class="storey" aria-labelledby="h-maps">
       <p class="level">Floor 7 · west wing</p>
       <h2 id="h-maps">Ready-made map art</h2>
-      <p class="lead">2 diamonds each. Want your own picture? <a href="/shop/mapart/">Get a quote</a>.</p>
+      <p class="lead">Each piece shows its price. Want your own picture? <a href="/shop/mapart/">Get a quote</a>.</p>
       <p class="note" id="counted">Checking the chests…</p>
       <ul class="maps" id="maps"></ul>
     </section>
@@ -33,8 +33,8 @@
 </div>
 <script>
 (function () {
-  // maps: { "<map id>": { count, name? } } from the stock counter; pictures drawn by it from the world's map files
-  var BASE = 'https://assets.craftyplayz.com/minecraft/';
+  // maps: { "<map id>": { count, name?, price? } }, name and price from the frame showing the map ('Mapname - 3 Diamonds each') from the stock counter; pictures drawn by it from the world's map files
+  var BASE = 'https://assets.craftyplayz.com/minecraft/', DEFAULT = 2; // unnamed maps: the shop's 'All other mapart 2 Diamonds each' frame
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   var note = document.getElementById('counted');
   fetch(BASE + 'shop-stock.json', { cache: 'no-store' }).then(function (r) {
@@ -49,6 +49,7 @@
       img.onerror = function () { img.replaceWith(el('p', 'note', 'Picture coming soon.')); };
       li.appendChild(img);
       li.appendChild(el('h3', null, m.name || 'Map art #' + id));
+      li.appendChild(el('p', 'price', (m.price || DEFAULT) + ' diamond' + ((m.price || DEFAULT) === 1 ? '' : 's') + ' each'));
       li.appendChild(el('p', m.count ? 'stock' : 'stock out', m.count ? m.count.toLocaleString('en-GB') + ' in stock' : 'Sold out'));
     });
   }).catch(function () { note.textContent = "Couldn't reach the stock counter. Try again in a minute."; note.className = 'note'; });
