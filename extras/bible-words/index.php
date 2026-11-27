@@ -44,7 +44,7 @@ foreach ($bw_versions as $id => $name) $bw_urls[$id] = asset("/extras/bible-word
                 </select>
             </label>
             <label class="bw-label">Your text
-                <textarea class="field bw-input" id="bw-text" rows="5" placeholder="We hope you enjoy our new burger"></textarea>
+                <textarea class="field bw-input" id="bw-text" rows="5" placeholder="McDonald's McRib NFT Project Links to Racial Slur Recorded On Blockchain"></textarea>
             </label>
             <p class="note" id="bw-status">Loading the word list...</p>
             <div class="bw-result" id="bw-result" hidden>
