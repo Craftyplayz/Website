@@ -14,7 +14,15 @@
   }).then(function (d) {
     $('shop-name').textContent = d.shop;
     var lists = {}, last;
-    function slug(s) { return s.toLowerCase().replace(/W+/g, '-'); }
+    function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-'); }
+    // floor guide: one line per floor with its sections, each a jump link
+    var guide = $('products').appendChild(el('ol', 'guide'));
+    d.floors.forEach(function (f, n) {
+      var li = guide.appendChild(el('li'));
+      var a = li.appendChild(el('a', 'guide-floor', f.label ? f.name : 'Floor ' + (n + 1) + ' · ' + f.name)); a.href = '#' + slug(f.name);
+      var secs = li.appendChild(el('span', 'guide-secs'));
+      f.sections.forEach(function (s2) { if (f.sections.length < 2) return; var b = secs.appendChild(el('a', null, s2)); b.href = '#' + slug(s2); });
+    });
     d.floors.forEach(function (f, n) {
       $('products').appendChild(el('h3', 'floor', f.label || 'Floor ' + (n + 1) + ' · ' + f.name)).id = slug(f.name);
       f.sections.forEach(function (s) {

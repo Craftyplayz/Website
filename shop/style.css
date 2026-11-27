@@ -18,7 +18,13 @@ h2{font-size:clamp(1.5rem,5vw,2.1rem);color:#f0e6d0;margin:2px 0 16px;letter-spa
 .lead{font:600 1.3rem/1.4 'Cormorant Garamond',serif;font-variant-numeric:lining-nums;color:#efe4cc}
 .niches{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px}
 .floor{margin:36px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line);font-size:1.05rem;letter-spacing:.08em;color:var(--ember)}
-.floor:first-child{margin-top:0}
+.floor:first-child,.guide+.floor{margin-top:0}
+.guide{margin:0 0 28px;padding:12px 16px;list-style:none;background:#050507;border:1px solid var(--line);border-radius:3px;display:grid;gap:6px}
+.guide li{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.guide a{color:var(--dim);text-decoration:none;font-size:.85rem}
+.guide a:hover,.guide a:focus-visible{color:var(--gold)}
+.guide .guide-floor{font:500 .9rem Cinzel,serif;letter-spacing:.06em;color:var(--ember);min-width:17.5em}
+.guide-secs{display:flex;flex-wrap:wrap;gap:2px 14px}
 .shelf{margin:16px 0 8px;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:#9a8f7a}
 .niche{display:flex;gap:12px;align-items:center;padding:10px 12px;background:#050507;border:1px solid #23232b;border-top-color:#000;border-radius:3px 3px 14px 14px;box-shadow:inset 0 6px 14px #000,inset 0 -1px 0 rgba(217,165,78,.18);min-width:0}
 .note{display:block;margin:2px 0 0;font-size:.8rem;color:#9a8f7a}
