@@ -8,7 +8,15 @@
 .bw-line { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
 .bw-key { margin: 0; font-size: 13px; display: flex; flex-wrap: wrap; gap: 8px; }
 .bw-words { margin: 0; padding: 12px; background: var(--sunken); border-radius: var(--radius); white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; }
-.bw mark { color: var(--text); padding: 1px 4px; border-radius: 4px; border: 1px solid; }
+.bw-key mark, .bw-words mark, .bw-words button { color: var(--text); padding: 1px 4px; border-radius: 4px; border: 1px solid; font: inherit; }
+.bw-words button { cursor: pointer; transition: border-color var(--fast), background var(--fast); }
+.bw-words button:hover, .bw-words button.on { border-color: var(--accent); background: var(--accent-soft); }
+.bw-detail { padding: 12px 16px; background: var(--card2); border-radius: var(--radius); }
+.bw-detail p { margin: 0 0 6px; }
+.bw-count { font-size: 17px; }
+.bw-ref { color: var(--muted); font-size: 14px; }
+.bw-verse { margin: 0; padding-left: 12px; border-left: 3px solid var(--line-strong); line-height: 1.6; }
+.bw-verse mark { background: none; color: var(--highlight); font-weight: 700; }
 .bw-in { background: var(--ok-bg); border-color: var(--ok-line); }
 .bw-out { background: var(--danger-bg); border-color: var(--danger-line); }
 .bw-src { max-width: 820px; font-size: 13px; }
