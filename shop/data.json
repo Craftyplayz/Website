@@ -916,11 +916,14 @@
     },
     {
       "id": "enchanted_book",
-      "name": "All books available*",
+      "name": "All books available",
       "price": "1 diamond each, or 5 books for 3 diamonds",
-      "note": "*Except Swift Sneak and Wind Burst",
       "floor": "Enchanting and map art",
-      "section": "Enchanted books"
+      "section": "Enchanted books",
+      "link": {
+        "text": "Click to view detailed stock levels",
+        "url": "/shop/books/"
+      }
     },
     {
       "id": "experience_bottle",

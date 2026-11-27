@@ -122,7 +122,7 @@ RedirectMatch 301 "^/minecraft/Invisible Bossbar \(all\)\.zip$" "/minecraft/down
 RedirectMatch 301 ^/minecraft/shop(/.*)?$ /shop$1
 RedirectMatch 301 ^/shop/upcoming(\.php)?$ /shop/
 # since 2026-11-21 the shop is one standalone page; the old sub-pages jump to its sections (NE keeps the #)
-RewriteRule ^shop/(enchanted-books|books)(/|\.php)?$ /shop/#enchanted-books [NE,R=301,L]
+RewriteRule ^shop/enchanted-books(/|\.php)?$ /shop/#enchanted-books [NE,R=301,L]
 RewriteRule ^shop/(requests|casino)(/|\.php)?$ /shop/#$1 [NE,R=301,L]
 # shop admin lives in /private/ so its password applies; rewritten (not redirected) so the URL stays /shop/admin/
 RewriteRule ^shop/admin/?$ /private/shop-admin/index.php [L]

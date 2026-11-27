@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enchanted books · Castle Crafty</title>
+<meta name="description" content="Every enchanted book in the Castle Crafty shop and how many are in stock right now.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shop/style.css?v=15">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the books</a>
+<div class="tower">
+  <header class="top"><h1>Enchanted books</h1></header>
+  <main id="main">
+    <section class="storey" aria-labelledby="h-books">
+      <p class="level">Floor 7 · north wing</p>
+      <h2 id="h-books">Stock by enchantment</h2>
+      <p class="lead">1 diamond each, or 5 books for 3 diamonds.</p>
+      <p class="note" id="counted">Checking the chests…</p>
+      <div id="books"></div>
+      <p class="note">Every book is sold at its highest level. Swift Sneak and Wind Burst aren't available.</p>
+    </section>
+  </main>
+  <footer><p><a href="/shop/#enchanted-books">Back to the price list</a> · Castle Crafty · all prices in diamonds</p></footer>
+</div>
+<script>
+(function () {
+  // books in the wing, by group; key = enchantment id, max = highest level
+  var GROUPS = [
+    ['Armour', [['protection', 'Protection', 4], ['fire_protection', 'Fire Protection', 4], ['blast_protection', 'Blast Protection', 4], ['projectile_protection', 'Projectile Protection', 4], ['feather_falling', 'Feather Falling', 4], ['thorns', 'Thorns', 3], ['respiration', 'Respiration', 3], ['aqua_affinity', 'Aqua Affinity', 1], ['depth_strider', 'Depth Strider', 3], ['frost_walker', 'Frost Walker', 2], ['soul_speed', 'Soul Speed', 3]]],
+    ['Tools and fishing', [['efficiency', 'Efficiency', 5], ['fortune', 'Fortune', 3], ['silk_touch', 'Silk Touch', 1], ['unbreaking', 'Unbreaking', 3], ['mending', 'Mending', 1], ['veinminer', 'Veinminer', 1], ['luck_of_the_sea', 'Luck of the Sea', 3], ['lure', 'Lure', 3]]],
+    ['Melee', [['sharpness', 'Sharpness', 5], ['smite', 'Smite', 5], ['bane_of_arthropods', 'Bane of Arthropods', 5], ['knockback', 'Knockback', 2], ['fire_aspect', 'Fire Aspect', 2], ['looting', 'Looting', 3], ['sweeping_edge', 'Sweeping Edge', 3], ['density', 'Density', 5], ['breach', 'Breach', 4]]],
+    ['Ranged', [['power', 'Power', 5], ['punch', 'Punch', 2], ['flame', 'Flame', 1], ['infinity', 'Infinity', 1], ['multishot', 'Multishot', 1], ['piercing', 'Piercing', 4], ['quick_charge', 'Quick Charge', 3], ['loyalty', 'Loyalty', 3], ['riptide', 'Riptide', 3], ['channeling', 'Channeling', 1], ['impaling', 'Impaling', 5]]]
+  ];
+  var ROMAN = ['', 'I', 'II', 'III', 'IV', 'V'];
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function render(books) {
+    // books: { "mending 1": 3, "soul_speed 2": 1, ... } from the stock counter; null = counts unavailable
+    var byId = {};
+    Object.keys(books || {}).forEach(function (k) {
+      if (k.indexOf(' + ') >= 0) return; // books with several enchantments aren't sold as a type
+      var m = k.match(/^(.+) (\d+)$/); if (!m) return;
+      var id = /veinminer/.test(m[1]) ? 'veinminer' : m[1];
+      (byId[id] = byId[id] || {})[+m[2]] = books[k];
+    });
+    var root = document.getElementById('books');
+    GROUPS.forEach(function (g) {
+      root.appendChild(el('h4', 'shelf', g[0]));
+      var ul = root.appendChild(el('ul', 'niches'));
+      g[1].forEach(function (b) {
+        var li = ul.appendChild(el('li', 'niche')), lv = byId[b[0]] || {};
+        var n = Object.keys(lv).reduce(function (s, k) { return s + lv[k]; }, 0);
+        var box = el('div', 'icon'), img = new Image(40, 40); img.alt = ''; img.loading = 'lazy';
+        img.src = '/minecraft/tools/item-list/minecraft_enchanted_book.png'; box.appendChild(img);
+        var t = el('div', 'txt');
+        t.appendChild(el('h5', 'name', b[1] + (b[2] > 1 ? ' ' + ROMAN[b[2]] : '')));
+        if (books) t.appendChild(el('p', n ? 'stock' : 'stock out', n ? n + ' in stock' : 'Sold out'));
+        var levels = Object.keys(lv).filter(function (k) { return +k !== b[2]; });
+        if (levels.length) t.appendChild(el('p', 'note', 'Includes ' + levels.sort().map(function (k) { return lv[k] + ' at level ' + (ROMAN[k] || k); }).join(', ')));
+        li.appendChild(box); li.appendChild(t);
+      });
+    });
+  }
+  fetch('https://assets.craftyplayz.com/minecraft/shop-stock.json', { cache: 'no-store' }).then(function (r) {
+    if (!r.ok) throw Error(r.status);
+    return r.json();
+  }).then(function (st) {
+    document.getElementById('counted').textContent = 'Counted from the shop chests ' + new Date(st.updated).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) + ', every 5 minutes.';
+    render(st.books || null); // null until the server counter has the per-book update
+  }).catch(function () {
+    document.getElementById('counted').textContent = "Couldn't reach the stock counter, so these are the books without counts. Try again in a minute.";
+    render(null);
+  });
+})();
+</script>
+</body>
+</html>
