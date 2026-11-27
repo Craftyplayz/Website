@@ -1,5 +1,5 @@
 <?php
-// Shared by every level: copy this file to medium/, hard/ and extrahard/ unchanged.
+// The easy, medium and hard levels are archived in _dev/archive/games/quizzes/harry-potter/; they shared this file unchanged.
 // Each level keeps its own assets/ (questions, answers, scripts.js), loaded by relative path, so the URL must end in /.
 $site_page = ['components' => true, 'css' => ['/assets/css/pages/games-quiz.css']];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';

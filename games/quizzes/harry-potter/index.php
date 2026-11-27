@@ -3,9 +3,6 @@ $site_page = ['components' => true];
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 
 $levels = [
-    ['easy', 'Easy', 'Four choices per question.', 'Not working', 'r'],
-    ['medium', 'Normal', 'Six choices per question.', 'Not working', 'r'],
-    ['hard', 'Hard', 'Six choices per question.', 'Not working', 'r'],
     ['extrahard', 'Extra Hard', 'Type the answers yourself.', 'Work in progress', 'b'],
 ];
 ?>
@@ -22,7 +19,7 @@ $levels = [
     <main class="page" id="main">
         <?= site_breadcrumbs(site_current_path()) ?>
         <h1 class="page-title">Harry Potter Quiz</h1>
-        <p class="page-lede">Four difficulty levels. Pick one to start.</p>
+        <p class="page-lede">Type the answers yourself. More levels are coming back later.</p>
 
         <div class="hub-grid">
             <?php foreach ($levels as [$dir, $name, $about, $status, $tone]): ?>
