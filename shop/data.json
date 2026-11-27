@@ -959,10 +959,16 @@
       "price": "Contact Crafty for a quote",
       "floor": "Enchanting and map art",
       "section": "Map art",
-      "link": {
-        "text": "Map art quote creator",
-        "url": "/shop/mapart/"
-      }
+      "links": [
+        {
+          "text": "View map art in stock",
+          "url": "/shop/maps/"
+        },
+        {
+          "text": "Map art quote creator",
+          "url": "/shop/mapart/"
+        }
+      ]
     },
     {
       "id": "rotten_flesh",

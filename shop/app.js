@@ -42,7 +42,7 @@
       t.appendChild(el('h5', 'name', p.name));
       t.appendChild(el('p', 'price', p.price));
       if (p.note) t.appendChild(el('p', 'note', p.note));
-      if (p.link) { var a = t.appendChild(el('a', 'note', p.link.text)); a.href = p.link.url; }
+      (p.links || (p.link ? [p.link] : [])).forEach(function (l) { var a = t.appendChild(el('a', 'note', l.text)); a.href = l.url; });
       li.appendChild(box); li.appendChild(t);
       li.dataset.id = p.id;
       if (p.colours) li.dataset.colours = p.colours;

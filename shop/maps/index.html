@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map art in stock · Castle Crafty</title>
+<meta name="description" content="Ready-made map art for sale in the Castle Crafty shop, with how many copies are in stock.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shop/style.css?v=15">
+<style>
+.maps{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:16px}
+.map{padding:12px;background:#050507;border:1px solid #23232b;border-radius:3px;box-shadow:inset 0 -1px 0 rgba(217,165,78,.18)}
+.map img{display:block;width:100%;height:auto;aspect-ratio:1;image-rendering:pixelated;background:#15151c;border:6px solid #6b4a2a;border-radius:2px}
+.map h3{margin:10px 0 0;font-size:1rem;color:#f0e6d0}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the map art</a>
+<div class="tower">
+  <header class="top"><h1>Map art</h1></header>
+  <main id="main">
+    <section class="storey" aria-labelledby="h-maps">
+      <p class="level">Floor 7 · west wing</p>
+      <h2 id="h-maps">Ready-made map art</h2>
+      <p class="lead">2 diamonds each. Want your own picture? <a href="/shop/mapart/">Get a quote</a>.</p>
+      <p class="note" id="counted">Checking the chests…</p>
+      <ul class="maps" id="maps"></ul>
+    </section>
+  </main>
+  <footer><p><a href="/shop/#map-art">Back to the price list</a> · Castle Crafty · all prices in diamonds</p></footer>
+</div>
+<script>
+(function () {
+  // maps: { "<map id>": { count, name? } } from the stock counter; pictures drawn by it from the world's map files
+  var BASE = 'https://assets.craftyplayz.com/minecraft/';
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  var note = document.getElementById('counted');
+  fetch(BASE + 'shop-stock.json', { cache: 'no-store' }).then(function (r) {
+    if (!r.ok) throw Error(r.status);
+    return r.json();
+  }).then(function (st) {
+    var ids = Object.keys(st.maps || {}).sort(function (a, b) { return a - b; });
+    note.textContent = ids.length ? 'Counted from the shop chests ' + new Date(st.updated).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) + ', every 5 minutes.' : 'No map art in stock right now. New pieces are added as they are made.';
+    ids.forEach(function (id) {
+      var m = st.maps[id], li = document.getElementById('maps').appendChild(el('li', 'map'));
+      var img = new Image(256, 256); img.alt = m.name || 'Map art ' + id; img.loading = 'lazy'; img.src = BASE + 'maps/' + id + '.png';
+      img.onerror = function () { img.replaceWith(el('p', 'note', 'Picture coming soon.')); };
+      li.appendChild(img);
+      li.appendChild(el('h3', null, m.name || 'Map art #' + id));
+      li.appendChild(el('p', m.count ? 'stock' : 'stock out', m.count ? m.count.toLocaleString('en-GB') + ' in stock' : 'Sold out'));
+    });
+  }).catch(function () { note.textContent = "Couldn't reach the stock counter. Try again in a minute."; note.className = 'note'; });
+})();
+</script>
+</body>
+</html>
