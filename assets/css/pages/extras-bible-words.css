@@ -5,7 +5,8 @@
 .bw-result { display: flex; align-items: center; gap: 16px; }
 .bw-ring { --size: 72px; }
 .bw-ring b { font-size: 17px; }
-.bw-line { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
+.bw-verdict { margin: 0 0 4px; font-size: clamp(20px, 3vw, 24px); font-weight: 700; line-height: 1.2; }
+.bw-line { margin: 0 0 4px; font-weight: 600; }
 .bw-key { margin: 0; font-size: 13px; display: flex; flex-wrap: wrap; gap: 8px; }
 .bw-words { margin: 0; padding: 12px; background: var(--sunken); border-radius: var(--radius); white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; }
 .bw-key mark, .bw-words mark, .bw-words button { color: var(--text); padding: 1px 4px; border-radius: 4px; border: 1px solid; font: inherit; }

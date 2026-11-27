@@ -50,6 +50,7 @@ foreach ($bw_versions as $id => $name) $bw_urls[$id] = asset("/extras/bible-word
             <div class="bw-result" id="bw-result" hidden>
                 <span class="ring bw-ring" id="bw-ring" role="img"><b id="bw-pct"></b></span>
                 <div class="grow">
+                    <p class="bw-verdict" id="bw-verdict"></p>
                     <p class="bw-line" id="bw-line"></p>
                     <p class="muted bw-key"><mark class="bw-in">in the Bible</mark> <mark class="bw-out">not in the Bible</mark> Click a green word to see where it first appears.</p>
                 </div>
@@ -70,6 +71,18 @@ foreach ($bw_versions as $id => $name) $bw_urls[$id] = asset("/extras/bible-word
         const urls = <?= json_encode($bw_urls) ?>, sets = {};
         const esc = (s) => s.replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
         let bible = null, timer;
+        // [lowest percentage, verdict], highest first; 0% gets its own line.
+        const VERDICTS = [
+            [100, '100% Bible approved'],
+            [90, 'Practically scripture'],
+            [75, 'Fit for Sunday school'],
+            [60, 'Sits at the back of the church'],
+            [45, 'Lukewarm, and about to be spat out'],
+            [30, 'In need of a good sermon'],
+            [15, 'Raised by heathens'],
+            [1, 'Speaking in tongues'],
+            [0, 'Actual spawn of Satan'],
+        ];
 
         // Same tokeniser as _dev/bible-words/build.js, so both sides split words the same way.
         const tokens = (t) => t.toLowerCase().replace(/[‘’]/g, "'").match(/[a-z]+(?:'[a-z]+)*/g) || [];
@@ -88,6 +101,7 @@ foreach ($bw_versions as $id => $name) $bw_urls[$id] = asset("/extras/bible-word
             $('bw-ring').style.setProperty('--p', pct);
             $('bw-ring').classList.toggle('full', pct === 100);
             $('bw-ring').setAttribute('aria-label', pct + '% of words are in the Bible');
+            $('bw-verdict').textContent = VERDICTS.find(([min]) => (hits === all.length ? 100 : hits ? Math.min(Math.max(pct, 1), 99) : 0) >= min)[1]; // 100 and 0 only when exact
             $('bw-line').textContent = pct + '% of these words are in the Bible (' + hits.toLocaleString() + ' of ' + all.length.toLocaleString() + ').';
             // Mark each word in the original text, keeping its spacing and capitals.
             words.innerHTML = text.split(/([A-Za-z‘’']+)/).map((m, i) => {
