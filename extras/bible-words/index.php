@@ -71,17 +71,17 @@ foreach ($bw_versions as $id => $name) $bw_urls[$id] = asset("/extras/bible-word
         const urls = <?= json_encode($bw_urls) ?>, sets = {};
         const esc = (s) => s.replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
         let bible = null, timer;
-        // [lowest percentage, verdict], highest first; 0% gets its own line.
+        // [lowest percentage, verdict, ring colour token], highest first; 100 and 0 only when exact.
         const VERDICTS = [
-            [100, '100% Bible approved'],
-            [90, 'Practically scripture'],
-            [75, 'Fit for Sunday school'],
-            [60, 'Sits at the back of the church'],
-            [45, 'Lukewarm, and about to be spat out'],
-            [30, 'In need of a good sermon'],
-            [15, 'Raised by heathens'],
-            [1, 'Speaking in tongues'],
-            [0, 'Actual spawn of Satan'],
+            [100, '100% Bible approved', 'gold-line'],
+            [90, 'Practically scripture', 'ok-line'],
+            [75, 'Fit for Sunday school', 'accent'],
+            [60, 'Sits at the back of the church', 'series-1'],
+            [45, 'Lukewarm, and about to be spat out', 'series-3'],
+            [30, 'In need of a good sermon', 'highlight'],
+            [15, 'Raised by heathens', 'series-2'],
+            [1, 'Speaking in tongues', 'danger-line'],
+            [0, 'Actual spawn of Satan', 'danger-line'],
         ];
 
         // Same tokeniser as _dev/bible-words/build.js, so both sides split words the same way.
@@ -99,9 +99,13 @@ foreach ($bw_versions as $id => $name) $bw_urls[$id] = asset("/extras/bible-word
             const pct = Math.round(hits / all.length * 100);
             $('bw-pct').textContent = pct + '%';
             $('bw-ring').style.setProperty('--p', pct);
-            $('bw-ring').classList.toggle('full', pct === 100);
+            const score = hits === all.length ? 100 : hits ? Math.min(Math.max(pct, 1), 99) : 0;
+            const [, verdict, colour] = VERDICTS.find(([min]) => score >= min);
+            $('bw-ring').style.setProperty('--bw-c', 'var(--' + colour + ')');
+            $('bw-ring').classList.toggle('full', score === 100);
+            $('bw-ring').classList.toggle('bw-zero', score === 0);
             $('bw-ring').setAttribute('aria-label', pct + '% of words are in the Bible');
-            $('bw-verdict').textContent = VERDICTS.find(([min]) => (hits === all.length ? 100 : hits ? Math.min(Math.max(pct, 1), 99) : 0) >= min)[1]; // 100 and 0 only when exact
+            $('bw-verdict').textContent = verdict;
             $('bw-line').textContent = pct + '% of these words are in the Bible (' + hits.toLocaleString() + ' of ' + all.length.toLocaleString() + ').';
             // Mark each word in the original text, keeping its spacing and capitals.
             words.innerHTML = text.split(/([A-Za-z‘’']+)/).map((m, i) => {

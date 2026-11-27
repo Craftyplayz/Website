@@ -22,3 +22,5 @@
 .bw-out { background: var(--danger-bg); border-color: var(--danger-line); }
 .bw-src { max-width: 820px; font-size: 13px; }
 .bw [hidden] { display: none !important; }
+.bw-ring:not(.full) { background: radial-gradient(closest-side, var(--sunken) 74%, transparent 76%), conic-gradient(var(--bw-c, var(--accent)) calc(var(--p) * 1%), rgb(255 255 255 / .15) 0); }
+.bw-ring.bw-zero { background: radial-gradient(closest-side, var(--danger-bg) 74%, transparent 76%), conic-gradient(var(--danger-line) 100%, transparent 0); }
