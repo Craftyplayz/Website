@@ -100,6 +100,8 @@
                         { "title": "Frame Guesser", "url": "/games/frame-guesser/", "description": "Guess the episode or film from a single still frame", "keywords": ["tv", "episode", "screenshot", "still", "quiz", "movie", "film"] },
                         { "title": "Craftle", "url": "/games/craftle/", "description": "Guess the Minecraft item from its crafting recipe", "keywords": ["craftle", "crafting", "recipe", "wordle", "daily", "minecraft"] },
                         { "title": "Higher or Lower: Steam Hours", "url": "/games/steam-higher-lower/", "description": "Guess whether one Steam game has more or fewer hours played than another", "keywords": ["steam", "higher or lower", "playtime", "hours", "guessing game", "streak"] },
+                        { "title": "Reaction Test", "url": "/games/reaction-test/", "description": "Test your reaction time over five tries and join the leaderboard", "keywords": ["reaction", "reflex", "speed", "click", "ms", "leaderboard"] },
+                        { "title": "Typing Defence", "url": "/games/typing-defence/", "description": "Arcade typing game: type the falling words before they land", "keywords": ["typing", "words", "wpm", "arcade", "speed", "keyboard", "leaderboard", "defense"] },
                         { "title": "Guess Who", "url": "/games/guesswho/", "description": "Guess Who boards: Classic, Avatar and more", "keywords": ["atla", "avatar"] },
                         { "title": "Free Games", "url": "/games/free/", "description": "Browse free-to-play PC and browser games", "keywords": ["freetogame", "f2p", "free to play"] },
                         { "title": "A Dark Room", "url": "/games/adarkroom/", "description": "A minimalist text adventure" },
