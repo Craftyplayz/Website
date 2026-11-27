@@ -188,6 +188,13 @@
       "section": "Natural stone"
     },
     {
+      "id": "sand",
+      "name": "Sand",
+      "price": "Price coming soon",
+      "floor": "Building blocks",
+      "section": "Natural stone"
+    },
+    {
       "id": "prismarine",
       "name": "Prismarine",
       "price": "1 diamond per stack",
