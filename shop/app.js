@@ -81,6 +81,14 @@
       return r.json();
     }).then(function (st) {
       var when = 'Counted ' + new Date(st.updated).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+      // prices: the in-game frame names win over data.json (owner 2026-11-28), e.g. "2 Stacks per Diamond" -> "2 stacks per diamond"
+      if (st.prices) document.querySelectorAll('.niche[data-id]').forEach(function (li) {
+        var ids = li.dataset.colours ? [li.dataset.id].concat(COLOURS.map(function (c) { return li.dataset.colours.replace('{c}', c); })) : [li.dataset.id];
+        var fp = ids.map(function (id) { return st.prices[id]; }).filter(Boolean)[0];
+        if (!fp) return;
+        var text = fp.charAt(0).toUpperCase() + fp.slice(1).toLowerCase() + (li.dataset.colours ? ', all colours' : '');
+        li.querySelector('.price').textContent = text;
+      });
       document.querySelectorAll('.niche[data-id]').forEach(function (li) {
         // "all colours" products ("colours": "{c}_wool") get the total plus one count per dye colour
         var ids = li.dataset.colours ? COLOURS.map(function (c) { return li.dataset.colours.replace('{c}', c); }) : [li.dataset.id];
