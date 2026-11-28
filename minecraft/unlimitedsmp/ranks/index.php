@@ -5,15 +5,15 @@ $site_page = [
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 // Playtime ranks on the server: [rank, total hours, perks new at this rank]; perks stack upwards
 $ranks = [
-    ['Default', 0, ['1 home', '/tpa, /spawn, /msg, /mail, /afk, /playtime', 'Free heads from /headdb', 'Veinminer', 'Use elevators']],
-    ['Rank 2', 1, ['2 homes']],
-    ['Rank 3', 4, ['3 homes']],
-    ['Rank 4', 12, ['4 homes']],
-    ['Rank 5', 24, ['5 homes', 'Craft and dye elevators']],
-    ['Rank 6', 48, ['6 homes']],
+    ['Default', 0, ['1 home (and /sethome bed)', '/tpa, /tpaccept, /tptoggle, /spawn', '/msg, /mail, /me, /afk, /helpop', '/playtime, /list, /rules, /motd', 'Free heads from /headdb', 'Veinminer (and its toggle)', 'Use elevators', 'Discord link and nickname sync']],
+    ['Rank 2', 1, ['2 homes', '/stonecutter, /loom, /cartographytable']],
+    ['Rank 3', 4, ['3 homes', '/nick']],
+    ['Rank 4', 12, ['4 homes', '/enderchest']],
+    ['Rank 5', 24, ['5 homes', 'Craft elevators']],
+    ['Rank 6', 48, ['6 homes', 'Coloured and formatted nicknames']],
     ['Rank 7', 72, ['7 homes']],
     ['Rank 8', 96, ['8 homes', '/workbench (portable crafting table)']],
-    ['Rank 9', 120, ['9 homes']],
+    ['Rank 9', 120, ['9 homes', 'PickupBot']],
     ['Rank 10', 168, ['10 homes', '/hat']],
     ['Rank 11', 216, ['11 homes']],
     ['Rank 12', 264, ['12 homes']],
@@ -44,7 +44,7 @@ $ranks = [
 <?php endforeach ?>
                 </tbody>
             </table></div>
-            <p class="muted">Type <span class="mono">/rank</span> in game to see your progress.</p>
+            <p class="muted">Type <span class="mono">/ranks</span> in game to see your progress and every rank's perks.</p>
         </section>
     </main>
 
